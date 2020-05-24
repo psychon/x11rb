@@ -8,7 +8,6 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
-use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -17,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -372,7 +371,7 @@ impl QueryVersionRequest {
     /// Opcode for the QueryVersion request
     pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -437,7 +436,7 @@ impl GetModeLineRequest {
     /// Opcode for the GetModeLine request
     pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -559,7 +558,7 @@ impl<'input> ModModeLineRequest<'input> {
     /// Opcode for the ModModeLine request
     pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -636,7 +635,7 @@ impl<'input> ModModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn mod_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -673,7 +672,7 @@ impl SwitchModeRequest {
     /// Opcode for the SwitchMode request
     pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -720,7 +719,7 @@ impl GetMonitorRequest {
     /// Opcode for the GetMonitor request
     pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -861,7 +860,7 @@ impl LockModeSwitchRequest {
     /// Opcode for the LockModeSwitch request
     pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -908,7 +907,7 @@ impl GetAllModeLinesRequest {
     /// Opcode for the GetAllModeLines request
     pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1018,7 +1017,7 @@ impl<'input> AddModeLineRequest<'input> {
     /// Opcode for the AddModeLine request
     pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1151,7 +1150,7 @@ impl<'input> AddModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn add_mode_line<'c, 'input, Conn, A, B>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1213,7 +1212,7 @@ impl<'input> DeleteModeLineRequest<'input> {
     /// Opcode for the DeleteModeLine request
     pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1295,7 +1294,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn delete_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1344,7 +1343,7 @@ impl<'input> ValidateModeLineRequest<'input> {
     /// Opcode for the ValidateModeLine request
     pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1426,7 +1425,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn validate_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
@@ -1501,7 +1500,7 @@ impl<'input> SwitchToModeRequest<'input> {
     /// Opcode for the SwitchToMode request
     pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1583,7 +1582,7 @@ impl<'input> SwitchToModeRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn switch_to_mode<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1620,7 +1619,7 @@ impl GetViewPortRequest {
     /// Opcode for the GetViewPort request
     pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1695,7 +1694,7 @@ impl SetViewPortRequest {
     /// Opcode for the SetViewPort request
     pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1752,7 +1751,7 @@ impl GetDotClocksRequest {
     /// Opcode for the GetDotClocks request
     pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1830,7 +1829,7 @@ impl SetClientVersionRequest {
     /// Opcode for the SetClientVersion request
     pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1880,7 +1879,7 @@ impl SetGammaRequest {
     /// Opcode for the SetGamma request
     pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1955,7 +1954,7 @@ impl GetGammaRequest {
     /// Opcode for the GetGamma request
     pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -2055,7 +2054,7 @@ impl GetGammaRampRequest {
     /// Opcode for the GetGammaRamp request
     pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -2138,7 +2137,7 @@ impl<'input> SetGammaRampRequest<'input> {
     /// Opcode for the SetGammaRamp request
     pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -2172,7 +2171,7 @@ impl<'input> SetGammaRampRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), red_bytes.into(), green_bytes.into(), blue_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), red_bytes.into(), green_bytes.into(), blue_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_gamma_ramp<'c, 'input, Conn>(conn: &'c Conn, screen: u16, size: u16, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2199,7 +2198,7 @@ impl GetGammaRampSizeRequest {
     /// Opcode for the GetGammaRampSize request
     pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -2270,7 +2269,7 @@ impl GetPermissionsRequest {
     /// Opcode for the GetPermissions request
     pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {

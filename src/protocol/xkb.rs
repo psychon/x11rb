@@ -8,7 +8,6 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
-use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -17,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -6317,7 +6316,7 @@ impl UseExtensionRequest {
     /// Opcode for the UseExtension request
     pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -6818,7 +6817,7 @@ impl<'input> SelectEventsRequest<'input> {
     /// Opcode for the SelectEvents request
     pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -6857,7 +6856,7 @@ impl<'input> SelectEventsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), details_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), details_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn select_events<'c, 'input, Conn, A, B, C, D, E>(conn: &'c Conn, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -6905,7 +6904,7 @@ impl BellRequest {
     /// Opcode for the Bell request
     pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -6988,7 +6987,7 @@ impl GetStateRequest {
     /// Opcode for the GetState request
     pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7096,7 +7095,7 @@ impl LatchLockStateRequest {
     /// Opcode for the LatchLockState request
     pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7169,7 +7168,7 @@ impl GetControlsRequest {
     /// Opcode for the GetControls request
     pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7322,7 +7321,7 @@ impl<'input> SetControlsRequest<'input> {
     /// Opcode for the SetControls request
     pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7534,7 +7533,7 @@ impl GetMapRequest {
     /// Opcode for the GetMap request
     pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8011,7 +8010,7 @@ impl<'input> SetMapRequest<'input> {
     /// Opcode for the SetMap request
     pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8091,7 +8090,7 @@ impl<'input> SetMapRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), values_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_map<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &'input SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -8147,7 +8146,7 @@ impl GetCompatMapRequest {
     /// Opcode for the GetCompatMap request
     pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8264,7 +8263,7 @@ impl<'input> SetCompatMapRequest<'input> {
     /// Opcode for the SetCompatMap request
     pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8307,7 +8306,7 @@ impl<'input> SetCompatMapRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), si_bytes.into(), group_maps_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), si_bytes.into(), group_maps_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_compat_map<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &'input [SymInterpret], group_maps: &'input [ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -8338,7 +8337,7 @@ impl GetIndicatorStateRequest {
     /// Opcode for the GetIndicatorState request
     pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8411,7 +8410,7 @@ impl GetIndicatorMapRequest {
     /// Opcode for the GetIndicatorMap request
     pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8497,7 +8496,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
     /// Opcode for the SetIndicatorMap request
     pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8529,7 +8528,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), maps_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), maps_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_indicator_map<'c, 'input, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &'input [IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -8557,7 +8556,7 @@ impl GetNamedIndicatorRequest {
     /// Opcode for the GetNamedIndicator request
     pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8685,7 +8684,7 @@ impl SetNamedIndicatorRequest {
     /// Opcode for the SetNamedIndicator request
     pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8799,7 +8798,7 @@ impl GetNamesRequest {
     /// Opcode for the GetNames request
     pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -9294,7 +9293,7 @@ impl<'input> SetNamesRequest<'input> {
     /// Opcode for the SetNames request
     pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -9354,7 +9353,7 @@ impl<'input> SetNamesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), values_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_names<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &'input SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -9399,7 +9398,7 @@ impl PerClientFlagsRequest {
     /// Opcode for the PerClientFlags request
     pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -9518,7 +9517,7 @@ impl ListComponentsRequest {
     /// Opcode for the ListComponents request
     pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -9693,7 +9692,7 @@ impl GetKbdByNameRequest {
     /// Opcode for the GetKbdByName request
     pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -10397,7 +10396,7 @@ impl GetDeviceInfoRequest {
     /// Opcode for the GetDeviceInfo request
     pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -10573,7 +10572,7 @@ impl<'input> SetDeviceInfoRequest<'input> {
     /// Opcode for the SetDeviceInfo request
     pub const fn opcode() -> u8 { 25 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -10611,7 +10610,7 @@ impl<'input> SetDeviceInfoRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), btn_actions_bytes.into(), leds_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), btn_actions_bytes.into(), leds_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_device_info<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &'input [Action], leds: &'input [DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -10644,7 +10643,7 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
     /// Opcode for the SetDebuggingFlags request
     pub const fn opcode() -> u8 { 101 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -10690,7 +10689,7 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.message[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.message[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn set_debugging_flags<'c, 'input, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>

@@ -8,7 +8,6 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
-use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -17,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -439,7 +438,7 @@ impl QueryVersionRequest {
     /// Opcode for the QueryVersion request
     pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -511,7 +510,7 @@ impl QueryClientsRequest {
     /// Opcode for the QueryClients request
     pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -591,7 +590,7 @@ impl QueryClientResourcesRequest {
     /// Opcode for the QueryClientResources request
     pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -678,7 +677,7 @@ impl QueryClientPixmapBytesRequest {
     /// Opcode for the QueryClientPixmapBytes request
     pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -750,7 +749,7 @@ impl<'input> QueryClientIdsRequest<'input> {
     /// Opcode for the QueryClientIds request
     pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -777,7 +776,7 @@ impl<'input> QueryClientIdsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), specs_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), specs_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn query_client_ids<'c, 'input, Conn>(conn: &'c Conn, specs: &'input [ClientIdSpec]) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
@@ -843,7 +842,7 @@ impl<'input> QueryResourceBytesRequest<'input> {
     /// Opcode for the QueryResourceBytes request
     pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -875,7 +874,7 @@ impl<'input> QueryResourceBytesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), specs_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), specs_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn query_resource_bytes<'c, 'input, Conn>(conn: &'c Conn, client: u32, specs: &'input [ResourceIdSpec]) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>

@@ -8,7 +8,6 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
-use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -17,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -504,7 +503,7 @@ impl QueryVersionRequest {
     /// Opcode for the QueryVersion request
     pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -581,7 +580,7 @@ impl<'input> CreateContextRequest<'input> {
     /// Opcode for the CreateContext request
     pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -626,7 +625,7 @@ impl<'input> CreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), client_specs_bytes.into(), ranges_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), client_specs_bytes.into(), ranges_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -655,7 +654,7 @@ impl<'input> RegisterClientsRequest<'input> {
     /// Opcode for the RegisterClients request
     pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -700,7 +699,7 @@ impl<'input> RegisterClientsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), client_specs_bytes.into(), ranges_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), client_specs_bytes.into(), ranges_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn register_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -727,7 +726,7 @@ impl<'input> UnregisterClientsRequest<'input> {
     /// Opcode for the UnregisterClients request
     pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -759,7 +758,7 @@ impl<'input> UnregisterClientsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), client_specs_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), client_specs_bytes.into(), padding0.into()], vec![]))
     }
 }
 pub fn unregister_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, client_specs: &'input [ClientSpec]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -783,7 +782,7 @@ impl GetContextRequest {
     /// Opcode for the GetContext request
     pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -874,7 +873,7 @@ impl EnableContextRequest {
     /// Opcode for the EnableContext request
     pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -973,7 +972,7 @@ impl DisableContextRequest {
     /// Opcode for the DisableContext request
     pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1018,7 +1017,7 @@ impl FreeContextRequest {
     /// Opcode for the FreeContext request
     pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {

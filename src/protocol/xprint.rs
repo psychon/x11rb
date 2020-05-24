@@ -8,7 +8,6 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
-use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -17,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -410,7 +409,7 @@ impl PrintQueryVersionRequest {
     /// Opcode for the PrintQueryVersion request
     pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -476,7 +475,7 @@ impl<'input> PrintGetPrinterListRequest<'input> {
     /// Opcode for the PrintGetPrinterList request
     pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -509,7 +508,7 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.printer_name[..]).into(), (&self.locale[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.printer_name[..]).into(), (&self.locale[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn print_get_printer_list<'c, 'input, Conn>(conn: &'c Conn, printer_name: &'input [String8], locale: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
@@ -573,7 +572,7 @@ impl PrintRehashPrinterListRequest {
     /// Opcode for the PrintRehashPrinterList request
     pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -613,7 +612,7 @@ impl<'input> CreateContextRequest<'input> {
     /// Opcode for the CreateContext request
     pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -651,7 +650,7 @@ impl<'input> CreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.printer_name[..]).into(), (&self.locale[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.printer_name[..]).into(), (&self.locale[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context_id: u32, printer_name: &'input [String8], locale: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -676,7 +675,7 @@ impl PrintSetContextRequest {
     /// Opcode for the PrintSetContext request
     pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -719,7 +718,7 @@ impl PrintGetContextRequest {
     /// Opcode for the PrintGetContext request
     pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -782,7 +781,7 @@ impl PrintDestroyContextRequest {
     /// Opcode for the PrintDestroyContext request
     pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -825,7 +824,7 @@ impl PrintGetScreenOfContextRequest {
     /// Opcode for the PrintGetScreenOfContext request
     pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -888,7 +887,7 @@ impl PrintStartJobRequest {
     /// Opcode for the PrintStartJob request
     pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -933,7 +932,7 @@ impl PrintEndJobRequest {
     /// Opcode for the PrintEndJob request
     pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -978,7 +977,7 @@ impl PrintStartDocRequest {
     /// Opcode for the PrintStartDoc request
     pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1023,7 +1022,7 @@ impl PrintEndDocRequest {
     /// Opcode for the PrintEndDoc request
     pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1071,7 +1070,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
     /// Opcode for the PrintPutDocumentData request
     pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1112,7 +1111,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), (&self.doc_format[..]).into(), (&self.options[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.data[..]).into(), (&self.doc_format[..]).into(), (&self.options[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn print_put_document_data<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &'input [u8], doc_format: &'input [String8], options: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1139,7 +1138,7 @@ impl PrintGetDocumentDataRequest {
     /// Opcode for the PrintGetDocumentData request
     pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1237,7 +1236,7 @@ impl PrintStartPageRequest {
     /// Opcode for the PrintStartPage request
     pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1282,7 +1281,7 @@ impl PrintEndPageRequest {
     /// Opcode for the PrintEndPage request
     pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1328,7 +1327,7 @@ impl PrintSelectInputRequest {
     /// Opcode for the PrintSelectInput request
     pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1379,7 +1378,7 @@ impl PrintInputSelectedRequest {
     /// Opcode for the PrintInputSelected request
     pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1452,7 +1451,7 @@ impl PrintGetAttributesRequest {
     /// Opcode for the PrintGetAttributes request
     pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1548,7 +1547,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
     /// Opcode for the PrintGetOneAttributes request
     pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1584,7 +1583,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn print_get_one_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
@@ -1656,7 +1655,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
     /// Opcode for the PrintSetAttributes request
     pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1692,7 +1691,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.attributes[..]).into(), Cow::Borrowed(&padding0)], vec![]))
+        Ok((vec![request0.into(), (&self.attributes[..]).into(), padding0.into()], vec![]))
     }
 }
 pub fn print_set_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1719,7 +1718,7 @@ impl PrintGetPageDimensionsRequest {
     /// Opcode for the PrintGetPageDimensions request
     pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1797,7 +1796,7 @@ impl PrintQueryScreensRequest {
     /// Opcode for the PrintQueryScreens request
     pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1878,7 +1877,7 @@ impl PrintSetImageResolutionRequest {
     /// Opcode for the PrintSetImageResolution request
     pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1955,7 +1954,7 @@ impl PrintGetImageResolutionRequest {
     /// Opcode for the PrintGetImageResolution request
     pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {

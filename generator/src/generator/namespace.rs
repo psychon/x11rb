@@ -73,7 +73,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#![allow(clippy::trivially_copy_pass_by_ref)]");
         outln!(out, "#![allow(clippy::eq_op)]");
         outln!(out, "");
-        outln!(out, "use std::borrow::Cow;");
         outln!(out, "use std::convert::TryFrom;");
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use std::convert::TryInto;");
@@ -82,7 +81,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "use crate::utils::RawFdContainer;");
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::x11_utils::{{Serialize, TryParse}};");
-        outln!(out, "use crate::connection::RequestConnection;");
+        outln!(
+            out,
+            "use crate::connection::{{BufWithFds, PiecewiseBuf, RequestConnection}};"
+        );
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
@@ -425,7 +427,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             );
 
             outln!(out, "/// Serialize this request into bytes for the provided connection");
-            outln!(out, "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>",
+            outln!(out, "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>",
                    lifetime=serialize_lifetime_block);
             outln!(out, "where");
             outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
@@ -750,7 +752,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         assert_eq!(pad_count, 0);
                         outln!(out, "let padding = [0; {}];", 4 - req_size_rem);
                         outln!(out, "let length_so_far = length_so_far + padding.len();");
-                        request_slices.push("Cow::Borrowed(&padding)".into());
+                        request_slices.push(String::from("(&padding).into()"));
                     }
                 } else {
                     outln!(
@@ -763,7 +765,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         "let length_so_far = length_so_far + padding{}.len();",
                         pad_count,
                     );
-                    request_slices.push(format!("Cow::Borrowed(&padding{})", pad_count));
+                    request_slices.push(format!("padding{}.into()", pad_count));
                 }
 
                 outln!(out, "assert_eq!(length_so_far % 4, 0);");
