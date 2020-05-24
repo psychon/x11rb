@@ -24,7 +24,7 @@ mod parse_display;
 mod stream;
 mod xauth;
 
-pub use fd_read_write::{BufReadFD, BufWriteFD, Poll, ReadFD, WriteFD};
+pub use fd_read_write::{BufWriteFD, Poll, ReadFD, WriteFD};
 use inner::PollReply;
 use packet_reader::PacketReader;
 
@@ -62,9 +62,12 @@ pub(crate) enum BlockingMode {
 /// writing. If the stream is buffered, polling is allowed to be incosistent across the
 /// reader and the writer: polling from the reader can ignore the writer buffer and polling
 /// from the writer is allowed to ignore the reader buffer.
+///
+/// `RustConnection` always used an internal buffer for reading, so `R` does not need
+/// to be buffered.
 #[derive(Debug)]
 pub struct RustConnection<
-    R: ReadFD + Poll = BufReadFD<stream::Stream>,
+    R: ReadFD + Poll = stream::Stream,
     W: WriteFD + Poll = BufWriteFD<stream::Stream>,
 > {
     inner: Mutex<inner::ConnectionInner>,
@@ -106,7 +109,7 @@ pub struct RustConnection<
 // for. Thus, after reading something from the connection, all threads that wait for something have
 // to check if they are the intended recipient.
 
-impl RustConnection<BufReadFD<stream::Stream>, BufWriteFD<stream::Stream>> {
+impl RustConnection<stream::Stream, BufWriteFD<stream::Stream>> {
     /// Establish a new connection.
     ///
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
@@ -128,7 +131,7 @@ impl RustConnection<BufReadFD<stream::Stream>, BufWriteFD<stream::Stream>> {
             .unwrap_or_else(|| (Vec::new(), Vec::new()));
 
         let write = BufWriteFD::new(stream.try_clone()?);
-        let read = BufReadFD::new(stream);
+        let read = stream;
         Ok((
             Self::connect_to_stream_with_auth_info(read, write, screen, auth_name, auth_data)?,
             screen,
@@ -388,14 +391,11 @@ impl<R: ReadFD + Poll, W: WriteFD + Poll> RustConnection<R, W> {
                 let mut packets = Vec::new();
 
                 if mode == BlockingMode::Blocking {
-                    // Read one packet blocking
-                    packets.push(lock.read_packet(&mut fds)?);
-                }
-
-                // And then read as many packages as possible
-                // without blocking.
-                while let Some(packet) = lock.try_read_packet(&mut fds)? {
-                    packets.push(packet);
+                    // Read at least one packet blocking
+                    lock.read_at_least_one_packet(&mut packets, &mut fds)?;
+                } else {
+                    // Read packets without blocking.
+                    lock.try_read_packets(&mut packets, &mut fds)?;
                 }
 
                 // 2.3. Relock `inner` to enqueue the packets.

@@ -170,7 +170,7 @@ fn redraw(
 fn do_poll(conn: &RustConnection) -> nix::Result<()> {
     use std::os::unix::io::AsRawFd;
 
-    let fd = conn.with_read(|r| r.get_ref().as_raw_fd());
+    let fd = conn.with_read(|r| r.as_raw_fd());
 
     // We do not really care about the result of poll. Either there was a timeout, in which case we
     // try to handle events (there are none) and then redraw. Or there was an event, in which case
