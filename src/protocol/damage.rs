@@ -197,7 +197,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_version_bytes[0],
@@ -280,7 +280,7 @@ impl CreateRequest {
         let level_bytes = u8::from(self.level).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             damage_bytes[0],
@@ -336,7 +336,7 @@ impl DestroyRequest {
         let damage_bytes = self.damage.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             damage_bytes[0],
@@ -386,7 +386,7 @@ impl SubtractRequest {
         let parts_bytes = self.parts.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SubtractRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             damage_bytes[0],
@@ -448,7 +448,7 @@ impl AddRequest {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AddRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],

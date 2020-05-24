@@ -451,7 +451,7 @@ impl QueryVersionRequest {
         let client_minor_bytes = self.client_minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_bytes[0],
@@ -522,7 +522,7 @@ impl QueryClientsRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryClientsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -604,7 +604,7 @@ impl QueryClientResourcesRequest {
         let xid_bytes = self.xid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryClientResourcesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             xid_bytes[0],
@@ -692,7 +692,7 @@ impl QueryClientPixmapBytesRequest {
         let xid_bytes = self.xid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryClientPixmapBytesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             xid_bytes[0],
@@ -766,7 +766,7 @@ impl<'input> QueryClientIdsRequest<'input> {
         let num_specs_bytes = num_specs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryClientIdsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             num_specs_bytes[0],
@@ -861,7 +861,7 @@ impl<'input> QueryResourceBytesRequest<'input> {
         let num_specs_bytes = num_specs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryResourceBytesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_bytes[0],

@@ -54,7 +54,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_version_bytes[0],

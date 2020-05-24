@@ -489,7 +489,7 @@ impl<'input> RenderRequest<'input> {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            RenderRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -546,7 +546,7 @@ impl<'input> RenderLargeRequest<'input> {
         let data_len_bytes = data_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            RenderLargeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -614,7 +614,7 @@ impl CreateContextRequest {
         let is_direct_bytes = self.is_direct.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -680,7 +680,7 @@ impl DestroyContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -730,7 +730,7 @@ impl MakeCurrentRequest {
         let old_context_tag_bytes = self.old_context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            MakeCurrentRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -812,7 +812,7 @@ impl IsDirectRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            IsDirectRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -886,7 +886,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -965,7 +965,7 @@ impl WaitGLRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            WaitGLRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -1011,7 +1011,7 @@ impl WaitXRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            WaitXRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -1063,7 +1063,7 @@ impl CopyContextRequest {
         let src_context_tag_bytes = self.src_context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CopyContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             src_bytes[0],
@@ -1214,7 +1214,7 @@ impl SwapBuffersRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SwapBuffersRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -1273,7 +1273,7 @@ impl UseXFontRequest {
         let list_base_bytes = self.list_base.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UseXFontRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -1345,7 +1345,7 @@ impl CreateGLXPixmapRequest {
         let glx_pixmap_bytes = self.glx_pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateGLXPixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1406,7 +1406,7 @@ impl GetVisualConfigsRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetVisualConfigsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1496,7 +1496,7 @@ impl DestroyGLXPixmapRequest {
         let glx_pixmap_bytes = self.glx_pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyGLXPixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             glx_pixmap_bytes[0],
@@ -1545,7 +1545,7 @@ impl<'input> VendorPrivateRequest<'input> {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            VendorPrivateRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             vendor_code_bytes[0],
@@ -1603,7 +1603,7 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            VendorPrivateWithReplyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             vendor_code_bytes[0],
@@ -1704,7 +1704,7 @@ impl QueryExtensionsStringRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryExtensionsStringRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1779,7 +1779,7 @@ impl QueryServerStringRequest {
         let name_bytes = self.name.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryServerStringRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1879,7 +1879,7 @@ impl<'input> ClientInfoRequest<'input> {
         let str_len_bytes = str_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ClientInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -1938,7 +1938,7 @@ impl GetFBConfigsRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetFBConfigsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -2038,7 +2038,7 @@ impl<'input> CreatePixmapRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreatePixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -2108,7 +2108,7 @@ impl DestroyPixmapRequest {
         let glx_pixmap_bytes = self.glx_pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyPixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             glx_pixmap_bytes[0],
@@ -2164,7 +2164,7 @@ impl CreateNewContextRequest {
         let is_direct_bytes = self.is_direct.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateNewContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -2235,7 +2235,7 @@ impl QueryContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -2330,7 +2330,7 @@ impl MakeContextCurrentRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            MakeContextCurrentRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             old_context_tag_bytes[0],
@@ -2425,7 +2425,7 @@ impl<'input> CreatePbufferRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreatePbufferRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -2490,7 +2490,7 @@ impl DestroyPbufferRequest {
         let pbuffer_bytes = self.pbuffer.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyPbufferRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             pbuffer_bytes[0],
@@ -2536,7 +2536,7 @@ impl GetDrawableAttributesRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDrawableAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -2629,7 +2629,7 @@ impl<'input> ChangeDrawableAttributesRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeDrawableAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -2694,7 +2694,7 @@ impl<'input> CreateWindowRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -2764,7 +2764,7 @@ impl DeleteWindowRequest {
         let glxwindow_bytes = self.glxwindow.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             glxwindow_bytes[0],
@@ -2822,7 +2822,7 @@ impl<'input> SetClientInfoARBRequest<'input> {
         let glx_str_len_bytes = glx_str_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetClientInfoARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -2906,7 +2906,7 @@ impl<'input> CreateContextAttribsARBRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateContextAttribsARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -2993,7 +2993,7 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         let glx_str_len_bytes = glx_str_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetClientInfo2ARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -3069,7 +3069,7 @@ impl NewListRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            NewListRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3125,7 +3125,7 @@ impl EndListRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            EndListRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3175,7 +3175,7 @@ impl DeleteListsRequest {
         let range_bytes = self.range.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteListsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3233,7 +3233,7 @@ impl GenListsRequest {
         let range_bytes = self.range.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GenListsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3313,7 +3313,7 @@ impl FeedbackBufferRequest {
         let type_bytes = self.type_.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FeedbackBufferRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3371,7 +3371,7 @@ impl SelectBufferRequest {
         let size_bytes = self.size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectBufferRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3424,7 +3424,7 @@ impl RenderModeRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            RenderModeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3571,7 +3571,7 @@ impl FinishRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FinishRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3644,7 +3644,7 @@ impl PixelStorefRequest {
         let datum_bytes = self.datum.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PixelStorefRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3704,7 +3704,7 @@ impl PixelStoreiRequest {
         let datum_bytes = self.datum.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PixelStoreiRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3776,7 +3776,7 @@ impl ReadPixelsRequest {
         let lsb_first_bytes = self.lsb_first.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ReadPixelsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -3902,7 +3902,7 @@ impl GetBooleanvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetBooleanvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4000,7 +4000,7 @@ impl GetClipPlaneRequest {
         let plane_bytes = self.plane.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetClipPlaneRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4094,7 +4094,7 @@ impl GetDoublevRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDoublevRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4190,7 +4190,7 @@ impl GetErrorRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetErrorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4263,7 +4263,7 @@ impl GetFloatvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetFloatvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4361,7 +4361,7 @@ impl GetIntegervRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetIntegervRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4461,7 +4461,7 @@ impl GetLightfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetLightfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4566,7 +4566,7 @@ impl GetLightivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetLightivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4671,7 +4671,7 @@ impl GetMapdvRequest {
         let query_bytes = self.query.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMapdvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4776,7 +4776,7 @@ impl GetMapfvRequest {
         let query_bytes = self.query.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMapfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4881,7 +4881,7 @@ impl GetMapivRequest {
         let query_bytes = self.query.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMapivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -4986,7 +4986,7 @@ impl GetMaterialfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMaterialfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5091,7 +5091,7 @@ impl GetMaterialivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMaterialivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5194,7 +5194,7 @@ impl GetPixelMapfvRequest {
         let map_bytes = self.map.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPixelMapfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5292,7 +5292,7 @@ impl GetPixelMapuivRequest {
         let map_bytes = self.map.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPixelMapuivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5390,7 +5390,7 @@ impl GetPixelMapusvRequest {
         let map_bytes = self.map.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPixelMapusvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5488,7 +5488,7 @@ impl GetPolygonStippleRequest {
         let lsb_first_bytes = self.lsb_first.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPolygonStippleRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5583,7 +5583,7 @@ impl GetStringRequest {
         let name_bytes = self.name.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetStringRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5682,7 +5682,7 @@ impl GetTexEnvfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexEnvfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5787,7 +5787,7 @@ impl GetTexEnvivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexEnvivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5892,7 +5892,7 @@ impl GetTexGendvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexGendvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -5997,7 +5997,7 @@ impl GetTexGenfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexGenfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6102,7 +6102,7 @@ impl GetTexGenivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexGenivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6213,7 +6213,7 @@ impl GetTexImageRequest {
         let swap_bytes_bytes = self.swap_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexImageRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6337,7 +6337,7 @@ impl GetTexParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexParameterfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6442,7 +6442,7 @@ impl GetTexParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexParameterivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6549,7 +6549,7 @@ impl GetTexLevelParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexLevelParameterfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6661,7 +6661,7 @@ impl GetTexLevelParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTexLevelParameterivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6769,7 +6769,7 @@ impl IsEnabledRequest {
         let capability_bytes = self.capability.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            IsEnabledRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6847,7 +6847,7 @@ impl IsListRequest {
         let list_bytes = self.list.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            IsListRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6923,7 +6923,7 @@ impl FlushRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FlushRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -6972,7 +6972,7 @@ impl<'input> AreTexturesResidentRequest<'input> {
         let n_bytes = n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AreTexturesResidentRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7073,7 +7073,7 @@ impl<'input> DeleteTexturesRequest<'input> {
         let n_bytes = n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteTexturesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7130,7 +7130,7 @@ impl GenTexturesRequest {
         let n_bytes = self.n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GenTexturesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7223,7 +7223,7 @@ impl IsTextureRequest {
         let texture_bytes = self.texture.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            IsTextureRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7307,7 +7307,7 @@ impl GetColorTableRequest {
         let swap_bytes_bytes = self.swap_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetColorTableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7422,7 +7422,7 @@ impl GetColorTableParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetColorTableParameterfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7527,7 +7527,7 @@ impl GetColorTableParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetColorTableParameterivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7636,7 +7636,7 @@ impl GetConvolutionFilterRequest {
         let swap_bytes_bytes = self.swap_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetConvolutionFilterRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7753,7 +7753,7 @@ impl GetConvolutionParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetConvolutionParameterfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7858,7 +7858,7 @@ impl GetConvolutionParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetConvolutionParameterivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -7967,7 +7967,7 @@ impl GetSeparableFilterRequest {
         let swap_bytes_bytes = self.swap_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetSeparableFilterRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8090,7 +8090,7 @@ impl GetHistogramRequest {
         let reset_bytes = self.reset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetHistogramRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8206,7 +8206,7 @@ impl GetHistogramParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetHistogramParameterfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8311,7 +8311,7 @@ impl GetHistogramParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetHistogramParameterivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8422,7 +8422,7 @@ impl GetMinmaxRequest {
         let reset_bytes = self.reset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMinmaxRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8535,7 +8535,7 @@ impl GetMinmaxParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMinmaxParameterfvRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8640,7 +8640,7 @@ impl GetMinmaxParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMinmaxParameterivRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8745,7 +8745,7 @@ impl GetCompressedTexImageARBRequest {
         let level_bytes = self.level.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetCompressedTexImageARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8849,7 +8849,7 @@ impl<'input> DeleteQueriesARBRequest<'input> {
         let n_bytes = n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteQueriesARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8906,7 +8906,7 @@ impl GenQueriesARBRequest {
         let n_bytes = self.n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GenQueriesARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -8999,7 +8999,7 @@ impl IsQueryARBRequest {
         let id_bytes = self.id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            IsQueryARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -9079,7 +9079,7 @@ impl GetQueryivARBRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetQueryivARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -9184,7 +9184,7 @@ impl GetQueryObjectivARBRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetQueryObjectivARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],
@@ -9289,7 +9289,7 @@ impl GetQueryObjectuivARBRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetQueryObjectuivARBRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_tag_bytes[0],

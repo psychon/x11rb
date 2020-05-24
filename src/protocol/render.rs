@@ -1831,7 +1831,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_version_bytes[0],
@@ -1907,7 +1907,7 @@ impl QueryPictFormatsRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryPictFormatsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -2033,7 +2033,7 @@ impl QueryPictIndexValuesRequest {
         let format_bytes = self.format.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryPictIndexValuesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             format_bytes[0],
@@ -2311,7 +2311,7 @@ impl<'input> CreatePictureRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreatePictureRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             pid_bytes[0],
@@ -2562,7 +2562,7 @@ impl<'input> ChangePictureRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangePictureRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -2622,7 +2622,7 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
         let clip_y_origin_bytes = self.clip_y_origin.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetPictureClipRectanglesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -2679,7 +2679,7 @@ impl FreePictureRequest {
         let picture_bytes = self.picture.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FreePictureRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -2747,7 +2747,7 @@ impl CompositeRequest {
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CompositeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             op_bytes[0],
@@ -2845,7 +2845,7 @@ impl<'input> TrapezoidsRequest<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            TrapezoidsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             op_bytes[0],
@@ -2928,7 +2928,7 @@ impl<'input> TrianglesRequest<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            TrianglesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             op_bytes[0],
@@ -3011,7 +3011,7 @@ impl<'input> TriStripRequest<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            TriStripRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             op_bytes[0],
@@ -3094,7 +3094,7 @@ impl<'input> TriFanRequest<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            TriFanRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             op_bytes[0],
@@ -3168,7 +3168,7 @@ impl CreateGlyphSetRequest {
         let format_bytes = self.format.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateGlyphSetRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             gsid_bytes[0],
@@ -3221,7 +3221,7 @@ impl ReferenceGlyphSetRequest {
         let existing_bytes = self.existing.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ReferenceGlyphSetRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             gsid_bytes[0],
@@ -3272,7 +3272,7 @@ impl FreeGlyphSetRequest {
         let glyphset_bytes = self.glyphset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FreeGlyphSetRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             glyphset_bytes[0],
@@ -3323,7 +3323,7 @@ impl<'input> AddGlyphsRequest<'input> {
         let glyphs_len_bytes = glyphs_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AddGlyphsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             glyphset_bytes[0],
@@ -3385,7 +3385,7 @@ impl<'input> FreeGlyphsRequest<'input> {
         let glyphset_bytes = self.glyphset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FreeGlyphsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             glyphset_bytes[0],
@@ -3449,7 +3449,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CompositeGlyphs8Request::opcode(),
+            Self::opcode(),
             0,
             0,
             op_bytes[0],
@@ -3538,7 +3538,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CompositeGlyphs16Request::opcode(),
+            Self::opcode(),
             0,
             0,
             op_bytes[0],
@@ -3627,7 +3627,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CompositeGlyphs32Request::opcode(),
+            Self::opcode(),
             0,
             0,
             op_bytes[0],
@@ -3708,7 +3708,7 @@ impl<'input> FillRectanglesRequest<'input> {
         let color_bytes = self.color.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FillRectanglesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             op_bytes[0],
@@ -3779,7 +3779,7 @@ impl CreateCursorRequest {
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             cid_bytes[0],
@@ -3936,7 +3936,7 @@ impl SetPictureTransformRequest {
         let transform_bytes = self.transform.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetPictureTransformRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -4019,7 +4019,7 @@ impl QueryFiltersRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryFiltersRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -4127,7 +4127,7 @@ impl<'input> SetPictureFilterRequest<'input> {
         let filter_len_bytes = filter_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetPictureFilterRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -4229,7 +4229,7 @@ impl<'input> CreateAnimCursorRequest<'input> {
         let cid_bytes = self.cid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateAnimCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             cid_bytes[0],
@@ -4393,7 +4393,7 @@ impl<'input> AddTrapsRequest<'input> {
         let y_off_bytes = self.y_off.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AddTrapsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -4452,7 +4452,7 @@ impl CreateSolidFillRequest {
         let color_bytes = self.color.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateSolidFillRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -4515,7 +4515,7 @@ impl<'input> CreateLinearGradientRequest<'input> {
         let num_stops_bytes = num_stops.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateLinearGradientRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -4604,7 +4604,7 @@ impl<'input> CreateRadialGradientRequest<'input> {
         let num_stops_bytes = num_stops.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateRadialGradientRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -4699,7 +4699,7 @@ impl<'input> CreateConicalGradientRequest<'input> {
         let num_stops_bytes = num_stops.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateConicalGradientRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],

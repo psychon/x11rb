@@ -99,7 +99,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -168,7 +168,7 @@ impl QueryDirectRenderingCapableRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryDirectRenderingCapableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -239,7 +239,7 @@ impl OpenConnectionRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            OpenConnectionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -332,7 +332,7 @@ impl CloseConnectionRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CloseConnectionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -378,7 +378,7 @@ impl GetClientDriverNameRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetClientDriverNameRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -477,7 +477,7 @@ impl CreateContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -560,7 +560,7 @@ impl DestroyContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -613,7 +613,7 @@ impl CreateDrawableRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateDrawableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -691,7 +691,7 @@ impl DestroyDrawableRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyDrawableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -744,7 +744,7 @@ impl GetDrawableInfoRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDrawableInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -868,7 +868,7 @@ impl GetDeviceInfoRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -967,7 +967,7 @@ impl AuthConnectionRequest {
         let magic_bytes = self.magic.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AuthConnectionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],

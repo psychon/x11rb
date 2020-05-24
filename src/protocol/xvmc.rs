@@ -142,7 +142,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -209,7 +209,7 @@ impl ListSurfaceTypesRequest {
         let port_id_bytes = self.port_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListSurfaceTypesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_id_bytes[0],
@@ -307,7 +307,7 @@ impl CreateContextRequest {
         let flags_bytes = self.flags.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_id_bytes[0],
@@ -420,7 +420,7 @@ impl DestroyContextRequest {
         let context_id_bytes = self.context_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_id_bytes[0],
@@ -468,7 +468,7 @@ impl CreateSurfaceRequest {
         let context_id_bytes = self.context_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateSurfaceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             surface_id_bytes[0],
@@ -559,7 +559,7 @@ impl DestroySurfaceRequest {
         let surface_id_bytes = self.surface_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroySurfaceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             surface_id_bytes[0],
@@ -613,7 +613,7 @@ impl CreateSubpictureRequest {
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateSubpictureRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             subpicture_id_bytes[0],
@@ -726,7 +726,7 @@ impl DestroySubpictureRequest {
         let subpicture_id_bytes = self.subpicture_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroySubpictureRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             subpicture_id_bytes[0],
@@ -774,7 +774,7 @@ impl ListSubpictureTypesRequest {
         let surface_id_bytes = self.surface_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListSubpictureTypesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_id_bytes[0],

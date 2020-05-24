@@ -54,7 +54,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_version_bytes[0],
@@ -129,7 +129,7 @@ impl StartRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            StartRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -199,7 +199,7 @@ impl EndRequest {
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            EndRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             cmap_bytes[0],
@@ -401,7 +401,7 @@ impl SendRequest {
         let data_type_bytes = self.data_type.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SendRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             event_bytes[0],
@@ -568,7 +568,7 @@ impl SelectInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectInputRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             event_mask_bytes[0],

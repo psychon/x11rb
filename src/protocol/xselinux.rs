@@ -55,7 +55,7 @@ impl QueryVersionRequest {
         let client_minor_bytes = self.client_minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_bytes[0],
@@ -130,7 +130,7 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetDeviceCreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_len_bytes[0],
@@ -176,7 +176,7 @@ impl GetDeviceCreateContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceCreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -262,7 +262,7 @@ impl<'input> SetDeviceContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetDeviceContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_bytes[0],
@@ -316,7 +316,7 @@ impl GetDeviceContextRequest {
         let device_bytes = self.device.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_bytes[0],
@@ -406,7 +406,7 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetWindowCreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_len_bytes[0],
@@ -452,7 +452,7 @@ impl GetWindowCreateContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetWindowCreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -535,7 +535,7 @@ impl GetWindowContextRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetWindowContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -708,7 +708,7 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetPropertyCreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_len_bytes[0],
@@ -754,7 +754,7 @@ impl GetPropertyCreateContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPropertyCreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -838,7 +838,7 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetPropertyUseContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_len_bytes[0],
@@ -884,7 +884,7 @@ impl GetPropertyUseContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPropertyUseContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -969,7 +969,7 @@ impl GetPropertyContextRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPropertyContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1065,7 +1065,7 @@ impl GetPropertyDataContextRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPropertyDataContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1159,7 +1159,7 @@ impl ListPropertiesRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListPropertiesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1248,7 +1248,7 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetSelectionCreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_len_bytes[0],
@@ -1294,7 +1294,7 @@ impl GetSelectionCreateContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetSelectionCreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -1378,7 +1378,7 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetSelectionUseContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_len_bytes[0],
@@ -1424,7 +1424,7 @@ impl GetSelectionUseContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetSelectionUseContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -1507,7 +1507,7 @@ impl GetSelectionContextRequest {
         let selection_bytes = self.selection.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetSelectionContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             selection_bytes[0],
@@ -1596,7 +1596,7 @@ impl GetSelectionDataContextRequest {
         let selection_bytes = self.selection.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetSelectionDataContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             selection_bytes[0],
@@ -1682,7 +1682,7 @@ impl ListSelectionsRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListSelectionsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -1764,7 +1764,7 @@ impl GetClientContextRequest {
         let resource_bytes = self.resource.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetClientContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             resource_bytes[0],

@@ -54,7 +54,7 @@ impl GetVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_version_bytes[0],
@@ -125,7 +125,7 @@ impl CapableRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            CapableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -188,7 +188,7 @@ impl GetTimeoutsRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetTimeoutsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -262,7 +262,7 @@ impl SetTimeoutsRequest {
         let off_timeout_bytes = self.off_timeout.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetTimeoutsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             standby_timeout_bytes[0],
@@ -311,7 +311,7 @@ impl EnableRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            EnableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -348,7 +348,7 @@ impl DisableRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            DisableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -456,7 +456,7 @@ impl ForceLevelRequest {
         let power_level_bytes = u16::from(self.power_level).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ForceLevelRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             power_level_bytes[0],
@@ -499,7 +499,7 @@ impl InfoRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            InfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];

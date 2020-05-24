@@ -49,7 +49,7 @@ impl EnableRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            EnableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];

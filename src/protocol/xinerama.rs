@@ -105,7 +105,7 @@ impl QueryVersionRequest {
         let minor_bytes = self.minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_bytes[0],
@@ -179,7 +179,7 @@ impl GetStateRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetStateRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -251,7 +251,7 @@ impl GetScreenCountRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetScreenCountRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -325,7 +325,7 @@ impl GetScreenSizeRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetScreenSizeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -404,7 +404,7 @@ impl IsActiveRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            IsActiveRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -466,7 +466,7 @@ impl QueryScreensRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryScreensRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];

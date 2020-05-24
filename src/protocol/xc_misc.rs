@@ -54,7 +54,7 @@ impl GetVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_version_bytes[0],
@@ -125,7 +125,7 @@ impl GetXIDRangeRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetXIDRangeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -192,7 +192,7 @@ impl GetXIDListRequest {
         let count_bytes = self.count.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetXIDListRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             count_bytes[0],

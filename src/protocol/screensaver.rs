@@ -251,7 +251,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_version_bytes[0],
@@ -326,7 +326,7 @@ impl QueryInfoRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -410,7 +410,7 @@ impl SelectInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectInputRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -689,7 +689,7 @@ impl<'input> SetAttributesRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -768,7 +768,7 @@ impl UnsetAttributesRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UnsetAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -814,7 +814,7 @@ impl SuspendRequest {
         let suspend_bytes = self.suspend.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SuspendRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             suspend_bytes[0],

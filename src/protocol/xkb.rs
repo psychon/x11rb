@@ -6329,7 +6329,7 @@ impl UseExtensionRequest {
         let wanted_minor_bytes = self.wanted_minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UseExtensionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             wanted_major_bytes[0],
@@ -6835,7 +6835,7 @@ impl<'input> SelectEventsRequest<'input> {
         let map_bytes = self.map.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectEventsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -6927,7 +6927,7 @@ impl BellRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            BellRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -7002,7 +7002,7 @@ impl GetStateRequest {
         let device_spec_bytes = self.device_spec.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetStateRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -7118,7 +7118,7 @@ impl LatchLockStateRequest {
         let group_latch_bytes = self.group_latch.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            LatchLockStateRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -7185,7 +7185,7 @@ impl GetControlsRequest {
         let device_spec_bytes = self.device_spec.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetControlsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -7367,7 +7367,7 @@ impl<'input> SetControlsRequest<'input> {
         let access_x_timeout_options_values_bytes = self.access_x_timeout_options_values.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetControlsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -7569,7 +7569,7 @@ impl GetMapRequest {
         let n_v_mod_map_keys_bytes = self.n_v_mod_map_keys.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -8056,7 +8056,7 @@ impl<'input> SetMapRequest<'input> {
         let virtual_mods_bytes = self.virtual_mods.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetMapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -8171,7 +8171,7 @@ impl GetCompatMapRequest {
         let n_si_bytes = self.n_si.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetCompatMapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -8291,7 +8291,7 @@ impl<'input> SetCompatMapRequest<'input> {
         let n_si_bytes = n_si.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetCompatMapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -8360,7 +8360,7 @@ impl GetIndicatorStateRequest {
         let device_spec_bytes = self.device_spec.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetIndicatorStateRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -8435,7 +8435,7 @@ impl GetIndicatorMapRequest {
         let which_bytes = self.which.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetIndicatorMapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -8522,7 +8522,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
         let which_bytes = self.which.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetIndicatorMapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -8585,7 +8585,7 @@ impl GetNamedIndicatorRequest {
         let indicator_bytes = self.indicator.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetNamedIndicatorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -8725,7 +8725,7 @@ impl SetNamedIndicatorRequest {
         let map_ctrls_bytes = self.map_ctrls.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetNamedIndicatorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -8827,7 +8827,7 @@ impl GetNamesRequest {
         let which_bytes = self.which.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetNamesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -9336,7 +9336,7 @@ impl<'input> SetNamesRequest<'input> {
         let total_kt_level_names_bytes = self.total_kt_level_names.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetNamesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -9433,7 +9433,7 @@ impl PerClientFlagsRequest {
         let auto_ctrls_values_bytes = self.auto_ctrls_values.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PerClientFlagsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -9549,7 +9549,7 @@ impl ListComponentsRequest {
         let max_names_bytes = self.max_names.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListComponentsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -9727,7 +9727,7 @@ impl GetKbdByNameRequest {
         let load_bytes = self.load.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetKbdByNameRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -10435,7 +10435,7 @@ impl GetDeviceInfoRequest {
         let led_id_bytes = self.led_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -10612,7 +10612,7 @@ impl<'input> SetDeviceInfoRequest<'input> {
         let n_device_led_f_bs_bytes = n_device_led_f_bs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetDeviceInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_spec_bytes[0],
@@ -10683,7 +10683,7 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         let ctrls_bytes = self.ctrls.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetDebuggingFlagsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             msg_length_bytes[0],

@@ -126,7 +126,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_version_bytes[0],
@@ -207,7 +207,7 @@ impl RedirectWindowRequest {
         let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            RedirectWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -260,7 +260,7 @@ impl RedirectSubwindowsRequest {
         let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            RedirectSubwindowsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -313,7 +313,7 @@ impl UnredirectWindowRequest {
         let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UnredirectWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -366,7 +366,7 @@ impl UnredirectSubwindowsRequest {
         let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UnredirectSubwindowsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -419,7 +419,7 @@ impl CreateRegionFromBorderClipRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateRegionFromBorderClipRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -472,7 +472,7 @@ impl NameWindowPixmapRequest {
         let pixmap_bytes = self.pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            NameWindowPixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -523,7 +523,7 @@ impl GetOverlayWindowRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetOverlayWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -595,7 +595,7 @@ impl ReleaseOverlayWindowRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ReleaseOverlayWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],

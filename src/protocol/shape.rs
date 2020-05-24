@@ -283,7 +283,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -361,7 +361,7 @@ impl<'input> RectanglesRequest<'input> {
         let y_offset_bytes = self.y_offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            RectanglesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             operation_bytes[0],
@@ -435,7 +435,7 @@ impl MaskRequest {
         let source_bitmap_bytes = self.source_bitmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            MaskRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             operation_bytes[0],
@@ -512,7 +512,7 @@ impl CombineRequest {
         let source_window_bytes = self.source_window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CombineRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             operation_bytes[0],
@@ -582,7 +582,7 @@ impl OffsetRequest {
         let y_offset_bytes = self.y_offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            OffsetRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             destination_kind_bytes[0],
@@ -639,7 +639,7 @@ impl QueryExtentsRequest {
         let destination_window_bytes = self.destination_window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryExtentsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             destination_window_bytes[0],
@@ -731,7 +731,7 @@ impl SelectInputRequest {
         let enable_bytes = self.enable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectInputRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             destination_window_bytes[0],
@@ -782,7 +782,7 @@ impl InputSelectedRequest {
         let destination_window_bytes = self.destination_window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            InputSelectedRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             destination_window_bytes[0],
@@ -854,7 +854,7 @@ impl GetRectanglesRequest {
         let source_kind_bytes = Kind::from(self.source_kind).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetRectanglesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],

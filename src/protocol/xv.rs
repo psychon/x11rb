@@ -1562,7 +1562,7 @@ impl QueryExtensionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryExtensionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -1629,7 +1629,7 @@ impl QueryAdaptorsRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryAdaptorsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1717,7 +1717,7 @@ impl QueryEncodingsRequest {
         let port_bytes = self.port.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryEncodingsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -1807,7 +1807,7 @@ impl GrabPortRequest {
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GrabPortRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -1887,7 +1887,7 @@ impl UngrabPortRequest {
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UngrabPortRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -1960,7 +1960,7 @@ impl PutVideoRequest {
         let drw_h_bytes = self.drw_h.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PutVideoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2060,7 +2060,7 @@ impl PutStillRequest {
         let drw_h_bytes = self.drw_h.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PutStillRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2160,7 +2160,7 @@ impl GetVideoRequest {
         let drw_h_bytes = self.drw_h.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetVideoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2260,7 +2260,7 @@ impl GetStillRequest {
         let drw_h_bytes = self.drw_h.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetStillRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2342,7 +2342,7 @@ impl StopVideoRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            StopVideoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2395,7 +2395,7 @@ impl SelectVideoNotifyRequest {
         let onoff_bytes = self.onoff.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectVideoNotifyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -2448,7 +2448,7 @@ impl SelectPortNotifyRequest {
         let onoff_bytes = self.onoff.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectPortNotifyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2509,7 +2509,7 @@ impl QueryBestSizeRequest {
         let motion_bytes = self.motion.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryBestSizeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2603,7 +2603,7 @@ impl SetPortAttributeRequest {
         let value_bytes = self.value.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetPortAttributeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2661,7 +2661,7 @@ impl GetPortAttributeRequest {
         let attribute_bytes = self.attribute.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPortAttributeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2737,7 +2737,7 @@ impl QueryPortAttributesRequest {
         let port_bytes = self.port.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryPortAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2827,7 +2827,7 @@ impl ListImageFormatsRequest {
         let port_bytes = self.port.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListImageFormatsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -2921,7 +2921,7 @@ impl QueryImageAttributesRequest {
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryImageAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -3055,7 +3055,7 @@ impl<'input> PutImageRequest<'input> {
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PutImageRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],
@@ -3182,7 +3182,7 @@ impl ShmPutImageRequest {
         let send_event_bytes = self.send_event.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ShmPutImageRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             port_bytes[0],

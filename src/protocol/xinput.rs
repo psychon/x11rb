@@ -105,7 +105,7 @@ impl<'input> GetExtensionVersionRequest<'input> {
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetExtensionVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             name_len_bytes[0],
@@ -960,7 +960,7 @@ impl ListInputDevicesRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListInputDevicesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -1091,7 +1091,7 @@ impl OpenDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            OpenDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -1185,7 +1185,7 @@ impl CloseDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CloseDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -1233,7 +1233,7 @@ impl SetDeviceModeRequest {
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetDeviceModeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -1311,7 +1311,7 @@ impl<'input> SelectExtensionEventRequest<'input> {
         let num_classes_bytes = num_classes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectExtensionEventRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1366,7 +1366,7 @@ impl GetSelectedExtensionEventsRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetSelectedExtensionEventsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1546,7 +1546,7 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeDeviceDontPropagateListRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1602,7 +1602,7 @@ impl GetDeviceDontPropagateListRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceDontPropagateListRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1723,7 +1723,7 @@ impl GetDeviceMotionEventsRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceMotionEventsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             start_bytes[0],
@@ -1836,7 +1836,7 @@ impl ChangeKeyboardDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeKeyboardDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -1914,7 +1914,7 @@ impl ChangePointerDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangePointerDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             x_axis_bytes[0],
@@ -2003,7 +2003,7 @@ impl<'input> GrabDeviceRequest<'input> {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GrabDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             grab_window_bytes[0],
@@ -2103,7 +2103,7 @@ impl UngrabDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UngrabDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             time_bytes[0],
@@ -2232,7 +2232,7 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         let owner_events_bytes = self.owner_events.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GrabDeviceKeyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             grab_window_bytes[0],
@@ -2316,7 +2316,7 @@ impl UngrabDeviceKeyRequest {
         let grabbed_device_bytes = self.grabbed_device.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UngrabDeviceKeyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             grab_window_bytes[0],
@@ -2397,7 +2397,7 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         let owner_events_bytes = self.owner_events.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GrabDeviceButtonRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             grab_window_bytes[0],
@@ -2481,7 +2481,7 @@ impl UngrabDeviceButtonRequest {
         let grabbed_device_bytes = self.grabbed_device.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UngrabDeviceButtonRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             grab_window_bytes[0],
@@ -2623,7 +2623,7 @@ impl AllowDeviceEventsRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AllowDeviceEventsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             time_bytes[0],
@@ -2677,7 +2677,7 @@ impl GetDeviceFocusRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceFocusRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -2761,7 +2761,7 @@ impl SetDeviceFocusRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetDeviceFocusRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             focus_bytes[0],
@@ -3843,7 +3843,7 @@ impl GetFeedbackControlRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetFeedbackControlRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -4844,7 +4844,7 @@ impl ChangeFeedbackControlRequest {
         let feedback_id_bytes = self.feedback_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeFeedbackControlRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             mask_bytes[0],
@@ -4907,7 +4907,7 @@ impl GetDeviceKeyMappingRequest {
         let count_bytes = self.count.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceKeyMappingRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -5005,7 +5005,7 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
         let keycode_count_bytes = self.keycode_count.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeDeviceKeyMappingRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -5060,7 +5060,7 @@ impl GetDeviceModifierMappingRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceModifierMappingRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -5155,7 +5155,7 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetDeviceModifierMappingRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -5233,7 +5233,7 @@ impl GetDeviceButtonMappingRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceButtonMappingRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -5331,7 +5331,7 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         let map_size_bytes = map_size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetDeviceButtonMappingRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -5996,7 +5996,7 @@ impl QueryDeviceStateRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryDeviceStateRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -6091,7 +6091,7 @@ impl DeviceBellRequest {
         let percent_bytes = self.percent.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeviceBellRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -6145,7 +6145,7 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
         let num_valuators_bytes = num_valuators.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetDeviceValuatorsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -7060,7 +7060,7 @@ impl GetDeviceControlRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDeviceControlRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             control_id_bytes[0],
@@ -7888,7 +7888,7 @@ impl ChangeDeviceControlRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeDeviceControlRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             control_id_bytes[0],
@@ -7967,7 +7967,7 @@ impl ListDevicePropertiesRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListDevicePropertiesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             device_id_bytes[0],
@@ -8194,7 +8194,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let num_items_bytes = self.num_items.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeDevicePropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             property_bytes[0],
@@ -8263,7 +8263,7 @@ impl DeleteDevicePropertyRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteDevicePropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             property_bytes[0],
@@ -8324,7 +8324,7 @@ impl GetDevicePropertyRequest {
         let delete_bytes = self.delete.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDevicePropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             property_bytes[0],
@@ -8673,7 +8673,7 @@ impl XIQueryPointerRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIQueryPointerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -8802,7 +8802,7 @@ impl XIWarpPointerRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIWarpPointerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             src_win_bytes[0],
@@ -8890,7 +8890,7 @@ impl XIChangeCursorRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIChangeCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -9628,7 +9628,7 @@ impl<'input> XIChangeHierarchyRequest<'input> {
         let num_changes_bytes = num_changes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIChangeHierarchyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             num_changes_bytes[0],
@@ -9680,7 +9680,7 @@ impl XISetClientPointerRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XISetClientPointerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -9733,7 +9733,7 @@ impl XIGetClientPointerRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIGetClientPointerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -9965,7 +9965,7 @@ impl<'input> XISelectEventsRequest<'input> {
         let num_mask_bytes = num_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XISelectEventsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -10022,7 +10022,7 @@ impl XIQueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIQueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -11324,7 +11324,7 @@ impl XIQueryDeviceRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIQueryDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             deviceid_bytes[0],
@@ -11418,7 +11418,7 @@ impl XISetFocusRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XISetFocusRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -11478,7 +11478,7 @@ impl XIGetFocusRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIGetFocusRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             deviceid_bytes[0],
@@ -11637,7 +11637,7 @@ impl<'input> XIGrabDeviceRequest<'input> {
         let mask_len_bytes = mask_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIGrabDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -11743,7 +11743,7 @@ impl XIUngrabDeviceRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIUngrabDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             time_bytes[0],
@@ -11886,7 +11886,7 @@ impl XIAllowEventsRequest {
         let grab_window_bytes = self.grab_window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIAllowEventsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             time_bytes[0],
@@ -12183,7 +12183,7 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         let owner_events_bytes = bool::from(self.owner_events).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIPassiveGrabDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             time_bytes[0],
@@ -12324,7 +12324,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         let grab_type_bytes = u8::from(self.grab_type).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIPassiveUngrabDeviceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             grab_window_bytes[0],
@@ -12392,7 +12392,7 @@ impl XIListPropertiesRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIListPropertiesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             deviceid_bytes[0],
@@ -12555,7 +12555,7 @@ impl<'input> XIChangePropertyRequest<'input> {
         let num_items_bytes = self.num_items.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIChangePropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             deviceid_bytes[0],
@@ -12626,7 +12626,7 @@ impl XIDeletePropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIDeletePropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             deviceid_bytes[0],
@@ -12689,7 +12689,7 @@ impl XIGetPropertyRequest {
         let len_bytes = self.len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIGetPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             deviceid_bytes[0],
@@ -12861,7 +12861,7 @@ impl XIGetSelectedEventsRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIGetSelectedEventsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -13002,7 +13002,7 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
         let num_barriers_bytes = num_barriers.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            XIBarrierReleasePointerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             num_barriers_bytes[0],
@@ -15917,7 +15917,7 @@ impl<'input> SendExtensionEventRequest<'input> {
         let num_events_bytes = num_events.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SendExtensionEventRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             destination_bytes[0],

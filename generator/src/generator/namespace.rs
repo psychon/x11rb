@@ -510,11 +510,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 fixed_fields_bytes
                                     .push(String::from("extension_information.major_opcode"));
                             } else {
-                                fixed_fields_bytes.push(format!("{}Request::opcode()", name));
+                                fixed_fields_bytes.push(String::from("Self::opcode()"));
                             }
                         } else if normal_field.name == "minor_opcode" {
                             assert!(ns.ext_info.is_some());
-                            fixed_fields_bytes.push(format!("{}Request::opcode()", name));
+                            fixed_fields_bytes.push(String::from("Self::opcode()"));
                         } else if normal_field.name == "length" {
                             // the actual length will be calculated later
                             fixed_fields_bytes.push(String::from("0"));

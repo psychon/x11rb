@@ -55,7 +55,7 @@ impl GetVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -200,7 +200,7 @@ impl CompareCursorRequest {
         let cursor_bytes = self.cursor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CompareCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -287,7 +287,7 @@ impl FakeInputRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FakeInputRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             type_bytes[0],
@@ -367,7 +367,7 @@ impl GrabControlRequest {
         let impervious_bytes = self.impervious.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GrabControlRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             impervious_bytes[0],

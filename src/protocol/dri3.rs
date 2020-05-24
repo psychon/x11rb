@@ -55,7 +55,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -135,7 +135,7 @@ impl OpenRequest {
         let provider_bytes = self.provider.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            OpenRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -230,7 +230,7 @@ impl PixmapFromBufferRequest {
         let bpp_bytes = self.bpp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PixmapFromBufferRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             pixmap_bytes[0],
@@ -302,7 +302,7 @@ impl BufferFromPixmapRequest {
         let pixmap_bytes = self.pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            BufferFromPixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             pixmap_bytes[0],
@@ -394,7 +394,7 @@ impl FenceFromFDRequest {
         let initially_triggered_bytes = self.initially_triggered.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FenceFromFDRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -455,7 +455,7 @@ impl FDFromFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FDFromFenceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -539,7 +539,7 @@ impl GetSupportedModifiersRequest {
         let bpp_bytes = self.bpp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetSupportedModifiersRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -680,7 +680,7 @@ impl PixmapFromBuffersRequest {
         let modifier_bytes = self.modifier.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PixmapFromBuffersRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             pixmap_bytes[0],
@@ -797,7 +797,7 @@ impl BuffersFromPixmapRequest {
         let pixmap_bytes = self.pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            BuffersFromPixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             pixmap_bytes[0],

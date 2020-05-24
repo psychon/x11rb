@@ -6049,7 +6049,7 @@ impl<'input> CreateWindowRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            CreateWindowRequest::opcode(),
+            Self::opcode(),
             depth_bytes[0],
             0,
             0,
@@ -6416,7 +6416,7 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            ChangeWindowAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -6567,7 +6567,7 @@ impl GetWindowAttributesRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            GetWindowAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -6719,7 +6719,7 @@ impl DestroyWindowRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            DestroyWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -6785,7 +6785,7 @@ impl DestroySubwindowsRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            DestroySubwindowsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -6923,7 +6923,7 @@ impl ChangeSaveSetRequest {
         let mode_bytes = u8::from(self.mode).serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            ChangeSaveSetRequest::opcode(),
+            Self::opcode(),
             mode_bytes[0],
             0,
             0,
@@ -7028,7 +7028,7 @@ impl ReparentWindowRequest {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            ReparentWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -7150,7 +7150,7 @@ impl MapWindowRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            MapWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -7229,7 +7229,7 @@ impl MapSubwindowsRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            MapSubwindowsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -7294,7 +7294,7 @@ impl UnmapWindowRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            UnmapWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -7359,7 +7359,7 @@ impl UnmapSubwindowsRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            UnmapSubwindowsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -7717,7 +7717,7 @@ impl<'input> ConfigureWindowRequest<'input> {
         let value_mask = u16::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            ConfigureWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -7909,7 +7909,7 @@ impl CirculateWindowRequest {
         let direction_bytes = u8::from(self.direction).serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            CirculateWindowRequest::opcode(),
+            Self::opcode(),
             direction_bytes[0],
             0,
             0,
@@ -8007,7 +8007,7 @@ impl GetGeometryRequest {
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
-            GetGeometryRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -8174,7 +8174,7 @@ impl QueryTreeRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            QueryTreeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -8354,7 +8354,7 @@ impl<'input> InternAtomRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            InternAtomRequest::opcode(),
+            Self::opcode(),
             only_if_exists_bytes[0],
             0,
             0,
@@ -8472,7 +8472,7 @@ impl GetAtomNameRequest {
         let length_so_far = 0;
         let atom_bytes = self.atom.serialize();
         let mut request0 = vec![
-            GetAtomNameRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -8695,7 +8695,7 @@ impl<'input> ChangePropertyRequest<'input> {
         let format_bytes = self.format.serialize();
         let data_len_bytes = self.data_len.serialize();
         let mut request0 = vec![
-            ChangePropertyRequest::opcode(),
+            Self::opcode(),
             mode_bytes[0],
             0,
             0,
@@ -8822,7 +8822,7 @@ impl DeletePropertyRequest {
         let window_bytes = self.window.serialize();
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
-            DeletePropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -9008,7 +9008,7 @@ impl GetPropertyRequest {
         let long_offset_bytes = self.long_offset.serialize();
         let long_length_bytes = self.long_length.serialize();
         let mut request0 = vec![
-            GetPropertyRequest::opcode(),
+            Self::opcode(),
             delete_bytes[0],
             0,
             0,
@@ -9352,7 +9352,7 @@ impl ListPropertiesRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            ListPropertiesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -9471,7 +9471,7 @@ impl SetSelectionOwnerRequest {
         let selection_bytes = self.selection.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            SetSelectionOwnerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -9575,7 +9575,7 @@ impl GetSelectionOwnerRequest {
         let length_so_far = 0;
         let selection_bytes = self.selection.serialize();
         let mut request0 = vec![
-            GetSelectionOwnerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -9672,7 +9672,7 @@ impl ConvertSelectionRequest {
         let property_bytes = self.property.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            ConvertSelectionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -9888,7 +9888,7 @@ impl<'input> SendEventRequest<'input> {
         let destination_bytes = self.destination.serialize();
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
-            SendEventRequest::opcode(),
+            Self::opcode(),
             propagate_bytes[0],
             0,
             0,
@@ -10311,7 +10311,7 @@ impl GrabPointerRequest {
         let cursor_bytes = self.cursor.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            GrabPointerRequest::opcode(),
+            Self::opcode(),
             owner_events_bytes[0],
             0,
             0,
@@ -10505,7 +10505,7 @@ impl UngrabPointerRequest {
         let length_so_far = 0;
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            UngrabPointerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -10739,7 +10739,7 @@ impl GrabButtonRequest {
         let button_bytes = u8::from(self.button).serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
-            GrabButtonRequest::opcode(),
+            Self::opcode(),
             owner_events_bytes[0],
             0,
             0,
@@ -10886,7 +10886,7 @@ impl UngrabButtonRequest {
         let grab_window_bytes = self.grab_window.serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
-            UngrabButtonRequest::opcode(),
+            Self::opcode(),
             button_bytes[0],
             0,
             0,
@@ -10942,7 +10942,7 @@ impl ChangeActivePointerGrabRequest {
         let time_bytes = self.time.serialize();
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
-            ChangeActivePointerGrabRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -11072,7 +11072,7 @@ impl GrabKeyboardRequest {
         let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
         let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let mut request0 = vec![
-            GrabKeyboardRequest::opcode(),
+            Self::opcode(),
             owner_events_bytes[0],
             0,
             0,
@@ -11217,7 +11217,7 @@ impl UngrabKeyboardRequest {
         let length_so_far = 0;
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            UngrabKeyboardRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -11392,7 +11392,7 @@ impl GrabKeyRequest {
         let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
         let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let mut request0 = vec![
-            GrabKeyRequest::opcode(),
+            Self::opcode(),
             owner_events_bytes[0],
             0,
             0,
@@ -11542,7 +11542,7 @@ impl UngrabKeyRequest {
         let grab_window_bytes = self.grab_window.serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
-            UngrabKeyRequest::opcode(),
+            Self::opcode(),
             key_bytes[0],
             0,
             0,
@@ -11780,7 +11780,7 @@ impl AllowEventsRequest {
         let mode_bytes = u8::from(self.mode).serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            AllowEventsRequest::opcode(),
+            Self::opcode(),
             mode_bytes[0],
             0,
             0,
@@ -11842,7 +11842,7 @@ impl GrabServerRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            GrabServerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -11877,7 +11877,7 @@ impl UngrabServerRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            UngrabServerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -11928,7 +11928,7 @@ impl QueryPointerRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            QueryPointerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -12093,7 +12093,7 @@ impl GetMotionEventsRequest {
         let start_bytes = self.start.serialize();
         let stop_bytes = self.stop.serialize();
         let mut request0 = vec![
-            GetMotionEventsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -12199,7 +12199,7 @@ impl TranslateCoordinatesRequest {
         let src_x_bytes = self.src_x.serialize();
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
-            TranslateCoordinatesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -12330,7 +12330,7 @@ impl WarpPointerRequest {
         let dst_x_bytes = self.dst_x.serialize();
         let dst_y_bytes = self.dst_y.serialize();
         let mut request0 = vec![
-            WarpPointerRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -12549,7 +12549,7 @@ impl SetInputFocusRequest {
         let focus_bytes = self.focus.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            SetInputFocusRequest::opcode(),
+            Self::opcode(),
             revert_to_bytes[0],
             0,
             0,
@@ -12635,7 +12635,7 @@ impl GetInputFocusRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            GetInputFocusRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -12697,7 +12697,7 @@ impl QueryKeymapRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            QueryKeymapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -12784,7 +12784,7 @@ impl<'input> OpenFontRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            OpenFontRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -12856,7 +12856,7 @@ impl CloseFontRequest {
         let length_so_far = 0;
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
-            CloseFontRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -13081,7 +13081,7 @@ impl QueryFontRequest {
         let length_so_far = 0;
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
-            QueryFontRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -13264,7 +13264,7 @@ impl<'input> QueryTextExtentsRequest<'input> {
         let odd_length_bytes = odd_length.serialize();
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
-            QueryTextExtentsRequest::opcode(),
+            Self::opcode(),
             odd_length_bytes[0],
             0,
             0,
@@ -13450,7 +13450,7 @@ impl<'input> ListFontsRequest<'input> {
         let pattern_len = u16::try_from(self.pattern.len()).expect("`pattern` has too many elements");
         let pattern_len_bytes = pattern_len.serialize();
         let mut request0 = vec![
-            ListFontsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -13572,7 +13572,7 @@ impl<'input> ListFontsWithInfoRequest<'input> {
         let pattern_len = u16::try_from(self.pattern.len()).expect("`pattern` has too many elements");
         let pattern_len_bytes = pattern_len.serialize();
         let mut request0 = vec![
-            ListFontsWithInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -13734,7 +13734,7 @@ impl<'input> SetFontPathRequest<'input> {
         let font_qty = u16::try_from(self.font.len()).expect("`font` has too many elements");
         let font_qty_bytes = font_qty.serialize();
         let mut request0 = vec![
-            SetFontPathRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -13779,7 +13779,7 @@ impl GetFontPathRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            GetFontPathRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -13890,7 +13890,7 @@ impl CreatePixmapRequest {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
-            CreatePixmapRequest::opcode(),
+            Self::opcode(),
             depth_bytes[0],
             0,
             0,
@@ -13981,7 +13981,7 @@ impl FreePixmapRequest {
         let length_so_far = 0;
         let pixmap_bytes = self.pixmap.serialize();
         let mut request0 = vec![
-            FreePixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -15144,7 +15144,7 @@ impl<'input> CreateGCRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            CreateGCRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -15576,7 +15576,7 @@ impl<'input> ChangeGCRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            ChangeGCRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -15678,7 +15678,7 @@ impl CopyGCRequest {
         let dst_gc_bytes = self.dst_gc.serialize();
         let value_mask_bytes = self.value_mask.serialize();
         let mut request0 = vec![
-            CopyGCRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -15739,7 +15739,7 @@ impl<'input> SetDashesRequest<'input> {
         let dashes_len = u16::try_from(self.dashes.len()).expect("`dashes` has too many elements");
         let dashes_len_bytes = dashes_len.serialize();
         let mut request0 = vec![
-            SetDashesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -15867,7 +15867,7 @@ impl<'input> SetClipRectanglesRequest<'input> {
         let clip_x_origin_bytes = self.clip_x_origin.serialize();
         let clip_y_origin_bytes = self.clip_y_origin.serialize();
         let mut request0 = vec![
-            SetClipRectanglesRequest::opcode(),
+            Self::opcode(),
             ordering_bytes[0],
             0,
             0,
@@ -15934,7 +15934,7 @@ impl FreeGCRequest {
         let length_so_far = 0;
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            FreeGCRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -15999,7 +15999,7 @@ impl ClearAreaRequest {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
-            ClearAreaRequest::opcode(),
+            Self::opcode(),
             exposures_bytes[0],
             0,
             0,
@@ -16093,7 +16093,7 @@ impl CopyAreaRequest {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
-            CopyAreaRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -16204,7 +16204,7 @@ impl CopyPlaneRequest {
         let height_bytes = self.height.serialize();
         let bit_plane_bytes = self.bit_plane.serialize();
         let mut request0 = vec![
-            CopyPlaneRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -16360,7 +16360,7 @@ impl<'input> PolyPointRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            PolyPointRequest::opcode(),
+            Self::opcode(),
             coordinate_mode_bytes[0],
             0,
             0,
@@ -16459,7 +16459,7 @@ impl<'input> PolyLineRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            PolyLineRequest::opcode(),
+            Self::opcode(),
             coordinate_mode_bytes[0],
             0,
             0,
@@ -16632,7 +16632,7 @@ impl<'input> PolySegmentRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            PolySegmentRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -16715,7 +16715,7 @@ impl<'input> PolyRectangleRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            PolyRectangleRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -16772,7 +16772,7 @@ impl<'input> PolyArcRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            PolyArcRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -16898,7 +16898,7 @@ impl<'input> FillPolyRequest<'input> {
         let shape_bytes = u8::from(self.shape).serialize();
         let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
         let mut request0 = vec![
-            FillPolyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -16986,7 +16986,7 @@ impl<'input> PolyFillRectangleRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            PolyFillRectangleRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -17068,7 +17068,7 @@ impl<'input> PolyFillArcRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            PolyFillArcRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -17204,7 +17204,7 @@ impl<'input> PutImageRequest<'input> {
         let left_pad_bytes = self.left_pad.serialize();
         let depth_bytes = self.depth.serialize();
         let mut request0 = vec![
-            PutImageRequest::opcode(),
+            Self::opcode(),
             format_bytes[0],
             0,
             0,
@@ -17288,7 +17288,7 @@ impl GetImageRequest {
         let height_bytes = self.height.serialize();
         let plane_mask_bytes = self.plane_mask.serialize();
         let mut request0 = vec![
-            GetImageRequest::opcode(),
+            Self::opcode(),
             format_bytes[0],
             0,
             0,
@@ -17402,7 +17402,7 @@ impl<'input> PolyText8Request<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            PolyText8Request::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -17468,7 +17468,7 @@ impl<'input> PolyText16Request<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            PolyText16Request::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -17570,7 +17570,7 @@ impl<'input> ImageText8Request<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            ImageText8Request::opcode(),
+            Self::opcode(),
             string_len_bytes[0],
             0,
             0,
@@ -17707,7 +17707,7 @@ impl<'input> ImageText16Request<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            ImageText16Request::opcode(),
+            Self::opcode(),
             string_len_bytes[0],
             0,
             0,
@@ -17878,7 +17878,7 @@ impl CreateColormapRequest {
         let window_bytes = self.window.serialize();
         let visual_bytes = self.visual.serialize();
         let mut request0 = vec![
-            CreateColormapRequest::opcode(),
+            Self::opcode(),
             alloc_bytes[0],
             0,
             0,
@@ -17933,7 +17933,7 @@ impl FreeColormapRequest {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            FreeColormapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -17979,7 +17979,7 @@ impl CopyColormapAndFreeRequest {
         let mid_bytes = self.mid.serialize();
         let src_cmap_bytes = self.src_cmap.serialize();
         let mut request0 = vec![
-            CopyColormapAndFreeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -18028,7 +18028,7 @@ impl InstallColormapRequest {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            InstallColormapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -18072,7 +18072,7 @@ impl UninstallColormapRequest {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            UninstallColormapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -18116,7 +18116,7 @@ impl ListInstalledColormapsRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            ListInstalledColormapsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -18226,7 +18226,7 @@ impl AllocColorRequest {
         let green_bytes = self.green.serialize();
         let blue_bytes = self.blue.serialize();
         let mut request0 = vec![
-            AllocColorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -18334,7 +18334,7 @@ impl<'input> AllocNamedColorRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            AllocNamedColorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -18429,7 +18429,7 @@ impl AllocColorCellsRequest {
         let colors_bytes = self.colors.serialize();
         let planes_bytes = self.planes.serialize();
         let mut request0 = vec![
-            AllocColorCellsRequest::opcode(),
+            Self::opcode(),
             contiguous_bytes[0],
             0,
             0,
@@ -18548,7 +18548,7 @@ impl AllocColorPlanesRequest {
         let greens_bytes = self.greens.serialize();
         let blues_bytes = self.blues.serialize();
         let mut request0 = vec![
-            AllocColorPlanesRequest::opcode(),
+            Self::opcode(),
             contiguous_bytes[0],
             0,
             0,
@@ -18657,7 +18657,7 @@ impl<'input> FreeColorsRequest<'input> {
         let cmap_bytes = self.cmap.serialize();
         let plane_mask_bytes = self.plane_mask.serialize();
         let mut request0 = vec![
-            FreeColorsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -18838,7 +18838,7 @@ impl<'input> StoreColorsRequest<'input> {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            StoreColorsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -18894,7 +18894,7 @@ impl<'input> StoreNamedColorRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            StoreNamedColorRequest::opcode(),
+            Self::opcode(),
             flags_bytes[0],
             0,
             0,
@@ -19003,7 +19003,7 @@ impl<'input> QueryColorsRequest<'input> {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            QueryColorsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -19097,7 +19097,7 @@ impl<'input> LookupColorRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            LookupColorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -19263,7 +19263,7 @@ impl CreateCursorRequest {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            CreateCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -19455,7 +19455,7 @@ impl CreateGlyphCursorRequest {
         let back_green_bytes = self.back_green.serialize();
         let back_blue_bytes = self.back_blue.serialize();
         let mut request0 = vec![
-            CreateGlyphCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -19580,7 +19580,7 @@ impl FreeCursorRequest {
         let length_so_far = 0;
         let cursor_bytes = self.cursor.serialize();
         let mut request0 = vec![
-            FreeCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -19648,7 +19648,7 @@ impl RecolorCursorRequest {
         let back_green_bytes = self.back_green.serialize();
         let back_blue_bytes = self.back_blue.serialize();
         let mut request0 = vec![
-            RecolorCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -19781,7 +19781,7 @@ impl QueryBestSizeRequest {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
-            QueryBestSizeRequest::opcode(),
+            Self::opcode(),
             class_bytes[0],
             0,
             0,
@@ -19882,7 +19882,7 @@ impl<'input> QueryExtensionRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            QueryExtensionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -19985,7 +19985,7 @@ impl ListExtensionsRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            ListExtensionsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -20069,7 +20069,7 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         let first_keycode_bytes = self.first_keycode.serialize();
         let keysyms_per_keycode_bytes = self.keysyms_per_keycode.serialize();
         let mut request0 = vec![
-            ChangeKeyboardMappingRequest::opcode(),
+            Self::opcode(),
             keycode_count_bytes[0],
             0,
             0,
@@ -20123,7 +20123,7 @@ impl GetKeyboardMappingRequest {
         let first_keycode_bytes = self.first_keycode.serialize();
         let count_bytes = self.count.serialize();
         let mut request0 = vec![
-            GetKeyboardMappingRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -20549,7 +20549,7 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            ChangeKeyboardControlRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -20594,7 +20594,7 @@ impl GetKeyboardControlRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            GetKeyboardControlRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -20671,7 +20671,7 @@ impl BellRequest {
         let length_so_far = 0;
         let percent_bytes = self.percent.serialize();
         let mut request0 = vec![
-            BellRequest::opcode(),
+            Self::opcode(),
             percent_bytes[0],
             0,
             0,
@@ -20719,7 +20719,7 @@ impl ChangePointerControlRequest {
         let do_acceleration_bytes = self.do_acceleration.serialize();
         let do_threshold_bytes = self.do_threshold.serialize();
         let mut request0 = vec![
-            ChangePointerControlRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -20768,7 +20768,7 @@ impl GetPointerControlRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            GetPointerControlRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -20972,7 +20972,7 @@ impl SetScreenSaverRequest {
         let prefer_blanking_bytes = u8::from(self.prefer_blanking).serialize();
         let allow_exposures_bytes = u8::from(self.allow_exposures).serialize();
         let mut request0 = vec![
-            SetScreenSaverRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -21020,7 +21020,7 @@ impl GetScreenSaverRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            GetScreenSaverRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -21238,7 +21238,7 @@ impl<'input> ChangeHostsRequest<'input> {
         let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
         let address_len_bytes = address_len.serialize();
         let mut request0 = vec![
-            ChangeHostsRequest::opcode(),
+            Self::opcode(),
             mode_bytes[0],
             0,
             0,
@@ -21345,7 +21345,7 @@ impl ListHostsRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            ListHostsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -21497,7 +21497,7 @@ impl SetAccessControlRequest {
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
-            SetAccessControlRequest::opcode(),
+            Self::opcode(),
             mode_bytes[0],
             0,
             0,
@@ -21602,7 +21602,7 @@ impl SetCloseDownModeRequest {
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
-            SetCloseDownModeRequest::opcode(),
+            Self::opcode(),
             mode_bytes[0],
             0,
             0,
@@ -21720,7 +21720,7 @@ impl KillClientRequest {
         let length_so_far = 0;
         let resource_bytes = self.resource.serialize();
         let mut request0 = vec![
-            KillClientRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -21790,7 +21790,7 @@ impl<'input> RotatePropertiesRequest<'input> {
         let atoms_len_bytes = atoms_len.serialize();
         let delta_bytes = self.delta.serialize();
         let mut request0 = vec![
-            RotatePropertiesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -21914,7 +21914,7 @@ impl ForceScreenSaverRequest {
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
-            ForceScreenSaverRequest::opcode(),
+            Self::opcode(),
             mode_bytes[0],
             0,
             0,
@@ -22020,7 +22020,7 @@ impl<'input> SetPointerMappingRequest<'input> {
         let map_len = u8::try_from(self.map.len()).expect("`map` has too many elements");
         let map_len_bytes = map_len.serialize();
         let mut request0 = vec![
-            SetPointerMappingRequest::opcode(),
+            Self::opcode(),
             map_len_bytes[0],
             0,
             0,
@@ -22085,7 +22085,7 @@ impl GetPointerMappingRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            GetPointerMappingRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -22247,7 +22247,7 @@ impl<'input> SetModifierMappingRequest<'input> {
         let keycodes_per_modifier = u8::try_from(self.keycodes.len() / 8).expect("`keycodes` has too many elements");
         let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
         let mut request0 = vec![
-            SetModifierMappingRequest::opcode(),
+            Self::opcode(),
             keycodes_per_modifier_bytes[0],
             0,
             0,
@@ -22312,7 +22312,7 @@ impl GetModifierMappingRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            GetModifierMappingRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,
@@ -22390,7 +22390,7 @@ impl NoOperationRequest {
     {
         let length_so_far = 0;
         let mut request0 = vec![
-            NoOperationRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             0,

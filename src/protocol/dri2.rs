@@ -390,7 +390,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -470,7 +470,7 @@ impl ConnectRequest {
         let driver_type_bytes = u32::from(self.driver_type).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ConnectRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -586,7 +586,7 @@ impl AuthenticateRequest {
         let magic_bytes = self.magic.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AuthenticateRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -662,7 +662,7 @@ impl CreateDrawableRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateDrawableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -708,7 +708,7 @@ impl DestroyDrawableRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyDrawableRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -757,7 +757,7 @@ impl<'input> GetBuffersRequest<'input> {
         let count_bytes = self.count.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetBuffersRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -865,7 +865,7 @@ impl CopyRegionRequest {
         let src_bytes = self.src.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CopyRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -952,7 +952,7 @@ impl<'input> GetBuffersWithFormatRequest<'input> {
         let count_bytes = self.count.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetBuffersWithFormatRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -1066,7 +1066,7 @@ impl SwapBuffersRequest {
         let remainder_lo_bytes = self.remainder_lo.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SwapBuffersRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -1169,7 +1169,7 @@ impl GetMSCRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMSCRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -1262,7 +1262,7 @@ impl WaitMSCRequest {
         let remainder_lo_bytes = self.remainder_lo.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            WaitMSCRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -1377,7 +1377,7 @@ impl WaitSBCRequest {
         let target_sbc_lo_bytes = self.target_sbc_lo.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            WaitSBCRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -1470,7 +1470,7 @@ impl SwapIntervalRequest {
         let interval_bytes = self.interval.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SwapIntervalRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -1523,7 +1523,7 @@ impl GetParamRequest {
         let param_bytes = self.param.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetParamRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],

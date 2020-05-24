@@ -420,7 +420,7 @@ impl PrintQueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintQueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -491,7 +491,7 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         let locale_len_bytes = locale_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintGetPrinterListRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             printer_name_len_bytes[0],
@@ -585,7 +585,7 @@ impl PrintRehashPrinterListRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintRehashPrinterListRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -631,7 +631,7 @@ impl<'input> CreateContextRequest<'input> {
         let locale_len_bytes = locale_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_id_bytes[0],
@@ -691,7 +691,7 @@ impl PrintSetContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintSetContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -734,7 +734,7 @@ impl PrintGetContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintGetContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -799,7 +799,7 @@ impl PrintDestroyContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintDestroyContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -842,7 +842,7 @@ impl PrintGetScreenOfContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintGetScreenOfContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -907,7 +907,7 @@ impl PrintStartJobRequest {
         let output_mode_bytes = self.output_mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintStartJobRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_mode_bytes[0],
@@ -953,7 +953,7 @@ impl PrintEndJobRequest {
         let cancel_bytes = self.cancel.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintEndJobRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             cancel_bytes[0],
@@ -999,7 +999,7 @@ impl PrintStartDocRequest {
         let driver_mode_bytes = self.driver_mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintStartDocRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             driver_mode_bytes[0],
@@ -1045,7 +1045,7 @@ impl PrintEndDocRequest {
         let cancel_bytes = self.cancel.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintEndDocRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             cancel_bytes[0],
@@ -1100,7 +1100,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         let len_options_bytes = len_options.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintPutDocumentDataRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -1164,7 +1164,7 @@ impl PrintGetDocumentDataRequest {
         let max_bytes_bytes = self.max_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintGetDocumentDataRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -1262,7 +1262,7 @@ impl PrintStartPageRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintStartPageRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1308,7 +1308,7 @@ impl PrintEndPageRequest {
         let cancel_bytes = self.cancel.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintEndPageRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             cancel_bytes[0],
@@ -1356,7 +1356,7 @@ impl PrintSelectInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintSelectInputRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -1407,7 +1407,7 @@ impl PrintInputSelectedRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintInputSelectedRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -1482,7 +1482,7 @@ impl PrintGetAttributesRequest {
         let pool_bytes = self.pool.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintGetAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -1581,7 +1581,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         let pool_bytes = self.pool.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintGetOneAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -1690,7 +1690,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
         let rule_bytes = self.rule.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintSetAttributesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -1751,7 +1751,7 @@ impl PrintGetPageDimensionsRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintGetPageDimensionsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -1829,7 +1829,7 @@ impl PrintQueryScreensRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintQueryScreensRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -1913,7 +1913,7 @@ impl PrintSetImageResolutionRequest {
         let image_resolution_bytes = self.image_resolution.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintSetImageResolutionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -1990,7 +1990,7 @@ impl PrintGetImageResolutionRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PrintGetImageResolutionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],

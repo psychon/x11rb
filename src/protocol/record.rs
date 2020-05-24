@@ -516,7 +516,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -598,7 +598,7 @@ impl<'input> CreateContextRequest<'input> {
         let num_ranges_bytes = num_ranges.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -673,7 +673,7 @@ impl<'input> RegisterClientsRequest<'input> {
         let num_ranges_bytes = num_ranges.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            RegisterClientsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -743,7 +743,7 @@ impl<'input> UnregisterClientsRequest<'input> {
         let num_client_specs_bytes = num_client_specs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UnregisterClientsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -798,7 +798,7 @@ impl GetContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -890,7 +890,7 @@ impl EnableContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            EnableContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -990,7 +990,7 @@ impl DisableContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DisableContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],
@@ -1036,7 +1036,7 @@ impl FreeContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FreeContextRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             context_bytes[0],

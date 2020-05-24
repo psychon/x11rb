@@ -57,7 +57,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             client_major_version_bytes[0],
@@ -352,7 +352,7 @@ impl ChangeSaveSetRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeSaveSetRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             mode_bytes[0],
@@ -627,7 +627,7 @@ impl SelectSelectionInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectSelectionInputRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -890,7 +890,7 @@ impl SelectCursorInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectCursorInputRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -940,7 +940,7 @@ impl GetCursorImageRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetCursorImageRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -1153,7 +1153,7 @@ impl<'input> CreateRegionRequest<'input> {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -1206,7 +1206,7 @@ impl CreateRegionFromBitmapRequest {
         let bitmap_bytes = self.bitmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateRegionFromBitmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -1261,7 +1261,7 @@ impl CreateRegionFromWindowRequest {
         let kind_bytes = shape::Kind::from(self.kind).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateRegionFromWindowRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -1319,7 +1319,7 @@ impl CreateRegionFromGCRequest {
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateRegionFromGCRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -1372,7 +1372,7 @@ impl CreateRegionFromPictureRequest {
         let picture_bytes = self.picture.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateRegionFromPictureRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -1423,7 +1423,7 @@ impl DestroyRegionRequest {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -1470,7 +1470,7 @@ impl<'input> SetRegionRequest<'input> {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -1523,7 +1523,7 @@ impl CopyRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CopyRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             source_bytes[0],
@@ -1578,7 +1578,7 @@ impl UnionRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            UnionRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             source1_bytes[0],
@@ -1638,7 +1638,7 @@ impl IntersectRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            IntersectRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             source1_bytes[0],
@@ -1698,7 +1698,7 @@ impl SubtractRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SubtractRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             source1_bytes[0],
@@ -1758,7 +1758,7 @@ impl InvertRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            InvertRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             source_bytes[0],
@@ -1822,7 +1822,7 @@ impl TranslateRegionRequest {
         let dy_bytes = self.dy.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            TranslateRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -1876,7 +1876,7 @@ impl RegionExtentsRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            RegionExtentsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             source_bytes[0],
@@ -1927,7 +1927,7 @@ impl FetchRegionRequest {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FetchRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             region_bytes[0],
@@ -2022,7 +2022,7 @@ impl SetGCClipRegionRequest {
         let y_origin_bytes = self.y_origin.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetGCClipRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             gc_bytes[0],
@@ -2089,7 +2089,7 @@ impl SetWindowShapeRegionRequest {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetWindowShapeRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             dest_bytes[0],
@@ -2159,7 +2159,7 @@ impl SetPictureClipRegionRequest {
         let y_origin_bytes = self.y_origin.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetPictureClipRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             picture_bytes[0],
@@ -2221,7 +2221,7 @@ impl<'input> SetCursorNameRequest<'input> {
         let nbytes_bytes = nbytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetCursorNameRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             cursor_bytes[0],
@@ -2275,7 +2275,7 @@ impl GetCursorNameRequest {
         let cursor_bytes = self.cursor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetCursorNameRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             cursor_bytes[0],
@@ -2363,7 +2363,7 @@ impl GetCursorImageAndNameRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetCursorImageAndNameRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -2466,7 +2466,7 @@ impl ChangeCursorRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             source_bytes[0],
@@ -2520,7 +2520,7 @@ impl<'input> ChangeCursorByNameRequest<'input> {
         let nbytes_bytes = nbytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeCursorByNameRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             src_bytes[0],
@@ -2584,7 +2584,7 @@ impl ExpandRegionRequest {
         let bottom_bytes = self.bottom.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ExpandRegionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             source_bytes[0],
@@ -2647,7 +2647,7 @@ impl HideCursorRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            HideCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -2693,7 +2693,7 @@ impl ShowCursorRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ShowCursorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -2825,7 +2825,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         let num_devices_bytes = num_devices.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreatePointerBarrierRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             barrier_bytes[0],
@@ -2904,7 +2904,7 @@ impl DeletePointerBarrierRequest {
         let barrier_bytes = self.barrier.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeletePointerBarrierRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             barrier_bytes[0],

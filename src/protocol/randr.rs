@@ -522,7 +522,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -679,7 +679,7 @@ impl SetScreenConfigRequest {
         let rate_bytes = self.rate.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetScreenConfigRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -866,7 +866,7 @@ impl SelectInputRequest {
         let enable_bytes = self.enable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectInputRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -919,7 +919,7 @@ impl GetScreenInfoRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetScreenInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1024,7 +1024,7 @@ impl GetScreenSizeRangeRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetScreenSizeRangeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1110,7 +1110,7 @@ impl SetScreenSizeRequest {
         let mm_height_bytes = self.mm_height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetScreenSizeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1365,7 +1365,7 @@ impl GetScreenResourcesRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetScreenResourcesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -1573,7 +1573,7 @@ impl GetOutputInfoRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetOutputInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_bytes[0],
@@ -1732,7 +1732,7 @@ impl ListOutputPropertiesRequest {
         let output_bytes = self.output.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListOutputPropertiesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_bytes[0],
@@ -1822,7 +1822,7 @@ impl QueryOutputPropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryOutputPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_bytes[0],
@@ -1926,7 +1926,7 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
         let range_bytes = self.range.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ConfigureOutputPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_bytes[0],
@@ -1999,7 +1999,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         let num_units_bytes = self.num_units.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeOutputPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_bytes[0],
@@ -2073,7 +2073,7 @@ impl DeleteOutputPropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteOutputPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_bytes[0],
@@ -2136,7 +2136,7 @@ impl GetOutputPropertyRequest {
         let pending_bytes = self.pending.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetOutputPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_bytes[0],
@@ -2247,7 +2247,7 @@ impl<'input> CreateModeRequest<'input> {
         let mode_info_bytes = self.mode_info.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateModeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -2356,7 +2356,7 @@ impl DestroyModeRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyModeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             mode_bytes[0],
@@ -2404,7 +2404,7 @@ impl AddOutputModeRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AddOutputModeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_bytes[0],
@@ -2457,7 +2457,7 @@ impl DeleteOutputModeRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteOutputModeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             output_bytes[0],
@@ -2510,7 +2510,7 @@ impl GetCrtcInfoRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetCrtcInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             crtc_bytes[0],
@@ -2649,7 +2649,7 @@ impl<'input> SetCrtcConfigRequest<'input> {
         let rotation_bytes = self.rotation.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetCrtcConfigRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             crtc_bytes[0],
@@ -2756,7 +2756,7 @@ impl GetCrtcGammaSizeRequest {
         let crtc_bytes = self.crtc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetCrtcGammaSizeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             crtc_bytes[0],
@@ -2828,7 +2828,7 @@ impl GetCrtcGammaRequest {
         let crtc_bytes = self.crtc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetCrtcGammaRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             crtc_bytes[0],
@@ -2925,7 +2925,7 @@ impl<'input> SetCrtcGammaRequest<'input> {
         let size_bytes = size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetCrtcGammaRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             crtc_bytes[0],
@@ -2988,7 +2988,7 @@ impl GetScreenResourcesCurrentRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetScreenResourcesCurrentRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -3204,7 +3204,7 @@ impl<'input> SetCrtcTransformRequest<'input> {
         let filter_len_bytes = filter_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetCrtcTransformRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             crtc_bytes[0],
@@ -3300,7 +3300,7 @@ impl GetCrtcTransformRequest {
         let crtc_bytes = self.crtc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetCrtcTransformRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             crtc_bytes[0],
@@ -3454,7 +3454,7 @@ impl GetPanningRequest {
         let crtc_bytes = self.crtc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPanningRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             crtc_bytes[0],
@@ -3577,7 +3577,7 @@ impl SetPanningRequest {
         let border_bottom_bytes = self.border_bottom.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetPanningRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             crtc_bytes[0],
@@ -3693,7 +3693,7 @@ impl SetOutputPrimaryRequest {
         let output_bytes = self.output.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetOutputPrimaryRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -3744,7 +3744,7 @@ impl GetOutputPrimaryRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetOutputPrimaryRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -3815,7 +3815,7 @@ impl GetProvidersRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetProvidersRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -3976,7 +3976,7 @@ impl GetProviderInfoRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetProviderInfoRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             provider_bytes[0],
@@ -4129,7 +4129,7 @@ impl SetProviderOffloadSinkRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetProviderOffloadSinkRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             provider_bytes[0],
@@ -4189,7 +4189,7 @@ impl SetProviderOutputSourceRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetProviderOutputSourceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             provider_bytes[0],
@@ -4245,7 +4245,7 @@ impl ListProviderPropertiesRequest {
         let provider_bytes = self.provider.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListProviderPropertiesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             provider_bytes[0],
@@ -4335,7 +4335,7 @@ impl QueryProviderPropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryProviderPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             provider_bytes[0],
@@ -4439,7 +4439,7 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
         let range_bytes = self.range.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ConfigureProviderPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             provider_bytes[0],
@@ -4512,7 +4512,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         let num_items_bytes = self.num_items.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeProviderPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             provider_bytes[0],
@@ -4586,7 +4586,7 @@ impl DeleteProviderPropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteProviderPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             provider_bytes[0],
@@ -4649,7 +4649,7 @@ impl GetProviderPropertyRequest {
         let pending_bytes = self.pending.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetProviderPropertyRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             provider_bytes[0],
@@ -5479,7 +5479,7 @@ impl GetMonitorsRequest {
         let get_active_bytes = self.get_active.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMonitorsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -5577,7 +5577,7 @@ impl SetMonitorRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetMonitorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -5630,7 +5630,7 @@ impl DeleteMonitorRequest {
         let name_bytes = self.name.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteMonitorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -5689,7 +5689,7 @@ impl<'input> CreateLeaseRequest<'input> {
         let num_outputs_bytes = num_outputs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateLeaseRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -5783,7 +5783,7 @@ impl FreeLeaseRequest {
         let terminate_bytes = self.terminate.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            FreeLeaseRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             lid_bytes[0],

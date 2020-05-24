@@ -141,7 +141,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -220,7 +220,7 @@ impl AttachRequest {
         let read_only_bytes = self.read_only.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AttachRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             shmseg_bytes[0],
@@ -276,7 +276,7 @@ impl DetachRequest {
         let shmseg_bytes = self.shmseg.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DetachRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             shmseg_bytes[0],
@@ -350,7 +350,7 @@ impl PutImageRequest {
         let offset_bytes = self.offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PutImageRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -458,7 +458,7 @@ impl GetImageRequest {
         let offset_bytes = self.offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetImageRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -576,7 +576,7 @@ impl CreatePixmapRequest {
         let offset_bytes = self.offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreatePixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             pid_bytes[0],
@@ -651,7 +651,7 @@ impl AttachFdRequest {
         let read_only_bytes = self.read_only.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AttachFdRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             shmseg_bytes[0],
@@ -709,7 +709,7 @@ impl CreateSegmentRequest {
         let read_only_bytes = self.read_only.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateSegmentRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             shmseg_bytes[0],

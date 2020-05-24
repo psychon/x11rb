@@ -382,7 +382,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -449,7 +449,7 @@ impl GetModeLineRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetModeLineRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -584,7 +584,7 @@ impl<'input> ModModeLineRequest<'input> {
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ModModeLineRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -688,7 +688,7 @@ impl SwitchModeRequest {
         let zoom_bytes = self.zoom.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SwitchModeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -735,7 +735,7 @@ impl GetMonitorRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetMonitorRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -878,7 +878,7 @@ impl LockModeSwitchRequest {
         let lock_bytes = self.lock.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            LockModeSwitchRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -925,7 +925,7 @@ impl GetAllModeLinesRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetAllModeLinesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1060,7 +1060,7 @@ impl<'input> AddModeLineRequest<'input> {
         let after_flags_bytes = self.after_flags.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            AddModeLineRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1245,7 +1245,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DeleteModeLineRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1377,7 +1377,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ValidateModeLineRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1535,7 +1535,7 @@ impl<'input> SwitchToModeRequest<'input> {
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SwitchToModeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1642,7 +1642,7 @@ impl GetViewPortRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetViewPortRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1720,7 +1720,7 @@ impl SetViewPortRequest {
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetViewPortRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1776,7 +1776,7 @@ impl GetDotClocksRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetDotClocksRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1856,7 +1856,7 @@ impl SetClientVersionRequest {
         let minor_bytes = self.minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetClientVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_bytes[0],
@@ -1909,7 +1909,7 @@ impl SetGammaRequest {
         let blue_bytes = self.blue.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetGammaRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -1982,7 +1982,7 @@ impl GetGammaRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetGammaRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -2084,7 +2084,7 @@ impl GetGammaRampRequest {
         let size_bytes = self.size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetGammaRampRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -2168,7 +2168,7 @@ impl<'input> SetGammaRampRequest<'input> {
         let size_bytes = self.size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetGammaRampRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -2229,7 +2229,7 @@ impl GetGammaRampSizeRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetGammaRampSizeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],
@@ -2301,7 +2301,7 @@ impl GetPermissionsRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPermissionsRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             screen_bytes[0],

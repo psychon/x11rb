@@ -521,7 +521,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryVersionRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             major_version_bytes[0],
@@ -626,7 +626,7 @@ impl<'input> PixmapRequest<'input> {
         let remainder_bytes = self.remainder.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            PixmapRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -762,7 +762,7 @@ impl NotifyMSCRequest {
         let remainder_bytes = self.remainder.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            NotifyMSCRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             window_bytes[0],
@@ -850,7 +850,7 @@ impl SelectInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SelectInputRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             eid_bytes[0],
@@ -908,7 +908,7 @@ impl QueryCapabilitiesRequest {
         let target_bytes = self.target.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryCapabilitiesRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             target_bytes[0],

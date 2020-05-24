@@ -728,7 +728,7 @@ impl InitializeRequest {
         let desired_minor_version_bytes = self.desired_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            InitializeRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             desired_major_version_bytes[0],
@@ -800,7 +800,7 @@ impl ListSystemCountersRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            ListSystemCountersRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -884,7 +884,7 @@ impl CreateCounterRequest {
         let initial_value_bytes = self.initial_value.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateCounterRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             id_bytes[0],
@@ -939,7 +939,7 @@ impl DestroyCounterRequest {
         let counter_bytes = self.counter.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyCounterRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             counter_bytes[0],
@@ -985,7 +985,7 @@ impl QueryCounterRequest {
         let counter_bytes = self.counter.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryCounterRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             counter_bytes[0],
@@ -1055,7 +1055,7 @@ impl<'input> AwaitRequest<'input> {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            AwaitRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
@@ -1103,7 +1103,7 @@ impl ChangeCounterRequest {
         let amount_bytes = self.amount.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeCounterRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             counter_bytes[0],
@@ -1160,7 +1160,7 @@ impl SetCounterRequest {
         let value_bytes = self.value.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetCounterRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             counter_bytes[0],
@@ -1317,7 +1317,7 @@ impl<'input> CreateAlarmRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateAlarmRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             id_bytes[0],
@@ -1474,7 +1474,7 @@ impl<'input> ChangeAlarmRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ChangeAlarmRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             id_bytes[0],
@@ -1529,7 +1529,7 @@ impl DestroyAlarmRequest {
         let alarm_bytes = self.alarm.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyAlarmRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             alarm_bytes[0],
@@ -1575,7 +1575,7 @@ impl QueryAlarmRequest {
         let alarm_bytes = self.alarm.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryAlarmRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             alarm_bytes[0],
@@ -1656,7 +1656,7 @@ impl SetPriorityRequest {
         let priority_bytes = self.priority.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            SetPriorityRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             id_bytes[0],
@@ -1707,7 +1707,7 @@ impl GetPriorityRequest {
         let id_bytes = self.id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            GetPriorityRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             id_bytes[0],
@@ -1782,7 +1782,7 @@ impl CreateFenceRequest {
         let initially_triggered_bytes = self.initially_triggered.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            CreateFenceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             drawable_bytes[0],
@@ -1838,7 +1838,7 @@ impl TriggerFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            TriggerFenceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             fence_bytes[0],
@@ -1884,7 +1884,7 @@ impl ResetFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            ResetFenceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             fence_bytes[0],
@@ -1930,7 +1930,7 @@ impl DestroyFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            DestroyFenceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             fence_bytes[0],
@@ -1976,7 +1976,7 @@ impl QueryFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            QueryFenceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
             fence_bytes[0],
@@ -2047,7 +2047,7 @@ impl<'input> AwaitFenceRequest<'input> {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            AwaitFenceRequest::opcode(),
+            Self::opcode(),
             0,
             0,
         ];
