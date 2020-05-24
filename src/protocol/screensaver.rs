@@ -229,14 +229,14 @@ impl TryFrom<u32> for State {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub client_major_version: u8,
     pub client_minor_version: u8,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -249,7 +249,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             client_major_version_bytes[0],
@@ -305,13 +305,13 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the QueryInfo request
+pub const QUERY_INFO_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryInfoRequest {
     pub drawable: xproto::Drawable,
 }
 impl QueryInfoRequest {
-    /// Opcode for the QueryInfo request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -323,7 +323,7 @@ impl QueryInfoRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_INFO_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -386,14 +386,14 @@ impl TryFrom<&[u8]> for QueryInfoReply {
     }
 }
 
+/// Opcode for the SelectInput request
+pub const SELECT_INPUT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectInputRequest {
     pub drawable: xproto::Drawable,
     pub event_mask: u32,
 }
 impl SelectInputRequest {
-    /// Opcode for the SelectInput request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -406,7 +406,7 @@ impl SelectInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_INPUT_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -647,6 +647,8 @@ impl SetAttributesAux {
     }
 }
 
+/// Opcode for the SetAttributes request
+pub const SET_ATTRIBUTES_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetAttributesRequest<'input> {
     pub drawable: xproto::Drawable,
@@ -661,8 +663,6 @@ pub struct SetAttributesRequest<'input> {
     pub value_list: &'input SetAttributesAux,
 }
 impl<'input> SetAttributesRequest<'input> {
-    /// Opcode for the SetAttributes request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -684,7 +684,7 @@ impl<'input> SetAttributesRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_ATTRIBUTES_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -744,13 +744,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UnsetAttributes request
+pub const UNSET_ATTRIBUTES_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnsetAttributesRequest {
     pub drawable: xproto::Drawable,
 }
 impl UnsetAttributesRequest {
-    /// Opcode for the UnsetAttributes request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -762,7 +762,7 @@ impl UnsetAttributesRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            UNSET_ATTRIBUTES_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -789,13 +789,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Suspend request
+pub const SUSPEND_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SuspendRequest {
     pub suspend: u32,
 }
 impl SuspendRequest {
-    /// Opcode for the Suspend request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -807,7 +807,7 @@ impl SuspendRequest {
         let suspend_bytes = self.suspend.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SUSPEND_REQUEST,
             0,
             0,
             suspend_bytes[0],

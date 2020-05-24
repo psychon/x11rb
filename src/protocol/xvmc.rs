@@ -125,11 +125,11 @@ impl Serialize for SurfaceInfo {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -140,7 +140,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
         ];
@@ -188,13 +188,13 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the ListSurfaceTypes request
+pub const LIST_SURFACE_TYPES_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListSurfaceTypesRequest {
     pub port_id: xv::Port,
 }
 impl ListSurfaceTypesRequest {
-    /// Opcode for the ListSurfaceTypes request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -206,7 +206,7 @@ impl ListSurfaceTypesRequest {
         let port_id_bytes = self.port_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_SURFACE_TYPES_REQUEST,
             0,
             0,
             port_id_bytes[0],
@@ -275,6 +275,8 @@ impl ListSurfaceTypesReply {
     }
 }
 
+/// Opcode for the CreateContext request
+pub const CREATE_CONTEXT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateContextRequest {
     pub context_id: Context,
@@ -285,8 +287,6 @@ pub struct CreateContextRequest {
     pub flags: u32,
 }
 impl CreateContextRequest {
-    /// Opcode for the CreateContext request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -303,7 +303,7 @@ impl CreateContextRequest {
         let flags_bytes = self.flags.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_CONTEXT_REQUEST,
             0,
             0,
             context_id_bytes[0],
@@ -397,13 +397,13 @@ impl CreateContextReply {
     }
 }
 
+/// Opcode for the DestroyContext request
+pub const DESTROY_CONTEXT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyContextRequest {
     pub context_id: Context,
 }
 impl DestroyContextRequest {
-    /// Opcode for the DestroyContext request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -415,7 +415,7 @@ impl DestroyContextRequest {
         let context_id_bytes = self.context_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_CONTEXT_REQUEST,
             0,
             0,
             context_id_bytes[0],
@@ -442,14 +442,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateSurface request
+pub const CREATE_SURFACE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateSurfaceRequest {
     pub surface_id: Surface,
     pub context_id: Context,
 }
 impl CreateSurfaceRequest {
-    /// Opcode for the CreateSurface request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -462,7 +462,7 @@ impl CreateSurfaceRequest {
         let context_id_bytes = self.context_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_SURFACE_REQUEST,
             0,
             0,
             surface_id_bytes[0],
@@ -534,13 +534,13 @@ impl CreateSurfaceReply {
     }
 }
 
+/// Opcode for the DestroySurface request
+pub const DESTROY_SURFACE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroySurfaceRequest {
     pub surface_id: Surface,
 }
 impl DestroySurfaceRequest {
-    /// Opcode for the DestroySurface request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -552,7 +552,7 @@ impl DestroySurfaceRequest {
         let surface_id_bytes = self.surface_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_SURFACE_REQUEST,
             0,
             0,
             surface_id_bytes[0],
@@ -579,6 +579,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateSubpicture request
+pub const CREATE_SUBPICTURE_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateSubpictureRequest {
     pub subpicture_id: Subpicture,
@@ -588,8 +590,6 @@ pub struct CreateSubpictureRequest {
     pub height: u16,
 }
 impl CreateSubpictureRequest {
-    /// Opcode for the CreateSubpicture request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -605,7 +605,7 @@ impl CreateSubpictureRequest {
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_SUBPICTURE_REQUEST,
             0,
             0,
             subpicture_id_bytes[0],
@@ -699,13 +699,13 @@ impl CreateSubpictureReply {
     }
 }
 
+/// Opcode for the DestroySubpicture request
+pub const DESTROY_SUBPICTURE_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroySubpictureRequest {
     pub subpicture_id: Subpicture,
 }
 impl DestroySubpictureRequest {
-    /// Opcode for the DestroySubpicture request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -717,7 +717,7 @@ impl DestroySubpictureRequest {
         let subpicture_id_bytes = self.subpicture_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_SUBPICTURE_REQUEST,
             0,
             0,
             subpicture_id_bytes[0],
@@ -744,14 +744,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ListSubpictureTypes request
+pub const LIST_SUBPICTURE_TYPES_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListSubpictureTypesRequest {
     pub port_id: xv::Port,
     pub surface_id: Surface,
 }
 impl ListSubpictureTypesRequest {
-    /// Opcode for the ListSubpictureTypes request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -764,7 +764,7 @@ impl ListSubpictureTypesRequest {
         let surface_id_bytes = self.surface_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_SUBPICTURE_TYPES_REQUEST,
             0,
             0,
             port_id_bytes[0],

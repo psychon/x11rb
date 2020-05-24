@@ -5957,6 +5957,8 @@ impl CreateWindowAux {
     }
 }
 
+/// Opcode for the CreateWindow request
+pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// Creates a window.
 ///
 /// Creates an unmapped window as child of the specified `parent` window. A
@@ -6026,8 +6028,6 @@ pub struct CreateWindowRequest<'input> {
     pub value_list: &'input CreateWindowAux,
 }
 impl<'input> CreateWindowRequest<'input> {
-    /// Opcode for the CreateWindow request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6048,7 +6048,7 @@ impl<'input> CreateWindowRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CREATE_WINDOW_REQUEST,
             depth_bytes[0],
             0,
             0,
@@ -6375,6 +6375,8 @@ impl ChangeWindowAttributesAux {
     }
 }
 
+/// Opcode for the ChangeWindowAttributes request
+pub const CHANGE_WINDOW_ATTRIBUTES_REQUEST: u8 = 2;
 /// change window attributes.
 ///
 /// Changes the attributes specified by `value_mask` for the specified `window`.
@@ -6402,8 +6404,6 @@ pub struct ChangeWindowAttributesRequest<'input> {
     pub value_list: &'input ChangeWindowAttributesAux,
 }
 impl<'input> ChangeWindowAttributesRequest<'input> {
-    /// Opcode for the ChangeWindowAttributes request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6415,7 +6415,7 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CHANGE_WINDOW_ATTRIBUTES_REQUEST,
             0,
             0,
             0,
@@ -6538,6 +6538,8 @@ impl TryFrom<u32> for MapState {
     }
 }
 
+/// Opcode for the GetWindowAttributes request
+pub const GET_WINDOW_ATTRIBUTES_REQUEST: u8 = 3;
 /// Gets window attributes.
 ///
 /// Gets the current attributes for the specified `window`.
@@ -6555,8 +6557,6 @@ pub struct GetWindowAttributesRequest {
     pub window: Window,
 }
 impl GetWindowAttributesRequest {
-    /// Opcode for the GetWindowAttributes request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6566,7 +6566,7 @@ impl GetWindowAttributesRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GET_WINDOW_ATTRIBUTES_REQUEST,
             0,
             0,
             0,
@@ -6680,6 +6680,8 @@ impl TryFrom<&[u8]> for GetWindowAttributesReply {
     }
 }
 
+/// Opcode for the DestroyWindow request
+pub const DESTROY_WINDOW_REQUEST: u8 = 4;
 /// Destroys a window.
 ///
 /// Destroys the specified window and all of its subwindows. A DestroyNotify event
@@ -6707,8 +6709,6 @@ pub struct DestroyWindowRequest {
     pub window: Window,
 }
 impl DestroyWindowRequest {
-    /// Opcode for the DestroyWindow request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6718,7 +6718,7 @@ impl DestroyWindowRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            DESTROY_WINDOW_REQUEST,
             0,
             0,
             0,
@@ -6768,13 +6768,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DestroySubwindows request
+pub const DESTROY_SUBWINDOWS_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroySubwindowsRequest {
     pub window: Window,
 }
 impl DestroySubwindowsRequest {
-    /// Opcode for the DestroySubwindows request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6784,7 +6784,7 @@ impl DestroySubwindowsRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            DESTROY_SUBWINDOWS_REQUEST,
             0,
             0,
             0,
@@ -6882,6 +6882,8 @@ impl TryFrom<u32> for SetMode {
     }
 }
 
+/// Opcode for the ChangeSaveSet request
+pub const CHANGE_SAVE_SET_REQUEST: u8 = 6;
 /// Changes a client's save set.
 ///
 /// TODO: explain what the save set is for.
@@ -6910,8 +6912,6 @@ pub struct ChangeSaveSetRequest {
     pub window: Window,
 }
 impl ChangeSaveSetRequest {
-    /// Opcode for the ChangeSaveSet request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6922,7 +6922,7 @@ impl ChangeSaveSetRequest {
         let mode_bytes = u8::from(self.mode).serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CHANGE_SAVE_SET_REQUEST,
             mode_bytes[0],
             0,
             0,
@@ -6973,6 +6973,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ReparentWindow request
+pub const REPARENT_WINDOW_REQUEST: u8 = 7;
 /// Reparents a window.
 ///
 /// Makes the specified window a child of the specified parent window. If the
@@ -7013,8 +7015,6 @@ pub struct ReparentWindowRequest {
     pub y: i16,
 }
 impl ReparentWindowRequest {
-    /// Opcode for the ReparentWindow request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7027,7 +7027,7 @@ impl ReparentWindowRequest {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            REPARENT_WINDOW_REQUEST,
             0,
             0,
             0,
@@ -7098,6 +7098,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the MapWindow request
+pub const MAP_WINDOW_REQUEST: u8 = 8;
 /// Makes a window visible.
 ///
 /// Maps the specified window. This means making the window visible (as long as its
@@ -7138,8 +7140,6 @@ pub struct MapWindowRequest {
     pub window: Window,
 }
 impl MapWindowRequest {
-    /// Opcode for the MapWindow request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7149,7 +7149,7 @@ impl MapWindowRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            MAP_WINDOW_REQUEST,
             0,
             0,
             0,
@@ -7212,13 +7212,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the MapSubwindows request
+pub const MAP_SUBWINDOWS_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MapSubwindowsRequest {
     pub window: Window,
 }
 impl MapSubwindowsRequest {
-    /// Opcode for the MapSubwindows request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7228,7 +7228,7 @@ impl MapSubwindowsRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            MAP_SUBWINDOWS_REQUEST,
             0,
             0,
             0,
@@ -7256,6 +7256,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UnmapWindow request
+pub const UNMAP_WINDOW_REQUEST: u8 = 10;
 /// Makes a window invisible.
 ///
 /// Unmaps the specified window. This means making the window invisible (and all
@@ -7282,8 +7284,6 @@ pub struct UnmapWindowRequest {
     pub window: Window,
 }
 impl UnmapWindowRequest {
-    /// Opcode for the UnmapWindow request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7293,7 +7293,7 @@ impl UnmapWindowRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            UNMAP_WINDOW_REQUEST,
             0,
             0,
             0,
@@ -7342,13 +7342,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UnmapSubwindows request
+pub const UNMAP_SUBWINDOWS_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnmapSubwindowsRequest {
     pub window: Window,
 }
 impl UnmapSubwindowsRequest {
-    /// Opcode for the UnmapSubwindows request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7358,7 +7358,7 @@ impl UnmapSubwindowsRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            UNMAP_SUBWINDOWS_REQUEST,
             0,
             0,
             0,
@@ -7647,6 +7647,8 @@ impl ConfigureWindowAux {
     }
 }
 
+/// Opcode for the ConfigureWindow request
+pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 /// Configures window attributes.
 ///
 /// Configures a window's size, position, border width and stacking order.
@@ -7703,8 +7705,6 @@ pub struct ConfigureWindowRequest<'input> {
     pub value_list: &'input ConfigureWindowAux,
 }
 impl<'input> ConfigureWindowRequest<'input> {
-    /// Opcode for the ConfigureWindow request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7716,7 +7716,7 @@ impl<'input> ConfigureWindowRequest<'input> {
         let value_mask = u16::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CONFIGURE_WINDOW_REQUEST,
             0,
             0,
             0,
@@ -7873,6 +7873,8 @@ impl TryFrom<u32> for Circulate {
     }
 }
 
+/// Opcode for the CirculateWindow request
+pub const CIRCULATE_WINDOW_REQUEST: u8 = 13;
 /// Change window stacking order.
 ///
 /// If `direction` is `XCB_CIRCULATE_RAISE_LOWEST`, the lowest mapped child (if
@@ -7896,8 +7898,6 @@ pub struct CirculateWindowRequest {
     pub window: Window,
 }
 impl CirculateWindowRequest {
-    /// Opcode for the CirculateWindow request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7908,7 +7908,7 @@ impl CirculateWindowRequest {
         let direction_bytes = u8::from(self.direction).serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CIRCULATE_WINDOW_REQUEST,
             direction_bytes[0],
             0,
             0,
@@ -7954,6 +7954,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetGeometry request
+pub const GET_GEOMETRY_REQUEST: u8 = 14;
 /// Get current window geometry.
 ///
 /// Gets the current geometry of the specified drawable (either `Window` or `Pixmap`).
@@ -7995,8 +7997,6 @@ pub struct GetGeometryRequest {
     pub drawable: Drawable,
 }
 impl GetGeometryRequest {
-    /// Opcode for the GetGeometry request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8006,7 +8006,7 @@ impl GetGeometryRequest {
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GET_GEOMETRY_REQUEST,
             0,
             0,
             0,
@@ -8120,6 +8120,8 @@ impl TryFrom<&[u8]> for GetGeometryReply {
     }
 }
 
+/// Opcode for the QueryTree request
+pub const QUERY_TREE_REQUEST: u8 = 15;
 /// query the window tree.
 ///
 /// Gets the root window ID, parent window ID and list of children windows for the
@@ -8162,8 +8164,6 @@ pub struct QueryTreeRequest {
     pub window: Window,
 }
 impl QueryTreeRequest {
-    /// Opcode for the QueryTree request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8173,7 +8173,7 @@ impl QueryTreeRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            QUERY_TREE_REQUEST,
             0,
             0,
             0,
@@ -8289,6 +8289,8 @@ impl QueryTreeReply {
     }
 }
 
+/// Opcode for the InternAtom request
+pub const INTERN_ATOM_REQUEST: u8 = 16;
 /// Get atom identifier by name.
 ///
 /// Retrieves the identifier (xcb_atom_t TODO) for the atom with the specified
@@ -8340,8 +8342,6 @@ pub struct InternAtomRequest<'input> {
     pub name: &'input [u8],
 }
 impl<'input> InternAtomRequest<'input> {
-    /// Opcode for the InternAtom request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8353,7 +8353,7 @@ impl<'input> InternAtomRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            INTERN_ATOM_REQUEST,
             only_if_exists_bytes[0],
             0,
             0,
@@ -8455,13 +8455,13 @@ impl TryFrom<&[u8]> for InternAtomReply {
     }
 }
 
+/// Opcode for the GetAtomName request
+pub const GET_ATOM_NAME_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetAtomNameRequest {
     pub atom: Atom,
 }
 impl GetAtomNameRequest {
-    /// Opcode for the GetAtomName request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8471,7 +8471,7 @@ impl GetAtomNameRequest {
         let length_so_far = 0;
         let atom_bytes = self.atom.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GET_ATOM_NAME_REQUEST,
             0,
             0,
             0,
@@ -8616,6 +8616,8 @@ impl TryFrom<u32> for PropMode {
     }
 }
 
+/// Opcode for the ChangeProperty request
+pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 /// Changes a window property.
 ///
 /// Sets or updates a property on the specified `window`. Properties are for
@@ -8678,8 +8680,6 @@ pub struct ChangePropertyRequest<'input> {
     pub data: &'input [u8],
 }
 impl<'input> ChangePropertyRequest<'input> {
-    /// Opcode for the ChangeProperty request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8694,7 +8694,7 @@ impl<'input> ChangePropertyRequest<'input> {
         let format_bytes = self.format.serialize();
         let data_len_bytes = self.data_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CHANGE_PROPERTY_REQUEST,
             mode_bytes[0],
             0,
             0,
@@ -8803,14 +8803,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeleteProperty request
+pub const DELETE_PROPERTY_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeletePropertyRequest {
     pub window: Window,
     pub property: Atom,
 }
 impl DeletePropertyRequest {
-    /// Opcode for the DeleteProperty request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8821,7 +8821,7 @@ impl DeletePropertyRequest {
         let window_bytes = self.window.serialize();
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            DELETE_PROPERTY_REQUEST,
             0,
             0,
             0,
@@ -8913,6 +8913,8 @@ impl TryFrom<u32> for GetPropertyType {
     }
 }
 
+/// Opcode for the GetProperty request
+pub const GET_PROPERTY_REQUEST: u8 = 20;
 /// Gets a window property.
 ///
 /// Gets the specified `property` from the specified `window`. Properties are for
@@ -8991,8 +8993,6 @@ pub struct GetPropertyRequest {
     pub long_length: u32,
 }
 impl GetPropertyRequest {
-    /// Opcode for the GetProperty request
-    pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9007,7 +9007,7 @@ impl GetPropertyRequest {
         let long_offset_bytes = self.long_offset.serialize();
         let long_length_bytes = self.long_length.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GET_PROPERTY_REQUEST,
             delete_bytes[0],
             0,
             0,
@@ -9335,13 +9335,13 @@ impl TryFrom<&[u8]> for GetPropertyReply {
     }
 }
 
+/// Opcode for the ListProperties request
+pub const LIST_PROPERTIES_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListPropertiesRequest {
     pub window: Window,
 }
 impl ListPropertiesRequest {
-    /// Opcode for the ListProperties request
-    pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9351,7 +9351,7 @@ impl ListPropertiesRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            LIST_PROPERTIES_REQUEST,
             0,
             0,
             0,
@@ -9421,6 +9421,8 @@ impl ListPropertiesReply {
     }
 }
 
+/// Opcode for the SetSelectionOwner request
+pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 /// Sets the owner of a selection.
 ///
 /// Makes `window` the owner of the selection `selection` and updates the
@@ -9457,8 +9459,6 @@ pub struct SetSelectionOwnerRequest {
     pub time: Timestamp,
 }
 impl SetSelectionOwnerRequest {
-    /// Opcode for the SetSelectionOwner request
-    pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9470,7 +9470,7 @@ impl SetSelectionOwnerRequest {
         let selection_bytes = self.selection.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_SELECTION_OWNER_REQUEST,
             0,
             0,
             0,
@@ -9541,6 +9541,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetSelectionOwner request
+pub const GET_SELECTION_OWNER_REQUEST: u8 = 23;
 /// Gets the owner of a selection.
 ///
 /// Gets the owner of the specified selection.
@@ -9563,8 +9565,6 @@ pub struct GetSelectionOwnerRequest {
     pub selection: Atom,
 }
 impl GetSelectionOwnerRequest {
-    /// Opcode for the GetSelectionOwner request
-    pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9574,7 +9574,7 @@ impl GetSelectionOwnerRequest {
         let length_so_far = 0;
         let selection_bytes = self.selection.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GET_SELECTION_OWNER_REQUEST,
             0,
             0,
             0,
@@ -9647,6 +9647,8 @@ impl TryFrom<&[u8]> for GetSelectionOwnerReply {
     }
 }
 
+/// Opcode for the ConvertSelection request
+pub const CONVERT_SELECTION_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ConvertSelectionRequest {
     pub requestor: Window,
@@ -9656,8 +9658,6 @@ pub struct ConvertSelectionRequest {
     pub time: Timestamp,
 }
 impl ConvertSelectionRequest {
-    /// Opcode for the ConvertSelection request
-    pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9671,7 +9671,7 @@ impl ConvertSelectionRequest {
         let property_bytes = self.property.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CONVERT_SELECTION_REQUEST,
             0,
             0,
             0,
@@ -9793,6 +9793,8 @@ impl TryFrom<u32> for SendEventDest {
     }
 }
 
+/// Opcode for the SendEvent request
+pub const SEND_EVENT_REQUEST: u8 = 25;
 /// send an event.
 ///
 /// Identifies the `destination` window, determines which clients should receive
@@ -9874,8 +9876,6 @@ pub struct SendEventRequest<'input> {
     pub event: &'input [u8; 32],
 }
 impl<'input> SendEventRequest<'input> {
-    /// Opcode for the SendEvent request
-    pub const fn opcode() -> u8 { 25 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9887,7 +9887,7 @@ impl<'input> SendEventRequest<'input> {
         let destination_bytes = self.destination.serialize();
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SEND_EVENT_REQUEST,
             propagate_bytes[0],
             0,
             0,
@@ -10209,6 +10209,8 @@ impl TryFrom<u32> for CursorEnum {
     }
 }
 
+/// Opcode for the GrabPointer request
+pub const GRAB_POINTER_REQUEST: u8 = 26;
 /// Grab the pointer.
 ///
 /// Actively grabs control of the pointer. Further pointer events are reported only to the grabbing client. Overrides any active pointer grab by this client.
@@ -10292,8 +10294,6 @@ pub struct GrabPointerRequest {
     pub time: Timestamp,
 }
 impl GrabPointerRequest {
-    /// Opcode for the GrabPointer request
-    pub const fn opcode() -> u8 { 26 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -10310,7 +10310,7 @@ impl GrabPointerRequest {
         let cursor_bytes = self.cursor.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GRAB_POINTER_REQUEST,
             owner_events_bytes[0],
             0,
             0,
@@ -10465,6 +10465,8 @@ impl TryFrom<&[u8]> for GrabPointerReply {
     }
 }
 
+/// Opcode for the UngrabPointer request
+pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 /// release the pointer.
 ///
 /// Releases the pointer and any queued events if you actively grabbed the pointer
@@ -10493,8 +10495,6 @@ pub struct UngrabPointerRequest {
     pub time: Timestamp,
 }
 impl UngrabPointerRequest {
-    /// Opcode for the UngrabPointer request
-    pub const fn opcode() -> u8 { 27 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -10504,7 +10504,7 @@ impl UngrabPointerRequest {
         let length_so_far = 0;
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            UNGRAB_POINTER_REQUEST,
             0,
             0,
             0,
@@ -10639,6 +10639,8 @@ impl TryFrom<u32> for ButtonIndex {
     }
 }
 
+/// Opcode for the GrabButton request
+pub const GRAB_BUTTON_REQUEST: u8 = 28;
 /// Grab pointer button(s).
 ///
 /// This request establishes a passive grab. The pointer is actively grabbed as
@@ -10719,8 +10721,6 @@ pub struct GrabButtonRequest {
     pub modifiers: u16,
 }
 impl GrabButtonRequest {
-    /// Opcode for the GrabButton request
-    pub const fn opcode() -> u8 { 28 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -10738,7 +10738,7 @@ impl GrabButtonRequest {
         let button_bytes = u8::from(self.button).serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GRAB_BUTTON_REQUEST,
             owner_events_bytes[0],
             0,
             0,
@@ -10865,6 +10865,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UngrabButton request
+pub const UNGRAB_BUTTON_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UngrabButtonRequest {
     pub button: ButtonIndex,
@@ -10872,8 +10874,6 @@ pub struct UngrabButtonRequest {
     pub modifiers: u16,
 }
 impl UngrabButtonRequest {
-    /// Opcode for the UngrabButton request
-    pub const fn opcode() -> u8 { 29 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -10885,7 +10885,7 @@ impl UngrabButtonRequest {
         let grab_window_bytes = self.grab_window.serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            UNGRAB_BUTTON_REQUEST,
             button_bytes[0],
             0,
             0,
@@ -10921,6 +10921,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ChangeActivePointerGrab request
+pub const CHANGE_ACTIVE_POINTER_GRAB_REQUEST: u8 = 30;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeActivePointerGrabRequest {
     pub cursor: Cursor,
@@ -10928,8 +10930,6 @@ pub struct ChangeActivePointerGrabRequest {
     pub event_mask: u16,
 }
 impl ChangeActivePointerGrabRequest {
-    /// Opcode for the ChangeActivePointerGrab request
-    pub const fn opcode() -> u8 { 30 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -10941,7 +10941,7 @@ impl ChangeActivePointerGrabRequest {
         let time_bytes = self.time.serialize();
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CHANGE_ACTIVE_POINTER_GRAB_REQUEST,
             0,
             0,
             0,
@@ -10985,6 +10985,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GrabKeyboard request
+pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 /// Grab the keyboard.
 ///
 /// Actively grabs control of the keyboard and generates FocusIn and FocusOut
@@ -11056,8 +11058,6 @@ pub struct GrabKeyboardRequest {
     pub keyboard_mode: GrabMode,
 }
 impl GrabKeyboardRequest {
-    /// Opcode for the GrabKeyboard request
-    pub const fn opcode() -> u8 { 31 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11071,7 +11071,7 @@ impl GrabKeyboardRequest {
         let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
         let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GRAB_KEYBOARD_REQUEST,
             owner_events_bytes[0],
             0,
             0,
@@ -11200,13 +11200,13 @@ impl TryFrom<&[u8]> for GrabKeyboardReply {
     }
 }
 
+/// Opcode for the UngrabKeyboard request
+pub const UNGRAB_KEYBOARD_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UngrabKeyboardRequest {
     pub time: Timestamp,
 }
 impl UngrabKeyboardRequest {
-    /// Opcode for the UngrabKeyboard request
-    pub const fn opcode() -> u8 { 32 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11216,7 +11216,7 @@ impl UngrabKeyboardRequest {
         let length_so_far = 0;
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            UNGRAB_KEYBOARD_REQUEST,
             0,
             0,
             0,
@@ -11305,6 +11305,8 @@ impl TryFrom<u32> for Grab {
     }
 }
 
+/// Opcode for the GrabKey request
+pub const GRAB_KEY_REQUEST: u8 = 33;
 /// Grab keyboard key(s).
 ///
 /// Establishes a passive grab on the keyboard. In the future, the keyboard is
@@ -11375,8 +11377,6 @@ pub struct GrabKeyRequest {
     pub keyboard_mode: GrabMode,
 }
 impl GrabKeyRequest {
-    /// Opcode for the GrabKey request
-    pub const fn opcode() -> u8 { 33 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11391,7 +11391,7 @@ impl GrabKeyRequest {
         let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
         let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GRAB_KEY_REQUEST,
             owner_events_bytes[0],
             0,
             0,
@@ -11496,6 +11496,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UngrabKey request
+pub const UNGRAB_KEY_REQUEST: u8 = 34;
 /// release a key combination.
 ///
 /// Releases the key combination on `grab_window` if you grabbed it using
@@ -11528,8 +11530,6 @@ pub struct UngrabKeyRequest {
     pub modifiers: u16,
 }
 impl UngrabKeyRequest {
-    /// Opcode for the UngrabKey request
-    pub const fn opcode() -> u8 { 34 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11541,7 +11541,7 @@ impl UngrabKeyRequest {
         let grab_window_bytes = self.grab_window.serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            UNGRAB_KEY_REQUEST,
             key_bytes[0],
             0,
             0,
@@ -11743,6 +11743,8 @@ impl TryFrom<u32> for Allow {
     }
 }
 
+/// Opcode for the AllowEvents request
+pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 /// release queued events.
 ///
 /// Releases queued events if the client has caused a device (pointer/keyboard) to
@@ -11767,8 +11769,6 @@ pub struct AllowEventsRequest {
     pub time: Timestamp,
 }
 impl AllowEventsRequest {
-    /// Opcode for the AllowEvents request
-    pub const fn opcode() -> u8 { 35 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11779,7 +11779,7 @@ impl AllowEventsRequest {
         let mode_bytes = u8::from(self.mode).serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            ALLOW_EVENTS_REQUEST,
             mode_bytes[0],
             0,
             0,
@@ -11828,11 +11828,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GrabServer request
+pub const GRAB_SERVER_REQUEST: u8 = 36;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabServerRequest;
 impl GrabServerRequest {
-    /// Opcode for the GrabServer request
-    pub const fn opcode() -> u8 { 36 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11841,7 +11841,7 @@ impl GrabServerRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            GRAB_SERVER_REQUEST,
             0,
             0,
             0,
@@ -11863,11 +11863,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UngrabServer request
+pub const UNGRAB_SERVER_REQUEST: u8 = 37;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UngrabServerRequest;
 impl UngrabServerRequest {
-    /// Opcode for the UngrabServer request
-    pub const fn opcode() -> u8 { 37 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11876,7 +11876,7 @@ impl UngrabServerRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            UNGRAB_SERVER_REQUEST,
             0,
             0,
             0,
@@ -11898,6 +11898,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the QueryPointer request
+pub const QUERY_POINTER_REQUEST: u8 = 38;
 /// get pointer coordinates.
 ///
 /// Gets the root window the pointer is logically on and the pointer coordinates
@@ -11916,8 +11918,6 @@ pub struct QueryPointerRequest {
     pub window: Window,
 }
 impl QueryPointerRequest {
-    /// Opcode for the QueryPointer request
-    pub const fn opcode() -> u8 { 38 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11927,7 +11927,7 @@ impl QueryPointerRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            QUERY_POINTER_REQUEST,
             0,
             0,
             0,
@@ -12072,6 +12072,8 @@ impl Serialize for Timecoord {
     }
 }
 
+/// Opcode for the GetMotionEvents request
+pub const GET_MOTION_EVENTS_REQUEST: u8 = 39;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMotionEventsRequest {
     pub window: Window,
@@ -12079,8 +12081,6 @@ pub struct GetMotionEventsRequest {
     pub stop: Timestamp,
 }
 impl GetMotionEventsRequest {
-    /// Opcode for the GetMotionEvents request
-    pub const fn opcode() -> u8 { 39 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12092,7 +12092,7 @@ impl GetMotionEventsRequest {
         let start_bytes = self.start.serialize();
         let stop_bytes = self.stop.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GET_MOTION_EVENTS_REQUEST,
             0,
             0,
             0,
@@ -12176,6 +12176,8 @@ impl GetMotionEventsReply {
     }
 }
 
+/// Opcode for the TranslateCoordinates request
+pub const TRANSLATE_COORDINATES_REQUEST: u8 = 40;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TranslateCoordinatesRequest {
     pub src_window: Window,
@@ -12184,8 +12186,6 @@ pub struct TranslateCoordinatesRequest {
     pub src_y: i16,
 }
 impl TranslateCoordinatesRequest {
-    /// Opcode for the TranslateCoordinates request
-    pub const fn opcode() -> u8 { 40 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12198,7 +12198,7 @@ impl TranslateCoordinatesRequest {
         let src_x_bytes = self.src_x.serialize();
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            TRANSLATE_COORDINATES_REQUEST,
             0,
             0,
             0,
@@ -12267,6 +12267,8 @@ impl TryFrom<&[u8]> for TranslateCoordinatesReply {
     }
 }
 
+/// Opcode for the WarpPointer request
+pub const WARP_POINTER_REQUEST: u8 = 41;
 /// move mouse pointer.
 ///
 /// Moves the mouse pointer to the specified position.
@@ -12311,8 +12313,6 @@ pub struct WarpPointerRequest {
     pub dst_y: i16,
 }
 impl WarpPointerRequest {
-    /// Opcode for the WarpPointer request
-    pub const fn opcode() -> u8 { 41 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12329,7 +12329,7 @@ impl WarpPointerRequest {
         let dst_x_bytes = self.dst_x.serialize();
         let dst_y_bytes = self.dst_y.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            WARP_POINTER_REQUEST,
             0,
             0,
             0,
@@ -12493,6 +12493,8 @@ impl TryFrom<u32> for InputFocus {
     }
 }
 
+/// Opcode for the SetInputFocus request
+pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 /// Sets input focus.
 ///
 /// Changes the input focus and the last-focus-change time. If the specified `time`
@@ -12535,8 +12537,6 @@ pub struct SetInputFocusRequest {
     pub time: Timestamp,
 }
 impl SetInputFocusRequest {
-    /// Opcode for the SetInputFocus request
-    pub const fn opcode() -> u8 { 42 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12548,7 +12548,7 @@ impl SetInputFocusRequest {
         let focus_bytes = self.focus.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_INPUT_FOCUS_REQUEST,
             revert_to_bytes[0],
             0,
             0,
@@ -12621,11 +12621,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetInputFocus request
+pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetInputFocusRequest;
 impl GetInputFocusRequest {
-    /// Opcode for the GetInputFocus request
-    pub const fn opcode() -> u8 { 43 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12634,7 +12634,7 @@ impl GetInputFocusRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            GET_INPUT_FOCUS_REQUEST,
             0,
             0,
             0,
@@ -12683,11 +12683,11 @@ impl TryFrom<&[u8]> for GetInputFocusReply {
     }
 }
 
+/// Opcode for the QueryKeymap request
+pub const QUERY_KEYMAP_REQUEST: u8 = 44;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryKeymapRequest;
 impl QueryKeymapRequest {
-    /// Opcode for the QueryKeymap request
-    pub const fn opcode() -> u8 { 44 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12696,7 +12696,7 @@ impl QueryKeymapRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            QUERY_KEYMAP_REQUEST,
             0,
             0,
             0,
@@ -12744,6 +12744,8 @@ impl TryFrom<&[u8]> for QueryKeymapReply {
     }
 }
 
+/// Opcode for the OpenFont request
+pub const OPEN_FONT_REQUEST: u8 = 45;
 /// opens a font.
 ///
 /// Opens any X core font matching the given `name` (for example "-misc-fixed-*").
@@ -12770,8 +12772,6 @@ pub struct OpenFontRequest<'input> {
     pub name: &'input [u8],
 }
 impl<'input> OpenFontRequest<'input> {
-    /// Opcode for the OpenFont request
-    pub const fn opcode() -> u8 { 45 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12783,7 +12783,7 @@ impl<'input> OpenFontRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            OPEN_FONT_REQUEST,
             0,
             0,
             0,
@@ -12839,13 +12839,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CloseFont request
+pub const CLOSE_FONT_REQUEST: u8 = 46;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CloseFontRequest {
     pub font: Font,
 }
 impl CloseFontRequest {
-    /// Opcode for the CloseFont request
-    pub const fn opcode() -> u8 { 46 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12855,7 +12855,7 @@ impl CloseFontRequest {
         let length_so_far = 0;
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CLOSE_FONT_REQUEST,
             0,
             0,
             0,
@@ -13057,6 +13057,8 @@ impl Serialize for Charinfo {
     }
 }
 
+/// Opcode for the QueryFont request
+pub const QUERY_FONT_REQUEST: u8 = 47;
 /// query font metrics.
 ///
 /// Queries information associated with the font.
@@ -13069,8 +13071,6 @@ pub struct QueryFontRequest {
     pub font: Fontable,
 }
 impl QueryFontRequest {
-    /// Opcode for the QueryFont request
-    pub const fn opcode() -> u8 { 47 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -13080,7 +13080,7 @@ impl QueryFontRequest {
         let length_so_far = 0;
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            QUERY_FONT_REQUEST,
             0,
             0,
             0,
@@ -13209,6 +13209,8 @@ impl QueryFontReply {
     }
 }
 
+/// Opcode for the QueryTextExtents request
+pub const QUERY_TEXT_EXTENTS_REQUEST: u8 = 48;
 /// get text extents.
 ///
 /// Query text extents from the X11 server. This request returns the bounding box
@@ -13249,8 +13251,6 @@ pub struct QueryTextExtentsRequest<'input> {
     pub string: &'input [Char2b],
 }
 impl<'input> QueryTextExtentsRequest<'input> {
-    /// Opcode for the QueryTextExtents request
-    pub const fn opcode() -> u8 { 48 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -13263,7 +13263,7 @@ impl<'input> QueryTextExtentsRequest<'input> {
         let odd_length_bytes = odd_length.serialize();
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            QUERY_TEXT_EXTENTS_REQUEST,
             odd_length_bytes[0],
             0,
             0,
@@ -13417,6 +13417,8 @@ impl Str {
     }
 }
 
+/// Opcode for the ListFonts request
+pub const LIST_FONTS_REQUEST: u8 = 49;
 /// get matching font names.
 ///
 /// Gets a list of available font names which match the given `pattern`.
@@ -13436,8 +13438,6 @@ pub struct ListFontsRequest<'input> {
     pub pattern: &'input [u8],
 }
 impl<'input> ListFontsRequest<'input> {
-    /// Opcode for the ListFonts request
-    pub const fn opcode() -> u8 { 49 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -13449,7 +13449,7 @@ impl<'input> ListFontsRequest<'input> {
         let pattern_len = u16::try_from(self.pattern.len()).expect("`pattern` has too many elements");
         let pattern_len_bytes = pattern_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            LIST_FONTS_REQUEST,
             0,
             0,
             0,
@@ -13539,6 +13539,8 @@ impl ListFontsReply {
     }
 }
 
+/// Opcode for the ListFontsWithInfo request
+pub const LIST_FONTS_WITH_INFO_REQUEST: u8 = 50;
 /// get matching font names and information.
 ///
 /// Gets a list of available font names which match the given `pattern`.
@@ -13558,8 +13560,6 @@ pub struct ListFontsWithInfoRequest<'input> {
     pub pattern: &'input [u8],
 }
 impl<'input> ListFontsWithInfoRequest<'input> {
-    /// Opcode for the ListFontsWithInfo request
-    pub const fn opcode() -> u8 { 50 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -13571,7 +13571,7 @@ impl<'input> ListFontsWithInfoRequest<'input> {
         let pattern_len = u16::try_from(self.pattern.len()).expect("`pattern` has too many elements");
         let pattern_len_bytes = pattern_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            LIST_FONTS_WITH_INFO_REQUEST,
             0,
             0,
             0,
@@ -13716,13 +13716,13 @@ impl ListFontsWithInfoReply {
     }
 }
 
+/// Opcode for the SetFontPath request
+pub const SET_FONT_PATH_REQUEST: u8 = 51;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetFontPathRequest<'input> {
     pub font: &'input [Str],
 }
 impl<'input> SetFontPathRequest<'input> {
-    /// Opcode for the SetFontPath request
-    pub const fn opcode() -> u8 { 51 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -13733,7 +13733,7 @@ impl<'input> SetFontPathRequest<'input> {
         let font_qty = u16::try_from(self.font.len()).expect("`font` has too many elements");
         let font_qty_bytes = font_qty.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_FONT_PATH_REQUEST,
             0,
             0,
             0,
@@ -13765,11 +13765,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetFontPath request
+pub const GET_FONT_PATH_REQUEST: u8 = 52;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetFontPathRequest;
 impl GetFontPathRequest {
-    /// Opcode for the GetFontPath request
-    pub const fn opcode() -> u8 { 52 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -13778,7 +13778,7 @@ impl GetFontPathRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            GET_FONT_PATH_REQUEST,
             0,
             0,
             0,
@@ -13842,6 +13842,8 @@ impl GetFontPathReply {
     }
 }
 
+/// Opcode for the CreatePixmap request
+pub const CREATE_PIXMAP_REQUEST: u8 = 53;
 /// Creates a pixmap.
 ///
 /// Creates a pixmap. The pixmap can only be used on the same screen as `drawable`
@@ -13874,8 +13876,6 @@ pub struct CreatePixmapRequest {
     pub height: u16,
 }
 impl CreatePixmapRequest {
-    /// Opcode for the CreatePixmap request
-    pub const fn opcode() -> u8 { 53 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -13889,7 +13889,7 @@ impl CreatePixmapRequest {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CREATE_PIXMAP_REQUEST,
             depth_bytes[0],
             0,
             0,
@@ -13952,6 +13952,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FreePixmap request
+pub const FREE_PIXMAP_REQUEST: u8 = 54;
 /// Destroys a pixmap.
 ///
 /// Deletes the association between the pixmap ID and the pixmap. The pixmap
@@ -13969,8 +13971,6 @@ pub struct FreePixmapRequest {
     pub pixmap: Pixmap,
 }
 impl FreePixmapRequest {
-    /// Opcode for the FreePixmap request
-    pub const fn opcode() -> u8 { 54 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -13980,7 +13980,7 @@ impl FreePixmapRequest {
         let length_so_far = 0;
         let pixmap_bytes = self.pixmap.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            FREE_PIXMAP_REQUEST,
             0,
             0,
             0,
@@ -15099,6 +15099,8 @@ impl CreateGCAux {
     }
 }
 
+/// Opcode for the CreateGC request
+pub const CREATE_GC_REQUEST: u8 = 55;
 /// Creates a graphics context.
 ///
 /// Creates a graphics context. The graphics context can be used with any drawable
@@ -15129,8 +15131,6 @@ pub struct CreateGCRequest<'input> {
     pub value_list: &'input CreateGCAux,
 }
 impl<'input> CreateGCRequest<'input> {
-    /// Opcode for the CreateGC request
-    pub const fn opcode() -> u8 { 55 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -15143,7 +15143,7 @@ impl<'input> CreateGCRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CREATE_GC_REQUEST,
             0,
             0,
             0,
@@ -15511,6 +15511,8 @@ impl ChangeGCAux {
     }
 }
 
+/// Opcode for the ChangeGC request
+pub const CHANGE_GC_REQUEST: u8 = 56;
 /// change graphics context components.
 ///
 /// Changes the components specified by `value_mask` for the specified graphics context.
@@ -15562,8 +15564,6 @@ pub struct ChangeGCRequest<'input> {
     pub value_list: &'input ChangeGCAux,
 }
 impl<'input> ChangeGCRequest<'input> {
-    /// Opcode for the ChangeGC request
-    pub const fn opcode() -> u8 { 56 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -15575,7 +15575,7 @@ impl<'input> ChangeGCRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CHANGE_GC_REQUEST,
             0,
             0,
             0,
@@ -15657,6 +15657,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CopyGC request
+pub const COPY_GC_REQUEST: u8 = 57;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyGCRequest {
     pub src_gc: Gcontext,
@@ -15664,8 +15666,6 @@ pub struct CopyGCRequest {
     pub value_mask: u32,
 }
 impl CopyGCRequest {
-    /// Opcode for the CopyGC request
-    pub const fn opcode() -> u8 { 57 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -15677,7 +15677,7 @@ impl CopyGCRequest {
         let dst_gc_bytes = self.dst_gc.serialize();
         let value_mask_bytes = self.value_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            COPY_GC_REQUEST,
             0,
             0,
             0,
@@ -15717,6 +15717,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetDashes request
+pub const SET_DASHES_REQUEST: u8 = 58;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDashesRequest<'input> {
     pub gc: Gcontext,
@@ -15724,8 +15726,6 @@ pub struct SetDashesRequest<'input> {
     pub dashes: &'input [u8],
 }
 impl<'input> SetDashesRequest<'input> {
-    /// Opcode for the SetDashes request
-    pub const fn opcode() -> u8 { 58 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -15738,7 +15738,7 @@ impl<'input> SetDashesRequest<'input> {
         let dashes_len = u16::try_from(self.dashes.len()).expect("`dashes` has too many elements");
         let dashes_len_bytes = dashes_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_DASHES_REQUEST,
             0,
             0,
             0,
@@ -15843,6 +15843,8 @@ impl TryFrom<u32> for ClipOrdering {
     }
 }
 
+/// Opcode for the SetClipRectangles request
+pub const SET_CLIP_RECTANGLES_REQUEST: u8 = 59;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetClipRectanglesRequest<'input> {
     pub ordering: ClipOrdering,
@@ -15852,8 +15854,6 @@ pub struct SetClipRectanglesRequest<'input> {
     pub rectangles: &'input [Rectangle],
 }
 impl<'input> SetClipRectanglesRequest<'input> {
-    /// Opcode for the SetClipRectangles request
-    pub const fn opcode() -> u8 { 59 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -15866,7 +15866,7 @@ impl<'input> SetClipRectanglesRequest<'input> {
         let clip_x_origin_bytes = self.clip_x_origin.serialize();
         let clip_y_origin_bytes = self.clip_y_origin.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_CLIP_RECTANGLES_REQUEST,
             ordering_bytes[0],
             0,
             0,
@@ -15906,6 +15906,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FreeGC request
+pub const FREE_GC_REQUEST: u8 = 60;
 /// Destroys a graphics context.
 ///
 /// Destroys the specified `gc` and all associated storage.
@@ -15922,8 +15924,6 @@ pub struct FreeGCRequest {
     pub gc: Gcontext,
 }
 impl FreeGCRequest {
-    /// Opcode for the FreeGC request
-    pub const fn opcode() -> u8 { 60 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -15933,7 +15933,7 @@ impl FreeGCRequest {
         let length_so_far = 0;
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            FREE_GC_REQUEST,
             0,
             0,
             0,
@@ -15972,6 +15972,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ClearArea request
+pub const CLEAR_AREA_REQUEST: u8 = 61;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ClearAreaRequest {
     pub exposures: bool,
@@ -15982,8 +15984,6 @@ pub struct ClearAreaRequest {
     pub height: u16,
 }
 impl ClearAreaRequest {
-    /// Opcode for the ClearArea request
-    pub const fn opcode() -> u8 { 61 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -15998,7 +15998,7 @@ impl ClearAreaRequest {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CLEAR_AREA_REQUEST,
             exposures_bytes[0],
             0,
             0,
@@ -16039,6 +16039,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CopyArea request
+pub const COPY_AREA_REQUEST: u8 = 62;
 /// copy areas.
 ///
 /// Copies the specified rectangle from `src_drawable` to `dst_drawable`.
@@ -16073,8 +16075,6 @@ pub struct CopyAreaRequest {
     pub height: u16,
 }
 impl CopyAreaRequest {
-    /// Opcode for the CopyArea request
-    pub const fn opcode() -> u8 { 62 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -16092,7 +16092,7 @@ impl CopyAreaRequest {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            COPY_AREA_REQUEST,
             0,
             0,
             0,
@@ -16169,6 +16169,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CopyPlane request
+pub const COPY_PLANE_REQUEST: u8 = 63;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyPlaneRequest {
     pub src_drawable: Drawable,
@@ -16183,8 +16185,6 @@ pub struct CopyPlaneRequest {
     pub bit_plane: u32,
 }
 impl CopyPlaneRequest {
-    /// Opcode for the CopyPlane request
-    pub const fn opcode() -> u8 { 63 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -16203,7 +16203,7 @@ impl CopyPlaneRequest {
         let height_bytes = self.height.serialize();
         let bit_plane_bytes = self.bit_plane.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            COPY_PLANE_REQUEST,
             0,
             0,
             0,
@@ -16338,6 +16338,8 @@ impl TryFrom<u32> for CoordMode {
     }
 }
 
+/// Opcode for the PolyPoint request
+pub const POLY_POINT_REQUEST: u8 = 64;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PolyPointRequest<'input> {
     pub coordinate_mode: CoordMode,
@@ -16346,8 +16348,6 @@ pub struct PolyPointRequest<'input> {
     pub points: &'input [Point],
 }
 impl<'input> PolyPointRequest<'input> {
-    /// Opcode for the PolyPoint request
-    pub const fn opcode() -> u8 { 64 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -16359,7 +16359,7 @@ impl<'input> PolyPointRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            POLY_POINT_REQUEST,
             coordinate_mode_bytes[0],
             0,
             0,
@@ -16398,6 +16398,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PolyLine request
+pub const POLY_LINE_REQUEST: u8 = 65;
 /// draw lines.
 ///
 /// Draws `points_len`-1 lines between each pair of points (point[i], point[i+1])
@@ -16445,8 +16447,6 @@ pub struct PolyLineRequest<'input> {
     pub points: &'input [Point],
 }
 impl<'input> PolyLineRequest<'input> {
-    /// Opcode for the PolyLine request
-    pub const fn opcode() -> u8 { 65 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -16458,7 +16458,7 @@ impl<'input> PolyLineRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            POLY_LINE_REQUEST,
             coordinate_mode_bytes[0],
             0,
             0,
@@ -16586,6 +16586,8 @@ impl Serialize for Segment {
     }
 }
 
+/// Opcode for the PolySegment request
+pub const POLY_SEGMENT_REQUEST: u8 = 66;
 /// draw lines.
 ///
 /// Draws multiple, unconnected lines. For each segment, a line is drawn between
@@ -16619,8 +16621,6 @@ pub struct PolySegmentRequest<'input> {
     pub segments: &'input [Segment],
 }
 impl<'input> PolySegmentRequest<'input> {
-    /// Opcode for the PolySegment request
-    pub const fn opcode() -> u8 { 66 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -16631,7 +16631,7 @@ impl<'input> PolySegmentRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            POLY_SEGMENT_REQUEST,
             0,
             0,
             0,
@@ -16695,6 +16695,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PolyRectangle request
+pub const POLY_RECTANGLE_REQUEST: u8 = 67;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PolyRectangleRequest<'input> {
     pub drawable: Drawable,
@@ -16702,8 +16704,6 @@ pub struct PolyRectangleRequest<'input> {
     pub rectangles: &'input [Rectangle],
 }
 impl<'input> PolyRectangleRequest<'input> {
-    /// Opcode for the PolyRectangle request
-    pub const fn opcode() -> u8 { 67 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -16714,7 +16714,7 @@ impl<'input> PolyRectangleRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            POLY_RECTANGLE_REQUEST,
             0,
             0,
             0,
@@ -16752,6 +16752,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PolyArc request
+pub const POLY_ARC_REQUEST: u8 = 68;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PolyArcRequest<'input> {
     pub drawable: Drawable,
@@ -16759,8 +16761,6 @@ pub struct PolyArcRequest<'input> {
     pub arcs: &'input [Arc],
 }
 impl<'input> PolyArcRequest<'input> {
-    /// Opcode for the PolyArc request
-    pub const fn opcode() -> u8 { 68 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -16771,7 +16771,7 @@ impl<'input> PolyArcRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            POLY_ARC_REQUEST,
             0,
             0,
             0,
@@ -16874,6 +16874,8 @@ impl TryFrom<u32> for PolyShape {
     }
 }
 
+/// Opcode for the FillPoly request
+pub const FILL_POLY_REQUEST: u8 = 69;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FillPolyRequest<'input> {
     pub drawable: Drawable,
@@ -16883,8 +16885,6 @@ pub struct FillPolyRequest<'input> {
     pub points: &'input [Point],
 }
 impl<'input> FillPolyRequest<'input> {
-    /// Opcode for the FillPoly request
-    pub const fn opcode() -> u8 { 69 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -16897,7 +16897,7 @@ impl<'input> FillPolyRequest<'input> {
         let shape_bytes = u8::from(self.shape).serialize();
         let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            FILL_POLY_REQUEST,
             0,
             0,
             0,
@@ -16941,6 +16941,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PolyFillRectangle request
+pub const POLY_FILL_RECTANGLE_REQUEST: u8 = 70;
 /// Fills rectangles.
 ///
 /// Fills the specified rectangle(s) in the order listed in the array. For any
@@ -16973,8 +16975,6 @@ pub struct PolyFillRectangleRequest<'input> {
     pub rectangles: &'input [Rectangle],
 }
 impl<'input> PolyFillRectangleRequest<'input> {
-    /// Opcode for the PolyFillRectangle request
-    pub const fn opcode() -> u8 { 70 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -16985,7 +16985,7 @@ impl<'input> PolyFillRectangleRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            POLY_FILL_RECTANGLE_REQUEST,
             0,
             0,
             0,
@@ -17048,6 +17048,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PolyFillArc request
+pub const POLY_FILL_ARC_REQUEST: u8 = 71;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PolyFillArcRequest<'input> {
     pub drawable: Drawable,
@@ -17055,8 +17057,6 @@ pub struct PolyFillArcRequest<'input> {
     pub arcs: &'input [Arc],
 }
 impl<'input> PolyFillArcRequest<'input> {
-    /// Opcode for the PolyFillArc request
-    pub const fn opcode() -> u8 { 71 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17067,7 +17067,7 @@ impl<'input> PolyFillArcRequest<'input> {
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            POLY_FILL_ARC_REQUEST,
             0,
             0,
             0,
@@ -17170,6 +17170,8 @@ impl TryFrom<u32> for ImageFormat {
     }
 }
 
+/// Opcode for the PutImage request
+pub const PUT_IMAGE_REQUEST: u8 = 72;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PutImageRequest<'input> {
     pub format: ImageFormat,
@@ -17184,8 +17186,6 @@ pub struct PutImageRequest<'input> {
     pub data: &'input [u8],
 }
 impl<'input> PutImageRequest<'input> {
-    /// Opcode for the PutImage request
-    pub const fn opcode() -> u8 { 72 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17203,7 +17203,7 @@ impl<'input> PutImageRequest<'input> {
         let left_pad_bytes = self.left_pad.serialize();
         let depth_bytes = self.depth.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            PUT_IMAGE_REQUEST,
             format_bytes[0],
             0,
             0,
@@ -17259,6 +17259,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetImage request
+pub const GET_IMAGE_REQUEST: u8 = 73;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetImageRequest {
     pub format: ImageFormat,
@@ -17270,8 +17272,6 @@ pub struct GetImageRequest {
     pub plane_mask: u32,
 }
 impl GetImageRequest {
-    /// Opcode for the GetImage request
-    pub const fn opcode() -> u8 { 73 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17287,7 +17287,7 @@ impl GetImageRequest {
         let height_bytes = self.height.serialize();
         let plane_mask_bytes = self.plane_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GET_IMAGE_REQUEST,
             format_bytes[0],
             0,
             0,
@@ -17378,6 +17378,8 @@ impl GetImageReply {
     }
 }
 
+/// Opcode for the PolyText8 request
+pub const POLY_TEXT8_REQUEST: u8 = 74;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PolyText8Request<'input> {
     pub drawable: Drawable,
@@ -17387,8 +17389,6 @@ pub struct PolyText8Request<'input> {
     pub items: &'input [u8],
 }
 impl<'input> PolyText8Request<'input> {
-    /// Opcode for the PolyText8 request
-    pub const fn opcode() -> u8 { 74 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17401,7 +17401,7 @@ impl<'input> PolyText8Request<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            POLY_TEXT8_REQUEST,
             0,
             0,
             0,
@@ -17444,6 +17444,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PolyText16 request
+pub const POLY_TEXT16_REQUEST: u8 = 75;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PolyText16Request<'input> {
     pub drawable: Drawable,
@@ -17453,8 +17455,6 @@ pub struct PolyText16Request<'input> {
     pub items: &'input [u8],
 }
 impl<'input> PolyText16Request<'input> {
-    /// Opcode for the PolyText16 request
-    pub const fn opcode() -> u8 { 75 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17467,7 +17467,7 @@ impl<'input> PolyText16Request<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            POLY_TEXT16_REQUEST,
             0,
             0,
             0,
@@ -17510,6 +17510,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ImageText8 request
+pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 /// Draws text.
 ///
 /// Fills the destination rectangle with the background pixel from `gc`, then
@@ -17553,8 +17555,6 @@ pub struct ImageText8Request<'input> {
     pub string: &'input [u8],
 }
 impl<'input> ImageText8Request<'input> {
-    /// Opcode for the ImageText8 request
-    pub const fn opcode() -> u8 { 76 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17569,7 +17569,7 @@ impl<'input> ImageText8Request<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            IMAGE_TEXT8_REQUEST,
             string_len_bytes[0],
             0,
             0,
@@ -17646,6 +17646,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ImageText16 request
+pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 /// Draws text.
 ///
 /// Fills the destination rectangle with the background pixel from `gc`, then
@@ -17690,8 +17692,6 @@ pub struct ImageText16Request<'input> {
     pub string: &'input [Char2b],
 }
 impl<'input> ImageText16Request<'input> {
-    /// Opcode for the ImageText16 request
-    pub const fn opcode() -> u8 { 77 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17706,7 +17706,7 @@ impl<'input> ImageText16Request<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            IMAGE_TEXT16_REQUEST,
             string_len_bytes[0],
             0,
             0,
@@ -17855,6 +17855,8 @@ impl TryFrom<u32> for ColormapAlloc {
     }
 }
 
+/// Opcode for the CreateColormap request
+pub const CREATE_COLORMAP_REQUEST: u8 = 78;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateColormapRequest {
     pub alloc: ColormapAlloc,
@@ -17863,8 +17865,6 @@ pub struct CreateColormapRequest {
     pub visual: Visualid,
 }
 impl CreateColormapRequest {
-    /// Opcode for the CreateColormap request
-    pub const fn opcode() -> u8 { 78 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17877,7 +17877,7 @@ impl CreateColormapRequest {
         let window_bytes = self.window.serialize();
         let visual_bytes = self.visual.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CREATE_COLORMAP_REQUEST,
             alloc_bytes[0],
             0,
             0,
@@ -17916,13 +17916,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FreeColormap request
+pub const FREE_COLORMAP_REQUEST: u8 = 79;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FreeColormapRequest {
     pub cmap: Colormap,
 }
 impl FreeColormapRequest {
-    /// Opcode for the FreeColormap request
-    pub const fn opcode() -> u8 { 79 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17932,7 +17932,7 @@ impl FreeColormapRequest {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            FREE_COLORMAP_REQUEST,
             0,
             0,
             0,
@@ -17960,14 +17960,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CopyColormapAndFree request
+pub const COPY_COLORMAP_AND_FREE_REQUEST: u8 = 80;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyColormapAndFreeRequest {
     pub mid: Colormap,
     pub src_cmap: Colormap,
 }
 impl CopyColormapAndFreeRequest {
-    /// Opcode for the CopyColormapAndFree request
-    pub const fn opcode() -> u8 { 80 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -17978,7 +17978,7 @@ impl CopyColormapAndFreeRequest {
         let mid_bytes = self.mid.serialize();
         let src_cmap_bytes = self.src_cmap.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            COPY_COLORMAP_AND_FREE_REQUEST,
             0,
             0,
             0,
@@ -18011,13 +18011,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the InstallColormap request
+pub const INSTALL_COLORMAP_REQUEST: u8 = 81;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InstallColormapRequest {
     pub cmap: Colormap,
 }
 impl InstallColormapRequest {
-    /// Opcode for the InstallColormap request
-    pub const fn opcode() -> u8 { 81 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18027,7 +18027,7 @@ impl InstallColormapRequest {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            INSTALL_COLORMAP_REQUEST,
             0,
             0,
             0,
@@ -18055,13 +18055,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UninstallColormap request
+pub const UNINSTALL_COLORMAP_REQUEST: u8 = 82;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UninstallColormapRequest {
     pub cmap: Colormap,
 }
 impl UninstallColormapRequest {
-    /// Opcode for the UninstallColormap request
-    pub const fn opcode() -> u8 { 82 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18071,7 +18071,7 @@ impl UninstallColormapRequest {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            UNINSTALL_COLORMAP_REQUEST,
             0,
             0,
             0,
@@ -18099,13 +18099,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ListInstalledColormaps request
+pub const LIST_INSTALLED_COLORMAPS_REQUEST: u8 = 83;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListInstalledColormapsRequest {
     pub window: Window,
 }
 impl ListInstalledColormapsRequest {
-    /// Opcode for the ListInstalledColormaps request
-    pub const fn opcode() -> u8 { 83 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18115,7 +18115,7 @@ impl ListInstalledColormapsRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            LIST_INSTALLED_COLORMAPS_REQUEST,
             0,
             0,
             0,
@@ -18185,6 +18185,8 @@ impl ListInstalledColormapsReply {
     }
 }
 
+/// Opcode for the AllocColor request
+pub const ALLOC_COLOR_REQUEST: u8 = 84;
 /// Allocate a color.
 ///
 /// Allocates a read-only colormap entry corresponding to the closest RGB value
@@ -18211,8 +18213,6 @@ pub struct AllocColorRequest {
     pub blue: u16,
 }
 impl AllocColorRequest {
-    /// Opcode for the AllocColor request
-    pub const fn opcode() -> u8 { 84 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18225,7 +18225,7 @@ impl AllocColorRequest {
         let green_bytes = self.green.serialize();
         let blue_bytes = self.blue.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            ALLOC_COLOR_REQUEST,
             0,
             0,
             0,
@@ -18314,14 +18314,14 @@ impl TryFrom<&[u8]> for AllocColorReply {
     }
 }
 
+/// Opcode for the AllocNamedColor request
+pub const ALLOC_NAMED_COLOR_REQUEST: u8 = 85;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocNamedColorRequest<'input> {
     pub cmap: Colormap,
     pub name: &'input [u8],
 }
 impl<'input> AllocNamedColorRequest<'input> {
-    /// Opcode for the AllocNamedColor request
-    pub const fn opcode() -> u8 { 85 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18333,7 +18333,7 @@ impl<'input> AllocNamedColorRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            ALLOC_NAMED_COLOR_REQUEST,
             0,
             0,
             0,
@@ -18406,6 +18406,8 @@ impl TryFrom<&[u8]> for AllocNamedColorReply {
     }
 }
 
+/// Opcode for the AllocColorCells request
+pub const ALLOC_COLOR_CELLS_REQUEST: u8 = 86;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocColorCellsRequest {
     pub contiguous: bool,
@@ -18414,8 +18416,6 @@ pub struct AllocColorCellsRequest {
     pub planes: u16,
 }
 impl AllocColorCellsRequest {
-    /// Opcode for the AllocColorCells request
-    pub const fn opcode() -> u8 { 86 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18428,7 +18428,7 @@ impl AllocColorCellsRequest {
         let colors_bytes = self.colors.serialize();
         let planes_bytes = self.planes.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            ALLOC_COLOR_CELLS_REQUEST,
             contiguous_bytes[0],
             0,
             0,
@@ -18521,6 +18521,8 @@ impl AllocColorCellsReply {
     }
 }
 
+/// Opcode for the AllocColorPlanes request
+pub const ALLOC_COLOR_PLANES_REQUEST: u8 = 87;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocColorPlanesRequest {
     pub contiguous: bool,
@@ -18531,8 +18533,6 @@ pub struct AllocColorPlanesRequest {
     pub blues: u16,
 }
 impl AllocColorPlanesRequest {
-    /// Opcode for the AllocColorPlanes request
-    pub const fn opcode() -> u8 { 87 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18547,7 +18547,7 @@ impl AllocColorPlanesRequest {
         let greens_bytes = self.greens.serialize();
         let blues_bytes = self.blues.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            ALLOC_COLOR_PLANES_REQUEST,
             contiguous_bytes[0],
             0,
             0,
@@ -18637,6 +18637,8 @@ impl AllocColorPlanesReply {
     }
 }
 
+/// Opcode for the FreeColors request
+pub const FREE_COLORS_REQUEST: u8 = 88;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FreeColorsRequest<'input> {
     pub cmap: Colormap,
@@ -18644,8 +18646,6 @@ pub struct FreeColorsRequest<'input> {
     pub pixels: &'input [u32],
 }
 impl<'input> FreeColorsRequest<'input> {
-    /// Opcode for the FreeColors request
-    pub const fn opcode() -> u8 { 88 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18656,7 +18656,7 @@ impl<'input> FreeColorsRequest<'input> {
         let cmap_bytes = self.cmap.serialize();
         let plane_mask_bytes = self.plane_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            FREE_COLORS_REQUEST,
             0,
             0,
             0,
@@ -18820,14 +18820,14 @@ impl Serialize for Coloritem {
     }
 }
 
+/// Opcode for the StoreColors request
+pub const STORE_COLORS_REQUEST: u8 = 89;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StoreColorsRequest<'input> {
     pub cmap: Colormap,
     pub items: &'input [Coloritem],
 }
 impl<'input> StoreColorsRequest<'input> {
-    /// Opcode for the StoreColors request
-    pub const fn opcode() -> u8 { 89 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18837,7 +18837,7 @@ impl<'input> StoreColorsRequest<'input> {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            STORE_COLORS_REQUEST,
             0,
             0,
             0,
@@ -18870,6 +18870,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the StoreNamedColor request
+pub const STORE_NAMED_COLOR_REQUEST: u8 = 90;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StoreNamedColorRequest<'input> {
     pub flags: u8,
@@ -18878,8 +18880,6 @@ pub struct StoreNamedColorRequest<'input> {
     pub name: &'input [u8],
 }
 impl<'input> StoreNamedColorRequest<'input> {
-    /// Opcode for the StoreNamedColor request
-    pub const fn opcode() -> u8 { 90 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -18893,7 +18893,7 @@ impl<'input> StoreNamedColorRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            STORE_NAMED_COLOR_REQUEST,
             flags_bytes[0],
             0,
             0,
@@ -18985,14 +18985,14 @@ impl Serialize for Rgb {
     }
 }
 
+/// Opcode for the QueryColors request
+pub const QUERY_COLORS_REQUEST: u8 = 91;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryColorsRequest<'input> {
     pub cmap: Colormap,
     pub pixels: &'input [u32],
 }
 impl<'input> QueryColorsRequest<'input> {
-    /// Opcode for the QueryColors request
-    pub const fn opcode() -> u8 { 91 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -19002,7 +19002,7 @@ impl<'input> QueryColorsRequest<'input> {
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            QUERY_COLORS_REQUEST,
             0,
             0,
             0,
@@ -19077,14 +19077,14 @@ impl QueryColorsReply {
     }
 }
 
+/// Opcode for the LookupColor request
+pub const LOOKUP_COLOR_REQUEST: u8 = 92;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LookupColorRequest<'input> {
     pub cmap: Colormap,
     pub name: &'input [u8],
 }
 impl<'input> LookupColorRequest<'input> {
-    /// Opcode for the LookupColor request
-    pub const fn opcode() -> u8 { 92 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -19096,7 +19096,7 @@ impl<'input> LookupColorRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            LOOKUP_COLOR_REQUEST,
             0,
             0,
             0,
@@ -19226,6 +19226,8 @@ impl TryFrom<u32> for PixmapEnum {
     }
 }
 
+/// Opcode for the CreateCursor request
+pub const CREATE_CURSOR_REQUEST: u8 = 93;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateCursorRequest {
     pub cid: Cursor,
@@ -19241,8 +19243,6 @@ pub struct CreateCursorRequest {
     pub y: u16,
 }
 impl CreateCursorRequest {
-    /// Opcode for the CreateCursor request
-    pub const fn opcode() -> u8 { 93 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -19262,7 +19262,7 @@ impl CreateCursorRequest {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CREATE_CURSOR_REQUEST,
             0,
             0,
             0,
@@ -19385,6 +19385,8 @@ impl TryFrom<u32> for FontEnum {
     }
 }
 
+/// Opcode for the CreateGlyphCursor request
+pub const CREATE_GLYPH_CURSOR_REQUEST: u8 = 94;
 /// create cursor.
 ///
 /// Creates a cursor from a font glyph. X provides a set of standard cursor shapes
@@ -19433,8 +19435,6 @@ pub struct CreateGlyphCursorRequest {
     pub back_blue: u16,
 }
 impl CreateGlyphCursorRequest {
-    /// Opcode for the CreateGlyphCursor request
-    pub const fn opcode() -> u8 { 94 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -19454,7 +19454,7 @@ impl CreateGlyphCursorRequest {
         let back_green_bytes = self.back_green.serialize();
         let back_blue_bytes = self.back_blue.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CREATE_GLYPH_CURSOR_REQUEST,
             0,
             0,
             0,
@@ -19551,6 +19551,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FreeCursor request
+pub const FREE_CURSOR_REQUEST: u8 = 95;
 /// Deletes a cursor.
 ///
 /// Deletes the association between the cursor resource ID and the specified
@@ -19568,8 +19570,6 @@ pub struct FreeCursorRequest {
     pub cursor: Cursor,
 }
 impl FreeCursorRequest {
-    /// Opcode for the FreeCursor request
-    pub const fn opcode() -> u8 { 95 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -19579,7 +19579,7 @@ impl FreeCursorRequest {
         let length_so_far = 0;
         let cursor_bytes = self.cursor.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            FREE_CURSOR_REQUEST,
             0,
             0,
             0,
@@ -19619,6 +19619,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the RecolorCursor request
+pub const RECOLOR_CURSOR_REQUEST: u8 = 96;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RecolorCursorRequest {
     pub cursor: Cursor,
@@ -19630,8 +19632,6 @@ pub struct RecolorCursorRequest {
     pub back_blue: u16,
 }
 impl RecolorCursorRequest {
-    /// Opcode for the RecolorCursor request
-    pub const fn opcode() -> u8 { 96 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -19647,7 +19647,7 @@ impl RecolorCursorRequest {
         let back_green_bytes = self.back_green.serialize();
         let back_blue_bytes = self.back_blue.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            RECOLOR_CURSOR_REQUEST,
             0,
             0,
             0,
@@ -19758,6 +19758,8 @@ impl TryFrom<u32> for QueryShapeOf {
     }
 }
 
+/// Opcode for the QueryBestSize request
+pub const QUERY_BEST_SIZE_REQUEST: u8 = 97;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeRequest {
     pub class: QueryShapeOf,
@@ -19766,8 +19768,6 @@ pub struct QueryBestSizeRequest {
     pub height: u16,
 }
 impl QueryBestSizeRequest {
-    /// Opcode for the QueryBestSize request
-    pub const fn opcode() -> u8 { 97 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -19780,7 +19780,7 @@ impl QueryBestSizeRequest {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            QUERY_BEST_SIZE_REQUEST,
             class_bytes[0],
             0,
             0,
@@ -19842,6 +19842,8 @@ impl TryFrom<&[u8]> for QueryBestSizeReply {
     }
 }
 
+/// Opcode for the QueryExtension request
+pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 /// check if extension is present.
 ///
 /// Determines if the specified extension is present on this X11 server.
@@ -19869,8 +19871,6 @@ pub struct QueryExtensionRequest<'input> {
     pub name: &'input [u8],
 }
 impl<'input> QueryExtensionRequest<'input> {
-    /// Opcode for the QueryExtension request
-    pub const fn opcode() -> u8 { 98 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -19881,7 +19881,7 @@ impl<'input> QueryExtensionRequest<'input> {
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            QUERY_EXTENSION_REQUEST,
             0,
             0,
             0,
@@ -19971,11 +19971,11 @@ impl TryFrom<&[u8]> for QueryExtensionReply {
     }
 }
 
+/// Opcode for the ListExtensions request
+pub const LIST_EXTENSIONS_REQUEST: u8 = 99;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListExtensionsRequest;
 impl ListExtensionsRequest {
-    /// Opcode for the ListExtensions request
-    pub const fn opcode() -> u8 { 99 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -19984,7 +19984,7 @@ impl ListExtensionsRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            LIST_EXTENSIONS_REQUEST,
             0,
             0,
             0,
@@ -20047,6 +20047,8 @@ impl ListExtensionsReply {
     }
 }
 
+/// Opcode for the ChangeKeyboardMapping request
+pub const CHANGE_KEYBOARD_MAPPING_REQUEST: u8 = 100;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeKeyboardMappingRequest<'input> {
     pub keycode_count: u8,
@@ -20055,8 +20057,6 @@ pub struct ChangeKeyboardMappingRequest<'input> {
     pub keysyms: &'input [Keysym],
 }
 impl<'input> ChangeKeyboardMappingRequest<'input> {
-    /// Opcode for the ChangeKeyboardMapping request
-    pub const fn opcode() -> u8 { 100 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -20068,7 +20068,7 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         let first_keycode_bytes = self.first_keycode.serialize();
         let keysyms_per_keycode_bytes = self.keysyms_per_keycode.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CHANGE_KEYBOARD_MAPPING_REQUEST,
             keycode_count_bytes[0],
             0,
             0,
@@ -20104,14 +20104,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetKeyboardMapping request
+pub const GET_KEYBOARD_MAPPING_REQUEST: u8 = 101;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetKeyboardMappingRequest {
     pub first_keycode: Keycode,
     pub count: u8,
 }
 impl GetKeyboardMappingRequest {
-    /// Opcode for the GetKeyboardMapping request
-    pub const fn opcode() -> u8 { 101 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -20122,7 +20122,7 @@ impl GetKeyboardMappingRequest {
         let first_keycode_bytes = self.first_keycode.serialize();
         let count_bytes = self.count.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            GET_KEYBOARD_MAPPING_REQUEST,
             0,
             0,
             0,
@@ -20531,13 +20531,13 @@ impl ChangeKeyboardControlAux {
     }
 }
 
+/// Opcode for the ChangeKeyboardControl request
+pub const CHANGE_KEYBOARD_CONTROL_REQUEST: u8 = 102;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeKeyboardControlRequest<'input> {
     pub value_list: &'input ChangeKeyboardControlAux,
 }
 impl<'input> ChangeKeyboardControlRequest<'input> {
-    /// Opcode for the ChangeKeyboardControl request
-    pub const fn opcode() -> u8 { 102 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -20548,7 +20548,7 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CHANGE_KEYBOARD_CONTROL_REQUEST,
             0,
             0,
             0,
@@ -20580,11 +20580,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetKeyboardControl request
+pub const GET_KEYBOARD_CONTROL_REQUEST: u8 = 103;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetKeyboardControlRequest;
 impl GetKeyboardControlRequest {
-    /// Opcode for the GetKeyboardControl request
-    pub const fn opcode() -> u8 { 103 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -20593,7 +20593,7 @@ impl GetKeyboardControlRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            GET_KEYBOARD_CONTROL_REQUEST,
             0,
             0,
             0,
@@ -20654,13 +20654,13 @@ impl TryFrom<&[u8]> for GetKeyboardControlReply {
     }
 }
 
+/// Opcode for the Bell request
+pub const BELL_REQUEST: u8 = 104;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BellRequest {
     pub percent: i8,
 }
 impl BellRequest {
-    /// Opcode for the Bell request
-    pub const fn opcode() -> u8 { 104 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -20670,7 +20670,7 @@ impl BellRequest {
         let length_so_far = 0;
         let percent_bytes = self.percent.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            BELL_REQUEST,
             percent_bytes[0],
             0,
             0,
@@ -20694,6 +20694,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ChangePointerControl request
+pub const CHANGE_POINTER_CONTROL_REQUEST: u8 = 105;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangePointerControlRequest {
     pub acceleration_numerator: i16,
@@ -20703,8 +20705,6 @@ pub struct ChangePointerControlRequest {
     pub do_threshold: bool,
 }
 impl ChangePointerControlRequest {
-    /// Opcode for the ChangePointerControl request
-    pub const fn opcode() -> u8 { 105 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -20718,7 +20718,7 @@ impl ChangePointerControlRequest {
         let do_acceleration_bytes = self.do_acceleration.serialize();
         let do_threshold_bytes = self.do_threshold.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CHANGE_POINTER_CONTROL_REQUEST,
             0,
             0,
             0,
@@ -20754,11 +20754,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetPointerControl request
+pub const GET_POINTER_CONTROL_REQUEST: u8 = 106;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPointerControlRequest;
 impl GetPointerControlRequest {
-    /// Opcode for the GetPointerControl request
-    pub const fn opcode() -> u8 { 106 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -20767,7 +20767,7 @@ impl GetPointerControlRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            GET_POINTER_CONTROL_REQUEST,
             0,
             0,
             0,
@@ -20949,6 +20949,8 @@ impl TryFrom<u32> for Exposures {
     }
 }
 
+/// Opcode for the SetScreenSaver request
+pub const SET_SCREEN_SAVER_REQUEST: u8 = 107;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetScreenSaverRequest {
     pub timeout: i16,
@@ -20957,8 +20959,6 @@ pub struct SetScreenSaverRequest {
     pub allow_exposures: Exposures,
 }
 impl SetScreenSaverRequest {
-    /// Opcode for the SetScreenSaver request
-    pub const fn opcode() -> u8 { 107 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -20971,7 +20971,7 @@ impl SetScreenSaverRequest {
         let prefer_blanking_bytes = u8::from(self.prefer_blanking).serialize();
         let allow_exposures_bytes = u8::from(self.allow_exposures).serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_SCREEN_SAVER_REQUEST,
             0,
             0,
             0,
@@ -21006,11 +21006,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetScreenSaver request
+pub const GET_SCREEN_SAVER_REQUEST: u8 = 108;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSaverRequest;
 impl GetScreenSaverRequest {
-    /// Opcode for the GetScreenSaver request
-    pub const fn opcode() -> u8 { 108 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -21019,7 +21019,7 @@ impl GetScreenSaverRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            GET_SCREEN_SAVER_REQUEST,
             0,
             0,
             0,
@@ -21216,6 +21216,8 @@ impl TryFrom<u32> for Family {
     }
 }
 
+/// Opcode for the ChangeHosts request
+pub const CHANGE_HOSTS_REQUEST: u8 = 109;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeHostsRequest<'input> {
     pub mode: HostMode,
@@ -21223,8 +21225,6 @@ pub struct ChangeHostsRequest<'input> {
     pub address: &'input [u8],
 }
 impl<'input> ChangeHostsRequest<'input> {
-    /// Opcode for the ChangeHosts request
-    pub const fn opcode() -> u8 { 109 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -21237,7 +21237,7 @@ impl<'input> ChangeHostsRequest<'input> {
         let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
         let address_len_bytes = address_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            CHANGE_HOSTS_REQUEST,
             mode_bytes[0],
             0,
             0,
@@ -21331,11 +21331,11 @@ impl Host {
     }
 }
 
+/// Opcode for the ListHosts request
+pub const LIST_HOSTS_REQUEST: u8 = 110;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListHostsRequest;
 impl ListHostsRequest {
-    /// Opcode for the ListHosts request
-    pub const fn opcode() -> u8 { 110 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -21344,7 +21344,7 @@ impl ListHostsRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            LIST_HOSTS_REQUEST,
             0,
             0,
             0,
@@ -21480,13 +21480,13 @@ impl TryFrom<u32> for AccessControl {
     }
 }
 
+/// Opcode for the SetAccessControl request
+pub const SET_ACCESS_CONTROL_REQUEST: u8 = 111;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetAccessControlRequest {
     pub mode: AccessControl,
 }
 impl SetAccessControlRequest {
-    /// Opcode for the SetAccessControl request
-    pub const fn opcode() -> u8 { 111 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -21496,7 +21496,7 @@ impl SetAccessControlRequest {
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_ACCESS_CONTROL_REQUEST,
             mode_bytes[0],
             0,
             0,
@@ -21585,13 +21585,13 @@ impl TryFrom<u32> for CloseDown {
     }
 }
 
+/// Opcode for the SetCloseDownMode request
+pub const SET_CLOSE_DOWN_MODE_REQUEST: u8 = 112;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetCloseDownModeRequest {
     pub mode: CloseDown,
 }
 impl SetCloseDownModeRequest {
-    /// Opcode for the SetCloseDownMode request
-    pub const fn opcode() -> u8 { 112 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -21601,7 +21601,7 @@ impl SetCloseDownModeRequest {
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_CLOSE_DOWN_MODE_REQUEST,
             mode_bytes[0],
             0,
             0,
@@ -21684,6 +21684,8 @@ impl TryFrom<u32> for Kill {
     }
 }
 
+/// Opcode for the KillClient request
+pub const KILL_CLIENT_REQUEST: u8 = 113;
 /// kills a client.
 ///
 /// Forces a close down of the client that created the specified `resource`.
@@ -21708,8 +21710,6 @@ pub struct KillClientRequest {
     pub resource: u32,
 }
 impl KillClientRequest {
-    /// Opcode for the KillClient request
-    pub const fn opcode() -> u8 { 113 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -21719,7 +21719,7 @@ impl KillClientRequest {
         let length_so_far = 0;
         let resource_bytes = self.resource.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            KILL_CLIENT_REQUEST,
             0,
             0,
             0,
@@ -21768,6 +21768,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the RotateProperties request
+pub const ROTATE_PROPERTIES_REQUEST: u8 = 114;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RotatePropertiesRequest<'input> {
     pub window: Window,
@@ -21775,8 +21777,6 @@ pub struct RotatePropertiesRequest<'input> {
     pub atoms: &'input [Atom],
 }
 impl<'input> RotatePropertiesRequest<'input> {
-    /// Opcode for the RotateProperties request
-    pub const fn opcode() -> u8 { 114 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -21789,7 +21789,7 @@ impl<'input> RotatePropertiesRequest<'input> {
         let atoms_len_bytes = atoms_len.serialize();
         let delta_bytes = self.delta.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            ROTATE_PROPERTIES_REQUEST,
             0,
             0,
             0,
@@ -21897,13 +21897,13 @@ impl TryFrom<u32> for ScreenSaver {
     }
 }
 
+/// Opcode for the ForceScreenSaver request
+pub const FORCE_SCREEN_SAVER_REQUEST: u8 = 115;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ForceScreenSaverRequest {
     pub mode: ScreenSaver,
 }
 impl ForceScreenSaverRequest {
-    /// Opcode for the ForceScreenSaver request
-    pub const fn opcode() -> u8 { 115 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -21913,7 +21913,7 @@ impl ForceScreenSaverRequest {
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            FORCE_SCREEN_SAVER_REQUEST,
             mode_bytes[0],
             0,
             0,
@@ -22002,13 +22002,13 @@ impl TryFrom<u32> for MappingStatus {
     }
 }
 
+/// Opcode for the SetPointerMapping request
+pub const SET_POINTER_MAPPING_REQUEST: u8 = 116;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetPointerMappingRequest<'input> {
     pub map: &'input [u8],
 }
 impl<'input> SetPointerMappingRequest<'input> {
-    /// Opcode for the SetPointerMapping request
-    pub const fn opcode() -> u8 { 116 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -22019,7 +22019,7 @@ impl<'input> SetPointerMappingRequest<'input> {
         let map_len = u8::try_from(self.map.len()).expect("`map` has too many elements");
         let map_len_bytes = map_len.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_POINTER_MAPPING_REQUEST,
             map_len_bytes[0],
             0,
             0,
@@ -22071,11 +22071,11 @@ impl TryFrom<&[u8]> for SetPointerMappingReply {
     }
 }
 
+/// Opcode for the GetPointerMapping request
+pub const GET_POINTER_MAPPING_REQUEST: u8 = 117;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPointerMappingRequest;
 impl GetPointerMappingRequest {
-    /// Opcode for the GetPointerMapping request
-    pub const fn opcode() -> u8 { 117 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -22084,7 +22084,7 @@ impl GetPointerMappingRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            GET_POINTER_MAPPING_REQUEST,
             0,
             0,
             0,
@@ -22228,13 +22228,13 @@ impl TryFrom<u32> for MapIndex {
     }
 }
 
+/// Opcode for the SetModifierMapping request
+pub const SET_MODIFIER_MAPPING_REQUEST: u8 = 118;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetModifierMappingRequest<'input> {
     pub keycodes: &'input [Keycode],
 }
 impl<'input> SetModifierMappingRequest<'input> {
-    /// Opcode for the SetModifierMapping request
-    pub const fn opcode() -> u8 { 118 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -22246,7 +22246,7 @@ impl<'input> SetModifierMappingRequest<'input> {
         let keycodes_per_modifier = u8::try_from(self.keycodes.len() / 8).expect("`keycodes` has too many elements");
         let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
         let mut request0 = vec![
-            Self::opcode(),
+            SET_MODIFIER_MAPPING_REQUEST,
             keycodes_per_modifier_bytes[0],
             0,
             0,
@@ -22298,11 +22298,11 @@ impl TryFrom<&[u8]> for SetModifierMappingReply {
     }
 }
 
+/// Opcode for the GetModifierMapping request
+pub const GET_MODIFIER_MAPPING_REQUEST: u8 = 119;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetModifierMappingRequest;
 impl GetModifierMappingRequest {
-    /// Opcode for the GetModifierMapping request
-    pub const fn opcode() -> u8 { 119 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -22311,7 +22311,7 @@ impl GetModifierMappingRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            GET_MODIFIER_MAPPING_REQUEST,
             0,
             0,
             0,
@@ -22376,11 +22376,11 @@ impl GetModifierMappingReply {
     }
 }
 
+/// Opcode for the NoOperation request
+pub const NO_OPERATION_REQUEST: u8 = 127;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NoOperationRequest;
 impl NoOperationRequest {
-    /// Opcode for the NoOperation request
-    pub const fn opcode() -> u8 { 127 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -22389,7 +22389,7 @@ impl NoOperationRequest {
         let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
-            Self::opcode(),
+            NO_OPERATION_REQUEST,
             0,
             0,
             0,

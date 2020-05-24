@@ -175,14 +175,14 @@ impl From<BadDamageError> for [u8; 32] {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -195,7 +195,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             client_major_version_bytes[0],
@@ -255,6 +255,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the Create request
+pub const CREATE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateRequest {
     pub damage: Damage,
@@ -262,8 +264,6 @@ pub struct CreateRequest {
     pub level: ReportLevel,
 }
 impl CreateRequest {
-    /// Opcode for the Create request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -277,7 +277,7 @@ impl CreateRequest {
         let level_bytes = u8::from(self.level).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_REQUEST,
             0,
             0,
             damage_bytes[0],
@@ -314,13 +314,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Destroy request
+pub const DESTROY_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyRequest {
     pub damage: Damage,
 }
 impl DestroyRequest {
-    /// Opcode for the Destroy request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -332,7 +332,7 @@ impl DestroyRequest {
         let damage_bytes = self.damage.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_REQUEST,
             0,
             0,
             damage_bytes[0],
@@ -359,6 +359,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Subtract request
+pub const SUBTRACT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SubtractRequest {
     pub damage: Damage,
@@ -366,8 +368,6 @@ pub struct SubtractRequest {
     pub parts: xfixes::Region,
 }
 impl SubtractRequest {
-    /// Opcode for the Subtract request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -381,7 +381,7 @@ impl SubtractRequest {
         let parts_bytes = self.parts.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SUBTRACT_REQUEST,
             0,
             0,
             damage_bytes[0],
@@ -422,14 +422,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Add request
+pub const ADD_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AddRequest {
     pub drawable: xproto::Drawable,
     pub region: xfixes::Region,
 }
 impl AddRequest {
-    /// Opcode for the Add request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -442,7 +442,7 @@ impl AddRequest {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ADD_REQUEST,
             0,
             0,
             drawable_bytes[0],

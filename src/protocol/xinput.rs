@@ -84,13 +84,13 @@ impl Serialize for Fp3232 {
     }
 }
 
+/// Opcode for the GetExtensionVersion request
+pub const GET_EXTENSION_VERSION_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetExtensionVersionRequest<'input> {
     pub name: &'input [u8],
 }
 impl<'input> GetExtensionVersionRequest<'input> {
-    /// Opcode for the GetExtensionVersion request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -103,7 +103,7 @@ impl<'input> GetExtensionVersionRequest<'input> {
         let name_len_bytes = name_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_EXTENSION_VERSION_REQUEST,
             0,
             0,
             name_len_bytes[0],
@@ -942,11 +942,11 @@ impl DeviceName {
     }
 }
 
+/// Opcode for the ListInputDevices request
+pub const LIST_INPUT_DEVICES_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListInputDevicesRequest;
 impl ListInputDevicesRequest {
-    /// Opcode for the ListInputDevices request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -957,7 +957,7 @@ impl ListInputDevicesRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_INPUT_DEVICES_REQUEST,
             0,
             0,
         ];
@@ -1069,13 +1069,13 @@ impl Serialize for InputClassInfo {
     }
 }
 
+/// Opcode for the OpenDevice request
+pub const OPEN_DEVICE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OpenDeviceRequest {
     pub device_id: u8,
 }
 impl OpenDeviceRequest {
-    /// Opcode for the OpenDevice request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1087,7 +1087,7 @@ impl OpenDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            OPEN_DEVICE_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -1162,13 +1162,13 @@ impl OpenDeviceReply {
     }
 }
 
+/// Opcode for the CloseDevice request
+pub const CLOSE_DEVICE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CloseDeviceRequest {
     pub device_id: u8,
 }
 impl CloseDeviceRequest {
-    /// Opcode for the CloseDevice request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1180,7 +1180,7 @@ impl CloseDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CLOSE_DEVICE_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -1207,14 +1207,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetDeviceMode request
+pub const SET_DEVICE_MODE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModeRequest {
     pub device_id: u8,
     pub mode: ValuatorMode,
 }
 impl SetDeviceModeRequest {
-    /// Opcode for the SetDeviceMode request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1227,7 +1227,7 @@ impl SetDeviceModeRequest {
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_DEVICE_MODE_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -1283,14 +1283,14 @@ impl TryFrom<&[u8]> for SetDeviceModeReply {
     }
 }
 
+/// Opcode for the SelectExtensionEvent request
+pub const SELECT_EXTENSION_EVENT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SelectExtensionEventRequest<'input> {
     pub window: xproto::Window,
     pub classes: &'input [EventClass],
 }
 impl<'input> SelectExtensionEventRequest<'input> {
-    /// Opcode for the SelectExtensionEvent request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1304,7 +1304,7 @@ impl<'input> SelectExtensionEventRequest<'input> {
         let num_classes_bytes = num_classes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_EXTENSION_EVENT_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1340,13 +1340,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetSelectedExtensionEvents request
+pub const GET_SELECTED_EXTENSION_EVENTS_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetSelectedExtensionEventsRequest {
     pub window: xproto::Window,
 }
 impl GetSelectedExtensionEventsRequest {
-    /// Opcode for the GetSelectedExtensionEvents request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1358,7 +1358,7 @@ impl GetSelectedExtensionEventsRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SELECTED_EXTENSION_EVENTS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1514,6 +1514,8 @@ impl TryFrom<u32> for PropagateMode {
     }
 }
 
+/// Opcode for the ChangeDeviceDontPropagateList request
+pub const CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 8;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeDeviceDontPropagateListRequest<'input> {
     pub window: xproto::Window,
@@ -1521,8 +1523,6 @@ pub struct ChangeDeviceDontPropagateListRequest<'input> {
     pub classes: &'input [EventClass],
 }
 impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
-    /// Opcode for the ChangeDeviceDontPropagateList request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1537,7 +1537,7 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1574,13 +1574,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDeviceDontPropagateList request
+pub const GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceDontPropagateListRequest {
     pub window: xproto::Window,
 }
 impl GetDeviceDontPropagateListRequest {
-    /// Opcode for the GetDeviceDontPropagateList request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1592,7 +1592,7 @@ impl GetDeviceDontPropagateListRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1690,6 +1690,8 @@ impl DeviceTimeCoord {
     }
 }
 
+/// Opcode for the GetDeviceMotionEvents request
+pub const GET_DEVICE_MOTION_EVENTS_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceMotionEventsRequest {
     pub start: xproto::Timestamp,
@@ -1697,8 +1699,6 @@ pub struct GetDeviceMotionEventsRequest {
     pub device_id: u8,
 }
 impl GetDeviceMotionEventsRequest {
-    /// Opcode for the GetDeviceMotionEvents request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1712,7 +1712,7 @@ impl GetDeviceMotionEventsRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_MOTION_EVENTS_REQUEST,
             0,
             0,
             start_bytes[0],
@@ -1806,13 +1806,13 @@ impl GetDeviceMotionEventsReply {
     }
 }
 
+/// Opcode for the ChangeKeyboardDevice request
+pub const CHANGE_KEYBOARD_DEVICE_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeKeyboardDeviceRequest {
     pub device_id: u8,
 }
 impl ChangeKeyboardDeviceRequest {
-    /// Opcode for the ChangeKeyboardDevice request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1824,7 +1824,7 @@ impl ChangeKeyboardDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_KEYBOARD_DEVICE_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -1879,6 +1879,8 @@ impl TryFrom<&[u8]> for ChangeKeyboardDeviceReply {
     }
 }
 
+/// Opcode for the ChangePointerDevice request
+pub const CHANGE_POINTER_DEVICE_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangePointerDeviceRequest {
     pub x_axis: u8,
@@ -1886,8 +1888,6 @@ pub struct ChangePointerDeviceRequest {
     pub device_id: u8,
 }
 impl ChangePointerDeviceRequest {
-    /// Opcode for the ChangePointerDevice request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1901,7 +1901,7 @@ impl ChangePointerDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_POINTER_DEVICE_REQUEST,
             0,
             0,
             x_axis_bytes[0],
@@ -1958,6 +1958,8 @@ impl TryFrom<&[u8]> for ChangePointerDeviceReply {
     }
 }
 
+/// Opcode for the GrabDevice request
+pub const GRAB_DEVICE_REQUEST: u8 = 13;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GrabDeviceRequest<'input> {
     pub grab_window: xproto::Window,
@@ -1969,8 +1971,6 @@ pub struct GrabDeviceRequest<'input> {
     pub classes: &'input [EventClass],
 }
 impl<'input> GrabDeviceRequest<'input> {
-    /// Opcode for the GrabDevice request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1989,7 +1989,7 @@ impl<'input> GrabDeviceRequest<'input> {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GRAB_DEVICE_REQUEST,
             0,
             0,
             grab_window_bytes[0],
@@ -2068,14 +2068,14 @@ impl TryFrom<&[u8]> for GrabDeviceReply {
     }
 }
 
+/// Opcode for the UngrabDevice request
+pub const UNGRAB_DEVICE_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UngrabDeviceRequest {
     pub time: xproto::Timestamp,
     pub device_id: u8,
 }
 impl UngrabDeviceRequest {
-    /// Opcode for the UngrabDevice request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2088,7 +2088,7 @@ impl UngrabDeviceRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            UNGRAB_DEVICE_REQUEST,
             0,
             0,
             time_bytes[0],
@@ -2181,6 +2181,8 @@ impl TryFrom<u32> for ModifierDevice {
     }
 }
 
+/// Opcode for the GrabDeviceKey request
+pub const GRAB_DEVICE_KEY_REQUEST: u8 = 15;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GrabDeviceKeyRequest<'input> {
     pub grab_window: xproto::Window,
@@ -2194,8 +2196,6 @@ pub struct GrabDeviceKeyRequest<'input> {
     pub classes: &'input [EventClass],
 }
 impl<'input> GrabDeviceKeyRequest<'input> {
-    /// Opcode for the GrabDeviceKey request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2216,7 +2216,7 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         let owner_events_bytes = self.owner_events.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GRAB_DEVICE_KEY_REQUEST,
             0,
             0,
             grab_window_bytes[0],
@@ -2273,6 +2273,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UngrabDeviceKey request
+pub const UNGRAB_DEVICE_KEY_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UngrabDeviceKeyRequest {
     pub grab_window: xproto::Window,
@@ -2282,8 +2284,6 @@ pub struct UngrabDeviceKeyRequest {
     pub grabbed_device: u8,
 }
 impl UngrabDeviceKeyRequest {
-    /// Opcode for the UngrabDeviceKey request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2299,7 +2299,7 @@ impl UngrabDeviceKeyRequest {
         let grabbed_device_bytes = self.grabbed_device.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            UNGRAB_DEVICE_KEY_REQUEST,
             0,
             0,
             grab_window_bytes[0],
@@ -2344,6 +2344,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GrabDeviceButton request
+pub const GRAB_DEVICE_BUTTON_REQUEST: u8 = 17;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GrabDeviceButtonRequest<'input> {
     pub grab_window: xproto::Window,
@@ -2357,8 +2359,6 @@ pub struct GrabDeviceButtonRequest<'input> {
     pub classes: &'input [EventClass],
 }
 impl<'input> GrabDeviceButtonRequest<'input> {
-    /// Opcode for the GrabDeviceButton request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2379,7 +2379,7 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         let owner_events_bytes = self.owner_events.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GRAB_DEVICE_BUTTON_REQUEST,
             0,
             0,
             grab_window_bytes[0],
@@ -2436,6 +2436,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UngrabDeviceButton request
+pub const UNGRAB_DEVICE_BUTTON_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UngrabDeviceButtonRequest {
     pub grab_window: xproto::Window,
@@ -2445,8 +2447,6 @@ pub struct UngrabDeviceButtonRequest {
     pub grabbed_device: u8,
 }
 impl UngrabDeviceButtonRequest {
-    /// Opcode for the UngrabDeviceButton request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2462,7 +2462,7 @@ impl UngrabDeviceButtonRequest {
         let grabbed_device_bytes = self.grabbed_device.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            UNGRAB_DEVICE_BUTTON_REQUEST,
             0,
             0,
             grab_window_bytes[0],
@@ -2581,6 +2581,8 @@ impl TryFrom<u32> for DeviceInputMode {
     }
 }
 
+/// Opcode for the AllowDeviceEvents request
+pub const ALLOW_DEVICE_EVENTS_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllowDeviceEventsRequest {
     pub time: xproto::Timestamp,
@@ -2588,8 +2590,6 @@ pub struct AllowDeviceEventsRequest {
     pub device_id: u8,
 }
 impl AllowDeviceEventsRequest {
-    /// Opcode for the AllowDeviceEvents request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2603,7 +2603,7 @@ impl AllowDeviceEventsRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ALLOW_DEVICE_EVENTS_REQUEST,
             0,
             0,
             time_bytes[0],
@@ -2638,13 +2638,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDeviceFocus request
+pub const GET_DEVICE_FOCUS_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceFocusRequest {
     pub device_id: u8,
 }
 impl GetDeviceFocusRequest {
-    /// Opcode for the GetDeviceFocus request
-    pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2656,7 +2656,7 @@ impl GetDeviceFocusRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_FOCUS_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -2715,6 +2715,8 @@ impl TryFrom<&[u8]> for GetDeviceFocusReply {
     }
 }
 
+/// Opcode for the SetDeviceFocus request
+pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceFocusRequest {
     pub focus: xproto::Window,
@@ -2723,8 +2725,6 @@ pub struct SetDeviceFocusRequest {
     pub device_id: u8,
 }
 impl SetDeviceFocusRequest {
-    /// Opcode for the SetDeviceFocus request
-    pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2739,7 +2739,7 @@ impl SetDeviceFocusRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_DEVICE_FOCUS_REQUEST,
             0,
             0,
             focus_bytes[0],
@@ -3802,13 +3802,13 @@ impl Serialize for FeedbackState {
     }
 }
 
+/// Opcode for the GetFeedbackControl request
+pub const GET_FEEDBACK_CONTROL_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetFeedbackControlRequest {
     pub device_id: u8,
 }
 impl GetFeedbackControlRequest {
-    /// Opcode for the GetFeedbackControl request
-    pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3820,7 +3820,7 @@ impl GetFeedbackControlRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_FEEDBACK_CONTROL_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -4797,6 +4797,8 @@ impl From<ChangeFeedbackControlMask> for Option<u32> {
 }
 bitmask_binop!(ChangeFeedbackControlMask, u8);
 
+/// Opcode for the ChangeFeedbackControl request
+pub const CHANGE_FEEDBACK_CONTROL_REQUEST: u8 = 23;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeFeedbackControlRequest {
     pub mask: u32,
@@ -4805,8 +4807,6 @@ pub struct ChangeFeedbackControlRequest {
     pub feedback: FeedbackCtl,
 }
 impl ChangeFeedbackControlRequest {
-    /// Opcode for the ChangeFeedbackControl request
-    pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4820,7 +4820,7 @@ impl ChangeFeedbackControlRequest {
         let feedback_id_bytes = self.feedback_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_FEEDBACK_CONTROL_REQUEST,
             0,
             0,
             mask_bytes[0],
@@ -4860,6 +4860,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDeviceKeyMapping request
+pub const GET_DEVICE_KEY_MAPPING_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceKeyMappingRequest {
     pub device_id: u8,
@@ -4867,8 +4869,6 @@ pub struct GetDeviceKeyMappingRequest {
     pub count: u8,
 }
 impl GetDeviceKeyMappingRequest {
-    /// Opcode for the GetDeviceKeyMapping request
-    pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4882,7 +4882,7 @@ impl GetDeviceKeyMappingRequest {
         let count_bytes = self.count.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_KEY_MAPPING_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -4954,6 +4954,8 @@ impl GetDeviceKeyMappingReply {
     }
 }
 
+/// Opcode for the ChangeDeviceKeyMapping request
+pub const CHANGE_DEVICE_KEY_MAPPING_REQUEST: u8 = 25;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeDeviceKeyMappingRequest<'input> {
     pub device_id: u8,
@@ -4963,8 +4965,6 @@ pub struct ChangeDeviceKeyMappingRequest<'input> {
     pub keysyms: &'input [xproto::Keysym],
 }
 impl<'input> ChangeDeviceKeyMappingRequest<'input> {
-    /// Opcode for the ChangeDeviceKeyMapping request
-    pub const fn opcode() -> u8 { 25 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4979,7 +4979,7 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
         let keycode_count_bytes = self.keycode_count.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_DEVICE_KEY_MAPPING_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -5015,13 +5015,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDeviceModifierMapping request
+pub const GET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 26;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceModifierMappingRequest {
     pub device_id: u8,
 }
 impl GetDeviceModifierMappingRequest {
-    /// Opcode for the GetDeviceModifierMapping request
-    pub const fn opcode() -> u8 { 26 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5033,7 +5033,7 @@ impl GetDeviceModifierMappingRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_MODIFIER_MAPPING_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -5105,14 +5105,14 @@ impl GetDeviceModifierMappingReply {
     }
 }
 
+/// Opcode for the SetDeviceModifierMapping request
+pub const SET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 27;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceModifierMappingRequest<'input> {
     pub device_id: u8,
     pub keymaps: &'input [u8],
 }
 impl<'input> SetDeviceModifierMappingRequest<'input> {
-    /// Opcode for the SetDeviceModifierMapping request
-    pub const fn opcode() -> u8 { 27 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5127,7 +5127,7 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_DEVICE_MODIFIER_MAPPING_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -5186,13 +5186,13 @@ impl TryFrom<&[u8]> for SetDeviceModifierMappingReply {
     }
 }
 
+/// Opcode for the GetDeviceButtonMapping request
+pub const GET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 28;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceButtonMappingRequest {
     pub device_id: u8,
 }
 impl GetDeviceButtonMappingRequest {
-    /// Opcode for the GetDeviceButtonMapping request
-    pub const fn opcode() -> u8 { 28 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5204,7 +5204,7 @@ impl GetDeviceButtonMappingRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_BUTTON_MAPPING_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -5280,14 +5280,14 @@ impl GetDeviceButtonMappingReply {
     }
 }
 
+/// Opcode for the SetDeviceButtonMapping request
+pub const SET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 29;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceButtonMappingRequest<'input> {
     pub device_id: u8,
     pub map: &'input [u8],
 }
 impl<'input> SetDeviceButtonMappingRequest<'input> {
-    /// Opcode for the SetDeviceButtonMapping request
-    pub const fn opcode() -> u8 { 29 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5301,7 +5301,7 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         let map_size_bytes = map_size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_DEVICE_BUTTON_MAPPING_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -5947,13 +5947,13 @@ impl Serialize for InputState {
     }
 }
 
+/// Opcode for the QueryDeviceState request
+pub const QUERY_DEVICE_STATE_REQUEST: u8 = 30;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryDeviceStateRequest {
     pub device_id: u8,
 }
 impl QueryDeviceStateRequest {
-    /// Opcode for the QueryDeviceState request
-    pub const fn opcode() -> u8 { 30 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5965,7 +5965,7 @@ impl QueryDeviceStateRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_DEVICE_STATE_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -6035,6 +6035,8 @@ impl QueryDeviceStateReply {
     }
 }
 
+/// Opcode for the DeviceBell request
+pub const DEVICE_BELL_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceBellRequest {
     pub device_id: u8,
@@ -6043,8 +6045,6 @@ pub struct DeviceBellRequest {
     pub percent: i8,
 }
 impl DeviceBellRequest {
-    /// Opcode for the DeviceBell request
-    pub const fn opcode() -> u8 { 32 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6059,7 +6059,7 @@ impl DeviceBellRequest {
         let percent_bytes = self.percent.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DEVICE_BELL_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -6089,6 +6089,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetDeviceValuators request
+pub const SET_DEVICE_VALUATORS_REQUEST: u8 = 33;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceValuatorsRequest<'input> {
     pub device_id: u8,
@@ -6096,8 +6098,6 @@ pub struct SetDeviceValuatorsRequest<'input> {
     pub valuators: &'input [i32],
 }
 impl<'input> SetDeviceValuatorsRequest<'input> {
-    /// Opcode for the SetDeviceValuators request
-    pub const fn opcode() -> u8 { 33 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6112,7 +6112,7 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
         let num_valuators_bytes = num_valuators.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_DEVICE_VALUATORS_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -7006,14 +7006,14 @@ impl Serialize for DeviceState {
     }
 }
 
+/// Opcode for the GetDeviceControl request
+pub const GET_DEVICE_CONTROL_REQUEST: u8 = 34;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceControlRequest {
     pub control_id: DeviceControl,
     pub device_id: u8,
 }
 impl GetDeviceControlRequest {
-    /// Opcode for the GetDeviceControl request
-    pub const fn opcode() -> u8 { 34 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7026,7 +7026,7 @@ impl GetDeviceControlRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_CONTROL_REQUEST,
             0,
             0,
             control_id_bytes[0],
@@ -7832,6 +7832,8 @@ impl Serialize for DeviceCtl {
     }
 }
 
+/// Opcode for the ChangeDeviceControl request
+pub const CHANGE_DEVICE_CONTROL_REQUEST: u8 = 35;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeDeviceControlRequest {
     pub control_id: DeviceControl,
@@ -7839,8 +7841,6 @@ pub struct ChangeDeviceControlRequest {
     pub control: DeviceCtl,
 }
 impl ChangeDeviceControlRequest {
-    /// Opcode for the ChangeDeviceControl request
-    pub const fn opcode() -> u8 { 35 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7853,7 +7853,7 @@ impl ChangeDeviceControlRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_DEVICE_CONTROL_REQUEST,
             0,
             0,
             control_id_bytes[0],
@@ -7913,13 +7913,13 @@ impl TryFrom<&[u8]> for ChangeDeviceControlReply {
     }
 }
 
+/// Opcode for the ListDeviceProperties request
+pub const LIST_DEVICE_PROPERTIES_REQUEST: u8 = 36;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListDevicePropertiesRequest {
     pub device_id: u8,
 }
 impl ListDevicePropertiesRequest {
-    /// Opcode for the ListDeviceProperties request
-    pub const fn opcode() -> u8 { 36 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7931,7 +7931,7 @@ impl ListDevicePropertiesRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_DEVICE_PROPERTIES_REQUEST,
             0,
             0,
             device_id_bytes[0],
@@ -8128,6 +8128,8 @@ impl ChangeDevicePropertyAux {
     }
 }
 
+/// Opcode for the ChangeDeviceProperty request
+pub const CHANGE_DEVICE_PROPERTY_REQUEST: u8 = 37;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeDevicePropertyRequest<'input> {
     pub property: xproto::Atom,
@@ -8138,8 +8140,6 @@ pub struct ChangeDevicePropertyRequest<'input> {
     pub items: &'input ChangeDevicePropertyAux,
 }
 impl<'input> ChangeDevicePropertyRequest<'input> {
-    /// Opcode for the ChangeDeviceProperty request
-    pub const fn opcode() -> u8 { 37 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8157,7 +8157,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let num_items_bytes = self.num_items.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_DEVICE_PROPERTY_REQUEST,
             0,
             0,
             property_bytes[0],
@@ -8205,14 +8205,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeleteDeviceProperty request
+pub const DELETE_DEVICE_PROPERTY_REQUEST: u8 = 38;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeleteDevicePropertyRequest {
     pub property: xproto::Atom,
     pub device_id: u8,
 }
 impl DeleteDevicePropertyRequest {
-    /// Opcode for the DeleteDeviceProperty request
-    pub const fn opcode() -> u8 { 38 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8225,7 +8225,7 @@ impl DeleteDevicePropertyRequest {
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_DEVICE_PROPERTY_REQUEST,
             0,
             0,
             property_bytes[0],
@@ -8257,6 +8257,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDeviceProperty request
+pub const GET_DEVICE_PROPERTY_REQUEST: u8 = 39;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDevicePropertyRequest {
     pub property: xproto::Atom,
@@ -8267,8 +8269,6 @@ pub struct GetDevicePropertyRequest {
     pub delete: bool,
 }
 impl GetDevicePropertyRequest {
-    /// Opcode for the GetDeviceProperty request
-    pub const fn opcode() -> u8 { 39 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8285,7 +8285,7 @@ impl GetDevicePropertyRequest {
         let delete_bytes = self.delete.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_PROPERTY_REQUEST,
             0,
             0,
             property_bytes[0],
@@ -8613,14 +8613,14 @@ impl Serialize for ModifierInfo {
     }
 }
 
+/// Opcode for the XIQueryPointer request
+pub const XI_QUERY_POINTER_REQUEST: u8 = 40;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIQueryPointerRequest {
     pub window: xproto::Window,
     pub deviceid: DeviceId,
 }
 impl XIQueryPointerRequest {
-    /// Opcode for the XIQueryPointer request
-    pub const fn opcode() -> u8 { 40 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8633,7 +8633,7 @@ impl XIQueryPointerRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_QUERY_POINTER_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -8727,6 +8727,8 @@ impl XIQueryPointerReply {
     }
 }
 
+/// Opcode for the XIWarpPointer request
+pub const XI_WARP_POINTER_REQUEST: u8 = 41;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIWarpPointerRequest {
     pub src_win: xproto::Window,
@@ -8740,8 +8742,6 @@ pub struct XIWarpPointerRequest {
     pub deviceid: DeviceId,
 }
 impl XIWarpPointerRequest {
-    /// Opcode for the XIWarpPointer request
-    pub const fn opcode() -> u8 { 41 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8761,7 +8761,7 @@ impl XIWarpPointerRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_WARP_POINTER_REQUEST,
             0,
             0,
             src_win_bytes[0],
@@ -8826,6 +8826,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the XIChangeCursor request
+pub const XI_CHANGE_CURSOR_REQUEST: u8 = 42;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIChangeCursorRequest {
     pub window: xproto::Window,
@@ -8833,8 +8835,6 @@ pub struct XIChangeCursorRequest {
     pub deviceid: DeviceId,
 }
 impl XIChangeCursorRequest {
-    /// Opcode for the XIChangeCursor request
-    pub const fn opcode() -> u8 { 42 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8848,7 +8848,7 @@ impl XIChangeCursorRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_CHANGE_CURSOR_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -9566,13 +9566,13 @@ impl Serialize for HierarchyChange {
     }
 }
 
+/// Opcode for the XIChangeHierarchy request
+pub const XI_CHANGE_HIERARCHY_REQUEST: u8 = 43;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIChangeHierarchyRequest<'input> {
     pub changes: &'input [HierarchyChange],
 }
 impl<'input> XIChangeHierarchyRequest<'input> {
-    /// Opcode for the XIChangeHierarchy request
-    pub const fn opcode() -> u8 { 43 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9585,7 +9585,7 @@ impl<'input> XIChangeHierarchyRequest<'input> {
         let num_changes_bytes = num_changes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_CHANGE_HIERARCHY_REQUEST,
             0,
             0,
             num_changes_bytes[0],
@@ -9616,14 +9616,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the XISetClientPointer request
+pub const XI_SET_CLIENT_POINTER_REQUEST: u8 = 44;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XISetClientPointerRequest {
     pub window: xproto::Window,
     pub deviceid: DeviceId,
 }
 impl XISetClientPointerRequest {
-    /// Opcode for the XISetClientPointer request
-    pub const fn opcode() -> u8 { 44 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9636,7 +9636,7 @@ impl XISetClientPointerRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_SET_CLIENT_POINTER_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -9670,13 +9670,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the XIGetClientPointer request
+pub const XI_GET_CLIENT_POINTER_REQUEST: u8 = 45;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetClientPointerRequest {
     pub window: xproto::Window,
 }
 impl XIGetClientPointerRequest {
-    /// Opcode for the XIGetClientPointer request
-    pub const fn opcode() -> u8 { 45 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9688,7 +9688,7 @@ impl XIGetClientPointerRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_GET_CLIENT_POINTER_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -9898,14 +9898,14 @@ impl EventMask {
     }
 }
 
+/// Opcode for the XISelectEvents request
+pub const XI_SELECT_EVENTS_REQUEST: u8 = 46;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XISelectEventsRequest<'input> {
     pub window: xproto::Window,
     pub masks: &'input [EventMask],
 }
 impl<'input> XISelectEventsRequest<'input> {
-    /// Opcode for the XISelectEvents request
-    pub const fn opcode() -> u8 { 46 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9919,7 +9919,7 @@ impl<'input> XISelectEventsRequest<'input> {
         let num_mask_bytes = num_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_SELECT_EVENTS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -9955,14 +9955,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the XIQueryVersion request
+pub const XI_QUERY_VERSION_REQUEST: u8 = 47;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIQueryVersionRequest {
     pub major_version: u16,
     pub minor_version: u16,
 }
 impl XIQueryVersionRequest {
-    /// Opcode for the XIQueryVersion request
-    pub const fn opcode() -> u8 { 47 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9975,7 +9975,7 @@ impl XIQueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_QUERY_VERSION_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -11258,13 +11258,13 @@ impl XIDeviceInfo {
     }
 }
 
+/// Opcode for the XIQueryDevice request
+pub const XI_QUERY_DEVICE_REQUEST: u8 = 48;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIQueryDeviceRequest {
     pub deviceid: DeviceId,
 }
 impl XIQueryDeviceRequest {
-    /// Opcode for the XIQueryDevice request
-    pub const fn opcode() -> u8 { 48 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11276,7 +11276,7 @@ impl XIQueryDeviceRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_QUERY_DEVICE_REQUEST,
             0,
             0,
             deviceid_bytes[0],
@@ -11347,6 +11347,8 @@ impl XIQueryDeviceReply {
     }
 }
 
+/// Opcode for the XISetFocus request
+pub const XI_SET_FOCUS_REQUEST: u8 = 49;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XISetFocusRequest {
     pub window: xproto::Window,
@@ -11354,8 +11356,6 @@ pub struct XISetFocusRequest {
     pub deviceid: DeviceId,
 }
 impl XISetFocusRequest {
-    /// Opcode for the XISetFocus request
-    pub const fn opcode() -> u8 { 49 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11369,7 +11369,7 @@ impl XISetFocusRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_SET_FOCUS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -11410,13 +11410,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the XIGetFocus request
+pub const XI_GET_FOCUS_REQUEST: u8 = 50;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetFocusRequest {
     pub deviceid: DeviceId,
 }
 impl XIGetFocusRequest {
-    /// Opcode for the XIGetFocus request
-    pub const fn opcode() -> u8 { 50 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11428,7 +11428,7 @@ impl XIGetFocusRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_GET_FOCUS_REQUEST,
             0,
             0,
             deviceid_bytes[0],
@@ -11553,6 +11553,8 @@ impl TryFrom<u32> for GrabOwner {
     }
 }
 
+/// Opcode for the XIGrabDevice request
+pub const XI_GRAB_DEVICE_REQUEST: u8 = 51;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIGrabDeviceRequest<'input> {
     pub window: xproto::Window,
@@ -11565,8 +11567,6 @@ pub struct XIGrabDeviceRequest<'input> {
     pub mask: &'input [u32],
 }
 impl<'input> XIGrabDeviceRequest<'input> {
-    /// Opcode for the XIGrabDevice request
-    pub const fn opcode() -> u8 { 51 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11586,7 +11586,7 @@ impl<'input> XIGrabDeviceRequest<'input> {
         let mask_len_bytes = mask_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_GRAB_DEVICE_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -11671,14 +11671,14 @@ impl TryFrom<&[u8]> for XIGrabDeviceReply {
     }
 }
 
+/// Opcode for the XIUngrabDevice request
+pub const XI_UNGRAB_DEVICE_REQUEST: u8 = 52;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIUngrabDeviceRequest {
     pub time: xproto::Timestamp,
     pub deviceid: DeviceId,
 }
 impl XIUngrabDeviceRequest {
-    /// Opcode for the XIUngrabDevice request
-    pub const fn opcode() -> u8 { 52 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11691,7 +11691,7 @@ impl XIUngrabDeviceRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_UNGRAB_DEVICE_REQUEST,
             0,
             0,
             time_bytes[0],
@@ -11807,6 +11807,8 @@ impl TryFrom<u32> for EventMode {
     }
 }
 
+/// Opcode for the XIAllowEvents request
+pub const XI_ALLOW_EVENTS_REQUEST: u8 = 53;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIAllowEventsRequest {
     pub time: xproto::Timestamp,
@@ -11816,8 +11818,6 @@ pub struct XIAllowEventsRequest {
     pub grab_window: xproto::Window,
 }
 impl XIAllowEventsRequest {
-    /// Opcode for the XIAllowEvents request
-    pub const fn opcode() -> u8 { 53 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -11833,7 +11833,7 @@ impl XIAllowEventsRequest {
         let grab_window_bytes = self.grab_window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_ALLOW_EVENTS_REQUEST,
             0,
             0,
             time_bytes[0],
@@ -12089,6 +12089,8 @@ impl Serialize for GrabModifierInfo {
     }
 }
 
+/// Opcode for the XIPassiveGrabDevice request
+pub const XI_PASSIVE_GRAB_DEVICE_REQUEST: u8 = 54;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIPassiveGrabDeviceRequest<'input> {
     pub time: xproto::Timestamp,
@@ -12104,8 +12106,6 @@ pub struct XIPassiveGrabDeviceRequest<'input> {
     pub modifiers: &'input [u32],
 }
 impl<'input> XIPassiveGrabDeviceRequest<'input> {
-    /// Opcode for the XIPassiveGrabDevice request
-    pub const fn opcode() -> u8 { 54 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12129,7 +12129,7 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         let owner_events_bytes = bool::from(self.owner_events).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_PASSIVE_GRAB_DEVICE_REQUEST,
             0,
             0,
             time_bytes[0],
@@ -12242,6 +12242,8 @@ impl XIPassiveGrabDeviceReply {
     }
 }
 
+/// Opcode for the XIPassiveUngrabDevice request
+pub const XI_PASSIVE_UNGRAB_DEVICE_REQUEST: u8 = 55;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIPassiveUngrabDeviceRequest<'input> {
     pub grab_window: xproto::Window,
@@ -12251,8 +12253,6 @@ pub struct XIPassiveUngrabDeviceRequest<'input> {
     pub modifiers: &'input [u32],
 }
 impl<'input> XIPassiveUngrabDeviceRequest<'input> {
-    /// Opcode for the XIPassiveUngrabDevice request
-    pub const fn opcode() -> u8 { 55 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12269,7 +12269,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         let grab_type_bytes = u8::from(self.grab_type).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_PASSIVE_UNGRAB_DEVICE_REQUEST,
             0,
             0,
             grab_window_bytes[0],
@@ -12318,13 +12318,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the XIListProperties request
+pub const XI_LIST_PROPERTIES_REQUEST: u8 = 56;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIListPropertiesRequest {
     pub deviceid: DeviceId,
 }
 impl XIListPropertiesRequest {
-    /// Opcode for the XIListProperties request
-    pub const fn opcode() -> u8 { 56 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12336,7 +12336,7 @@ impl XIListPropertiesRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_LIST_PROPERTIES_REQUEST,
             0,
             0,
             deviceid_bytes[0],
@@ -12469,6 +12469,8 @@ impl XIChangePropertyAux {
     }
 }
 
+/// Opcode for the XIChangeProperty request
+pub const XI_CHANGE_PROPERTY_REQUEST: u8 = 57;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIChangePropertyRequest<'input> {
     pub deviceid: DeviceId,
@@ -12479,8 +12481,6 @@ pub struct XIChangePropertyRequest<'input> {
     pub items: &'input XIChangePropertyAux,
 }
 impl<'input> XIChangePropertyRequest<'input> {
-    /// Opcode for the XIChangeProperty request
-    pub const fn opcode() -> u8 { 57 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12498,7 +12498,7 @@ impl<'input> XIChangePropertyRequest<'input> {
         let num_items_bytes = self.num_items.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_CHANGE_PROPERTY_REQUEST,
             0,
             0,
             deviceid_bytes[0],
@@ -12548,14 +12548,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the XIDeleteProperty request
+pub const XI_DELETE_PROPERTY_REQUEST: u8 = 58;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIDeletePropertyRequest {
     pub deviceid: DeviceId,
     pub property: xproto::Atom,
 }
 impl XIDeletePropertyRequest {
-    /// Opcode for the XIDeleteProperty request
-    pub const fn opcode() -> u8 { 58 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12568,7 +12568,7 @@ impl XIDeletePropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_DELETE_PROPERTY_REQUEST,
             0,
             0,
             deviceid_bytes[0],
@@ -12602,6 +12602,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the XIGetProperty request
+pub const XI_GET_PROPERTY_REQUEST: u8 = 59;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetPropertyRequest {
     pub deviceid: DeviceId,
@@ -12612,8 +12614,6 @@ pub struct XIGetPropertyRequest {
     pub len: u32,
 }
 impl XIGetPropertyRequest {
-    /// Opcode for the XIGetProperty request
-    pub const fn opcode() -> u8 { 59 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12630,7 +12630,7 @@ impl XIGetPropertyRequest {
         let len_bytes = self.len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_GET_PROPERTY_REQUEST,
             0,
             0,
             deviceid_bytes[0],
@@ -12783,13 +12783,13 @@ impl TryFrom<&[u8]> for XIGetPropertyReply {
     }
 }
 
+/// Opcode for the XIGetSelectedEvents request
+pub const XI_GET_SELECTED_EVENTS_REQUEST: u8 = 60;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetSelectedEventsRequest {
     pub window: xproto::Window,
 }
 impl XIGetSelectedEventsRequest {
-    /// Opcode for the XIGetSelectedEvents request
-    pub const fn opcode() -> u8 { 60 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12801,7 +12801,7 @@ impl XIGetSelectedEventsRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_GET_SELECTED_EVENTS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -12922,13 +12922,13 @@ impl Serialize for BarrierReleasePointerInfo {
     }
 }
 
+/// Opcode for the XIBarrierReleasePointer request
+pub const XI_BARRIER_RELEASE_POINTER_REQUEST: u8 = 61;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIBarrierReleasePointerRequest<'input> {
     pub barriers: &'input [BarrierReleasePointerInfo],
 }
 impl<'input> XIBarrierReleasePointerRequest<'input> {
-    /// Opcode for the XIBarrierReleasePointer request
-    pub const fn opcode() -> u8 { 61 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -12941,7 +12941,7 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
         let num_barriers_bytes = num_barriers.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            XI_BARRIER_RELEASE_POINTER_REQUEST,
             0,
             0,
             num_barriers_bytes[0],
@@ -15827,6 +15827,8 @@ impl From<&DevicePropertyNotifyEvent> for EventForSend {
     }
 }
 
+/// Opcode for the SendExtensionEvent request
+pub const SEND_EXTENSION_EVENT_REQUEST: u8 = 31;
 #[derive(Debug, Clone)]
 pub struct SendExtensionEventRequest<'input> {
     pub destination: xproto::Window,
@@ -15836,8 +15838,6 @@ pub struct SendExtensionEventRequest<'input> {
     pub classes: &'input [EventClass],
 }
 impl<'input> SendExtensionEventRequest<'input> {
-    /// Opcode for the SendExtensionEvent request
-    pub const fn opcode() -> u8 { 31 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -15855,7 +15855,7 @@ impl<'input> SendExtensionEventRequest<'input> {
         let num_events_bytes = num_events.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SEND_EXTENSION_EVENT_REQUEST,
             0,
             0,
             destination_bytes[0],

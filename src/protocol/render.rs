@@ -1809,14 +1809,14 @@ impl Serialize for Glyphinfo {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1829,7 +1829,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             client_major_version_bytes[0],
@@ -1889,11 +1889,11 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the QueryPictFormats request
+pub const QUERY_PICT_FORMATS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryPictFormatsRequest;
 impl QueryPictFormatsRequest {
-    /// Opcode for the QueryPictFormats request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1904,7 +1904,7 @@ impl QueryPictFormatsRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_PICT_FORMATS_REQUEST,
             0,
             0,
         ];
@@ -2011,13 +2011,13 @@ impl QueryPictFormatsReply {
     }
 }
 
+/// Opcode for the QueryPictIndexValues request
+pub const QUERY_PICT_INDEX_VALUES_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryPictIndexValuesRequest {
     pub format: Pictformat,
 }
 impl QueryPictIndexValuesRequest {
-    /// Opcode for the QueryPictIndexValues request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2029,7 +2029,7 @@ impl QueryPictIndexValuesRequest {
         let format_bytes = self.format.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_PICT_INDEX_VALUES_REQUEST,
             0,
             0,
             format_bytes[0],
@@ -2281,6 +2281,8 @@ impl CreatePictureAux {
     }
 }
 
+/// Opcode for the CreatePicture request
+pub const CREATE_PICTURE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreatePictureRequest<'input> {
     pub pid: Picture,
@@ -2289,8 +2291,6 @@ pub struct CreatePictureRequest<'input> {
     pub value_list: &'input CreatePictureAux,
 }
 impl<'input> CreatePictureRequest<'input> {
-    /// Opcode for the CreatePicture request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2306,7 +2306,7 @@ impl<'input> CreatePictureRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_PICTURE_REQUEST,
             0,
             0,
             pid_bytes[0],
@@ -2535,14 +2535,14 @@ impl ChangePictureAux {
     }
 }
 
+/// Opcode for the ChangePicture request
+pub const CHANGE_PICTURE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangePictureRequest<'input> {
     pub picture: Picture,
     pub value_list: &'input ChangePictureAux,
 }
 impl<'input> ChangePictureRequest<'input> {
-    /// Opcode for the ChangePicture request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2556,7 +2556,7 @@ impl<'input> ChangePictureRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_PICTURE_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -2592,6 +2592,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetPictureClipRectangles request
+pub const SET_PICTURE_CLIP_RECTANGLES_REQUEST: u8 = 6;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetPictureClipRectanglesRequest<'input> {
     pub picture: Picture,
@@ -2600,8 +2602,6 @@ pub struct SetPictureClipRectanglesRequest<'input> {
     pub rectangles: &'input [xproto::Rectangle],
 }
 impl<'input> SetPictureClipRectanglesRequest<'input> {
-    /// Opcode for the SetPictureClipRectangles request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2615,7 +2615,7 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
         let clip_y_origin_bytes = self.clip_y_origin.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PICTURE_CLIP_RECTANGLES_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -2653,13 +2653,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FreePicture request
+pub const FREE_PICTURE_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FreePictureRequest {
     pub picture: Picture,
 }
 impl FreePictureRequest {
-    /// Opcode for the FreePicture request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2671,7 +2671,7 @@ impl FreePictureRequest {
         let picture_bytes = self.picture.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FREE_PICTURE_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -2698,6 +2698,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Composite request
+pub const COMPOSITE_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CompositeRequest {
     pub op: PictOp,
@@ -2714,8 +2716,6 @@ pub struct CompositeRequest {
     pub height: u16,
 }
 impl CompositeRequest {
-    /// Opcode for the Composite request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2738,7 +2738,7 @@ impl CompositeRequest {
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            COMPOSITE_REQUEST,
             0,
             0,
             op_bytes[0],
@@ -2806,6 +2806,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Trapezoids request
+pub const TRAPEZOIDS_REQUEST: u8 = 10;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TrapezoidsRequest<'input> {
     pub op: PictOp,
@@ -2817,8 +2819,6 @@ pub struct TrapezoidsRequest<'input> {
     pub traps: &'input [Trapezoid],
 }
 impl<'input> TrapezoidsRequest<'input> {
-    /// Opcode for the Trapezoids request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2835,7 +2835,7 @@ impl<'input> TrapezoidsRequest<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            TRAPEZOIDS_REQUEST,
             0,
             0,
             op_bytes[0],
@@ -2888,6 +2888,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Triangles request
+pub const TRIANGLES_REQUEST: u8 = 11;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TrianglesRequest<'input> {
     pub op: PictOp,
@@ -2899,8 +2901,6 @@ pub struct TrianglesRequest<'input> {
     pub triangles: &'input [Triangle],
 }
 impl<'input> TrianglesRequest<'input> {
-    /// Opcode for the Triangles request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2917,7 +2917,7 @@ impl<'input> TrianglesRequest<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            TRIANGLES_REQUEST,
             0,
             0,
             op_bytes[0],
@@ -2970,6 +2970,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the TriStrip request
+pub const TRI_STRIP_REQUEST: u8 = 12;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TriStripRequest<'input> {
     pub op: PictOp,
@@ -2981,8 +2983,6 @@ pub struct TriStripRequest<'input> {
     pub points: &'input [Pointfix],
 }
 impl<'input> TriStripRequest<'input> {
-    /// Opcode for the TriStrip request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2999,7 +2999,7 @@ impl<'input> TriStripRequest<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            TRI_STRIP_REQUEST,
             0,
             0,
             op_bytes[0],
@@ -3052,6 +3052,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the TriFan request
+pub const TRI_FAN_REQUEST: u8 = 13;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TriFanRequest<'input> {
     pub op: PictOp,
@@ -3063,8 +3065,6 @@ pub struct TriFanRequest<'input> {
     pub points: &'input [Pointfix],
 }
 impl<'input> TriFanRequest<'input> {
-    /// Opcode for the TriFan request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3081,7 +3081,7 @@ impl<'input> TriFanRequest<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            TRI_FAN_REQUEST,
             0,
             0,
             op_bytes[0],
@@ -3134,14 +3134,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateGlyphSet request
+pub const CREATE_GLYPH_SET_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateGlyphSetRequest {
     pub gsid: Glyphset,
     pub format: Pictformat,
 }
 impl CreateGlyphSetRequest {
-    /// Opcode for the CreateGlyphSet request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3154,7 +3154,7 @@ impl CreateGlyphSetRequest {
         let format_bytes = self.format.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_GLYPH_SET_REQUEST,
             0,
             0,
             gsid_bytes[0],
@@ -3186,14 +3186,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ReferenceGlyphSet request
+pub const REFERENCE_GLYPH_SET_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ReferenceGlyphSetRequest {
     pub gsid: Glyphset,
     pub existing: Glyphset,
 }
 impl ReferenceGlyphSetRequest {
-    /// Opcode for the ReferenceGlyphSet request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3206,7 +3206,7 @@ impl ReferenceGlyphSetRequest {
         let existing_bytes = self.existing.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            REFERENCE_GLYPH_SET_REQUEST,
             0,
             0,
             gsid_bytes[0],
@@ -3238,13 +3238,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FreeGlyphSet request
+pub const FREE_GLYPH_SET_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FreeGlyphSetRequest {
     pub glyphset: Glyphset,
 }
 impl FreeGlyphSetRequest {
-    /// Opcode for the FreeGlyphSet request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3256,7 +3256,7 @@ impl FreeGlyphSetRequest {
         let glyphset_bytes = self.glyphset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FREE_GLYPH_SET_REQUEST,
             0,
             0,
             glyphset_bytes[0],
@@ -3283,6 +3283,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the AddGlyphs request
+pub const ADD_GLYPHS_REQUEST: u8 = 20;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddGlyphsRequest<'input> {
     pub glyphset: Glyphset,
@@ -3291,8 +3293,6 @@ pub struct AddGlyphsRequest<'input> {
     pub data: &'input [u8],
 }
 impl<'input> AddGlyphsRequest<'input> {
-    /// Opcode for the AddGlyphs request
-    pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3306,7 +3306,7 @@ impl<'input> AddGlyphsRequest<'input> {
         let glyphs_len_bytes = glyphs_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ADD_GLYPHS_REQUEST,
             0,
             0,
             glyphset_bytes[0],
@@ -3348,14 +3348,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FreeGlyphs request
+pub const FREE_GLYPHS_REQUEST: u8 = 22;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FreeGlyphsRequest<'input> {
     pub glyphset: Glyphset,
     pub glyphs: &'input [Glyph],
 }
 impl<'input> FreeGlyphsRequest<'input> {
-    /// Opcode for the FreeGlyphs request
-    pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3367,7 +3367,7 @@ impl<'input> FreeGlyphsRequest<'input> {
         let glyphset_bytes = self.glyphset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FREE_GLYPHS_REQUEST,
             0,
             0,
             glyphset_bytes[0],
@@ -3399,6 +3399,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CompositeGlyphs8 request
+pub const COMPOSITE_GLYPHS8_REQUEST: u8 = 23;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CompositeGlyphs8Request<'input> {
     pub op: PictOp,
@@ -3411,8 +3413,6 @@ pub struct CompositeGlyphs8Request<'input> {
     pub glyphcmds: &'input [u8],
 }
 impl<'input> CompositeGlyphs8Request<'input> {
-    /// Opcode for the CompositeGlyphs8 request
-    pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3430,7 +3430,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            COMPOSITE_GLYPHS8_REQUEST,
             0,
             0,
             op_bytes[0],
@@ -3487,6 +3487,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CompositeGlyphs16 request
+pub const COMPOSITE_GLYPHS16_REQUEST: u8 = 24;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CompositeGlyphs16Request<'input> {
     pub op: PictOp,
@@ -3499,8 +3501,6 @@ pub struct CompositeGlyphs16Request<'input> {
     pub glyphcmds: &'input [u8],
 }
 impl<'input> CompositeGlyphs16Request<'input> {
-    /// Opcode for the CompositeGlyphs16 request
-    pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3518,7 +3518,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            COMPOSITE_GLYPHS16_REQUEST,
             0,
             0,
             op_bytes[0],
@@ -3575,6 +3575,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CompositeGlyphs32 request
+pub const COMPOSITE_GLYPHS32_REQUEST: u8 = 25;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CompositeGlyphs32Request<'input> {
     pub op: PictOp,
@@ -3587,8 +3589,6 @@ pub struct CompositeGlyphs32Request<'input> {
     pub glyphcmds: &'input [u8],
 }
 impl<'input> CompositeGlyphs32Request<'input> {
-    /// Opcode for the CompositeGlyphs32 request
-    pub const fn opcode() -> u8 { 25 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3606,7 +3606,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
         let src_y_bytes = self.src_y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            COMPOSITE_GLYPHS32_REQUEST,
             0,
             0,
             op_bytes[0],
@@ -3663,6 +3663,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FillRectangles request
+pub const FILL_RECTANGLES_REQUEST: u8 = 26;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FillRectanglesRequest<'input> {
     pub op: PictOp,
@@ -3671,8 +3673,6 @@ pub struct FillRectanglesRequest<'input> {
     pub rects: &'input [xproto::Rectangle],
 }
 impl<'input> FillRectanglesRequest<'input> {
-    /// Opcode for the FillRectangles request
-    pub const fn opcode() -> u8 { 26 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3686,7 +3686,7 @@ impl<'input> FillRectanglesRequest<'input> {
         let color_bytes = self.color.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FILL_RECTANGLES_REQUEST,
             0,
             0,
             op_bytes[0],
@@ -3732,6 +3732,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateCursor request
+pub const CREATE_CURSOR_REQUEST: u8 = 27;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateCursorRequest {
     pub cid: xproto::Cursor,
@@ -3740,8 +3742,6 @@ pub struct CreateCursorRequest {
     pub y: u16,
 }
 impl CreateCursorRequest {
-    /// Opcode for the CreateCursor request
-    pub const fn opcode() -> u8 { 27 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3756,7 +3756,7 @@ impl CreateCursorRequest {
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_CURSOR_REQUEST,
             0,
             0,
             cid_bytes[0],
@@ -3892,14 +3892,14 @@ impl Serialize for Transform {
     }
 }
 
+/// Opcode for the SetPictureTransform request
+pub const SET_PICTURE_TRANSFORM_REQUEST: u8 = 28;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPictureTransformRequest {
     pub picture: Picture,
     pub transform: Transform,
 }
 impl SetPictureTransformRequest {
-    /// Opcode for the SetPictureTransform request
-    pub const fn opcode() -> u8 { 28 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3912,7 +3912,7 @@ impl SetPictureTransformRequest {
         let transform_bytes = self.transform.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PICTURE_TRANSFORM_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -3976,13 +3976,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the QueryFilters request
+pub const QUERY_FILTERS_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryFiltersRequest {
     pub drawable: xproto::Drawable,
 }
 impl QueryFiltersRequest {
-    /// Opcode for the QueryFilters request
-    pub const fn opcode() -> u8 { 29 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3994,7 +3994,7 @@ impl QueryFiltersRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_FILTERS_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -4079,6 +4079,8 @@ impl QueryFiltersReply {
     }
 }
 
+/// Opcode for the SetPictureFilter request
+pub const SET_PICTURE_FILTER_REQUEST: u8 = 30;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetPictureFilterRequest<'input> {
     pub picture: Picture,
@@ -4086,8 +4088,6 @@ pub struct SetPictureFilterRequest<'input> {
     pub values: &'input [Fixed],
 }
 impl<'input> SetPictureFilterRequest<'input> {
-    /// Opcode for the SetPictureFilter request
-    pub const fn opcode() -> u8 { 30 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4101,7 +4101,7 @@ impl<'input> SetPictureFilterRequest<'input> {
         let filter_len_bytes = filter_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PICTURE_FILTER_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -4183,14 +4183,14 @@ impl Serialize for Animcursorelt {
     }
 }
 
+/// Opcode for the CreateAnimCursor request
+pub const CREATE_ANIM_CURSOR_REQUEST: u8 = 31;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateAnimCursorRequest<'input> {
     pub cid: xproto::Cursor,
     pub cursors: &'input [Animcursorelt],
 }
 impl<'input> CreateAnimCursorRequest<'input> {
-    /// Opcode for the CreateAnimCursor request
-    pub const fn opcode() -> u8 { 31 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4202,7 +4202,7 @@ impl<'input> CreateAnimCursorRequest<'input> {
         let cid_bytes = self.cid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_ANIM_CURSOR_REQUEST,
             0,
             0,
             cid_bytes[0],
@@ -4342,6 +4342,8 @@ impl Serialize for Trap {
     }
 }
 
+/// Opcode for the AddTraps request
+pub const ADD_TRAPS_REQUEST: u8 = 32;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddTrapsRequest<'input> {
     pub picture: Picture,
@@ -4350,8 +4352,6 @@ pub struct AddTrapsRequest<'input> {
     pub traps: &'input [Trap],
 }
 impl<'input> AddTrapsRequest<'input> {
-    /// Opcode for the AddTraps request
-    pub const fn opcode() -> u8 { 32 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4365,7 +4365,7 @@ impl<'input> AddTrapsRequest<'input> {
         let y_off_bytes = self.y_off.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ADD_TRAPS_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -4403,14 +4403,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateSolidFill request
+pub const CREATE_SOLID_FILL_REQUEST: u8 = 33;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateSolidFillRequest {
     pub picture: Picture,
     pub color: Color,
 }
 impl CreateSolidFillRequest {
-    /// Opcode for the CreateSolidFill request
-    pub const fn opcode() -> u8 { 33 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4423,7 +4423,7 @@ impl CreateSolidFillRequest {
         let color_bytes = self.color.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_SOLID_FILL_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -4459,6 +4459,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateLinearGradient request
+pub const CREATE_LINEAR_GRADIENT_REQUEST: u8 = 34;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateLinearGradientRequest<'input> {
     pub picture: Picture,
@@ -4468,8 +4470,6 @@ pub struct CreateLinearGradientRequest<'input> {
     pub colors: &'input [Color],
 }
 impl<'input> CreateLinearGradientRequest<'input> {
-    /// Opcode for the CreateLinearGradient request
-    pub const fn opcode() -> u8 { 34 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4485,7 +4485,7 @@ impl<'input> CreateLinearGradientRequest<'input> {
         let num_stops_bytes = num_stops.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_LINEAR_GRADIENT_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -4543,6 +4543,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateRadialGradient request
+pub const CREATE_RADIAL_GRADIENT_REQUEST: u8 = 35;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateRadialGradientRequest<'input> {
     pub picture: Picture,
@@ -4554,8 +4556,6 @@ pub struct CreateRadialGradientRequest<'input> {
     pub colors: &'input [Color],
 }
 impl<'input> CreateRadialGradientRequest<'input> {
-    /// Opcode for the CreateRadialGradient request
-    pub const fn opcode() -> u8 { 35 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4573,7 +4573,7 @@ impl<'input> CreateRadialGradientRequest<'input> {
         let num_stops_bytes = num_stops.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_RADIAL_GRADIENT_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -4641,6 +4641,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateConicalGradient request
+pub const CREATE_CONICAL_GRADIENT_REQUEST: u8 = 36;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateConicalGradientRequest<'input> {
     pub picture: Picture,
@@ -4650,8 +4652,6 @@ pub struct CreateConicalGradientRequest<'input> {
     pub colors: &'input [Color],
 }
 impl<'input> CreateConicalGradientRequest<'input> {
-    /// Opcode for the CreateConicalGradient request
-    pub const fn opcode() -> u8 { 36 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4667,7 +4667,7 @@ impl<'input> CreateConicalGradientRequest<'input> {
         let num_stops_bytes = num_stops.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_CONICAL_GRADIENT_REQUEST,
             0,
             0,
             picture_bytes[0],

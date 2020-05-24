@@ -33,14 +33,14 @@ pub const X11_EXTENSION_NAME: &str = "XTEST";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (2, 2);
 
+/// Opcode for the GetVersion request
+pub const GET_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionRequest {
     pub major_version: u8,
     pub minor_version: u16,
 }
 impl GetVersionRequest {
-    /// Opcode for the GetVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -53,7 +53,7 @@ impl GetVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_VERSION_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -177,14 +177,14 @@ impl TryFrom<u32> for Cursor {
     }
 }
 
+/// Opcode for the CompareCursor request
+pub const COMPARE_CURSOR_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CompareCursorRequest {
     pub window: xproto::Window,
     pub cursor: xproto::Cursor,
 }
 impl CompareCursorRequest {
-    /// Opcode for the CompareCursor request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -197,7 +197,7 @@ impl CompareCursorRequest {
         let cursor_bytes = self.cursor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            COMPARE_CURSOR_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -253,6 +253,8 @@ impl TryFrom<&[u8]> for CompareCursorReply {
     }
 }
 
+/// Opcode for the FakeInput request
+pub const FAKE_INPUT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FakeInputRequest {
     pub type_: u8,
@@ -264,8 +266,6 @@ pub struct FakeInputRequest {
     pub deviceid: u8,
 }
 impl FakeInputRequest {
-    /// Opcode for the FakeInput request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -283,7 +283,7 @@ impl FakeInputRequest {
         let deviceid_bytes = self.deviceid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FAKE_INPUT_REQUEST,
             0,
             0,
             type_bytes[0],
@@ -344,13 +344,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GrabControl request
+pub const GRAB_CONTROL_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabControlRequest {
     pub impervious: bool,
 }
 impl GrabControlRequest {
-    /// Opcode for the GrabControl request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -362,7 +362,7 @@ impl GrabControlRequest {
         let impervious_bytes = self.impervious.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GRAB_CONTROL_REQUEST,
             0,
             0,
             impervious_bytes[0],

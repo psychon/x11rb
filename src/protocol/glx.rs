@@ -468,14 +468,14 @@ impl TryFrom<u32> for PBCDT {
     }
 }
 
+/// Opcode for the Render request
+pub const RENDER_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RenderRequest<'input> {
     pub context_tag: ContextTag,
     pub data: &'input [u8],
 }
 impl<'input> RenderRequest<'input> {
-    /// Opcode for the Render request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -487,7 +487,7 @@ impl<'input> RenderRequest<'input> {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            RENDER_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -518,6 +518,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the RenderLarge request
+pub const RENDER_LARGE_REQUEST: u8 = 2;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RenderLargeRequest<'input> {
     pub context_tag: ContextTag,
@@ -526,8 +528,6 @@ pub struct RenderLargeRequest<'input> {
     pub data: &'input [u8],
 }
 impl<'input> RenderLargeRequest<'input> {
-    /// Opcode for the RenderLarge request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -543,7 +543,7 @@ impl<'input> RenderLargeRequest<'input> {
         let data_len_bytes = data_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            RENDER_LARGE_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -584,6 +584,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateContext request
+pub const CREATE_CONTEXT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateContextRequest {
     pub context: Context,
@@ -593,8 +595,6 @@ pub struct CreateContextRequest {
     pub is_direct: bool,
 }
 impl CreateContextRequest {
-    /// Opcode for the CreateContext request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -610,7 +610,7 @@ impl CreateContextRequest {
         let is_direct_bytes = self.is_direct.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -657,13 +657,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DestroyContext request
+pub const DESTROY_CONTEXT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyContextRequest {
     pub context: Context,
 }
 impl DestroyContextRequest {
-    /// Opcode for the DestroyContext request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -675,7 +675,7 @@ impl DestroyContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -702,6 +702,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the MakeCurrent request
+pub const MAKE_CURRENT_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MakeCurrentRequest {
     pub drawable: Drawable,
@@ -709,8 +711,6 @@ pub struct MakeCurrentRequest {
     pub old_context_tag: ContextTag,
 }
 impl MakeCurrentRequest {
-    /// Opcode for the MakeCurrent request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -724,7 +724,7 @@ impl MakeCurrentRequest {
         let old_context_tag_bytes = self.old_context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            MAKE_CURRENT_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -787,13 +787,13 @@ impl TryFrom<&[u8]> for MakeCurrentReply {
     }
 }
 
+/// Opcode for the IsDirect request
+pub const IS_DIRECT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsDirectRequest {
     pub context: Context,
 }
 impl IsDirectRequest {
-    /// Opcode for the IsDirect request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -805,7 +805,7 @@ impl IsDirectRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            IS_DIRECT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -858,14 +858,14 @@ impl TryFrom<&[u8]> for IsDirectReply {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -878,7 +878,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -938,13 +938,13 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the WaitGL request
+pub const WAIT_GL_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitGLRequest {
     pub context_tag: ContextTag,
 }
 impl WaitGLRequest {
-    /// Opcode for the WaitGL request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -956,7 +956,7 @@ impl WaitGLRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            WAIT_GL_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -983,13 +983,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the WaitX request
+pub const WAIT_X_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitXRequest {
     pub context_tag: ContextTag,
 }
 impl WaitXRequest {
-    /// Opcode for the WaitX request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1001,7 +1001,7 @@ impl WaitXRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            WAIT_X_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -1028,6 +1028,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CopyContext request
+pub const COPY_CONTEXT_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyContextRequest {
     pub src: Context,
@@ -1036,8 +1038,6 @@ pub struct CopyContextRequest {
     pub src_context_tag: ContextTag,
 }
 impl CopyContextRequest {
-    /// Opcode for the CopyContext request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1052,7 +1052,7 @@ impl CopyContextRequest {
         let src_context_tag_bytes = self.src_context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            COPY_CONTEXT_REQUEST,
             0,
             0,
             src_bytes[0],
@@ -1182,14 +1182,14 @@ impl TryFrom<u32> for GC {
     }
 }
 
+/// Opcode for the SwapBuffers request
+pub const SWAP_BUFFERS_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SwapBuffersRequest {
     pub context_tag: ContextTag,
     pub drawable: Drawable,
 }
 impl SwapBuffersRequest {
-    /// Opcode for the SwapBuffers request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1202,7 +1202,7 @@ impl SwapBuffersRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SWAP_BUFFERS_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -1234,6 +1234,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UseXFont request
+pub const USE_X_FONT_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UseXFontRequest {
     pub context_tag: ContextTag,
@@ -1243,8 +1245,6 @@ pub struct UseXFontRequest {
     pub list_base: u32,
 }
 impl UseXFontRequest {
-    /// Opcode for the UseXFont request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1260,7 +1260,7 @@ impl UseXFontRequest {
         let list_base_bytes = self.list_base.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            USE_X_FONT_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -1307,6 +1307,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateGLXPixmap request
+pub const CREATE_GLX_PIXMAP_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateGLXPixmapRequest {
     pub screen: u32,
@@ -1315,8 +1317,6 @@ pub struct CreateGLXPixmapRequest {
     pub glx_pixmap: Pixmap,
 }
 impl CreateGLXPixmapRequest {
-    /// Opcode for the CreateGLXPixmap request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1331,7 +1331,7 @@ impl CreateGLXPixmapRequest {
         let glx_pixmap_bytes = self.glx_pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_GLX_PIXMAP_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1373,13 +1373,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetVisualConfigs request
+pub const GET_VISUAL_CONFIGS_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVisualConfigsRequest {
     pub screen: u32,
 }
 impl GetVisualConfigsRequest {
-    /// Opcode for the GetVisualConfigs request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1391,7 +1391,7 @@ impl GetVisualConfigsRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_VISUAL_CONFIGS_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1462,13 +1462,13 @@ impl GetVisualConfigsReply {
     }
 }
 
+/// Opcode for the DestroyGLXPixmap request
+pub const DESTROY_GLX_PIXMAP_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyGLXPixmapRequest {
     pub glx_pixmap: Pixmap,
 }
 impl DestroyGLXPixmapRequest {
-    /// Opcode for the DestroyGLXPixmap request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1480,7 +1480,7 @@ impl DestroyGLXPixmapRequest {
         let glx_pixmap_bytes = self.glx_pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_GLX_PIXMAP_REQUEST,
             0,
             0,
             glx_pixmap_bytes[0],
@@ -1507,6 +1507,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the VendorPrivate request
+pub const VENDOR_PRIVATE_REQUEST: u8 = 16;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorPrivateRequest<'input> {
     pub vendor_code: u32,
@@ -1514,8 +1516,6 @@ pub struct VendorPrivateRequest<'input> {
     pub data: &'input [u8],
 }
 impl<'input> VendorPrivateRequest<'input> {
-    /// Opcode for the VendorPrivate request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1528,7 +1528,7 @@ impl<'input> VendorPrivateRequest<'input> {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            VENDOR_PRIVATE_REQUEST,
             0,
             0,
             vendor_code_bytes[0],
@@ -1564,6 +1564,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the VendorPrivateWithReply request
+pub const VENDOR_PRIVATE_WITH_REPLY_REQUEST: u8 = 17;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorPrivateWithReplyRequest<'input> {
     pub vendor_code: u32,
@@ -1571,8 +1573,6 @@ pub struct VendorPrivateWithReplyRequest<'input> {
     pub data: &'input [u8],
 }
 impl<'input> VendorPrivateWithReplyRequest<'input> {
-    /// Opcode for the VendorPrivateWithReply request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1585,7 +1585,7 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            VENDOR_PRIVATE_WITH_REPLY_REQUEST,
             0,
             0,
             vendor_code_bytes[0],
@@ -1667,13 +1667,13 @@ impl VendorPrivateWithReplyReply {
     }
 }
 
+/// Opcode for the QueryExtensionsString request
+pub const QUERY_EXTENSIONS_STRING_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionsStringRequest {
     pub screen: u32,
 }
 impl QueryExtensionsStringRequest {
-    /// Opcode for the QueryExtensionsString request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1685,7 +1685,7 @@ impl QueryExtensionsStringRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_EXTENSIONS_STRING_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1739,14 +1739,14 @@ impl TryFrom<&[u8]> for QueryExtensionsStringReply {
     }
 }
 
+/// Opcode for the QueryServerString request
+pub const QUERY_SERVER_STRING_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryServerStringRequest {
     pub screen: u32,
     pub name: u32,
 }
 impl QueryServerStringRequest {
-    /// Opcode for the QueryServerString request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1759,7 +1759,7 @@ impl QueryServerStringRequest {
         let name_bytes = self.name.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_SERVER_STRING_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1835,6 +1835,8 @@ impl QueryServerStringReply {
     }
 }
 
+/// Opcode for the ClientInfo request
+pub const CLIENT_INFO_REQUEST: u8 = 20;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ClientInfoRequest<'input> {
     pub major_version: u32,
@@ -1842,8 +1844,6 @@ pub struct ClientInfoRequest<'input> {
     pub string: &'input [u8],
 }
 impl<'input> ClientInfoRequest<'input> {
-    /// Opcode for the ClientInfo request
-    pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1858,7 +1858,7 @@ impl<'input> ClientInfoRequest<'input> {
         let str_len_bytes = str_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CLIENT_INFO_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -1898,13 +1898,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetFBConfigs request
+pub const GET_FB_CONFIGS_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetFBConfigsRequest {
     pub screen: u32,
 }
 impl GetFBConfigsRequest {
-    /// Opcode for the GetFBConfigs request
-    pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1916,7 +1916,7 @@ impl GetFBConfigsRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_FB_CONFIGS_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1987,6 +1987,8 @@ impl GetFBConfigsReply {
     }
 }
 
+/// Opcode for the CreatePixmap request
+pub const CREATE_PIXMAP_REQUEST: u8 = 22;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreatePixmapRequest<'input> {
     pub screen: u32,
@@ -1996,8 +1998,6 @@ pub struct CreatePixmapRequest<'input> {
     pub attribs: &'input [u32],
 }
 impl<'input> CreatePixmapRequest<'input> {
-    /// Opcode for the CreatePixmap request
-    pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2015,7 +2015,7 @@ impl<'input> CreatePixmapRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_PIXMAP_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -2066,13 +2066,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DestroyPixmap request
+pub const DESTROY_PIXMAP_REQUEST: u8 = 23;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyPixmapRequest {
     pub glx_pixmap: Pixmap,
 }
 impl DestroyPixmapRequest {
-    /// Opcode for the DestroyPixmap request
-    pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2084,7 +2084,7 @@ impl DestroyPixmapRequest {
         let glx_pixmap_bytes = self.glx_pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_PIXMAP_REQUEST,
             0,
             0,
             glx_pixmap_bytes[0],
@@ -2111,6 +2111,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateNewContext request
+pub const CREATE_NEW_CONTEXT_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateNewContextRequest {
     pub context: Context,
@@ -2121,8 +2123,6 @@ pub struct CreateNewContextRequest {
     pub is_direct: bool,
 }
 impl CreateNewContextRequest {
-    /// Opcode for the CreateNewContext request
-    pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2139,7 +2139,7 @@ impl CreateNewContextRequest {
         let is_direct_bytes = self.is_direct.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_NEW_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -2191,13 +2191,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the QueryContext request
+pub const QUERY_CONTEXT_REQUEST: u8 = 25;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryContextRequest {
     pub context: Context,
 }
 impl QueryContextRequest {
-    /// Opcode for the QueryContext request
-    pub const fn opcode() -> u8 { 25 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2209,7 +2209,7 @@ impl QueryContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -2279,6 +2279,8 @@ impl QueryContextReply {
     }
 }
 
+/// Opcode for the MakeContextCurrent request
+pub const MAKE_CONTEXT_CURRENT_REQUEST: u8 = 26;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MakeContextCurrentRequest {
     pub old_context_tag: ContextTag,
@@ -2287,8 +2289,6 @@ pub struct MakeContextCurrentRequest {
     pub context: Context,
 }
 impl MakeContextCurrentRequest {
-    /// Opcode for the MakeContextCurrent request
-    pub const fn opcode() -> u8 { 26 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2303,7 +2303,7 @@ impl MakeContextCurrentRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            MAKE_CONTEXT_CURRENT_REQUEST,
             0,
             0,
             old_context_tag_bytes[0],
@@ -2371,6 +2371,8 @@ impl TryFrom<&[u8]> for MakeContextCurrentReply {
     }
 }
 
+/// Opcode for the CreatePbuffer request
+pub const CREATE_PBUFFER_REQUEST: u8 = 27;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreatePbufferRequest<'input> {
     pub screen: u32,
@@ -2379,8 +2381,6 @@ pub struct CreatePbufferRequest<'input> {
     pub attribs: &'input [u32],
 }
 impl<'input> CreatePbufferRequest<'input> {
-    /// Opcode for the CreatePbuffer request
-    pub const fn opcode() -> u8 { 27 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2397,7 +2397,7 @@ impl<'input> CreatePbufferRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_PBUFFER_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -2443,13 +2443,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DestroyPbuffer request
+pub const DESTROY_PBUFFER_REQUEST: u8 = 28;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyPbufferRequest {
     pub pbuffer: Pbuffer,
 }
 impl DestroyPbufferRequest {
-    /// Opcode for the DestroyPbuffer request
-    pub const fn opcode() -> u8 { 28 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2461,7 +2461,7 @@ impl DestroyPbufferRequest {
         let pbuffer_bytes = self.pbuffer.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_PBUFFER_REQUEST,
             0,
             0,
             pbuffer_bytes[0],
@@ -2488,13 +2488,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDrawableAttributes request
+pub const GET_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDrawableAttributesRequest {
     pub drawable: Drawable,
 }
 impl GetDrawableAttributesRequest {
-    /// Opcode for the GetDrawableAttributes request
-    pub const fn opcode() -> u8 { 29 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2506,7 +2506,7 @@ impl GetDrawableAttributesRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DRAWABLE_ATTRIBUTES_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -2576,14 +2576,14 @@ impl GetDrawableAttributesReply {
     }
 }
 
+/// Opcode for the ChangeDrawableAttributes request
+pub const CHANGE_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 30;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeDrawableAttributesRequest<'input> {
     pub drawable: Drawable,
     pub attribs: &'input [u32],
 }
 impl<'input> ChangeDrawableAttributesRequest<'input> {
-    /// Opcode for the ChangeDrawableAttributes request
-    pub const fn opcode() -> u8 { 30 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2598,7 +2598,7 @@ impl<'input> ChangeDrawableAttributesRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_DRAWABLE_ATTRIBUTES_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -2634,6 +2634,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateWindow request
+pub const CREATE_WINDOW_REQUEST: u8 = 31;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateWindowRequest<'input> {
     pub screen: u32,
@@ -2643,8 +2645,6 @@ pub struct CreateWindowRequest<'input> {
     pub attribs: &'input [u32],
 }
 impl<'input> CreateWindowRequest<'input> {
-    /// Opcode for the CreateWindow request
-    pub const fn opcode() -> u8 { 31 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2662,7 +2662,7 @@ impl<'input> CreateWindowRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_WINDOW_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -2713,13 +2713,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeleteWindow request
+pub const DELETE_WINDOW_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeleteWindowRequest {
     pub glxwindow: Window,
 }
 impl DeleteWindowRequest {
-    /// Opcode for the DeleteWindow request
-    pub const fn opcode() -> u8 { 32 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2731,7 +2731,7 @@ impl DeleteWindowRequest {
         let glxwindow_bytes = self.glxwindow.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_WINDOW_REQUEST,
             0,
             0,
             glxwindow_bytes[0],
@@ -2758,6 +2758,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetClientInfoARB request
+pub const SET_CLIENT_INFO_ARB_REQUEST: u8 = 33;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetClientInfoARBRequest<'input> {
     pub major_version: u32,
@@ -2767,8 +2769,6 @@ pub struct SetClientInfoARBRequest<'input> {
     pub glx_extension_string: &'input [u8],
 }
 impl<'input> SetClientInfoARBRequest<'input> {
-    /// Opcode for the SetClientInfoARB request
-    pub const fn opcode() -> u8 { 33 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2788,7 +2788,7 @@ impl<'input> SetClientInfoARBRequest<'input> {
         let glx_str_len_bytes = glx_str_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_CLIENT_INFO_ARB_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -2841,6 +2841,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateContextAttribsARB request
+pub const CREATE_CONTEXT_ATTRIBS_ARB_REQUEST: u8 = 34;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateContextAttribsARBRequest<'input> {
     pub context: Context,
@@ -2851,8 +2853,6 @@ pub struct CreateContextAttribsARBRequest<'input> {
     pub attribs: &'input [u32],
 }
 impl<'input> CreateContextAttribsARBRequest<'input> {
-    /// Opcode for the CreateContextAttribsARB request
-    pub const fn opcode() -> u8 { 34 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2871,7 +2871,7 @@ impl<'input> CreateContextAttribsARBRequest<'input> {
         let num_attribs_bytes = num_attribs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_CONTEXT_ATTRIBS_ARB_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -2927,6 +2927,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetClientInfo2ARB request
+pub const SET_CLIENT_INFO2_ARB_REQUEST: u8 = 35;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetClientInfo2ARBRequest<'input> {
     pub major_version: u32,
@@ -2936,8 +2938,6 @@ pub struct SetClientInfo2ARBRequest<'input> {
     pub glx_extension_string: &'input [u8],
 }
 impl<'input> SetClientInfo2ARBRequest<'input> {
-    /// Opcode for the SetClientInfo2ARB request
-    pub const fn opcode() -> u8 { 35 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2957,7 +2957,7 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         let glx_str_len_bytes = glx_str_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_CLIENT_INFO2_ARB_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -3010,6 +3010,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the NewList request
+pub const NEW_LIST_REQUEST: u8 = 101;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NewListRequest {
     pub context_tag: ContextTag,
@@ -3017,8 +3019,6 @@ pub struct NewListRequest {
     pub mode: u32,
 }
 impl NewListRequest {
-    /// Opcode for the NewList request
-    pub const fn opcode() -> u8 { 101 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3032,7 +3032,7 @@ impl NewListRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            NEW_LIST_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3069,13 +3069,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the EndList request
+pub const END_LIST_REQUEST: u8 = 102;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EndListRequest {
     pub context_tag: ContextTag,
 }
 impl EndListRequest {
-    /// Opcode for the EndList request
-    pub const fn opcode() -> u8 { 102 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3087,7 +3087,7 @@ impl EndListRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            END_LIST_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3114,6 +3114,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeleteLists request
+pub const DELETE_LISTS_REQUEST: u8 = 103;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeleteListsRequest {
     pub context_tag: ContextTag,
@@ -3121,8 +3123,6 @@ pub struct DeleteListsRequest {
     pub range: i32,
 }
 impl DeleteListsRequest {
-    /// Opcode for the DeleteLists request
-    pub const fn opcode() -> u8 { 103 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3136,7 +3136,7 @@ impl DeleteListsRequest {
         let range_bytes = self.range.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_LISTS_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3173,14 +3173,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GenLists request
+pub const GEN_LISTS_REQUEST: u8 = 104;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GenListsRequest {
     pub context_tag: ContextTag,
     pub range: i32,
 }
 impl GenListsRequest {
-    /// Opcode for the GenLists request
-    pub const fn opcode() -> u8 { 104 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3193,7 +3193,7 @@ impl GenListsRequest {
         let range_bytes = self.range.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GEN_LISTS_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3250,6 +3250,8 @@ impl TryFrom<&[u8]> for GenListsReply {
     }
 }
 
+/// Opcode for the FeedbackBuffer request
+pub const FEEDBACK_BUFFER_REQUEST: u8 = 105;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FeedbackBufferRequest {
     pub context_tag: ContextTag,
@@ -3257,8 +3259,6 @@ pub struct FeedbackBufferRequest {
     pub type_: i32,
 }
 impl FeedbackBufferRequest {
-    /// Opcode for the FeedbackBuffer request
-    pub const fn opcode() -> u8 { 105 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3272,7 +3272,7 @@ impl FeedbackBufferRequest {
         let type_bytes = self.type_.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FEEDBACK_BUFFER_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3309,14 +3309,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SelectBuffer request
+pub const SELECT_BUFFER_REQUEST: u8 = 106;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectBufferRequest {
     pub context_tag: ContextTag,
     pub size: i32,
 }
 impl SelectBufferRequest {
-    /// Opcode for the SelectBuffer request
-    pub const fn opcode() -> u8 { 106 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3329,7 +3329,7 @@ impl SelectBufferRequest {
         let size_bytes = self.size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_BUFFER_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3361,14 +3361,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the RenderMode request
+pub const RENDER_MODE_REQUEST: u8 = 107;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RenderModeRequest {
     pub context_tag: ContextTag,
     pub mode: u32,
 }
 impl RenderModeRequest {
-    /// Opcode for the RenderMode request
-    pub const fn opcode() -> u8 { 107 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3381,7 +3381,7 @@ impl RenderModeRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            RENDER_MODE_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3509,13 +3509,13 @@ impl TryFrom<u32> for RM {
     }
 }
 
+/// Opcode for the Finish request
+pub const FINISH_REQUEST: u8 = 108;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FinishRequest {
     pub context_tag: ContextTag,
 }
 impl FinishRequest {
-    /// Opcode for the Finish request
-    pub const fn opcode() -> u8 { 108 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3527,7 +3527,7 @@ impl FinishRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FINISH_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3577,6 +3577,8 @@ impl TryFrom<&[u8]> for FinishReply {
     }
 }
 
+/// Opcode for the PixelStoref request
+pub const PIXEL_STOREF_REQUEST: u8 = 109;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PixelStorefRequest {
     pub context_tag: ContextTag,
@@ -3584,8 +3586,6 @@ pub struct PixelStorefRequest {
     pub datum: Float32,
 }
 impl PixelStorefRequest {
-    /// Opcode for the PixelStoref request
-    pub const fn opcode() -> u8 { 109 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3599,7 +3599,7 @@ impl PixelStorefRequest {
         let datum_bytes = self.datum.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PIXEL_STOREF_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3636,6 +3636,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PixelStorei request
+pub const PIXEL_STOREI_REQUEST: u8 = 110;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PixelStoreiRequest {
     pub context_tag: ContextTag,
@@ -3643,8 +3645,6 @@ pub struct PixelStoreiRequest {
     pub datum: i32,
 }
 impl PixelStoreiRequest {
-    /// Opcode for the PixelStorei request
-    pub const fn opcode() -> u8 { 110 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3658,7 +3658,7 @@ impl PixelStoreiRequest {
         let datum_bytes = self.datum.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PIXEL_STOREI_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3695,6 +3695,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ReadPixels request
+pub const READ_PIXELS_REQUEST: u8 = 111;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ReadPixelsRequest {
     pub context_tag: ContextTag,
@@ -3708,8 +3710,6 @@ pub struct ReadPixelsRequest {
     pub lsb_first: bool,
 }
 impl ReadPixelsRequest {
-    /// Opcode for the ReadPixels request
-    pub const fn opcode() -> u8 { 111 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3729,7 +3729,7 @@ impl ReadPixelsRequest {
         let lsb_first_bytes = self.lsb_first.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            READ_PIXELS_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3834,14 +3834,14 @@ impl ReadPixelsReply {
     }
 }
 
+/// Opcode for the GetBooleanv request
+pub const GET_BOOLEANV_REQUEST: u8 = 112;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetBooleanvRequest {
     pub context_tag: ContextTag,
     pub pname: i32,
 }
 impl GetBooleanvRequest {
-    /// Opcode for the GetBooleanv request
-    pub const fn opcode() -> u8 { 112 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3854,7 +3854,7 @@ impl GetBooleanvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_BOOLEANV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -3931,14 +3931,14 @@ impl GetBooleanvReply {
     }
 }
 
+/// Opcode for the GetClipPlane request
+pub const GET_CLIP_PLANE_REQUEST: u8 = 113;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetClipPlaneRequest {
     pub context_tag: ContextTag,
     pub plane: i32,
 }
 impl GetClipPlaneRequest {
-    /// Opcode for the GetClipPlane request
-    pub const fn opcode() -> u8 { 113 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3951,7 +3951,7 @@ impl GetClipPlaneRequest {
         let plane_bytes = self.plane.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CLIP_PLANE_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4024,14 +4024,14 @@ impl GetClipPlaneReply {
     }
 }
 
+/// Opcode for the GetDoublev request
+pub const GET_DOUBLEV_REQUEST: u8 = 114;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDoublevRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
 }
 impl GetDoublevRequest {
-    /// Opcode for the GetDoublev request
-    pub const fn opcode() -> u8 { 114 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4044,7 +4044,7 @@ impl GetDoublevRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DOUBLEV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4121,13 +4121,13 @@ impl GetDoublevReply {
     }
 }
 
+/// Opcode for the GetError request
+pub const GET_ERROR_REQUEST: u8 = 115;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetErrorRequest {
     pub context_tag: ContextTag,
 }
 impl GetErrorRequest {
-    /// Opcode for the GetError request
-    pub const fn opcode() -> u8 { 115 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4139,7 +4139,7 @@ impl GetErrorRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_ERROR_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4191,14 +4191,14 @@ impl TryFrom<&[u8]> for GetErrorReply {
     }
 }
 
+/// Opcode for the GetFloatv request
+pub const GET_FLOATV_REQUEST: u8 = 116;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetFloatvRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
 }
 impl GetFloatvRequest {
-    /// Opcode for the GetFloatv request
-    pub const fn opcode() -> u8 { 116 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4211,7 +4211,7 @@ impl GetFloatvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_FLOATV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4288,14 +4288,14 @@ impl GetFloatvReply {
     }
 }
 
+/// Opcode for the GetIntegerv request
+pub const GET_INTEGERV_REQUEST: u8 = 117;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetIntegervRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
 }
 impl GetIntegervRequest {
-    /// Opcode for the GetIntegerv request
-    pub const fn opcode() -> u8 { 117 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4308,7 +4308,7 @@ impl GetIntegervRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_INTEGERV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4385,6 +4385,8 @@ impl GetIntegervReply {
     }
 }
 
+/// Opcode for the GetLightfv request
+pub const GET_LIGHTFV_REQUEST: u8 = 118;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetLightfvRequest {
     pub context_tag: ContextTag,
@@ -4392,8 +4394,6 @@ pub struct GetLightfvRequest {
     pub pname: u32,
 }
 impl GetLightfvRequest {
-    /// Opcode for the GetLightfv request
-    pub const fn opcode() -> u8 { 118 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4407,7 +4407,7 @@ impl GetLightfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_LIGHTFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4489,6 +4489,8 @@ impl GetLightfvReply {
     }
 }
 
+/// Opcode for the GetLightiv request
+pub const GET_LIGHTIV_REQUEST: u8 = 119;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetLightivRequest {
     pub context_tag: ContextTag,
@@ -4496,8 +4498,6 @@ pub struct GetLightivRequest {
     pub pname: u32,
 }
 impl GetLightivRequest {
-    /// Opcode for the GetLightiv request
-    pub const fn opcode() -> u8 { 119 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4511,7 +4511,7 @@ impl GetLightivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_LIGHTIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4593,6 +4593,8 @@ impl GetLightivReply {
     }
 }
 
+/// Opcode for the GetMapdv request
+pub const GET_MAPDV_REQUEST: u8 = 120;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMapdvRequest {
     pub context_tag: ContextTag,
@@ -4600,8 +4602,6 @@ pub struct GetMapdvRequest {
     pub query: u32,
 }
 impl GetMapdvRequest {
-    /// Opcode for the GetMapdv request
-    pub const fn opcode() -> u8 { 120 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4615,7 +4615,7 @@ impl GetMapdvRequest {
         let query_bytes = self.query.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MAPDV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4697,6 +4697,8 @@ impl GetMapdvReply {
     }
 }
 
+/// Opcode for the GetMapfv request
+pub const GET_MAPFV_REQUEST: u8 = 121;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMapfvRequest {
     pub context_tag: ContextTag,
@@ -4704,8 +4706,6 @@ pub struct GetMapfvRequest {
     pub query: u32,
 }
 impl GetMapfvRequest {
-    /// Opcode for the GetMapfv request
-    pub const fn opcode() -> u8 { 121 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4719,7 +4719,7 @@ impl GetMapfvRequest {
         let query_bytes = self.query.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MAPFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4801,6 +4801,8 @@ impl GetMapfvReply {
     }
 }
 
+/// Opcode for the GetMapiv request
+pub const GET_MAPIV_REQUEST: u8 = 122;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMapivRequest {
     pub context_tag: ContextTag,
@@ -4808,8 +4810,6 @@ pub struct GetMapivRequest {
     pub query: u32,
 }
 impl GetMapivRequest {
-    /// Opcode for the GetMapiv request
-    pub const fn opcode() -> u8 { 122 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4823,7 +4823,7 @@ impl GetMapivRequest {
         let query_bytes = self.query.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MAPIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -4905,6 +4905,8 @@ impl GetMapivReply {
     }
 }
 
+/// Opcode for the GetMaterialfv request
+pub const GET_MATERIALFV_REQUEST: u8 = 123;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMaterialfvRequest {
     pub context_tag: ContextTag,
@@ -4912,8 +4914,6 @@ pub struct GetMaterialfvRequest {
     pub pname: u32,
 }
 impl GetMaterialfvRequest {
-    /// Opcode for the GetMaterialfv request
-    pub const fn opcode() -> u8 { 123 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4927,7 +4927,7 @@ impl GetMaterialfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MATERIALFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5009,6 +5009,8 @@ impl GetMaterialfvReply {
     }
 }
 
+/// Opcode for the GetMaterialiv request
+pub const GET_MATERIALIV_REQUEST: u8 = 124;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMaterialivRequest {
     pub context_tag: ContextTag,
@@ -5016,8 +5018,6 @@ pub struct GetMaterialivRequest {
     pub pname: u32,
 }
 impl GetMaterialivRequest {
-    /// Opcode for the GetMaterialiv request
-    pub const fn opcode() -> u8 { 124 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5031,7 +5031,7 @@ impl GetMaterialivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MATERIALIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5113,14 +5113,14 @@ impl GetMaterialivReply {
     }
 }
 
+/// Opcode for the GetPixelMapfv request
+pub const GET_PIXEL_MAPFV_REQUEST: u8 = 125;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPixelMapfvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
 }
 impl GetPixelMapfvRequest {
-    /// Opcode for the GetPixelMapfv request
-    pub const fn opcode() -> u8 { 125 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5133,7 +5133,7 @@ impl GetPixelMapfvRequest {
         let map_bytes = self.map.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PIXEL_MAPFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5210,14 +5210,14 @@ impl GetPixelMapfvReply {
     }
 }
 
+/// Opcode for the GetPixelMapuiv request
+pub const GET_PIXEL_MAPUIV_REQUEST: u8 = 126;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPixelMapuivRequest {
     pub context_tag: ContextTag,
     pub map: u32,
 }
 impl GetPixelMapuivRequest {
-    /// Opcode for the GetPixelMapuiv request
-    pub const fn opcode() -> u8 { 126 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5230,7 +5230,7 @@ impl GetPixelMapuivRequest {
         let map_bytes = self.map.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PIXEL_MAPUIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5307,14 +5307,14 @@ impl GetPixelMapuivReply {
     }
 }
 
+/// Opcode for the GetPixelMapusv request
+pub const GET_PIXEL_MAPUSV_REQUEST: u8 = 127;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPixelMapusvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
 }
 impl GetPixelMapusvRequest {
-    /// Opcode for the GetPixelMapusv request
-    pub const fn opcode() -> u8 { 127 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5327,7 +5327,7 @@ impl GetPixelMapusvRequest {
         let map_bytes = self.map.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PIXEL_MAPUSV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5404,14 +5404,14 @@ impl GetPixelMapusvReply {
     }
 }
 
+/// Opcode for the GetPolygonStipple request
+pub const GET_POLYGON_STIPPLE_REQUEST: u8 = 128;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPolygonStippleRequest {
     pub context_tag: ContextTag,
     pub lsb_first: bool,
 }
 impl GetPolygonStippleRequest {
-    /// Opcode for the GetPolygonStipple request
-    pub const fn opcode() -> u8 { 128 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5424,7 +5424,7 @@ impl GetPolygonStippleRequest {
         let lsb_first_bytes = self.lsb_first.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_POLYGON_STIPPLE_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5498,14 +5498,14 @@ impl GetPolygonStippleReply {
     }
 }
 
+/// Opcode for the GetString request
+pub const GET_STRING_REQUEST: u8 = 129;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStringRequest {
     pub context_tag: ContextTag,
     pub name: u32,
 }
 impl GetStringRequest {
-    /// Opcode for the GetString request
-    pub const fn opcode() -> u8 { 129 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5518,7 +5518,7 @@ impl GetStringRequest {
         let name_bytes = self.name.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_STRING_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5594,6 +5594,8 @@ impl GetStringReply {
     }
 }
 
+/// Opcode for the GetTexEnvfv request
+pub const GET_TEX_ENVFV_REQUEST: u8 = 130;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexEnvfvRequest {
     pub context_tag: ContextTag,
@@ -5601,8 +5603,6 @@ pub struct GetTexEnvfvRequest {
     pub pname: u32,
 }
 impl GetTexEnvfvRequest {
-    /// Opcode for the GetTexEnvfv request
-    pub const fn opcode() -> u8 { 130 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5616,7 +5616,7 @@ impl GetTexEnvfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_ENVFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5698,6 +5698,8 @@ impl GetTexEnvfvReply {
     }
 }
 
+/// Opcode for the GetTexEnviv request
+pub const GET_TEX_ENVIV_REQUEST: u8 = 131;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexEnvivRequest {
     pub context_tag: ContextTag,
@@ -5705,8 +5707,6 @@ pub struct GetTexEnvivRequest {
     pub pname: u32,
 }
 impl GetTexEnvivRequest {
-    /// Opcode for the GetTexEnviv request
-    pub const fn opcode() -> u8 { 131 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5720,7 +5720,7 @@ impl GetTexEnvivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_ENVIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5802,6 +5802,8 @@ impl GetTexEnvivReply {
     }
 }
 
+/// Opcode for the GetTexGendv request
+pub const GET_TEX_GENDV_REQUEST: u8 = 132;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexGendvRequest {
     pub context_tag: ContextTag,
@@ -5809,8 +5811,6 @@ pub struct GetTexGendvRequest {
     pub pname: u32,
 }
 impl GetTexGendvRequest {
-    /// Opcode for the GetTexGendv request
-    pub const fn opcode() -> u8 { 132 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5824,7 +5824,7 @@ impl GetTexGendvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_GENDV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -5906,6 +5906,8 @@ impl GetTexGendvReply {
     }
 }
 
+/// Opcode for the GetTexGenfv request
+pub const GET_TEX_GENFV_REQUEST: u8 = 133;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexGenfvRequest {
     pub context_tag: ContextTag,
@@ -5913,8 +5915,6 @@ pub struct GetTexGenfvRequest {
     pub pname: u32,
 }
 impl GetTexGenfvRequest {
-    /// Opcode for the GetTexGenfv request
-    pub const fn opcode() -> u8 { 133 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5928,7 +5928,7 @@ impl GetTexGenfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_GENFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6010,6 +6010,8 @@ impl GetTexGenfvReply {
     }
 }
 
+/// Opcode for the GetTexGeniv request
+pub const GET_TEX_GENIV_REQUEST: u8 = 134;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexGenivRequest {
     pub context_tag: ContextTag,
@@ -6017,8 +6019,6 @@ pub struct GetTexGenivRequest {
     pub pname: u32,
 }
 impl GetTexGenivRequest {
-    /// Opcode for the GetTexGeniv request
-    pub const fn opcode() -> u8 { 134 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6032,7 +6032,7 @@ impl GetTexGenivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_GENIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6114,6 +6114,8 @@ impl GetTexGenivReply {
     }
 }
 
+/// Opcode for the GetTexImage request
+pub const GET_TEX_IMAGE_REQUEST: u8 = 135;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexImageRequest {
     pub context_tag: ContextTag,
@@ -6124,8 +6126,6 @@ pub struct GetTexImageRequest {
     pub swap_bytes: bool,
 }
 impl GetTexImageRequest {
-    /// Opcode for the GetTexImage request
-    pub const fn opcode() -> u8 { 135 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6142,7 +6142,7 @@ impl GetTexImageRequest {
         let swap_bytes_bytes = self.swap_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_IMAGE_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6243,6 +6243,8 @@ impl GetTexImageReply {
     }
 }
 
+/// Opcode for the GetTexParameterfv request
+pub const GET_TEX_PARAMETERFV_REQUEST: u8 = 136;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexParameterfvRequest {
     pub context_tag: ContextTag,
@@ -6250,8 +6252,6 @@ pub struct GetTexParameterfvRequest {
     pub pname: u32,
 }
 impl GetTexParameterfvRequest {
-    /// Opcode for the GetTexParameterfv request
-    pub const fn opcode() -> u8 { 136 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6265,7 +6265,7 @@ impl GetTexParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_PARAMETERFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6347,6 +6347,8 @@ impl GetTexParameterfvReply {
     }
 }
 
+/// Opcode for the GetTexParameteriv request
+pub const GET_TEX_PARAMETERIV_REQUEST: u8 = 137;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexParameterivRequest {
     pub context_tag: ContextTag,
@@ -6354,8 +6356,6 @@ pub struct GetTexParameterivRequest {
     pub pname: u32,
 }
 impl GetTexParameterivRequest {
-    /// Opcode for the GetTexParameteriv request
-    pub const fn opcode() -> u8 { 137 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6369,7 +6369,7 @@ impl GetTexParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_PARAMETERIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6451,6 +6451,8 @@ impl GetTexParameterivReply {
     }
 }
 
+/// Opcode for the GetTexLevelParameterfv request
+pub const GET_TEX_LEVEL_PARAMETERFV_REQUEST: u8 = 138;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexLevelParameterfvRequest {
     pub context_tag: ContextTag,
@@ -6459,8 +6461,6 @@ pub struct GetTexLevelParameterfvRequest {
     pub pname: u32,
 }
 impl GetTexLevelParameterfvRequest {
-    /// Opcode for the GetTexLevelParameterfv request
-    pub const fn opcode() -> u8 { 138 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6475,7 +6475,7 @@ impl GetTexLevelParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_LEVEL_PARAMETERFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6562,6 +6562,8 @@ impl GetTexLevelParameterfvReply {
     }
 }
 
+/// Opcode for the GetTexLevelParameteriv request
+pub const GET_TEX_LEVEL_PARAMETERIV_REQUEST: u8 = 139;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTexLevelParameterivRequest {
     pub context_tag: ContextTag,
@@ -6570,8 +6572,6 @@ pub struct GetTexLevelParameterivRequest {
     pub pname: u32,
 }
 impl GetTexLevelParameterivRequest {
-    /// Opcode for the GetTexLevelParameteriv request
-    pub const fn opcode() -> u8 { 139 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6586,7 +6586,7 @@ impl GetTexLevelParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TEX_LEVEL_PARAMETERIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6673,14 +6673,14 @@ impl GetTexLevelParameterivReply {
     }
 }
 
+/// Opcode for the IsEnabled request
+pub const IS_ENABLED_REQUEST: u8 = 140;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsEnabledRequest {
     pub context_tag: ContextTag,
     pub capability: u32,
 }
 impl IsEnabledRequest {
-    /// Opcode for the IsEnabled request
-    pub const fn opcode() -> u8 { 140 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6693,7 +6693,7 @@ impl IsEnabledRequest {
         let capability_bytes = self.capability.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            IS_ENABLED_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6750,14 +6750,14 @@ impl TryFrom<&[u8]> for IsEnabledReply {
     }
 }
 
+/// Opcode for the IsList request
+pub const IS_LIST_REQUEST: u8 = 141;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsListRequest {
     pub context_tag: ContextTag,
     pub list: u32,
 }
 impl IsListRequest {
-    /// Opcode for the IsList request
-    pub const fn opcode() -> u8 { 141 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6770,7 +6770,7 @@ impl IsListRequest {
         let list_bytes = self.list.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            IS_LIST_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6827,13 +6827,13 @@ impl TryFrom<&[u8]> for IsListReply {
     }
 }
 
+/// Opcode for the Flush request
+pub const FLUSH_REQUEST: u8 = 142;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FlushRequest {
     pub context_tag: ContextTag,
 }
 impl FlushRequest {
-    /// Opcode for the Flush request
-    pub const fn opcode() -> u8 { 142 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6845,7 +6845,7 @@ impl FlushRequest {
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FLUSH_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6872,14 +6872,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the AreTexturesResident request
+pub const ARE_TEXTURES_RESIDENT_REQUEST: u8 = 143;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AreTexturesResidentRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: &'input [u32],
 }
 impl<'input> AreTexturesResidentRequest<'input> {
-    /// Opcode for the AreTexturesResident request
-    pub const fn opcode() -> u8 { 143 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6893,7 +6893,7 @@ impl<'input> AreTexturesResidentRequest<'input> {
         let n_bytes = n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ARE_TEXTURES_RESIDENT_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -6972,14 +6972,14 @@ impl AreTexturesResidentReply {
     }
 }
 
+/// Opcode for the DeleteTextures request
+pub const DELETE_TEXTURES_REQUEST: u8 = 144;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeleteTexturesRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: &'input [u32],
 }
 impl<'input> DeleteTexturesRequest<'input> {
-    /// Opcode for the DeleteTextures request
-    pub const fn opcode() -> u8 { 144 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6993,7 +6993,7 @@ impl<'input> DeleteTexturesRequest<'input> {
         let n_bytes = n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_TEXTURES_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7029,14 +7029,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GenTextures request
+pub const GEN_TEXTURES_REQUEST: u8 = 145;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GenTexturesRequest {
     pub context_tag: ContextTag,
     pub n: i32,
 }
 impl GenTexturesRequest {
-    /// Opcode for the GenTextures request
-    pub const fn opcode() -> u8 { 145 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7049,7 +7049,7 @@ impl GenTexturesRequest {
         let n_bytes = self.n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GEN_TEXTURES_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7121,14 +7121,14 @@ impl GenTexturesReply {
     }
 }
 
+/// Opcode for the IsTexture request
+pub const IS_TEXTURE_REQUEST: u8 = 146;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsTextureRequest {
     pub context_tag: ContextTag,
     pub texture: u32,
 }
 impl IsTextureRequest {
-    /// Opcode for the IsTexture request
-    pub const fn opcode() -> u8 { 146 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7141,7 +7141,7 @@ impl IsTextureRequest {
         let texture_bytes = self.texture.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            IS_TEXTURE_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7198,6 +7198,8 @@ impl TryFrom<&[u8]> for IsTextureReply {
     }
 }
 
+/// Opcode for the GetColorTable request
+pub const GET_COLOR_TABLE_REQUEST: u8 = 147;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetColorTableRequest {
     pub context_tag: ContextTag,
@@ -7207,8 +7209,6 @@ pub struct GetColorTableRequest {
     pub swap_bytes: bool,
 }
 impl GetColorTableRequest {
-    /// Opcode for the GetColorTable request
-    pub const fn opcode() -> u8 { 147 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7224,7 +7224,7 @@ impl GetColorTableRequest {
         let swap_bytes_bytes = self.swap_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_COLOR_TABLE_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7316,6 +7316,8 @@ impl GetColorTableReply {
     }
 }
 
+/// Opcode for the GetColorTableParameterfv request
+pub const GET_COLOR_TABLE_PARAMETERFV_REQUEST: u8 = 148;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetColorTableParameterfvRequest {
     pub context_tag: ContextTag,
@@ -7323,8 +7325,6 @@ pub struct GetColorTableParameterfvRequest {
     pub pname: u32,
 }
 impl GetColorTableParameterfvRequest {
-    /// Opcode for the GetColorTableParameterfv request
-    pub const fn opcode() -> u8 { 148 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7338,7 +7338,7 @@ impl GetColorTableParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_COLOR_TABLE_PARAMETERFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7420,6 +7420,8 @@ impl GetColorTableParameterfvReply {
     }
 }
 
+/// Opcode for the GetColorTableParameteriv request
+pub const GET_COLOR_TABLE_PARAMETERIV_REQUEST: u8 = 149;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetColorTableParameterivRequest {
     pub context_tag: ContextTag,
@@ -7427,8 +7429,6 @@ pub struct GetColorTableParameterivRequest {
     pub pname: u32,
 }
 impl GetColorTableParameterivRequest {
-    /// Opcode for the GetColorTableParameteriv request
-    pub const fn opcode() -> u8 { 149 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7442,7 +7442,7 @@ impl GetColorTableParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_COLOR_TABLE_PARAMETERIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7524,6 +7524,8 @@ impl GetColorTableParameterivReply {
     }
 }
 
+/// Opcode for the GetConvolutionFilter request
+pub const GET_CONVOLUTION_FILTER_REQUEST: u8 = 150;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetConvolutionFilterRequest {
     pub context_tag: ContextTag,
@@ -7533,8 +7535,6 @@ pub struct GetConvolutionFilterRequest {
     pub swap_bytes: bool,
 }
 impl GetConvolutionFilterRequest {
-    /// Opcode for the GetConvolutionFilter request
-    pub const fn opcode() -> u8 { 150 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7550,7 +7550,7 @@ impl GetConvolutionFilterRequest {
         let swap_bytes_bytes = self.swap_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CONVOLUTION_FILTER_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7644,6 +7644,8 @@ impl GetConvolutionFilterReply {
     }
 }
 
+/// Opcode for the GetConvolutionParameterfv request
+pub const GET_CONVOLUTION_PARAMETERFV_REQUEST: u8 = 151;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetConvolutionParameterfvRequest {
     pub context_tag: ContextTag,
@@ -7651,8 +7653,6 @@ pub struct GetConvolutionParameterfvRequest {
     pub pname: u32,
 }
 impl GetConvolutionParameterfvRequest {
-    /// Opcode for the GetConvolutionParameterfv request
-    pub const fn opcode() -> u8 { 151 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7666,7 +7666,7 @@ impl GetConvolutionParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CONVOLUTION_PARAMETERFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7748,6 +7748,8 @@ impl GetConvolutionParameterfvReply {
     }
 }
 
+/// Opcode for the GetConvolutionParameteriv request
+pub const GET_CONVOLUTION_PARAMETERIV_REQUEST: u8 = 152;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetConvolutionParameterivRequest {
     pub context_tag: ContextTag,
@@ -7755,8 +7757,6 @@ pub struct GetConvolutionParameterivRequest {
     pub pname: u32,
 }
 impl GetConvolutionParameterivRequest {
-    /// Opcode for the GetConvolutionParameteriv request
-    pub const fn opcode() -> u8 { 152 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7770,7 +7770,7 @@ impl GetConvolutionParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CONVOLUTION_PARAMETERIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7852,6 +7852,8 @@ impl GetConvolutionParameterivReply {
     }
 }
 
+/// Opcode for the GetSeparableFilter request
+pub const GET_SEPARABLE_FILTER_REQUEST: u8 = 153;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetSeparableFilterRequest {
     pub context_tag: ContextTag,
@@ -7861,8 +7863,6 @@ pub struct GetSeparableFilterRequest {
     pub swap_bytes: bool,
 }
 impl GetSeparableFilterRequest {
-    /// Opcode for the GetSeparableFilter request
-    pub const fn opcode() -> u8 { 153 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7878,7 +7878,7 @@ impl GetSeparableFilterRequest {
         let swap_bytes_bytes = self.swap_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SEPARABLE_FILTER_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -7972,6 +7972,8 @@ impl GetSeparableFilterReply {
     }
 }
 
+/// Opcode for the GetHistogram request
+pub const GET_HISTOGRAM_REQUEST: u8 = 154;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetHistogramRequest {
     pub context_tag: ContextTag,
@@ -7982,8 +7984,6 @@ pub struct GetHistogramRequest {
     pub reset: bool,
 }
 impl GetHistogramRequest {
-    /// Opcode for the GetHistogram request
-    pub const fn opcode() -> u8 { 154 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8000,7 +8000,7 @@ impl GetHistogramRequest {
         let reset_bytes = self.reset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_HISTOGRAM_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8093,6 +8093,8 @@ impl GetHistogramReply {
     }
 }
 
+/// Opcode for the GetHistogramParameterfv request
+pub const GET_HISTOGRAM_PARAMETERFV_REQUEST: u8 = 155;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetHistogramParameterfvRequest {
     pub context_tag: ContextTag,
@@ -8100,8 +8102,6 @@ pub struct GetHistogramParameterfvRequest {
     pub pname: u32,
 }
 impl GetHistogramParameterfvRequest {
-    /// Opcode for the GetHistogramParameterfv request
-    pub const fn opcode() -> u8 { 155 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8115,7 +8115,7 @@ impl GetHistogramParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_HISTOGRAM_PARAMETERFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8197,6 +8197,8 @@ impl GetHistogramParameterfvReply {
     }
 }
 
+/// Opcode for the GetHistogramParameteriv request
+pub const GET_HISTOGRAM_PARAMETERIV_REQUEST: u8 = 156;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetHistogramParameterivRequest {
     pub context_tag: ContextTag,
@@ -8204,8 +8206,6 @@ pub struct GetHistogramParameterivRequest {
     pub pname: u32,
 }
 impl GetHistogramParameterivRequest {
-    /// Opcode for the GetHistogramParameteriv request
-    pub const fn opcode() -> u8 { 156 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8219,7 +8219,7 @@ impl GetHistogramParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_HISTOGRAM_PARAMETERIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8301,6 +8301,8 @@ impl GetHistogramParameterivReply {
     }
 }
 
+/// Opcode for the GetMinmax request
+pub const GET_MINMAX_REQUEST: u8 = 157;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMinmaxRequest {
     pub context_tag: ContextTag,
@@ -8311,8 +8313,6 @@ pub struct GetMinmaxRequest {
     pub reset: bool,
 }
 impl GetMinmaxRequest {
-    /// Opcode for the GetMinmax request
-    pub const fn opcode() -> u8 { 157 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8329,7 +8329,7 @@ impl GetMinmaxRequest {
         let reset_bytes = self.reset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MINMAX_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8419,6 +8419,8 @@ impl GetMinmaxReply {
     }
 }
 
+/// Opcode for the GetMinmaxParameterfv request
+pub const GET_MINMAX_PARAMETERFV_REQUEST: u8 = 158;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMinmaxParameterfvRequest {
     pub context_tag: ContextTag,
@@ -8426,8 +8428,6 @@ pub struct GetMinmaxParameterfvRequest {
     pub pname: u32,
 }
 impl GetMinmaxParameterfvRequest {
-    /// Opcode for the GetMinmaxParameterfv request
-    pub const fn opcode() -> u8 { 158 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8441,7 +8441,7 @@ impl GetMinmaxParameterfvRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MINMAX_PARAMETERFV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8523,6 +8523,8 @@ impl GetMinmaxParameterfvReply {
     }
 }
 
+/// Opcode for the GetMinmaxParameteriv request
+pub const GET_MINMAX_PARAMETERIV_REQUEST: u8 = 159;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMinmaxParameterivRequest {
     pub context_tag: ContextTag,
@@ -8530,8 +8532,6 @@ pub struct GetMinmaxParameterivRequest {
     pub pname: u32,
 }
 impl GetMinmaxParameterivRequest {
-    /// Opcode for the GetMinmaxParameteriv request
-    pub const fn opcode() -> u8 { 159 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8545,7 +8545,7 @@ impl GetMinmaxParameterivRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MINMAX_PARAMETERIV_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8627,6 +8627,8 @@ impl GetMinmaxParameterivReply {
     }
 }
 
+/// Opcode for the GetCompressedTexImageARB request
+pub const GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST: u8 = 160;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCompressedTexImageARBRequest {
     pub context_tag: ContextTag,
@@ -8634,8 +8636,6 @@ pub struct GetCompressedTexImageARBRequest {
     pub level: i32,
 }
 impl GetCompressedTexImageARBRequest {
-    /// Opcode for the GetCompressedTexImageARB request
-    pub const fn opcode() -> u8 { 160 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8649,7 +8649,7 @@ impl GetCompressedTexImageARBRequest {
         let level_bytes = self.level.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8731,14 +8731,14 @@ impl GetCompressedTexImageARBReply {
     }
 }
 
+/// Opcode for the DeleteQueriesARB request
+pub const DELETE_QUERIES_ARB_REQUEST: u8 = 161;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeleteQueriesARBRequest<'input> {
     pub context_tag: ContextTag,
     pub ids: &'input [u32],
 }
 impl<'input> DeleteQueriesARBRequest<'input> {
-    /// Opcode for the DeleteQueriesARB request
-    pub const fn opcode() -> u8 { 161 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8752,7 +8752,7 @@ impl<'input> DeleteQueriesARBRequest<'input> {
         let n_bytes = n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_QUERIES_ARB_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8788,14 +8788,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GenQueriesARB request
+pub const GEN_QUERIES_ARB_REQUEST: u8 = 162;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GenQueriesARBRequest {
     pub context_tag: ContextTag,
     pub n: i32,
 }
 impl GenQueriesARBRequest {
-    /// Opcode for the GenQueriesARB request
-    pub const fn opcode() -> u8 { 162 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8808,7 +8808,7 @@ impl GenQueriesARBRequest {
         let n_bytes = self.n.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GEN_QUERIES_ARB_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8880,14 +8880,14 @@ impl GenQueriesARBReply {
     }
 }
 
+/// Opcode for the IsQueryARB request
+pub const IS_QUERY_ARB_REQUEST: u8 = 163;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsQueryARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
 }
 impl IsQueryARBRequest {
-    /// Opcode for the IsQueryARB request
-    pub const fn opcode() -> u8 { 163 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8900,7 +8900,7 @@ impl IsQueryARBRequest {
         let id_bytes = self.id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            IS_QUERY_ARB_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -8957,6 +8957,8 @@ impl TryFrom<&[u8]> for IsQueryARBReply {
     }
 }
 
+/// Opcode for the GetQueryivARB request
+pub const GET_QUERYIV_ARB_REQUEST: u8 = 164;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetQueryivARBRequest {
     pub context_tag: ContextTag,
@@ -8964,8 +8966,6 @@ pub struct GetQueryivARBRequest {
     pub pname: u32,
 }
 impl GetQueryivARBRequest {
-    /// Opcode for the GetQueryivARB request
-    pub const fn opcode() -> u8 { 164 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8979,7 +8979,7 @@ impl GetQueryivARBRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_QUERYIV_ARB_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -9061,6 +9061,8 @@ impl GetQueryivARBReply {
     }
 }
 
+/// Opcode for the GetQueryObjectivARB request
+pub const GET_QUERY_OBJECTIV_ARB_REQUEST: u8 = 165;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetQueryObjectivARBRequest {
     pub context_tag: ContextTag,
@@ -9068,8 +9070,6 @@ pub struct GetQueryObjectivARBRequest {
     pub pname: u32,
 }
 impl GetQueryObjectivARBRequest {
-    /// Opcode for the GetQueryObjectivARB request
-    pub const fn opcode() -> u8 { 165 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9083,7 +9083,7 @@ impl GetQueryObjectivARBRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_QUERY_OBJECTIV_ARB_REQUEST,
             0,
             0,
             context_tag_bytes[0],
@@ -9165,6 +9165,8 @@ impl GetQueryObjectivARBReply {
     }
 }
 
+/// Opcode for the GetQueryObjectuivARB request
+pub const GET_QUERY_OBJECTUIV_ARB_REQUEST: u8 = 166;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetQueryObjectuivARBRequest {
     pub context_tag: ContextTag,
@@ -9172,8 +9174,6 @@ pub struct GetQueryObjectuivARBRequest {
     pub pname: u32,
 }
 impl GetQueryObjectuivARBRequest {
-    /// Opcode for the GetQueryObjectuivARB request
-    pub const fn opcode() -> u8 { 166 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9187,7 +9187,7 @@ impl GetQueryObjectuivARBRequest {
         let pname_bytes = self.pname.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_QUERY_OBJECTUIV_ARB_REQUEST,
             0,
             0,
             context_tag_bytes[0],

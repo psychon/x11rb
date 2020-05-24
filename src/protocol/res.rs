@@ -429,14 +429,14 @@ impl ResourceSizeValue {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub client_major: u8,
     pub client_minor: u8,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -449,7 +449,7 @@ impl QueryVersionRequest {
         let client_minor_bytes = self.client_minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             client_major_bytes[0],
@@ -504,11 +504,11 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the QueryClients request
+pub const QUERY_CLIENTS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryClientsRequest;
 impl QueryClientsRequest {
-    /// Opcode for the QueryClients request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -519,7 +519,7 @@ impl QueryClientsRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_CLIENTS_REQUEST,
             0,
             0,
         ];
@@ -582,13 +582,13 @@ impl QueryClientsReply {
     }
 }
 
+/// Opcode for the QueryClientResources request
+pub const QUERY_CLIENT_RESOURCES_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryClientResourcesRequest {
     pub xid: u32,
 }
 impl QueryClientResourcesRequest {
-    /// Opcode for the QueryClientResources request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -600,7 +600,7 @@ impl QueryClientResourcesRequest {
         let xid_bytes = self.xid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_CLIENT_RESOURCES_REQUEST,
             0,
             0,
             xid_bytes[0],
@@ -669,13 +669,13 @@ impl QueryClientResourcesReply {
     }
 }
 
+/// Opcode for the QueryClientPixmapBytes request
+pub const QUERY_CLIENT_PIXMAP_BYTES_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryClientPixmapBytesRequest {
     pub xid: u32,
 }
 impl QueryClientPixmapBytesRequest {
-    /// Opcode for the QueryClientPixmapBytes request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -687,7 +687,7 @@ impl QueryClientPixmapBytesRequest {
         let xid_bytes = self.xid.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_CLIENT_PIXMAP_BYTES_REQUEST,
             0,
             0,
             xid_bytes[0],
@@ -741,13 +741,13 @@ impl TryFrom<&[u8]> for QueryClientPixmapBytesReply {
     }
 }
 
+/// Opcode for the QueryClientIds request
+pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientIdsRequest<'input> {
     pub specs: &'input [ClientIdSpec],
 }
 impl<'input> QueryClientIdsRequest<'input> {
-    /// Opcode for the QueryClientIds request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -760,7 +760,7 @@ impl<'input> QueryClientIdsRequest<'input> {
         let num_specs_bytes = num_specs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_CLIENT_IDS_REQUEST,
             0,
             0,
             num_specs_bytes[0],
@@ -833,14 +833,14 @@ impl QueryClientIdsReply {
     }
 }
 
+/// Opcode for the QueryResourceBytes request
+pub const QUERY_RESOURCE_BYTES_REQUEST: u8 = 5;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryResourceBytesRequest<'input> {
     pub client: u32,
     pub specs: &'input [ResourceIdSpec],
 }
 impl<'input> QueryResourceBytesRequest<'input> {
-    /// Opcode for the QueryResourceBytes request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -854,7 +854,7 @@ impl<'input> QueryResourceBytesRequest<'input> {
         let num_specs_bytes = num_specs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_RESOURCE_BYTES_REQUEST,
             0,
             0,
             client_bytes[0],

@@ -494,14 +494,14 @@ impl From<BadContextError> for [u8; 32] {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub major_version: u16,
     pub minor_version: u16,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -514,7 +514,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -569,6 +569,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the CreateContext request
+pub const CREATE_CONTEXT_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateContextRequest<'input> {
     pub context: Context,
@@ -577,8 +579,6 @@ pub struct CreateContextRequest<'input> {
     pub ranges: &'input [Range],
 }
 impl<'input> CreateContextRequest<'input> {
-    /// Opcode for the CreateContext request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -595,7 +595,7 @@ impl<'input> CreateContextRequest<'input> {
         let num_ranges_bytes = num_ranges.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -643,6 +643,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the RegisterClients request
+pub const REGISTER_CLIENTS_REQUEST: u8 = 2;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RegisterClientsRequest<'input> {
     pub context: Context,
@@ -651,8 +653,6 @@ pub struct RegisterClientsRequest<'input> {
     pub ranges: &'input [Range],
 }
 impl<'input> RegisterClientsRequest<'input> {
-    /// Opcode for the RegisterClients request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -669,7 +669,7 @@ impl<'input> RegisterClientsRequest<'input> {
         let num_ranges_bytes = num_ranges.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            REGISTER_CLIENTS_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -717,14 +717,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UnregisterClients request
+pub const UNREGISTER_CLIENTS_REQUEST: u8 = 3;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UnregisterClientsRequest<'input> {
     pub context: Context,
     pub client_specs: &'input [ClientSpec],
 }
 impl<'input> UnregisterClientsRequest<'input> {
-    /// Opcode for the UnregisterClients request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -738,7 +738,7 @@ impl<'input> UnregisterClientsRequest<'input> {
         let num_client_specs_bytes = num_client_specs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            UNREGISTER_CLIENTS_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -774,13 +774,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetContext request
+pub const GET_CONTEXT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetContextRequest {
     pub context: Context,
 }
 impl GetContextRequest {
-    /// Opcode for the GetContext request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -792,7 +792,7 @@ impl GetContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -865,13 +865,13 @@ impl GetContextReply {
     }
 }
 
+/// Opcode for the EnableContext request
+pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnableContextRequest {
     pub context: Context,
 }
 impl EnableContextRequest {
-    /// Opcode for the EnableContext request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -883,7 +883,7 @@ impl EnableContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ENABLE_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -964,13 +964,13 @@ impl EnableContextReply {
     }
 }
 
+/// Opcode for the DisableContext request
+pub const DISABLE_CONTEXT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DisableContextRequest {
     pub context: Context,
 }
 impl DisableContextRequest {
-    /// Opcode for the DisableContext request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -982,7 +982,7 @@ impl DisableContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DISABLE_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -1009,13 +1009,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FreeContext request
+pub const FREE_CONTEXT_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FreeContextRequest {
     pub context: Context,
 }
 impl FreeContextRequest {
-    /// Opcode for the FreeContext request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1027,7 +1027,7 @@ impl FreeContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FREE_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],

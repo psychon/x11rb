@@ -35,14 +35,14 @@ pub const X11_EXTENSION_NAME: &str = "XFIXES";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (5, 0);
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -55,7 +55,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             client_major_version_bytes[0],
@@ -325,6 +325,8 @@ impl TryFrom<u32> for SaveSetMapping {
     }
 }
 
+/// Opcode for the ChangeSaveSet request
+pub const CHANGE_SAVE_SET_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeSaveSetRequest {
     pub mode: SaveSetMode,
@@ -333,8 +335,6 @@ pub struct ChangeSaveSetRequest {
     pub window: xproto::Window,
 }
 impl ChangeSaveSetRequest {
-    /// Opcode for the ChangeSaveSet request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -349,7 +349,7 @@ impl ChangeSaveSetRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_SAVE_SET_REQUEST,
             0,
             0,
             mode_bytes[0],
@@ -601,6 +601,8 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
     }
 }
 
+/// Opcode for the SelectSelectionInput request
+pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectSelectionInputRequest {
     pub window: xproto::Window,
@@ -608,8 +610,6 @@ pub struct SelectSelectionInputRequest {
     pub event_mask: u32,
 }
 impl SelectSelectionInputRequest {
-    /// Opcode for the SelectSelectionInput request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -623,7 +623,7 @@ impl SelectSelectionInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_SELECTION_INPUT_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -865,14 +865,14 @@ impl From<CursorNotifyEvent> for [u8; 32] {
     }
 }
 
+/// Opcode for the SelectCursorInput request
+pub const SELECT_CURSOR_INPUT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectCursorInputRequest {
     pub window: xproto::Window,
     pub event_mask: u32,
 }
 impl SelectCursorInputRequest {
-    /// Opcode for the SelectCursorInput request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -885,7 +885,7 @@ impl SelectCursorInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_CURSOR_INPUT_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -919,11 +919,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetCursorImage request
+pub const GET_CURSOR_IMAGE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCursorImageRequest;
 impl GetCursorImageRequest {
-    /// Opcode for the GetCursorImage request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -934,7 +934,7 @@ impl GetCursorImageRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CURSOR_IMAGE_REQUEST,
             0,
             0,
         ];
@@ -1127,14 +1127,14 @@ impl TryFrom<u32> for RegionEnum {
     }
 }
 
+/// Opcode for the CreateRegion request
+pub const CREATE_REGION_REQUEST: u8 = 5;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateRegionRequest<'input> {
     pub region: Region,
     pub rectangles: &'input [xproto::Rectangle],
 }
 impl<'input> CreateRegionRequest<'input> {
-    /// Opcode for the CreateRegion request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1146,7 +1146,7 @@ impl<'input> CreateRegionRequest<'input> {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_REGION_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -1178,14 +1178,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateRegionFromBitmap request
+pub const CREATE_REGION_FROM_BITMAP_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateRegionFromBitmapRequest {
     pub region: Region,
     pub bitmap: xproto::Pixmap,
 }
 impl CreateRegionFromBitmapRequest {
-    /// Opcode for the CreateRegionFromBitmap request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1198,7 +1198,7 @@ impl CreateRegionFromBitmapRequest {
         let bitmap_bytes = self.bitmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_REGION_FROM_BITMAP_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -1230,6 +1230,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateRegionFromWindow request
+pub const CREATE_REGION_FROM_WINDOW_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateRegionFromWindowRequest {
     pub region: Region,
@@ -1237,8 +1239,6 @@ pub struct CreateRegionFromWindowRequest {
     pub kind: shape::SK,
 }
 impl CreateRegionFromWindowRequest {
-    /// Opcode for the CreateRegionFromWindow request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1252,7 +1252,7 @@ impl CreateRegionFromWindowRequest {
         let kind_bytes = shape::Kind::from(self.kind).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_REGION_FROM_WINDOW_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -1289,14 +1289,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateRegionFromGC request
+pub const CREATE_REGION_FROM_GC_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateRegionFromGCRequest {
     pub region: Region,
     pub gc: xproto::Gcontext,
 }
 impl CreateRegionFromGCRequest {
-    /// Opcode for the CreateRegionFromGC request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1309,7 +1309,7 @@ impl CreateRegionFromGCRequest {
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_REGION_FROM_GC_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -1341,14 +1341,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateRegionFromPicture request
+pub const CREATE_REGION_FROM_PICTURE_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateRegionFromPictureRequest {
     pub region: Region,
     pub picture: render::Picture,
 }
 impl CreateRegionFromPictureRequest {
-    /// Opcode for the CreateRegionFromPicture request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1361,7 +1361,7 @@ impl CreateRegionFromPictureRequest {
         let picture_bytes = self.picture.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_REGION_FROM_PICTURE_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -1393,13 +1393,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DestroyRegion request
+pub const DESTROY_REGION_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyRegionRequest {
     pub region: Region,
 }
 impl DestroyRegionRequest {
-    /// Opcode for the DestroyRegion request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1411,7 +1411,7 @@ impl DestroyRegionRequest {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_REGION_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -1438,14 +1438,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetRegion request
+pub const SET_REGION_REQUEST: u8 = 11;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetRegionRequest<'input> {
     pub region: Region,
     pub rectangles: &'input [xproto::Rectangle],
 }
 impl<'input> SetRegionRequest<'input> {
-    /// Opcode for the SetRegion request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1457,7 +1457,7 @@ impl<'input> SetRegionRequest<'input> {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_REGION_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -1489,14 +1489,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CopyRegion request
+pub const COPY_REGION_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyRegionRequest {
     pub source: Region,
     pub destination: Region,
 }
 impl CopyRegionRequest {
-    /// Opcode for the CopyRegion request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1509,7 +1509,7 @@ impl CopyRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            COPY_REGION_REQUEST,
             0,
             0,
             source_bytes[0],
@@ -1541,6 +1541,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UnionRegion request
+pub const UNION_REGION_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnionRegionRequest {
     pub source1: Region,
@@ -1548,8 +1550,6 @@ pub struct UnionRegionRequest {
     pub destination: Region,
 }
 impl UnionRegionRequest {
-    /// Opcode for the UnionRegion request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1563,7 +1563,7 @@ impl UnionRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            UNION_REGION_REQUEST,
             0,
             0,
             source1_bytes[0],
@@ -1600,6 +1600,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the IntersectRegion request
+pub const INTERSECT_REGION_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IntersectRegionRequest {
     pub source1: Region,
@@ -1607,8 +1609,6 @@ pub struct IntersectRegionRequest {
     pub destination: Region,
 }
 impl IntersectRegionRequest {
-    /// Opcode for the IntersectRegion request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1622,7 +1622,7 @@ impl IntersectRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            INTERSECT_REGION_REQUEST,
             0,
             0,
             source1_bytes[0],
@@ -1659,6 +1659,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SubtractRegion request
+pub const SUBTRACT_REGION_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SubtractRegionRequest {
     pub source1: Region,
@@ -1666,8 +1668,6 @@ pub struct SubtractRegionRequest {
     pub destination: Region,
 }
 impl SubtractRegionRequest {
-    /// Opcode for the SubtractRegion request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1681,7 +1681,7 @@ impl SubtractRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SUBTRACT_REGION_REQUEST,
             0,
             0,
             source1_bytes[0],
@@ -1718,6 +1718,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the InvertRegion request
+pub const INVERT_REGION_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InvertRegionRequest {
     pub source: Region,
@@ -1725,8 +1727,6 @@ pub struct InvertRegionRequest {
     pub destination: Region,
 }
 impl InvertRegionRequest {
-    /// Opcode for the InvertRegion request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1740,7 +1740,7 @@ impl InvertRegionRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            INVERT_REGION_REQUEST,
             0,
             0,
             source_bytes[0],
@@ -1781,6 +1781,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the TranslateRegion request
+pub const TRANSLATE_REGION_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TranslateRegionRequest {
     pub region: Region,
@@ -1788,8 +1790,6 @@ pub struct TranslateRegionRequest {
     pub dy: i16,
 }
 impl TranslateRegionRequest {
-    /// Opcode for the TranslateRegion request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1803,7 +1803,7 @@ impl TranslateRegionRequest {
         let dy_bytes = self.dy.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            TRANSLATE_REGION_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -1836,14 +1836,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the RegionExtents request
+pub const REGION_EXTENTS_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RegionExtentsRequest {
     pub source: Region,
     pub destination: Region,
 }
 impl RegionExtentsRequest {
-    /// Opcode for the RegionExtents request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1856,7 +1856,7 @@ impl RegionExtentsRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            REGION_EXTENTS_REQUEST,
             0,
             0,
             source_bytes[0],
@@ -1888,13 +1888,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FetchRegion request
+pub const FETCH_REGION_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FetchRegionRequest {
     pub region: Region,
 }
 impl FetchRegionRequest {
-    /// Opcode for the FetchRegion request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1906,7 +1906,7 @@ impl FetchRegionRequest {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FETCH_REGION_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -1976,6 +1976,8 @@ impl FetchRegionReply {
     }
 }
 
+/// Opcode for the SetGCClipRegion request
+pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetGCClipRegionRequest {
     pub gc: xproto::Gcontext,
@@ -1984,8 +1986,6 @@ pub struct SetGCClipRegionRequest {
     pub y_origin: i16,
 }
 impl SetGCClipRegionRequest {
-    /// Opcode for the SetGCClipRegion request
-    pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2000,7 +2000,7 @@ impl SetGCClipRegionRequest {
         let y_origin_bytes = self.y_origin.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_GC_CLIP_REGION_REQUEST,
             0,
             0,
             gc_bytes[0],
@@ -2040,6 +2040,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetWindowShapeRegion request
+pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetWindowShapeRegionRequest {
     pub dest: xproto::Window,
@@ -2049,8 +2051,6 @@ pub struct SetWindowShapeRegionRequest {
     pub region: Region,
 }
 impl SetWindowShapeRegionRequest {
-    /// Opcode for the SetWindowShapeRegion request
-    pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2066,7 +2066,7 @@ impl SetWindowShapeRegionRequest {
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_WINDOW_SHAPE_REGION_REQUEST,
             0,
             0,
             dest_bytes[0],
@@ -2111,6 +2111,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetPictureClipRegion request
+pub const SET_PICTURE_CLIP_REGION_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPictureClipRegionRequest {
     pub picture: render::Picture,
@@ -2119,8 +2121,6 @@ pub struct SetPictureClipRegionRequest {
     pub y_origin: i16,
 }
 impl SetPictureClipRegionRequest {
-    /// Opcode for the SetPictureClipRegion request
-    pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2135,7 +2135,7 @@ impl SetPictureClipRegionRequest {
         let y_origin_bytes = self.y_origin.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PICTURE_CLIP_REGION_REQUEST,
             0,
             0,
             picture_bytes[0],
@@ -2175,14 +2175,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetCursorName request
+pub const SET_CURSOR_NAME_REQUEST: u8 = 23;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetCursorNameRequest<'input> {
     pub cursor: xproto::Cursor,
     pub name: &'input [u8],
 }
 impl<'input> SetCursorNameRequest<'input> {
-    /// Opcode for the SetCursorName request
-    pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2196,7 +2196,7 @@ impl<'input> SetCursorNameRequest<'input> {
         let nbytes_bytes = nbytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_CURSOR_NAME_REQUEST,
             0,
             0,
             cursor_bytes[0],
@@ -2231,13 +2231,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetCursorName request
+pub const GET_CURSOR_NAME_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCursorNameRequest {
     pub cursor: xproto::Cursor,
 }
 impl GetCursorNameRequest {
-    /// Opcode for the GetCursorName request
-    pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2249,7 +2249,7 @@ impl GetCursorNameRequest {
         let cursor_bytes = self.cursor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CURSOR_NAME_REQUEST,
             0,
             0,
             cursor_bytes[0],
@@ -2321,11 +2321,11 @@ impl GetCursorNameReply {
     }
 }
 
+/// Opcode for the GetCursorImageAndName request
+pub const GET_CURSOR_IMAGE_AND_NAME_REQUEST: u8 = 25;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCursorImageAndNameRequest;
 impl GetCursorImageAndNameRequest {
-    /// Opcode for the GetCursorImageAndName request
-    pub const fn opcode() -> u8 { 25 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2336,7 +2336,7 @@ impl GetCursorImageAndNameRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CURSOR_IMAGE_AND_NAME_REQUEST,
             0,
             0,
         ];
@@ -2418,14 +2418,14 @@ impl GetCursorImageAndNameReply {
     }
 }
 
+/// Opcode for the ChangeCursor request
+pub const CHANGE_CURSOR_REQUEST: u8 = 26;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeCursorRequest {
     pub source: xproto::Cursor,
     pub destination: xproto::Cursor,
 }
 impl ChangeCursorRequest {
-    /// Opcode for the ChangeCursor request
-    pub const fn opcode() -> u8 { 26 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2438,7 +2438,7 @@ impl ChangeCursorRequest {
         let destination_bytes = self.destination.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_CURSOR_REQUEST,
             0,
             0,
             source_bytes[0],
@@ -2470,14 +2470,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ChangeCursorByName request
+pub const CHANGE_CURSOR_BY_NAME_REQUEST: u8 = 27;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeCursorByNameRequest<'input> {
     pub src: xproto::Cursor,
     pub name: &'input [u8],
 }
 impl<'input> ChangeCursorByNameRequest<'input> {
-    /// Opcode for the ChangeCursorByName request
-    pub const fn opcode() -> u8 { 27 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2491,7 +2491,7 @@ impl<'input> ChangeCursorByNameRequest<'input> {
         let nbytes_bytes = nbytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_CURSOR_BY_NAME_REQUEST,
             0,
             0,
             src_bytes[0],
@@ -2526,6 +2526,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ExpandRegion request
+pub const EXPAND_REGION_REQUEST: u8 = 28;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ExpandRegionRequest {
     pub source: Region,
@@ -2536,8 +2538,6 @@ pub struct ExpandRegionRequest {
     pub bottom: u16,
 }
 impl ExpandRegionRequest {
-    /// Opcode for the ExpandRegion request
-    pub const fn opcode() -> u8 { 28 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2554,7 +2554,7 @@ impl ExpandRegionRequest {
         let bottom_bytes = self.bottom.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            EXPAND_REGION_REQUEST,
             0,
             0,
             source_bytes[0],
@@ -2598,13 +2598,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the HideCursor request
+pub const HIDE_CURSOR_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HideCursorRequest {
     pub window: xproto::Window,
 }
 impl HideCursorRequest {
-    /// Opcode for the HideCursor request
-    pub const fn opcode() -> u8 { 29 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2616,7 +2616,7 @@ impl HideCursorRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            HIDE_CURSOR_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -2643,13 +2643,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ShowCursor request
+pub const SHOW_CURSOR_REQUEST: u8 = 30;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ShowCursorRequest {
     pub window: xproto::Window,
 }
 impl ShowCursorRequest {
-    /// Opcode for the ShowCursor request
-    pub const fn opcode() -> u8 { 30 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2661,7 +2661,7 @@ impl ShowCursorRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SHOW_CURSOR_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -2759,6 +2759,8 @@ impl TryFrom<u32> for BarrierDirections {
 }
 bitmask_binop!(BarrierDirections, u8);
 
+/// Opcode for the CreatePointerBarrier request
+pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreatePointerBarrierRequest<'input> {
     pub barrier: Barrier,
@@ -2771,8 +2773,6 @@ pub struct CreatePointerBarrierRequest<'input> {
     pub devices: &'input [u16],
 }
 impl<'input> CreatePointerBarrierRequest<'input> {
-    /// Opcode for the CreatePointerBarrier request
-    pub const fn opcode() -> u8 { 31 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2792,7 +2792,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         let num_devices_bytes = num_devices.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_POINTER_BARRIER_REQUEST,
             0,
             0,
             barrier_bytes[0],
@@ -2852,13 +2852,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeletePointerBarrier request
+pub const DELETE_POINTER_BARRIER_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeletePointerBarrierRequest {
     pub barrier: Barrier,
 }
 impl DeletePointerBarrierRequest {
-    /// Opcode for the DeletePointerBarrier request
-    pub const fn opcode() -> u8 { 32 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2870,7 +2870,7 @@ impl DeletePointerBarrierRequest {
         let barrier_bytes = self.barrier.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_POINTER_BARRIER_REQUEST,
             0,
             0,
             barrier_bytes[0],

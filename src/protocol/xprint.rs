@@ -403,11 +403,11 @@ impl TryFrom<u32> for Attr {
     }
 }
 
+/// Opcode for the PrintQueryVersion request
+pub const PRINT_QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintQueryVersionRequest;
 impl PrintQueryVersionRequest {
-    /// Opcode for the PrintQueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -418,7 +418,7 @@ impl PrintQueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_QUERY_VERSION_REQUEST,
             0,
             0,
         ];
@@ -466,14 +466,14 @@ impl TryFrom<&[u8]> for PrintQueryVersionReply {
     }
 }
 
+/// Opcode for the PrintGetPrinterList request
+pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetPrinterListRequest<'input> {
     pub printer_name: &'input [String8],
     pub locale: &'input [String8],
 }
 impl<'input> PrintGetPrinterListRequest<'input> {
-    /// Opcode for the PrintGetPrinterList request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -488,7 +488,7 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         let locale_len_bytes = locale_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_GET_PRINTER_LIST_REQUEST,
             0,
             0,
             printer_name_len_bytes[0],
@@ -566,11 +566,11 @@ impl PrintGetPrinterListReply {
     }
 }
 
+/// Opcode for the PrintRehashPrinterList request
+pub const PRINT_REHASH_PRINTER_LIST_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintRehashPrinterListRequest;
 impl PrintRehashPrinterListRequest {
-    /// Opcode for the PrintRehashPrinterList request
-    pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -581,7 +581,7 @@ impl PrintRehashPrinterListRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_REHASH_PRINTER_LIST_REQUEST,
             0,
             0,
         ];
@@ -602,6 +602,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateContext request
+pub const CREATE_CONTEXT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateContextRequest<'input> {
     pub context_id: u32,
@@ -609,8 +611,6 @@ pub struct CreateContextRequest<'input> {
     pub locale: &'input [String8],
 }
 impl<'input> CreateContextRequest<'input> {
-    /// Opcode for the CreateContext request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -626,7 +626,7 @@ impl<'input> CreateContextRequest<'input> {
         let locale_len_bytes = locale_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_CONTEXT_REQUEST,
             0,
             0,
             context_id_bytes[0],
@@ -667,13 +667,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintSetContext request
+pub const PRINT_SET_CONTEXT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintSetContextRequest {
     pub context: u32,
 }
 impl PrintSetContextRequest {
-    /// Opcode for the PrintSetContext request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -685,7 +685,7 @@ impl PrintSetContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_SET_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -712,11 +712,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintGetContext request
+pub const PRINT_GET_CONTEXT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetContextRequest;
 impl PrintGetContextRequest {
-    /// Opcode for the PrintGetContext request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -727,7 +727,7 @@ impl PrintGetContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_GET_CONTEXT_REQUEST,
             0,
             0,
         ];
@@ -773,13 +773,13 @@ impl TryFrom<&[u8]> for PrintGetContextReply {
     }
 }
 
+/// Opcode for the PrintDestroyContext request
+pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintDestroyContextRequest {
     pub context: u32,
 }
 impl PrintDestroyContextRequest {
-    /// Opcode for the PrintDestroyContext request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -791,7 +791,7 @@ impl PrintDestroyContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_DESTROY_CONTEXT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -818,11 +818,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintGetScreenOfContext request
+pub const PRINT_GET_SCREEN_OF_CONTEXT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetScreenOfContextRequest;
 impl PrintGetScreenOfContextRequest {
-    /// Opcode for the PrintGetScreenOfContext request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -833,7 +833,7 @@ impl PrintGetScreenOfContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_GET_SCREEN_OF_CONTEXT_REQUEST,
             0,
             0,
         ];
@@ -879,13 +879,13 @@ impl TryFrom<&[u8]> for PrintGetScreenOfContextReply {
     }
 }
 
+/// Opcode for the PrintStartJob request
+pub const PRINT_START_JOB_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintStartJobRequest {
     pub output_mode: u8,
 }
 impl PrintStartJobRequest {
-    /// Opcode for the PrintStartJob request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -897,7 +897,7 @@ impl PrintStartJobRequest {
         let output_mode_bytes = self.output_mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_START_JOB_REQUEST,
             0,
             0,
             output_mode_bytes[0],
@@ -924,13 +924,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintEndJob request
+pub const PRINT_END_JOB_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintEndJobRequest {
     pub cancel: bool,
 }
 impl PrintEndJobRequest {
-    /// Opcode for the PrintEndJob request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -942,7 +942,7 @@ impl PrintEndJobRequest {
         let cancel_bytes = self.cancel.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_END_JOB_REQUEST,
             0,
             0,
             cancel_bytes[0],
@@ -969,13 +969,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintStartDoc request
+pub const PRINT_START_DOC_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintStartDocRequest {
     pub driver_mode: u8,
 }
 impl PrintStartDocRequest {
-    /// Opcode for the PrintStartDoc request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -987,7 +987,7 @@ impl PrintStartDocRequest {
         let driver_mode_bytes = self.driver_mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_START_DOC_REQUEST,
             0,
             0,
             driver_mode_bytes[0],
@@ -1014,13 +1014,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintEndDoc request
+pub const PRINT_END_DOC_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintEndDocRequest {
     pub cancel: bool,
 }
 impl PrintEndDocRequest {
-    /// Opcode for the PrintEndDoc request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1032,7 +1032,7 @@ impl PrintEndDocRequest {
         let cancel_bytes = self.cancel.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_END_DOC_REQUEST,
             0,
             0,
             cancel_bytes[0],
@@ -1059,6 +1059,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintPutDocumentData request
+pub const PRINT_PUT_DOCUMENT_DATA_REQUEST: u8 = 11;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintPutDocumentDataRequest<'input> {
     pub drawable: xproto::Drawable,
@@ -1067,8 +1069,6 @@ pub struct PrintPutDocumentDataRequest<'input> {
     pub options: &'input [String8],
 }
 impl<'input> PrintPutDocumentDataRequest<'input> {
-    /// Opcode for the PrintPutDocumentData request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1086,7 +1086,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         let len_options_bytes = len_options.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_PUT_DOCUMENT_DATA_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -1129,14 +1129,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintGetDocumentData request
+pub const PRINT_GET_DOCUMENT_DATA_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetDocumentDataRequest {
     pub context: Pcontext,
     pub max_bytes: u32,
 }
 impl PrintGetDocumentDataRequest {
-    /// Opcode for the PrintGetDocumentData request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1149,7 +1149,7 @@ impl PrintGetDocumentDataRequest {
         let max_bytes_bytes = self.max_bytes.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_GET_DOCUMENT_DATA_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -1228,13 +1228,13 @@ impl PrintGetDocumentDataReply {
     }
 }
 
+/// Opcode for the PrintStartPage request
+pub const PRINT_START_PAGE_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintStartPageRequest {
     pub window: xproto::Window,
 }
 impl PrintStartPageRequest {
-    /// Opcode for the PrintStartPage request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1246,7 +1246,7 @@ impl PrintStartPageRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_START_PAGE_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1273,13 +1273,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintEndPage request
+pub const PRINT_END_PAGE_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintEndPageRequest {
     pub cancel: bool,
 }
 impl PrintEndPageRequest {
-    /// Opcode for the PrintEndPage request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1291,7 +1291,7 @@ impl PrintEndPageRequest {
         let cancel_bytes = self.cancel.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_END_PAGE_REQUEST,
             0,
             0,
             cancel_bytes[0],
@@ -1318,14 +1318,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintSelectInput request
+pub const PRINT_SELECT_INPUT_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintSelectInputRequest {
     pub context: Pcontext,
     pub event_mask: u32,
 }
 impl PrintSelectInputRequest {
-    /// Opcode for the PrintSelectInput request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1338,7 +1338,7 @@ impl PrintSelectInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_SELECT_INPUT_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -1370,13 +1370,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintInputSelected request
+pub const PRINT_INPUT_SELECTED_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintInputSelectedRequest {
     pub context: Pcontext,
 }
 impl PrintInputSelectedRequest {
-    /// Opcode for the PrintInputSelected request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1388,7 +1388,7 @@ impl PrintInputSelectedRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_INPUT_SELECTED_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -1442,14 +1442,14 @@ impl TryFrom<&[u8]> for PrintInputSelectedReply {
     }
 }
 
+/// Opcode for the PrintGetAttributes request
+pub const PRINT_GET_ATTRIBUTES_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetAttributesRequest {
     pub context: Pcontext,
     pub pool: u8,
 }
 impl PrintGetAttributesRequest {
-    /// Opcode for the PrintGetAttributes request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1462,7 +1462,7 @@ impl PrintGetAttributesRequest {
         let pool_bytes = self.pool.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_GET_ATTRIBUTES_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -1537,6 +1537,8 @@ impl PrintGetAttributesReply {
     }
 }
 
+/// Opcode for the PrintGetOneAttributes request
+pub const PRINT_GET_ONE_ATTRIBUTES_REQUEST: u8 = 19;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetOneAttributesRequest<'input> {
     pub context: Pcontext,
@@ -1544,8 +1546,6 @@ pub struct PrintGetOneAttributesRequest<'input> {
     pub name: &'input [String8],
 }
 impl<'input> PrintGetOneAttributesRequest<'input> {
-    /// Opcode for the PrintGetOneAttributes request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1560,7 +1560,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         let pool_bytes = self.pool.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_GET_ONE_ATTRIBUTES_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -1643,6 +1643,8 @@ impl PrintGetOneAttributesReply {
     }
 }
 
+/// Opcode for the PrintSetAttributes request
+pub const PRINT_SET_ATTRIBUTES_REQUEST: u8 = 18;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintSetAttributesRequest<'input> {
     pub context: Pcontext,
@@ -1652,8 +1654,6 @@ pub struct PrintSetAttributesRequest<'input> {
     pub attributes: &'input [String8],
 }
 impl<'input> PrintSetAttributesRequest<'input> {
-    /// Opcode for the PrintSetAttributes request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1668,7 +1668,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
         let rule_bytes = self.rule.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_SET_ATTRIBUTES_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -1710,13 +1710,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PrintGetPageDimensions request
+pub const PRINT_GET_PAGE_DIMENSIONS_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetPageDimensionsRequest {
     pub context: Pcontext,
 }
 impl PrintGetPageDimensionsRequest {
-    /// Opcode for the PrintGetPageDimensions request
-    pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1728,7 +1728,7 @@ impl PrintGetPageDimensionsRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_GET_PAGE_DIMENSIONS_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -1790,11 +1790,11 @@ impl TryFrom<&[u8]> for PrintGetPageDimensionsReply {
     }
 }
 
+/// Opcode for the PrintQueryScreens request
+pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintQueryScreensRequest;
 impl PrintQueryScreensRequest {
-    /// Opcode for the PrintQueryScreens request
-    pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1805,7 +1805,7 @@ impl PrintQueryScreensRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_QUERY_SCREENS_REQUEST,
             0,
             0,
         ];
@@ -1868,14 +1868,14 @@ impl PrintQueryScreensReply {
     }
 }
 
+/// Opcode for the PrintSetImageResolution request
+pub const PRINT_SET_IMAGE_RESOLUTION_REQUEST: u8 = 23;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintSetImageResolutionRequest {
     pub context: Pcontext,
     pub image_resolution: u16,
 }
 impl PrintSetImageResolutionRequest {
-    /// Opcode for the PrintSetImageResolution request
-    pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1888,7 +1888,7 @@ impl PrintSetImageResolutionRequest {
         let image_resolution_bytes = self.image_resolution.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_SET_IMAGE_RESOLUTION_REQUEST,
             0,
             0,
             context_bytes[0],
@@ -1946,13 +1946,13 @@ impl TryFrom<&[u8]> for PrintSetImageResolutionReply {
     }
 }
 
+/// Opcode for the PrintGetImageResolution request
+pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetImageResolutionRequest {
     pub context: Pcontext,
 }
 impl PrintGetImageResolutionRequest {
-    /// Opcode for the PrintGetImageResolution request
-    pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1964,7 +1964,7 @@ impl PrintGetImageResolutionRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PRINT_GET_IMAGE_RESOLUTION_REQUEST,
             0,
             0,
             context_bytes[0],

@@ -83,14 +83,14 @@ impl Serialize for ScreenInfo {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub major: u8,
     pub minor: u8,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -103,7 +103,7 @@ impl QueryVersionRequest {
         let minor_bytes = self.minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             major_bytes[0],
@@ -158,13 +158,13 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the GetState request
+pub const GET_STATE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStateRequest {
     pub window: xproto::Window,
 }
 impl GetStateRequest {
-    /// Opcode for the GetState request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -176,7 +176,7 @@ impl GetStateRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_STATE_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -229,13 +229,13 @@ impl TryFrom<&[u8]> for GetStateReply {
     }
 }
 
+/// Opcode for the GetScreenCount request
+pub const GET_SCREEN_COUNT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenCountRequest {
     pub window: xproto::Window,
 }
 impl GetScreenCountRequest {
-    /// Opcode for the GetScreenCount request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -247,7 +247,7 @@ impl GetScreenCountRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SCREEN_COUNT_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -300,14 +300,14 @@ impl TryFrom<&[u8]> for GetScreenCountReply {
     }
 }
 
+/// Opcode for the GetScreenSize request
+pub const GET_SCREEN_SIZE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSizeRequest {
     pub window: xproto::Window,
     pub screen: u32,
 }
 impl GetScreenSizeRequest {
-    /// Opcode for the GetScreenSize request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -320,7 +320,7 @@ impl GetScreenSizeRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SCREEN_SIZE_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -383,11 +383,11 @@ impl TryFrom<&[u8]> for GetScreenSizeReply {
     }
 }
 
+/// Opcode for the IsActive request
+pub const IS_ACTIVE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsActiveRequest;
 impl IsActiveRequest {
-    /// Opcode for the IsActive request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -398,7 +398,7 @@ impl IsActiveRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            IS_ACTIVE_REQUEST,
             0,
             0,
         ];
@@ -444,11 +444,11 @@ impl TryFrom<&[u8]> for IsActiveReply {
     }
 }
 
+/// Opcode for the QueryScreens request
+pub const QUERY_SCREENS_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryScreensRequest;
 impl QueryScreensRequest {
-    /// Opcode for the QueryScreens request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -459,7 +459,7 @@ impl QueryScreensRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_SCREENS_REQUEST,
             0,
             0,
         ];

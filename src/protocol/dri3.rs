@@ -33,14 +33,14 @@ pub const X11_EXTENSION_NAME: &str = "DRI3";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -53,7 +53,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -112,14 +112,14 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the Open request
+pub const OPEN_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OpenRequest {
     pub drawable: xproto::Drawable,
     pub provider: u32,
 }
 impl OpenRequest {
-    /// Opcode for the Open request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -132,7 +132,7 @@ impl OpenRequest {
         let provider_bytes = self.provider.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            OPEN_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -193,6 +193,8 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for OpenReply {
     }
 }
 
+/// Opcode for the PixmapFromBuffer request
+pub const PIXMAP_FROM_BUFFER_REQUEST: u8 = 2;
 #[derive(Debug, PartialEq, Eq)]
 pub struct PixmapFromBufferRequest {
     pub pixmap: xproto::Pixmap,
@@ -206,8 +208,6 @@ pub struct PixmapFromBufferRequest {
     pub pixmap_fd: RawFdContainer,
 }
 impl PixmapFromBufferRequest {
-    /// Opcode for the PixmapFromBuffer request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -226,7 +226,7 @@ impl PixmapFromBufferRequest {
         let bpp_bytes = self.bpp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PIXMAP_FROM_BUFFER_REQUEST,
             0,
             0,
             pixmap_bytes[0],
@@ -279,13 +279,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the BufferFromPixmap request
+pub const BUFFER_FROM_PIXMAP_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BufferFromPixmapRequest {
     pub pixmap: xproto::Pixmap,
 }
 impl BufferFromPixmapRequest {
-    /// Opcode for the BufferFromPixmap request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -297,7 +297,7 @@ impl BufferFromPixmapRequest {
         let pixmap_bytes = self.pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            BUFFER_FROM_PIXMAP_REQUEST,
             0,
             0,
             pixmap_bytes[0],
@@ -365,6 +365,8 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for BufferFromPixmapReply {
     }
 }
 
+/// Opcode for the FenceFromFD request
+pub const FENCE_FROM_FD_REQUEST: u8 = 4;
 #[derive(Debug, PartialEq, Eq)]
 pub struct FenceFromFDRequest {
     pub drawable: xproto::Drawable,
@@ -373,8 +375,6 @@ pub struct FenceFromFDRequest {
     pub fence_fd: RawFdContainer,
 }
 impl FenceFromFDRequest {
-    /// Opcode for the FenceFromFD request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -388,7 +388,7 @@ impl FenceFromFDRequest {
         let initially_triggered_bytes = self.initially_triggered.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FENCE_FROM_FD_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -428,14 +428,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the FDFromFence request
+pub const FD_FROM_FENCE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FDFromFenceRequest {
     pub drawable: xproto::Drawable,
     pub fence: u32,
 }
 impl FDFromFenceRequest {
-    /// Opcode for the FDFromFence request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -448,7 +448,7 @@ impl FDFromFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FD_FROM_FENCE_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -509,6 +509,8 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for FDFromFenceReply {
     }
 }
 
+/// Opcode for the GetSupportedModifiers request
+pub const GET_SUPPORTED_MODIFIERS_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetSupportedModifiersRequest {
     pub window: u32,
@@ -516,8 +518,6 @@ pub struct GetSupportedModifiersRequest {
     pub bpp: u8,
 }
 impl GetSupportedModifiersRequest {
-    /// Opcode for the GetSupportedModifiers request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -531,7 +531,7 @@ impl GetSupportedModifiersRequest {
         let bpp_bytes = self.bpp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SUPPORTED_MODIFIERS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -622,6 +622,8 @@ impl GetSupportedModifiersReply {
     }
 }
 
+/// Opcode for the PixmapFromBuffers request
+pub const PIXMAP_FROM_BUFFERS_REQUEST: u8 = 7;
 #[derive(Debug, PartialEq, Eq)]
 pub struct PixmapFromBuffersRequest {
     pub pixmap: xproto::Pixmap,
@@ -642,8 +644,6 @@ pub struct PixmapFromBuffersRequest {
     pub buffers: Vec<RawFdContainer>,
 }
 impl PixmapFromBuffersRequest {
-    /// Opcode for the PixmapFromBuffers request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -671,7 +671,7 @@ impl PixmapFromBuffersRequest {
         let modifier_bytes = self.modifier.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PIXMAP_FROM_BUFFERS_REQUEST,
             0,
             0,
             pixmap_bytes[0],
@@ -769,13 +769,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the BuffersFromPixmap request
+pub const BUFFERS_FROM_PIXMAP_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BuffersFromPixmapRequest {
     pub pixmap: xproto::Pixmap,
 }
 impl BuffersFromPixmapRequest {
-    /// Opcode for the BuffersFromPixmap request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -787,7 +787,7 @@ impl BuffersFromPixmapRequest {
         let pixmap_bytes = self.pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            BUFFERS_FROM_PIXMAP_REQUEST,
             0,
             0,
             pixmap_bytes[0],

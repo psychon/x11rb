@@ -374,6 +374,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     ) {
         let ns = request_def.namespace.upgrade().unwrap();
 
+        outln!(out, "/// Opcode for the {} request", name);
+        outln!(
+            out,
+            "pub const {}_REQUEST: u8 = {};",
+            super::camel_case_to_upper_snake(&name),
+            request_def.opcode,
+        );
+
         if let Some(ref doc) = request_def.doc {
             self.emit_doc(doc, out);
         }
@@ -419,13 +427,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             name = name
         );
         out.indented(|out| {
-            outln!(out, "/// Opcode for the {} request", name);
-            outln!(
-                out,
-                "pub const fn opcode() -> u8 {{ {opcode} }}",
-                opcode=request_def.opcode
-            );
-
             outln!(out, "/// Serialize this request into bytes for the provided connection");
             outln!(out, "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>",
                    lifetime=serialize_lifetime_block);
@@ -514,11 +515,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 fixed_fields_bytes
                                     .push(String::from("extension_information.major_opcode"));
                             } else {
-                                fixed_fields_bytes.push(String::from("Self::opcode()"));
+                                fixed_fields_bytes.push(format!("{}_REQUEST",
+                                                               super::camel_case_to_upper_snake(&name)));
                             }
                         } else if normal_field.name == "minor_opcode" {
                             assert!(ns.ext_info.is_some());
-                            fixed_fields_bytes.push(String::from("Self::opcode()"));
+                            fixed_fields_bytes.push(format!("{}_REQUEST", super::camel_case_to_upper_snake(&name)));
                         } else if normal_field.name == "length" {
                             // the actual length will be calculated later
                             fixed_fields_bytes.push(String::from("0"));

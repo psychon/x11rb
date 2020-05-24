@@ -32,14 +32,14 @@ pub const X11_EXTENSION_NAME: &str = "XC-MISC";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
+/// Opcode for the GetVersion request
+pub const GET_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
 }
 impl GetVersionRequest {
-    /// Opcode for the GetVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -52,7 +52,7 @@ impl GetVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_VERSION_REQUEST,
             0,
             0,
             client_major_version_bytes[0],
@@ -107,11 +107,11 @@ impl TryFrom<&[u8]> for GetVersionReply {
     }
 }
 
+/// Opcode for the GetXIDRange request
+pub const GET_XID_RANGE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetXIDRangeRequest;
 impl GetXIDRangeRequest {
-    /// Opcode for the GetXIDRange request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -122,7 +122,7 @@ impl GetXIDRangeRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_XID_RANGE_REQUEST,
             0,
             0,
         ];
@@ -170,13 +170,13 @@ impl TryFrom<&[u8]> for GetXIDRangeReply {
     }
 }
 
+/// Opcode for the GetXIDList request
+pub const GET_XID_LIST_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetXIDListRequest {
     pub count: u32,
 }
 impl GetXIDListRequest {
-    /// Opcode for the GetXIDList request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -188,7 +188,7 @@ impl GetXIDListRequest {
         let count_bytes = self.count.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_XID_LIST_REQUEST,
             0,
             0,
             count_bytes[0],

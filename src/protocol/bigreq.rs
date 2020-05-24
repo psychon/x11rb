@@ -32,11 +32,11 @@ pub const X11_EXTENSION_NAME: &str = "BIG-REQUESTS";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (0, 0);
 
+/// Opcode for the Enable request
+pub const ENABLE_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnableRequest;
 impl EnableRequest {
-    /// Opcode for the Enable request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -47,7 +47,7 @@ impl EnableRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ENABLE_REQUEST,
             0,
             0,
         ];

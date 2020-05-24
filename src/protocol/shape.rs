@@ -266,11 +266,11 @@ impl From<NotifyEvent> for [u8; 32] {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -281,7 +281,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
         ];
@@ -329,6 +329,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the Rectangles request
+pub const RECTANGLES_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RectanglesRequest<'input> {
     pub operation: SO,
@@ -340,8 +342,6 @@ pub struct RectanglesRequest<'input> {
     pub rectangles: &'input [xproto::Rectangle],
 }
 impl<'input> RectanglesRequest<'input> {
-    /// Opcode for the Rectangles request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -358,7 +358,7 @@ impl<'input> RectanglesRequest<'input> {
         let y_offset_bytes = self.y_offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            RECTANGLES_REQUEST,
             0,
             0,
             operation_bytes[0],
@@ -403,6 +403,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Mask request
+pub const MASK_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MaskRequest {
     pub operation: SO,
@@ -413,8 +415,6 @@ pub struct MaskRequest {
     pub source_bitmap: xproto::Pixmap,
 }
 impl MaskRequest {
-    /// Opcode for the Mask request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -431,7 +431,7 @@ impl MaskRequest {
         let source_bitmap_bytes = self.source_bitmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            MASK_REQUEST,
             0,
             0,
             operation_bytes[0],
@@ -477,6 +477,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Combine request
+pub const COMBINE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CombineRequest {
     pub operation: SO,
@@ -488,8 +490,6 @@ pub struct CombineRequest {
     pub source_window: xproto::Window,
 }
 impl CombineRequest {
-    /// Opcode for the Combine request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -507,7 +507,7 @@ impl CombineRequest {
         let source_window_bytes = self.source_window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            COMBINE_REQUEST,
             0,
             0,
             operation_bytes[0],
@@ -552,6 +552,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Offset request
+pub const OFFSET_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OffsetRequest {
     pub destination_kind: SK,
@@ -560,8 +562,6 @@ pub struct OffsetRequest {
     pub y_offset: i16,
 }
 impl OffsetRequest {
-    /// Opcode for the Offset request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -576,7 +576,7 @@ impl OffsetRequest {
         let y_offset_bytes = self.y_offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            OFFSET_REQUEST,
             0,
             0,
             destination_kind_bytes[0],
@@ -614,13 +614,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the QueryExtents request
+pub const QUERY_EXTENTS_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtentsRequest {
     pub destination_window: xproto::Window,
 }
 impl QueryExtentsRequest {
-    /// Opcode for the QueryExtents request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -632,7 +632,7 @@ impl QueryExtentsRequest {
         let destination_window_bytes = self.destination_window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_EXTENTS_REQUEST,
             0,
             0,
             destination_window_bytes[0],
@@ -703,14 +703,14 @@ impl TryFrom<&[u8]> for QueryExtentsReply {
     }
 }
 
+/// Opcode for the SelectInput request
+pub const SELECT_INPUT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectInputRequest {
     pub destination_window: xproto::Window,
     pub enable: bool,
 }
 impl SelectInputRequest {
-    /// Opcode for the SelectInput request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -723,7 +723,7 @@ impl SelectInputRequest {
         let enable_bytes = self.enable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_INPUT_REQUEST,
             0,
             0,
             destination_window_bytes[0],
@@ -755,13 +755,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the InputSelected request
+pub const INPUT_SELECTED_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InputSelectedRequest {
     pub destination_window: xproto::Window,
 }
 impl InputSelectedRequest {
-    /// Opcode for the InputSelected request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -773,7 +773,7 @@ impl InputSelectedRequest {
         let destination_window_bytes = self.destination_window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            INPUT_SELECTED_REQUEST,
             0,
             0,
             destination_window_bytes[0],
@@ -824,14 +824,14 @@ impl TryFrom<&[u8]> for InputSelectedReply {
     }
 }
 
+/// Opcode for the GetRectangles request
+pub const GET_RECTANGLES_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetRectanglesRequest {
     pub window: xproto::Window,
     pub source_kind: SK,
 }
 impl GetRectanglesRequest {
-    /// Opcode for the GetRectangles request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -844,7 +844,7 @@ impl GetRectanglesRequest {
         let source_kind_bytes = Kind::from(self.source_kind).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_RECTANGLES_REQUEST,
             0,
             0,
             window_bytes[0],

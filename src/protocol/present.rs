@@ -499,14 +499,14 @@ impl Serialize for Notify {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -519,7 +519,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -578,6 +578,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the Pixmap request
+pub const PIXMAP_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PixmapRequest<'input> {
     pub window: xproto::Window,
@@ -597,8 +599,6 @@ pub struct PixmapRequest<'input> {
     pub notifies: &'input [Notify],
 }
 impl<'input> PixmapRequest<'input> {
-    /// Opcode for the Pixmap request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -623,7 +623,7 @@ impl<'input> PixmapRequest<'input> {
         let remainder_bytes = self.remainder.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PIXMAP_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -732,6 +732,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the NotifyMSC request
+pub const NOTIFY_MSC_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NotifyMSCRequest {
     pub window: xproto::Window,
@@ -741,8 +743,6 @@ pub struct NotifyMSCRequest {
     pub remainder: u64,
 }
 impl NotifyMSCRequest {
-    /// Opcode for the NotifyMSC request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -758,7 +758,7 @@ impl NotifyMSCRequest {
         let remainder_bytes = self.remainder.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            NOTIFY_MSC_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -823,6 +823,8 @@ where
 
 pub type Event = u32;
 
+/// Opcode for the SelectInput request
+pub const SELECT_INPUT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectInputRequest {
     pub eid: Event,
@@ -830,8 +832,6 @@ pub struct SelectInputRequest {
     pub event_mask: u32,
 }
 impl SelectInputRequest {
-    /// Opcode for the SelectInput request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -845,7 +845,7 @@ impl SelectInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_INPUT_REQUEST,
             0,
             0,
             eid_bytes[0],
@@ -884,13 +884,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the QueryCapabilities request
+pub const QUERY_CAPABILITIES_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCapabilitiesRequest {
     pub target: u32,
 }
 impl QueryCapabilitiesRequest {
-    /// Opcode for the QueryCapabilities request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -902,7 +902,7 @@ impl QueryCapabilitiesRequest {
         let target_bytes = self.target.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_CAPABILITIES_REQUEST,
             0,
             0,
             target_bytes[0],

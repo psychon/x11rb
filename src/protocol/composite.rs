@@ -104,14 +104,14 @@ impl TryFrom<u32> for Redirect {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -124,7 +124,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             client_major_version_bytes[0],
@@ -184,14 +184,14 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the RedirectWindow request
+pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RedirectWindowRequest {
     pub window: xproto::Window,
     pub update: Redirect,
 }
 impl RedirectWindowRequest {
-    /// Opcode for the RedirectWindow request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -204,7 +204,7 @@ impl RedirectWindowRequest {
         let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            REDIRECT_WINDOW_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -236,14 +236,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the RedirectSubwindows request
+pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RedirectSubwindowsRequest {
     pub window: xproto::Window,
     pub update: Redirect,
 }
 impl RedirectSubwindowsRequest {
-    /// Opcode for the RedirectSubwindows request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -256,7 +256,7 @@ impl RedirectSubwindowsRequest {
         let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            REDIRECT_SUBWINDOWS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -288,14 +288,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UnredirectWindow request
+pub const UNREDIRECT_WINDOW_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnredirectWindowRequest {
     pub window: xproto::Window,
     pub update: Redirect,
 }
 impl UnredirectWindowRequest {
-    /// Opcode for the UnredirectWindow request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -308,7 +308,7 @@ impl UnredirectWindowRequest {
         let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            UNREDIRECT_WINDOW_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -340,14 +340,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the UnredirectSubwindows request
+pub const UNREDIRECT_SUBWINDOWS_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnredirectSubwindowsRequest {
     pub window: xproto::Window,
     pub update: Redirect,
 }
 impl UnredirectSubwindowsRequest {
-    /// Opcode for the UnredirectSubwindows request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -360,7 +360,7 @@ impl UnredirectSubwindowsRequest {
         let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            UNREDIRECT_SUBWINDOWS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -392,14 +392,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateRegionFromBorderClip request
+pub const CREATE_REGION_FROM_BORDER_CLIP_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateRegionFromBorderClipRequest {
     pub region: xfixes::Region,
     pub window: xproto::Window,
 }
 impl CreateRegionFromBorderClipRequest {
-    /// Opcode for the CreateRegionFromBorderClip request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -412,7 +412,7 @@ impl CreateRegionFromBorderClipRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_REGION_FROM_BORDER_CLIP_REQUEST,
             0,
             0,
             region_bytes[0],
@@ -444,14 +444,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the NameWindowPixmap request
+pub const NAME_WINDOW_PIXMAP_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NameWindowPixmapRequest {
     pub window: xproto::Window,
     pub pixmap: xproto::Pixmap,
 }
 impl NameWindowPixmapRequest {
-    /// Opcode for the NameWindowPixmap request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -464,7 +464,7 @@ impl NameWindowPixmapRequest {
         let pixmap_bytes = self.pixmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            NAME_WINDOW_PIXMAP_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -496,13 +496,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetOverlayWindow request
+pub const GET_OVERLAY_WINDOW_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOverlayWindowRequest {
     pub window: xproto::Window,
 }
 impl GetOverlayWindowRequest {
-    /// Opcode for the GetOverlayWindow request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -514,7 +514,7 @@ impl GetOverlayWindowRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_OVERLAY_WINDOW_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -567,13 +567,13 @@ impl TryFrom<&[u8]> for GetOverlayWindowReply {
     }
 }
 
+/// Opcode for the ReleaseOverlayWindow request
+pub const RELEASE_OVERLAY_WINDOW_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ReleaseOverlayWindowRequest {
     pub window: xproto::Window,
 }
 impl ReleaseOverlayWindowRequest {
-    /// Opcode for the ReleaseOverlayWindow request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -585,7 +585,7 @@ impl ReleaseOverlayWindowRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            RELEASE_OVERLAY_WINDOW_REQUEST,
             0,
             0,
             window_bytes[0],

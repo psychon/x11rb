@@ -706,14 +706,14 @@ impl From<AlarmError> for [u8; 32] {
     }
 }
 
+/// Opcode for the Initialize request
+pub const INITIALIZE_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InitializeRequest {
     pub desired_major_version: u8,
     pub desired_minor_version: u8,
 }
 impl InitializeRequest {
-    /// Opcode for the Initialize request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -726,7 +726,7 @@ impl InitializeRequest {
         let desired_minor_version_bytes = self.desired_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            INITIALIZE_REQUEST,
             0,
             0,
             desired_major_version_bytes[0],
@@ -782,11 +782,11 @@ impl TryFrom<&[u8]> for InitializeReply {
     }
 }
 
+/// Opcode for the ListSystemCounters request
+pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListSystemCountersRequest;
 impl ListSystemCountersRequest {
-    /// Opcode for the ListSystemCounters request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -797,7 +797,7 @@ impl ListSystemCountersRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_SYSTEM_COUNTERS_REQUEST,
             0,
             0,
         ];
@@ -860,14 +860,14 @@ impl ListSystemCountersReply {
     }
 }
 
+/// Opcode for the CreateCounter request
+pub const CREATE_COUNTER_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateCounterRequest {
     pub id: Counter,
     pub initial_value: Int64,
 }
 impl CreateCounterRequest {
-    /// Opcode for the CreateCounter request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -880,7 +880,7 @@ impl CreateCounterRequest {
         let initial_value_bytes = self.initial_value.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_COUNTER_REQUEST,
             0,
             0,
             id_bytes[0],
@@ -916,13 +916,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DestroyCounter request
+pub const DESTROY_COUNTER_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyCounterRequest {
     pub counter: Counter,
 }
 impl DestroyCounterRequest {
-    /// Opcode for the DestroyCounter request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -934,7 +934,7 @@ impl DestroyCounterRequest {
         let counter_bytes = self.counter.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_COUNTER_REQUEST,
             0,
             0,
             counter_bytes[0],
@@ -961,13 +961,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the QueryCounter request
+pub const QUERY_COUNTER_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCounterRequest {
     pub counter: Counter,
 }
 impl QueryCounterRequest {
-    /// Opcode for the QueryCounter request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -979,7 +979,7 @@ impl QueryCounterRequest {
         let counter_bytes = self.counter.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_COUNTER_REQUEST,
             0,
             0,
             counter_bytes[0],
@@ -1031,13 +1031,13 @@ impl TryFrom<&[u8]> for QueryCounterReply {
     }
 }
 
+/// Opcode for the Await request
+pub const AWAIT_REQUEST: u8 = 7;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AwaitRequest<'input> {
     pub wait_list: &'input [Waitcondition],
 }
 impl<'input> AwaitRequest<'input> {
-    /// Opcode for the Await request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1048,7 +1048,7 @@ impl<'input> AwaitRequest<'input> {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            AWAIT_REQUEST,
             0,
             0,
         ];
@@ -1075,14 +1075,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ChangeCounter request
+pub const CHANGE_COUNTER_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeCounterRequest {
     pub counter: Counter,
     pub amount: Int64,
 }
 impl ChangeCounterRequest {
-    /// Opcode for the ChangeCounter request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1095,7 +1095,7 @@ impl ChangeCounterRequest {
         let amount_bytes = self.amount.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_COUNTER_REQUEST,
             0,
             0,
             counter_bytes[0],
@@ -1131,14 +1131,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetCounter request
+pub const SET_COUNTER_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetCounterRequest {
     pub counter: Counter,
     pub value: Int64,
 }
 impl SetCounterRequest {
-    /// Opcode for the SetCounter request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1151,7 +1151,7 @@ impl SetCounterRequest {
         let value_bytes = self.value.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_COUNTER_REQUEST,
             0,
             0,
             counter_bytes[0],
@@ -1286,14 +1286,14 @@ impl CreateAlarmAux {
     }
 }
 
+/// Opcode for the CreateAlarm request
+pub const CREATE_ALARM_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateAlarmRequest<'input> {
     pub id: Alarm,
     pub value_list: &'input CreateAlarmAux,
 }
 impl<'input> CreateAlarmRequest<'input> {
-    /// Opcode for the CreateAlarm request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1307,7 +1307,7 @@ impl<'input> CreateAlarmRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_ALARM_REQUEST,
             0,
             0,
             id_bytes[0],
@@ -1442,14 +1442,14 @@ impl ChangeAlarmAux {
     }
 }
 
+/// Opcode for the ChangeAlarm request
+pub const CHANGE_ALARM_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeAlarmRequest<'input> {
     pub id: Alarm,
     pub value_list: &'input ChangeAlarmAux,
 }
 impl<'input> ChangeAlarmRequest<'input> {
-    /// Opcode for the ChangeAlarm request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1463,7 +1463,7 @@ impl<'input> ChangeAlarmRequest<'input> {
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_ALARM_REQUEST,
             0,
             0,
             id_bytes[0],
@@ -1499,13 +1499,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DestroyAlarm request
+pub const DESTROY_ALARM_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyAlarmRequest {
     pub alarm: Alarm,
 }
 impl DestroyAlarmRequest {
-    /// Opcode for the DestroyAlarm request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1517,7 +1517,7 @@ impl DestroyAlarmRequest {
         let alarm_bytes = self.alarm.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_ALARM_REQUEST,
             0,
             0,
             alarm_bytes[0],
@@ -1544,13 +1544,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the QueryAlarm request
+pub const QUERY_ALARM_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryAlarmRequest {
     pub alarm: Alarm,
 }
 impl QueryAlarmRequest {
-    /// Opcode for the QueryAlarm request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1562,7 +1562,7 @@ impl QueryAlarmRequest {
         let alarm_bytes = self.alarm.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_ALARM_REQUEST,
             0,
             0,
             alarm_bytes[0],
@@ -1622,14 +1622,14 @@ impl TryFrom<&[u8]> for QueryAlarmReply {
     }
 }
 
+/// Opcode for the SetPriority request
+pub const SET_PRIORITY_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPriorityRequest {
     pub id: u32,
     pub priority: i32,
 }
 impl SetPriorityRequest {
-    /// Opcode for the SetPriority request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1642,7 +1642,7 @@ impl SetPriorityRequest {
         let priority_bytes = self.priority.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PRIORITY_REQUEST,
             0,
             0,
             id_bytes[0],
@@ -1674,13 +1674,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetPriority request
+pub const GET_PRIORITY_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPriorityRequest {
     pub id: u32,
 }
 impl GetPriorityRequest {
-    /// Opcode for the GetPriority request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1692,7 +1692,7 @@ impl GetPriorityRequest {
         let id_bytes = self.id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PRIORITY_REQUEST,
             0,
             0,
             id_bytes[0],
@@ -1744,6 +1744,8 @@ impl TryFrom<&[u8]> for GetPriorityReply {
     }
 }
 
+/// Opcode for the CreateFence request
+pub const CREATE_FENCE_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateFenceRequest {
     pub drawable: xproto::Drawable,
@@ -1751,8 +1753,6 @@ pub struct CreateFenceRequest {
     pub initially_triggered: bool,
 }
 impl CreateFenceRequest {
-    /// Opcode for the CreateFence request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1766,7 +1766,7 @@ impl CreateFenceRequest {
         let initially_triggered_bytes = self.initially_triggered.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_FENCE_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -1803,13 +1803,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the TriggerFence request
+pub const TRIGGER_FENCE_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TriggerFenceRequest {
     pub fence: Fence,
 }
 impl TriggerFenceRequest {
-    /// Opcode for the TriggerFence request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1821,7 +1821,7 @@ impl TriggerFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            TRIGGER_FENCE_REQUEST,
             0,
             0,
             fence_bytes[0],
@@ -1848,13 +1848,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ResetFence request
+pub const RESET_FENCE_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ResetFenceRequest {
     pub fence: Fence,
 }
 impl ResetFenceRequest {
-    /// Opcode for the ResetFence request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1866,7 +1866,7 @@ impl ResetFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            RESET_FENCE_REQUEST,
             0,
             0,
             fence_bytes[0],
@@ -1893,13 +1893,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DestroyFence request
+pub const DESTROY_FENCE_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyFenceRequest {
     pub fence: Fence,
 }
 impl DestroyFenceRequest {
-    /// Opcode for the DestroyFence request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1911,7 +1911,7 @@ impl DestroyFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_FENCE_REQUEST,
             0,
             0,
             fence_bytes[0],
@@ -1938,13 +1938,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the QueryFence request
+pub const QUERY_FENCE_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryFenceRequest {
     pub fence: Fence,
 }
 impl QueryFenceRequest {
-    /// Opcode for the QueryFence request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1956,7 +1956,7 @@ impl QueryFenceRequest {
         let fence_bytes = self.fence.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_FENCE_REQUEST,
             0,
             0,
             fence_bytes[0],
@@ -2009,13 +2009,13 @@ impl TryFrom<&[u8]> for QueryFenceReply {
     }
 }
 
+/// Opcode for the AwaitFence request
+pub const AWAIT_FENCE_REQUEST: u8 = 19;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AwaitFenceRequest<'input> {
     pub fence_list: &'input [Fence],
 }
 impl<'input> AwaitFenceRequest<'input> {
-    /// Opcode for the AwaitFence request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2026,7 +2026,7 @@ impl<'input> AwaitFenceRequest<'input> {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            AWAIT_FENCE_REQUEST,
             0,
             0,
         ];

@@ -365,11 +365,11 @@ impl Serialize for ModeInfo {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -380,7 +380,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
         ];
@@ -428,13 +428,13 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the GetModeLine request
+pub const GET_MODE_LINE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetModeLineRequest {
     pub screen: u16,
 }
 impl GetModeLineRequest {
-    /// Opcode for the GetModeLine request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -446,7 +446,7 @@ impl GetModeLineRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MODE_LINE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -539,6 +539,8 @@ impl GetModeLineReply {
     }
 }
 
+/// Opcode for the ModModeLine request
+pub const MOD_MODE_LINE_REQUEST: u8 = 2;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ModModeLineRequest<'input> {
     pub screen: u32,
@@ -555,8 +557,6 @@ pub struct ModModeLineRequest<'input> {
     pub private: &'input [u8],
 }
 impl<'input> ModModeLineRequest<'input> {
-    /// Opcode for the ModModeLine request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -580,7 +580,7 @@ impl<'input> ModModeLineRequest<'input> {
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            MOD_MODE_LINE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -663,14 +663,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SwitchMode request
+pub const SWITCH_MODE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SwitchModeRequest {
     pub screen: u16,
     pub zoom: u16,
 }
 impl SwitchModeRequest {
-    /// Opcode for the SwitchMode request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -683,7 +683,7 @@ impl SwitchModeRequest {
         let zoom_bytes = self.zoom.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SWITCH_MODE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -711,13 +711,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetMonitor request
+pub const GET_MONITOR_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMonitorRequest {
     pub screen: u16,
 }
 impl GetMonitorRequest {
-    /// Opcode for the GetMonitor request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -729,7 +729,7 @@ impl GetMonitorRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MONITOR_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -851,14 +851,14 @@ impl GetMonitorReply {
     }
 }
 
+/// Opcode for the LockModeSwitch request
+pub const LOCK_MODE_SWITCH_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LockModeSwitchRequest {
     pub screen: u16,
     pub lock: u16,
 }
 impl LockModeSwitchRequest {
-    /// Opcode for the LockModeSwitch request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -871,7 +871,7 @@ impl LockModeSwitchRequest {
         let lock_bytes = self.lock.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LOCK_MODE_SWITCH_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -899,13 +899,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetAllModeLines request
+pub const GET_ALL_MODE_LINES_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetAllModeLinesRequest {
     pub screen: u16,
 }
 impl GetAllModeLinesRequest {
-    /// Opcode for the GetAllModeLines request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -917,7 +917,7 @@ impl GetAllModeLinesRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_ALL_MODE_LINES_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -986,6 +986,8 @@ impl GetAllModeLinesReply {
     }
 }
 
+/// Opcode for the AddModeLine request
+pub const ADD_MODE_LINE_REQUEST: u8 = 7;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddModeLineRequest<'input> {
     pub screen: u32,
@@ -1014,8 +1016,6 @@ pub struct AddModeLineRequest<'input> {
     pub private: &'input [u8],
 }
 impl<'input> AddModeLineRequest<'input> {
-    /// Opcode for the AddModeLine request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1051,7 +1051,7 @@ impl<'input> AddModeLineRequest<'input> {
         let after_flags_bytes = self.after_flags.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ADD_MODE_LINE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1192,6 +1192,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeleteModeLine request
+pub const DELETE_MODE_LINE_REQUEST: u8 = 8;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeleteModeLineRequest<'input> {
     pub screen: u32,
@@ -1209,8 +1211,6 @@ pub struct DeleteModeLineRequest<'input> {
     pub private: &'input [u8],
 }
 impl<'input> DeleteModeLineRequest<'input> {
-    /// Opcode for the DeleteModeLine request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1235,7 +1235,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_MODE_LINE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1323,6 +1323,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ValidateModeLine request
+pub const VALIDATE_MODE_LINE_REQUEST: u8 = 9;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValidateModeLineRequest<'input> {
     pub screen: u32,
@@ -1340,8 +1342,6 @@ pub struct ValidateModeLineRequest<'input> {
     pub private: &'input [u8],
 }
 impl<'input> ValidateModeLineRequest<'input> {
-    /// Opcode for the ValidateModeLine request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1366,7 +1366,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            VALIDATE_MODE_LINE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1480,6 +1480,8 @@ impl TryFrom<&[u8]> for ValidateModeLineReply {
     }
 }
 
+/// Opcode for the SwitchToMode request
+pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SwitchToModeRequest<'input> {
     pub screen: u32,
@@ -1497,8 +1499,6 @@ pub struct SwitchToModeRequest<'input> {
     pub private: &'input [u8],
 }
 impl<'input> SwitchToModeRequest<'input> {
-    /// Opcode for the SwitchToMode request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1523,7 +1523,7 @@ impl<'input> SwitchToModeRequest<'input> {
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SWITCH_TO_MODE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1611,13 +1611,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetViewPort request
+pub const GET_VIEW_PORT_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetViewPortRequest {
     pub screen: u16,
 }
 impl GetViewPortRequest {
-    /// Opcode for the GetViewPort request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1629,7 +1629,7 @@ impl GetViewPortRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_VIEW_PORT_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1684,6 +1684,8 @@ impl TryFrom<&[u8]> for GetViewPortReply {
     }
 }
 
+/// Opcode for the SetViewPort request
+pub const SET_VIEW_PORT_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetViewPortRequest {
     pub screen: u16,
@@ -1691,8 +1693,6 @@ pub struct SetViewPortRequest {
     pub y: u32,
 }
 impl SetViewPortRequest {
-    /// Opcode for the SetViewPort request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1706,7 +1706,7 @@ impl SetViewPortRequest {
         let y_bytes = self.y.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_VIEW_PORT_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1743,13 +1743,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDotClocks request
+pub const GET_DOT_CLOCKS_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDotClocksRequest {
     pub screen: u16,
 }
 impl GetDotClocksRequest {
-    /// Opcode for the GetDotClocks request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1761,7 +1761,7 @@ impl GetDotClocksRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DOT_CLOCKS_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1820,14 +1820,14 @@ impl TryFrom<&[u8]> for GetDotClocksReply {
     }
 }
 
+/// Opcode for the SetClientVersion request
+pub const SET_CLIENT_VERSION_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetClientVersionRequest {
     pub major: u16,
     pub minor: u16,
 }
 impl SetClientVersionRequest {
-    /// Opcode for the SetClientVersion request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1840,7 +1840,7 @@ impl SetClientVersionRequest {
         let minor_bytes = self.minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_CLIENT_VERSION_REQUEST,
             0,
             0,
             major_bytes[0],
@@ -1868,6 +1868,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetGamma request
+pub const SET_GAMMA_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetGammaRequest {
     pub screen: u16,
@@ -1876,8 +1878,6 @@ pub struct SetGammaRequest {
     pub blue: u32,
 }
 impl SetGammaRequest {
-    /// Opcode for the SetGamma request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1892,7 +1892,7 @@ impl SetGammaRequest {
         let blue_bytes = self.blue.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_GAMMA_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -1946,13 +1946,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetGamma request
+pub const GET_GAMMA_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetGammaRequest {
     pub screen: u16,
 }
 impl GetGammaRequest {
-    /// Opcode for the GetGamma request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1964,7 +1964,7 @@ impl GetGammaRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_GAMMA_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -2045,14 +2045,14 @@ impl TryFrom<&[u8]> for GetGammaReply {
     }
 }
 
+/// Opcode for the GetGammaRamp request
+pub const GET_GAMMA_RAMP_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetGammaRampRequest {
     pub screen: u16,
     pub size: u16,
 }
 impl GetGammaRampRequest {
-    /// Opcode for the GetGammaRamp request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2065,7 +2065,7 @@ impl GetGammaRampRequest {
         let size_bytes = self.size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_GAMMA_RAMP_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -2125,6 +2125,8 @@ impl TryFrom<&[u8]> for GetGammaRampReply {
     }
 }
 
+/// Opcode for the SetGammaRamp request
+pub const SET_GAMMA_RAMP_REQUEST: u8 = 18;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetGammaRampRequest<'input> {
     pub screen: u16,
@@ -2134,8 +2136,6 @@ pub struct SetGammaRampRequest<'input> {
     pub blue: &'input [u16],
 }
 impl<'input> SetGammaRampRequest<'input> {
-    /// Opcode for the SetGammaRamp request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2148,7 +2148,7 @@ impl<'input> SetGammaRampRequest<'input> {
         let size_bytes = self.size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_GAMMA_RAMP_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -2190,13 +2190,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetGammaRampSize request
+pub const GET_GAMMA_RAMP_SIZE_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetGammaRampSizeRequest {
     pub screen: u16,
 }
 impl GetGammaRampSizeRequest {
-    /// Opcode for the GetGammaRampSize request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2208,7 +2208,7 @@ impl GetGammaRampSizeRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_GAMMA_RAMP_SIZE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -2261,13 +2261,13 @@ impl TryFrom<&[u8]> for GetGammaRampSizeReply {
     }
 }
 
+/// Opcode for the GetPermissions request
+pub const GET_PERMISSIONS_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPermissionsRequest {
     pub screen: u16,
 }
 impl GetPermissionsRequest {
-    /// Opcode for the GetPermissions request
-    pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2279,7 +2279,7 @@ impl GetPermissionsRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PERMISSIONS_REQUEST,
             0,
             0,
             screen_bytes[0],

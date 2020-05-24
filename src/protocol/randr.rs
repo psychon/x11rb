@@ -500,14 +500,14 @@ impl RefreshRates {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -520,7 +520,7 @@ impl QueryVersionRequest {
         let minor_version_bytes = self.minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             major_version_bytes[0],
@@ -648,6 +648,8 @@ impl TryFrom<u32> for SetConfig {
     }
 }
 
+/// Opcode for the SetScreenConfig request
+pub const SET_SCREEN_CONFIG_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetScreenConfigRequest {
     pub window: xproto::Window,
@@ -658,8 +660,6 @@ pub struct SetScreenConfigRequest {
     pub rate: u16,
 }
 impl SetScreenConfigRequest {
-    /// Opcode for the SetScreenConfig request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -676,7 +676,7 @@ impl SetScreenConfigRequest {
         let rate_bytes = self.rate.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_SCREEN_CONFIG_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -842,14 +842,14 @@ impl TryFrom<u32> for NotifyMask {
 }
 bitmask_binop!(NotifyMask, u8);
 
+/// Opcode for the SelectInput request
+pub const SELECT_INPUT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectInputRequest {
     pub window: xproto::Window,
     pub enable: u16,
 }
 impl SelectInputRequest {
-    /// Opcode for the SelectInput request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -862,7 +862,7 @@ impl SelectInputRequest {
         let enable_bytes = self.enable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_INPUT_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -896,13 +896,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetScreenInfo request
+pub const GET_SCREEN_INFO_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenInfoRequest {
     pub window: xproto::Window,
 }
 impl GetScreenInfoRequest {
-    /// Opcode for the GetScreenInfo request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -914,7 +914,7 @@ impl GetScreenInfoRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SCREEN_INFO_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1000,13 +1000,13 @@ impl GetScreenInfoReply {
     }
 }
 
+/// Opcode for the GetScreenSizeRange request
+pub const GET_SCREEN_SIZE_RANGE_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSizeRangeRequest {
     pub window: xproto::Window,
 }
 impl GetScreenSizeRangeRequest {
-    /// Opcode for the GetScreenSizeRange request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1018,7 +1018,7 @@ impl GetScreenSizeRangeRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SCREEN_SIZE_RANGE_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1077,6 +1077,8 @@ impl TryFrom<&[u8]> for GetScreenSizeRangeReply {
     }
 }
 
+/// Opcode for the SetScreenSize request
+pub const SET_SCREEN_SIZE_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetScreenSizeRequest {
     pub window: xproto::Window,
@@ -1086,8 +1088,6 @@ pub struct SetScreenSizeRequest {
     pub mm_height: u32,
 }
 impl SetScreenSizeRequest {
-    /// Opcode for the SetScreenSize request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1103,7 +1103,7 @@ impl SetScreenSizeRequest {
         let mm_height_bytes = self.mm_height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_SCREEN_SIZE_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1339,13 +1339,13 @@ impl Serialize for ModeInfo {
     }
 }
 
+/// Opcode for the GetScreenResources request
+pub const GET_SCREEN_RESOURCES_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenResourcesRequest {
     pub window: xproto::Window,
 }
 impl GetScreenResourcesRequest {
-    /// Opcode for the GetScreenResources request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1357,7 +1357,7 @@ impl GetScreenResourcesRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SCREEN_RESOURCES_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1544,14 +1544,14 @@ impl TryFrom<u32> for Connection {
     }
 }
 
+/// Opcode for the GetOutputInfo request
+pub const GET_OUTPUT_INFO_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOutputInfoRequest {
     pub output: Output,
     pub config_timestamp: xproto::Timestamp,
 }
 impl GetOutputInfoRequest {
-    /// Opcode for the GetOutputInfo request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1564,7 +1564,7 @@ impl GetOutputInfoRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_OUTPUT_INFO_REQUEST,
             0,
             0,
             output_bytes[0],
@@ -1704,13 +1704,13 @@ impl GetOutputInfoReply {
     }
 }
 
+/// Opcode for the ListOutputProperties request
+pub const LIST_OUTPUT_PROPERTIES_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListOutputPropertiesRequest {
     pub output: Output,
 }
 impl ListOutputPropertiesRequest {
-    /// Opcode for the ListOutputProperties request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1722,7 +1722,7 @@ impl ListOutputPropertiesRequest {
         let output_bytes = self.output.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_OUTPUT_PROPERTIES_REQUEST,
             0,
             0,
             output_bytes[0],
@@ -1791,14 +1791,14 @@ impl ListOutputPropertiesReply {
     }
 }
 
+/// Opcode for the QueryOutputProperty request
+pub const QUERY_OUTPUT_PROPERTY_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryOutputPropertyRequest {
     pub output: Output,
     pub property: xproto::Atom,
 }
 impl QueryOutputPropertyRequest {
-    /// Opcode for the QueryOutputProperty request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1811,7 +1811,7 @@ impl QueryOutputPropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_OUTPUT_PROPERTY_REQUEST,
             0,
             0,
             output_bytes[0],
@@ -1889,6 +1889,8 @@ impl QueryOutputPropertyReply {
     }
 }
 
+/// Opcode for the ConfigureOutputProperty request
+pub const CONFIGURE_OUTPUT_PROPERTY_REQUEST: u8 = 12;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConfigureOutputPropertyRequest<'input> {
     pub output: Output,
@@ -1898,8 +1900,6 @@ pub struct ConfigureOutputPropertyRequest<'input> {
     pub values: &'input [i32],
 }
 impl<'input> ConfigureOutputPropertyRequest<'input> {
-    /// Opcode for the ConfigureOutputProperty request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1914,7 +1914,7 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
         let range_bytes = self.range.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CONFIGURE_OUTPUT_PROPERTY_REQUEST,
             0,
             0,
             output_bytes[0],
@@ -1957,6 +1957,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ChangeOutputProperty request
+pub const CHANGE_OUTPUT_PROPERTY_REQUEST: u8 = 13;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeOutputPropertyRequest<'input> {
     pub output: Output,
@@ -1968,8 +1970,6 @@ pub struct ChangeOutputPropertyRequest<'input> {
     pub data: &'input [u8],
 }
 impl<'input> ChangeOutputPropertyRequest<'input> {
-    /// Opcode for the ChangeOutputProperty request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1986,7 +1986,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         let num_units_bytes = self.num_units.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_OUTPUT_PROPERTY_REQUEST,
             0,
             0,
             output_bytes[0],
@@ -2039,14 +2039,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeleteOutputProperty request
+pub const DELETE_OUTPUT_PROPERTY_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeleteOutputPropertyRequest {
     pub output: Output,
     pub property: xproto::Atom,
 }
 impl DeleteOutputPropertyRequest {
-    /// Opcode for the DeleteOutputProperty request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2059,7 +2059,7 @@ impl DeleteOutputPropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_OUTPUT_PROPERTY_REQUEST,
             0,
             0,
             output_bytes[0],
@@ -2091,6 +2091,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetOutputProperty request
+pub const GET_OUTPUT_PROPERTY_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOutputPropertyRequest {
     pub output: Output,
@@ -2102,8 +2104,6 @@ pub struct GetOutputPropertyRequest {
     pub pending: bool,
 }
 impl GetOutputPropertyRequest {
-    /// Opcode for the GetOutputProperty request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2121,7 +2121,7 @@ impl GetOutputPropertyRequest {
         let pending_bytes = self.pending.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_OUTPUT_PROPERTY_REQUEST,
             0,
             0,
             output_bytes[0],
@@ -2210,6 +2210,8 @@ impl TryFrom<&[u8]> for GetOutputPropertyReply {
     }
 }
 
+/// Opcode for the CreateMode request
+pub const CREATE_MODE_REQUEST: u8 = 16;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateModeRequest<'input> {
     pub window: xproto::Window,
@@ -2217,8 +2219,6 @@ pub struct CreateModeRequest<'input> {
     pub name: &'input [u8],
 }
 impl<'input> CreateModeRequest<'input> {
-    /// Opcode for the CreateMode request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2231,7 +2231,7 @@ impl<'input> CreateModeRequest<'input> {
         let mode_info_bytes = self.mode_info.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_MODE_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -2321,13 +2321,13 @@ impl TryFrom<&[u8]> for CreateModeReply {
     }
 }
 
+/// Opcode for the DestroyMode request
+pub const DESTROY_MODE_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyModeRequest {
     pub mode: Mode,
 }
 impl DestroyModeRequest {
-    /// Opcode for the DestroyMode request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2339,7 +2339,7 @@ impl DestroyModeRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_MODE_REQUEST,
             0,
             0,
             mode_bytes[0],
@@ -2366,14 +2366,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the AddOutputMode request
+pub const ADD_OUTPUT_MODE_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AddOutputModeRequest {
     pub output: Output,
     pub mode: Mode,
 }
 impl AddOutputModeRequest {
-    /// Opcode for the AddOutputMode request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2386,7 +2386,7 @@ impl AddOutputModeRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ADD_OUTPUT_MODE_REQUEST,
             0,
             0,
             output_bytes[0],
@@ -2418,14 +2418,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeleteOutputMode request
+pub const DELETE_OUTPUT_MODE_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeleteOutputModeRequest {
     pub output: Output,
     pub mode: Mode,
 }
 impl DeleteOutputModeRequest {
-    /// Opcode for the DeleteOutputMode request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2438,7 +2438,7 @@ impl DeleteOutputModeRequest {
         let mode_bytes = self.mode.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_OUTPUT_MODE_REQUEST,
             0,
             0,
             output_bytes[0],
@@ -2470,14 +2470,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetCrtcInfo request
+pub const GET_CRTC_INFO_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCrtcInfoRequest {
     pub crtc: Crtc,
     pub config_timestamp: xproto::Timestamp,
 }
 impl GetCrtcInfoRequest {
-    /// Opcode for the GetCrtcInfo request
-    pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2490,7 +2490,7 @@ impl GetCrtcInfoRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CRTC_INFO_REQUEST,
             0,
             0,
             crtc_bytes[0],
@@ -2597,6 +2597,8 @@ impl GetCrtcInfoReply {
     }
 }
 
+/// Opcode for the SetCrtcConfig request
+pub const SET_CRTC_CONFIG_REQUEST: u8 = 21;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetCrtcConfigRequest<'input> {
     pub crtc: Crtc,
@@ -2609,8 +2611,6 @@ pub struct SetCrtcConfigRequest<'input> {
     pub outputs: &'input [Output],
 }
 impl<'input> SetCrtcConfigRequest<'input> {
-    /// Opcode for the SetCrtcConfig request
-    pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2628,7 +2628,7 @@ impl<'input> SetCrtcConfigRequest<'input> {
         let rotation_bytes = self.rotation.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_CRTC_CONFIG_REQUEST,
             0,
             0,
             crtc_bytes[0],
@@ -2716,13 +2716,13 @@ impl TryFrom<&[u8]> for SetCrtcConfigReply {
     }
 }
 
+/// Opcode for the GetCrtcGammaSize request
+pub const GET_CRTC_GAMMA_SIZE_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCrtcGammaSizeRequest {
     pub crtc: Crtc,
 }
 impl GetCrtcGammaSizeRequest {
-    /// Opcode for the GetCrtcGammaSize request
-    pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2734,7 +2734,7 @@ impl GetCrtcGammaSizeRequest {
         let crtc_bytes = self.crtc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CRTC_GAMMA_SIZE_REQUEST,
             0,
             0,
             crtc_bytes[0],
@@ -2787,13 +2787,13 @@ impl TryFrom<&[u8]> for GetCrtcGammaSizeReply {
     }
 }
 
+/// Opcode for the GetCrtcGamma request
+pub const GET_CRTC_GAMMA_REQUEST: u8 = 23;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCrtcGammaRequest {
     pub crtc: Crtc,
 }
 impl GetCrtcGammaRequest {
-    /// Opcode for the GetCrtcGamma request
-    pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2805,7 +2805,7 @@ impl GetCrtcGammaRequest {
         let crtc_bytes = self.crtc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CRTC_GAMMA_REQUEST,
             0,
             0,
             crtc_bytes[0],
@@ -2878,6 +2878,8 @@ impl GetCrtcGammaReply {
     }
 }
 
+/// Opcode for the SetCrtcGamma request
+pub const SET_CRTC_GAMMA_REQUEST: u8 = 24;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetCrtcGammaRequest<'input> {
     pub crtc: Crtc,
@@ -2886,8 +2888,6 @@ pub struct SetCrtcGammaRequest<'input> {
     pub blue: &'input [u16],
 }
 impl<'input> SetCrtcGammaRequest<'input> {
-    /// Opcode for the SetCrtcGamma request
-    pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2901,7 +2901,7 @@ impl<'input> SetCrtcGammaRequest<'input> {
         let size_bytes = size.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_CRTC_GAMMA_REQUEST,
             0,
             0,
             crtc_bytes[0],
@@ -2945,13 +2945,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetScreenResourcesCurrent request
+pub const GET_SCREEN_RESOURCES_CURRENT_REQUEST: u8 = 25;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenResourcesCurrentRequest {
     pub window: xproto::Window,
 }
 impl GetScreenResourcesCurrentRequest {
-    /// Opcode for the GetScreenResourcesCurrent request
-    pub const fn opcode() -> u8 { 25 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2963,7 +2963,7 @@ impl GetScreenResourcesCurrentRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SCREEN_RESOURCES_CURRENT_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -3154,6 +3154,8 @@ impl TryFrom<u32> for Transform {
 }
 bitmask_binop!(Transform, u8);
 
+/// Opcode for the SetCrtcTransform request
+pub const SET_CRTC_TRANSFORM_REQUEST: u8 = 26;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetCrtcTransformRequest<'input> {
     pub crtc: Crtc,
@@ -3162,8 +3164,6 @@ pub struct SetCrtcTransformRequest<'input> {
     pub filter_params: &'input [render::Fixed],
 }
 impl<'input> SetCrtcTransformRequest<'input> {
-    /// Opcode for the SetCrtcTransform request
-    pub const fn opcode() -> u8 { 26 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3178,7 +3178,7 @@ impl<'input> SetCrtcTransformRequest<'input> {
         let filter_len_bytes = filter_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_CRTC_TRANSFORM_REQUEST,
             0,
             0,
             crtc_bytes[0],
@@ -3255,13 +3255,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetCrtcTransform request
+pub const GET_CRTC_TRANSFORM_REQUEST: u8 = 27;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCrtcTransformRequest {
     pub crtc: Crtc,
 }
 impl GetCrtcTransformRequest {
-    /// Opcode for the GetCrtcTransform request
-    pub const fn opcode() -> u8 { 27 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3273,7 +3273,7 @@ impl GetCrtcTransformRequest {
         let crtc_bytes = self.crtc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CRTC_TRANSFORM_REQUEST,
             0,
             0,
             crtc_bytes[0],
@@ -3408,13 +3408,13 @@ impl GetCrtcTransformReply {
     }
 }
 
+/// Opcode for the GetPanning request
+pub const GET_PANNING_REQUEST: u8 = 28;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPanningRequest {
     pub crtc: Crtc,
 }
 impl GetPanningRequest {
-    /// Opcode for the GetPanning request
-    pub const fn opcode() -> u8 { 28 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3426,7 +3426,7 @@ impl GetPanningRequest {
         let crtc_bytes = self.crtc.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PANNING_REQUEST,
             0,
             0,
             crtc_bytes[0],
@@ -3504,6 +3504,8 @@ impl TryFrom<&[u8]> for GetPanningReply {
     }
 }
 
+/// Opcode for the SetPanning request
+pub const SET_PANNING_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPanningRequest {
     pub crtc: Crtc,
@@ -3522,8 +3524,6 @@ pub struct SetPanningRequest {
     pub border_bottom: i16,
 }
 impl SetPanningRequest {
-    /// Opcode for the SetPanning request
-    pub const fn opcode() -> u8 { 29 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3548,7 +3548,7 @@ impl SetPanningRequest {
         let border_bottom_bytes = self.border_bottom.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PANNING_REQUEST,
             0,
             0,
             crtc_bytes[0],
@@ -3643,14 +3643,14 @@ impl TryFrom<&[u8]> for SetPanningReply {
     }
 }
 
+/// Opcode for the SetOutputPrimary request
+pub const SET_OUTPUT_PRIMARY_REQUEST: u8 = 30;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetOutputPrimaryRequest {
     pub window: xproto::Window,
     pub output: Output,
 }
 impl SetOutputPrimaryRequest {
-    /// Opcode for the SetOutputPrimary request
-    pub const fn opcode() -> u8 { 30 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3663,7 +3663,7 @@ impl SetOutputPrimaryRequest {
         let output_bytes = self.output.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_OUTPUT_PRIMARY_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -3695,13 +3695,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetOutputPrimary request
+pub const GET_OUTPUT_PRIMARY_REQUEST: u8 = 31;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOutputPrimaryRequest {
     pub window: xproto::Window,
 }
 impl GetOutputPrimaryRequest {
-    /// Opcode for the GetOutputPrimary request
-    pub const fn opcode() -> u8 { 31 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3713,7 +3713,7 @@ impl GetOutputPrimaryRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_OUTPUT_PRIMARY_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -3765,13 +3765,13 @@ impl TryFrom<&[u8]> for GetOutputPrimaryReply {
     }
 }
 
+/// Opcode for the GetProviders request
+pub const GET_PROVIDERS_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetProvidersRequest {
     pub window: xproto::Window,
 }
 impl GetProvidersRequest {
-    /// Opcode for the GetProviders request
-    pub const fn opcode() -> u8 { 32 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3783,7 +3783,7 @@ impl GetProvidersRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PROVIDERS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -3923,14 +3923,14 @@ impl TryFrom<u32> for ProviderCapability {
 }
 bitmask_binop!(ProviderCapability, u8);
 
+/// Opcode for the GetProviderInfo request
+pub const GET_PROVIDER_INFO_REQUEST: u8 = 33;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetProviderInfoRequest {
     pub provider: Provider,
     pub config_timestamp: xproto::Timestamp,
 }
 impl GetProviderInfoRequest {
-    /// Opcode for the GetProviderInfo request
-    pub const fn opcode() -> u8 { 33 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3943,7 +3943,7 @@ impl GetProviderInfoRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PROVIDER_INFO_REQUEST,
             0,
             0,
             provider_bytes[0],
@@ -4073,6 +4073,8 @@ impl GetProviderInfoReply {
     }
 }
 
+/// Opcode for the SetProviderOffloadSink request
+pub const SET_PROVIDER_OFFLOAD_SINK_REQUEST: u8 = 34;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetProviderOffloadSinkRequest {
     pub provider: Provider,
@@ -4080,8 +4082,6 @@ pub struct SetProviderOffloadSinkRequest {
     pub config_timestamp: xproto::Timestamp,
 }
 impl SetProviderOffloadSinkRequest {
-    /// Opcode for the SetProviderOffloadSink request
-    pub const fn opcode() -> u8 { 34 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4095,7 +4095,7 @@ impl SetProviderOffloadSinkRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PROVIDER_OFFLOAD_SINK_REQUEST,
             0,
             0,
             provider_bytes[0],
@@ -4132,6 +4132,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetProviderOutputSource request
+pub const SET_PROVIDER_OUTPUT_SOURCE_REQUEST: u8 = 35;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetProviderOutputSourceRequest {
     pub provider: Provider,
@@ -4139,8 +4141,6 @@ pub struct SetProviderOutputSourceRequest {
     pub config_timestamp: xproto::Timestamp,
 }
 impl SetProviderOutputSourceRequest {
-    /// Opcode for the SetProviderOutputSource request
-    pub const fn opcode() -> u8 { 35 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4154,7 +4154,7 @@ impl SetProviderOutputSourceRequest {
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PROVIDER_OUTPUT_SOURCE_REQUEST,
             0,
             0,
             provider_bytes[0],
@@ -4191,13 +4191,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ListProviderProperties request
+pub const LIST_PROVIDER_PROPERTIES_REQUEST: u8 = 36;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListProviderPropertiesRequest {
     pub provider: Provider,
 }
 impl ListProviderPropertiesRequest {
-    /// Opcode for the ListProviderProperties request
-    pub const fn opcode() -> u8 { 36 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4209,7 +4209,7 @@ impl ListProviderPropertiesRequest {
         let provider_bytes = self.provider.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_PROVIDER_PROPERTIES_REQUEST,
             0,
             0,
             provider_bytes[0],
@@ -4278,14 +4278,14 @@ impl ListProviderPropertiesReply {
     }
 }
 
+/// Opcode for the QueryProviderProperty request
+pub const QUERY_PROVIDER_PROPERTY_REQUEST: u8 = 37;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryProviderPropertyRequest {
     pub provider: Provider,
     pub property: xproto::Atom,
 }
 impl QueryProviderPropertyRequest {
-    /// Opcode for the QueryProviderProperty request
-    pub const fn opcode() -> u8 { 37 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4298,7 +4298,7 @@ impl QueryProviderPropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_PROVIDER_PROPERTY_REQUEST,
             0,
             0,
             provider_bytes[0],
@@ -4376,6 +4376,8 @@ impl QueryProviderPropertyReply {
     }
 }
 
+/// Opcode for the ConfigureProviderProperty request
+pub const CONFIGURE_PROVIDER_PROPERTY_REQUEST: u8 = 38;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConfigureProviderPropertyRequest<'input> {
     pub provider: Provider,
@@ -4385,8 +4387,6 @@ pub struct ConfigureProviderPropertyRequest<'input> {
     pub values: &'input [i32],
 }
 impl<'input> ConfigureProviderPropertyRequest<'input> {
-    /// Opcode for the ConfigureProviderProperty request
-    pub const fn opcode() -> u8 { 38 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4401,7 +4401,7 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
         let range_bytes = self.range.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CONFIGURE_PROVIDER_PROPERTY_REQUEST,
             0,
             0,
             provider_bytes[0],
@@ -4444,6 +4444,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ChangeProviderProperty request
+pub const CHANGE_PROVIDER_PROPERTY_REQUEST: u8 = 39;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeProviderPropertyRequest<'input> {
     pub provider: Provider,
@@ -4455,8 +4457,6 @@ pub struct ChangeProviderPropertyRequest<'input> {
     pub data: &'input [u8],
 }
 impl<'input> ChangeProviderPropertyRequest<'input> {
-    /// Opcode for the ChangeProviderProperty request
-    pub const fn opcode() -> u8 { 39 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4473,7 +4473,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         let num_items_bytes = self.num_items.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CHANGE_PROVIDER_PROPERTY_REQUEST,
             0,
             0,
             provider_bytes[0],
@@ -4526,14 +4526,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeleteProviderProperty request
+pub const DELETE_PROVIDER_PROPERTY_REQUEST: u8 = 40;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeleteProviderPropertyRequest {
     pub provider: Provider,
     pub property: xproto::Atom,
 }
 impl DeleteProviderPropertyRequest {
-    /// Opcode for the DeleteProviderProperty request
-    pub const fn opcode() -> u8 { 40 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4546,7 +4546,7 @@ impl DeleteProviderPropertyRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_PROVIDER_PROPERTY_REQUEST,
             0,
             0,
             provider_bytes[0],
@@ -4578,6 +4578,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetProviderProperty request
+pub const GET_PROVIDER_PROPERTY_REQUEST: u8 = 41;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetProviderPropertyRequest {
     pub provider: Provider,
@@ -4589,8 +4591,6 @@ pub struct GetProviderPropertyRequest {
     pub pending: bool,
 }
 impl GetProviderPropertyRequest {
-    /// Opcode for the GetProviderProperty request
-    pub const fn opcode() -> u8 { 41 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -4608,7 +4608,7 @@ impl GetProviderPropertyRequest {
         let pending_bytes = self.pending.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PROVIDER_PROPERTY_REQUEST,
             0,
             0,
             provider_bytes[0],
@@ -5417,14 +5417,14 @@ impl MonitorInfo {
     }
 }
 
+/// Opcode for the GetMonitors request
+pub const GET_MONITORS_REQUEST: u8 = 42;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMonitorsRequest {
     pub window: xproto::Window,
     pub get_active: bool,
 }
 impl GetMonitorsRequest {
-    /// Opcode for the GetMonitors request
-    pub const fn opcode() -> u8 { 42 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5437,7 +5437,7 @@ impl GetMonitorsRequest {
         let get_active_bytes = self.get_active.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MONITORS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -5515,14 +5515,14 @@ impl GetMonitorsReply {
     }
 }
 
+/// Opcode for the SetMonitor request
+pub const SET_MONITOR_REQUEST: u8 = 43;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetMonitorRequest {
     pub window: xproto::Window,
     pub monitorinfo: MonitorInfo,
 }
 impl SetMonitorRequest {
-    /// Opcode for the SetMonitor request
-    pub const fn opcode() -> u8 { 43 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5534,7 +5534,7 @@ impl SetMonitorRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_MONITOR_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -5566,14 +5566,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the DeleteMonitor request
+pub const DELETE_MONITOR_REQUEST: u8 = 44;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeleteMonitorRequest {
     pub window: xproto::Window,
     pub name: xproto::Atom,
 }
 impl DeleteMonitorRequest {
-    /// Opcode for the DeleteMonitor request
-    pub const fn opcode() -> u8 { 44 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5586,7 +5586,7 @@ impl DeleteMonitorRequest {
         let name_bytes = self.name.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DELETE_MONITOR_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -5618,6 +5618,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateLease request
+pub const CREATE_LEASE_REQUEST: u8 = 45;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateLeaseRequest<'input> {
     pub window: xproto::Window,
@@ -5626,8 +5628,6 @@ pub struct CreateLeaseRequest<'input> {
     pub outputs: &'input [Output],
 }
 impl<'input> CreateLeaseRequest<'input> {
-    /// Opcode for the CreateLease request
-    pub const fn opcode() -> u8 { 45 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5644,7 +5644,7 @@ impl<'input> CreateLeaseRequest<'input> {
         let num_outputs_bytes = num_outputs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_LEASE_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -5717,14 +5717,14 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for CreateLeaseReply {
     }
 }
 
+/// Opcode for the FreeLease request
+pub const FREE_LEASE_REQUEST: u8 = 46;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FreeLeaseRequest {
     pub lid: Lease,
     pub terminate: u8,
 }
 impl FreeLeaseRequest {
-    /// Opcode for the FreeLease request
-    pub const fn opcode() -> u8 { 46 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -5737,7 +5737,7 @@ impl FreeLeaseRequest {
         let terminate_bytes = self.terminate.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FREE_LEASE_REQUEST,
             0,
             0,
             lid_bytes[0],

@@ -124,11 +124,11 @@ impl From<CompletionEvent> for [u8; 32] {
 pub const BAD_SEG_ERROR: u8 = 0;
 pub type BadSegError = xproto::ValueError;
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -139,7 +139,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
         ];
@@ -195,6 +195,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the Attach request
+pub const ATTACH_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AttachRequest {
     pub shmseg: Seg,
@@ -202,8 +204,6 @@ pub struct AttachRequest {
     pub read_only: bool,
 }
 impl AttachRequest {
-    /// Opcode for the Attach request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -217,7 +217,7 @@ impl AttachRequest {
         let read_only_bytes = self.read_only.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ATTACH_REQUEST,
             0,
             0,
             shmseg_bytes[0],
@@ -254,13 +254,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Detach request
+pub const DETACH_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DetachRequest {
     pub shmseg: Seg,
 }
 impl DetachRequest {
-    /// Opcode for the Detach request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -272,7 +272,7 @@ impl DetachRequest {
         let shmseg_bytes = self.shmseg.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DETACH_REQUEST,
             0,
             0,
             shmseg_bytes[0],
@@ -299,6 +299,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PutImage request
+pub const PUT_IMAGE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PutImageRequest {
     pub drawable: xproto::Drawable,
@@ -318,8 +320,6 @@ pub struct PutImageRequest {
     pub offset: u32,
 }
 impl PutImageRequest {
-    /// Opcode for the PutImage request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -345,7 +345,7 @@ impl PutImageRequest {
         let offset_bytes = self.offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PUT_IMAGE_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -418,6 +418,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetImage request
+pub const GET_IMAGE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetImageRequest {
     pub drawable: xproto::Drawable,
@@ -431,8 +433,6 @@ pub struct GetImageRequest {
     pub offset: u32,
 }
 impl GetImageRequest {
-    /// Opcode for the GetImage request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -452,7 +452,7 @@ impl GetImageRequest {
         let offset_bytes = self.offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_IMAGE_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -539,6 +539,8 @@ impl TryFrom<&[u8]> for GetImageReply {
     }
 }
 
+/// Opcode for the CreatePixmap request
+pub const CREATE_PIXMAP_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreatePixmapRequest {
     pub pid: xproto::Pixmap,
@@ -550,8 +552,6 @@ pub struct CreatePixmapRequest {
     pub offset: u32,
 }
 impl CreatePixmapRequest {
-    /// Opcode for the CreatePixmap request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -569,7 +569,7 @@ impl CreatePixmapRequest {
         let offset_bytes = self.offset.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_PIXMAP_REQUEST,
             0,
             0,
             pid_bytes[0],
@@ -622,6 +622,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the AttachFd request
+pub const ATTACH_FD_REQUEST: u8 = 6;
 #[derive(Debug, PartialEq, Eq)]
 pub struct AttachFdRequest {
     pub shmseg: Seg,
@@ -629,8 +631,6 @@ pub struct AttachFdRequest {
     pub read_only: bool,
 }
 impl AttachFdRequest {
-    /// Opcode for the AttachFd request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -643,7 +643,7 @@ impl AttachFdRequest {
         let read_only_bytes = self.read_only.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ATTACH_FD_REQUEST,
             0,
             0,
             shmseg_bytes[0],
@@ -678,6 +678,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateSegment request
+pub const CREATE_SEGMENT_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateSegmentRequest {
     pub shmseg: Seg,
@@ -685,8 +687,6 @@ pub struct CreateSegmentRequest {
     pub read_only: bool,
 }
 impl CreateSegmentRequest {
-    /// Opcode for the CreateSegment request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -700,7 +700,7 @@ impl CreateSegmentRequest {
         let read_only_bytes = self.read_only.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_SEGMENT_REQUEST,
             0,
             0,
             shmseg_bytes[0],

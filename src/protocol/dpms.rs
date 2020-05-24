@@ -32,14 +32,14 @@ pub const X11_EXTENSION_NAME: &str = "DPMS";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (0, 0);
 
+/// Opcode for the GetVersion request
+pub const GET_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
 }
 impl GetVersionRequest {
-    /// Opcode for the GetVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -52,7 +52,7 @@ impl GetVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_VERSION_REQUEST,
             0,
             0,
             client_major_version_bytes[0],
@@ -107,11 +107,11 @@ impl TryFrom<&[u8]> for GetVersionReply {
     }
 }
 
+/// Opcode for the Capable request
+pub const CAPABLE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CapableRequest;
 impl CapableRequest {
-    /// Opcode for the Capable request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -122,7 +122,7 @@ impl CapableRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CAPABLE_REQUEST,
             0,
             0,
         ];
@@ -169,11 +169,11 @@ impl TryFrom<&[u8]> for CapableReply {
     }
 }
 
+/// Opcode for the GetTimeouts request
+pub const GET_TIMEOUTS_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTimeoutsRequest;
 impl GetTimeoutsRequest {
-    /// Opcode for the GetTimeouts request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -184,7 +184,7 @@ impl GetTimeoutsRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_TIMEOUTS_REQUEST,
             0,
             0,
         ];
@@ -235,6 +235,8 @@ impl TryFrom<&[u8]> for GetTimeoutsReply {
     }
 }
 
+/// Opcode for the SetTimeouts request
+pub const SET_TIMEOUTS_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetTimeoutsRequest {
     pub standby_timeout: u16,
@@ -242,8 +244,6 @@ pub struct SetTimeoutsRequest {
     pub off_timeout: u16,
 }
 impl SetTimeoutsRequest {
-    /// Opcode for the SetTimeouts request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -257,7 +257,7 @@ impl SetTimeoutsRequest {
         let off_timeout_bytes = self.off_timeout.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_TIMEOUTS_REQUEST,
             0,
             0,
             standby_timeout_bytes[0],
@@ -290,11 +290,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Enable request
+pub const ENABLE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnableRequest;
 impl EnableRequest {
-    /// Opcode for the Enable request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -305,7 +305,7 @@ impl EnableRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            ENABLE_REQUEST,
             0,
             0,
         ];
@@ -326,11 +326,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Disable request
+pub const DISABLE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DisableRequest;
 impl DisableRequest {
-    /// Opcode for the Disable request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -341,7 +341,7 @@ impl DisableRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DISABLE_REQUEST,
             0,
             0,
         ];
@@ -430,13 +430,13 @@ impl TryFrom<u32> for DPMSMode {
     }
 }
 
+/// Opcode for the ForceLevel request
+pub const FORCE_LEVEL_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ForceLevelRequest {
     pub power_level: DPMSMode,
 }
 impl ForceLevelRequest {
-    /// Opcode for the ForceLevel request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -448,7 +448,7 @@ impl ForceLevelRequest {
         let power_level_bytes = u16::from(self.power_level).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            FORCE_LEVEL_REQUEST,
             0,
             0,
             power_level_bytes[0],
@@ -475,11 +475,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Info request
+pub const INFO_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InfoRequest;
 impl InfoRequest {
-    /// Opcode for the Info request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -490,7 +490,7 @@ impl InfoRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            INFO_REQUEST,
             0,
             0,
         ];

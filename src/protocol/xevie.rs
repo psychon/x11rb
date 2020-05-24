@@ -32,14 +32,14 @@ pub const X11_EXTENSION_NAME: &str = "XEVIE";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -52,7 +52,7 @@ impl QueryVersionRequest {
         let client_minor_version_bytes = self.client_minor_version.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             client_major_version_bytes[0],
@@ -108,13 +108,13 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the Start request
+pub const START_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct StartRequest {
     pub screen: u32,
 }
 impl StartRequest {
-    /// Opcode for the Start request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -126,7 +126,7 @@ impl StartRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            START_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -177,13 +177,13 @@ impl TryFrom<&[u8]> for StartReply {
     }
 }
 
+/// Opcode for the End request
+pub const END_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EndRequest {
     pub cmap: u32,
 }
 impl EndRequest {
-    /// Opcode for the End request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -195,7 +195,7 @@ impl EndRequest {
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            END_REQUEST,
             0,
             0,
             cmap_bytes[0],
@@ -376,14 +376,14 @@ impl Serialize for Event {
     }
 }
 
+/// Opcode for the Send request
+pub const SEND_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SendRequest {
     pub event: Event,
     pub data_type: u32,
 }
 impl SendRequest {
-    /// Opcode for the Send request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -396,7 +396,7 @@ impl SendRequest {
         let data_type_bytes = self.data_type.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SEND_REQUEST,
             0,
             0,
             event_bytes[0],
@@ -544,13 +544,13 @@ impl TryFrom<&[u8]> for SendReply {
     }
 }
 
+/// Opcode for the SelectInput request
+pub const SELECT_INPUT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectInputRequest {
     pub event_mask: u32,
 }
 impl SelectInputRequest {
-    /// Opcode for the SelectInput request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -562,7 +562,7 @@ impl SelectInputRequest {
         let event_mask_bytes = self.event_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_INPUT_REQUEST,
             0,
             0,
             event_mask_bytes[0],

@@ -33,14 +33,14 @@ pub const X11_EXTENSION_NAME: &str = "SELinux";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest {
     pub client_major: u8,
     pub client_minor: u8,
 }
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -53,7 +53,7 @@ impl QueryVersionRequest {
         let client_minor_bytes = self.client_minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
             client_major_bytes[0],
@@ -108,13 +108,13 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the SetDeviceCreateContext request
+pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceCreateContextRequest<'input> {
     pub context: &'input [u8],
 }
 impl<'input> SetDeviceCreateContextRequest<'input> {
-    /// Opcode for the SetDeviceCreateContext request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -127,7 +127,7 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_DEVICE_CREATE_CONTEXT_REQUEST,
             0,
             0,
             context_len_bytes[0],
@@ -157,11 +157,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDeviceCreateContext request
+pub const GET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceCreateContextRequest;
 impl GetDeviceCreateContextRequest {
-    /// Opcode for the GetDeviceCreateContext request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -172,7 +172,7 @@ impl GetDeviceCreateContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_CREATE_CONTEXT_REQUEST,
             0,
             0,
         ];
@@ -236,14 +236,14 @@ impl GetDeviceCreateContextReply {
     }
 }
 
+/// Opcode for the SetDeviceContext request
+pub const SET_DEVICE_CONTEXT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceContextRequest<'input> {
     pub device: u32,
     pub context: &'input [u8],
 }
 impl<'input> SetDeviceContextRequest<'input> {
-    /// Opcode for the SetDeviceContext request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -257,7 +257,7 @@ impl<'input> SetDeviceContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_DEVICE_CONTEXT_REQUEST,
             0,
             0,
             device_bytes[0],
@@ -292,13 +292,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDeviceContext request
+pub const GET_DEVICE_CONTEXT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceContextRequest {
     pub device: u32,
 }
 impl GetDeviceContextRequest {
-    /// Opcode for the GetDeviceContext request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -310,7 +310,7 @@ impl GetDeviceContextRequest {
         let device_bytes = self.device.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_CONTEXT_REQUEST,
             0,
             0,
             device_bytes[0],
@@ -380,13 +380,13 @@ impl GetDeviceContextReply {
     }
 }
 
+/// Opcode for the SetWindowCreateContext request
+pub const SET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 5;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetWindowCreateContextRequest<'input> {
     pub context: &'input [u8],
 }
 impl<'input> SetWindowCreateContextRequest<'input> {
-    /// Opcode for the SetWindowCreateContext request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -399,7 +399,7 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_WINDOW_CREATE_CONTEXT_REQUEST,
             0,
             0,
             context_len_bytes[0],
@@ -429,11 +429,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetWindowCreateContext request
+pub const GET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetWindowCreateContextRequest;
 impl GetWindowCreateContextRequest {
-    /// Opcode for the GetWindowCreateContext request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -444,7 +444,7 @@ impl GetWindowCreateContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_WINDOW_CREATE_CONTEXT_REQUEST,
             0,
             0,
         ];
@@ -508,13 +508,13 @@ impl GetWindowCreateContextReply {
     }
 }
 
+/// Opcode for the GetWindowContext request
+pub const GET_WINDOW_CONTEXT_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetWindowContextRequest {
     pub window: xproto::Window,
 }
 impl GetWindowContextRequest {
-    /// Opcode for the GetWindowContext request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -526,7 +526,7 @@ impl GetWindowContextRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_WINDOW_CONTEXT_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -679,13 +679,13 @@ impl ListItem {
     }
 }
 
+/// Opcode for the SetPropertyCreateContext request
+pub const SET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 8;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetPropertyCreateContextRequest<'input> {
     pub context: &'input [u8],
 }
 impl<'input> SetPropertyCreateContextRequest<'input> {
-    /// Opcode for the SetPropertyCreateContext request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -698,7 +698,7 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PROPERTY_CREATE_CONTEXT_REQUEST,
             0,
             0,
             context_len_bytes[0],
@@ -728,11 +728,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetPropertyCreateContext request
+pub const GET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPropertyCreateContextRequest;
 impl GetPropertyCreateContextRequest {
-    /// Opcode for the GetPropertyCreateContext request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -743,7 +743,7 @@ impl GetPropertyCreateContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PROPERTY_CREATE_CONTEXT_REQUEST,
             0,
             0,
         ];
@@ -807,13 +807,13 @@ impl GetPropertyCreateContextReply {
     }
 }
 
+/// Opcode for the SetPropertyUseContext request
+pub const SET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 10;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetPropertyUseContextRequest<'input> {
     pub context: &'input [u8],
 }
 impl<'input> SetPropertyUseContextRequest<'input> {
-    /// Opcode for the SetPropertyUseContext request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -826,7 +826,7 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PROPERTY_USE_CONTEXT_REQUEST,
             0,
             0,
             context_len_bytes[0],
@@ -856,11 +856,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetPropertyUseContext request
+pub const GET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPropertyUseContextRequest;
 impl GetPropertyUseContextRequest {
-    /// Opcode for the GetPropertyUseContext request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -871,7 +871,7 @@ impl GetPropertyUseContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PROPERTY_USE_CONTEXT_REQUEST,
             0,
             0,
         ];
@@ -935,14 +935,14 @@ impl GetPropertyUseContextReply {
     }
 }
 
+/// Opcode for the GetPropertyContext request
+pub const GET_PROPERTY_CONTEXT_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPropertyContextRequest {
     pub window: xproto::Window,
     pub property: xproto::Atom,
 }
 impl GetPropertyContextRequest {
-    /// Opcode for the GetPropertyContext request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -955,7 +955,7 @@ impl GetPropertyContextRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PROPERTY_CONTEXT_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1030,14 +1030,14 @@ impl GetPropertyContextReply {
     }
 }
 
+/// Opcode for the GetPropertyDataContext request
+pub const GET_PROPERTY_DATA_CONTEXT_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPropertyDataContextRequest {
     pub window: xproto::Window,
     pub property: xproto::Atom,
 }
 impl GetPropertyDataContextRequest {
-    /// Opcode for the GetPropertyDataContext request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1050,7 +1050,7 @@ impl GetPropertyDataContextRequest {
         let property_bytes = self.property.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PROPERTY_DATA_CONTEXT_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1125,13 +1125,13 @@ impl GetPropertyDataContextReply {
     }
 }
 
+/// Opcode for the ListProperties request
+pub const LIST_PROPERTIES_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListPropertiesRequest {
     pub window: xproto::Window,
 }
 impl ListPropertiesRequest {
-    /// Opcode for the ListProperties request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1143,7 +1143,7 @@ impl ListPropertiesRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_PROPERTIES_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1212,13 +1212,13 @@ impl ListPropertiesReply {
     }
 }
 
+/// Opcode for the SetSelectionCreateContext request
+pub const SET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 15;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetSelectionCreateContextRequest<'input> {
     pub context: &'input [u8],
 }
 impl<'input> SetSelectionCreateContextRequest<'input> {
-    /// Opcode for the SetSelectionCreateContext request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1231,7 +1231,7 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_SELECTION_CREATE_CONTEXT_REQUEST,
             0,
             0,
             context_len_bytes[0],
@@ -1261,11 +1261,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetSelectionCreateContext request
+pub const GET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetSelectionCreateContextRequest;
 impl GetSelectionCreateContextRequest {
-    /// Opcode for the GetSelectionCreateContext request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1276,7 +1276,7 @@ impl GetSelectionCreateContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SELECTION_CREATE_CONTEXT_REQUEST,
             0,
             0,
         ];
@@ -1340,13 +1340,13 @@ impl GetSelectionCreateContextReply {
     }
 }
 
+/// Opcode for the SetSelectionUseContext request
+pub const SET_SELECTION_USE_CONTEXT_REQUEST: u8 = 17;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetSelectionUseContextRequest<'input> {
     pub context: &'input [u8],
 }
 impl<'input> SetSelectionUseContextRequest<'input> {
-    /// Opcode for the SetSelectionUseContext request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1359,7 +1359,7 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         let context_len_bytes = context_len.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_SELECTION_USE_CONTEXT_REQUEST,
             0,
             0,
             context_len_bytes[0],
@@ -1389,11 +1389,11 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetSelectionUseContext request
+pub const GET_SELECTION_USE_CONTEXT_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetSelectionUseContextRequest;
 impl GetSelectionUseContextRequest {
-    /// Opcode for the GetSelectionUseContext request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1404,7 +1404,7 @@ impl GetSelectionUseContextRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SELECTION_USE_CONTEXT_REQUEST,
             0,
             0,
         ];
@@ -1468,13 +1468,13 @@ impl GetSelectionUseContextReply {
     }
 }
 
+/// Opcode for the GetSelectionContext request
+pub const GET_SELECTION_CONTEXT_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetSelectionContextRequest {
     pub selection: xproto::Atom,
 }
 impl GetSelectionContextRequest {
-    /// Opcode for the GetSelectionContext request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1486,7 +1486,7 @@ impl GetSelectionContextRequest {
         let selection_bytes = self.selection.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SELECTION_CONTEXT_REQUEST,
             0,
             0,
             selection_bytes[0],
@@ -1556,13 +1556,13 @@ impl GetSelectionContextReply {
     }
 }
 
+/// Opcode for the GetSelectionDataContext request
+pub const GET_SELECTION_DATA_CONTEXT_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetSelectionDataContextRequest {
     pub selection: xproto::Atom,
 }
 impl GetSelectionDataContextRequest {
-    /// Opcode for the GetSelectionDataContext request
-    pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1574,7 +1574,7 @@ impl GetSelectionDataContextRequest {
         let selection_bytes = self.selection.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_SELECTION_DATA_CONTEXT_REQUEST,
             0,
             0,
             selection_bytes[0],
@@ -1644,11 +1644,11 @@ impl GetSelectionDataContextReply {
     }
 }
 
+/// Opcode for the ListSelections request
+pub const LIST_SELECTIONS_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListSelectionsRequest;
 impl ListSelectionsRequest {
-    /// Opcode for the ListSelections request
-    pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1659,7 +1659,7 @@ impl ListSelectionsRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_SELECTIONS_REQUEST,
             0,
             0,
         ];
@@ -1722,13 +1722,13 @@ impl ListSelectionsReply {
     }
 }
 
+/// Opcode for the GetClientContext request
+pub const GET_CLIENT_CONTEXT_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetClientContextRequest {
     pub resource: u32,
 }
 impl GetClientContextRequest {
-    /// Opcode for the GetClientContext request
-    pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1740,7 +1740,7 @@ impl GetClientContextRequest {
         let resource_bytes = self.resource.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CLIENT_CONTEXT_REQUEST,
             0,
             0,
             resource_bytes[0],

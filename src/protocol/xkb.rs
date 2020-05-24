@@ -6307,14 +6307,14 @@ impl From<SAType> for Action {
     }
 }
 
+/// Opcode for the UseExtension request
+pub const USE_EXTENSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UseExtensionRequest {
     pub wanted_major: u16,
     pub wanted_minor: u16,
 }
 impl UseExtensionRequest {
-    /// Opcode for the UseExtension request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6327,7 +6327,7 @@ impl UseExtensionRequest {
         let wanted_minor_bytes = self.wanted_minor.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            USE_EXTENSION_REQUEST,
             0,
             0,
             wanted_major_bytes[0],
@@ -6803,6 +6803,8 @@ impl SelectEventsAux {
     }
 }
 
+/// Opcode for the SelectEvents request
+pub const SELECT_EVENTS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectEventsRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -6814,8 +6816,6 @@ pub struct SelectEventsRequest<'input> {
     pub details: &'input SelectEventsAux,
 }
 impl<'input> SelectEventsRequest<'input> {
-    /// Opcode for the SelectEvents request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6832,7 +6832,7 @@ impl<'input> SelectEventsRequest<'input> {
         let map_bytes = self.map.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_EVENTS_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -6887,6 +6887,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the Bell request
+pub const BELL_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BellRequest {
     pub device_spec: DeviceSpec,
@@ -6901,8 +6903,6 @@ pub struct BellRequest {
     pub window: xproto::Window,
 }
 impl BellRequest {
-    /// Opcode for the Bell request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6923,7 +6923,7 @@ impl BellRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            BELL_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -6979,13 +6979,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetState request
+pub const GET_STATE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStateRequest {
     pub device_spec: DeviceSpec,
 }
 impl GetStateRequest {
-    /// Opcode for the GetState request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -6997,7 +6997,7 @@ impl GetStateRequest {
         let device_spec_bytes = self.device_spec.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_STATE_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -7080,6 +7080,8 @@ impl TryFrom<&[u8]> for GetStateReply {
     }
 }
 
+/// Opcode for the LatchLockState request
+pub const LATCH_LOCK_STATE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LatchLockStateRequest {
     pub device_spec: DeviceSpec,
@@ -7092,8 +7094,6 @@ pub struct LatchLockStateRequest {
     pub group_latch: u16,
 }
 impl LatchLockStateRequest {
-    /// Opcode for the LatchLockState request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7112,7 +7112,7 @@ impl LatchLockStateRequest {
         let group_latch_bytes = self.group_latch.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LATCH_LOCK_STATE_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -7160,13 +7160,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetControls request
+pub const GET_CONTROLS_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetControlsRequest {
     pub device_spec: DeviceSpec,
 }
 impl GetControlsRequest {
-    /// Opcode for the GetControls request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7178,7 +7178,7 @@ impl GetControlsRequest {
         let device_spec_bytes = self.device_spec.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CONTROLS_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -7284,6 +7284,8 @@ impl TryFrom<&[u8]> for GetControlsReply {
     }
 }
 
+/// Opcode for the SetControls request
+pub const SET_CONTROLS_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetControlsRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -7318,8 +7320,6 @@ pub struct SetControlsRequest<'input> {
     pub per_key_repeat: &'input [u8; 32],
 }
 impl<'input> SetControlsRequest<'input> {
-    /// Opcode for the SetControls request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7359,7 +7359,7 @@ impl<'input> SetControlsRequest<'input> {
         let access_x_timeout_options_values_bytes = self.access_x_timeout_options_values.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_CONTROLS_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -7508,6 +7508,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetMap request
+pub const GET_MAP_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMapRequest {
     pub device_spec: DeviceSpec,
@@ -7530,8 +7532,6 @@ pub struct GetMapRequest {
     pub n_v_mod_map_keys: u8,
 }
 impl GetMapRequest {
-    /// Opcode for the GetMap request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -7560,7 +7560,7 @@ impl GetMapRequest {
         let n_v_mod_map_keys_bytes = self.n_v_mod_map_keys.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_MAP_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -7977,6 +7977,8 @@ impl SetMapAux {
     }
 }
 
+/// Opcode for the SetMap request
+pub const SET_MAP_REQUEST: u8 = 9;
 #[derive(Debug, Clone)]
 pub struct SetMapRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -8007,8 +8009,6 @@ pub struct SetMapRequest<'input> {
     pub values: &'input SetMapAux,
 }
 impl<'input> SetMapRequest<'input> {
-    /// Opcode for the SetMap request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8046,7 +8046,7 @@ impl<'input> SetMapRequest<'input> {
         let virtual_mods_bytes = self.virtual_mods.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_MAP_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -8134,6 +8134,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetCompatMap request
+pub const GET_COMPAT_MAP_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCompatMapRequest {
     pub device_spec: DeviceSpec,
@@ -8143,8 +8145,6 @@ pub struct GetCompatMapRequest {
     pub n_si: u16,
 }
 impl GetCompatMapRequest {
-    /// Opcode for the GetCompatMap request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8160,7 +8160,7 @@ impl GetCompatMapRequest {
         let n_si_bytes = self.n_si.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_COMPAT_MAP_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -8249,6 +8249,8 @@ impl GetCompatMapReply {
     }
 }
 
+/// Opcode for the SetCompatMap request
+pub const SET_COMPAT_MAP_REQUEST: u8 = 11;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetCompatMapRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -8260,8 +8262,6 @@ pub struct SetCompatMapRequest<'input> {
     pub group_maps: &'input [ModDef],
 }
 impl<'input> SetCompatMapRequest<'input> {
-    /// Opcode for the SetCompatMap request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8279,7 +8279,7 @@ impl<'input> SetCompatMapRequest<'input> {
         let n_si_bytes = n_si.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_COMPAT_MAP_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -8329,13 +8329,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetIndicatorState request
+pub const GET_INDICATOR_STATE_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetIndicatorStateRequest {
     pub device_spec: DeviceSpec,
 }
 impl GetIndicatorStateRequest {
-    /// Opcode for the GetIndicatorState request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8347,7 +8347,7 @@ impl GetIndicatorStateRequest {
         let device_spec_bytes = self.device_spec.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_INDICATOR_STATE_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -8401,14 +8401,14 @@ impl TryFrom<&[u8]> for GetIndicatorStateReply {
     }
 }
 
+/// Opcode for the GetIndicatorMap request
+pub const GET_INDICATOR_MAP_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetIndicatorMapRequest {
     pub device_spec: DeviceSpec,
     pub which: u32,
 }
 impl GetIndicatorMapRequest {
-    /// Opcode for the GetIndicatorMap request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8421,7 +8421,7 @@ impl GetIndicatorMapRequest {
         let which_bytes = self.which.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_INDICATOR_MAP_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -8486,6 +8486,8 @@ impl TryFrom<&[u8]> for GetIndicatorMapReply {
     }
 }
 
+/// Opcode for the SetIndicatorMap request
+pub const SET_INDICATOR_MAP_REQUEST: u8 = 14;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetIndicatorMapRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -8493,8 +8495,6 @@ pub struct SetIndicatorMapRequest<'input> {
     pub maps: &'input [IndicatorMap],
 }
 impl<'input> SetIndicatorMapRequest<'input> {
-    /// Opcode for the SetIndicatorMap request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8507,7 +8507,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
         let which_bytes = self.which.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_INDICATOR_MAP_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -8545,6 +8545,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetNamedIndicator request
+pub const GET_NAMED_INDICATOR_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetNamedIndicatorRequest {
     pub device_spec: DeviceSpec,
@@ -8553,8 +8555,6 @@ pub struct GetNamedIndicatorRequest {
     pub indicator: xproto::Atom,
 }
 impl GetNamedIndicatorRequest {
-    /// Opcode for the GetNamedIndicator request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8569,7 +8569,7 @@ impl GetNamedIndicatorRequest {
         let indicator_bytes = self.indicator.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_NAMED_INDICATOR_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -8662,6 +8662,8 @@ impl TryFrom<&[u8]> for GetNamedIndicatorReply {
     }
 }
 
+/// Opcode for the SetNamedIndicator request
+pub const SET_NAMED_INDICATOR_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetNamedIndicatorRequest {
     pub device_spec: DeviceSpec,
@@ -8681,8 +8683,6 @@ pub struct SetNamedIndicatorRequest {
     pub map_ctrls: u32,
 }
 impl SetNamedIndicatorRequest {
-    /// Opcode for the SetNamedIndicator request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8708,7 +8708,7 @@ impl SetNamedIndicatorRequest {
         let map_ctrls_bytes = self.map_ctrls.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_NAMED_INDICATOR_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -8789,14 +8789,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetNames request
+pub const GET_NAMES_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetNamesRequest {
     pub device_spec: DeviceSpec,
     pub which: u32,
 }
 impl GetNamesRequest {
-    /// Opcode for the GetNames request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -8809,7 +8809,7 @@ impl GetNamesRequest {
         let which_bytes = self.which.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_NAMES_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -9272,6 +9272,8 @@ impl SetNamesAux {
     }
 }
 
+/// Opcode for the SetNames request
+pub const SET_NAMES_REQUEST: u8 = 18;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetNamesRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -9290,8 +9292,6 @@ pub struct SetNamesRequest<'input> {
     pub values: &'input SetNamesAux,
 }
 impl<'input> SetNamesRequest<'input> {
-    /// Opcode for the SetNames request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9317,7 +9317,7 @@ impl<'input> SetNamesRequest<'input> {
         let total_kt_level_names_bytes = self.total_kt_level_names.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_NAMES_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -9385,6 +9385,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PerClientFlags request
+pub const PER_CLIENT_FLAGS_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PerClientFlagsRequest {
     pub device_spec: DeviceSpec,
@@ -9395,8 +9397,6 @@ pub struct PerClientFlagsRequest {
     pub auto_ctrls_values: u32,
 }
 impl PerClientFlagsRequest {
-    /// Opcode for the PerClientFlags request
-    pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9413,7 +9413,7 @@ impl PerClientFlagsRequest {
         let auto_ctrls_values_bytes = self.auto_ctrls_values.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PER_CLIENT_FLAGS_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -9508,14 +9508,14 @@ impl TryFrom<&[u8]> for PerClientFlagsReply {
     }
 }
 
+/// Opcode for the ListComponents request
+pub const LIST_COMPONENTS_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListComponentsRequest {
     pub device_spec: DeviceSpec,
     pub max_names: u16,
 }
 impl ListComponentsRequest {
-    /// Opcode for the ListComponents request
-    pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9528,7 +9528,7 @@ impl ListComponentsRequest {
         let max_names_bytes = self.max_names.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_COMPONENTS_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -9681,6 +9681,8 @@ impl ListComponentsReply {
     }
 }
 
+/// Opcode for the GetKbdByName request
+pub const GET_KBD_BY_NAME_REQUEST: u8 = 23;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetKbdByNameRequest {
     pub device_spec: DeviceSpec,
@@ -9689,8 +9691,6 @@ pub struct GetKbdByNameRequest {
     pub load: bool,
 }
 impl GetKbdByNameRequest {
-    /// Opcode for the GetKbdByName request
-    pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -9705,7 +9705,7 @@ impl GetKbdByNameRequest {
         let load_bytes = self.load.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_KBD_BY_NAME_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -10382,6 +10382,8 @@ impl TryFrom<&[u8]> for GetKbdByNameReply {
     }
 }
 
+/// Opcode for the GetDeviceInfo request
+pub const GET_DEVICE_INFO_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceInfoRequest {
     pub device_spec: DeviceSpec,
@@ -10393,8 +10395,6 @@ pub struct GetDeviceInfoRequest {
     pub led_id: IDSpec,
 }
 impl GetDeviceInfoRequest {
-    /// Opcode for the GetDeviceInfo request
-    pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -10412,7 +10412,7 @@ impl GetDeviceInfoRequest {
         let led_id_bytes = self.led_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_INFO_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -10560,6 +10560,8 @@ impl GetDeviceInfoReply {
     }
 }
 
+/// Opcode for the SetDeviceInfo request
+pub const SET_DEVICE_INFO_REQUEST: u8 = 25;
 #[derive(Debug, Clone)]
 pub struct SetDeviceInfoRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -10569,8 +10571,6 @@ pub struct SetDeviceInfoRequest<'input> {
     pub leds: &'input [DeviceLedInfo],
 }
 impl<'input> SetDeviceInfoRequest<'input> {
-    /// Opcode for the SetDeviceInfo request
-    pub const fn opcode() -> u8 { 25 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -10588,7 +10588,7 @@ impl<'input> SetDeviceInfoRequest<'input> {
         let n_device_led_f_bs_bytes = n_device_led_f_bs.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_DEVICE_INFO_REQUEST,
             0,
             0,
             device_spec_bytes[0],
@@ -10631,6 +10631,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SetDebuggingFlags request
+pub const SET_DEBUGGING_FLAGS_REQUEST: u8 = 101;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDebuggingFlagsRequest<'input> {
     pub affect_flags: u32,
@@ -10640,8 +10642,6 @@ pub struct SetDebuggingFlagsRequest<'input> {
     pub message: &'input [String8],
 }
 impl<'input> SetDebuggingFlagsRequest<'input> {
-    /// Opcode for the SetDebuggingFlags request
-    pub const fn opcode() -> u8 { 101 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -10658,7 +10658,7 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         let ctrls_bytes = self.ctrls.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_DEBUGGING_FLAGS_REQUEST,
             0,
             0,
             msg_length_bytes[0],

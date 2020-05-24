@@ -1545,11 +1545,11 @@ impl From<PortNotifyEvent> for [u8; 32] {
     }
 }
 
+/// Opcode for the QueryExtension request
+pub const QUERY_EXTENSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionRequest;
 impl QueryExtensionRequest {
-    /// Opcode for the QueryExtension request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1560,7 +1560,7 @@ impl QueryExtensionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_EXTENSION_REQUEST,
             0,
             0,
         ];
@@ -1608,13 +1608,13 @@ impl TryFrom<&[u8]> for QueryExtensionReply {
     }
 }
 
+/// Opcode for the QueryAdaptors request
+pub const QUERY_ADAPTORS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryAdaptorsRequest {
     pub window: xproto::Window,
 }
 impl QueryAdaptorsRequest {
-    /// Opcode for the QueryAdaptors request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1626,7 +1626,7 @@ impl QueryAdaptorsRequest {
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_ADAPTORS_REQUEST,
             0,
             0,
             window_bytes[0],
@@ -1695,13 +1695,13 @@ impl QueryAdaptorsReply {
     }
 }
 
+/// Opcode for the QueryEncodings request
+pub const QUERY_ENCODINGS_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryEncodingsRequest {
     pub port: Port,
 }
 impl QueryEncodingsRequest {
-    /// Opcode for the QueryEncodings request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1713,7 +1713,7 @@ impl QueryEncodingsRequest {
         let port_bytes = self.port.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_ENCODINGS_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -1782,14 +1782,14 @@ impl QueryEncodingsReply {
     }
 }
 
+/// Opcode for the GrabPort request
+pub const GRAB_PORT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortRequest {
     pub port: Port,
     pub time: xproto::Timestamp,
 }
 impl GrabPortRequest {
-    /// Opcode for the GrabPort request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1802,7 +1802,7 @@ impl GrabPortRequest {
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GRAB_PORT_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -1861,14 +1861,14 @@ impl TryFrom<&[u8]> for GrabPortReply {
     }
 }
 
+/// Opcode for the UngrabPort request
+pub const UNGRAB_PORT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UngrabPortRequest {
     pub port: Port,
     pub time: xproto::Timestamp,
 }
 impl UngrabPortRequest {
-    /// Opcode for the UngrabPort request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1881,7 +1881,7 @@ impl UngrabPortRequest {
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            UNGRAB_PORT_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -1915,6 +1915,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PutVideo request
+pub const PUT_VIDEO_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PutVideoRequest {
     pub port: Port,
@@ -1930,8 +1932,6 @@ pub struct PutVideoRequest {
     pub drw_h: u16,
 }
 impl PutVideoRequest {
-    /// Opcode for the PutVideo request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -1953,7 +1953,7 @@ impl PutVideoRequest {
         let drw_h_bytes = self.drw_h.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PUT_VIDEO_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2014,6 +2014,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the PutStill request
+pub const PUT_STILL_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PutStillRequest {
     pub port: Port,
@@ -2029,8 +2031,6 @@ pub struct PutStillRequest {
     pub drw_h: u16,
 }
 impl PutStillRequest {
-    /// Opcode for the PutStill request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2052,7 +2052,7 @@ impl PutStillRequest {
         let drw_h_bytes = self.drw_h.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PUT_STILL_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2113,6 +2113,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetVideo request
+pub const GET_VIDEO_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVideoRequest {
     pub port: Port,
@@ -2128,8 +2130,6 @@ pub struct GetVideoRequest {
     pub drw_h: u16,
 }
 impl GetVideoRequest {
-    /// Opcode for the GetVideo request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2151,7 +2151,7 @@ impl GetVideoRequest {
         let drw_h_bytes = self.drw_h.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_VIDEO_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2212,6 +2212,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetStill request
+pub const GET_STILL_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStillRequest {
     pub port: Port,
@@ -2227,8 +2229,6 @@ pub struct GetStillRequest {
     pub drw_h: u16,
 }
 impl GetStillRequest {
-    /// Opcode for the GetStill request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2250,7 +2250,7 @@ impl GetStillRequest {
         let drw_h_bytes = self.drw_h.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_STILL_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2311,14 +2311,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the StopVideo request
+pub const STOP_VIDEO_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct StopVideoRequest {
     pub port: Port,
     pub drawable: xproto::Drawable,
 }
 impl StopVideoRequest {
-    /// Opcode for the StopVideo request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2331,7 +2331,7 @@ impl StopVideoRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            STOP_VIDEO_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2363,14 +2363,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SelectVideoNotify request
+pub const SELECT_VIDEO_NOTIFY_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectVideoNotifyRequest {
     pub drawable: xproto::Drawable,
     pub onoff: bool,
 }
 impl SelectVideoNotifyRequest {
-    /// Opcode for the SelectVideoNotify request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2383,7 +2383,7 @@ impl SelectVideoNotifyRequest {
         let onoff_bytes = self.onoff.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_VIDEO_NOTIFY_REQUEST,
             0,
             0,
             drawable_bytes[0],
@@ -2415,14 +2415,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the SelectPortNotify request
+pub const SELECT_PORT_NOTIFY_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectPortNotifyRequest {
     pub port: Port,
     pub onoff: bool,
 }
 impl SelectPortNotifyRequest {
-    /// Opcode for the SelectPortNotify request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2435,7 +2435,7 @@ impl SelectPortNotifyRequest {
         let onoff_bytes = self.onoff.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SELECT_PORT_NOTIFY_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2467,6 +2467,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the QueryBestSize request
+pub const QUERY_BEST_SIZE_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeRequest {
     pub port: Port,
@@ -2477,8 +2479,6 @@ pub struct QueryBestSizeRequest {
     pub motion: bool,
 }
 impl QueryBestSizeRequest {
-    /// Opcode for the QueryBestSize request
-    pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2495,7 +2495,7 @@ impl QueryBestSizeRequest {
         let motion_bytes = self.motion.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_BEST_SIZE_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2566,6 +2566,8 @@ impl TryFrom<&[u8]> for QueryBestSizeReply {
     }
 }
 
+/// Opcode for the SetPortAttribute request
+pub const SET_PORT_ATTRIBUTE_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPortAttributeRequest {
     pub port: Port,
@@ -2573,8 +2575,6 @@ pub struct SetPortAttributeRequest {
     pub value: i32,
 }
 impl SetPortAttributeRequest {
-    /// Opcode for the SetPortAttribute request
-    pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2588,7 +2588,7 @@ impl SetPortAttributeRequest {
         let value_bytes = self.value.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SET_PORT_ATTRIBUTE_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2625,14 +2625,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetPortAttribute request
+pub const GET_PORT_ATTRIBUTE_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPortAttributeRequest {
     pub port: Port,
     pub attribute: xproto::Atom,
 }
 impl GetPortAttributeRequest {
-    /// Opcode for the GetPortAttribute request
-    pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2645,7 +2645,7 @@ impl GetPortAttributeRequest {
         let attribute_bytes = self.attribute.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_PORT_ATTRIBUTE_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2702,13 +2702,13 @@ impl TryFrom<&[u8]> for GetPortAttributeReply {
     }
 }
 
+/// Opcode for the QueryPortAttributes request
+pub const QUERY_PORT_ATTRIBUTES_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryPortAttributesRequest {
     pub port: Port,
 }
 impl QueryPortAttributesRequest {
-    /// Opcode for the QueryPortAttributes request
-    pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2720,7 +2720,7 @@ impl QueryPortAttributesRequest {
         let port_bytes = self.port.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_PORT_ATTRIBUTES_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2791,13 +2791,13 @@ impl QueryPortAttributesReply {
     }
 }
 
+/// Opcode for the ListImageFormats request
+pub const LIST_IMAGE_FORMATS_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListImageFormatsRequest {
     pub port: Port,
 }
 impl ListImageFormatsRequest {
-    /// Opcode for the ListImageFormats request
-    pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2809,7 +2809,7 @@ impl ListImageFormatsRequest {
         let port_bytes = self.port.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            LIST_IMAGE_FORMATS_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2878,6 +2878,8 @@ impl ListImageFormatsReply {
     }
 }
 
+/// Opcode for the QueryImageAttributes request
+pub const QUERY_IMAGE_ATTRIBUTES_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryImageAttributesRequest {
     pub port: Port,
@@ -2886,8 +2888,6 @@ pub struct QueryImageAttributesRequest {
     pub height: u16,
 }
 impl QueryImageAttributesRequest {
-    /// Opcode for the QueryImageAttributes request
-    pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -2902,7 +2902,7 @@ impl QueryImageAttributesRequest {
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_IMAGE_ATTRIBUTES_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -2990,6 +2990,8 @@ impl QueryImageAttributesReply {
     }
 }
 
+/// Opcode for the PutImage request
+pub const PUT_IMAGE_REQUEST: u8 = 18;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PutImageRequest<'input> {
     pub port: Port,
@@ -3009,8 +3011,6 @@ pub struct PutImageRequest<'input> {
     pub data: &'input [u8],
 }
 impl<'input> PutImageRequest<'input> {
-    /// Opcode for the PutImage request
-    pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3035,7 +3035,7 @@ impl<'input> PutImageRequest<'input> {
         let height_bytes = self.height.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            PUT_IMAGE_REQUEST,
             0,
             0,
             port_bytes[0],
@@ -3111,6 +3111,8 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the ShmPutImage request
+pub const SHM_PUT_IMAGE_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ShmPutImageRequest {
     pub port: Port,
@@ -3132,8 +3134,6 @@ pub struct ShmPutImageRequest {
     pub send_event: u8,
 }
 impl ShmPutImageRequest {
-    /// Opcode for the ShmPutImage request
-    pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -3161,7 +3161,7 @@ impl ShmPutImageRequest {
         let send_event_bytes = self.send_event.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            SHM_PUT_IMAGE_REQUEST,
             0,
             0,
             port_bytes[0],

@@ -82,11 +82,11 @@ impl Serialize for DrmClipRect {
     }
 }
 
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
-    /// Opcode for the QueryVersion request
-    pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -97,7 +97,7 @@ impl QueryVersionRequest {
         let length_so_far = 0;
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_VERSION_REQUEST,
             0,
             0,
         ];
@@ -147,13 +147,13 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
+/// Opcode for the QueryDirectRenderingCapable request
+pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryDirectRenderingCapableRequest {
     pub screen: u32,
 }
 impl QueryDirectRenderingCapableRequest {
-    /// Opcode for the QueryDirectRenderingCapable request
-    pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -165,7 +165,7 @@ impl QueryDirectRenderingCapableRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            QUERY_DIRECT_RENDERING_CAPABLE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -217,13 +217,13 @@ impl TryFrom<&[u8]> for QueryDirectRenderingCapableReply {
     }
 }
 
+/// Opcode for the OpenConnection request
+pub const OPEN_CONNECTION_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OpenConnectionRequest {
     pub screen: u32,
 }
 impl OpenConnectionRequest {
-    /// Opcode for the OpenConnection request
-    pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -235,7 +235,7 @@ impl OpenConnectionRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            OPEN_CONNECTION_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -309,13 +309,13 @@ impl OpenConnectionReply {
     }
 }
 
+/// Opcode for the CloseConnection request
+pub const CLOSE_CONNECTION_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CloseConnectionRequest {
     pub screen: u32,
 }
 impl CloseConnectionRequest {
-    /// Opcode for the CloseConnection request
-    pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -327,7 +327,7 @@ impl CloseConnectionRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CLOSE_CONNECTION_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -354,13 +354,13 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetClientDriverName request
+pub const GET_CLIENT_DRIVER_NAME_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetClientDriverNameRequest {
     pub screen: u32,
 }
 impl GetClientDriverNameRequest {
-    /// Opcode for the GetClientDriverName request
-    pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -372,7 +372,7 @@ impl GetClientDriverNameRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_CLIENT_DRIVER_NAME_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -448,6 +448,8 @@ impl GetClientDriverNameReply {
     }
 }
 
+/// Opcode for the CreateContext request
+pub const CREATE_CONTEXT_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateContextRequest {
     pub screen: u32,
@@ -455,8 +457,6 @@ pub struct CreateContextRequest {
     pub context: u32,
 }
 impl CreateContextRequest {
-    /// Opcode for the CreateContext request
-    pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -470,7 +470,7 @@ impl CreateContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_CONTEXT_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -532,14 +532,14 @@ impl TryFrom<&[u8]> for CreateContextReply {
     }
 }
 
+/// Opcode for the DestroyContext request
+pub const DESTROY_CONTEXT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyContextRequest {
     pub screen: u32,
     pub context: u32,
 }
 impl DestroyContextRequest {
-    /// Opcode for the DestroyContext request
-    pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -552,7 +552,7 @@ impl DestroyContextRequest {
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_CONTEXT_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -584,14 +584,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the CreateDrawable request
+pub const CREATE_DRAWABLE_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateDrawableRequest {
     pub screen: u32,
     pub drawable: u32,
 }
 impl CreateDrawableRequest {
-    /// Opcode for the CreateDrawable request
-    pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -604,7 +604,7 @@ impl CreateDrawableRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            CREATE_DRAWABLE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -661,14 +661,14 @@ impl TryFrom<&[u8]> for CreateDrawableReply {
     }
 }
 
+/// Opcode for the DestroyDrawable request
+pub const DESTROY_DRAWABLE_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyDrawableRequest {
     pub screen: u32,
     pub drawable: u32,
 }
 impl DestroyDrawableRequest {
-    /// Opcode for the DestroyDrawable request
-    pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -681,7 +681,7 @@ impl DestroyDrawableRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            DESTROY_DRAWABLE_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -713,14 +713,14 @@ where
     Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
+/// Opcode for the GetDrawableInfo request
+pub const GET_DRAWABLE_INFO_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDrawableInfoRequest {
     pub screen: u32,
     pub drawable: u32,
 }
 impl GetDrawableInfoRequest {
-    /// Opcode for the GetDrawableInfo request
-    pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -733,7 +733,7 @@ impl GetDrawableInfoRequest {
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DRAWABLE_INFO_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -838,13 +838,13 @@ impl GetDrawableInfoReply {
     }
 }
 
+/// Opcode for the GetDeviceInfo request
+pub const GET_DEVICE_INFO_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceInfoRequest {
     pub screen: u32,
 }
 impl GetDeviceInfoRequest {
-    /// Opcode for the GetDeviceInfo request
-    pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -856,7 +856,7 @@ impl GetDeviceInfoRequest {
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            GET_DEVICE_INFO_REQUEST,
             0,
             0,
             screen_bytes[0],
@@ -934,14 +934,14 @@ impl GetDeviceInfoReply {
     }
 }
 
+/// Opcode for the AuthConnection request
+pub const AUTH_CONNECTION_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthConnectionRequest {
     pub screen: u32,
     pub magic: u32,
 }
 impl AuthConnectionRequest {
-    /// Opcode for the AuthConnection request
-    pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
     where
@@ -954,7 +954,7 @@ impl AuthConnectionRequest {
         let magic_bytes = self.magic.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
-            Self::opcode(),
+            AUTH_CONNECTION_REQUEST,
             0,
             0,
             screen_bytes[0],

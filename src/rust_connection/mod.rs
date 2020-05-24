@@ -12,7 +12,7 @@ use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_manager::ExtensionManager;
 use crate::protocol::bigreq::{ConnectionExt as _, EnableReply};
-use crate::protocol::xproto::{GetInputFocusRequest, Setup, SetupRequest};
+use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, Serialize};
 
@@ -245,7 +245,7 @@ impl<R: ReadFD + Poll, W: WriteFD + Poll> RustConnection<R, W> {
     ) -> Result<MutexGuardInner<'a>, std::io::Error> {
         let length = 1u16.to_ne_bytes();
         let request = [
-            GetInputFocusRequest::opcode(),
+            GET_INPUT_FOCUS_REQUEST,
             0, /* pad */
             length[0],
             length[1],
