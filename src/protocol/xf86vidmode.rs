@@ -16,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -367,24 +367,38 @@ impl Serialize for ModeInfo {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryVersionRequest;
+impl QueryVersionRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QUERY_VERSION_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_VERSION_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryVersionRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -416,29 +430,47 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the GetModeLine request
 pub const GET_MODE_LINE_REQUEST: u8 = 1;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetModeLineRequest {
+    pub screen: u16,
+}
+impl GetModeLineRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_MODE_LINE_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_mode_line<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetModeLineReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_MODE_LINE_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetModeLineRequest {
+        screen,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -509,141 +541,219 @@ impl GetModeLineReply {
 
 /// Opcode for the ModModeLine request
 pub const MOD_MODE_LINE_REQUEST: u8 = 2;
-pub fn mod_mode_line<'c, Conn, A>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ModModeLineRequest<'input> {
+    pub screen: u32,
+    pub hdisplay: u16,
+    pub hsyncstart: u16,
+    pub hsyncend: u16,
+    pub htotal: u16,
+    pub hskew: u16,
+    pub vdisplay: u16,
+    pub vsyncstart: u16,
+    pub vsyncend: u16,
+    pub vtotal: u16,
+    pub flags: u32,
+    pub private: &'input [u8],
+}
+impl<'input> ModModeLineRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let hdisplay_bytes = self.hdisplay.serialize();
+        let hsyncstart_bytes = self.hsyncstart.serialize();
+        let hsyncend_bytes = self.hsyncend.serialize();
+        let htotal_bytes = self.htotal.serialize();
+        let hskew_bytes = self.hskew.serialize();
+        let vdisplay_bytes = self.vdisplay.serialize();
+        let vsyncstart_bytes = self.vsyncstart.serialize();
+        let vsyncend_bytes = self.vsyncend.serialize();
+        let vtotal_bytes = self.vtotal.serialize();
+        let flags_bytes = self.flags.serialize();
+        let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
+        let privsize_bytes = privsize.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            MOD_MODE_LINE_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            screen_bytes[2],
+            screen_bytes[3],
+            hdisplay_bytes[0],
+            hdisplay_bytes[1],
+            hsyncstart_bytes[0],
+            hsyncstart_bytes[1],
+            hsyncend_bytes[0],
+            hsyncend_bytes[1],
+            htotal_bytes[0],
+            htotal_bytes[1],
+            hskew_bytes[0],
+            hskew_bytes[1],
+            vdisplay_bytes[0],
+            vdisplay_bytes[1],
+            vsyncstart_bytes[0],
+            vsyncstart_bytes[1],
+            vsyncend_bytes[0],
+            vsyncend_bytes[1],
+            vtotal_bytes[0],
+            vtotal_bytes[1],
+            0,
+            0,
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            privsize_bytes[0],
+            privsize_bytes[1],
+            privsize_bytes[2],
+            privsize_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.private[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn mod_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u32>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let flags: u32 = flags.into();
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let hdisplay_bytes = hdisplay.serialize();
-    let hsyncstart_bytes = hsyncstart.serialize();
-    let hsyncend_bytes = hsyncend.serialize();
-    let htotal_bytes = htotal.serialize();
-    let hskew_bytes = hskew.serialize();
-    let vdisplay_bytes = vdisplay.serialize();
-    let vsyncstart_bytes = vsyncstart.serialize();
-    let vsyncend_bytes = vsyncend.serialize();
-    let vtotal_bytes = vtotal.serialize();
-    let flags_bytes = flags.serialize();
-    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
-    let privsize_bytes = privsize.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        MOD_MODE_LINE_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        screen_bytes[2],
-        screen_bytes[3],
-        hdisplay_bytes[0],
-        hdisplay_bytes[1],
-        hsyncstart_bytes[0],
-        hsyncstart_bytes[1],
-        hsyncend_bytes[0],
-        hsyncend_bytes[1],
-        htotal_bytes[0],
-        htotal_bytes[1],
-        hskew_bytes[0],
-        hskew_bytes[1],
-        vdisplay_bytes[0],
-        vdisplay_bytes[1],
-        vsyncstart_bytes[0],
-        vsyncstart_bytes[1],
-        vsyncend_bytes[0],
-        vsyncend_bytes[1],
-        vtotal_bytes[0],
-        vtotal_bytes[1],
-        0,
-        0,
-        flags_bytes[0],
-        flags_bytes[1],
-        flags_bytes[2],
-        flags_bytes[3],
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        privsize_bytes[0],
-        privsize_bytes[1],
-        privsize_bytes[2],
-        privsize_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + private.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(private), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ModModeLineRequest {
+        screen,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        private,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the SwitchMode request
 pub const SWITCH_MODE_REQUEST: u8 = 3;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SwitchModeRequest {
+    pub screen: u16,
+    pub zoom: u16,
+}
+impl SwitchModeRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let zoom_bytes = self.zoom.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SWITCH_MODE_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            zoom_bytes[0],
+            zoom_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn switch_mode<Conn>(conn: &Conn, screen: u16, zoom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let zoom_bytes = zoom.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SWITCH_MODE_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        zoom_bytes[0],
-        zoom_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SwitchModeRequest {
+        screen,
+        zoom,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetMonitor request
 pub const GET_MONITOR_REQUEST: u8 = 4;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetMonitorRequest {
+    pub screen: u16,
+}
+impl GetMonitorRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_MONITOR_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_monitor<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetMonitorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_MONITOR_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetMonitorRequest {
+        screen,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -743,57 +853,95 @@ impl GetMonitorReply {
 
 /// Opcode for the LockModeSwitch request
 pub const LOCK_MODE_SWITCH_REQUEST: u8 = 5;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LockModeSwitchRequest {
+    pub screen: u16,
+    pub lock: u16,
+}
+impl LockModeSwitchRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let lock_bytes = self.lock.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            LOCK_MODE_SWITCH_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            lock_bytes[0],
+            lock_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn lock_mode_switch<Conn>(conn: &Conn, screen: u16, lock: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let lock_bytes = lock.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        LOCK_MODE_SWITCH_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        lock_bytes[0],
-        lock_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = LockModeSwitchRequest {
+        screen,
+        lock,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetAllModeLines request
 pub const GET_ALL_MODE_LINES_REQUEST: u8 = 6;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetAllModeLinesRequest {
+    pub screen: u16,
+}
+impl GetAllModeLinesRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_ALL_MODE_LINES_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_all_mode_lines<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetAllModeLinesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_ALL_MODE_LINES_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetAllModeLinesRequest {
+        screen,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -840,322 +988,470 @@ impl GetAllModeLinesReply {
 
 /// Opcode for the AddModeLine request
 pub const ADD_MODE_LINE_REQUEST: u8 = 7;
-pub fn add_mode_line<'c, Conn, A, B>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AddModeLineRequest<'input> {
+    pub screen: u32,
+    pub dotclock: Dotclock,
+    pub hdisplay: u16,
+    pub hsyncstart: u16,
+    pub hsyncend: u16,
+    pub htotal: u16,
+    pub hskew: u16,
+    pub vdisplay: u16,
+    pub vsyncstart: u16,
+    pub vsyncend: u16,
+    pub vtotal: u16,
+    pub flags: u32,
+    pub after_dotclock: Dotclock,
+    pub after_hdisplay: u16,
+    pub after_hsyncstart: u16,
+    pub after_hsyncend: u16,
+    pub after_htotal: u16,
+    pub after_hskew: u16,
+    pub after_vdisplay: u16,
+    pub after_vsyncstart: u16,
+    pub after_vsyncend: u16,
+    pub after_vtotal: u16,
+    pub after_flags: u32,
+    pub private: &'input [u8],
+}
+impl<'input> AddModeLineRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let dotclock_bytes = self.dotclock.serialize();
+        let hdisplay_bytes = self.hdisplay.serialize();
+        let hsyncstart_bytes = self.hsyncstart.serialize();
+        let hsyncend_bytes = self.hsyncend.serialize();
+        let htotal_bytes = self.htotal.serialize();
+        let hskew_bytes = self.hskew.serialize();
+        let vdisplay_bytes = self.vdisplay.serialize();
+        let vsyncstart_bytes = self.vsyncstart.serialize();
+        let vsyncend_bytes = self.vsyncend.serialize();
+        let vtotal_bytes = self.vtotal.serialize();
+        let flags_bytes = self.flags.serialize();
+        let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
+        let privsize_bytes = privsize.serialize();
+        let after_dotclock_bytes = self.after_dotclock.serialize();
+        let after_hdisplay_bytes = self.after_hdisplay.serialize();
+        let after_hsyncstart_bytes = self.after_hsyncstart.serialize();
+        let after_hsyncend_bytes = self.after_hsyncend.serialize();
+        let after_htotal_bytes = self.after_htotal.serialize();
+        let after_hskew_bytes = self.after_hskew.serialize();
+        let after_vdisplay_bytes = self.after_vdisplay.serialize();
+        let after_vsyncstart_bytes = self.after_vsyncstart.serialize();
+        let after_vsyncend_bytes = self.after_vsyncend.serialize();
+        let after_vtotal_bytes = self.after_vtotal.serialize();
+        let after_flags_bytes = self.after_flags.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            ADD_MODE_LINE_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            screen_bytes[2],
+            screen_bytes[3],
+            dotclock_bytes[0],
+            dotclock_bytes[1],
+            dotclock_bytes[2],
+            dotclock_bytes[3],
+            hdisplay_bytes[0],
+            hdisplay_bytes[1],
+            hsyncstart_bytes[0],
+            hsyncstart_bytes[1],
+            hsyncend_bytes[0],
+            hsyncend_bytes[1],
+            htotal_bytes[0],
+            htotal_bytes[1],
+            hskew_bytes[0],
+            hskew_bytes[1],
+            vdisplay_bytes[0],
+            vdisplay_bytes[1],
+            vsyncstart_bytes[0],
+            vsyncstart_bytes[1],
+            vsyncend_bytes[0],
+            vsyncend_bytes[1],
+            vtotal_bytes[0],
+            vtotal_bytes[1],
+            0,
+            0,
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            privsize_bytes[0],
+            privsize_bytes[1],
+            privsize_bytes[2],
+            privsize_bytes[3],
+            after_dotclock_bytes[0],
+            after_dotclock_bytes[1],
+            after_dotclock_bytes[2],
+            after_dotclock_bytes[3],
+            after_hdisplay_bytes[0],
+            after_hdisplay_bytes[1],
+            after_hsyncstart_bytes[0],
+            after_hsyncstart_bytes[1],
+            after_hsyncend_bytes[0],
+            after_hsyncend_bytes[1],
+            after_htotal_bytes[0],
+            after_htotal_bytes[1],
+            after_hskew_bytes[0],
+            after_hskew_bytes[1],
+            after_vdisplay_bytes[0],
+            after_vdisplay_bytes[1],
+            after_vsyncstart_bytes[0],
+            after_vsyncstart_bytes[1],
+            after_vsyncend_bytes[0],
+            after_vsyncend_bytes[1],
+            after_vtotal_bytes[0],
+            after_vtotal_bytes[1],
+            0,
+            0,
+            after_flags_bytes[0],
+            after_flags_bytes[1],
+            after_flags_bytes[2],
+            after_flags_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.private[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn add_mode_line<'c, 'input, Conn, A, B>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u32>,
     B: Into<u32>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let flags: u32 = flags.into();
     let after_flags: u32 = after_flags.into();
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let dotclock_bytes = dotclock.serialize();
-    let hdisplay_bytes = hdisplay.serialize();
-    let hsyncstart_bytes = hsyncstart.serialize();
-    let hsyncend_bytes = hsyncend.serialize();
-    let htotal_bytes = htotal.serialize();
-    let hskew_bytes = hskew.serialize();
-    let vdisplay_bytes = vdisplay.serialize();
-    let vsyncstart_bytes = vsyncstart.serialize();
-    let vsyncend_bytes = vsyncend.serialize();
-    let vtotal_bytes = vtotal.serialize();
-    let flags_bytes = flags.serialize();
-    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
-    let privsize_bytes = privsize.serialize();
-    let after_dotclock_bytes = after_dotclock.serialize();
-    let after_hdisplay_bytes = after_hdisplay.serialize();
-    let after_hsyncstart_bytes = after_hsyncstart.serialize();
-    let after_hsyncend_bytes = after_hsyncend.serialize();
-    let after_htotal_bytes = after_htotal.serialize();
-    let after_hskew_bytes = after_hskew.serialize();
-    let after_vdisplay_bytes = after_vdisplay.serialize();
-    let after_vsyncstart_bytes = after_vsyncstart.serialize();
-    let after_vsyncend_bytes = after_vsyncend.serialize();
-    let after_vtotal_bytes = after_vtotal.serialize();
-    let after_flags_bytes = after_flags.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        ADD_MODE_LINE_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        screen_bytes[2],
-        screen_bytes[3],
-        dotclock_bytes[0],
-        dotclock_bytes[1],
-        dotclock_bytes[2],
-        dotclock_bytes[3],
-        hdisplay_bytes[0],
-        hdisplay_bytes[1],
-        hsyncstart_bytes[0],
-        hsyncstart_bytes[1],
-        hsyncend_bytes[0],
-        hsyncend_bytes[1],
-        htotal_bytes[0],
-        htotal_bytes[1],
-        hskew_bytes[0],
-        hskew_bytes[1],
-        vdisplay_bytes[0],
-        vdisplay_bytes[1],
-        vsyncstart_bytes[0],
-        vsyncstart_bytes[1],
-        vsyncend_bytes[0],
-        vsyncend_bytes[1],
-        vtotal_bytes[0],
-        vtotal_bytes[1],
-        0,
-        0,
-        flags_bytes[0],
-        flags_bytes[1],
-        flags_bytes[2],
-        flags_bytes[3],
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        privsize_bytes[0],
-        privsize_bytes[1],
-        privsize_bytes[2],
-        privsize_bytes[3],
-        after_dotclock_bytes[0],
-        after_dotclock_bytes[1],
-        after_dotclock_bytes[2],
-        after_dotclock_bytes[3],
-        after_hdisplay_bytes[0],
-        after_hdisplay_bytes[1],
-        after_hsyncstart_bytes[0],
-        after_hsyncstart_bytes[1],
-        after_hsyncend_bytes[0],
-        after_hsyncend_bytes[1],
-        after_htotal_bytes[0],
-        after_htotal_bytes[1],
-        after_hskew_bytes[0],
-        after_hskew_bytes[1],
-        after_vdisplay_bytes[0],
-        after_vdisplay_bytes[1],
-        after_vsyncstart_bytes[0],
-        after_vsyncstart_bytes[1],
-        after_vsyncend_bytes[0],
-        after_vsyncend_bytes[1],
-        after_vtotal_bytes[0],
-        after_vtotal_bytes[1],
-        0,
-        0,
-        after_flags_bytes[0],
-        after_flags_bytes[1],
-        after_flags_bytes[2],
-        after_flags_bytes[3],
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + private.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(private), IoSlice::new(&padding0)], vec![])?)
+    let request0 = AddModeLineRequest {
+        screen,
+        dotclock,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        after_dotclock,
+        after_hdisplay,
+        after_hsyncstart,
+        after_hsyncend,
+        after_htotal,
+        after_hskew,
+        after_vdisplay,
+        after_vsyncstart,
+        after_vsyncend,
+        after_vtotal,
+        after_flags,
+        private,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the DeleteModeLine request
 pub const DELETE_MODE_LINE_REQUEST: u8 = 8;
-pub fn delete_mode_line<'c, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DeleteModeLineRequest<'input> {
+    pub screen: u32,
+    pub dotclock: Dotclock,
+    pub hdisplay: u16,
+    pub hsyncstart: u16,
+    pub hsyncend: u16,
+    pub htotal: u16,
+    pub hskew: u16,
+    pub vdisplay: u16,
+    pub vsyncstart: u16,
+    pub vsyncend: u16,
+    pub vtotal: u16,
+    pub flags: u32,
+    pub private: &'input [u8],
+}
+impl<'input> DeleteModeLineRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let dotclock_bytes = self.dotclock.serialize();
+        let hdisplay_bytes = self.hdisplay.serialize();
+        let hsyncstart_bytes = self.hsyncstart.serialize();
+        let hsyncend_bytes = self.hsyncend.serialize();
+        let htotal_bytes = self.htotal.serialize();
+        let hskew_bytes = self.hskew.serialize();
+        let vdisplay_bytes = self.vdisplay.serialize();
+        let vsyncstart_bytes = self.vsyncstart.serialize();
+        let vsyncend_bytes = self.vsyncend.serialize();
+        let vtotal_bytes = self.vtotal.serialize();
+        let flags_bytes = self.flags.serialize();
+        let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
+        let privsize_bytes = privsize.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            DELETE_MODE_LINE_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            screen_bytes[2],
+            screen_bytes[3],
+            dotclock_bytes[0],
+            dotclock_bytes[1],
+            dotclock_bytes[2],
+            dotclock_bytes[3],
+            hdisplay_bytes[0],
+            hdisplay_bytes[1],
+            hsyncstart_bytes[0],
+            hsyncstart_bytes[1],
+            hsyncend_bytes[0],
+            hsyncend_bytes[1],
+            htotal_bytes[0],
+            htotal_bytes[1],
+            hskew_bytes[0],
+            hskew_bytes[1],
+            vdisplay_bytes[0],
+            vdisplay_bytes[1],
+            vsyncstart_bytes[0],
+            vsyncstart_bytes[1],
+            vsyncend_bytes[0],
+            vsyncend_bytes[1],
+            vtotal_bytes[0],
+            vtotal_bytes[1],
+            0,
+            0,
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            privsize_bytes[0],
+            privsize_bytes[1],
+            privsize_bytes[2],
+            privsize_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.private[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn delete_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u32>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let flags: u32 = flags.into();
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let dotclock_bytes = dotclock.serialize();
-    let hdisplay_bytes = hdisplay.serialize();
-    let hsyncstart_bytes = hsyncstart.serialize();
-    let hsyncend_bytes = hsyncend.serialize();
-    let htotal_bytes = htotal.serialize();
-    let hskew_bytes = hskew.serialize();
-    let vdisplay_bytes = vdisplay.serialize();
-    let vsyncstart_bytes = vsyncstart.serialize();
-    let vsyncend_bytes = vsyncend.serialize();
-    let vtotal_bytes = vtotal.serialize();
-    let flags_bytes = flags.serialize();
-    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
-    let privsize_bytes = privsize.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        DELETE_MODE_LINE_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        screen_bytes[2],
-        screen_bytes[3],
-        dotclock_bytes[0],
-        dotclock_bytes[1],
-        dotclock_bytes[2],
-        dotclock_bytes[3],
-        hdisplay_bytes[0],
-        hdisplay_bytes[1],
-        hsyncstart_bytes[0],
-        hsyncstart_bytes[1],
-        hsyncend_bytes[0],
-        hsyncend_bytes[1],
-        htotal_bytes[0],
-        htotal_bytes[1],
-        hskew_bytes[0],
-        hskew_bytes[1],
-        vdisplay_bytes[0],
-        vdisplay_bytes[1],
-        vsyncstart_bytes[0],
-        vsyncstart_bytes[1],
-        vsyncend_bytes[0],
-        vsyncend_bytes[1],
-        vtotal_bytes[0],
-        vtotal_bytes[1],
-        0,
-        0,
-        flags_bytes[0],
-        flags_bytes[1],
-        flags_bytes[2],
-        flags_bytes[3],
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        privsize_bytes[0],
-        privsize_bytes[1],
-        privsize_bytes[2],
-        privsize_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + private.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(private), IoSlice::new(&padding0)], vec![])?)
+    let request0 = DeleteModeLineRequest {
+        screen,
+        dotclock,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        private,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ValidateModeLine request
 pub const VALIDATE_MODE_LINE_REQUEST: u8 = 9;
-pub fn validate_mode_line<'c, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ValidateModeLineRequest<'input> {
+    pub screen: u32,
+    pub dotclock: Dotclock,
+    pub hdisplay: u16,
+    pub hsyncstart: u16,
+    pub hsyncend: u16,
+    pub htotal: u16,
+    pub hskew: u16,
+    pub vdisplay: u16,
+    pub vsyncstart: u16,
+    pub vsyncend: u16,
+    pub vtotal: u16,
+    pub flags: u32,
+    pub private: &'input [u8],
+}
+impl<'input> ValidateModeLineRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let dotclock_bytes = self.dotclock.serialize();
+        let hdisplay_bytes = self.hdisplay.serialize();
+        let hsyncstart_bytes = self.hsyncstart.serialize();
+        let hsyncend_bytes = self.hsyncend.serialize();
+        let htotal_bytes = self.htotal.serialize();
+        let hskew_bytes = self.hskew.serialize();
+        let vdisplay_bytes = self.vdisplay.serialize();
+        let vsyncstart_bytes = self.vsyncstart.serialize();
+        let vsyncend_bytes = self.vsyncend.serialize();
+        let vtotal_bytes = self.vtotal.serialize();
+        let flags_bytes = self.flags.serialize();
+        let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
+        let privsize_bytes = privsize.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            VALIDATE_MODE_LINE_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            screen_bytes[2],
+            screen_bytes[3],
+            dotclock_bytes[0],
+            dotclock_bytes[1],
+            dotclock_bytes[2],
+            dotclock_bytes[3],
+            hdisplay_bytes[0],
+            hdisplay_bytes[1],
+            hsyncstart_bytes[0],
+            hsyncstart_bytes[1],
+            hsyncend_bytes[0],
+            hsyncend_bytes[1],
+            htotal_bytes[0],
+            htotal_bytes[1],
+            hskew_bytes[0],
+            hskew_bytes[1],
+            vdisplay_bytes[0],
+            vdisplay_bytes[1],
+            vsyncstart_bytes[0],
+            vsyncstart_bytes[1],
+            vsyncend_bytes[0],
+            vsyncend_bytes[1],
+            vtotal_bytes[0],
+            vtotal_bytes[1],
+            0,
+            0,
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            privsize_bytes[0],
+            privsize_bytes[1],
+            privsize_bytes[2],
+            privsize_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.private[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn validate_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u32>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let flags: u32 = flags.into();
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let dotclock_bytes = dotclock.serialize();
-    let hdisplay_bytes = hdisplay.serialize();
-    let hsyncstart_bytes = hsyncstart.serialize();
-    let hsyncend_bytes = hsyncend.serialize();
-    let htotal_bytes = htotal.serialize();
-    let hskew_bytes = hskew.serialize();
-    let vdisplay_bytes = vdisplay.serialize();
-    let vsyncstart_bytes = vsyncstart.serialize();
-    let vsyncend_bytes = vsyncend.serialize();
-    let vtotal_bytes = vtotal.serialize();
-    let flags_bytes = flags.serialize();
-    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
-    let privsize_bytes = privsize.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        VALIDATE_MODE_LINE_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        screen_bytes[2],
-        screen_bytes[3],
-        dotclock_bytes[0],
-        dotclock_bytes[1],
-        dotclock_bytes[2],
-        dotclock_bytes[3],
-        hdisplay_bytes[0],
-        hdisplay_bytes[1],
-        hsyncstart_bytes[0],
-        hsyncstart_bytes[1],
-        hsyncend_bytes[0],
-        hsyncend_bytes[1],
-        htotal_bytes[0],
-        htotal_bytes[1],
-        hskew_bytes[0],
-        hskew_bytes[1],
-        vdisplay_bytes[0],
-        vdisplay_bytes[1],
-        vsyncstart_bytes[0],
-        vsyncstart_bytes[1],
-        vsyncend_bytes[0],
-        vsyncend_bytes[1],
-        vtotal_bytes[0],
-        vtotal_bytes[1],
-        0,
-        0,
-        flags_bytes[0],
-        flags_bytes[1],
-        flags_bytes[2],
-        flags_bytes[3],
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        privsize_bytes[0],
-        privsize_bytes[1],
-        privsize_bytes[2],
-        privsize_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + private.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(private), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ValidateModeLineRequest {
+        screen,
+        dotclock,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        private,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1186,118 +1482,178 @@ impl TryFrom<&[u8]> for ValidateModeLineReply {
 
 /// Opcode for the SwitchToMode request
 pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
-pub fn switch_to_mode<'c, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SwitchToModeRequest<'input> {
+    pub screen: u32,
+    pub dotclock: Dotclock,
+    pub hdisplay: u16,
+    pub hsyncstart: u16,
+    pub hsyncend: u16,
+    pub htotal: u16,
+    pub hskew: u16,
+    pub vdisplay: u16,
+    pub vsyncstart: u16,
+    pub vsyncend: u16,
+    pub vtotal: u16,
+    pub flags: u32,
+    pub private: &'input [u8],
+}
+impl<'input> SwitchToModeRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let dotclock_bytes = self.dotclock.serialize();
+        let hdisplay_bytes = self.hdisplay.serialize();
+        let hsyncstart_bytes = self.hsyncstart.serialize();
+        let hsyncend_bytes = self.hsyncend.serialize();
+        let htotal_bytes = self.htotal.serialize();
+        let hskew_bytes = self.hskew.serialize();
+        let vdisplay_bytes = self.vdisplay.serialize();
+        let vsyncstart_bytes = self.vsyncstart.serialize();
+        let vsyncend_bytes = self.vsyncend.serialize();
+        let vtotal_bytes = self.vtotal.serialize();
+        let flags_bytes = self.flags.serialize();
+        let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
+        let privsize_bytes = privsize.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SWITCH_TO_MODE_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            screen_bytes[2],
+            screen_bytes[3],
+            dotclock_bytes[0],
+            dotclock_bytes[1],
+            dotclock_bytes[2],
+            dotclock_bytes[3],
+            hdisplay_bytes[0],
+            hdisplay_bytes[1],
+            hsyncstart_bytes[0],
+            hsyncstart_bytes[1],
+            hsyncend_bytes[0],
+            hsyncend_bytes[1],
+            htotal_bytes[0],
+            htotal_bytes[1],
+            hskew_bytes[0],
+            hskew_bytes[1],
+            vdisplay_bytes[0],
+            vdisplay_bytes[1],
+            vsyncstart_bytes[0],
+            vsyncstart_bytes[1],
+            vsyncend_bytes[0],
+            vsyncend_bytes[1],
+            vtotal_bytes[0],
+            vtotal_bytes[1],
+            0,
+            0,
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            privsize_bytes[0],
+            privsize_bytes[1],
+            privsize_bytes[2],
+            privsize_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.private[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn switch_to_mode<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u32>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let flags: u32 = flags.into();
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let dotclock_bytes = dotclock.serialize();
-    let hdisplay_bytes = hdisplay.serialize();
-    let hsyncstart_bytes = hsyncstart.serialize();
-    let hsyncend_bytes = hsyncend.serialize();
-    let htotal_bytes = htotal.serialize();
-    let hskew_bytes = hskew.serialize();
-    let vdisplay_bytes = vdisplay.serialize();
-    let vsyncstart_bytes = vsyncstart.serialize();
-    let vsyncend_bytes = vsyncend.serialize();
-    let vtotal_bytes = vtotal.serialize();
-    let flags_bytes = flags.serialize();
-    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
-    let privsize_bytes = privsize.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SWITCH_TO_MODE_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        screen_bytes[2],
-        screen_bytes[3],
-        dotclock_bytes[0],
-        dotclock_bytes[1],
-        dotclock_bytes[2],
-        dotclock_bytes[3],
-        hdisplay_bytes[0],
-        hdisplay_bytes[1],
-        hsyncstart_bytes[0],
-        hsyncstart_bytes[1],
-        hsyncend_bytes[0],
-        hsyncend_bytes[1],
-        htotal_bytes[0],
-        htotal_bytes[1],
-        hskew_bytes[0],
-        hskew_bytes[1],
-        vdisplay_bytes[0],
-        vdisplay_bytes[1],
-        vsyncstart_bytes[0],
-        vsyncstart_bytes[1],
-        vsyncend_bytes[0],
-        vsyncend_bytes[1],
-        vtotal_bytes[0],
-        vtotal_bytes[1],
-        0,
-        0,
-        flags_bytes[0],
-        flags_bytes[1],
-        flags_bytes[2],
-        flags_bytes[3],
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        privsize_bytes[0],
-        privsize_bytes[1],
-        privsize_bytes[2],
-        privsize_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + private.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(private), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SwitchToModeRequest {
+        screen,
+        dotclock,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        private,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetViewPort request
 pub const GET_VIEW_PORT_REQUEST: u8 = 11;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetViewPortRequest {
+    pub screen: u16,
+}
+impl GetViewPortRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_VIEW_PORT_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_view_port<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetViewPortReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_VIEW_PORT_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetViewPortRequest {
+        screen,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1330,66 +1686,106 @@ impl TryFrom<&[u8]> for GetViewPortReply {
 
 /// Opcode for the SetViewPort request
 pub const SET_VIEW_PORT_REQUEST: u8 = 12;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetViewPortRequest {
+    pub screen: u16,
+    pub x: u32,
+    pub y: u32,
+}
+impl SetViewPortRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_VIEW_PORT_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+            x_bytes[0],
+            x_bytes[1],
+            x_bytes[2],
+            x_bytes[3],
+            y_bytes[0],
+            y_bytes[1],
+            y_bytes[2],
+            y_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn set_view_port<Conn>(conn: &Conn, screen: u16, x: u32, y: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_VIEW_PORT_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-        x_bytes[0],
-        x_bytes[1],
-        x_bytes[2],
-        x_bytes[3],
-        y_bytes[0],
-        y_bytes[1],
-        y_bytes[2],
-        y_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetViewPortRequest {
+        screen,
+        x,
+        y,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetDotClocks request
 pub const GET_DOT_CLOCKS_REQUEST: u8 = 13;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetDotClocksRequest {
+    pub screen: u16,
+}
+impl GetDotClocksRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_DOT_CLOCKS_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_dot_clocks<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetDotClocksReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_DOT_CLOCKS_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetDotClocksRequest {
+        screen,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1426,135 +1822,197 @@ impl TryFrom<&[u8]> for GetDotClocksReply {
 
 /// Opcode for the SetClientVersion request
 pub const SET_CLIENT_VERSION_REQUEST: u8 = 14;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetClientVersionRequest {
+    pub major: u16,
+    pub minor: u16,
+}
+impl SetClientVersionRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let major_bytes = self.major.serialize();
+        let minor_bytes = self.minor.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_CLIENT_VERSION_REQUEST,
+            0,
+            0,
+            major_bytes[0],
+            major_bytes[1],
+            minor_bytes[0],
+            minor_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn set_client_version<Conn>(conn: &Conn, major: u16, minor: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let major_bytes = major.serialize();
-    let minor_bytes = minor.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_CLIENT_VERSION_REQUEST,
-        0,
-        0,
-        major_bytes[0],
-        major_bytes[1],
-        minor_bytes[0],
-        minor_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetClientVersionRequest {
+        major,
+        minor,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the SetGamma request
 pub const SET_GAMMA_REQUEST: u8 = 15;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetGammaRequest {
+    pub screen: u16,
+    pub red: u32,
+    pub green: u32,
+    pub blue: u32,
+}
+impl SetGammaRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let red_bytes = self.red.serialize();
+        let green_bytes = self.green.serialize();
+        let blue_bytes = self.blue.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_GAMMA_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+            red_bytes[0],
+            red_bytes[1],
+            red_bytes[2],
+            red_bytes[3],
+            green_bytes[0],
+            green_bytes[1],
+            green_bytes[2],
+            green_bytes[3],
+            blue_bytes[0],
+            blue_bytes[1],
+            blue_bytes[2],
+            blue_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn set_gamma<Conn>(conn: &Conn, screen: u16, red: u32, green: u32, blue: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let red_bytes = red.serialize();
-    let green_bytes = green.serialize();
-    let blue_bytes = blue.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_GAMMA_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-        red_bytes[0],
-        red_bytes[1],
-        red_bytes[2],
-        red_bytes[3],
-        green_bytes[0],
-        green_bytes[1],
-        green_bytes[2],
-        green_bytes[3],
-        blue_bytes[0],
-        blue_bytes[1],
-        blue_bytes[2],
-        blue_bytes[3],
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetGammaRequest {
+        screen,
+        red,
+        green,
+        blue,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetGamma request
 pub const GET_GAMMA_REQUEST: u8 = 16;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetGammaRequest {
+    pub screen: u16,
+}
+impl GetGammaRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_GAMMA_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_gamma<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_GAMMA_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetGammaRequest {
+        screen,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1589,30 +2047,50 @@ impl TryFrom<&[u8]> for GetGammaReply {
 
 /// Opcode for the GetGammaRamp request
 pub const GET_GAMMA_RAMP_REQUEST: u8 = 17;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetGammaRampRequest {
+    pub screen: u16,
+    pub size: u16,
+}
+impl GetGammaRampRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let size_bytes = self.size.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_GAMMA_RAMP_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            size_bytes[0],
+            size_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_gamma_ramp<Conn>(conn: &Conn, screen: u16, size: u16) -> Result<Cookie<'_, Conn, GetGammaRampReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let size_bytes = size.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_GAMMA_RAMP_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        size_bytes[0],
-        size_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetGammaRampRequest {
+        screen,
+        size,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1649,68 +2127,112 @@ impl TryFrom<&[u8]> for GetGammaRampReply {
 
 /// Opcode for the SetGammaRamp request
 pub const SET_GAMMA_RAMP_REQUEST: u8 = 18;
-pub fn set_gamma_ramp<'c, Conn>(conn: &'c Conn, screen: u16, size: u16, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetGammaRampRequest<'input> {
+    pub screen: u16,
+    pub size: u16,
+    pub red: &'input [u16],
+    pub green: &'input [u16],
+    pub blue: &'input [u16],
+}
+impl<'input> SetGammaRampRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let size_bytes = self.size.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_GAMMA_RAMP_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            size_bytes[0],
+            size_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(self.red.len(), usize::try_from(u32::from(self.size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`red` has an incorrect length");
+        let red_bytes = self.red.serialize();
+        let length_so_far = length_so_far + red_bytes.len();
+        assert_eq!(self.green.len(), usize::try_from(u32::from(self.size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`green` has an incorrect length");
+        let green_bytes = self.green.serialize();
+        let length_so_far = length_so_far + green_bytes.len();
+        assert_eq!(self.blue.len(), usize::try_from(u32::from(self.size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`blue` has an incorrect length");
+        let blue_bytes = self.blue.serialize();
+        let length_so_far = length_so_far + blue_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), red_bytes.into(), green_bytes.into(), blue_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_gamma_ramp<'c, 'input, Conn>(conn: &'c Conn, screen: u16, size: u16, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let size_bytes = size.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_GAMMA_RAMP_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        size_bytes[0],
-        size_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(red.len(), usize::try_from(u32::from(size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`red` has an incorrect length");
-    let red_bytes = red.serialize();
-    let length_so_far = length_so_far + red_bytes.len();
-    assert_eq!(green.len(), usize::try_from(u32::from(size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`green` has an incorrect length");
-    let green_bytes = green.serialize();
-    let length_so_far = length_so_far + green_bytes.len();
-    assert_eq!(blue.len(), usize::try_from(u32::from(size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`blue` has an incorrect length");
-    let blue_bytes = blue.serialize();
-    let length_so_far = length_so_far + blue_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&red_bytes), IoSlice::new(&green_bytes), IoSlice::new(&blue_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetGammaRampRequest {
+        screen,
+        size,
+        red,
+        green,
+        blue,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetGammaRampSize request
 pub const GET_GAMMA_RAMP_SIZE_REQUEST: u8 = 19;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetGammaRampSizeRequest {
+    pub screen: u16,
+}
+impl GetGammaRampSizeRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_GAMMA_RAMP_SIZE_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_gamma_ramp_size<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaRampSizeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_GAMMA_RAMP_SIZE_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetGammaRampSizeRequest {
+        screen,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1741,29 +2263,47 @@ impl TryFrom<&[u8]> for GetGammaRampSizeReply {
 
 /// Opcode for the GetPermissions request
 pub const GET_PERMISSIONS_REQUEST: u8 = 20;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetPermissionsRequest {
+    pub screen: u16,
+}
+impl GetPermissionsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let screen_bytes = self.screen.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_PERMISSIONS_REQUEST,
+            0,
+            0,
+            screen_bytes[0],
+            screen_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_permissions<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetPermissionsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let screen_bytes = screen.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_PERMISSIONS_REQUEST,
-        0,
-        0,
-        screen_bytes[0],
-        screen_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetPermissionsRequest {
+        screen,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2299,7 +2839,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_mode_line(self, screen)
     }
-    fn xf86vidmode_mod_mode_line<'c, A>(&'c self, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_mod_mode_line<'c, 'input, A>(&'c self, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u32>,
     {
@@ -2321,26 +2861,26 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_all_mode_lines(self, screen)
     }
-    fn xf86vidmode_add_mode_line<'c, A, B>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_add_mode_line<'c, 'input, A, B>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u32>,
         B: Into<u32>,
     {
         add_mode_line(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, after_dotclock, after_hdisplay, after_hsyncstart, after_hsyncend, after_htotal, after_hskew, after_vdisplay, after_vsyncstart, after_vsyncend, after_vtotal, after_flags, private)
     }
-    fn xf86vidmode_delete_mode_line<'c, A>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_delete_mode_line<'c, 'input, A>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u32>,
     {
         delete_mode_line(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private)
     }
-    fn xf86vidmode_validate_mode_line<'c, A>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<Cookie<'c, Self, ValidateModeLineReply>, ConnectionError>
+    fn xf86vidmode_validate_mode_line<'c, 'input, A>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<Cookie<'c, Self, ValidateModeLineReply>, ConnectionError>
     where
         A: Into<u32>,
     {
         validate_mode_line(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private)
     }
-    fn xf86vidmode_switch_to_mode<'c, A>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_switch_to_mode<'c, 'input, A>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u32>,
     {
@@ -2374,7 +2914,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_gamma_ramp(self, screen, size)
     }
-    fn xf86vidmode_set_gamma_ramp<'c>(&'c self, screen: u16, size: u16, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_set_gamma_ramp<'c, 'input>(&'c self, screen: u16, size: u16, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_gamma_ramp(self, screen, size, red, green, blue)
     }

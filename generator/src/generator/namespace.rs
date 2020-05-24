@@ -81,7 +81,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "use crate::utils::RawFdContainer;");
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::x11_utils::{{Serialize, TryParse}};");
-        outln!(out, "use crate::connection::RequestConnection;");
+        outln!(
+            out,
+            "use crate::connection::{{BufWithFds, PiecewiseBuf, RequestConnection}};"
+        );
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
@@ -209,14 +212,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     ) {
         let name = to_rust_type_name(&request_def.name);
 
-        outln!(out, "/// Opcode for the {} request", name);
-        outln!(
-            out,
-            "pub const {}_REQUEST: u8 = {};",
-            super::camel_case_to_upper_snake(&name),
-            request_def.opcode,
-        );
-
         let mut function_name = super::camel_case_to_lower_snake(&name);
         if function_name == "await" {
             function_name.push('_');
@@ -255,14 +250,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let gathered = self.gather_request_fields(request_def, &deducible_fields);
 
-        self.emit_request_function(
-            request_def,
-            &name,
-            &function_name,
-            &deducible_fields,
-            &gathered,
-            out,
-        );
+        self.emit_request_struct(request_def, &name, &deducible_fields, &gathered, out);
+
+        self.emit_request_function(request_def, &name, &function_name, &gathered, out);
         self.emit_request_trait_function(request_def, &name, &function_name, &gathered, trait_out);
 
         special_cases::handle_request(request_def, out);
@@ -374,131 +364,130 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "");
     }
 
-    fn emit_request_function(
+    fn emit_request_struct(
         &self,
         request_def: &xcbdefs::RequestDef,
         name: &str,
-        function_name: &str,
         deducible_fields: &FxHashMap<String, DeducibleField>,
         gathered: &GatheredRequestFields,
         out: &mut Output,
     ) {
-        let mut generic_params = String::new();
-        if gathered.needs_lifetime {
-            generic_params.push_str("'c, Conn");
-        } else {
-            generic_params.push_str("Conn");
-        }
-        for (param_name, _) in gathered.generics.iter() {
-            generic_params.push_str(", ");
-            generic_params.push_str(param_name);
-        }
-
         let ns = request_def.namespace.upgrade().unwrap();
-        let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
-        let is_list_fonts_with_info =
-            request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
 
-        let ret_lifetime = if gathered.needs_lifetime { "'c" } else { "'_" };
-        let ret_type = if is_list_fonts_with_info {
-            assert!(request_def.reply.is_some());
-            assert!(!gathered.reply_has_fds);
-            format!("ListFontsWithInfoCookie<{}, Conn>", ret_lifetime)
-        } else {
-            match (request_def.reply.is_some(), gathered.reply_has_fds) {
-                (false, _) => format!("VoidCookie<{}, Conn>", ret_lifetime),
-                (true, false) => format!("Cookie<{}, Conn, {}Reply>", ret_lifetime, name),
-                (true, true) => format!("CookieWithFds<{}, Conn, {}Reply>", ret_lifetime, name),
-            }
-        };
-
-        let mut args = String::new();
-        if gathered.needs_lifetime {
-            args.push_str("conn: &'c Conn");
-        } else {
-            args.push_str("conn: &Conn");
-        }
-        for (arg_name, arg_type) in gathered.args.iter() {
-            args.push_str(", ");
-            args.push_str(arg_name);
-            args.push_str(": ");
-            args.push_str(arg_type);
-        }
+        outln!(out, "/// Opcode for the {} request", name);
+        outln!(
+            out,
+            "pub const {}_REQUEST: u8 = {};",
+            super::camel_case_to_upper_snake(&name),
+            request_def.opcode,
+        );
 
         if let Some(ref doc) = request_def.doc {
             self.emit_doc(doc, out);
         }
+
+        let mut derives = Derives::all();
+        self.filter_derives_for_fields(&mut derives, &request_def.fields.borrow());
+        let derives = derives.to_list();
+        if !derives.is_empty() {
+            outln!(out, "#[derive({})]", derives.join(", "));
+        }
+
+        let (struct_lifetime_block, serialize_lifetime_block) = if gathered.needs_lifetime {
+            ("<'input>", "")
+        } else {
+            ("", "'input, ")
+        };
+
+        let has_members = !gathered.request_args.is_empty();
+        let members_start = if has_members { " {" } else { ";" };
         outln!(
             out,
-            "pub fn {}<{}>({}) -> Result<{}, ConnectionError>",
-            function_name,
-            generic_params,
-            args,
-            ret_type,
+            "pub struct {name}Request{lifetime}{members_start}",
+            name = name,
+            lifetime = struct_lifetime_block,
+            members_start = members_start
         );
-        outln!(out, "where");
-        outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
-        for (param_name, where_) in gathered.generics.iter() {
-            outln!(out.indent(), "{}: {},", param_name, where_);
-        }
-        outln!(out, "{{");
-        #[allow(clippy::cognitive_complexity)]
         out.indented(|out| {
-            if ns.ext_info.is_some() {
-                outln!(
-                    out,
-                    "let extension_information = conn.extension_information(X11_EXTENSION_NAME)?",
-                );
-                outln!(
-                    out.indent(),
-                    ".ok_or(ConnectionError::UnsupportedExtension)?;"
-                );
+            for (member_name, member_type) in gathered.request_args.iter() {
+                outln!(out, "pub {name}: {type},",
+                       name=member_name,
+                       type=member_type);
             }
+        });
+        if has_members {
+            outln!(out, "}}",);
+        }
 
-            for preamble in gathered.preamble.iter() {
-                outln!(out, "{}", preamble);
-            }
-
-            let fields = request_def.fields.borrow();
-
-            let has_expr_fields = fields.iter().any(|field| {
-                if let xcbdefs::FieldDef::Expr(_) = field {
-                    true
+        // Methods implemented on every request
+        outln!(
+            out,
+            "impl{lifetime} {name}Request{lifetime} {{",
+            lifetime = struct_lifetime_block,
+            name = name
+        );
+        out.indented(|out| {
+            outln!(out, "/// Serialize this request into bytes for the provided connection");
+            outln!(out, "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>",
+                   lifetime=serialize_lifetime_block);
+            outln!(out, "where");
+            outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
+            outln!(out, "{{");
+            out.indented(|out| {
+                if ns.ext_info.is_some() {
+                    outln!(
+                        out,
+                        "let extension_information = conn.extension_information(X11_EXTENSION_NAME)?",
+                    );
+                    outln!(
+                        out.indent(),
+                        ".ok_or(ConnectionError::UnsupportedExtension)?;"
+                    );
                 } else {
-                    false
+                    // Silence a warning about an unused `conn`.
+                    outln!(out, "let _ = conn;");
                 }
-            });
-            // Calculate `VirtualLen` field values because they
-            // may be used by <exprfield>s.
-            if has_expr_fields {
-                for field in fields.iter() {
-                    if let xcbdefs::FieldDef::VirtualLen(virtual_len_field) = field {
-                        outln!(
-                            out,
-                            "let {} = u32::try_from({}.len()).unwrap();",
-                            to_rust_variable_name(&virtual_len_field.name),
-                            to_rust_variable_name(&virtual_len_field.list_name),
-                        );
+
+                let fields = request_def.fields.borrow();
+
+                let has_expr_fields = fields.iter().any(|field| {
+                    if let xcbdefs::FieldDef::Expr(_) = field {
+                        true
+                    } else {
+                        false
+                    }
+                });
+                // Calculate `VirtualLen` field values because they
+                // may be used by <exprfield>s.
+                if has_expr_fields {
+                    for field in fields.iter() {
+                        if let xcbdefs::FieldDef::VirtualLen(virtual_len_field) = field {
+                            outln!(
+                                out,
+                                "let {} = u32::try_from(self.{}.len()).unwrap();",
+                                to_rust_variable_name(&virtual_len_field.name),
+                                to_rust_variable_name(&virtual_len_field.list_name),
+                            );
+                        }
                     }
                 }
-            }
 
-            outln!(out, "let length_so_far = 0;");
+                outln!(out, "let length_so_far = 0;");
 
-            let mut request_size = fields
-                .iter()
-                .try_fold(0, |sum, field| Some(sum + field.size()?));
+                let mut request_size = fields
+                    .iter()
+                    .try_fold(0, |sum, field| Some(sum + field.size()?));
 
-            let mut request_slices = Vec::new();
-            let mut fixed_fields_bytes = Vec::new();
-            let mut num_fixed_len_slices = 0;
-            let mut pad_count = 0;
+                let mut request_slices = Vec::new();
+                let mut fixed_fields_bytes = Vec::new();
+                let mut num_fixed_len_slices = 0;
+                let mut pad_count = 0;
 
-            for (field_i, field) in fields.iter().enumerate() {
+                for (field_i, field) in fields.iter().enumerate() {
                 let mut next_slice = None;
 
                 let mut tmp_out = Output::new();
-                self.emit_assert_for_field_serialize(field, deducible_fields, "", &mut tmp_out);
+                self.emit_assert_for_field_serialize(field, deducible_fields, "self.", &mut tmp_out);
                 match field {
                     xcbdefs::FieldDef::Pad(pad_field) => match pad_field.kind {
                         xcbdefs::PadKind::Bytes(bytes) => {
@@ -516,7 +505,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 align,
                                 align,
                             );
-                            next_slice = Some(format!("&padding{}", pad_count));
+                            next_slice = Some(format!("padding{}", pad_count));
                             pad_count += 1;
                         }
                     },
@@ -526,17 +515,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 fixed_fields_bytes
                                     .push(String::from("extension_information.major_opcode"));
                             } else {
-                                fixed_fields_bytes.push(format!(
-                                    "{}_REQUEST",
-                                    super::camel_case_to_upper_snake(name),
-                                ));
+                                fixed_fields_bytes.push(format!("{}_REQUEST",
+                                                               super::camel_case_to_upper_snake(&name)));
                             }
                         } else if normal_field.name == "minor_opcode" {
                             assert!(ns.ext_info.is_some());
-                            fixed_fields_bytes.push(format!(
-                                "{}_REQUEST",
-                                super::camel_case_to_upper_snake(name),
-                            ));
+                            fixed_fields_bytes.push(format!("{}_REQUEST", super::camel_case_to_upper_snake(&name)));
                         } else if normal_field.name == "length" {
                             // the actual length will be calculated later
                             fixed_fields_bytes.push(String::from("0"));
@@ -550,7 +534,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 self.emit_calc_deducible_field(
                                     field,
                                     deducible_field,
-                                    "",
+                                    "self.",
                                     &rust_field_name,
                                     out,
                                 );
@@ -561,13 +545,21 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
                             let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                             if let Some(field_size) = normal_field.type_.size() {
+                                let field_name = if was_deduced {
+                                    // If we deduced this value it comes from a local.
+                                    rust_field_name
+                                } else {
+                                    // Otherwise a member.
+                                    format!("self.{}", rust_field_name)
+                                };
+
                                 outln!(
                                     out,
                                     "let {} = {};",
                                     bytes_name,
                                     self.emit_value_serialize(
                                         &normal_field.type_,
-                                        &rust_field_name,
+                                        &field_name,
                                         was_deduced,
                                     ),
                                 );
@@ -577,11 +569,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             } else {
                                 outln!(
                                     tmp_out,
-                                    "let {} = {}.serialize();",
+                                    "let {} = self.{}.serialize();",
                                     bytes_name,
-                                    rust_field_name
+                                    rust_field_name,
                                 );
-                                next_slice = Some(format!("&{}", bytes_name));
+                                next_slice = Some(bytes_name);
                             }
                         }
                     }
@@ -589,15 +581,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         let rust_field_name = to_rust_variable_name(&list_field.name);
                         let list_length = list_field.length();
                         if self.rust_value_type_is_u8(&list_field.element_type) {
-                            if list_length.is_some() {
-                                if is_send_event && list_field.name == "event" {
-                                    next_slice = Some(format!("&{}", rust_field_name));
-                                } else {
-                                    next_slice = Some(rust_field_name);
-                                }
-                            } else {
-                                next_slice = Some(rust_field_name);
-                            }
+                            next_slice = Some(format!("(&self.{}[..])", rust_field_name));
                         } else {
                             let element_size = list_field.element_type.size();
                             if let (Some(list_length), Some(element_size)) =
@@ -625,11 +609,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                 outln!(
                                     tmp_out,
-                                    "let {} = {}.serialize();",
+                                    "let {} = self.{}.serialize();",
                                     bytes_name,
                                     rust_field_name,
                                 );
-                                next_slice = Some(format!("&{}", bytes_name));
+                                next_slice = Some(bytes_name);
                             } else {
                                 let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                 outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
@@ -644,7 +628,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     );
                                 });
                                 outln!(tmp_out, "}}");
-                                next_slice = Some(format!("&{}", bytes_name));
+                                next_slice = Some(bytes_name);
                             }
                         }
                     }
@@ -653,12 +637,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                         outln!(
                             tmp_out,
-                            "let {} = {}.serialize({});",
+                            "let {} = self.{}.serialize({});",
                             bytes_name,
                             rust_field_name,
                             self.ext_params_to_call_args(
                                 false,
-                                to_rust_variable_name,
+                                |name| {
+                                    if deducible_fields.get(name).is_some() {
+                                        to_rust_variable_name(name)
+                                    } else {
+                                        format!("self.{}", to_rust_variable_name(name))
+                                    }
+                                },
                                 &*switch_field.external_params.borrow(),
                             )
                         );
@@ -667,7 +657,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
                             }
                         } else {
-                            next_slice = Some(format!("&{}", bytes_name));
+                            next_slice = Some(bytes_name);
                         }
                     }
                     xcbdefs::FieldDef::Fd(_) => {}
@@ -730,7 +720,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         } else {
                             ""
                         };
-                        outln!(out, "let {}request{} = [", maybe_mut, num_fixed_len_slices);
+                        outln!(out, "let {}request{} = vec![", maybe_mut, num_fixed_len_slices);
                         for byte in fixed_fields_bytes.iter() {
                             outln!(out.indent(), "{},", byte);
                         }
@@ -740,128 +730,213 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             "let length_so_far = length_so_far + request{}.len();",
                             num_fixed_len_slices,
                         );
-                        request_slices.push(format!("&request{}", num_fixed_len_slices));
+                        request_slices.push(format!("request{}.into()", num_fixed_len_slices));
                         fixed_fields_bytes.clear();
                         num_fixed_len_slices += 1;
                     }
                     if let Some(next_slice) = next_slice {
-                        let next_slice_for_len = if next_slice.starts_with('&') {
-                            &next_slice[1..]
-                        } else {
-                            next_slice.as_str()
-                        };
                         outln!(
                             tmp_out,
                             "let length_so_far = length_so_far + {}.len();",
-                            next_slice_for_len,
+                            next_slice,
                         );
-                        request_slices.push(next_slice);
+                        request_slices.push(format!("{}.into()", next_slice));
                     }
                 }
 
                 out!(out, "{}", tmp_out.into_data());
-            }
-
-            // The XML does not describe trailing padding in requests. Requests
-            // are implicitly padded to a four byte boundary.
-            if let Some(request_size) = request_size {
-                let req_size_rem = request_size % 4;
-                if req_size_rem != 0 {
-                    assert_eq!(pad_count, 0);
-                    outln!(out, "let padding = [0; {}];", 4 - req_size_rem);
-                    outln!(out, "let length_so_far = length_so_far + padding.len();");
-                    request_slices.push(String::from("&padding"));
                 }
-            } else {
-                outln!(
-                    out,
-                    "let padding{} = &[0; 3][..(4 - (length_so_far % 4)) % 4];",
-                    pad_count,
-                );
-                outln!(
-                    out,
-                    "let length_so_far = length_so_far + padding{}.len();",
-                    pad_count,
-                );
-                request_slices.push(format!("&padding{}", pad_count));
-            }
-
-            outln!(out, "assert_eq!(length_so_far % 4, 0);");
-            // Set the length in the request.
-            // If it does not fit into u16, compute_length_field will use BigRequests.
-            outln!(
-                out,
-                "let length = u16::try_from(length_so_far / 4).unwrap_or(0);",
-            );
-            outln!(
-                out,
-                "request0[2..4].copy_from_slice(&length.to_ne_bytes());",
-            );
-
-            let fds_arg = if gathered.fd_lists.is_empty() {
-                format!("vec![{}]", gathered.single_fds.join(", "))
-            } else if gathered.fd_lists.len() == 1 && gathered.single_fds.is_empty() {
-                gathered.fd_lists[0].clone()
-            } else {
-                outln!(out, "let mut fds = Vec::new();");
-                for field in fields.iter() {
-                    match field {
-                        xcbdefs::FieldDef::Fd(fd_field) => {
-                            outln!(out, "fds.push({});", to_rust_variable_name(&fd_field.name));
-                        }
-                        xcbdefs::FieldDef::FdList(fd_list_field) => {
-                            outln!(
-                                out,
-                                "fds.extend({});",
-                                to_rust_variable_name(&fd_list_field.name)
-                            );
-                        }
-                        _ => {}
+                // The XML does not describe trailing padding in requests. Requests
+                // are implicitly padded to a four byte boundary.
+                if let Some(request_size) = request_size {
+                    let req_size_rem = request_size % 4;
+                    if req_size_rem != 0 {
+                        assert_eq!(pad_count, 0);
+                        outln!(out, "let padding = [0; {}];", 4 - req_size_rem);
+                        outln!(out, "let length_so_far = length_so_far + padding.len();");
+                        request_slices.push(String::from("(&padding).into()"));
                     }
+                } else {
+                    outln!(
+                        out,
+                        "let padding{} = &[0; 3][..(4 - (length_so_far % 4)) % 4];",
+                        pad_count,
+                    );
+                    outln!(
+                        out,
+                        "let length_so_far = length_so_far + padding{}.len();",
+                        pad_count,
+                    );
+                    request_slices.push(format!("padding{}.into()", pad_count));
                 }
-                String::from("fds")
-            };
 
-            let mut slices_arg = String::new();
-            for (i, request_slices) in request_slices.iter().enumerate() {
-                if i != 0 {
-                    slices_arg.push_str(", ");
+                outln!(out, "assert_eq!(length_so_far % 4, 0);");
+                // Set the length in the request.
+                // If it does not fit into u16, compute_length_field will use BigRequests.
+                outln!(
+                    out,
+                    "let length = u16::try_from(length_so_far / 4).unwrap_or(0);",
+                );
+                outln!(
+                    out,
+                    "request0[2..4].copy_from_slice(&length.to_ne_bytes());",
+                );
+
+                let fds_arg = if gathered.fd_lists.is_empty() {
+                    format!("vec![{}]", gathered.single_fds.iter().enumerate().map(|(i, single_fd)| {
+                        let sep = if i == 0 {
+                            ""
+                        } else {
+                            ", "
+                        };
+                        format!("{}self.{}", sep, single_fd)
+                    }).collect::<String>())
+                } else if gathered.fd_lists.len() == 1 && gathered.single_fds.is_empty() {
+                    format!("self.{}", gathered.fd_lists[0])
+                } else {
+                    outln!(out, "let mut fds = Vec::new();");
+                    for field in fields.iter() {
+                        match field {
+                            xcbdefs::FieldDef::Fd(fd_field) => {
+                                outln!(out, "fds.push({});", to_rust_variable_name(&fd_field.name));
+                            }
+                            xcbdefs::FieldDef::FdList(fd_list_field) => {
+                                outln!(
+                                    out,
+                                    "fds.extend({});",
+                                    to_rust_variable_name(&fd_list_field.name)
+                                );
+                            }
+                            _ => {}
+                        }
+                    }
+                    String::from("fds")
+                };
+
+                let mut slices_arg = String::new();
+                for (i, request_slices) in request_slices.iter().enumerate() {
+                    if i != 0 {
+                        slices_arg.push_str(", ");
+                    }
+                    slices_arg.push_str(request_slices);
                 }
-                slices_arg.push_str("IoSlice::new(");
-                slices_arg.push_str(request_slices);
-                slices_arg.push(')');
+
+                outln!(out, "Ok((vec![{slices}], {fds}))", slices=slices_arg, fds=fds_arg);
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}",);
+    }
+
+    fn emit_request_function(
+        &self,
+        request_def: &xcbdefs::RequestDef,
+        name: &str,
+        function_name: &str,
+        gathered: &GatheredRequestFields,
+        out: &mut Output,
+    ) {
+        let ns = request_def.namespace.upgrade().unwrap();
+        let is_list_fonts_with_info =
+            request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
+        let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
+
+        let needs_lifetime = gathered.needs_lifetime && !is_send_event;
+
+        let mut generic_params = String::new();
+        if needs_lifetime {
+            generic_params.push_str("'c, 'input, Conn");
+        } else {
+            generic_params.push_str("Conn");
+        }
+        for (param_name, _) in gathered.generics.iter() {
+            generic_params.push_str(", ");
+            generic_params.push_str(param_name);
+        }
+
+        let ret_lifetime = if needs_lifetime { "'c" } else { "'_" };
+        let ret_type = if is_list_fonts_with_info {
+            assert!(request_def.reply.is_some());
+            assert!(!gathered.reply_has_fds);
+            format!("ListFontsWithInfoCookie<{}, Conn>", ret_lifetime)
+        } else {
+            match (request_def.reply.is_some(), gathered.reply_has_fds) {
+                (false, _) => format!("VoidCookie<{}, Conn>", ret_lifetime),
+                (true, false) => format!("Cookie<{}, Conn, {}Reply>", ret_lifetime, name),
+                (true, true) => format!("CookieWithFds<{}, Conn, {}Reply>", ret_lifetime, name),
             }
+        };
+
+        let mut args = String::new();
+        if needs_lifetime {
+            args.push_str("conn: &'c Conn");
+        } else {
+            args.push_str("conn: &Conn");
+        }
+        for (arg_name, arg_type) in gathered.args.iter() {
+            args.push_str(", ");
+            args.push_str(arg_name);
+            args.push_str(": ");
+            args.push_str(arg_type);
+        }
+
+        if let Some(ref doc) = request_def.doc {
+            self.emit_doc(doc, out);
+        }
+        outln!(
+            out,
+            "pub fn {}<{}>({}) -> Result<{}, ConnectionError>",
+            function_name,
+            generic_params,
+            args,
+            ret_type,
+        );
+        outln!(out, "where");
+        outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
+        for (param_name, where_) in gathered.generics.iter() {
+            outln!(out.indent(), "{}: {},", param_name, where_);
+        }
+        outln!(out, "{{");
+        #[allow(clippy::cognitive_complexity)]
+        out.indented(|out| {
+            for preamble in gathered.preamble.iter() {
+                outln!(out, "{}", preamble);
+            }
+
+            let has_members = !gathered.request_args.is_empty();
+            let members_start = if has_members { " {" } else { ";" };
+            outln!(out, "let request0 = {}Request{}", name, members_start);
+            out.indented(|out| {
+                for (arg_name, _) in gathered.args.iter() {
+                    outln!(out, "{},", arg_name);
+                }
+            });
+            if has_members {
+                outln!(out, "}};");
+            }
+
+            outln!(out, "let (bytes, fds) = request0.serialize(conn)?;");
+            outln!(
+                out,
+                "let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();"
+            );
 
             if is_list_fonts_with_info {
                 outln!(
                     out,
-                    "Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[{}], {})?))",
-                    slices_arg,
-                    fds_arg,
+                    "Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&slices, fds)?))",
                 )
             } else if request_def.reply.is_some() {
                 if gathered.reply_has_fds {
                     outln!(
                         out,
-                        "Ok(conn.send_request_with_reply_with_fds(&[{}], {})?)",
-                        slices_arg,
-                        fds_arg,
+                        "Ok(conn.send_request_with_reply_with_fds(&slices, fds)?)",
                     );
                 } else {
-                    outln!(
-                        out,
-                        "Ok(conn.send_request_with_reply(&[{}], {})?)",
-                        slices_arg,
-                        fds_arg,
-                    );
+                    outln!(out, "Ok(conn.send_request_with_reply(&slices, fds)?)",);
                 }
             } else {
-                outln!(
-                    out,
-                    "Ok(conn.send_request_without_reply(&[{}], {})?)",
-                    slices_arg,
-                    fds_arg
-                );
+                outln!(out, "Ok(conn.send_request_without_reply(&slices, fds)?)",);
             }
         });
         outln!(out, "}}");
@@ -875,14 +950,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         gathered: &GatheredRequestFields,
         out: &mut Output,
     ) {
+        let ns = request_def.namespace.upgrade().unwrap();
+        let is_list_fonts_with_info =
+            request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
+        let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
+        let needs_lifetime = gathered.needs_lifetime && !is_send_event;
+
         let mut generic_params = String::new();
-        if gathered.needs_lifetime || !gathered.generics.is_empty() {
+        if needs_lifetime || !gathered.generics.is_empty() {
             generic_params.push('<');
-            if gathered.needs_lifetime {
-                generic_params.push_str("'c");
+            if needs_lifetime {
+                generic_params.push_str("'c, 'input");
             }
             for (i, (param_name, _)) in gathered.generics.iter().enumerate() {
-                if i != 0 || gathered.needs_lifetime {
+                if i != 0 || needs_lifetime {
                     generic_params.push_str(", ");
                 }
                 generic_params.push_str(param_name);
@@ -890,11 +971,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             generic_params.push('>');
         }
 
-        let ns = request_def.namespace.upgrade().unwrap();
-        let is_list_fonts_with_info =
-            request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
-
-        let ret_lifetime = if gathered.needs_lifetime { "'c" } else { "'_" };
+        let ret_lifetime = if needs_lifetime { "'c" } else { "'_" };
         let ret_type = if is_list_fonts_with_info {
             assert!(request_def.reply.is_some());
             assert!(!gathered.reply_has_fds);
@@ -908,7 +985,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         };
 
         let mut args = String::new();
-        if gathered.needs_lifetime {
+        if needs_lifetime {
             args.push_str("&'c self");
         } else {
             args.push_str("&self");
@@ -920,7 +997,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             args.push_str(arg_type);
         }
 
-        let ns = request_def.namespace.upgrade().unwrap();
         let func_name_prefix = if ns.ext_info.is_some() {
             format!("{}_", ns.header)
         } else {
@@ -4351,14 +4427,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let mut needs_lifetime = false;
         let mut args = Vec::new();
+        let mut request_args = Vec::new();
         let mut generics = Vec::new();
         let mut preamble = Vec::new();
         let mut single_fds = Vec::new();
         let mut fd_lists = Vec::new();
 
         let ns = request_def.namespace.upgrade().unwrap();
-        let is_change_propery = request_def.name == "ChangeProperty" && ns.header == "xproto";
-        let is_get_propery = request_def.name == "GetProperty" && ns.header == "xproto";
+        let is_change_property = request_def.name == "ChangeProperty" && ns.header == "xproto";
+        let is_get_property = request_def.name == "GetProperty" && ns.header == "xproto";
         let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
 
         for field in request_def.fields.borrow().iter() {
@@ -4375,9 +4452,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 xcbdefs::FieldDef::Normal(normal_field) => {
                     let rust_field_name = to_rust_variable_name(&normal_field.name);
                     let rust_field_type = self.field_value_type_to_rust_type(&normal_field.type_);
-                    let use_into = if ((is_change_propery || is_get_propery)
+                    let use_into = if ((is_change_property || is_get_property)
                         && normal_field.name == "property")
-                        || (is_change_propery && normal_field.name == "type")
+                        || (is_change_property && normal_field.name == "type")
                     {
                         true
                     } else if self.use_enum_type_in_field(&normal_field.type_).is_none() {
@@ -4396,36 +4473,44 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         );
                         let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
                         let where_ = format!("Into<{}>", rust_field_type);
-                        args.push((rust_field_name, generic_param.clone()));
+                        args.push((rust_field_name.clone(), generic_param.clone()));
+                        request_args.push((rust_field_name, rust_field_type));
                         generics.push((generic_param, where_));
                         preamble.push(preamble_part);
                     } else {
-                        args.push((rust_field_name, rust_field_type));
+                        args.push((rust_field_name.clone(), rust_field_type.clone()));
+                        request_args.push((rust_field_name, rust_field_type));
                     }
                 }
                 xcbdefs::FieldDef::List(list_field) => {
                     if is_send_event && list_field.name == "event" {
                         let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
                         args.push((list_field.name.clone(), generic_param.clone()));
+                        request_args.push((list_field.name.clone(), "&'input [u8; 32]".into()));
                         generics.push((generic_param, String::from("Into<[u8; 32]>")));
                         preamble.push(String::from("let event: [u8; 32] = event.into();"));
+                        preamble.push(String::from("let event = &event;"));
+                        needs_lifetime = true;
                     } else {
                         let element_type =
                             self.field_value_type_to_rust_type(&list_field.element_type);
                         let rust_field_name = to_rust_variable_name(&list_field.name);
                         let rust_field_type = if let Some(list_len) = list_field.length() {
-                            format!("&[{}; {}]", element_type, list_len)
+                            format!("&'input [{}; {}]", element_type, list_len)
                         } else {
-                            format!("&[{}]", element_type)
+                            format!("&'input [{}]", element_type)
                         };
-                        args.push((rust_field_name, rust_field_type));
+                        args.push((rust_field_name.clone(), rust_field_type.clone()));
+                        request_args.push((rust_field_name, rust_field_type));
                         needs_lifetime = true;
                     }
                 }
                 xcbdefs::FieldDef::Switch(switch_field) => {
                     let rust_field_name = to_rust_variable_name(&switch_field.name);
-                    let rust_field_type = format!("&{}Aux", to_rust_type_name(&request_def.name));
-                    args.push((rust_field_name, rust_field_type));
+                    let rust_field_type =
+                        format!("&'input {}Aux", to_rust_type_name(&request_def.name));
+                    args.push((rust_field_name.clone(), rust_field_type.clone()));
+                    request_args.push((rust_field_name, rust_field_type));
                     needs_lifetime = true;
                 }
                 xcbdefs::FieldDef::Fd(fd_field) => {
@@ -4435,14 +4520,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         "let {}: RawFdContainer = {}.into();",
                         rust_field_name, rust_field_name,
                     );
-                    args.push((rust_field_name, generic_param.clone()));
+                    args.push((rust_field_name.clone(), generic_param.clone()));
+                    request_args.push((rust_field_name, "RawFdContainer".into()));
                     generics.push((generic_param, "Into<RawFdContainer>".into()));
                     preamble.push(preamble_part);
                     single_fds.push(fd_field.name.clone());
                 }
                 xcbdefs::FieldDef::FdList(fd_list_field) => {
                     let rust_field_name = to_rust_variable_name(&fd_list_field.name);
-                    args.push((rust_field_name, "Vec<RawFdContainer>".into()));
+                    args.push((rust_field_name.clone(), "Vec<RawFdContainer>".into()));
+                    request_args.push((rust_field_name, "Vec<RawFdContainer>".into()));
                     fd_lists.push(fd_list_field.name.clone());
                 }
                 xcbdefs::FieldDef::Expr(_) => unreachable!(),
@@ -4462,10 +4549,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             })
             .unwrap_or(false);
 
+        assert_eq!(args.len(), request_args.len());
         GatheredRequestFields {
             reply_has_fds,
             needs_lifetime,
             args,
+            request_args,
             generics,
             preamble,
             single_fds,
@@ -4736,8 +4825,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 derives.eq = false;
             }
             xcbdefs::TypeRef::EventStruct(_) => {
-                // Only appears in requests
-                unreachable!();
+                // Event structs don't support equality tests.
+                derives.partial_eq = false;
+                derives.eq = false;
             }
             xcbdefs::TypeRef::Xid(_) => {}
             xcbdefs::TypeRef::XidUnion(_) => {}
@@ -4999,12 +5089,18 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, De
 /// Some information about the fields of a request.
 struct GatheredRequestFields {
     reply_has_fds: bool,
-    /// Whether the request function needs a lifetime parameter
-    /// for the connection object.
+    /// Whether lifetimes in the request need to be explicitly
+    /// specified. If a request function takes any other
+    /// references other than the connection object, we'll need
+    /// to disambiguate the lifetimes for rustc.
     needs_lifetime: bool,
     /// Function arguments
     /// `(name, type)`
     args: Vec<(String, String)>,
+    /// Request arguments
+    /// The type here has been converted as necessary.
+    /// `(name, type)`
+    request_args: Vec<(String, String)>,
     /// Generic type parameters
     ///
     /// `(name, where clause)`

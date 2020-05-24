@@ -16,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -34,24 +34,38 @@ pub const X11_XML_VERSION: (u32, u32) = (0, 0);
 
 /// Opcode for the Enable request
 pub const ENABLE_REQUEST: u8 = 0;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct EnableRequest;
+impl EnableRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            ENABLE_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn enable<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, EnableReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        ENABLE_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = EnableRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

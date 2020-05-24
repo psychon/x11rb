@@ -16,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -405,24 +405,38 @@ impl TryFrom<u32> for Attr {
 
 /// Opcode for the PrintQueryVersion request
 pub const PRINT_QUERY_VERSION_REQUEST: u8 = 0;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintQueryVersionRequest;
+impl PrintQueryVersionRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_QUERY_VERSION_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintQueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_QUERY_VERSION_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintQueryVersionRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -454,40 +468,60 @@ impl TryFrom<&[u8]> for PrintQueryVersionReply {
 
 /// Opcode for the PrintGetPrinterList request
 pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
-pub fn print_get_printer_list<'c, Conn>(conn: &'c Conn, printer_name: &[String8], locale: &[String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrintGetPrinterListRequest<'input> {
+    pub printer_name: &'input [String8],
+    pub locale: &'input [String8],
+}
+impl<'input> PrintGetPrinterListRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let printer_name_len = u32::try_from(self.printer_name.len()).expect("`printer_name` has too many elements");
+        let printer_name_len_bytes = printer_name_len.serialize();
+        let locale_len = u32::try_from(self.locale.len()).expect("`locale` has too many elements");
+        let locale_len_bytes = locale_len.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_GET_PRINTER_LIST_REQUEST,
+            0,
+            0,
+            printer_name_len_bytes[0],
+            printer_name_len_bytes[1],
+            printer_name_len_bytes[2],
+            printer_name_len_bytes[3],
+            locale_len_bytes[0],
+            locale_len_bytes[1],
+            locale_len_bytes[2],
+            locale_len_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.printer_name[..]).len();
+        let length_so_far = length_so_far + (&self.locale[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.printer_name[..]).into(), (&self.locale[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn print_get_printer_list<'c, 'input, Conn>(conn: &'c Conn, printer_name: &'input [String8], locale: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let printer_name_len = u32::try_from(printer_name.len()).expect("`printer_name` has too many elements");
-    let printer_name_len_bytes = printer_name_len.serialize();
-    let locale_len = u32::try_from(locale.len()).expect("`locale` has too many elements");
-    let locale_len_bytes = locale_len.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_GET_PRINTER_LIST_REQUEST,
-        0,
-        0,
-        printer_name_len_bytes[0],
-        printer_name_len_bytes[1],
-        printer_name_len_bytes[2],
-        printer_name_len_bytes[3],
-        locale_len_bytes[0],
-        locale_len_bytes[1],
-        locale_len_bytes[2],
-        locale_len_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + printer_name.len();
-    let length_so_far = length_so_far + locale.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(printer_name), IoSlice::new(locale), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PrintGetPrinterListRequest {
+        printer_name,
+        locale,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -534,116 +568,184 @@ impl PrintGetPrinterListReply {
 
 /// Opcode for the PrintRehashPrinterList request
 pub const PRINT_REHASH_PRINTER_LIST_REQUEST: u8 = 20;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintRehashPrinterListRequest;
+impl PrintRehashPrinterListRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_REHASH_PRINTER_LIST_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_rehash_printer_list<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_REHASH_PRINTER_LIST_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintRehashPrinterListRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
-pub fn create_context<'c, Conn>(conn: &'c Conn, context_id: u32, printer_name: &[String8], locale: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CreateContextRequest<'input> {
+    pub context_id: u32,
+    pub printer_name: &'input [String8],
+    pub locale: &'input [String8],
+}
+impl<'input> CreateContextRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_id_bytes = self.context_id.serialize();
+        let printer_name_len = u32::try_from(self.printer_name.len()).expect("`printer_name` has too many elements");
+        let printer_name_len_bytes = printer_name_len.serialize();
+        let locale_len = u32::try_from(self.locale.len()).expect("`locale` has too many elements");
+        let locale_len_bytes = locale_len.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            CREATE_CONTEXT_REQUEST,
+            0,
+            0,
+            context_id_bytes[0],
+            context_id_bytes[1],
+            context_id_bytes[2],
+            context_id_bytes[3],
+            printer_name_len_bytes[0],
+            printer_name_len_bytes[1],
+            printer_name_len_bytes[2],
+            printer_name_len_bytes[3],
+            locale_len_bytes[0],
+            locale_len_bytes[1],
+            locale_len_bytes[2],
+            locale_len_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.printer_name[..]).len();
+        let length_so_far = length_so_far + (&self.locale[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.printer_name[..]).into(), (&self.locale[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context_id: u32, printer_name: &'input [String8], locale: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_id_bytes = context_id.serialize();
-    let printer_name_len = u32::try_from(printer_name.len()).expect("`printer_name` has too many elements");
-    let printer_name_len_bytes = printer_name_len.serialize();
-    let locale_len = u32::try_from(locale.len()).expect("`locale` has too many elements");
-    let locale_len_bytes = locale_len.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        CREATE_CONTEXT_REQUEST,
-        0,
-        0,
-        context_id_bytes[0],
-        context_id_bytes[1],
-        context_id_bytes[2],
-        context_id_bytes[3],
-        printer_name_len_bytes[0],
-        printer_name_len_bytes[1],
-        printer_name_len_bytes[2],
-        printer_name_len_bytes[3],
-        locale_len_bytes[0],
-        locale_len_bytes[1],
-        locale_len_bytes[2],
-        locale_len_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + printer_name.len();
-    let length_so_far = length_so_far + locale.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(printer_name), IoSlice::new(locale), IoSlice::new(&padding0)], vec![])?)
+    let request0 = CreateContextRequest {
+        context_id,
+        printer_name,
+        locale,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintSetContext request
 pub const PRINT_SET_CONTEXT_REQUEST: u8 = 3;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintSetContextRequest {
+    pub context: u32,
+}
+impl PrintSetContextRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_SET_CONTEXT_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_set_context<Conn>(conn: &Conn, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_SET_CONTEXT_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintSetContextRequest {
+        context,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintGetContext request
 pub const PRINT_GET_CONTEXT_REQUEST: u8 = 4;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintGetContextRequest;
+impl PrintGetContextRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_GET_CONTEXT_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_get_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintGetContextReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_GET_CONTEXT_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintGetContextRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -673,51 +775,83 @@ impl TryFrom<&[u8]> for PrintGetContextReply {
 
 /// Opcode for the PrintDestroyContext request
 pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintDestroyContextRequest {
+    pub context: u32,
+}
+impl PrintDestroyContextRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_DESTROY_CONTEXT_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_destroy_context<Conn>(conn: &Conn, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_DESTROY_CONTEXT_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintDestroyContextRequest {
+        context,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintGetScreenOfContext request
 pub const PRINT_GET_SCREEN_OF_CONTEXT_REQUEST: u8 = 6;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintGetScreenOfContextRequest;
+impl PrintGetScreenOfContextRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_GET_SCREEN_OF_CONTEXT_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_get_screen_of_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintGetScreenOfContextReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_GET_SCREEN_OF_CONTEXT_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintGetScreenOfContextRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -747,188 +881,304 @@ impl TryFrom<&[u8]> for PrintGetScreenOfContextReply {
 
 /// Opcode for the PrintStartJob request
 pub const PRINT_START_JOB_REQUEST: u8 = 7;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintStartJobRequest {
+    pub output_mode: u8,
+}
+impl PrintStartJobRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let output_mode_bytes = self.output_mode.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_START_JOB_REQUEST,
+            0,
+            0,
+            output_mode_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_start_job<Conn>(conn: &Conn, output_mode: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let output_mode_bytes = output_mode.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_START_JOB_REQUEST,
-        0,
-        0,
-        output_mode_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintStartJobRequest {
+        output_mode,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintEndJob request
 pub const PRINT_END_JOB_REQUEST: u8 = 8;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintEndJobRequest {
+    pub cancel: bool,
+}
+impl PrintEndJobRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let cancel_bytes = self.cancel.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_END_JOB_REQUEST,
+            0,
+            0,
+            cancel_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_end_job<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let cancel_bytes = cancel.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_END_JOB_REQUEST,
-        0,
-        0,
-        cancel_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintEndJobRequest {
+        cancel,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintStartDoc request
 pub const PRINT_START_DOC_REQUEST: u8 = 9;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintStartDocRequest {
+    pub driver_mode: u8,
+}
+impl PrintStartDocRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let driver_mode_bytes = self.driver_mode.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_START_DOC_REQUEST,
+            0,
+            0,
+            driver_mode_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_start_doc<Conn>(conn: &Conn, driver_mode: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let driver_mode_bytes = driver_mode.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_START_DOC_REQUEST,
-        0,
-        0,
-        driver_mode_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintStartDocRequest {
+        driver_mode,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintEndDoc request
 pub const PRINT_END_DOC_REQUEST: u8 = 10;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintEndDocRequest {
+    pub cancel: bool,
+}
+impl PrintEndDocRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let cancel_bytes = self.cancel.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_END_DOC_REQUEST,
+            0,
+            0,
+            cancel_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_end_doc<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let cancel_bytes = cancel.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_END_DOC_REQUEST,
-        0,
-        0,
-        cancel_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintEndDocRequest {
+        cancel,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintPutDocumentData request
 pub const PRINT_PUT_DOCUMENT_DATA_REQUEST: u8 = 11;
-pub fn print_put_document_data<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrintPutDocumentDataRequest<'input> {
+    pub drawable: xproto::Drawable,
+    pub data: &'input [u8],
+    pub doc_format: &'input [String8],
+    pub options: &'input [String8],
+}
+impl<'input> PrintPutDocumentDataRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let len_data = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        let len_data_bytes = len_data.serialize();
+        let len_fmt = u16::try_from(self.doc_format.len()).expect("`doc_format` has too many elements");
+        let len_fmt_bytes = len_fmt.serialize();
+        let len_options = u16::try_from(self.options.len()).expect("`options` has too many elements");
+        let len_options_bytes = len_options.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_PUT_DOCUMENT_DATA_REQUEST,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            len_data_bytes[0],
+            len_data_bytes[1],
+            len_data_bytes[2],
+            len_data_bytes[3],
+            len_fmt_bytes[0],
+            len_fmt_bytes[1],
+            len_options_bytes[0],
+            len_options_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + (&self.doc_format[..]).len();
+        let length_so_far = length_so_far + (&self.options[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.data[..]).into(), (&self.doc_format[..]).into(), (&self.options[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn print_put_document_data<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &'input [u8], doc_format: &'input [String8], options: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let len_data = u32::try_from(data.len()).expect("`data` has too many elements");
-    let len_data_bytes = len_data.serialize();
-    let len_fmt = u16::try_from(doc_format.len()).expect("`doc_format` has too many elements");
-    let len_fmt_bytes = len_fmt.serialize();
-    let len_options = u16::try_from(options.len()).expect("`options` has too many elements");
-    let len_options_bytes = len_options.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_PUT_DOCUMENT_DATA_REQUEST,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        len_data_bytes[0],
-        len_data_bytes[1],
-        len_data_bytes[2],
-        len_data_bytes[3],
-        len_fmt_bytes[0],
-        len_fmt_bytes[1],
-        len_options_bytes[0],
-        len_options_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + data.len();
-    let length_so_far = length_so_far + doc_format.len();
-    let length_so_far = length_so_far + options.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(doc_format), IoSlice::new(options), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PrintPutDocumentDataRequest {
+        drawable,
+        data,
+        doc_format,
+        options,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintGetDocumentData request
 pub const PRINT_GET_DOCUMENT_DATA_REQUEST: u8 = 12;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintGetDocumentDataRequest {
+    pub context: Pcontext,
+    pub max_bytes: u32,
+}
+impl PrintGetDocumentDataRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let max_bytes_bytes = self.max_bytes.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_GET_DOCUMENT_DATA_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            max_bytes_bytes[0],
+            max_bytes_bytes[1],
+            max_bytes_bytes[2],
+            max_bytes_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_get_document_data<Conn>(conn: &Conn, context: Pcontext, max_bytes: u32) -> Result<Cookie<'_, Conn, PrintGetDocumentDataReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let max_bytes_bytes = max_bytes.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_GET_DOCUMENT_DATA_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-        max_bytes_bytes[0],
-        max_bytes_bytes[1],
-        max_bytes_bytes[2],
-        max_bytes_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintGetDocumentDataRequest {
+        context,
+        max_bytes,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -980,115 +1230,189 @@ impl PrintGetDocumentDataReply {
 
 /// Opcode for the PrintStartPage request
 pub const PRINT_START_PAGE_REQUEST: u8 = 13;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintStartPageRequest {
+    pub window: xproto::Window,
+}
+impl PrintStartPageRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_START_PAGE_REQUEST,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_start_page<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_START_PAGE_REQUEST,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintStartPageRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintEndPage request
 pub const PRINT_END_PAGE_REQUEST: u8 = 14;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintEndPageRequest {
+    pub cancel: bool,
+}
+impl PrintEndPageRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let cancel_bytes = self.cancel.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_END_PAGE_REQUEST,
+            0,
+            0,
+            cancel_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_end_page<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let cancel_bytes = cancel.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_END_PAGE_REQUEST,
-        0,
-        0,
-        cancel_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintEndPageRequest {
+        cancel,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintSelectInput request
 pub const PRINT_SELECT_INPUT_REQUEST: u8 = 15;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintSelectInputRequest {
+    pub context: Pcontext,
+    pub event_mask: u32,
+}
+impl PrintSelectInputRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let event_mask_bytes = self.event_mask.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_SELECT_INPUT_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            event_mask_bytes[0],
+            event_mask_bytes[1],
+            event_mask_bytes[2],
+            event_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_select_input<Conn>(conn: &Conn, context: Pcontext, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let event_mask_bytes = event_mask.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_SELECT_INPUT_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-        event_mask_bytes[0],
-        event_mask_bytes[1],
-        event_mask_bytes[2],
-        event_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintSelectInputRequest {
+        context,
+        event_mask,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintInputSelected request
 pub const PRINT_INPUT_SELECTED_REQUEST: u8 = 16;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintInputSelectedRequest {
+    pub context: Pcontext,
+}
+impl PrintInputSelectedRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_INPUT_SELECTED_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_input_selected<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintInputSelectedReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_INPUT_SELECTED_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintInputSelectedRequest {
+        context,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1120,34 +1444,54 @@ impl TryFrom<&[u8]> for PrintInputSelectedReply {
 
 /// Opcode for the PrintGetAttributes request
 pub const PRINT_GET_ATTRIBUTES_REQUEST: u8 = 17;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintGetAttributesRequest {
+    pub context: Pcontext,
+    pub pool: u8,
+}
+impl PrintGetAttributesRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let pool_bytes = self.pool.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_GET_ATTRIBUTES_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            pool_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_get_attributes<Conn>(conn: &Conn, context: Pcontext, pool: u8) -> Result<Cookie<'_, Conn, PrintGetAttributesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let pool_bytes = pool.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_GET_ATTRIBUTES_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-        pool_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintGetAttributesRequest {
+        context,
+        pool,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1195,43 +1539,65 @@ impl PrintGetAttributesReply {
 
 /// Opcode for the PrintGetOneAttributes request
 pub const PRINT_GET_ONE_ATTRIBUTES_REQUEST: u8 = 19;
-pub fn print_get_one_attributes<'c, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &[String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrintGetOneAttributesRequest<'input> {
+    pub context: Pcontext,
+    pub pool: u8,
+    pub name: &'input [String8],
+}
+impl<'input> PrintGetOneAttributesRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let name_len = u32::try_from(self.name.len()).expect("`name` has too many elements");
+        let name_len_bytes = name_len.serialize();
+        let pool_bytes = self.pool.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_GET_ONE_ATTRIBUTES_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            name_len_bytes[0],
+            name_len_bytes[1],
+            name_len_bytes[2],
+            name_len_bytes[3],
+            pool_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.name[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn print_get_one_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let name_len = u32::try_from(name.len()).expect("`name` has too many elements");
-    let name_len_bytes = name_len.serialize();
-    let pool_bytes = pool.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_GET_ONE_ATTRIBUTES_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-        name_len_bytes[0],
-        name_len_bytes[1],
-        name_len_bytes[2],
-        name_len_bytes[3],
-        pool_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + name.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PrintGetOneAttributesRequest {
+        context,
+        pool,
+        name,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1279,70 +1645,114 @@ impl PrintGetOneAttributesReply {
 
 /// Opcode for the PrintSetAttributes request
 pub const PRINT_SET_ATTRIBUTES_REQUEST: u8 = 18;
-pub fn print_set_attributes<'c, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrintSetAttributesRequest<'input> {
+    pub context: Pcontext,
+    pub string_len: u32,
+    pub pool: u8,
+    pub rule: u8,
+    pub attributes: &'input [String8],
+}
+impl<'input> PrintSetAttributesRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let string_len_bytes = self.string_len.serialize();
+        let pool_bytes = self.pool.serialize();
+        let rule_bytes = self.rule.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_SET_ATTRIBUTES_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            string_len_bytes[0],
+            string_len_bytes[1],
+            string_len_bytes[2],
+            string_len_bytes[3],
+            pool_bytes[0],
+            rule_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.attributes[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.attributes[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn print_set_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let string_len_bytes = string_len.serialize();
-    let pool_bytes = pool.serialize();
-    let rule_bytes = rule.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_SET_ATTRIBUTES_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-        string_len_bytes[0],
-        string_len_bytes[1],
-        string_len_bytes[2],
-        string_len_bytes[3],
-        pool_bytes[0],
-        rule_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + attributes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(attributes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PrintSetAttributesRequest {
+        context,
+        string_len,
+        pool,
+        rule,
+        attributes,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PrintGetPageDimensions request
 pub const PRINT_GET_PAGE_DIMENSIONS_REQUEST: u8 = 21;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintGetPageDimensionsRequest {
+    pub context: Pcontext,
+}
+impl PrintGetPageDimensionsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_GET_PAGE_DIMENSIONS_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_get_page_dimensions<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetPageDimensionsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_GET_PAGE_DIMENSIONS_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintGetPageDimensionsRequest {
+        context,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1382,24 +1792,38 @@ impl TryFrom<&[u8]> for PrintGetPageDimensionsReply {
 
 /// Opcode for the PrintQueryScreens request
 pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintQueryScreensRequest;
+impl PrintQueryScreensRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_QUERY_SCREENS_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_query_screens<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintQueryScreensReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_QUERY_SCREENS_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintQueryScreensRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1446,34 +1870,54 @@ impl PrintQueryScreensReply {
 
 /// Opcode for the PrintSetImageResolution request
 pub const PRINT_SET_IMAGE_RESOLUTION_REQUEST: u8 = 23;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintSetImageResolutionRequest {
+    pub context: Pcontext,
+    pub image_resolution: u16,
+}
+impl PrintSetImageResolutionRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let image_resolution_bytes = self.image_resolution.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_SET_IMAGE_RESOLUTION_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            image_resolution_bytes[0],
+            image_resolution_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_set_image_resolution<Conn>(conn: &Conn, context: Pcontext, image_resolution: u16) -> Result<Cookie<'_, Conn, PrintSetImageResolutionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let image_resolution_bytes = image_resolution.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_SET_IMAGE_RESOLUTION_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-        image_resolution_bytes[0],
-        image_resolution_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintSetImageResolutionRequest {
+        context,
+        image_resolution,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1504,29 +1948,47 @@ impl TryFrom<&[u8]> for PrintSetImageResolutionReply {
 
 /// Opcode for the PrintGetImageResolution request
 pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrintGetImageResolutionRequest {
+    pub context: Pcontext,
+}
+impl PrintGetImageResolutionRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PRINT_GET_IMAGE_RESOLUTION_REQUEST,
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn print_get_image_resolution<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetImageResolutionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PRINT_GET_IMAGE_RESOLUTION_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PrintGetImageResolutionRequest {
+        context,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1853,7 +2315,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_query_version(self)
     }
-    fn xprint_print_get_printer_list<'c>(&'c self, printer_name: &[String8], locale: &[String8]) -> Result<Cookie<'c, Self, PrintGetPrinterListReply>, ConnectionError>
+    fn xprint_print_get_printer_list<'c, 'input>(&'c self, printer_name: &'input [String8], locale: &'input [String8]) -> Result<Cookie<'c, Self, PrintGetPrinterListReply>, ConnectionError>
     {
         print_get_printer_list(self, printer_name, locale)
     }
@@ -1861,7 +2323,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_rehash_printer_list(self)
     }
-    fn xprint_create_context<'c>(&'c self, context_id: u32, printer_name: &[String8], locale: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_create_context<'c, 'input>(&'c self, context_id: u32, printer_name: &'input [String8], locale: &'input [String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context(self, context_id, printer_name, locale)
     }
@@ -1897,7 +2359,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_end_doc(self, cancel)
     }
-    fn xprint_print_put_document_data<'c>(&'c self, drawable: xproto::Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_print_put_document_data<'c, 'input>(&'c self, drawable: xproto::Drawable, data: &'input [u8], doc_format: &'input [String8], options: &'input [String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_put_document_data(self, drawable, data, doc_format, options)
     }
@@ -1925,11 +2387,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_get_attributes(self, context, pool)
     }
-    fn xprint_print_get_one_attributes<'c>(&'c self, context: Pcontext, pool: u8, name: &[String8]) -> Result<Cookie<'c, Self, PrintGetOneAttributesReply>, ConnectionError>
+    fn xprint_print_get_one_attributes<'c, 'input>(&'c self, context: Pcontext, pool: u8, name: &'input [String8]) -> Result<Cookie<'c, Self, PrintGetOneAttributesReply>, ConnectionError>
     {
         print_get_one_attributes(self, context, pool, name)
     }
-    fn xprint_print_set_attributes<'c>(&'c self, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_print_set_attributes<'c, 'input>(&'c self, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &'input [String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_set_attributes(self, context, string_len, pool, rule, attributes)
     }

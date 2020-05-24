@@ -16,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -6309,30 +6309,50 @@ impl From<SAType> for Action {
 
 /// Opcode for the UseExtension request
 pub const USE_EXTENSION_REQUEST: u8 = 0;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UseExtensionRequest {
+    pub wanted_major: u16,
+    pub wanted_minor: u16,
+}
+impl UseExtensionRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let wanted_major_bytes = self.wanted_major.serialize();
+        let wanted_minor_bytes = self.wanted_minor.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            USE_EXTENSION_REQUEST,
+            0,
+            0,
+            wanted_major_bytes[0],
+            wanted_major_bytes[1],
+            wanted_minor_bytes[0],
+            wanted_minor_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn use_extension<Conn>(conn: &Conn, wanted_major: u16, wanted_minor: u16) -> Result<Cookie<'_, Conn, UseExtensionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let wanted_major_bytes = wanted_major.serialize();
-    let wanted_minor_bytes = wanted_minor.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        USE_EXTENSION_REQUEST,
-        0,
-        0,
-        wanted_major_bytes[0],
-        wanted_major_bytes[1],
-        wanted_minor_bytes[0],
-        wanted_minor_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = UseExtensionRequest {
+        wanted_major,
+        wanted_minor,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -6364,8 +6384,6 @@ impl TryFrom<&[u8]> for UseExtensionReply {
     }
 }
 
-/// Opcode for the SelectEvents request
-pub const SELECT_EVENTS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectEventsAuxBitcase1 {
     pub affect_new_keyboard: u16,
@@ -6785,7 +6803,63 @@ impl SelectEventsAux {
     }
 }
 
-pub fn select_events<'c, Conn, A, B, C, D, E>(conn: &'c Conn, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+/// Opcode for the SelectEvents request
+pub const SELECT_EVENTS_REQUEST: u8 = 1;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SelectEventsRequest<'input> {
+    pub device_spec: DeviceSpec,
+    pub affect_which: u16,
+    pub clear: u16,
+    pub select_all: u16,
+    pub affect_map: u16,
+    pub map: u16,
+    pub details: &'input SelectEventsAux,
+}
+impl<'input> SelectEventsRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let affect_which_bytes = self.affect_which.serialize();
+        let clear_bytes = self.clear.serialize();
+        let select_all_bytes = self.select_all.serialize();
+        let affect_map_bytes = self.affect_map.serialize();
+        let map_bytes = self.map.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SELECT_EVENTS_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            affect_which_bytes[0],
+            affect_which_bytes[1],
+            clear_bytes[0],
+            clear_bytes[1],
+            select_all_bytes[0],
+            select_all_bytes[1],
+            affect_map_bytes[0],
+            affect_map_bytes[1],
+            map_bytes[0],
+            map_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let details_bytes = self.details.serialize(self.affect_which, self.clear, self.select_all);
+        let length_so_far = length_so_far + details_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), details_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn select_events<'c, 'input, Conn, A, B, C, D, E>(conn: &'c Conn, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
@@ -6794,130 +6868,160 @@ where
     D: Into<u16>,
     E: Into<u16>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let affect_which: u16 = affect_which.into();
     let clear: u16 = clear.into();
     let select_all: u16 = select_all.into();
     let affect_map: u16 = affect_map.into();
     let map: u16 = map.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let affect_which_bytes = affect_which.serialize();
-    let clear_bytes = clear.serialize();
-    let select_all_bytes = select_all.serialize();
-    let affect_map_bytes = affect_map.serialize();
-    let map_bytes = map.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SELECT_EVENTS_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        affect_which_bytes[0],
-        affect_which_bytes[1],
-        clear_bytes[0],
-        clear_bytes[1],
-        select_all_bytes[0],
-        select_all_bytes[1],
-        affect_map_bytes[0],
-        affect_map_bytes[1],
-        map_bytes[0],
-        map_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let details_bytes = details.serialize(affect_which, clear, select_all);
-    let length_so_far = length_so_far + details_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&details_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SelectEventsRequest {
+        device_spec,
+        affect_which,
+        clear,
+        select_all,
+        affect_map,
+        map,
+        details,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 3;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BellRequest {
+    pub device_spec: DeviceSpec,
+    pub bell_class: BellClassSpec,
+    pub bell_id: IDSpec,
+    pub percent: i8,
+    pub force_sound: bool,
+    pub event_only: bool,
+    pub pitch: i16,
+    pub duration: i16,
+    pub name: xproto::Atom,
+    pub window: xproto::Window,
+}
+impl BellRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let bell_class_bytes = self.bell_class.serialize();
+        let bell_id_bytes = self.bell_id.serialize();
+        let percent_bytes = self.percent.serialize();
+        let force_sound_bytes = self.force_sound.serialize();
+        let event_only_bytes = self.event_only.serialize();
+        let pitch_bytes = self.pitch.serialize();
+        let duration_bytes = self.duration.serialize();
+        let name_bytes = self.name.serialize();
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            BELL_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            bell_class_bytes[0],
+            bell_class_bytes[1],
+            bell_id_bytes[0],
+            bell_id_bytes[1],
+            percent_bytes[0],
+            force_sound_bytes[0],
+            event_only_bytes[0],
+            0,
+            pitch_bytes[0],
+            pitch_bytes[1],
+            duration_bytes[0],
+            duration_bytes[1],
+            0,
+            0,
+            name_bytes[0],
+            name_bytes[1],
+            name_bytes[2],
+            name_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn bell<Conn>(conn: &Conn, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: xproto::Atom, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let bell_class_bytes = bell_class.serialize();
-    let bell_id_bytes = bell_id.serialize();
-    let percent_bytes = percent.serialize();
-    let force_sound_bytes = force_sound.serialize();
-    let event_only_bytes = event_only.serialize();
-    let pitch_bytes = pitch.serialize();
-    let duration_bytes = duration.serialize();
-    let name_bytes = name.serialize();
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        BELL_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        bell_class_bytes[0],
-        bell_class_bytes[1],
-        bell_id_bytes[0],
-        bell_id_bytes[1],
-        percent_bytes[0],
-        force_sound_bytes[0],
-        event_only_bytes[0],
-        0,
-        pitch_bytes[0],
-        pitch_bytes[1],
-        duration_bytes[0],
-        duration_bytes[1],
-        0,
-        0,
-        name_bytes[0],
-        name_bytes[1],
-        name_bytes[2],
-        name_bytes[3],
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = BellRequest {
+        device_spec,
+        bell_class,
+        bell_id,
+        percent,
+        force_sound,
+        event_only,
+        pitch,
+        duration,
+        name,
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 4;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetStateRequest {
+    pub device_spec: DeviceSpec,
+}
+impl GetStateRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_STATE_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_STATE_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetStateRequest {
+        device_spec,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -6978,6 +7082,59 @@ impl TryFrom<&[u8]> for GetStateReply {
 
 /// Opcode for the LatchLockState request
 pub const LATCH_LOCK_STATE_REQUEST: u8 = 5;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LatchLockStateRequest {
+    pub device_spec: DeviceSpec,
+    pub affect_mod_locks: u8,
+    pub mod_locks: u8,
+    pub lock_group: bool,
+    pub group_lock: Group,
+    pub affect_mod_latches: u8,
+    pub latch_group: bool,
+    pub group_latch: u16,
+}
+impl LatchLockStateRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let affect_mod_locks_bytes = self.affect_mod_locks.serialize();
+        let mod_locks_bytes = self.mod_locks.serialize();
+        let lock_group_bytes = self.lock_group.serialize();
+        let group_lock_bytes = u8::from(self.group_lock).serialize();
+        let affect_mod_latches_bytes = self.affect_mod_latches.serialize();
+        let latch_group_bytes = self.latch_group.serialize();
+        let group_latch_bytes = self.group_latch.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            LATCH_LOCK_STATE_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            affect_mod_locks_bytes[0],
+            mod_locks_bytes[0],
+            lock_group_bytes[0],
+            group_lock_bytes[0],
+            affect_mod_latches_bytes[0],
+            0,
+            0,
+            latch_group_bytes[0],
+            group_latch_bytes[0],
+            group_latch_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn latch_lock_state<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, affect_mod_locks: A, mod_locks: B, lock_group: bool, group_lock: Group, affect_mod_latches: C, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -6985,70 +7142,67 @@ where
     B: Into<u8>,
     C: Into<u8>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let affect_mod_locks: u8 = affect_mod_locks.into();
     let mod_locks: u8 = mod_locks.into();
     let affect_mod_latches: u8 = affect_mod_latches.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let affect_mod_locks_bytes = affect_mod_locks.serialize();
-    let mod_locks_bytes = mod_locks.serialize();
-    let lock_group_bytes = lock_group.serialize();
-    let group_lock_bytes = u8::from(group_lock).serialize();
-    let affect_mod_latches_bytes = affect_mod_latches.serialize();
-    let latch_group_bytes = latch_group.serialize();
-    let group_latch_bytes = group_latch.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        LATCH_LOCK_STATE_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        affect_mod_locks_bytes[0],
-        mod_locks_bytes[0],
-        lock_group_bytes[0],
-        group_lock_bytes[0],
-        affect_mod_latches_bytes[0],
-        0,
-        0,
-        latch_group_bytes[0],
-        group_latch_bytes[0],
-        group_latch_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = LatchLockStateRequest {
+        device_spec,
+        affect_mod_locks,
+        mod_locks,
+        lock_group,
+        group_lock,
+        affect_mod_latches,
+        latch_group,
+        group_latch,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetControls request
 pub const GET_CONTROLS_REQUEST: u8 = 6;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetControlsRequest {
+    pub device_spec: DeviceSpec,
+}
+impl GetControlsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_CONTROLS_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_controls<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetControlsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_CONTROLS_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetControlsRequest {
+        device_spec,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7132,7 +7286,156 @@ impl TryFrom<&[u8]> for GetControlsReply {
 
 /// Opcode for the SetControls request
 pub const SET_CONTROLS_REQUEST: u8 = 7;
-pub fn set_controls<'c, Conn, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(conn: &'c Conn, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &[u8; 32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetControlsRequest<'input> {
+    pub device_spec: DeviceSpec,
+    pub affect_internal_real_mods: u8,
+    pub internal_real_mods: u8,
+    pub affect_ignore_lock_real_mods: u8,
+    pub ignore_lock_real_mods: u8,
+    pub affect_internal_virtual_mods: u16,
+    pub internal_virtual_mods: u16,
+    pub affect_ignore_lock_virtual_mods: u16,
+    pub ignore_lock_virtual_mods: u16,
+    pub mouse_keys_dflt_btn: u8,
+    pub groups_wrap: u8,
+    pub access_x_options: u16,
+    pub affect_enabled_controls: u32,
+    pub enabled_controls: u32,
+    pub change_controls: u32,
+    pub repeat_delay: u16,
+    pub repeat_interval: u16,
+    pub slow_keys_delay: u16,
+    pub debounce_delay: u16,
+    pub mouse_keys_delay: u16,
+    pub mouse_keys_interval: u16,
+    pub mouse_keys_time_to_max: u16,
+    pub mouse_keys_max_speed: u16,
+    pub mouse_keys_curve: i16,
+    pub access_x_timeout: u16,
+    pub access_x_timeout_mask: u32,
+    pub access_x_timeout_values: u32,
+    pub access_x_timeout_options_mask: u16,
+    pub access_x_timeout_options_values: u16,
+    pub per_key_repeat: &'input [u8; 32],
+}
+impl<'input> SetControlsRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let affect_internal_real_mods_bytes = self.affect_internal_real_mods.serialize();
+        let internal_real_mods_bytes = self.internal_real_mods.serialize();
+        let affect_ignore_lock_real_mods_bytes = self.affect_ignore_lock_real_mods.serialize();
+        let ignore_lock_real_mods_bytes = self.ignore_lock_real_mods.serialize();
+        let affect_internal_virtual_mods_bytes = self.affect_internal_virtual_mods.serialize();
+        let internal_virtual_mods_bytes = self.internal_virtual_mods.serialize();
+        let affect_ignore_lock_virtual_mods_bytes = self.affect_ignore_lock_virtual_mods.serialize();
+        let ignore_lock_virtual_mods_bytes = self.ignore_lock_virtual_mods.serialize();
+        let mouse_keys_dflt_btn_bytes = self.mouse_keys_dflt_btn.serialize();
+        let groups_wrap_bytes = self.groups_wrap.serialize();
+        let access_x_options_bytes = self.access_x_options.serialize();
+        let affect_enabled_controls_bytes = self.affect_enabled_controls.serialize();
+        let enabled_controls_bytes = self.enabled_controls.serialize();
+        let change_controls_bytes = self.change_controls.serialize();
+        let repeat_delay_bytes = self.repeat_delay.serialize();
+        let repeat_interval_bytes = self.repeat_interval.serialize();
+        let slow_keys_delay_bytes = self.slow_keys_delay.serialize();
+        let debounce_delay_bytes = self.debounce_delay.serialize();
+        let mouse_keys_delay_bytes = self.mouse_keys_delay.serialize();
+        let mouse_keys_interval_bytes = self.mouse_keys_interval.serialize();
+        let mouse_keys_time_to_max_bytes = self.mouse_keys_time_to_max.serialize();
+        let mouse_keys_max_speed_bytes = self.mouse_keys_max_speed.serialize();
+        let mouse_keys_curve_bytes = self.mouse_keys_curve.serialize();
+        let access_x_timeout_bytes = self.access_x_timeout.serialize();
+        let access_x_timeout_mask_bytes = self.access_x_timeout_mask.serialize();
+        let access_x_timeout_values_bytes = self.access_x_timeout_values.serialize();
+        let access_x_timeout_options_mask_bytes = self.access_x_timeout_options_mask.serialize();
+        let access_x_timeout_options_values_bytes = self.access_x_timeout_options_values.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_CONTROLS_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            affect_internal_real_mods_bytes[0],
+            internal_real_mods_bytes[0],
+            affect_ignore_lock_real_mods_bytes[0],
+            ignore_lock_real_mods_bytes[0],
+            affect_internal_virtual_mods_bytes[0],
+            affect_internal_virtual_mods_bytes[1],
+            internal_virtual_mods_bytes[0],
+            internal_virtual_mods_bytes[1],
+            affect_ignore_lock_virtual_mods_bytes[0],
+            affect_ignore_lock_virtual_mods_bytes[1],
+            ignore_lock_virtual_mods_bytes[0],
+            ignore_lock_virtual_mods_bytes[1],
+            mouse_keys_dflt_btn_bytes[0],
+            groups_wrap_bytes[0],
+            access_x_options_bytes[0],
+            access_x_options_bytes[1],
+            0,
+            0,
+            affect_enabled_controls_bytes[0],
+            affect_enabled_controls_bytes[1],
+            affect_enabled_controls_bytes[2],
+            affect_enabled_controls_bytes[3],
+            enabled_controls_bytes[0],
+            enabled_controls_bytes[1],
+            enabled_controls_bytes[2],
+            enabled_controls_bytes[3],
+            change_controls_bytes[0],
+            change_controls_bytes[1],
+            change_controls_bytes[2],
+            change_controls_bytes[3],
+            repeat_delay_bytes[0],
+            repeat_delay_bytes[1],
+            repeat_interval_bytes[0],
+            repeat_interval_bytes[1],
+            slow_keys_delay_bytes[0],
+            slow_keys_delay_bytes[1],
+            debounce_delay_bytes[0],
+            debounce_delay_bytes[1],
+            mouse_keys_delay_bytes[0],
+            mouse_keys_delay_bytes[1],
+            mouse_keys_interval_bytes[0],
+            mouse_keys_interval_bytes[1],
+            mouse_keys_time_to_max_bytes[0],
+            mouse_keys_time_to_max_bytes[1],
+            mouse_keys_max_speed_bytes[0],
+            mouse_keys_max_speed_bytes[1],
+            mouse_keys_curve_bytes[0],
+            mouse_keys_curve_bytes[1],
+            access_x_timeout_bytes[0],
+            access_x_timeout_bytes[1],
+            access_x_timeout_mask_bytes[0],
+            access_x_timeout_mask_bytes[1],
+            access_x_timeout_mask_bytes[2],
+            access_x_timeout_mask_bytes[3],
+            access_x_timeout_values_bytes[0],
+            access_x_timeout_values_bytes[1],
+            access_x_timeout_values_bytes[2],
+            access_x_timeout_values_bytes[3],
+            access_x_timeout_options_mask_bytes[0],
+            access_x_timeout_options_mask_bytes[1],
+            access_x_timeout_options_values_bytes[0],
+            access_x_timeout_options_values_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.per_key_repeat[..]).len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.per_key_repeat[..]).into()], vec![]))
+    }
+}
+pub fn set_controls<'c, 'input, Conn, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(conn: &'c Conn, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &'input [u8; 32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
@@ -7152,8 +7455,6 @@ where
     O: Into<u16>,
     P: Into<u16>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let affect_internal_real_mods: u8 = affect_internal_real_mods.into();
     let internal_real_mods: u8 = internal_real_mods.into();
     let affect_ignore_lock_real_mods: u8 = affect_ignore_lock_real_mods.into();
@@ -7170,116 +7471,130 @@ where
     let access_x_timeout_values: u32 = access_x_timeout_values.into();
     let access_x_timeout_options_mask: u16 = access_x_timeout_options_mask.into();
     let access_x_timeout_options_values: u16 = access_x_timeout_options_values.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let affect_internal_real_mods_bytes = affect_internal_real_mods.serialize();
-    let internal_real_mods_bytes = internal_real_mods.serialize();
-    let affect_ignore_lock_real_mods_bytes = affect_ignore_lock_real_mods.serialize();
-    let ignore_lock_real_mods_bytes = ignore_lock_real_mods.serialize();
-    let affect_internal_virtual_mods_bytes = affect_internal_virtual_mods.serialize();
-    let internal_virtual_mods_bytes = internal_virtual_mods.serialize();
-    let affect_ignore_lock_virtual_mods_bytes = affect_ignore_lock_virtual_mods.serialize();
-    let ignore_lock_virtual_mods_bytes = ignore_lock_virtual_mods.serialize();
-    let mouse_keys_dflt_btn_bytes = mouse_keys_dflt_btn.serialize();
-    let groups_wrap_bytes = groups_wrap.serialize();
-    let access_x_options_bytes = access_x_options.serialize();
-    let affect_enabled_controls_bytes = affect_enabled_controls.serialize();
-    let enabled_controls_bytes = enabled_controls.serialize();
-    let change_controls_bytes = change_controls.serialize();
-    let repeat_delay_bytes = repeat_delay.serialize();
-    let repeat_interval_bytes = repeat_interval.serialize();
-    let slow_keys_delay_bytes = slow_keys_delay.serialize();
-    let debounce_delay_bytes = debounce_delay.serialize();
-    let mouse_keys_delay_bytes = mouse_keys_delay.serialize();
-    let mouse_keys_interval_bytes = mouse_keys_interval.serialize();
-    let mouse_keys_time_to_max_bytes = mouse_keys_time_to_max.serialize();
-    let mouse_keys_max_speed_bytes = mouse_keys_max_speed.serialize();
-    let mouse_keys_curve_bytes = mouse_keys_curve.serialize();
-    let access_x_timeout_bytes = access_x_timeout.serialize();
-    let access_x_timeout_mask_bytes = access_x_timeout_mask.serialize();
-    let access_x_timeout_values_bytes = access_x_timeout_values.serialize();
-    let access_x_timeout_options_mask_bytes = access_x_timeout_options_mask.serialize();
-    let access_x_timeout_options_values_bytes = access_x_timeout_options_values.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_CONTROLS_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        affect_internal_real_mods_bytes[0],
-        internal_real_mods_bytes[0],
-        affect_ignore_lock_real_mods_bytes[0],
-        ignore_lock_real_mods_bytes[0],
-        affect_internal_virtual_mods_bytes[0],
-        affect_internal_virtual_mods_bytes[1],
-        internal_virtual_mods_bytes[0],
-        internal_virtual_mods_bytes[1],
-        affect_ignore_lock_virtual_mods_bytes[0],
-        affect_ignore_lock_virtual_mods_bytes[1],
-        ignore_lock_virtual_mods_bytes[0],
-        ignore_lock_virtual_mods_bytes[1],
-        mouse_keys_dflt_btn_bytes[0],
-        groups_wrap_bytes[0],
-        access_x_options_bytes[0],
-        access_x_options_bytes[1],
-        0,
-        0,
-        affect_enabled_controls_bytes[0],
-        affect_enabled_controls_bytes[1],
-        affect_enabled_controls_bytes[2],
-        affect_enabled_controls_bytes[3],
-        enabled_controls_bytes[0],
-        enabled_controls_bytes[1],
-        enabled_controls_bytes[2],
-        enabled_controls_bytes[3],
-        change_controls_bytes[0],
-        change_controls_bytes[1],
-        change_controls_bytes[2],
-        change_controls_bytes[3],
-        repeat_delay_bytes[0],
-        repeat_delay_bytes[1],
-        repeat_interval_bytes[0],
-        repeat_interval_bytes[1],
-        slow_keys_delay_bytes[0],
-        slow_keys_delay_bytes[1],
-        debounce_delay_bytes[0],
-        debounce_delay_bytes[1],
-        mouse_keys_delay_bytes[0],
-        mouse_keys_delay_bytes[1],
-        mouse_keys_interval_bytes[0],
-        mouse_keys_interval_bytes[1],
-        mouse_keys_time_to_max_bytes[0],
-        mouse_keys_time_to_max_bytes[1],
-        mouse_keys_max_speed_bytes[0],
-        mouse_keys_max_speed_bytes[1],
-        mouse_keys_curve_bytes[0],
-        mouse_keys_curve_bytes[1],
-        access_x_timeout_bytes[0],
-        access_x_timeout_bytes[1],
-        access_x_timeout_mask_bytes[0],
-        access_x_timeout_mask_bytes[1],
-        access_x_timeout_mask_bytes[2],
-        access_x_timeout_mask_bytes[3],
-        access_x_timeout_values_bytes[0],
-        access_x_timeout_values_bytes[1],
-        access_x_timeout_values_bytes[2],
-        access_x_timeout_values_bytes[3],
-        access_x_timeout_options_mask_bytes[0],
-        access_x_timeout_options_mask_bytes[1],
-        access_x_timeout_options_values_bytes[0],
-        access_x_timeout_options_values_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + per_key_repeat.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(per_key_repeat)], vec![])?)
+    let request0 = SetControlsRequest {
+        device_spec,
+        affect_internal_real_mods,
+        internal_real_mods,
+        affect_ignore_lock_real_mods,
+        ignore_lock_real_mods,
+        affect_internal_virtual_mods,
+        internal_virtual_mods,
+        affect_ignore_lock_virtual_mods,
+        ignore_lock_virtual_mods,
+        mouse_keys_dflt_btn,
+        groups_wrap,
+        access_x_options,
+        affect_enabled_controls,
+        enabled_controls,
+        change_controls,
+        repeat_delay,
+        repeat_interval,
+        slow_keys_delay,
+        debounce_delay,
+        mouse_keys_delay,
+        mouse_keys_interval,
+        mouse_keys_time_to_max,
+        mouse_keys_max_speed,
+        mouse_keys_curve,
+        access_x_timeout,
+        access_x_timeout_mask,
+        access_x_timeout_values,
+        access_x_timeout_options_mask,
+        access_x_timeout_options_values,
+        per_key_repeat,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetMap request
 pub const GET_MAP_REQUEST: u8 = 8;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetMapRequest {
+    pub device_spec: DeviceSpec,
+    pub full: u16,
+    pub partial: u16,
+    pub first_type: u8,
+    pub n_types: u8,
+    pub first_key_sym: xproto::Keycode,
+    pub n_key_syms: u8,
+    pub first_key_action: xproto::Keycode,
+    pub n_key_actions: u8,
+    pub first_key_behavior: xproto::Keycode,
+    pub n_key_behaviors: u8,
+    pub virtual_mods: u16,
+    pub first_key_explicit: xproto::Keycode,
+    pub n_key_explicit: u8,
+    pub first_mod_map_key: xproto::Keycode,
+    pub n_mod_map_keys: u8,
+    pub first_v_mod_map_key: xproto::Keycode,
+    pub n_v_mod_map_keys: u8,
+}
+impl GetMapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let full_bytes = self.full.serialize();
+        let partial_bytes = self.partial.serialize();
+        let first_type_bytes = self.first_type.serialize();
+        let n_types_bytes = self.n_types.serialize();
+        let first_key_sym_bytes = self.first_key_sym.serialize();
+        let n_key_syms_bytes = self.n_key_syms.serialize();
+        let first_key_action_bytes = self.first_key_action.serialize();
+        let n_key_actions_bytes = self.n_key_actions.serialize();
+        let first_key_behavior_bytes = self.first_key_behavior.serialize();
+        let n_key_behaviors_bytes = self.n_key_behaviors.serialize();
+        let virtual_mods_bytes = self.virtual_mods.serialize();
+        let first_key_explicit_bytes = self.first_key_explicit.serialize();
+        let n_key_explicit_bytes = self.n_key_explicit.serialize();
+        let first_mod_map_key_bytes = self.first_mod_map_key.serialize();
+        let n_mod_map_keys_bytes = self.n_mod_map_keys.serialize();
+        let first_v_mod_map_key_bytes = self.first_v_mod_map_key.serialize();
+        let n_v_mod_map_keys_bytes = self.n_v_mod_map_keys.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_MAP_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            full_bytes[0],
+            full_bytes[1],
+            partial_bytes[0],
+            partial_bytes[1],
+            first_type_bytes[0],
+            n_types_bytes[0],
+            first_key_sym_bytes[0],
+            n_key_syms_bytes[0],
+            first_key_action_bytes[0],
+            n_key_actions_bytes[0],
+            first_key_behavior_bytes[0],
+            n_key_behaviors_bytes[0],
+            virtual_mods_bytes[0],
+            virtual_mods_bytes[1],
+            first_key_explicit_bytes[0],
+            n_key_explicit_bytes[0],
+            first_mod_map_key_bytes[0],
+            n_mod_map_keys_bytes[0],
+            first_v_mod_map_key_bytes[0],
+            n_v_mod_map_keys_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_map<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, full: A, partial: B, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, first_key_action: xproto::Keycode, n_key_actions: u8, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, virtual_mods: C, first_key_explicit: xproto::Keycode, n_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Conn, GetMapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7287,65 +7602,32 @@ where
     B: Into<u16>,
     C: Into<u16>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let full: u16 = full.into();
     let partial: u16 = partial.into();
     let virtual_mods: u16 = virtual_mods.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let full_bytes = full.serialize();
-    let partial_bytes = partial.serialize();
-    let first_type_bytes = first_type.serialize();
-    let n_types_bytes = n_types.serialize();
-    let first_key_sym_bytes = first_key_sym.serialize();
-    let n_key_syms_bytes = n_key_syms.serialize();
-    let first_key_action_bytes = first_key_action.serialize();
-    let n_key_actions_bytes = n_key_actions.serialize();
-    let first_key_behavior_bytes = first_key_behavior.serialize();
-    let n_key_behaviors_bytes = n_key_behaviors.serialize();
-    let virtual_mods_bytes = virtual_mods.serialize();
-    let first_key_explicit_bytes = first_key_explicit.serialize();
-    let n_key_explicit_bytes = n_key_explicit.serialize();
-    let first_mod_map_key_bytes = first_mod_map_key.serialize();
-    let n_mod_map_keys_bytes = n_mod_map_keys.serialize();
-    let first_v_mod_map_key_bytes = first_v_mod_map_key.serialize();
-    let n_v_mod_map_keys_bytes = n_v_mod_map_keys.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_MAP_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        full_bytes[0],
-        full_bytes[1],
-        partial_bytes[0],
-        partial_bytes[1],
-        first_type_bytes[0],
-        n_types_bytes[0],
-        first_key_sym_bytes[0],
-        n_key_syms_bytes[0],
-        first_key_action_bytes[0],
-        n_key_actions_bytes[0],
-        first_key_behavior_bytes[0],
-        n_key_behaviors_bytes[0],
-        virtual_mods_bytes[0],
-        virtual_mods_bytes[1],
-        first_key_explicit_bytes[0],
-        n_key_explicit_bytes[0],
-        first_mod_map_key_bytes[0],
-        n_mod_map_keys_bytes[0],
-        first_v_mod_map_key_bytes[0],
-        n_v_mod_map_keys_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetMapRequest {
+        device_spec,
+        full,
+        partial,
+        first_type,
+        n_types,
+        first_key_sym,
+        n_key_syms,
+        first_key_action,
+        n_key_actions,
+        first_key_behavior,
+        n_key_behaviors,
+        virtual_mods,
+        first_key_explicit,
+        n_key_explicit,
+        first_mod_map_key,
+        n_mod_map_keys,
+        first_v_mod_map_key,
+        n_v_mod_map_keys,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone)]
@@ -7544,8 +7826,6 @@ impl TryFrom<&[u8]> for GetMapReply {
     }
 }
 
-/// Opcode for the SetMap request
-pub const SET_MAP_REQUEST: u8 = 9;
 #[derive(Debug, Clone)]
 pub struct SetMapAuxBitcase3 {
     pub actions_count: Vec<u8>,
@@ -7697,128 +7977,224 @@ impl SetMapAux {
     }
 }
 
-pub fn set_map<'c, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+/// Opcode for the SetMap request
+pub const SET_MAP_REQUEST: u8 = 9;
+#[derive(Debug, Clone)]
+pub struct SetMapRequest<'input> {
+    pub device_spec: DeviceSpec,
+    pub flags: u16,
+    pub min_key_code: xproto::Keycode,
+    pub max_key_code: xproto::Keycode,
+    pub first_type: u8,
+    pub n_types: u8,
+    pub first_key_sym: xproto::Keycode,
+    pub n_key_syms: u8,
+    pub total_syms: u16,
+    pub first_key_action: xproto::Keycode,
+    pub n_key_actions: u8,
+    pub total_actions: u16,
+    pub first_key_behavior: xproto::Keycode,
+    pub n_key_behaviors: u8,
+    pub total_key_behaviors: u8,
+    pub first_key_explicit: xproto::Keycode,
+    pub n_key_explicit: u8,
+    pub total_key_explicit: u8,
+    pub first_mod_map_key: xproto::Keycode,
+    pub n_mod_map_keys: u8,
+    pub total_mod_map_keys: u8,
+    pub first_v_mod_map_key: xproto::Keycode,
+    pub n_v_mod_map_keys: u8,
+    pub total_v_mod_map_keys: u8,
+    pub virtual_mods: u16,
+    pub values: &'input SetMapAux,
+}
+impl<'input> SetMapRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let present = u16::try_from(self.values.switch_expr()).unwrap();
+        let present_bytes = present.serialize();
+        let flags_bytes = self.flags.serialize();
+        let min_key_code_bytes = self.min_key_code.serialize();
+        let max_key_code_bytes = self.max_key_code.serialize();
+        let first_type_bytes = self.first_type.serialize();
+        let n_types_bytes = self.n_types.serialize();
+        let first_key_sym_bytes = self.first_key_sym.serialize();
+        let n_key_syms_bytes = self.n_key_syms.serialize();
+        let total_syms_bytes = self.total_syms.serialize();
+        let first_key_action_bytes = self.first_key_action.serialize();
+        let n_key_actions_bytes = self.n_key_actions.serialize();
+        let total_actions_bytes = self.total_actions.serialize();
+        let first_key_behavior_bytes = self.first_key_behavior.serialize();
+        let n_key_behaviors_bytes = self.n_key_behaviors.serialize();
+        let total_key_behaviors_bytes = self.total_key_behaviors.serialize();
+        let first_key_explicit_bytes = self.first_key_explicit.serialize();
+        let n_key_explicit_bytes = self.n_key_explicit.serialize();
+        let total_key_explicit_bytes = self.total_key_explicit.serialize();
+        let first_mod_map_key_bytes = self.first_mod_map_key.serialize();
+        let n_mod_map_keys_bytes = self.n_mod_map_keys.serialize();
+        let total_mod_map_keys_bytes = self.total_mod_map_keys.serialize();
+        let first_v_mod_map_key_bytes = self.first_v_mod_map_key.serialize();
+        let n_v_mod_map_keys_bytes = self.n_v_mod_map_keys.serialize();
+        let total_v_mod_map_keys_bytes = self.total_v_mod_map_keys.serialize();
+        let virtual_mods_bytes = self.virtual_mods.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_MAP_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            present_bytes[0],
+            present_bytes[1],
+            flags_bytes[0],
+            flags_bytes[1],
+            min_key_code_bytes[0],
+            max_key_code_bytes[0],
+            first_type_bytes[0],
+            n_types_bytes[0],
+            first_key_sym_bytes[0],
+            n_key_syms_bytes[0],
+            total_syms_bytes[0],
+            total_syms_bytes[1],
+            first_key_action_bytes[0],
+            n_key_actions_bytes[0],
+            total_actions_bytes[0],
+            total_actions_bytes[1],
+            first_key_behavior_bytes[0],
+            n_key_behaviors_bytes[0],
+            total_key_behaviors_bytes[0],
+            first_key_explicit_bytes[0],
+            n_key_explicit_bytes[0],
+            total_key_explicit_bytes[0],
+            first_mod_map_key_bytes[0],
+            n_mod_map_keys_bytes[0],
+            total_mod_map_keys_bytes[0],
+            first_v_mod_map_key_bytes[0],
+            n_v_mod_map_keys_bytes[0],
+            total_v_mod_map_keys_bytes[0],
+            virtual_mods_bytes[0],
+            virtual_mods_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let values_bytes = self.values.serialize(present, self.n_types, self.n_key_syms, self.n_key_actions, self.total_actions, self.total_key_behaviors, self.virtual_mods, self.total_key_explicit, self.total_mod_map_keys, self.total_v_mod_map_keys);
+        let length_so_far = length_so_far + values_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_map<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &'input SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
     B: Into<u16>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let flags: u16 = flags.into();
     let virtual_mods: u16 = virtual_mods.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let present = u16::try_from(values.switch_expr()).unwrap();
-    let present_bytes = present.serialize();
-    let flags_bytes = flags.serialize();
-    let min_key_code_bytes = min_key_code.serialize();
-    let max_key_code_bytes = max_key_code.serialize();
-    let first_type_bytes = first_type.serialize();
-    let n_types_bytes = n_types.serialize();
-    let first_key_sym_bytes = first_key_sym.serialize();
-    let n_key_syms_bytes = n_key_syms.serialize();
-    let total_syms_bytes = total_syms.serialize();
-    let first_key_action_bytes = first_key_action.serialize();
-    let n_key_actions_bytes = n_key_actions.serialize();
-    let total_actions_bytes = total_actions.serialize();
-    let first_key_behavior_bytes = first_key_behavior.serialize();
-    let n_key_behaviors_bytes = n_key_behaviors.serialize();
-    let total_key_behaviors_bytes = total_key_behaviors.serialize();
-    let first_key_explicit_bytes = first_key_explicit.serialize();
-    let n_key_explicit_bytes = n_key_explicit.serialize();
-    let total_key_explicit_bytes = total_key_explicit.serialize();
-    let first_mod_map_key_bytes = first_mod_map_key.serialize();
-    let n_mod_map_keys_bytes = n_mod_map_keys.serialize();
-    let total_mod_map_keys_bytes = total_mod_map_keys.serialize();
-    let first_v_mod_map_key_bytes = first_v_mod_map_key.serialize();
-    let n_v_mod_map_keys_bytes = n_v_mod_map_keys.serialize();
-    let total_v_mod_map_keys_bytes = total_v_mod_map_keys.serialize();
-    let virtual_mods_bytes = virtual_mods.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_MAP_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        present_bytes[0],
-        present_bytes[1],
-        flags_bytes[0],
-        flags_bytes[1],
-        min_key_code_bytes[0],
-        max_key_code_bytes[0],
-        first_type_bytes[0],
-        n_types_bytes[0],
-        first_key_sym_bytes[0],
-        n_key_syms_bytes[0],
-        total_syms_bytes[0],
-        total_syms_bytes[1],
-        first_key_action_bytes[0],
-        n_key_actions_bytes[0],
-        total_actions_bytes[0],
-        total_actions_bytes[1],
-        first_key_behavior_bytes[0],
-        n_key_behaviors_bytes[0],
-        total_key_behaviors_bytes[0],
-        first_key_explicit_bytes[0],
-        n_key_explicit_bytes[0],
-        total_key_explicit_bytes[0],
-        first_mod_map_key_bytes[0],
-        n_mod_map_keys_bytes[0],
-        total_mod_map_keys_bytes[0],
-        first_v_mod_map_key_bytes[0],
-        n_v_mod_map_keys_bytes[0],
-        total_v_mod_map_keys_bytes[0],
-        virtual_mods_bytes[0],
-        virtual_mods_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let values_bytes = values.serialize(present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
-    let length_so_far = length_so_far + values_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&values_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetMapRequest {
+        device_spec,
+        flags,
+        min_key_code,
+        max_key_code,
+        first_type,
+        n_types,
+        first_key_sym,
+        n_key_syms,
+        total_syms,
+        first_key_action,
+        n_key_actions,
+        total_actions,
+        first_key_behavior,
+        n_key_behaviors,
+        total_key_behaviors,
+        first_key_explicit,
+        n_key_explicit,
+        total_key_explicit,
+        first_mod_map_key,
+        n_mod_map_keys,
+        total_mod_map_keys,
+        first_v_mod_map_key,
+        n_v_mod_map_keys,
+        total_v_mod_map_keys,
+        virtual_mods,
+        values,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetCompatMap request
 pub const GET_COMPAT_MAP_REQUEST: u8 = 10;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetCompatMapRequest {
+    pub device_spec: DeviceSpec,
+    pub groups: u8,
+    pub get_all_si: bool,
+    pub first_si: u16,
+    pub n_si: u16,
+}
+impl GetCompatMapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let groups_bytes = self.groups.serialize();
+        let get_all_si_bytes = self.get_all_si.serialize();
+        let first_si_bytes = self.first_si.serialize();
+        let n_si_bytes = self.n_si.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_COMPAT_MAP_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            groups_bytes[0],
+            get_all_si_bytes[0],
+            first_si_bytes[0],
+            first_si_bytes[1],
+            n_si_bytes[0],
+            n_si_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_compat_map<Conn, A>(conn: &Conn, device_spec: DeviceSpec, groups: A, get_all_si: bool, first_si: u16, n_si: u16) -> Result<Cookie<'_, Conn, GetCompatMapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let groups: u8 = groups.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let groups_bytes = groups.serialize();
-    let get_all_si_bytes = get_all_si.serialize();
-    let first_si_bytes = first_si.serialize();
-    let n_si_bytes = n_si.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_COMPAT_MAP_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        groups_bytes[0],
-        get_all_si_bytes[0],
-        first_si_bytes[0],
-        first_si_bytes[1],
-        n_si_bytes[0],
-        n_si_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetCompatMapRequest {
+        device_spec,
+        groups,
+        get_all_si,
+        first_si,
+        n_si,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -7875,79 +8251,127 @@ impl GetCompatMapReply {
 
 /// Opcode for the SetCompatMap request
 pub const SET_COMPAT_MAP_REQUEST: u8 = 11;
-pub fn set_compat_map<'c, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &[SymInterpret], group_maps: &[ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetCompatMapRequest<'input> {
+    pub device_spec: DeviceSpec,
+    pub recompute_actions: bool,
+    pub truncate_si: bool,
+    pub groups: u8,
+    pub first_si: u16,
+    pub si: &'input [SymInterpret],
+    pub group_maps: &'input [ModDef],
+}
+impl<'input> SetCompatMapRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let recompute_actions_bytes = self.recompute_actions.serialize();
+        let truncate_si_bytes = self.truncate_si.serialize();
+        let groups_bytes = self.groups.serialize();
+        let first_si_bytes = self.first_si.serialize();
+        let n_si = u16::try_from(self.si.len()).expect("`si` has too many elements");
+        let n_si_bytes = n_si.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_COMPAT_MAP_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            0,
+            recompute_actions_bytes[0],
+            truncate_si_bytes[0],
+            groups_bytes[0],
+            first_si_bytes[0],
+            first_si_bytes[1],
+            n_si_bytes[0],
+            n_si_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let si_bytes = self.si.serialize();
+        let length_so_far = length_so_far + si_bytes.len();
+        assert_eq!(self.group_maps.len(), usize::try_from(self.groups.count_ones()).unwrap(), "`group_maps` has an incorrect length");
+        let group_maps_bytes = self.group_maps.serialize();
+        let length_so_far = length_so_far + group_maps_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), si_bytes.into(), group_maps_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_compat_map<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &'input [SymInterpret], group_maps: &'input [ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let groups: u8 = groups.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let recompute_actions_bytes = recompute_actions.serialize();
-    let truncate_si_bytes = truncate_si.serialize();
-    let groups_bytes = groups.serialize();
-    let first_si_bytes = first_si.serialize();
-    let n_si = u16::try_from(si.len()).expect("`si` has too many elements");
-    let n_si_bytes = n_si.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_COMPAT_MAP_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        0,
-        recompute_actions_bytes[0],
-        truncate_si_bytes[0],
-        groups_bytes[0],
-        first_si_bytes[0],
-        first_si_bytes[1],
-        n_si_bytes[0],
-        n_si_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let si_bytes = si.serialize();
-    let length_so_far = length_so_far + si_bytes.len();
-    assert_eq!(group_maps.len(), usize::try_from(groups.count_ones()).unwrap(), "`group_maps` has an incorrect length");
-    let group_maps_bytes = group_maps.serialize();
-    let length_so_far = length_so_far + group_maps_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&si_bytes), IoSlice::new(&group_maps_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetCompatMapRequest {
+        device_spec,
+        recompute_actions,
+        truncate_si,
+        groups,
+        first_si,
+        si,
+        group_maps,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetIndicatorState request
 pub const GET_INDICATOR_STATE_REQUEST: u8 = 12;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetIndicatorStateRequest {
+    pub device_spec: DeviceSpec,
+}
+impl GetIndicatorStateRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_INDICATOR_STATE_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_indicator_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetIndicatorStateReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_INDICATOR_STATE_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetIndicatorStateRequest {
+        device_spec,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7979,34 +8403,54 @@ impl TryFrom<&[u8]> for GetIndicatorStateReply {
 
 /// Opcode for the GetIndicatorMap request
 pub const GET_INDICATOR_MAP_REQUEST: u8 = 13;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetIndicatorMapRequest {
+    pub device_spec: DeviceSpec,
+    pub which: u32,
+}
+impl GetIndicatorMapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let which_bytes = self.which.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_INDICATOR_MAP_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            0,
+            0,
+            which_bytes[0],
+            which_bytes[1],
+            which_bytes[2],
+            which_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_indicator_map<Conn>(conn: &Conn, device_spec: DeviceSpec, which: u32) -> Result<Cookie<'_, Conn, GetIndicatorMapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let which_bytes = which.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_INDICATOR_MAP_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        0,
-        0,
-        which_bytes[0],
-        which_bytes[1],
-        which_bytes[2],
-        which_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetIndicatorMapRequest {
+        device_spec,
+        which,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -8044,79 +8488,125 @@ impl TryFrom<&[u8]> for GetIndicatorMapReply {
 
 /// Opcode for the SetIndicatorMap request
 pub const SET_INDICATOR_MAP_REQUEST: u8 = 14;
-pub fn set_indicator_map<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &[IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetIndicatorMapRequest<'input> {
+    pub device_spec: DeviceSpec,
+    pub which: u32,
+    pub maps: &'input [IndicatorMap],
+}
+impl<'input> SetIndicatorMapRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let which_bytes = self.which.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_INDICATOR_MAP_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            0,
+            0,
+            which_bytes[0],
+            which_bytes[1],
+            which_bytes[2],
+            which_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(self.maps.len(), usize::try_from(self.which.count_ones()).unwrap(), "`maps` has an incorrect length");
+        let maps_bytes = self.maps.serialize();
+        let length_so_far = length_so_far + maps_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), maps_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_indicator_map<'c, 'input, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &'input [IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let which_bytes = which.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_INDICATOR_MAP_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        0,
-        0,
-        which_bytes[0],
-        which_bytes[1],
-        which_bytes[2],
-        which_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(maps.len(), usize::try_from(which.count_ones()).unwrap(), "`maps` has an incorrect length");
-    let maps_bytes = maps.serialize();
-    let length_so_far = length_so_far + maps_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&maps_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetIndicatorMapRequest {
+        device_spec,
+        which,
+        maps,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetNamedIndicator request
 pub const GET_NAMED_INDICATOR_REQUEST: u8 = 15;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetNamedIndicatorRequest {
+    pub device_spec: DeviceSpec,
+    pub led_class: LedClass,
+    pub led_id: IDSpec,
+    pub indicator: xproto::Atom,
+}
+impl GetNamedIndicatorRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let led_class_bytes = LedClassSpec::from(self.led_class).serialize();
+        let led_id_bytes = self.led_id.serialize();
+        let indicator_bytes = self.indicator.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_NAMED_INDICATOR_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            led_class_bytes[0],
+            led_class_bytes[1],
+            led_id_bytes[0],
+            led_id_bytes[1],
+            0,
+            0,
+            indicator_bytes[0],
+            indicator_bytes[1],
+            indicator_bytes[2],
+            indicator_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<IDSpec>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let led_id: IDSpec = led_id.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let led_class_bytes = LedClassSpec::from(led_class).serialize();
-    let led_id_bytes = led_id.serialize();
-    let indicator_bytes = indicator.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_NAMED_INDICATOR_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        led_class_bytes[0],
-        led_class_bytes[1],
-        led_id_bytes[0],
-        led_id_bytes[1],
-        0,
-        0,
-        indicator_bytes[0],
-        indicator_bytes[1],
-        indicator_bytes[2],
-        indicator_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetNamedIndicatorRequest {
+        device_spec,
+        led_class,
+        led_id,
+        indicator,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -8174,6 +8664,89 @@ impl TryFrom<&[u8]> for GetNamedIndicatorReply {
 
 /// Opcode for the SetNamedIndicator request
 pub const SET_NAMED_INDICATOR_REQUEST: u8 = 16;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetNamedIndicatorRequest {
+    pub device_spec: DeviceSpec,
+    pub led_class: LedClass,
+    pub led_id: IDSpec,
+    pub indicator: xproto::Atom,
+    pub set_state: bool,
+    pub on: bool,
+    pub set_map: bool,
+    pub create_map: bool,
+    pub map_flags: u8,
+    pub map_which_groups: u8,
+    pub map_groups: u8,
+    pub map_which_mods: u8,
+    pub map_real_mods: u8,
+    pub map_vmods: u16,
+    pub map_ctrls: u32,
+}
+impl SetNamedIndicatorRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let led_class_bytes = LedClassSpec::from(self.led_class).serialize();
+        let led_id_bytes = self.led_id.serialize();
+        let indicator_bytes = self.indicator.serialize();
+        let set_state_bytes = self.set_state.serialize();
+        let on_bytes = self.on.serialize();
+        let set_map_bytes = self.set_map.serialize();
+        let create_map_bytes = self.create_map.serialize();
+        let map_flags_bytes = self.map_flags.serialize();
+        let map_which_groups_bytes = self.map_which_groups.serialize();
+        let map_groups_bytes = self.map_groups.serialize();
+        let map_which_mods_bytes = self.map_which_mods.serialize();
+        let map_real_mods_bytes = self.map_real_mods.serialize();
+        let map_vmods_bytes = self.map_vmods.serialize();
+        let map_ctrls_bytes = self.map_ctrls.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_NAMED_INDICATOR_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            led_class_bytes[0],
+            led_class_bytes[1],
+            led_id_bytes[0],
+            led_id_bytes[1],
+            0,
+            0,
+            indicator_bytes[0],
+            indicator_bytes[1],
+            indicator_bytes[2],
+            indicator_bytes[3],
+            set_state_bytes[0],
+            on_bytes[0],
+            set_map_bytes[0],
+            create_map_bytes[0],
+            0,
+            map_flags_bytes[0],
+            map_which_groups_bytes[0],
+            map_groups_bytes[0],
+            map_which_mods_bytes[0],
+            map_real_mods_bytes[0],
+            map_vmods_bytes[0],
+            map_vmods_bytes[1],
+            map_ctrls_bytes[0],
+            map_ctrls_bytes[1],
+            map_ctrls_bytes[2],
+            map_ctrls_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn set_named_indicator<Conn, A, B, C, D, E, F, G, H>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: B, map_which_groups: C, map_groups: D, map_which_mods: E, map_real_mods: F, map_vmods: G, map_ctrls: H) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8186,8 +8759,6 @@ where
     G: Into<u16>,
     H: Into<u32>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let led_id: IDSpec = led_id.into();
     let map_flags: u8 = map_flags.into();
     let map_which_groups: u8 = map_which_groups.into();
@@ -8196,95 +8767,80 @@ where
     let map_real_mods: u8 = map_real_mods.into();
     let map_vmods: u16 = map_vmods.into();
     let map_ctrls: u32 = map_ctrls.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let led_class_bytes = LedClassSpec::from(led_class).serialize();
-    let led_id_bytes = led_id.serialize();
-    let indicator_bytes = indicator.serialize();
-    let set_state_bytes = set_state.serialize();
-    let on_bytes = on.serialize();
-    let set_map_bytes = set_map.serialize();
-    let create_map_bytes = create_map.serialize();
-    let map_flags_bytes = map_flags.serialize();
-    let map_which_groups_bytes = map_which_groups.serialize();
-    let map_groups_bytes = map_groups.serialize();
-    let map_which_mods_bytes = map_which_mods.serialize();
-    let map_real_mods_bytes = map_real_mods.serialize();
-    let map_vmods_bytes = map_vmods.serialize();
-    let map_ctrls_bytes = map_ctrls.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_NAMED_INDICATOR_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        led_class_bytes[0],
-        led_class_bytes[1],
-        led_id_bytes[0],
-        led_id_bytes[1],
-        0,
-        0,
-        indicator_bytes[0],
-        indicator_bytes[1],
-        indicator_bytes[2],
-        indicator_bytes[3],
-        set_state_bytes[0],
-        on_bytes[0],
-        set_map_bytes[0],
-        create_map_bytes[0],
-        0,
-        map_flags_bytes[0],
-        map_which_groups_bytes[0],
-        map_groups_bytes[0],
-        map_which_mods_bytes[0],
-        map_real_mods_bytes[0],
-        map_vmods_bytes[0],
-        map_vmods_bytes[1],
-        map_ctrls_bytes[0],
-        map_ctrls_bytes[1],
-        map_ctrls_bytes[2],
-        map_ctrls_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetNamedIndicatorRequest {
+        device_spec,
+        led_class,
+        led_id,
+        indicator,
+        set_state,
+        on,
+        set_map,
+        create_map,
+        map_flags,
+        map_which_groups,
+        map_groups,
+        map_which_mods,
+        map_real_mods,
+        map_vmods,
+        map_ctrls,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetNames request
 pub const GET_NAMES_REQUEST: u8 = 17;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetNamesRequest {
+    pub device_spec: DeviceSpec,
+    pub which: u32,
+}
+impl GetNamesRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let which_bytes = self.which.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_NAMES_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            0,
+            0,
+            which_bytes[0],
+            which_bytes[1],
+            which_bytes[2],
+            which_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_names<Conn, A>(conn: &Conn, device_spec: DeviceSpec, which: A) -> Result<Cookie<'_, Conn, GetNamesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u32>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let which: u32 = which.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let which_bytes = which.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_NAMES_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        0,
-        0,
-        which_bytes[0],
-        which_bytes[1],
-        which_bytes[2],
-        which_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetNamesRequest {
+        device_spec,
+        which,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -8494,8 +9050,6 @@ impl TryFrom<&[u8]> for GetNamesReply {
     }
 }
 
-/// Opcode for the SetNames request
-pub const SET_NAMES_REQUEST: u8 = 18;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetNamesAuxBitcase8 {
     pub n_levels_per_type: Vec<u8>,
@@ -8718,75 +9272,182 @@ impl SetNamesAux {
     }
 }
 
-pub fn set_names<'c, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+/// Opcode for the SetNames request
+pub const SET_NAMES_REQUEST: u8 = 18;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetNamesRequest<'input> {
+    pub device_spec: DeviceSpec,
+    pub virtual_mods: u16,
+    pub first_type: u8,
+    pub n_types: u8,
+    pub first_kt_levelt: u8,
+    pub n_kt_levels: u8,
+    pub indicators: u32,
+    pub group_names: u8,
+    pub n_radio_groups: u8,
+    pub first_key: xproto::Keycode,
+    pub n_keys: u8,
+    pub n_key_aliases: u8,
+    pub total_kt_level_names: u16,
+    pub values: &'input SetNamesAux,
+}
+impl<'input> SetNamesRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let virtual_mods_bytes = self.virtual_mods.serialize();
+        let which = u32::try_from(self.values.switch_expr()).unwrap();
+        let which_bytes = which.serialize();
+        let first_type_bytes = self.first_type.serialize();
+        let n_types_bytes = self.n_types.serialize();
+        let first_kt_levelt_bytes = self.first_kt_levelt.serialize();
+        let n_kt_levels_bytes = self.n_kt_levels.serialize();
+        let indicators_bytes = self.indicators.serialize();
+        let group_names_bytes = self.group_names.serialize();
+        let n_radio_groups_bytes = self.n_radio_groups.serialize();
+        let first_key_bytes = self.first_key.serialize();
+        let n_keys_bytes = self.n_keys.serialize();
+        let n_key_aliases_bytes = self.n_key_aliases.serialize();
+        let total_kt_level_names_bytes = self.total_kt_level_names.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_NAMES_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            virtual_mods_bytes[0],
+            virtual_mods_bytes[1],
+            which_bytes[0],
+            which_bytes[1],
+            which_bytes[2],
+            which_bytes[3],
+            first_type_bytes[0],
+            n_types_bytes[0],
+            first_kt_levelt_bytes[0],
+            n_kt_levels_bytes[0],
+            indicators_bytes[0],
+            indicators_bytes[1],
+            indicators_bytes[2],
+            indicators_bytes[3],
+            group_names_bytes[0],
+            n_radio_groups_bytes[0],
+            first_key_bytes[0],
+            n_keys_bytes[0],
+            n_key_aliases_bytes[0],
+            0,
+            total_kt_level_names_bytes[0],
+            total_kt_level_names_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let values_bytes = self.values.serialize(which, self.n_types, self.indicators, self.virtual_mods, self.group_names, self.n_keys, self.n_key_aliases, self.n_radio_groups);
+        let length_so_far = length_so_far + values_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_names<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &'input SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
     B: Into<u8>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let virtual_mods: u16 = virtual_mods.into();
     let group_names: u8 = group_names.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let virtual_mods_bytes = virtual_mods.serialize();
-    let which = u32::try_from(values.switch_expr()).unwrap();
-    let which_bytes = which.serialize();
-    let first_type_bytes = first_type.serialize();
-    let n_types_bytes = n_types.serialize();
-    let first_kt_levelt_bytes = first_kt_levelt.serialize();
-    let n_kt_levels_bytes = n_kt_levels.serialize();
-    let indicators_bytes = indicators.serialize();
-    let group_names_bytes = group_names.serialize();
-    let n_radio_groups_bytes = n_radio_groups.serialize();
-    let first_key_bytes = first_key.serialize();
-    let n_keys_bytes = n_keys.serialize();
-    let n_key_aliases_bytes = n_key_aliases.serialize();
-    let total_kt_level_names_bytes = total_kt_level_names.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_NAMES_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        virtual_mods_bytes[0],
-        virtual_mods_bytes[1],
-        which_bytes[0],
-        which_bytes[1],
-        which_bytes[2],
-        which_bytes[3],
-        first_type_bytes[0],
-        n_types_bytes[0],
-        first_kt_levelt_bytes[0],
-        n_kt_levels_bytes[0],
-        indicators_bytes[0],
-        indicators_bytes[1],
-        indicators_bytes[2],
-        indicators_bytes[3],
-        group_names_bytes[0],
-        n_radio_groups_bytes[0],
-        first_key_bytes[0],
-        n_keys_bytes[0],
-        n_key_aliases_bytes[0],
-        0,
-        total_kt_level_names_bytes[0],
-        total_kt_level_names_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let values_bytes = values.serialize(which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);
-    let length_so_far = length_so_far + values_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&values_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetNamesRequest {
+        device_spec,
+        virtual_mods,
+        first_type,
+        n_types,
+        first_kt_levelt,
+        n_kt_levels,
+        indicators,
+        group_names,
+        n_radio_groups,
+        first_key,
+        n_keys,
+        n_key_aliases,
+        total_kt_level_names,
+        values,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PerClientFlags request
 pub const PER_CLIENT_FLAGS_REQUEST: u8 = 21;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PerClientFlagsRequest {
+    pub device_spec: DeviceSpec,
+    pub change: u32,
+    pub value: u32,
+    pub ctrls_to_change: u32,
+    pub auto_ctrls: u32,
+    pub auto_ctrls_values: u32,
+}
+impl PerClientFlagsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let change_bytes = self.change.serialize();
+        let value_bytes = self.value.serialize();
+        let ctrls_to_change_bytes = self.ctrls_to_change.serialize();
+        let auto_ctrls_bytes = self.auto_ctrls.serialize();
+        let auto_ctrls_values_bytes = self.auto_ctrls_values.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PER_CLIENT_FLAGS_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            0,
+            0,
+            change_bytes[0],
+            change_bytes[1],
+            change_bytes[2],
+            change_bytes[3],
+            value_bytes[0],
+            value_bytes[1],
+            value_bytes[2],
+            value_bytes[3],
+            ctrls_to_change_bytes[0],
+            ctrls_to_change_bytes[1],
+            ctrls_to_change_bytes[2],
+            ctrls_to_change_bytes[3],
+            auto_ctrls_bytes[0],
+            auto_ctrls_bytes[1],
+            auto_ctrls_bytes[2],
+            auto_ctrls_bytes[3],
+            auto_ctrls_values_bytes[0],
+            auto_ctrls_values_bytes[1],
+            auto_ctrls_values_bytes[2],
+            auto_ctrls_values_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn per_client_flags<Conn, A, B, C, D, E>(conn: &Conn, device_spec: DeviceSpec, change: A, value: B, ctrls_to_change: C, auto_ctrls: D, auto_ctrls_values: E) -> Result<Cookie<'_, Conn, PerClientFlagsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8796,55 +9457,22 @@ where
     D: Into<u32>,
     E: Into<u32>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let change: u32 = change.into();
     let value: u32 = value.into();
     let ctrls_to_change: u32 = ctrls_to_change.into();
     let auto_ctrls: u32 = auto_ctrls.into();
     let auto_ctrls_values: u32 = auto_ctrls_values.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let change_bytes = change.serialize();
-    let value_bytes = value.serialize();
-    let ctrls_to_change_bytes = ctrls_to_change.serialize();
-    let auto_ctrls_bytes = auto_ctrls.serialize();
-    let auto_ctrls_values_bytes = auto_ctrls_values.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PER_CLIENT_FLAGS_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        0,
-        0,
-        change_bytes[0],
-        change_bytes[1],
-        change_bytes[2],
-        change_bytes[3],
-        value_bytes[0],
-        value_bytes[1],
-        value_bytes[2],
-        value_bytes[3],
-        ctrls_to_change_bytes[0],
-        ctrls_to_change_bytes[1],
-        ctrls_to_change_bytes[2],
-        ctrls_to_change_bytes[3],
-        auto_ctrls_bytes[0],
-        auto_ctrls_bytes[1],
-        auto_ctrls_bytes[2],
-        auto_ctrls_bytes[3],
-        auto_ctrls_values_bytes[0],
-        auto_ctrls_values_bytes[1],
-        auto_ctrls_values_bytes[2],
-        auto_ctrls_values_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PerClientFlagsRequest {
+        device_spec,
+        change,
+        value,
+        ctrls_to_change,
+        auto_ctrls,
+        auto_ctrls_values,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -8882,30 +9510,50 @@ impl TryFrom<&[u8]> for PerClientFlagsReply {
 
 /// Opcode for the ListComponents request
 pub const LIST_COMPONENTS_REQUEST: u8 = 22;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ListComponentsRequest {
+    pub device_spec: DeviceSpec,
+    pub max_names: u16,
+}
+impl ListComponentsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let max_names_bytes = self.max_names.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            LIST_COMPONENTS_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            max_names_bytes[0],
+            max_names_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn list_components<Conn>(conn: &Conn, device_spec: DeviceSpec, max_names: u16) -> Result<Cookie<'_, Conn, ListComponentsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let max_names_bytes = max_names.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        LIST_COMPONENTS_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        max_names_bytes[0],
-        max_names_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ListComponentsRequest {
+        device_spec,
+        max_names,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -9035,40 +9683,64 @@ impl ListComponentsReply {
 
 /// Opcode for the GetKbdByName request
 pub const GET_KBD_BY_NAME_REQUEST: u8 = 23;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetKbdByNameRequest {
+    pub device_spec: DeviceSpec,
+    pub need: u16,
+    pub want: u16,
+    pub load: bool,
+}
+impl GetKbdByNameRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let need_bytes = self.need.serialize();
+        let want_bytes = self.want.serialize();
+        let load_bytes = self.load.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_KBD_BY_NAME_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            need_bytes[0],
+            need_bytes[1],
+            want_bytes[0],
+            want_bytes[1],
+            load_bytes[0],
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_kbd_by_name<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, need: A, want: B, load: bool) -> Result<Cookie<'_, Conn, GetKbdByNameReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
     B: Into<u16>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let need: u16 = need.into();
     let want: u16 = want.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let need_bytes = need.serialize();
-    let want_bytes = want.serialize();
-    let load_bytes = load.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_KBD_BY_NAME_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        need_bytes[0],
-        need_bytes[1],
-        want_bytes[0],
-        want_bytes[1],
-        load_bytes[0],
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetKbdByNameRequest {
+        device_spec,
+        need,
+        want,
+        load,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone)]
@@ -9712,47 +10384,77 @@ impl TryFrom<&[u8]> for GetKbdByNameReply {
 
 /// Opcode for the GetDeviceInfo request
 pub const GET_DEVICE_INFO_REQUEST: u8 = 24;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetDeviceInfoRequest {
+    pub device_spec: DeviceSpec,
+    pub wanted: u16,
+    pub all_buttons: bool,
+    pub first_button: u8,
+    pub n_buttons: u8,
+    pub led_class: LedClass,
+    pub led_id: IDSpec,
+}
+impl GetDeviceInfoRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let wanted_bytes = self.wanted.serialize();
+        let all_buttons_bytes = self.all_buttons.serialize();
+        let first_button_bytes = self.first_button.serialize();
+        let n_buttons_bytes = self.n_buttons.serialize();
+        let led_class_bytes = LedClassSpec::from(self.led_class).serialize();
+        let led_id_bytes = self.led_id.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_DEVICE_INFO_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            wanted_bytes[0],
+            wanted_bytes[1],
+            all_buttons_bytes[0],
+            first_button_bytes[0],
+            n_buttons_bytes[0],
+            0,
+            led_class_bytes[0],
+            led_class_bytes[1],
+            led_id_bytes[0],
+            led_id_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_device_info<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, wanted: A, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: LedClass, led_id: B) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
     B: Into<IDSpec>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let wanted: u16 = wanted.into();
     let led_id: IDSpec = led_id.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let wanted_bytes = wanted.serialize();
-    let all_buttons_bytes = all_buttons.serialize();
-    let first_button_bytes = first_button.serialize();
-    let n_buttons_bytes = n_buttons.serialize();
-    let led_class_bytes = LedClassSpec::from(led_class).serialize();
-    let led_id_bytes = led_id.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_DEVICE_INFO_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        wanted_bytes[0],
-        wanted_bytes[1],
-        all_buttons_bytes[0],
-        first_button_bytes[0],
-        n_buttons_bytes[0],
-        0,
-        led_class_bytes[0],
-        led_class_bytes[1],
-        led_id_bytes[0],
-        led_id_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetDeviceInfoRequest {
+        device_spec,
+        wanted,
+        all_buttons,
+        first_button,
+        n_buttons,
+        led_class,
+        led_id,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone)]
@@ -9860,98 +10562,150 @@ impl GetDeviceInfoReply {
 
 /// Opcode for the SetDeviceInfo request
 pub const SET_DEVICE_INFO_REQUEST: u8 = 25;
-pub fn set_device_info<'c, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &[Action], leds: &[DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone)]
+pub struct SetDeviceInfoRequest<'input> {
+    pub device_spec: DeviceSpec,
+    pub first_btn: u8,
+    pub change: u16,
+    pub btn_actions: &'input [Action],
+    pub leds: &'input [DeviceLedInfo],
+}
+impl<'input> SetDeviceInfoRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let device_spec_bytes = self.device_spec.serialize();
+        let first_btn_bytes = self.first_btn.serialize();
+        let n_btns = u8::try_from(self.btn_actions.len()).expect("`btn_actions` has too many elements");
+        let n_btns_bytes = n_btns.serialize();
+        let change_bytes = self.change.serialize();
+        let n_device_led_f_bs = u16::try_from(self.leds.len()).expect("`leds` has too many elements");
+        let n_device_led_f_bs_bytes = n_device_led_f_bs.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_DEVICE_INFO_REQUEST,
+            0,
+            0,
+            device_spec_bytes[0],
+            device_spec_bytes[1],
+            first_btn_bytes[0],
+            n_btns_bytes[0],
+            change_bytes[0],
+            change_bytes[1],
+            n_device_led_f_bs_bytes[0],
+            n_device_led_f_bs_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let btn_actions_bytes = self.btn_actions.serialize();
+        let length_so_far = length_so_far + btn_actions_bytes.len();
+        let leds_bytes = self.leds.serialize();
+        let length_so_far = length_so_far + leds_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), btn_actions_bytes.into(), leds_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_device_info<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &'input [Action], leds: &'input [DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let change: u16 = change.into();
-    let length_so_far = 0;
-    let device_spec_bytes = device_spec.serialize();
-    let first_btn_bytes = first_btn.serialize();
-    let n_btns = u8::try_from(btn_actions.len()).expect("`btn_actions` has too many elements");
-    let n_btns_bytes = n_btns.serialize();
-    let change_bytes = change.serialize();
-    let n_device_led_f_bs = u16::try_from(leds.len()).expect("`leds` has too many elements");
-    let n_device_led_f_bs_bytes = n_device_led_f_bs.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_DEVICE_INFO_REQUEST,
-        0,
-        0,
-        device_spec_bytes[0],
-        device_spec_bytes[1],
-        first_btn_bytes[0],
-        n_btns_bytes[0],
-        change_bytes[0],
-        change_bytes[1],
-        n_device_led_f_bs_bytes[0],
-        n_device_led_f_bs_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let btn_actions_bytes = btn_actions.serialize();
-    let length_so_far = length_so_far + btn_actions_bytes.len();
-    let leds_bytes = leds.serialize();
-    let length_so_far = length_so_far + leds_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&btn_actions_bytes), IoSlice::new(&leds_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetDeviceInfoRequest {
+        device_spec,
+        first_btn,
+        change,
+        btn_actions,
+        leds,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the SetDebuggingFlags request
 pub const SET_DEBUGGING_FLAGS_REQUEST: u8 = 101;
-pub fn set_debugging_flags<'c, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetDebuggingFlagsRequest<'input> {
+    pub affect_flags: u32,
+    pub flags: u32,
+    pub affect_ctrls: u32,
+    pub ctrls: u32,
+    pub message: &'input [String8],
+}
+impl<'input> SetDebuggingFlagsRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let msg_length = u16::try_from(self.message.len()).expect("`message` has too many elements");
+        let msg_length_bytes = msg_length.serialize();
+        let affect_flags_bytes = self.affect_flags.serialize();
+        let flags_bytes = self.flags.serialize();
+        let affect_ctrls_bytes = self.affect_ctrls.serialize();
+        let ctrls_bytes = self.ctrls.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_DEBUGGING_FLAGS_REQUEST,
+            0,
+            0,
+            msg_length_bytes[0],
+            msg_length_bytes[1],
+            0,
+            0,
+            affect_flags_bytes[0],
+            affect_flags_bytes[1],
+            affect_flags_bytes[2],
+            affect_flags_bytes[3],
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+            affect_ctrls_bytes[0],
+            affect_ctrls_bytes[1],
+            affect_ctrls_bytes[2],
+            affect_ctrls_bytes[3],
+            ctrls_bytes[0],
+            ctrls_bytes[1],
+            ctrls_bytes[2],
+            ctrls_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.message[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.message[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_debugging_flags<'c, 'input, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let msg_length = u16::try_from(message.len()).expect("`message` has too many elements");
-    let msg_length_bytes = msg_length.serialize();
-    let affect_flags_bytes = affect_flags.serialize();
-    let flags_bytes = flags.serialize();
-    let affect_ctrls_bytes = affect_ctrls.serialize();
-    let ctrls_bytes = ctrls.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_DEBUGGING_FLAGS_REQUEST,
-        0,
-        0,
-        msg_length_bytes[0],
-        msg_length_bytes[1],
-        0,
-        0,
-        affect_flags_bytes[0],
-        affect_flags_bytes[1],
-        affect_flags_bytes[2],
-        affect_flags_bytes[3],
-        flags_bytes[0],
-        flags_bytes[1],
-        flags_bytes[2],
-        flags_bytes[3],
-        affect_ctrls_bytes[0],
-        affect_ctrls_bytes[1],
-        affect_ctrls_bytes[2],
-        affect_ctrls_bytes[3],
-        ctrls_bytes[0],
-        ctrls_bytes[1],
-        ctrls_bytes[2],
-        ctrls_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + message.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(message), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetDebuggingFlagsRequest {
+        affect_flags,
+        flags,
+        affect_ctrls,
+        ctrls,
+        message,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -11229,7 +11983,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         use_extension(self, wanted_major, wanted_minor)
     }
-    fn xkb_select_events<'c, A, B, C, D, E>(&'c self, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &SelectEventsAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_select_events<'c, 'input, A, B, C, D, E>(&'c self, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
         B: Into<u16>,
@@ -11259,7 +12013,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_controls(self, device_spec)
     }
-    fn xkb_set_controls<'c, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(&'c self, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &[u8; 32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_controls<'c, 'input, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(&'c self, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &'input [u8; 32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u8>,
         B: Into<u8>,
@@ -11288,7 +12042,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_map(self, device_spec, full, partial, first_type, n_types, first_key_sym, n_key_syms, first_key_action, n_key_actions, first_key_behavior, n_key_behaviors, virtual_mods, first_key_explicit, n_key_explicit, first_mod_map_key, n_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys)
     }
-    fn xkb_set_map<'c, A, B>(&'c self, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &SetMapAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_map<'c, 'input, A, B>(&'c self, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &'input SetMapAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
         B: Into<u16>,
@@ -11301,7 +12055,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_compat_map(self, device_spec, groups, get_all_si, first_si, n_si)
     }
-    fn xkb_set_compat_map<'c, A>(&'c self, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &[SymInterpret], group_maps: &[ModDef]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_compat_map<'c, 'input, A>(&'c self, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &'input [SymInterpret], group_maps: &'input [ModDef]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u8>,
     {
@@ -11315,7 +12069,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_indicator_map(self, device_spec, which)
     }
-    fn xkb_set_indicator_map<'c>(&'c self, device_spec: DeviceSpec, which: u32, maps: &[IndicatorMap]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_indicator_map<'c, 'input>(&'c self, device_spec: DeviceSpec, which: u32, maps: &'input [IndicatorMap]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_indicator_map(self, device_spec, which, maps)
     }
@@ -11344,7 +12098,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_names(self, device_spec, which)
     }
-    fn xkb_set_names<'c, A, B>(&'c self, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_names<'c, 'input, A, B>(&'c self, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &'input SetNamesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
         B: Into<u8>,
@@ -11379,13 +12133,13 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_device_info(self, device_spec, wanted, all_buttons, first_button, n_buttons, led_class, led_id)
     }
-    fn xkb_set_device_info<'c, A>(&'c self, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &[Action], leds: &[DeviceLedInfo]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_device_info<'c, 'input, A>(&'c self, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &'input [Action], leds: &'input [DeviceLedInfo]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
     {
         set_device_info(self, device_spec, first_btn, change, btn_actions, leds)
     }
-    fn xkb_set_debugging_flags<'c>(&'c self, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[String8]) -> Result<Cookie<'c, Self, SetDebuggingFlagsReply>, ConnectionError>
+    fn xkb_set_debugging_flags<'c, 'input>(&'c self, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Self, SetDebuggingFlagsReply>, ConnectionError>
     {
         set_debugging_flags(self, affect_flags, flags, affect_ctrls, ctrls, message)
     }

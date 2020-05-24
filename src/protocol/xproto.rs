@@ -21,7 +21,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::cookie::ListFontsWithInfoCookie;
@@ -5750,8 +5750,6 @@ impl Gravity {
     }
 }
 
-/// Opcode for the CreateWindow request
-pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// Auxiliary and optional information for the `create_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateWindowAux {
@@ -5959,6 +5957,8 @@ impl CreateWindowAux {
     }
 }
 
+/// Opcode for the CreateWindow request
+pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// Creates a window.
 ///
 /// Creates an unmapped window as child of the specified `parent` window. A
@@ -6013,70 +6013,161 @@ impl CreateWindowAux {
 /// * `xcb_generate_id`: function
 /// * `MapWindow`: request
 /// * `CreateNotify`: event
-pub fn create_window<'c, Conn>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateWindowRequest<'input> {
+    pub depth: u8,
+    pub wid: Window,
+    pub parent: Window,
+    pub x: i16,
+    pub y: i16,
+    pub width: u16,
+    pub height: u16,
+    pub border_width: u16,
+    pub class: WindowClass,
+    pub visual: Visualid,
+    pub value_list: &'input CreateWindowAux,
+}
+impl<'input> CreateWindowRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let depth_bytes = self.depth.serialize();
+        let wid_bytes = self.wid.serialize();
+        let parent_bytes = self.parent.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let border_width_bytes = self.border_width.serialize();
+        let class_bytes = u16::from(self.class).serialize();
+        let visual_bytes = self.visual.serialize();
+        let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask_bytes = value_mask.serialize();
+        let mut request0 = vec![
+            CREATE_WINDOW_REQUEST,
+            depth_bytes[0],
+            0,
+            0,
+            wid_bytes[0],
+            wid_bytes[1],
+            wid_bytes[2],
+            wid_bytes[3],
+            parent_bytes[0],
+            parent_bytes[1],
+            parent_bytes[2],
+            parent_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            border_width_bytes[0],
+            border_width_bytes[1],
+            class_bytes[0],
+            class_bytes[1],
+            visual_bytes[0],
+            visual_bytes[1],
+            visual_bytes[2],
+            visual_bytes[3],
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            value_mask_bytes[2],
+            value_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let value_list_bytes = self.value_list.serialize(value_mask);
+        let length_so_far = length_so_far + value_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// Creates a window.
+///
+/// Creates an unmapped window as child of the specified `parent` window. A
+/// CreateNotify event will be generated. The new window is placed on top in the
+/// stacking order with respect to siblings.
+///
+/// The coordinate system has the X axis horizontal and the Y axis vertical with
+/// the origin [0, 0] at the upper-left corner. Coordinates are integral, in terms
+/// of pixels, and coincide with pixel centers. Each window and pixmap has its own
+/// coordinate system. For a window, the origin is inside the border at the inside,
+/// upper-left corner.
+///
+/// The created window is not yet displayed (mapped), call `xcb_map_window` to
+/// display it.
+///
+/// The created window will initially use the same cursor as its parent.
+///
+/// # Fields
+///
+/// * `wid` - The ID with which you will refer to the new window, created by
+/// `xcb_generate_id`.
+/// * `depth` - Specifies the new window's depth (TODO: what unit?).
+///
+/// The special value `XCB_COPY_FROM_PARENT` means the depth is taken from the
+/// `parent` window.
+/// * `visual` - Specifies the id for the new window's visual.
+///
+/// The special value `XCB_COPY_FROM_PARENT` means the visual is taken from the
+/// `parent` window.
+/// * `class` -
+/// * `parent` - The parent window of the new window.
+/// * `border_width` - TODO:
+///
+/// Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
+/// * `x` - The X coordinate of the new window.
+/// * `y` - The Y coordinate of the new window.
+/// * `width` - The width of the new window.
+/// * `height` - The height of the new window.
+///
+/// # Errors
+///
+/// * `Colormap` - TODO: reasons?
+/// * `Match` - TODO: reasons?
+/// * `Cursor` - TODO: reasons?
+/// * `Pixmap` - TODO: reasons?
+/// * `Value` - TODO: reasons?
+/// * `Window` - TODO: reasons?
+/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
+///
+/// # See
+///
+/// * `xcb_generate_id`: function
+/// * `MapWindow`: request
+/// * `CreateNotify`: event
+pub fn create_window<'c, 'input, Conn>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &'input CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let depth_bytes = depth.serialize();
-    let wid_bytes = wid.serialize();
-    let parent_bytes = parent.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let border_width_bytes = border_width.serialize();
-    let class_bytes = u16::from(class).serialize();
-    let visual_bytes = visual.serialize();
-    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
-    let value_mask_bytes = value_mask.serialize();
-    let mut request0 = [
-        CREATE_WINDOW_REQUEST,
-        depth_bytes[0],
-        0,
-        0,
-        wid_bytes[0],
-        wid_bytes[1],
-        wid_bytes[2],
-        wid_bytes[3],
-        parent_bytes[0],
-        parent_bytes[1],
-        parent_bytes[2],
-        parent_bytes[3],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-        border_width_bytes[0],
-        border_width_bytes[1],
-        class_bytes[0],
-        class_bytes[1],
-        visual_bytes[0],
-        visual_bytes[1],
-        visual_bytes[2],
-        visual_bytes[3],
-        value_mask_bytes[0],
-        value_mask_bytes[1],
-        value_mask_bytes[2],
-        value_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize(value_mask);
-    let length_so_far = length_so_far + value_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = CreateWindowRequest {
+        depth,
+        wid,
+        parent,
+        x,
+        y,
+        width,
+        height,
+        border_width,
+        class,
+        visual,
+        value_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the ChangeWindowAttributes request
-pub const CHANGE_WINDOW_ATTRIBUTES_REQUEST: u8 = 2;
 /// Auxiliary and optional information for the `change_window_attributes` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeWindowAttributesAux {
@@ -6284,6 +6375,8 @@ impl ChangeWindowAttributesAux {
     }
 }
 
+/// Opcode for the ChangeWindowAttributes request
+pub const CHANGE_WINDOW_ATTRIBUTES_REQUEST: u8 = 2;
 /// change window attributes.
 ///
 /// Changes the attributes specified by `value_mask` for the specified `window`.
@@ -6305,37 +6398,79 @@ impl ChangeWindowAttributesAux {
 /// * `Pixmap` - TODO: reasons?
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
-pub fn change_window_attributes<'c, Conn>(conn: &'c Conn, window: Window, value_list: &ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChangeWindowAttributesRequest<'input> {
+    pub window: Window,
+    pub value_list: &'input ChangeWindowAttributesAux,
+}
+impl<'input> ChangeWindowAttributesRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask_bytes = value_mask.serialize();
+        let mut request0 = vec![
+            CHANGE_WINDOW_ATTRIBUTES_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            value_mask_bytes[2],
+            value_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let value_list_bytes = self.value_list.serialize(value_mask);
+        let length_so_far = length_so_far + value_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// change window attributes.
+///
+/// Changes the attributes specified by `value_mask` for the specified `window`.
+///
+/// # Fields
+///
+/// * `window` - The window to change.
+/// * `value_mask` -
+/// * `value_list` - Values for each of the attributes specified in the bitmask `value_mask`. The
+/// order has to correspond to the order of possible `value_mask` bits. See the
+/// example.
+///
+/// # Errors
+///
+/// * `Access` - TODO: reasons?
+/// * `Colormap` - TODO: reasons?
+/// * `Cursor` - TODO: reasons?
+/// * `Match` - TODO: reasons?
+/// * `Pixmap` - TODO: reasons?
+/// * `Value` - TODO: reasons?
+/// * `Window` - The specified `window` does not exist.
+pub fn change_window_attributes<'c, 'input, Conn>(conn: &'c Conn, window: Window, value_list: &'input ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
-    let value_mask_bytes = value_mask.serialize();
-    let mut request0 = [
-        CHANGE_WINDOW_ATTRIBUTES_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        value_mask_bytes[0],
-        value_mask_bytes[1],
-        value_mask_bytes[2],
-        value_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize(value_mask);
-    let length_so_far = length_so_far + value_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ChangeWindowAttributesRequest {
+        window,
+        value_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -6417,27 +6552,58 @@ pub const GET_WINDOW_ATTRIBUTES_REQUEST: u8 = 3;
 ///
 /// * `Window` - The specified `window` does not exist.
 /// * `Drawable` - TODO: reasons?
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetWindowAttributesRequest {
+    pub window: Window,
+}
+impl GetWindowAttributesRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            GET_WINDOW_ATTRIBUTES_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Gets window attributes.
+///
+/// Gets the current attributes for the specified `window`.
+///
+/// # Fields
+///
+/// * `window` - The window to get the attributes from.
+///
+/// # Errors
+///
+/// * `Window` - The specified `window` does not exist.
+/// * `Drawable` - TODO: reasons?
 pub fn get_window_attributes<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetWindowAttributesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        GET_WINDOW_ATTRIBUTES_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetWindowAttributesRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -6538,52 +6704,112 @@ pub const DESTROY_WINDOW_REQUEST: u8 = 4;
 /// * `DestroyNotify`: event
 /// * `MapWindow`: request
 /// * `UnmapWindow`: request
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DestroyWindowRequest {
+    pub window: Window,
+}
+impl DestroyWindowRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            DESTROY_WINDOW_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Destroys a window.
+///
+/// Destroys the specified window and all of its subwindows. A DestroyNotify event
+/// is generated for each destroyed window (a DestroyNotify event is first generated
+/// for any given window's inferiors). If the window was mapped, it will be
+/// automatically unmapped before destroying.
+///
+/// Calling DestroyWindow on the root window will do nothing.
+///
+/// # Fields
+///
+/// * `window` - The window to destroy.
+///
+/// # Errors
+///
+/// * `Window` - The specified window does not exist.
+///
+/// # See
+///
+/// * `DestroyNotify`: event
+/// * `MapWindow`: request
+/// * `UnmapWindow`: request
 pub fn destroy_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        DESTROY_WINDOW_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = DestroyWindowRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the DestroySubwindows request
 pub const DESTROY_SUBWINDOWS_REQUEST: u8 = 5;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DestroySubwindowsRequest {
+    pub window: Window,
+}
+impl DestroySubwindowsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            DESTROY_SUBWINDOWS_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn destroy_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        DESTROY_SUBWINDOWS_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = DestroySubwindowsRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -6680,28 +6906,71 @@ pub const CHANGE_SAVE_SET_REQUEST: u8 = 6;
 /// # See
 ///
 /// * `ReparentWindow`: request
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChangeSaveSetRequest {
+    pub mode: SetMode,
+    pub window: Window,
+}
+impl ChangeSaveSetRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mode_bytes = u8::from(self.mode).serialize();
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            CHANGE_SAVE_SET_REQUEST,
+            mode_bytes[0],
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Changes a client's save set.
+///
+/// TODO: explain what the save set is for.
+///
+/// This function either adds or removes the specified window to the client's (your
+/// application's) save set.
+///
+/// # Fields
+///
+/// * `mode` - Insert to add the specified window to the save set or Delete to delete it from the save set.
+/// * `window` - The window to add or delete to/from your save set.
+///
+/// # Errors
+///
+/// * `Match` - You created the specified window. This does not make sense, you can only add
+/// windows created by other clients to your save set.
+/// * `Value` - You specified an invalid mode.
+/// * `Window` - The specified window does not exist.
+///
+/// # See
+///
+/// * `ReparentWindow`: request
 pub fn change_save_set<Conn>(conn: &Conn, mode: SetMode, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mode_bytes = u8::from(mode).serialize();
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        CHANGE_SAVE_SET_REQUEST,
-        mode_bytes[0],
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ChangeSaveSetRequest {
+        mode,
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ReparentWindow request
@@ -6738,38 +7007,95 @@ pub const REPARENT_WINDOW_REQUEST: u8 = 7;
 /// * `ReparentNotify`: event
 /// * `MapWindow`: request
 /// * `UnmapWindow`: request
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ReparentWindowRequest {
+    pub window: Window,
+    pub parent: Window,
+    pub x: i16,
+    pub y: i16,
+}
+impl ReparentWindowRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let parent_bytes = self.parent.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let mut request0 = vec![
+            REPARENT_WINDOW_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            parent_bytes[0],
+            parent_bytes[1],
+            parent_bytes[2],
+            parent_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Reparents a window.
+///
+/// Makes the specified window a child of the specified parent window. If the
+/// window is mapped, it will automatically be unmapped before reparenting and
+/// re-mapped after reparenting. The window is placed in the stacking order on top
+/// with respect to sibling windows.
+///
+/// After reparenting, a ReparentNotify event is generated.
+///
+/// # Fields
+///
+/// * `window` - The window to reparent.
+/// * `parent` - The new parent of the window.
+/// * `x` - The X position of the window within its new parent.
+/// * `y` - The Y position of the window within its new parent.
+///
+/// # Errors
+///
+/// * `Match` - The new parent window is not on the same screen as the old parent window.
+/// 
+/// The new parent window is the specified window or an inferior of the specified window.
+/// 
+/// The new parent is InputOnly and the window is not.
+/// 
+/// The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
+/// * `Window` - The specified window does not exist.
+///
+/// # See
+///
+/// * `ReparentNotify`: event
+/// * `MapWindow`: request
+/// * `UnmapWindow`: request
 pub fn reparent_window<Conn>(conn: &Conn, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let parent_bytes = parent.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let mut request0 = [
-        REPARENT_WINDOW_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        parent_bytes[0],
-        parent_bytes[1],
-        parent_bytes[2],
-        parent_bytes[3],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ReparentWindowRequest {
+        window,
+        parent,
+        x,
+        y,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the MapWindow request
@@ -6809,52 +7135,125 @@ pub const MAP_WINDOW_REQUEST: u8 = 8;
 /// * `MapNotify`: event
 /// * `Expose`: event
 /// * `UnmapWindow`: request
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct MapWindowRequest {
+    pub window: Window,
+}
+impl MapWindowRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            MAP_WINDOW_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Makes a window visible.
+///
+/// Maps the specified window. This means making the window visible (as long as its
+/// parent is visible).
+///
+/// This MapWindow request will be translated to a MapRequest request if a window
+/// manager is running. The window manager then decides to either map the window or
+/// not. Set the override-redirect window attribute to true if you want to bypass
+/// this mechanism.
+///
+/// If the window manager decides to map the window (or if no window manager is
+/// running), a MapNotify event is generated.
+///
+/// If the window becomes viewable and no earlier contents for it are remembered,
+/// the X server tiles the window with its background. If the window's background
+/// is undefined, the existing screen contents are not altered, and the X server
+/// generates zero or more Expose events.
+///
+/// If the window type is InputOutput, an Expose event will be generated when the
+/// window becomes visible. The normal response to an Expose event should be to
+/// repaint the window.
+///
+/// # Fields
+///
+/// * `window` - The window to make visible.
+///
+/// # Errors
+///
+/// * `Match` - The specified window does not exist.
+///
+/// # See
+///
+/// * `MapNotify`: event
+/// * `Expose`: event
+/// * `UnmapWindow`: request
 pub fn map_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        MAP_WINDOW_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = MapWindowRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the MapSubwindows request
 pub const MAP_SUBWINDOWS_REQUEST: u8 = 9;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct MapSubwindowsRequest {
+    pub window: Window,
+}
+impl MapSubwindowsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            MAP_SUBWINDOWS_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn map_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        MAP_SUBWINDOWS_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = MapSubwindowsRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the UnmapWindow request
@@ -6880,52 +7279,111 @@ pub const UNMAP_WINDOW_REQUEST: u8 = 10;
 /// * `UnmapNotify`: event
 /// * `Expose`: event
 /// * `MapWindow`: request
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UnmapWindowRequest {
+    pub window: Window,
+}
+impl UnmapWindowRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            UNMAP_WINDOW_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Makes a window invisible.
+///
+/// Unmaps the specified window. This means making the window invisible (and all
+/// its child windows).
+///
+/// Unmapping a window leads to the `UnmapNotify` event being generated. Also,
+/// `Expose` events are generated for formerly obscured windows.
+///
+/// # Fields
+///
+/// * `window` - The window to make invisible.
+///
+/// # Errors
+///
+/// * `Window` - The specified window does not exist.
+///
+/// # See
+///
+/// * `UnmapNotify`: event
+/// * `Expose`: event
+/// * `MapWindow`: request
 pub fn unmap_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        UNMAP_WINDOW_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = UnmapWindowRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the UnmapSubwindows request
 pub const UNMAP_SUBWINDOWS_REQUEST: u8 = 11;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UnmapSubwindowsRequest {
+    pub window: Window,
+}
+impl UnmapSubwindowsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            UNMAP_SUBWINDOWS_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn unmap_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        UNMAP_SUBWINDOWS_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = UnmapSubwindowsRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7078,8 +7536,6 @@ impl TryFrom<u32> for StackMode {
     }
 }
 
-/// Opcode for the ConfigureWindow request
-pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 /// Auxiliary and optional information for the `configure_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ConfigureWindowAux {
@@ -7191,6 +7647,8 @@ impl ConfigureWindowAux {
     }
 }
 
+/// Opcode for the ConfigureWindow request
+pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 /// Configures window attributes.
 ///
 /// Configures a window's size, position, border width and stacking order.
@@ -7241,37 +7699,108 @@ impl ConfigureWindowAux {
 ///     xcb_flush(c);
 /// }
 /// ```
-pub fn configure_window<'c, Conn>(conn: &'c Conn, window: Window, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ConfigureWindowRequest<'input> {
+    pub window: Window,
+    pub value_list: &'input ConfigureWindowAux,
+}
+impl<'input> ConfigureWindowRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let value_mask = u16::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask_bytes = value_mask.serialize();
+        let mut request0 = vec![
+            CONFIGURE_WINDOW_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let value_list_bytes = self.value_list.serialize(value_mask);
+        let length_so_far = length_so_far + value_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// Configures window attributes.
+///
+/// Configures a window's size, position, border width and stacking order.
+///
+/// # Fields
+///
+/// * `window` - The window to configure.
+/// * `value_mask` - Bitmask of attributes to change.
+/// * `value_list` - New values, corresponding to the attributes in value_mask. The order has to
+/// correspond to the order of possible `value_mask` bits. See the example.
+///
+/// # Errors
+///
+/// * `Match` - You specified a Sibling without also specifying StackMode or the window is not
+/// actually a Sibling.
+/// * `Window` - The specified window does not exist. TODO: any other reason?
+/// * `Value` - TODO: reasons?
+///
+/// # See
+///
+/// * `MapNotify`: event
+/// * `Expose`: event
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Configures the given window to the left upper corner
+///  * with a size of 1024x768 pixels.
+///  *
+///  */
+/// void my_example(xcb_connection_t *c, xcb_window_t window) {
+///     uint16_t mask = 0;
+///
+///     mask |= XCB_CONFIG_WINDOW_X;
+///     mask |= XCB_CONFIG_WINDOW_Y;
+///     mask |= XCB_CONFIG_WINDOW_WIDTH;
+///     mask |= XCB_CONFIG_WINDOW_HEIGHT;
+///
+///     const uint32_t values[] = {
+///         0,    /* x */
+///         0,    /* y */
+///         1024, /* width */
+///         768   /* height */
+///     };
+///
+///     xcb_configure_window(c, window, mask, values);
+///     xcb_flush(c);
+/// }
+/// ```
+pub fn configure_window<'c, 'input, Conn>(conn: &'c Conn, window: Window, value_list: &'input ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let value_mask = u16::try_from(value_list.switch_expr()).unwrap();
-    let value_mask_bytes = value_mask.serialize();
-    let mut request0 = [
-        CONFIGURE_WINDOW_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        value_mask_bytes[0],
-        value_mask_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize(value_mask);
-    let length_so_far = length_so_far + value_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ConfigureWindowRequest {
+        window,
+        value_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7363,28 +7892,66 @@ pub const CIRCULATE_WINDOW_REQUEST: u8 = 13;
 ///
 /// * `Window` - The specified `window` does not exist.
 /// * `Value` - The specified `direction` is invalid.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CirculateWindowRequest {
+    pub direction: Circulate,
+    pub window: Window,
+}
+impl CirculateWindowRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let direction_bytes = u8::from(self.direction).serialize();
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            CIRCULATE_WINDOW_REQUEST,
+            direction_bytes[0],
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Change window stacking order.
+///
+/// If `direction` is `XCB_CIRCULATE_RAISE_LOWEST`, the lowest mapped child (if
+/// any) will be raised to the top of the stack.
+///
+/// If `direction` is `XCB_CIRCULATE_LOWER_HIGHEST`, the highest mapped child will
+/// be lowered to the bottom of the stack.
+///
+/// # Fields
+///
+/// * `direction` -
+/// * `window` - The window to raise/lower (depending on `direction`).
+///
+/// # Errors
+///
+/// * `Window` - The specified `window` does not exist.
+/// * `Value` - The specified `direction` is invalid.
 pub fn circulate_window<Conn>(conn: &Conn, direction: Circulate, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let direction_bytes = u8::from(direction).serialize();
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        CIRCULATE_WINDOW_REQUEST,
-        direction_bytes[0],
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CirculateWindowRequest {
+        direction,
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetGeometry request
@@ -7425,27 +7992,82 @@ pub const GET_GEOMETRY_REQUEST: u8 = 14;
 ///     free(reply);
 /// }
 /// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetGeometryRequest {
+    pub drawable: Drawable,
+}
+impl GetGeometryRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let mut request0 = vec![
+            GET_GEOMETRY_REQUEST,
+            0,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Get current window geometry.
+///
+/// Gets the current geometry of the specified drawable (either `Window` or `Pixmap`).
+///
+/// # Fields
+///
+/// * `drawable` - The drawable (`Window` or `Pixmap`) of which the geometry will be received.
+///
+/// # Errors
+///
+/// * `Drawable` - TODO: reasons?
+/// * `Window` - TODO: reasons?
+///
+/// # See
+///
+/// * `xwininfo`: program
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Displays the x and y position of the given window.
+///  *
+///  */
+/// void my_example(xcb_connection_t *c, xcb_window_t window) {
+///     xcb_get_geometry_cookie_t cookie;
+///     xcb_get_geometry_reply_t *reply;
+///
+///     cookie = xcb_get_geometry(c, window);
+///     /* ... do other work here if possible ... */
+///     if ((reply = xcb_get_geometry_reply(c, cookie, NULL))) {
+///         printf("This window is at %d, %d\\n", reply->x, reply->y);
+///     }
+///     free(reply);
+/// }
+/// ```
 pub fn get_geometry<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, Conn, GetGeometryReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let mut request0 = [
-        GET_GEOMETRY_REQUEST,
-        0,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetGeometryRequest {
+        drawable,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -7537,27 +8159,83 @@ pub const QUERY_TREE_REQUEST: u8 = 15;
 ///     }
 /// }
 /// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryTreeRequest {
+    pub window: Window,
+}
+impl QueryTreeRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            QUERY_TREE_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// query the window tree.
+///
+/// Gets the root window ID, parent window ID and list of children windows for the
+/// specified `window`. The children are listed in bottom-to-top stacking order.
+///
+/// # Fields
+///
+/// * `window` - The `window` to query.
+///
+/// # See
+///
+/// * `xwininfo`: program
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Displays the root, parent and children of the specified window.
+///  *
+///  */
+/// void my_example(xcb_connection_t *conn, xcb_window_t window) {
+///     xcb_query_tree_cookie_t cookie;
+///     xcb_query_tree_reply_t *reply;
+///
+///     cookie = xcb_query_tree(conn, window);
+///     if ((reply = xcb_query_tree_reply(conn, cookie, NULL))) {
+///         printf("root = 0x%08x\\n", reply->root);
+///         printf("parent = 0x%08x\\n", reply->parent);
+///
+///         xcb_window_t *children = xcb_query_tree_children(reply);
+///         for (int i = 0; i < xcb_query_tree_children_length(reply); i++)
+///             printf("child window = 0x%08x\\n", children[i]);
+///
+///         free(reply);
+///     }
+/// }
+/// ```
 pub fn query_tree<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, QueryTreeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        QUERY_TREE_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryTreeRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -7658,32 +8336,98 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 ///     }
 /// }
 /// ```
-pub fn intern_atom<'c, Conn>(conn: &'c Conn, only_if_exists: bool, name: &[u8]) -> Result<Cookie<'c, Conn, InternAtomReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InternAtomRequest<'input> {
+    pub only_if_exists: bool,
+    pub name: &'input [u8],
+}
+impl<'input> InternAtomRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let only_if_exists_bytes = self.only_if_exists.serialize();
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
+        let name_len_bytes = name_len.serialize();
+        let mut request0 = vec![
+            INTERN_ATOM_REQUEST,
+            only_if_exists_bytes[0],
+            0,
+            0,
+            name_len_bytes[0],
+            name_len_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.name[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+    }
+}
+/// Get atom identifier by name.
+///
+/// Retrieves the identifier (xcb_atom_t TODO) for the atom with the specified
+/// name. Atoms are used in protocols like EWMH, for example to store window titles
+/// (`_NET_WM_NAME` atom) as property of a window.
+///
+/// If `only_if_exists` is 0, the atom will be created if it does not already exist.
+/// If `only_if_exists` is 1, `XCB_ATOM_NONE` will be returned if the atom does
+/// not yet exist.
+///
+/// # Fields
+///
+/// * `name_len` - The length of the following `name`.
+/// * `name` - The name of the atom.
+/// * `only_if_exists` - Return a valid atom id only if the atom already exists.
+///
+/// # Errors
+///
+/// * `Alloc` - TODO: reasons?
+/// * `Value` - A value other than 0 or 1 was specified for `only_if_exists`.
+///
+/// # See
+///
+/// * `xlsatoms`: program
+/// * `GetAtomName`: request
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Resolves the _NET_WM_NAME atom.
+///  *
+///  */
+/// void my_example(xcb_connection_t *c) {
+///     xcb_intern_atom_cookie_t cookie;
+///     xcb_intern_atom_reply_t *reply;
+///
+///     cookie = xcb_intern_atom(c, 0, strlen("_NET_WM_NAME"), "_NET_WM_NAME");
+///     /* ... do other work here if possible ... */
+///     if ((reply = xcb_intern_atom_reply(c, cookie, NULL))) {
+///         printf("The _NET_WM_NAME atom has ID %u\n", reply->atom);
+///         free(reply);
+///     }
+/// }
+/// ```
+pub fn intern_atom<'c, 'input, Conn>(conn: &'c Conn, only_if_exists: bool, name: &'input [u8]) -> Result<Cookie<'c, Conn, InternAtomReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let only_if_exists_bytes = only_if_exists.serialize();
-    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
-    let name_len_bytes = name_len.serialize();
-    let mut request0 = [
-        INTERN_ATOM_REQUEST,
-        only_if_exists_bytes[0],
-        0,
-        0,
-        name_len_bytes[0],
-        name_len_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + name.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
+    let request0 = InternAtomRequest {
+        only_if_exists,
+        name,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7713,27 +8457,46 @@ impl TryFrom<&[u8]> for InternAtomReply {
 
 /// Opcode for the GetAtomName request
 pub const GET_ATOM_NAME_REQUEST: u8 = 17;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetAtomNameRequest {
+    pub atom: Atom,
+}
+impl GetAtomNameRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let atom_bytes = self.atom.serialize();
+        let mut request0 = vec![
+            GET_ATOM_NAME_REQUEST,
+            0,
+            0,
+            0,
+            atom_bytes[0],
+            atom_bytes[1],
+            atom_bytes[2],
+            atom_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_atom_name<Conn>(conn: &Conn, atom: Atom) -> Result<Cookie<'_, Conn, GetAtomNameReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let atom_bytes = atom.serialize();
-    let mut request0 = [
-        GET_ATOM_NAME_REQUEST,
-        0,
-        0,
-        0,
-        atom_bytes[0],
-        atom_bytes[1],
-        atom_bytes[2],
-        atom_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetAtomNameRequest {
+        atom,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -7906,7 +8669,119 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn change_property<'c, Conn, A, B>(conn: &'c Conn, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ChangePropertyRequest<'input> {
+    pub mode: PropMode,
+    pub window: Window,
+    pub property: Atom,
+    pub type_: Atom,
+    pub format: u8,
+    pub data_len: u32,
+    pub data: &'input [u8],
+}
+impl<'input> ChangePropertyRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mode_bytes = u8::from(self.mode).serialize();
+        let window_bytes = self.window.serialize();
+        let property_bytes = self.property.serialize();
+        let type_bytes = self.type_.serialize();
+        let format_bytes = self.format.serialize();
+        let data_len_bytes = self.data_len.serialize();
+        let mut request0 = vec![
+            CHANGE_PROPERTY_REQUEST,
+            mode_bytes[0],
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            property_bytes[0],
+            property_bytes[1],
+            property_bytes[2],
+            property_bytes[3],
+            type_bytes[0],
+            type_bytes[1],
+            type_bytes[2],
+            type_bytes[3],
+            format_bytes[0],
+            0,
+            0,
+            0,
+            data_len_bytes[0],
+            data_len_bytes[1],
+            data_len_bytes[2],
+            data_len_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(self.data.len(), usize::try_from(self.data_len.checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
+        let length_so_far = length_so_far + (&self.data[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+    }
+}
+/// Changes a window property.
+///
+/// Sets or updates a property on the specified `window`. Properties are for
+/// example the window title (`WM_NAME`) or its minimum size (`WM_NORMAL_HINTS`).
+/// Protocols such as EWMH also use properties - for example EWMH defines the
+/// window title, encoded as UTF-8 string, in the `_NET_WM_NAME` property.
+///
+/// # Fields
+///
+/// * `window` - The window whose property you want to change.
+/// * `mode` -
+/// * `property` - The property you want to change (an atom).
+/// * `type` - The type of the property you want to change (an atom).
+/// * `format` - Specifies whether the data should be viewed as a list of 8-bit, 16-bit or
+/// 32-bit quantities. Possible values are 8, 16 and 32. This information allows
+/// the X server to correctly perform byte-swap operations as necessary.
+/// * `data_len` - Specifies the number of elements (see `format`).
+/// * `data` - The property data.
+///
+/// # Errors
+///
+/// * `Match` - TODO: reasons?
+/// * `Value` - TODO: reasons?
+/// * `Window` - The specified `window` does not exist.
+/// * `Atom` - `property` or `type` do not refer to a valid atom.
+/// * `Alloc` - The X server could not store the property (no memory?).
+///
+/// # See
+///
+/// * `InternAtom`: request
+/// * `xprop`: program
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Sets the WM_NAME property of the window to "XCB Example".
+///  *
+///  */
+/// void my_example(xcb_connection_t *conn, xcb_window_t window) {
+///     xcb_change_property(conn,
+///         XCB_PROP_MODE_REPLACE,
+///         window,
+///         XCB_ATOM_WM_NAME,
+///         XCB_ATOM_STRING,
+///         8,
+///         strlen("XCB Example"),
+///         "XCB Example");
+///     xcb_flush(conn);
+/// }
+/// ```
+pub fn change_property<'c, 'input, Conn, A, B>(conn: &'c Conn, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Atom>,
@@ -7914,78 +8789,69 @@ where
 {
     let property: Atom = property.into();
     let type_: Atom = type_.into();
-    let length_so_far = 0;
-    let mode_bytes = u8::from(mode).serialize();
-    let window_bytes = window.serialize();
-    let property_bytes = property.serialize();
-    let type_bytes = type_.serialize();
-    let format_bytes = format.serialize();
-    let data_len_bytes = data_len.serialize();
-    let mut request0 = [
-        CHANGE_PROPERTY_REQUEST,
-        mode_bytes[0],
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        property_bytes[0],
-        property_bytes[1],
-        property_bytes[2],
-        property_bytes[3],
-        type_bytes[0],
-        type_bytes[1],
-        type_bytes[2],
-        type_bytes[3],
-        format_bytes[0],
-        0,
-        0,
-        0,
-        data_len_bytes[0],
-        data_len_bytes[1],
-        data_len_bytes[2],
-        data_len_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(data.len(), usize::try_from(data_len.checked_mul(u32::from(format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
-    let length_so_far = length_so_far + data.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ChangePropertyRequest {
+        mode,
+        window,
+        property,
+        type_,
+        format,
+        data_len,
+        data,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the DeleteProperty request
 pub const DELETE_PROPERTY_REQUEST: u8 = 19;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DeletePropertyRequest {
+    pub window: Window,
+    pub property: Atom,
+}
+impl DeletePropertyRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let property_bytes = self.property.serialize();
+        let mut request0 = vec![
+            DELETE_PROPERTY_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            property_bytes[0],
+            property_bytes[1],
+            property_bytes[2],
+            property_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn delete_property<Conn>(conn: &Conn, window: Window, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let property_bytes = property.serialize();
-    let mut request0 = [
-        DELETE_PROPERTY_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        property_bytes[0],
-        property_bytes[1],
-        property_bytes[2],
-        property_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = DeletePropertyRequest {
+        window,
+        property,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -8117,6 +8983,130 @@ pub const GET_PROPERTY_REQUEST: u8 = 20;
 ///     free(reply);
 /// }
 /// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetPropertyRequest {
+    pub delete: bool,
+    pub window: Window,
+    pub property: Atom,
+    pub type_: Atom,
+    pub long_offset: u32,
+    pub long_length: u32,
+}
+impl GetPropertyRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let delete_bytes = self.delete.serialize();
+        let window_bytes = self.window.serialize();
+        let property_bytes = self.property.serialize();
+        let type_bytes = self.type_.serialize();
+        let long_offset_bytes = self.long_offset.serialize();
+        let long_length_bytes = self.long_length.serialize();
+        let mut request0 = vec![
+            GET_PROPERTY_REQUEST,
+            delete_bytes[0],
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            property_bytes[0],
+            property_bytes[1],
+            property_bytes[2],
+            property_bytes[3],
+            type_bytes[0],
+            type_bytes[1],
+            type_bytes[2],
+            type_bytes[3],
+            long_offset_bytes[0],
+            long_offset_bytes[1],
+            long_offset_bytes[2],
+            long_offset_bytes[3],
+            long_length_bytes[0],
+            long_length_bytes[1],
+            long_length_bytes[2],
+            long_length_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Gets a window property.
+///
+/// Gets the specified `property` from the specified `window`. Properties are for
+/// example the window title (`WM_NAME`) or its minimum size (`WM_NORMAL_HINTS`).
+/// Protocols such as EWMH also use properties - for example EWMH defines the
+/// window title, encoded as UTF-8 string, in the `_NET_WM_NAME` property.
+///
+/// TODO: talk about `type`
+///
+/// TODO: talk about `delete`
+///
+/// TODO: talk about the offset/length thing. what's a valid use case?
+///
+/// # Fields
+///
+/// * `window` - The window whose property you want to get.
+/// * `delete` - Whether the property should actually be deleted. For deleting a property, the
+/// specified `type` has to match the actual property type.
+/// * `property` - The property you want to get (an atom).
+/// * `type` - The type of the property you want to get (an atom).
+/// * `long_offset` - Specifies the offset (in 32-bit multiples) in the specified property where the
+/// data is to be retrieved.
+/// * `long_length` - Specifies how many 32-bit multiples of data should be retrieved (e.g. if you
+/// set `long_length` to 4, you will receive 16 bytes of data).
+///
+/// # Errors
+///
+/// * `Window` - The specified `window` does not exist.
+/// * `Atom` - `property` or `type` do not refer to a valid atom.
+/// * `Value` - The specified `long_offset` is beyond the actual property length (e.g. the
+/// property has a length of 3 bytes and you are setting `long_offset` to 1,
+/// resulting in a byte offset of 4).
+///
+/// # See
+///
+/// * `InternAtom`: request
+/// * `xprop`: program
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Prints the WM_NAME property of the window.
+///  *
+///  */
+/// void my_example(xcb_connection_t *c, xcb_window_t window) {
+///     xcb_get_property_cookie_t cookie;
+///     xcb_get_property_reply_t *reply;
+///
+///     /* These atoms are predefined in the X11 protocol. */
+///     xcb_atom_t property = XCB_ATOM_WM_NAME;
+///     xcb_atom_t type = XCB_ATOM_STRING;
+///
+///     // TODO: a reasonable long_length for WM_NAME?
+///     cookie = xcb_get_property(c, 0, window, property, type, 0, 0);
+///     if ((reply = xcb_get_property_reply(c, cookie, NULL))) {
+///         int len = xcb_get_property_value_length(reply);
+///         if (len == 0) {
+///             printf("TODO\\n");
+///             free(reply);
+///             return;
+///         }
+///         printf("WM_NAME is %.*s\\n", len,
+///                (char*)xcb_get_property_value(reply));
+///     }
+///     free(reply);
+/// }
+/// ```
 pub fn get_property<Conn, A, B>(conn: &Conn, delete: bool, window: Window, property: A, type_: B, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Conn, GetPropertyReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8125,44 +9115,17 @@ where
 {
     let property: Atom = property.into();
     let type_: Atom = type_.into();
-    let length_so_far = 0;
-    let delete_bytes = delete.serialize();
-    let window_bytes = window.serialize();
-    let property_bytes = property.serialize();
-    let type_bytes = type_.serialize();
-    let long_offset_bytes = long_offset.serialize();
-    let long_length_bytes = long_length.serialize();
-    let mut request0 = [
-        GET_PROPERTY_REQUEST,
-        delete_bytes[0],
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        property_bytes[0],
-        property_bytes[1],
-        property_bytes[2],
-        property_bytes[3],
-        type_bytes[0],
-        type_bytes[1],
-        type_bytes[2],
-        type_bytes[3],
-        long_offset_bytes[0],
-        long_offset_bytes[1],
-        long_offset_bytes[2],
-        long_offset_bytes[3],
-        long_length_bytes[0],
-        long_length_bytes[1],
-        long_length_bytes[2],
-        long_length_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetPropertyRequest {
+        delete,
+        window,
+        property,
+        type_,
+        long_offset,
+        long_length,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 impl GetPropertyReply {
     /// Iterate over the contained value if its format is 8.
@@ -8374,27 +9337,46 @@ impl TryFrom<&[u8]> for GetPropertyReply {
 
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 21;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ListPropertiesRequest {
+    pub window: Window,
+}
+impl ListPropertiesRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            LIST_PROPERTIES_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        LIST_PROPERTIES_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ListPropertiesRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -8470,6 +9452,77 @@ pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 /// # See
 ///
 /// * `SetSelectionOwner`: request
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetSelectionOwnerRequest {
+    pub owner: Window,
+    pub selection: Atom,
+    pub time: Timestamp,
+}
+impl SetSelectionOwnerRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let owner_bytes = self.owner.serialize();
+        let selection_bytes = self.selection.serialize();
+        let time_bytes = self.time.serialize();
+        let mut request0 = vec![
+            SET_SELECTION_OWNER_REQUEST,
+            0,
+            0,
+            0,
+            owner_bytes[0],
+            owner_bytes[1],
+            owner_bytes[2],
+            owner_bytes[3],
+            selection_bytes[0],
+            selection_bytes[1],
+            selection_bytes[2],
+            selection_bytes[3],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Sets the owner of a selection.
+///
+/// Makes `window` the owner of the selection `selection` and updates the
+/// last-change time of the specified selection.
+///
+/// TODO: briefly explain what a selection is.
+///
+/// # Fields
+///
+/// * `selection` - The selection.
+/// * `owner` - The new owner of the selection.
+///
+/// The special value `XCB_NONE` means that the selection will have no owner.
+/// * `time` - Timestamp to avoid race conditions when running X over the network.
+///
+/// The selection will not be changed if `time` is earlier than the current
+/// last-change time of the `selection` or is later than the current X server time.
+/// Otherwise, the last-change time is set to the specified time.
+///
+/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
+/// time.
+///
+/// # Errors
+///
+/// * `Atom` - `selection` does not refer to a valid atom.
+///
+/// # See
+///
+/// * `SetSelectionOwner`: request
 pub fn set_selection_owner<Conn, A, B>(conn: &Conn, owner: A, selection: Atom, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8478,33 +9531,14 @@ where
 {
     let owner: Window = owner.into();
     let time: Timestamp = time.into();
-    let length_so_far = 0;
-    let owner_bytes = owner.serialize();
-    let selection_bytes = selection.serialize();
-    let time_bytes = time.serialize();
-    let mut request0 = [
-        SET_SELECTION_OWNER_REQUEST,
-        0,
-        0,
-        0,
-        owner_bytes[0],
-        owner_bytes[1],
-        owner_bytes[2],
-        owner_bytes[3],
-        selection_bytes[0],
-        selection_bytes[1],
-        selection_bytes[2],
-        selection_bytes[3],
-        time_bytes[0],
-        time_bytes[1],
-        time_bytes[2],
-        time_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetSelectionOwnerRequest {
+        owner,
+        selection,
+        time,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetSelectionOwner request
@@ -8526,27 +9560,63 @@ pub const GET_SELECTION_OWNER_REQUEST: u8 = 23;
 /// # See
 ///
 /// * `SetSelectionOwner`: request
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetSelectionOwnerRequest {
+    pub selection: Atom,
+}
+impl GetSelectionOwnerRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let selection_bytes = self.selection.serialize();
+        let mut request0 = vec![
+            GET_SELECTION_OWNER_REQUEST,
+            0,
+            0,
+            0,
+            selection_bytes[0],
+            selection_bytes[1],
+            selection_bytes[2],
+            selection_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Gets the owner of a selection.
+///
+/// Gets the owner of the specified selection.
+///
+/// TODO: briefly explain what a selection is.
+///
+/// # Fields
+///
+/// * `selection` - The selection.
+///
+/// # Errors
+///
+/// * `Atom` - `selection` does not refer to a valid atom.
+///
+/// # See
+///
+/// * `SetSelectionOwner`: request
 pub fn get_selection_owner<Conn>(conn: &Conn, selection: Atom) -> Result<Cookie<'_, Conn, GetSelectionOwnerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let selection_bytes = selection.serialize();
-    let mut request0 = [
-        GET_SELECTION_OWNER_REQUEST,
-        0,
-        0,
-        0,
-        selection_bytes[0],
-        selection_bytes[1],
-        selection_bytes[2],
-        selection_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetSelectionOwnerRequest {
+        selection,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -8579,6 +9649,60 @@ impl TryFrom<&[u8]> for GetSelectionOwnerReply {
 
 /// Opcode for the ConvertSelection request
 pub const CONVERT_SELECTION_REQUEST: u8 = 24;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ConvertSelectionRequest {
+    pub requestor: Window,
+    pub selection: Atom,
+    pub target: Atom,
+    pub property: Atom,
+    pub time: Timestamp,
+}
+impl ConvertSelectionRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let requestor_bytes = self.requestor.serialize();
+        let selection_bytes = self.selection.serialize();
+        let target_bytes = self.target.serialize();
+        let property_bytes = self.property.serialize();
+        let time_bytes = self.time.serialize();
+        let mut request0 = vec![
+            CONVERT_SELECTION_REQUEST,
+            0,
+            0,
+            0,
+            requestor_bytes[0],
+            requestor_bytes[1],
+            requestor_bytes[2],
+            requestor_bytes[3],
+            selection_bytes[0],
+            selection_bytes[1],
+            selection_bytes[2],
+            selection_bytes[3],
+            target_bytes[0],
+            target_bytes[1],
+            target_bytes[2],
+            target_bytes[3],
+            property_bytes[0],
+            property_bytes[1],
+            property_bytes[2],
+            property_bytes[3],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn convert_selection<Conn, A, B>(conn: &Conn, requestor: Window, selection: Atom, target: Atom, property: A, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8587,43 +9711,16 @@ where
 {
     let property: Atom = property.into();
     let time: Timestamp = time.into();
-    let length_so_far = 0;
-    let requestor_bytes = requestor.serialize();
-    let selection_bytes = selection.serialize();
-    let target_bytes = target.serialize();
-    let property_bytes = property.serialize();
-    let time_bytes = time.serialize();
-    let mut request0 = [
-        CONVERT_SELECTION_REQUEST,
-        0,
-        0,
-        0,
-        requestor_bytes[0],
-        requestor_bytes[1],
-        requestor_bytes[2],
-        requestor_bytes[3],
-        selection_bytes[0],
-        selection_bytes[1],
-        selection_bytes[2],
-        selection_bytes[3],
-        target_bytes[0],
-        target_bytes[1],
-        target_bytes[2],
-        target_bytes[3],
-        property_bytes[0],
-        property_bytes[1],
-        property_bytes[2],
-        property_bytes[3],
-        time_bytes[0],
-        time_bytes[1],
-        time_bytes[2],
-        time_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ConvertSelectionRequest {
+        requestor,
+        selection,
+        target,
+        property,
+        time,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -8771,6 +9868,119 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 ///     free(event);
 /// }
 /// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SendEventRequest<'input> {
+    pub propagate: bool,
+    pub destination: Window,
+    pub event_mask: u32,
+    pub event: &'input [u8; 32],
+}
+impl<'input> SendEventRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let propagate_bytes = self.propagate.serialize();
+        let destination_bytes = self.destination.serialize();
+        let event_mask_bytes = self.event_mask.serialize();
+        let mut request0 = vec![
+            SEND_EVENT_REQUEST,
+            propagate_bytes[0],
+            0,
+            0,
+            destination_bytes[0],
+            destination_bytes[1],
+            destination_bytes[2],
+            destination_bytes[3],
+            event_mask_bytes[0],
+            event_mask_bytes[1],
+            event_mask_bytes[2],
+            event_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.event[..]).len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.event[..]).into()], vec![]))
+    }
+}
+/// send an event.
+///
+/// Identifies the `destination` window, determines which clients should receive
+/// the specified event and ignores any active grabs.
+///
+/// The `event` must be one of the core events or an event defined by an extension,
+/// so that the X server can correctly byte-swap the contents as necessary. The
+/// contents of `event` are otherwise unaltered and unchecked except for the
+/// `send_event` field which is forced to 'true'.
+///
+/// # Fields
+///
+/// * `destination` - The window to send this event to. Every client which selects any event within
+/// `event_mask` on `destination` will get the event.
+///
+/// The special value `XCB_SEND_EVENT_DEST_POINTER_WINDOW` refers to the window
+/// that contains the mouse pointer.
+///
+/// The special value `XCB_SEND_EVENT_DEST_ITEM_FOCUS` refers to the window which
+/// has the keyboard focus.
+/// * `event_mask` - Event_mask for determining which clients should receive the specified event.
+/// See `destination` and `propagate`.
+/// * `propagate` - If `propagate` is true and no clients have selected any event on `destination`,
+/// the destination is replaced with the closest ancestor of `destination` for
+/// which some client has selected a type in `event_mask` and for which no
+/// intervening window has that type in its do-not-propagate-mask. If no such
+/// window exists or if the window is an ancestor of the focus window and
+/// `InputFocus` was originally specified as the destination, the event is not sent
+/// to any clients. Otherwise, the event is reported to every client selecting on
+/// the final destination any of the types specified in `event_mask`.
+/// * `event` - The event to send to the specified `destination`.
+///
+/// # Errors
+///
+/// * `Window` - The specified `destination` window does not exist.
+/// * `Value` - The given `event` is neither a core event nor an event defined by an extension.
+///
+/// # See
+///
+/// * `ConfigureNotify`: event
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Tell the given window that it was configured to a size of 800x600 pixels.
+///  *
+///  */
+/// void my_example(xcb_connection_t *conn, xcb_window_t window) {
+///     /* Every X11 event is 32 bytes long. Therefore, XCB will copy 32 bytes.
+///      * In order to properly initialize these bytes, we allocate 32 bytes even
+///      * though we only need less for an xcb_configure_notify_event_t */
+///     xcb_configure_notify_event_t *event = calloc(32, 1);
+///
+///     event->event = window;
+///     event->window = window;
+///     event->response_type = XCB_CONFIGURE_NOTIFY;
+///
+///     event->x = 0;
+///     event->y = 0;
+///     event->width = 800;
+///     event->height = 600;
+///
+///     event->border_width = 0;
+///     event->above_sibling = XCB_NONE;
+///     event->override_redirect = false;
+///
+///     xcb_send_event(conn, false, window, XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+///                    (char*)event);
+///     xcb_flush(conn);
+///     free(event);
+/// }
+/// ```
 pub fn send_event<Conn, A, B, C>(conn: &Conn, propagate: bool, destination: A, event_mask: B, event: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8781,30 +9991,16 @@ where
     let destination: Window = destination.into();
     let event_mask: u32 = event_mask.into();
     let event: [u8; 32] = event.into();
-    let length_so_far = 0;
-    let propagate_bytes = propagate.serialize();
-    let destination_bytes = destination.serialize();
-    let event_mask_bytes = event_mask.serialize();
-    let mut request0 = [
-        SEND_EVENT_REQUEST,
-        propagate_bytes[0],
-        0,
-        0,
-        destination_bytes[0],
-        destination_bytes[1],
-        destination_bytes[2],
-        destination_bytes[3],
-        event_mask_bytes[0],
-        event_mask_bytes[1],
-        event_mask_bytes[2],
-        event_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + event.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&event)], vec![])?)
+    let event = &event;
+    let request0 = SendEventRequest {
+        propagate,
+        destination,
+        event_mask,
+        event,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -9086,6 +10282,137 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///     }
 /// }
 /// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GrabPointerRequest {
+    pub owner_events: bool,
+    pub grab_window: Window,
+    pub event_mask: u16,
+    pub pointer_mode: GrabMode,
+    pub keyboard_mode: GrabMode,
+    pub confine_to: Window,
+    pub cursor: Cursor,
+    pub time: Timestamp,
+}
+impl GrabPointerRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let owner_events_bytes = self.owner_events.serialize();
+        let grab_window_bytes = self.grab_window.serialize();
+        let event_mask_bytes = self.event_mask.serialize();
+        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
+        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
+        let confine_to_bytes = self.confine_to.serialize();
+        let cursor_bytes = self.cursor.serialize();
+        let time_bytes = self.time.serialize();
+        let mut request0 = vec![
+            GRAB_POINTER_REQUEST,
+            owner_events_bytes[0],
+            0,
+            0,
+            grab_window_bytes[0],
+            grab_window_bytes[1],
+            grab_window_bytes[2],
+            grab_window_bytes[3],
+            event_mask_bytes[0],
+            event_mask_bytes[1],
+            pointer_mode_bytes[0],
+            keyboard_mode_bytes[0],
+            confine_to_bytes[0],
+            confine_to_bytes[1],
+            confine_to_bytes[2],
+            confine_to_bytes[3],
+            cursor_bytes[0],
+            cursor_bytes[1],
+            cursor_bytes[2],
+            cursor_bytes[3],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Grab the pointer.
+///
+/// Actively grabs control of the pointer. Further pointer events are reported only to the grabbing client. Overrides any active pointer grab by this client.
+///
+/// # Fields
+///
+/// * `event_mask` - Specifies which pointer events are reported to the client.
+///
+/// TODO: which values?
+/// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
+/// move the pointer out of that window).
+///
+/// The special value `XCB_NONE` means don't confine the pointer.
+/// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
+/// cursor.
+/// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+/// reported to the `grab_window`.
+/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
+/// * `time` - The time argument allows you to avoid certain circumstances that come up if
+/// applications take a long time to respond or if there are long network delays.
+/// Consider a situation where you have two applications, both of which normally
+/// grab the pointer when clicked on. If both applications specify the timestamp
+/// from the event, the second application may wake up faster and successfully grab
+/// the pointer before the first application. The first application then will get
+/// an indication that the other application grabbed the pointer before its request
+/// was processed.
+///
+/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
+/// time.
+/// * `pointer_mode` -
+/// * `keyboard_mode` -
+///
+/// # Errors
+///
+/// * `Value` - TODO: reasons?
+/// * `Window` - The specified `window` does not exist.
+///
+/// # See
+///
+/// * `GrabKeyboard`: request
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Grabs the pointer actively
+///  *
+///  */
+/// void my_example(xcb_connection_t *conn, xcb_screen_t *screen, xcb_cursor_t cursor) {
+///     xcb_grab_pointer_cookie_t cookie;
+///     xcb_grab_pointer_reply_t *reply;
+///
+///     cookie = xcb_grab_pointer(
+///         conn,
+///         false,               /* get all pointer events specified by the following mask */
+///         screen->root,        /* grab the root window */
+///         XCB_NONE,            /* which events to let through */
+///         XCB_GRAB_MODE_ASYNC, /* pointer events should continue as normal */
+///         XCB_GRAB_MODE_ASYNC, /* keyboard mode */
+///         XCB_NONE,            /* confine_to = in which window should the cursor stay */
+///         cursor,              /* we change the cursor to whatever the user wanted */
+///         XCB_CURRENT_TIME
+///     );
+///
+///     if ((reply = xcb_grab_pointer_reply(conn, cookie, NULL))) {
+///         if (reply->status == XCB_GRAB_STATUS_SUCCESS)
+///             printf("successfully grabbed the pointer\\n");
+///         free(preply);
+///     }
+/// }
+/// ```
 pub fn grab_pointer<Conn, A, B, C, D>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, time: D) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9098,46 +10425,19 @@ where
     let confine_to: Window = confine_to.into();
     let cursor: Cursor = cursor.into();
     let time: Timestamp = time.into();
-    let length_so_far = 0;
-    let owner_events_bytes = owner_events.serialize();
-    let grab_window_bytes = grab_window.serialize();
-    let event_mask_bytes = event_mask.serialize();
-    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
-    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
-    let confine_to_bytes = confine_to.serialize();
-    let cursor_bytes = cursor.serialize();
-    let time_bytes = time.serialize();
-    let mut request0 = [
-        GRAB_POINTER_REQUEST,
-        owner_events_bytes[0],
-        0,
-        0,
-        grab_window_bytes[0],
-        grab_window_bytes[1],
-        grab_window_bytes[2],
-        grab_window_bytes[3],
-        event_mask_bytes[0],
-        event_mask_bytes[1],
-        pointer_mode_bytes[0],
-        keyboard_mode_bytes[0],
-        confine_to_bytes[0],
-        confine_to_bytes[1],
-        confine_to_bytes[2],
-        confine_to_bytes[3],
-        cursor_bytes[0],
-        cursor_bytes[1],
-        cursor_bytes[2],
-        cursor_bytes[3],
-        time_bytes[0],
-        time_bytes[1],
-        time_bytes[2],
-        time_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GrabPointerRequest {
+        owner_events,
+        grab_window,
+        event_mask,
+        pointer_mode,
+        keyboard_mode,
+        confine_to,
+        cursor,
+        time,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -9190,29 +10490,71 @@ pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 /// * `GrabButton`: request
 /// * `EnterNotify`: event
 /// * `LeaveNotify`: event
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UngrabPointerRequest {
+    pub time: Timestamp,
+}
+impl UngrabPointerRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let time_bytes = self.time.serialize();
+        let mut request0 = vec![
+            UNGRAB_POINTER_REQUEST,
+            0,
+            0,
+            0,
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// release the pointer.
+///
+/// Releases the pointer and any queued events if you actively grabbed the pointer
+/// before using `xcb_grab_pointer`, `xcb_grab_button` or within a normal button
+/// press.
+///
+/// EnterNotify and LeaveNotify events are generated.
+///
+/// # Fields
+///
+/// * `time` - Timestamp to avoid race conditions when running X over the network.
+///
+/// The pointer will not be released if `time` is earlier than the
+/// last-pointer-grab time or later than the current X server time.
+/// * `name_len` - Length (in bytes) of `name`.
+/// * `name` - A pattern describing an X core font.
+///
+/// # See
+///
+/// * `GrabPointer`: request
+/// * `GrabButton`: request
+/// * `EnterNotify`: event
+/// * `LeaveNotify`: event
 pub fn ungrab_pointer<Conn, A>(conn: &Conn, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Timestamp>,
 {
     let time: Timestamp = time.into();
-    let length_so_far = 0;
-    let time_bytes = time.serialize();
-    let mut request0 = [
-        UNGRAB_POINTER_REQUEST,
-        0,
-        0,
-        0,
-        time_bytes[0],
-        time_bytes[1],
-        time_bytes[2],
-        time_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = UngrabPointerRequest {
+        time,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -9366,6 +10708,135 @@ pub const GRAB_BUTTON_REQUEST: u8 = 28;
 /// * `Value` - TODO: reasons?
 /// * `Cursor` - The specified `cursor` does not exist.
 /// * `Window` - The specified `window` does not exist.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GrabButtonRequest {
+    pub owner_events: bool,
+    pub grab_window: Window,
+    pub event_mask: u16,
+    pub pointer_mode: GrabMode,
+    pub keyboard_mode: GrabMode,
+    pub confine_to: Window,
+    pub cursor: Cursor,
+    pub button: ButtonIndex,
+    pub modifiers: u16,
+}
+impl GrabButtonRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let owner_events_bytes = self.owner_events.serialize();
+        let grab_window_bytes = self.grab_window.serialize();
+        let event_mask_bytes = self.event_mask.serialize();
+        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
+        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
+        let confine_to_bytes = self.confine_to.serialize();
+        let cursor_bytes = self.cursor.serialize();
+        let button_bytes = u8::from(self.button).serialize();
+        let modifiers_bytes = self.modifiers.serialize();
+        let mut request0 = vec![
+            GRAB_BUTTON_REQUEST,
+            owner_events_bytes[0],
+            0,
+            0,
+            grab_window_bytes[0],
+            grab_window_bytes[1],
+            grab_window_bytes[2],
+            grab_window_bytes[3],
+            event_mask_bytes[0],
+            event_mask_bytes[1],
+            pointer_mode_bytes[0],
+            keyboard_mode_bytes[0],
+            confine_to_bytes[0],
+            confine_to_bytes[1],
+            confine_to_bytes[2],
+            confine_to_bytes[3],
+            cursor_bytes[0],
+            cursor_bytes[1],
+            cursor_bytes[2],
+            cursor_bytes[3],
+            button_bytes[0],
+            0,
+            modifiers_bytes[0],
+            modifiers_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Grab pointer button(s).
+///
+/// This request establishes a passive grab. The pointer is actively grabbed as
+/// described in GrabPointer, the last-pointer-grab time is set to the time at
+/// which the button was pressed (as transmitted in the ButtonPress event), and the
+/// ButtonPress event is reported if all of the following conditions are true:
+///
+/// The pointer is not grabbed and the specified button is logically pressed when
+/// the specified modifier keys are logically down, and no other buttons or
+/// modifier keys are logically down.
+///
+/// The grab-window contains the pointer.
+///
+/// The confine-to window (if any) is viewable.
+///
+/// A passive grab on the same button/key combination does not exist on any
+/// ancestor of grab-window.
+///
+/// The interpretation of the remaining arguments is the same as for GrabPointer.
+/// The active grab is terminated automatically when the logical state of the
+/// pointer has all buttons released, independent of the logical state of modifier
+/// keys. Note that the logical state of a device (as seen by means of the
+/// protocol) may lag the physical state if device event processing is frozen. This
+/// request overrides all previous passive grabs by the same client on the same
+/// button/key combinations on the same window. A modifier of AnyModifier is
+/// equivalent to issuing the request for all possible modifier combinations
+/// (including the combination of no modifiers). It is not required that all
+/// specified modifiers have currently assigned keycodes. A button of AnyButton is
+/// equivalent to issuing the request for all possible buttons. Otherwise, it is
+/// not required that the button specified currently be assigned to a physical
+/// button.
+///
+/// An Access error is generated if some other client has already issued a
+/// GrabButton request with the same button/key combination on the same window.
+/// When using AnyModifier or AnyButton, the request fails completely (no grabs are
+/// established), and an Access error is generated if there is a conflicting grab
+/// for any combination. The request has no effect on an active grab.
+///
+/// # Fields
+///
+/// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+/// reported to the `grab_window`.
+/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
+/// * `event_mask` - Specifies which pointer events are reported to the client.
+///
+/// TODO: which values?
+/// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
+/// move the pointer out of that window).
+///
+/// The special value `XCB_NONE` means don't confine the pointer.
+/// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
+/// cursor.
+/// * `modifiers` - The modifiers to grab.
+///
+/// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
+/// possible modifier combinations.
+/// * `pointer_mode` -
+/// * `keyboard_mode` -
+/// * `button` -
+///
+/// # Errors
+///
+/// * `Access` - Another client has already issued a GrabButton with the same button/key
+/// combination on the same window.
+/// * `Value` - TODO: reasons?
+/// * `Cursor` - The specified `cursor` does not exist.
+/// * `Window` - The specified `window` does not exist.
 pub fn grab_button<Conn, A, B, C, D>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, button: ButtonIndex, modifiers: D) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9378,84 +10849,122 @@ where
     let confine_to: Window = confine_to.into();
     let cursor: Cursor = cursor.into();
     let modifiers: u16 = modifiers.into();
-    let length_so_far = 0;
-    let owner_events_bytes = owner_events.serialize();
-    let grab_window_bytes = grab_window.serialize();
-    let event_mask_bytes = event_mask.serialize();
-    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
-    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
-    let confine_to_bytes = confine_to.serialize();
-    let cursor_bytes = cursor.serialize();
-    let button_bytes = u8::from(button).serialize();
-    let modifiers_bytes = modifiers.serialize();
-    let mut request0 = [
-        GRAB_BUTTON_REQUEST,
-        owner_events_bytes[0],
-        0,
-        0,
-        grab_window_bytes[0],
-        grab_window_bytes[1],
-        grab_window_bytes[2],
-        grab_window_bytes[3],
-        event_mask_bytes[0],
-        event_mask_bytes[1],
-        pointer_mode_bytes[0],
-        keyboard_mode_bytes[0],
-        confine_to_bytes[0],
-        confine_to_bytes[1],
-        confine_to_bytes[2],
-        confine_to_bytes[3],
-        cursor_bytes[0],
-        cursor_bytes[1],
-        cursor_bytes[2],
-        cursor_bytes[3],
-        button_bytes[0],
-        0,
-        modifiers_bytes[0],
-        modifiers_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GrabButtonRequest {
+        owner_events,
+        grab_window,
+        event_mask,
+        pointer_mode,
+        keyboard_mode,
+        confine_to,
+        cursor,
+        button,
+        modifiers,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the UngrabButton request
 pub const UNGRAB_BUTTON_REQUEST: u8 = 29;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UngrabButtonRequest {
+    pub button: ButtonIndex,
+    pub grab_window: Window,
+    pub modifiers: u16,
+}
+impl UngrabButtonRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let button_bytes = u8::from(self.button).serialize();
+        let grab_window_bytes = self.grab_window.serialize();
+        let modifiers_bytes = self.modifiers.serialize();
+        let mut request0 = vec![
+            UNGRAB_BUTTON_REQUEST,
+            button_bytes[0],
+            0,
+            0,
+            grab_window_bytes[0],
+            grab_window_bytes[1],
+            grab_window_bytes[2],
+            grab_window_bytes[3],
+            modifiers_bytes[0],
+            modifiers_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn ungrab_button<Conn, A>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
 {
     let modifiers: u16 = modifiers.into();
-    let length_so_far = 0;
-    let button_bytes = u8::from(button).serialize();
-    let grab_window_bytes = grab_window.serialize();
-    let modifiers_bytes = modifiers.serialize();
-    let mut request0 = [
-        UNGRAB_BUTTON_REQUEST,
-        button_bytes[0],
-        0,
-        0,
-        grab_window_bytes[0],
-        grab_window_bytes[1],
-        grab_window_bytes[2],
-        grab_window_bytes[3],
-        modifiers_bytes[0],
-        modifiers_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = UngrabButtonRequest {
+        button,
+        grab_window,
+        modifiers,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ChangeActivePointerGrab request
 pub const CHANGE_ACTIVE_POINTER_GRAB_REQUEST: u8 = 30;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChangeActivePointerGrabRequest {
+    pub cursor: Cursor,
+    pub time: Timestamp,
+    pub event_mask: u16,
+}
+impl ChangeActivePointerGrabRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cursor_bytes = self.cursor.serialize();
+        let time_bytes = self.time.serialize();
+        let event_mask_bytes = self.event_mask.serialize();
+        let mut request0 = vec![
+            CHANGE_ACTIVE_POINTER_GRAB_REQUEST,
+            0,
+            0,
+            0,
+            cursor_bytes[0],
+            cursor_bytes[1],
+            cursor_bytes[2],
+            cursor_bytes[3],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            event_mask_bytes[0],
+            event_mask_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn change_active_pointer_grab<Conn, A, B, C>(conn: &Conn, cursor: A, time: B, event_mask: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9466,37 +10975,126 @@ where
     let cursor: Cursor = cursor.into();
     let time: Timestamp = time.into();
     let event_mask: u16 = event_mask.into();
-    let length_so_far = 0;
-    let cursor_bytes = cursor.serialize();
-    let time_bytes = time.serialize();
-    let event_mask_bytes = event_mask.serialize();
-    let mut request0 = [
-        CHANGE_ACTIVE_POINTER_GRAB_REQUEST,
-        0,
-        0,
-        0,
-        cursor_bytes[0],
-        cursor_bytes[1],
-        cursor_bytes[2],
-        cursor_bytes[3],
-        time_bytes[0],
-        time_bytes[1],
-        time_bytes[2],
-        time_bytes[3],
-        event_mask_bytes[0],
-        event_mask_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ChangeActivePointerGrabRequest {
+        cursor,
+        time,
+        event_mask,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GrabKeyboard request
 pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
+/// Grab the keyboard.
+///
+/// Actively grabs control of the keyboard and generates FocusIn and FocusOut
+/// events. Further key events are reported only to the grabbing client.
+///
+/// Any active keyboard grab by this client is overridden. If the keyboard is
+/// actively grabbed by some other client, `AlreadyGrabbed` is returned. If
+/// `grab_window` is not viewable, `GrabNotViewable` is returned. If the keyboard
+/// is frozen by an active grab of another client, `GrabFrozen` is returned. If the
+/// specified `time` is earlier than the last-keyboard-grab time or later than the
+/// current X server time, `GrabInvalidTime` is returned. Otherwise, the
+/// last-keyboard-grab time is set to the specified time.
+///
+/// # Fields
+///
+/// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+/// reported to the `grab_window`.
+/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
+/// * `time` - Timestamp to avoid race conditions when running X over the network.
+///
+/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
+/// time.
+/// * `pointer_mode` -
+/// * `keyboard_mode` -
+///
+/// # Errors
+///
+/// * `Value` - TODO: reasons?
+/// * `Window` - The specified `window` does not exist.
+///
+/// # See
+///
+/// * `GrabPointer`: request
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Grabs the keyboard actively
+///  *
+///  */
+/// void my_example(xcb_connection_t *conn, xcb_screen_t *screen) {
+///     xcb_grab_keyboard_cookie_t cookie;
+///     xcb_grab_keyboard_reply_t *reply;
+///
+///     cookie = xcb_grab_keyboard(
+///         conn,
+///         true,                /* report events */
+///         screen->root,        /* grab the root window */
+///         XCB_CURRENT_TIME,
+///         XCB_GRAB_MODE_ASYNC, /* process events as normal, do not require sync */
+///         XCB_GRAB_MODE_ASYNC
+///     );
+///
+///     if ((reply = xcb_grab_keyboard_reply(conn, cookie, NULL))) {
+///         if (reply->status == XCB_GRAB_STATUS_SUCCESS)
+///             printf("successfully grabbed the keyboard\\n");
+///
+///         free(reply);
+///     }
+/// }
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GrabKeyboardRequest {
+    pub owner_events: bool,
+    pub grab_window: Window,
+    pub time: Timestamp,
+    pub pointer_mode: GrabMode,
+    pub keyboard_mode: GrabMode,
+}
+impl GrabKeyboardRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let owner_events_bytes = self.owner_events.serialize();
+        let grab_window_bytes = self.grab_window.serialize();
+        let time_bytes = self.time.serialize();
+        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
+        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
+        let mut request0 = vec![
+            GRAB_KEYBOARD_REQUEST,
+            owner_events_bytes[0],
+            0,
+            0,
+            grab_window_bytes[0],
+            grab_window_bytes[1],
+            grab_window_bytes[2],
+            grab_window_bytes[3],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            pointer_mode_bytes[0],
+            keyboard_mode_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 /// Grab the keyboard.
 ///
 /// Actively grabs control of the keyboard and generates FocusIn and FocusOut
@@ -9565,35 +11163,16 @@ where
     A: Into<Timestamp>,
 {
     let time: Timestamp = time.into();
-    let length_so_far = 0;
-    let owner_events_bytes = owner_events.serialize();
-    let grab_window_bytes = grab_window.serialize();
-    let time_bytes = time.serialize();
-    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
-    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
-    let mut request0 = [
-        GRAB_KEYBOARD_REQUEST,
-        owner_events_bytes[0],
-        0,
-        0,
-        grab_window_bytes[0],
-        grab_window_bytes[1],
-        grab_window_bytes[2],
-        grab_window_bytes[3],
-        time_bytes[0],
-        time_bytes[1],
-        time_bytes[2],
-        time_bytes[3],
-        pointer_mode_bytes[0],
-        keyboard_mode_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GrabKeyboardRequest {
+        owner_events,
+        grab_window,
+        time,
+        pointer_mode,
+        keyboard_mode,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -9623,29 +11202,48 @@ impl TryFrom<&[u8]> for GrabKeyboardReply {
 
 /// Opcode for the UngrabKeyboard request
 pub const UNGRAB_KEYBOARD_REQUEST: u8 = 32;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UngrabKeyboardRequest {
+    pub time: Timestamp,
+}
+impl UngrabKeyboardRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let time_bytes = self.time.serialize();
+        let mut request0 = vec![
+            UNGRAB_KEYBOARD_REQUEST,
+            0,
+            0,
+            0,
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn ungrab_keyboard<Conn, A>(conn: &Conn, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Timestamp>,
 {
     let time: Timestamp = time.into();
-    let length_so_far = 0;
-    let time_bytes = time.serialize();
-    let mut request0 = [
-        UNGRAB_KEYBOARD_REQUEST,
-        0,
-        0,
-        0,
-        time_bytes[0],
-        time_bytes[1],
-        time_bytes[2],
-        time_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = UngrabKeyboardRequest {
+        time,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -9769,6 +11367,114 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 /// # See
 ///
 /// * `GrabKeyboard`: request
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GrabKeyRequest {
+    pub owner_events: bool,
+    pub grab_window: Window,
+    pub modifiers: u16,
+    pub key: Keycode,
+    pub pointer_mode: GrabMode,
+    pub keyboard_mode: GrabMode,
+}
+impl GrabKeyRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let owner_events_bytes = self.owner_events.serialize();
+        let grab_window_bytes = self.grab_window.serialize();
+        let modifiers_bytes = self.modifiers.serialize();
+        let key_bytes = self.key.serialize();
+        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
+        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
+        let mut request0 = vec![
+            GRAB_KEY_REQUEST,
+            owner_events_bytes[0],
+            0,
+            0,
+            grab_window_bytes[0],
+            grab_window_bytes[1],
+            grab_window_bytes[2],
+            grab_window_bytes[3],
+            modifiers_bytes[0],
+            modifiers_bytes[1],
+            key_bytes[0],
+            pointer_mode_bytes[0],
+            keyboard_mode_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Grab keyboard key(s).
+///
+/// Establishes a passive grab on the keyboard. In the future, the keyboard is
+/// actively grabbed (as for `GrabKeyboard`), the last-keyboard-grab time is set to
+/// the time at which the key was pressed (as transmitted in the KeyPress event),
+/// and the KeyPress event is reported if all of the following conditions are true:
+///
+/// The keyboard is not grabbed and the specified key (which can itself be a
+/// modifier key) is logically pressed when the specified modifier keys are
+/// logically down, and no other modifier keys are logically down.
+///
+/// Either the grab_window is an ancestor of (or is) the focus window, or the
+/// grab_window is a descendant of the focus window and contains the pointer.
+///
+/// A passive grab on the same key combination does not exist on any ancestor of
+/// grab_window.
+///
+/// The interpretation of the remaining arguments is as for XGrabKeyboard.  The active grab is terminated
+/// automatically when the logical state of the keyboard has the specified key released (independent of the
+/// logical state of the modifier keys), at which point a KeyRelease event is reported to the grabbing window.
+///
+/// Note that the logical state of a device (as seen by client applications) may lag the physical state if
+/// device event processing is frozen.
+///
+/// A modifiers argument of AnyModifier is equivalent to issuing the request for all possible modifier combinations (including the combination of no modifiers).  It is not required that all modifiers specified
+/// have currently assigned KeyCodes.  A keycode argument of AnyKey is equivalent to issuing the request for
+/// all possible KeyCodes.  Otherwise, the specified keycode must be in the range specified by min_keycode
+/// and max_keycode in the connection setup, or a BadValue error results.
+///
+/// If some other client has issued a XGrabKey with the same key combination on the same window, a BadAccess
+/// error results.  When using AnyModifier or AnyKey, the request fails completely, and a BadAccess error
+/// results (no grabs are established) if there is a conflicting grab for any combination.
+///
+/// # Fields
+///
+/// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+/// reported to the `grab_window`.
+/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
+/// * `key` - The keycode of the key to grab.
+///
+/// The special value `XCB_GRAB_ANY` means grab any key.
+/// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
+/// cursor.
+/// * `modifiers` - The modifiers to grab.
+///
+/// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
+/// possible modifier combinations.
+/// * `pointer_mode` -
+/// * `keyboard_mode` -
+///
+/// # Errors
+///
+/// * `Access` - Another client has already issued a GrabKey with the same button/key
+/// combination on the same window.
+/// * `Value` - TODO: reasons?
+/// * `Window` - The specified `window` does not exist.
+///
+/// # See
+///
+/// * `GrabKeyboard`: request
 pub fn grab_key<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: A, key: B, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9777,40 +11483,84 @@ where
 {
     let modifiers: u16 = modifiers.into();
     let key: Keycode = key.into();
-    let length_so_far = 0;
-    let owner_events_bytes = owner_events.serialize();
-    let grab_window_bytes = grab_window.serialize();
-    let modifiers_bytes = modifiers.serialize();
-    let key_bytes = key.serialize();
-    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
-    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
-    let mut request0 = [
-        GRAB_KEY_REQUEST,
-        owner_events_bytes[0],
-        0,
-        0,
-        grab_window_bytes[0],
-        grab_window_bytes[1],
-        grab_window_bytes[2],
-        grab_window_bytes[3],
-        modifiers_bytes[0],
-        modifiers_bytes[1],
-        key_bytes[0],
-        pointer_mode_bytes[0],
-        keyboard_mode_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GrabKeyRequest {
+        owner_events,
+        grab_window,
+        modifiers,
+        key,
+        pointer_mode,
+        keyboard_mode,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the UngrabKey request
 pub const UNGRAB_KEY_REQUEST: u8 = 34;
+/// release a key combination.
+///
+/// Releases the key combination on `grab_window` if you grabbed it using
+/// `xcb_grab_key` before.
+///
+/// # Fields
+///
+/// * `key` - The keycode of the specified key combination.
+///
+/// Using the special value `XCB_GRAB_ANY` means releasing all possible key codes.
+/// * `grab_window` - The window on which the grabbed key combination will be released.
+/// * `modifiers` - The modifiers of the specified key combination.
+///
+/// Using the special value `XCB_MOD_MASK_ANY` means releasing the key combination
+/// with every possible modifier combination.
+///
+/// # Errors
+///
+/// * `Window` - The specified `grab_window` does not exist.
+/// * `Value` - TODO: reasons?
+///
+/// # See
+///
+/// * `GrabKey`: request
+/// * `xev`: program
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UngrabKeyRequest {
+    pub key: Keycode,
+    pub grab_window: Window,
+    pub modifiers: u16,
+}
+impl UngrabKeyRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let key_bytes = self.key.serialize();
+        let grab_window_bytes = self.grab_window.serialize();
+        let modifiers_bytes = self.modifiers.serialize();
+        let mut request0 = vec![
+            UNGRAB_KEY_REQUEST,
+            key_bytes[0],
+            0,
+            0,
+            grab_window_bytes[0],
+            grab_window_bytes[1],
+            grab_window_bytes[2],
+            grab_window_bytes[3],
+            modifiers_bytes[0],
+            modifiers_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 /// release a key combination.
 ///
 /// Releases the key combination on `grab_window` if you grabbed it using
@@ -9844,29 +11594,14 @@ where
 {
     let key: Keycode = key.into();
     let modifiers: u16 = modifiers.into();
-    let length_so_far = 0;
-    let key_bytes = key.serialize();
-    let grab_window_bytes = grab_window.serialize();
-    let modifiers_bytes = modifiers.serialize();
-    let mut request0 = [
-        UNGRAB_KEY_REQUEST,
-        key_bytes[0],
-        0,
-        0,
-        grab_window_bytes[0],
-        grab_window_bytes[1],
-        grab_window_bytes[2],
-        grab_window_bytes[3],
-        modifiers_bytes[0],
-        modifiers_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = UngrabKeyRequest {
+        key,
+        grab_window,
+        modifiers,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -10028,70 +11763,139 @@ pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 /// # Errors
 ///
 /// * `Value` - You specified an invalid `mode`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AllowEventsRequest {
+    pub mode: Allow,
+    pub time: Timestamp,
+}
+impl AllowEventsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mode_bytes = u8::from(self.mode).serialize();
+        let time_bytes = self.time.serialize();
+        let mut request0 = vec![
+            ALLOW_EVENTS_REQUEST,
+            mode_bytes[0],
+            0,
+            0,
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// release queued events.
+///
+/// Releases queued events if the client has caused a device (pointer/keyboard) to
+/// freeze due to grabbing it actively. This request has no effect if `time` is
+/// earlier than the last-grab time of the most recent active grab for this client
+/// or if `time` is later than the current X server time.
+///
+/// # Fields
+///
+/// * `mode` -
+/// * `time` - Timestamp to avoid race conditions when running X over the network.
+///
+/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
+/// time.
+///
+/// # Errors
+///
+/// * `Value` - You specified an invalid `mode`.
 pub fn allow_events<Conn, A>(conn: &Conn, mode: Allow, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Timestamp>,
 {
     let time: Timestamp = time.into();
-    let length_so_far = 0;
-    let mode_bytes = u8::from(mode).serialize();
-    let time_bytes = time.serialize();
-    let mut request0 = [
-        ALLOW_EVENTS_REQUEST,
-        mode_bytes[0],
-        0,
-        0,
-        time_bytes[0],
-        time_bytes[1],
-        time_bytes[2],
-        time_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = AllowEventsRequest {
+        mode,
+        time,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GrabServer request
 pub const GRAB_SERVER_REQUEST: u8 = 36;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GrabServerRequest;
+impl GrabServerRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            GRAB_SERVER_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn grab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        GRAB_SERVER_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GrabServerRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the UngrabServer request
 pub const UNGRAB_SERVER_REQUEST: u8 = 37;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UngrabServerRequest;
+impl UngrabServerRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            UNGRAB_SERVER_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn ungrab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        UNGRAB_SERVER_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = UngrabServerRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the QueryPointer request
@@ -10109,27 +11913,59 @@ pub const QUERY_POINTER_REQUEST: u8 = 38;
 /// # Errors
 ///
 /// * `Window` - The specified `window` does not exist.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryPointerRequest {
+    pub window: Window,
+}
+impl QueryPointerRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            QUERY_POINTER_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// get pointer coordinates.
+///
+/// Gets the root window the pointer is logically on and the pointer coordinates
+/// relative to the root window's origin.
+///
+/// # Fields
+///
+/// * `window` - A window to check if the pointer is on the same screen as `window` (see the
+/// `same_screen` field in the reply).
+///
+/// # Errors
+///
+/// * `Window` - The specified `window` does not exist.
 pub fn query_pointer<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, QueryPointerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        QUERY_POINTER_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryPointerRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -10238,6 +12074,48 @@ impl Serialize for Timecoord {
 
 /// Opcode for the GetMotionEvents request
 pub const GET_MOTION_EVENTS_REQUEST: u8 = 39;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetMotionEventsRequest {
+    pub window: Window,
+    pub start: Timestamp,
+    pub stop: Timestamp,
+}
+impl GetMotionEventsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let start_bytes = self.start.serialize();
+        let stop_bytes = self.stop.serialize();
+        let mut request0 = vec![
+            GET_MOTION_EVENTS_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            start_bytes[0],
+            start_bytes[1],
+            start_bytes[2],
+            start_bytes[3],
+            stop_bytes[0],
+            stop_bytes[1],
+            stop_bytes[2],
+            stop_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_motion_events<Conn, A, B>(conn: &Conn, window: Window, start: A, stop: B) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10246,33 +12124,14 @@ where
 {
     let start: Timestamp = start.into();
     let stop: Timestamp = stop.into();
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let start_bytes = start.serialize();
-    let stop_bytes = stop.serialize();
-    let mut request0 = [
-        GET_MOTION_EVENTS_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        start_bytes[0],
-        start_bytes[1],
-        start_bytes[2],
-        start_bytes[3],
-        stop_bytes[0],
-        stop_bytes[1],
-        stop_bytes[2],
-        stop_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetMotionEventsRequest {
+        window,
+        start,
+        stop,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -10319,38 +12178,63 @@ impl GetMotionEventsReply {
 
 /// Opcode for the TranslateCoordinates request
 pub const TRANSLATE_COORDINATES_REQUEST: u8 = 40;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TranslateCoordinatesRequest {
+    pub src_window: Window,
+    pub dst_window: Window,
+    pub src_x: i16,
+    pub src_y: i16,
+}
+impl TranslateCoordinatesRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let src_window_bytes = self.src_window.serialize();
+        let dst_window_bytes = self.dst_window.serialize();
+        let src_x_bytes = self.src_x.serialize();
+        let src_y_bytes = self.src_y.serialize();
+        let mut request0 = vec![
+            TRANSLATE_COORDINATES_REQUEST,
+            0,
+            0,
+            0,
+            src_window_bytes[0],
+            src_window_bytes[1],
+            src_window_bytes[2],
+            src_window_bytes[3],
+            dst_window_bytes[0],
+            dst_window_bytes[1],
+            dst_window_bytes[2],
+            dst_window_bytes[3],
+            src_x_bytes[0],
+            src_x_bytes[1],
+            src_y_bytes[0],
+            src_y_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn translate_coordinates<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Conn, TranslateCoordinatesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let src_window_bytes = src_window.serialize();
-    let dst_window_bytes = dst_window.serialize();
-    let src_x_bytes = src_x.serialize();
-    let src_y_bytes = src_y.serialize();
-    let mut request0 = [
-        TRANSLATE_COORDINATES_REQUEST,
-        0,
-        0,
-        0,
-        src_window_bytes[0],
-        src_window_bytes[1],
-        src_window_bytes[2],
-        src_window_bytes[3],
-        dst_window_bytes[0],
-        dst_window_bytes[1],
-        dst_window_bytes[2],
-        dst_window_bytes[3],
-        src_x_bytes[0],
-        src_x_bytes[1],
-        src_y_bytes[0],
-        src_y_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = TranslateCoordinatesRequest {
+        src_window,
+        dst_window,
+        src_x,
+        src_y,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -10417,6 +12301,98 @@ pub const WARP_POINTER_REQUEST: u8 = 41;
 /// # See
 ///
 /// * `SetInputFocus`: request
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct WarpPointerRequest {
+    pub src_window: Window,
+    pub dst_window: Window,
+    pub src_x: i16,
+    pub src_y: i16,
+    pub src_width: u16,
+    pub src_height: u16,
+    pub dst_x: i16,
+    pub dst_y: i16,
+}
+impl WarpPointerRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let src_window_bytes = self.src_window.serialize();
+        let dst_window_bytes = self.dst_window.serialize();
+        let src_x_bytes = self.src_x.serialize();
+        let src_y_bytes = self.src_y.serialize();
+        let src_width_bytes = self.src_width.serialize();
+        let src_height_bytes = self.src_height.serialize();
+        let dst_x_bytes = self.dst_x.serialize();
+        let dst_y_bytes = self.dst_y.serialize();
+        let mut request0 = vec![
+            WARP_POINTER_REQUEST,
+            0,
+            0,
+            0,
+            src_window_bytes[0],
+            src_window_bytes[1],
+            src_window_bytes[2],
+            src_window_bytes[3],
+            dst_window_bytes[0],
+            dst_window_bytes[1],
+            dst_window_bytes[2],
+            dst_window_bytes[3],
+            src_x_bytes[0],
+            src_x_bytes[1],
+            src_y_bytes[0],
+            src_y_bytes[1],
+            src_width_bytes[0],
+            src_width_bytes[1],
+            src_height_bytes[0],
+            src_height_bytes[1],
+            dst_x_bytes[0],
+            dst_x_bytes[1],
+            dst_y_bytes[0],
+            dst_y_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// move mouse pointer.
+///
+/// Moves the mouse pointer to the specified position.
+///
+/// If `src_window` is not `XCB_NONE` (TODO), the move will only take place if the
+/// pointer is inside `src_window` and within the rectangle specified by (`src_x`,
+/// `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
+/// `src_window`.
+///
+/// If `dst_window` is not `XCB_NONE` (TODO), the pointer will be moved to the
+/// offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
+/// `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
+/// relative to the current position of the pointer.
+///
+/// # Fields
+///
+/// * `src_window` - If `src_window` is not `XCB_NONE` (TODO), the move will only take place if the
+/// pointer is inside `src_window` and within the rectangle specified by (`src_x`,
+/// `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
+/// `src_window`.
+/// * `dst_window` - If `dst_window` is not `XCB_NONE` (TODO), the pointer will be moved to the
+/// offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
+/// `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
+/// relative to the current position of the pointer.
+///
+/// # Errors
+///
+/// * `Window` - TODO: reasons?
+///
+/// # See
+///
+/// * `SetInputFocus`: request
 pub fn warp_pointer<Conn, A, B>(conn: &Conn, src_window: A, dst_window: B, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10425,46 +12401,19 @@ where
 {
     let src_window: Window = src_window.into();
     let dst_window: Window = dst_window.into();
-    let length_so_far = 0;
-    let src_window_bytes = src_window.serialize();
-    let dst_window_bytes = dst_window.serialize();
-    let src_x_bytes = src_x.serialize();
-    let src_y_bytes = src_y.serialize();
-    let src_width_bytes = src_width.serialize();
-    let src_height_bytes = src_height.serialize();
-    let dst_x_bytes = dst_x.serialize();
-    let dst_y_bytes = dst_y.serialize();
-    let mut request0 = [
-        WARP_POINTER_REQUEST,
-        0,
-        0,
-        0,
-        src_window_bytes[0],
-        src_window_bytes[1],
-        src_window_bytes[2],
-        src_window_bytes[3],
-        dst_window_bytes[0],
-        dst_window_bytes[1],
-        dst_window_bytes[2],
-        dst_window_bytes[3],
-        src_x_bytes[0],
-        src_x_bytes[1],
-        src_y_bytes[0],
-        src_y_bytes[1],
-        src_width_bytes[0],
-        src_width_bytes[1],
-        src_height_bytes[0],
-        src_height_bytes[1],
-        dst_x_bytes[0],
-        dst_x_bytes[1],
-        dst_y_bytes[0],
-        dst_y_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = WarpPointerRequest {
+        src_window,
+        dst_window,
+        src_x,
+        src_y,
+        src_width,
+        src_height,
+        dst_x,
+        dst_y,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -10581,6 +12530,79 @@ pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 ///
 /// * `FocusIn`: event
 /// * `FocusOut`: event
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetInputFocusRequest {
+    pub revert_to: InputFocus,
+    pub focus: Window,
+    pub time: Timestamp,
+}
+impl SetInputFocusRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let revert_to_bytes = u8::from(self.revert_to).serialize();
+        let focus_bytes = self.focus.serialize();
+        let time_bytes = self.time.serialize();
+        let mut request0 = vec![
+            SET_INPUT_FOCUS_REQUEST,
+            revert_to_bytes[0],
+            0,
+            0,
+            focus_bytes[0],
+            focus_bytes[1],
+            focus_bytes[2],
+            focus_bytes[3],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Sets input focus.
+///
+/// Changes the input focus and the last-focus-change time. If the specified `time`
+/// is earlier than the current last-focus-change time, the request is ignored (to
+/// avoid race conditions when running X over the network).
+///
+/// A FocusIn and FocusOut event is generated when focus is changed.
+///
+/// # Fields
+///
+/// * `focus` - The window to focus. All keyboard events will be reported to this window. The
+/// window must be viewable (TODO), or a `xcb_match_error_t` occurs (TODO).
+///
+/// If `focus` is `XCB_NONE` (TODO), all keyboard events are
+/// discarded until a new focus window is set.
+///
+/// If `focus` is `XCB_POINTER_ROOT` (TODO), focus is on the root window of the
+/// screen on which the pointer is on currently.
+/// * `time` - Timestamp to avoid race conditions when running X over the network.
+///
+/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
+/// time.
+/// * `revert_to` - Specifies what happens when the `focus` window becomes unviewable (if `focus`
+/// is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
+///
+/// # Errors
+///
+/// * `Window` - The specified `focus` window does not exist.
+/// * `Match` - The specified `focus` window is not viewable.
+/// * `Value` - TODO: Reasons?
+///
+/// # See
+///
+/// * `FocusIn`: event
+/// * `FocusOut`: event
 pub fn set_input_focus<Conn, A, B>(conn: &Conn, revert_to: InputFocus, focus: A, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10589,49 +12611,49 @@ where
 {
     let focus: Window = focus.into();
     let time: Timestamp = time.into();
-    let length_so_far = 0;
-    let revert_to_bytes = u8::from(revert_to).serialize();
-    let focus_bytes = focus.serialize();
-    let time_bytes = time.serialize();
-    let mut request0 = [
-        SET_INPUT_FOCUS_REQUEST,
-        revert_to_bytes[0],
-        0,
-        0,
-        focus_bytes[0],
-        focus_bytes[1],
-        focus_bytes[2],
-        focus_bytes[3],
-        time_bytes[0],
-        time_bytes[1],
-        time_bytes[2],
-        time_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetInputFocusRequest {
+        revert_to,
+        focus,
+        time,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetInputFocusRequest;
+impl GetInputFocusRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            GET_INPUT_FOCUS_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        GET_INPUT_FOCUS_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetInputFocusRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -10663,22 +12685,37 @@ impl TryFrom<&[u8]> for GetInputFocusReply {
 
 /// Opcode for the QueryKeymap request
 pub const QUERY_KEYMAP_REQUEST: u8 = 44;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryKeymapRequest;
+impl QueryKeymapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            QUERY_KEYMAP_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_keymap<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryKeymapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        QUERY_KEYMAP_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryKeymapRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -10729,61 +12766,121 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 /// # See
 ///
 /// * `xcb_generate_id`: function
-pub fn open_font<'c, Conn>(conn: &'c Conn, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct OpenFontRequest<'input> {
+    pub fid: Font,
+    pub name: &'input [u8],
+}
+impl<'input> OpenFontRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let fid_bytes = self.fid.serialize();
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
+        let name_len_bytes = name_len.serialize();
+        let mut request0 = vec![
+            OPEN_FONT_REQUEST,
+            0,
+            0,
+            0,
+            fid_bytes[0],
+            fid_bytes[1],
+            fid_bytes[2],
+            fid_bytes[3],
+            name_len_bytes[0],
+            name_len_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.name[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+    }
+}
+/// opens a font.
+///
+/// Opens any X core font matching the given `name` (for example "-misc-fixed-*").
+///
+/// Note that X core fonts are deprecated (but still supported) in favor of
+/// client-side rendering using Xft.
+///
+/// # Fields
+///
+/// * `fid` - The ID with which you will refer to the font, created by `xcb_generate_id`.
+/// * `name_len` - Length (in bytes) of `name`.
+/// * `name` - A pattern describing an X core font.
+///
+/// # Errors
+///
+/// * `Name` - No font matches the given `name`.
+///
+/// # See
+///
+/// * `xcb_generate_id`: function
+pub fn open_font<'c, 'input, Conn>(conn: &'c Conn, fid: Font, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let fid_bytes = fid.serialize();
-    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
-    let name_len_bytes = name_len.serialize();
-    let mut request0 = [
-        OPEN_FONT_REQUEST,
-        0,
-        0,
-        0,
-        fid_bytes[0],
-        fid_bytes[1],
-        fid_bytes[2],
-        fid_bytes[3],
-        name_len_bytes[0],
-        name_len_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + name.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
+    let request0 = OpenFontRequest {
+        fid,
+        name,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the CloseFont request
 pub const CLOSE_FONT_REQUEST: u8 = 46;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CloseFontRequest {
+    pub font: Font,
+}
+impl CloseFontRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let font_bytes = self.font.serialize();
+        let mut request0 = vec![
+            CLOSE_FONT_REQUEST,
+            0,
+            0,
+            0,
+            font_bytes[0],
+            font_bytes[1],
+            font_bytes[2],
+            font_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn close_font<Conn>(conn: &Conn, font: Font) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let font_bytes = font.serialize();
-    let mut request0 = [
-        CLOSE_FONT_REQUEST,
-        0,
-        0,
-        0,
-        font_bytes[0],
-        font_bytes[1],
-        font_bytes[2],
-        font_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CloseFontRequest {
+        font,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -10969,27 +13066,53 @@ pub const QUERY_FONT_REQUEST: u8 = 47;
 /// # Fields
 ///
 /// * `font` - The fontable (Font or Graphics Context) to query.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryFontRequest {
+    pub font: Fontable,
+}
+impl QueryFontRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let font_bytes = self.font.serialize();
+        let mut request0 = vec![
+            QUERY_FONT_REQUEST,
+            0,
+            0,
+            0,
+            font_bytes[0],
+            font_bytes[1],
+            font_bytes[2],
+            font_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// query font metrics.
+///
+/// Queries information associated with the font.
+///
+/// # Fields
+///
+/// * `font` - The fontable (Font or Graphics Context) to query.
 pub fn query_font<Conn>(conn: &Conn, font: Fontable) -> Result<Cookie<'_, Conn, QueryFontReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let font_bytes = font.serialize();
-    let mut request0 = [
-        QUERY_FONT_REQUEST,
-        0,
-        0,
-        0,
-        font_bytes[0],
-        font_bytes[1],
-        font_bytes[2],
-        font_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryFontRequest {
+        font,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -11122,34 +13245,89 @@ pub const QUERY_TEXT_EXTENTS_REQUEST: u8 = 48;
 ///
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Font` - The specified `font` does not exist.
-pub fn query_text_extents<'c, Conn>(conn: &'c Conn, font: Fontable, string: &[Char2b]) -> Result<Cookie<'c, Conn, QueryTextExtentsReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct QueryTextExtentsRequest<'input> {
+    pub font: Fontable,
+    pub string: &'input [Char2b],
+}
+impl<'input> QueryTextExtentsRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let string_len = u32::try_from(self.string.len()).unwrap();
+        let length_so_far = 0;
+        let odd_length = (string_len & 1u32) != 0;
+        let odd_length_bytes = odd_length.serialize();
+        let font_bytes = self.font.serialize();
+        let mut request0 = vec![
+            QUERY_TEXT_EXTENTS_REQUEST,
+            odd_length_bytes[0],
+            0,
+            0,
+            font_bytes[0],
+            font_bytes[1],
+            font_bytes[2],
+            font_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let string_bytes = self.string.serialize();
+        let length_so_far = length_so_far + string_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), string_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// get text extents.
+///
+/// Query text extents from the X11 server. This request returns the bounding box
+/// of the specified 16-bit character string in the specified `font` or the font
+/// contained in the specified graphics context.
+///
+/// `font_ascent` is set to the maximum of the ascent metrics of all characters in
+/// the string. `font_descent` is set to the maximum of the descent metrics.
+/// `overall_width` is set to the sum of the character-width metrics of all
+/// characters in the string. For each character in the string, let W be the sum of
+/// the character-width metrics of all characters preceding it in the string. Let L
+/// be the left-side-bearing metric of the character plus W. Let R be the
+/// right-side-bearing metric of the character plus W. The lbearing member is set
+/// to the minimum L of all characters in the string. The rbearing member is set to
+/// the maximum R.
+///
+/// For fonts defined with linear indexing rather than 2-byte matrix indexing, each
+/// `xcb_char2b_t` structure is interpreted as a 16-bit number with byte1 as the
+/// most significant byte. If the font has no defined default character, undefined
+/// characters in the string are taken to have all zero metrics.
+///
+/// Characters with all zero metrics are ignored. If the font has no defined
+/// default_char, the undefined characters in the string are also ignored.
+///
+/// # Fields
+///
+/// * `font` - The `font` to calculate text extents in. You can also pass a graphics context.
+/// * `string_len` - The number of characters in `string`.
+/// * `string` - The text to get text extents for.
+///
+/// # Errors
+///
+/// * `GContext` - The specified graphics context does not exist.
+/// * `Font` - The specified `font` does not exist.
+pub fn query_text_extents<'c, 'input, Conn>(conn: &'c Conn, font: Fontable, string: &'input [Char2b]) -> Result<Cookie<'c, Conn, QueryTextExtentsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let string_len = u32::try_from(string.len()).unwrap();
-    let length_so_far = 0;
-    let odd_length = (string_len & 1u32) != 0;
-    let odd_length_bytes = odd_length.serialize();
-    let font_bytes = font.serialize();
-    let mut request0 = [
-        QUERY_TEXT_EXTENTS_REQUEST,
-        odd_length_bytes[0],
-        0,
-        0,
-        font_bytes[0],
-        font_bytes[1],
-        font_bytes[2],
-        font_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let string_bytes = string.serialize();
-    let length_so_far = length_so_far + string_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&string_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = QueryTextExtentsRequest {
+        font,
+        string,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -11254,32 +13432,66 @@ pub const LIST_FONTS_REQUEST: u8 = 49;
 /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
 /// not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
-pub fn list_fonts<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> Result<Cookie<'c, Conn, ListFontsReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ListFontsRequest<'input> {
+    pub max_names: u16,
+    pub pattern: &'input [u8],
+}
+impl<'input> ListFontsRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let max_names_bytes = self.max_names.serialize();
+        let pattern_len = u16::try_from(self.pattern.len()).expect("`pattern` has too many elements");
+        let pattern_len_bytes = pattern_len.serialize();
+        let mut request0 = vec![
+            LIST_FONTS_REQUEST,
+            0,
+            0,
+            0,
+            max_names_bytes[0],
+            max_names_bytes[1],
+            pattern_len_bytes[0],
+            pattern_len_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.pattern[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.pattern[..]).into(), padding0.into()], vec![]))
+    }
+}
+/// get matching font names.
+///
+/// Gets a list of available font names which match the given `pattern`.
+///
+/// # Fields
+///
+/// * `pattern_len` - The length (in bytes) of `pattern`.
+/// * `pattern` - A font pattern, for example "-misc-fixed-*".
+///
+/// The asterisk (*) is a wildcard for any number of characters. The question mark
+/// (?) is a wildcard for a single character. Use of uppercase or lowercase does
+/// not matter.
+/// * `max_names` - The maximum number of fonts to be returned.
+pub fn list_fonts<'c, 'input, Conn>(conn: &'c Conn, max_names: u16, pattern: &'input [u8]) -> Result<Cookie<'c, Conn, ListFontsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let max_names_bytes = max_names.serialize();
-    let pattern_len = u16::try_from(pattern.len()).expect("`pattern` has too many elements");
-    let pattern_len_bytes = pattern_len.serialize();
-    let mut request0 = [
-        LIST_FONTS_REQUEST,
-        0,
-        0,
-        0,
-        max_names_bytes[0],
-        max_names_bytes[1],
-        pattern_len_bytes[0],
-        pattern_len_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + pattern.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ListFontsRequest {
+        max_names,
+        pattern,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -11342,32 +13554,66 @@ pub const LIST_FONTS_WITH_INFO_REQUEST: u8 = 50;
 /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
 /// not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
-pub fn list_fonts_with_info<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> Result<ListFontsWithInfoCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ListFontsWithInfoRequest<'input> {
+    pub max_names: u16,
+    pub pattern: &'input [u8],
+}
+impl<'input> ListFontsWithInfoRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let max_names_bytes = self.max_names.serialize();
+        let pattern_len = u16::try_from(self.pattern.len()).expect("`pattern` has too many elements");
+        let pattern_len_bytes = pattern_len.serialize();
+        let mut request0 = vec![
+            LIST_FONTS_WITH_INFO_REQUEST,
+            0,
+            0,
+            0,
+            max_names_bytes[0],
+            max_names_bytes[1],
+            pattern_len_bytes[0],
+            pattern_len_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.pattern[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.pattern[..]).into(), padding0.into()], vec![]))
+    }
+}
+/// get matching font names and information.
+///
+/// Gets a list of available font names which match the given `pattern`.
+///
+/// # Fields
+///
+/// * `pattern_len` - The length (in bytes) of `pattern`.
+/// * `pattern` - A font pattern, for example "-misc-fixed-*".
+///
+/// The asterisk (*) is a wildcard for any number of characters. The question mark
+/// (?) is a wildcard for a single character. Use of uppercase or lowercase does
+/// not matter.
+/// * `max_names` - The maximum number of fonts to be returned.
+pub fn list_fonts_with_info<'c, 'input, Conn>(conn: &'c Conn, max_names: u16, pattern: &'input [u8]) -> Result<ListFontsWithInfoCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let max_names_bytes = max_names.serialize();
-    let pattern_len = u16::try_from(pattern.len()).expect("`pattern` has too many elements");
-    let pattern_len_bytes = pattern_len.serialize();
-    let mut request0 = [
-        LIST_FONTS_WITH_INFO_REQUEST,
-        0,
-        0,
-        0,
-        max_names_bytes[0],
-        max_names_bytes[1],
-        pattern_len_bytes[0],
-        pattern_len_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + pattern.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], vec![])?))
+    let request0 = ListFontsWithInfoRequest {
+        max_names,
+        pattern,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&slices, fds)?))
 }
 
 /// # Fields
@@ -11472,52 +13718,86 @@ impl ListFontsWithInfoReply {
 
 /// Opcode for the SetFontPath request
 pub const SET_FONT_PATH_REQUEST: u8 = 51;
-pub fn set_font_path<'c, Conn>(conn: &'c Conn, font: &[Str]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetFontPathRequest<'input> {
+    pub font: &'input [Str],
+}
+impl<'input> SetFontPathRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let font_qty = u16::try_from(self.font.len()).expect("`font` has too many elements");
+        let font_qty_bytes = font_qty.serialize();
+        let mut request0 = vec![
+            SET_FONT_PATH_REQUEST,
+            0,
+            0,
+            0,
+            font_qty_bytes[0],
+            font_qty_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let font_bytes = self.font.serialize();
+        let length_so_far = length_so_far + font_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), font_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_font_path<'c, 'input, Conn>(conn: &'c Conn, font: &'input [Str]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let font_qty = u16::try_from(font.len()).expect("`font` has too many elements");
-    let font_qty_bytes = font_qty.serialize();
-    let mut request0 = [
-        SET_FONT_PATH_REQUEST,
-        0,
-        0,
-        0,
-        font_qty_bytes[0],
-        font_qty_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let font_bytes = font.serialize();
-    let length_so_far = length_so_far + font_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&font_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetFontPathRequest {
+        font,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetFontPath request
 pub const GET_FONT_PATH_REQUEST: u8 = 52;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetFontPathRequest;
+impl GetFontPathRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            GET_FONT_PATH_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_font_path<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetFontPathReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        GET_FONT_PATH_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetFontPathRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -11587,39 +13867,89 @@ pub const CREATE_PIXMAP_REQUEST: u8 = 53;
 /// # See
 ///
 /// * `xcb_generate_id`: function
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreatePixmapRequest {
+    pub depth: u8,
+    pub pid: Pixmap,
+    pub drawable: Drawable,
+    pub width: u16,
+    pub height: u16,
+}
+impl CreatePixmapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let depth_bytes = self.depth.serialize();
+        let pid_bytes = self.pid.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let mut request0 = vec![
+            CREATE_PIXMAP_REQUEST,
+            depth_bytes[0],
+            0,
+            0,
+            pid_bytes[0],
+            pid_bytes[1],
+            pid_bytes[2],
+            pid_bytes[3],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Creates a pixmap.
+///
+/// Creates a pixmap. The pixmap can only be used on the same screen as `drawable`
+/// is on and only with drawables of the same `depth`.
+///
+/// # Fields
+///
+/// * `depth` - TODO
+/// * `pid` - The ID with which you will refer to the new pixmap, created by
+/// `xcb_generate_id`.
+/// * `drawable` - Drawable to get the screen from.
+/// * `width` - The width of the new pixmap.
+/// * `height` - The height of the new pixmap.
+///
+/// # Errors
+///
+/// * `Value` - TODO: reasons?
+/// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
+/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
+///
+/// # See
+///
+/// * `xcb_generate_id`: function
 pub fn create_pixmap<Conn>(conn: &Conn, depth: u8, pid: Pixmap, drawable: Drawable, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let depth_bytes = depth.serialize();
-    let pid_bytes = pid.serialize();
-    let drawable_bytes = drawable.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let mut request0 = [
-        CREATE_PIXMAP_REQUEST,
-        depth_bytes[0],
-        0,
-        0,
-        pid_bytes[0],
-        pid_bytes[1],
-        pid_bytes[2],
-        pid_bytes[3],
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CreatePixmapRequest {
+        depth,
+        pid,
+        drawable,
+        width,
+        height,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the FreePixmap request
@@ -11636,27 +13966,58 @@ pub const FREE_PIXMAP_REQUEST: u8 = 54;
 /// # Errors
 ///
 /// * `Pixmap` - The specified pixmap does not exist.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FreePixmapRequest {
+    pub pixmap: Pixmap,
+}
+impl FreePixmapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let pixmap_bytes = self.pixmap.serialize();
+        let mut request0 = vec![
+            FREE_PIXMAP_REQUEST,
+            0,
+            0,
+            0,
+            pixmap_bytes[0],
+            pixmap_bytes[1],
+            pixmap_bytes[2],
+            pixmap_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Destroys a pixmap.
+///
+/// Deletes the association between the pixmap ID and the pixmap. The pixmap
+/// storage will be freed when there are no more references to it.
+///
+/// # Fields
+///
+/// * `pixmap` - The pixmap to destroy.
+///
+/// # Errors
+///
+/// * `Pixmap` - The specified pixmap does not exist.
 pub fn free_pixmap<Conn>(conn: &Conn, pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let pixmap_bytes = pixmap.serialize();
-    let mut request0 = [
-        FREE_PIXMAP_REQUEST,
-        0,
-        0,
-        0,
-        pixmap_bytes[0],
-        pixmap_bytes[1],
-        pixmap_bytes[2],
-        pixmap_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = FreePixmapRequest {
+        pixmap,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -12435,8 +14796,6 @@ impl TryFrom<u32> for ArcMode {
     }
 }
 
-/// Opcode for the CreateGC request
-pub const CREATE_GC_REQUEST: u8 = 55;
 /// Auxiliary and optional information for the `create_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateGCAux {
@@ -12740,6 +15099,8 @@ impl CreateGCAux {
     }
 }
 
+/// Opcode for the CreateGC request
+pub const CREATE_GC_REQUEST: u8 = 55;
 /// Creates a graphics context.
 ///
 /// Creates a graphics context. The graphics context can be used with any drawable
@@ -12763,46 +15124,90 @@ impl CreateGCAux {
 /// # See
 ///
 /// * `xcb_generate_id`: function
-pub fn create_gc<'c, Conn>(conn: &'c Conn, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateGCRequest<'input> {
+    pub cid: Gcontext,
+    pub drawable: Drawable,
+    pub value_list: &'input CreateGCAux,
+}
+impl<'input> CreateGCRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cid_bytes = self.cid.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask_bytes = value_mask.serialize();
+        let mut request0 = vec![
+            CREATE_GC_REQUEST,
+            0,
+            0,
+            0,
+            cid_bytes[0],
+            cid_bytes[1],
+            cid_bytes[2],
+            cid_bytes[3],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            value_mask_bytes[2],
+            value_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let value_list_bytes = self.value_list.serialize(value_mask);
+        let length_so_far = length_so_far + value_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// Creates a graphics context.
+///
+/// Creates a graphics context. The graphics context can be used with any drawable
+/// that has the same root and depth as the specified drawable.
+///
+/// # Fields
+///
+/// * `cid` - The ID with which you will refer to the graphics context, created by
+/// `xcb_generate_id`.
+/// * `drawable` - Drawable to get the root/depth from.
+///
+/// # Errors
+///
+/// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
+/// * `Match` - TODO: reasons?
+/// * `Font` - TODO: reasons?
+/// * `Pixmap` - TODO: reasons?
+/// * `Value` - TODO: reasons?
+/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
+///
+/// # See
+///
+/// * `xcb_generate_id`: function
+pub fn create_gc<'c, 'input, Conn>(conn: &'c Conn, cid: Gcontext, drawable: Drawable, value_list: &'input CreateGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cid_bytes = cid.serialize();
-    let drawable_bytes = drawable.serialize();
-    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
-    let value_mask_bytes = value_mask.serialize();
-    let mut request0 = [
-        CREATE_GC_REQUEST,
-        0,
-        0,
-        0,
-        cid_bytes[0],
-        cid_bytes[1],
-        cid_bytes[2],
-        cid_bytes[3],
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        value_mask_bytes[0],
-        value_mask_bytes[1],
-        value_mask_bytes[2],
-        value_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize(value_mask);
-    let length_so_far = length_so_far + value_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = CreateGCRequest {
+        cid,
+        drawable,
+        value_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the ChangeGC request
-pub const CHANGE_GC_REQUEST: u8 = 56;
 /// Auxiliary and optional information for the `change_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeGCAux {
@@ -13106,6 +15511,8 @@ impl ChangeGCAux {
     }
 }
 
+/// Opcode for the ChangeGC request
+pub const CHANGE_GC_REQUEST: u8 = 56;
 /// change graphics context components.
 ///
 /// Changes the components specified by `value_mask` for the specified graphics context.
@@ -13151,109 +15558,221 @@ impl ChangeGCAux {
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn change_gc<'c, Conn>(conn: &'c Conn, gc: Gcontext, value_list: &ChangeGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChangeGCRequest<'input> {
+    pub gc: Gcontext,
+    pub value_list: &'input ChangeGCAux,
+}
+impl<'input> ChangeGCRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let gc_bytes = self.gc.serialize();
+        let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask_bytes = value_mask.serialize();
+        let mut request0 = vec![
+            CHANGE_GC_REQUEST,
+            0,
+            0,
+            0,
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            value_mask_bytes[2],
+            value_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let value_list_bytes = self.value_list.serialize(value_mask);
+        let length_so_far = length_so_far + value_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// change graphics context components.
+///
+/// Changes the components specified by `value_mask` for the specified graphics context.
+///
+/// # Fields
+///
+/// * `gc` - The graphics context to change.
+/// * `value_mask` -
+/// * `value_list` - Values for each of the components specified in the bitmask `value_mask`. The
+/// order has to correspond to the order of possible `value_mask` bits. See the
+/// example.
+///
+/// # Errors
+///
+/// * `Font` - TODO: reasons?
+/// * `GContext` - TODO: reasons?
+/// * `Match` - TODO: reasons?
+/// * `Pixmap` - TODO: reasons?
+/// * `Value` - TODO: reasons?
+/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Changes the foreground color component of the specified graphics context.
+///  *
+///  */
+/// void my_example(xcb_connection_t *conn, xcb_gcontext_t gc, uint32_t fg, uint32_t bg) {
+///     /* C99 allows us to use a compact way of changing a single component: */
+///     xcb_change_gc(conn, gc, XCB_GC_FOREGROUND, (uint32_t[]){ fg });
+///
+///     /* The more explicit way. Beware that the order of values is important! */
+///     uint32_t mask = 0;
+///     mask |= XCB_GC_FOREGROUND;
+///     mask |= XCB_GC_BACKGROUND;
+///
+///     uint32_t values[] = {
+///         fg,
+///         bg
+///     };
+///     xcb_change_gc(conn, gc, mask, values);
+///     xcb_flush(conn);
+/// }
+/// ```
+pub fn change_gc<'c, 'input, Conn>(conn: &'c Conn, gc: Gcontext, value_list: &'input ChangeGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let gc_bytes = gc.serialize();
-    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
-    let value_mask_bytes = value_mask.serialize();
-    let mut request0 = [
-        CHANGE_GC_REQUEST,
-        0,
-        0,
-        0,
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        value_mask_bytes[0],
-        value_mask_bytes[1],
-        value_mask_bytes[2],
-        value_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize(value_mask);
-    let length_so_far = length_so_far + value_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ChangeGCRequest {
+        gc,
+        value_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the CopyGC request
 pub const COPY_GC_REQUEST: u8 = 57;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CopyGCRequest {
+    pub src_gc: Gcontext,
+    pub dst_gc: Gcontext,
+    pub value_mask: u32,
+}
+impl CopyGCRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let src_gc_bytes = self.src_gc.serialize();
+        let dst_gc_bytes = self.dst_gc.serialize();
+        let value_mask_bytes = self.value_mask.serialize();
+        let mut request0 = vec![
+            COPY_GC_REQUEST,
+            0,
+            0,
+            0,
+            src_gc_bytes[0],
+            src_gc_bytes[1],
+            src_gc_bytes[2],
+            src_gc_bytes[3],
+            dst_gc_bytes[0],
+            dst_gc_bytes[1],
+            dst_gc_bytes[2],
+            dst_gc_bytes[3],
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            value_mask_bytes[2],
+            value_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn copy_gc<Conn, A>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u32>,
 {
     let value_mask: u32 = value_mask.into();
-    let length_so_far = 0;
-    let src_gc_bytes = src_gc.serialize();
-    let dst_gc_bytes = dst_gc.serialize();
-    let value_mask_bytes = value_mask.serialize();
-    let mut request0 = [
-        COPY_GC_REQUEST,
-        0,
-        0,
-        0,
-        src_gc_bytes[0],
-        src_gc_bytes[1],
-        src_gc_bytes[2],
-        src_gc_bytes[3],
-        dst_gc_bytes[0],
-        dst_gc_bytes[1],
-        dst_gc_bytes[2],
-        dst_gc_bytes[3],
-        value_mask_bytes[0],
-        value_mask_bytes[1],
-        value_mask_bytes[2],
-        value_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CopyGCRequest {
+        src_gc,
+        dst_gc,
+        value_mask,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the SetDashes request
 pub const SET_DASHES_REQUEST: u8 = 58;
-pub fn set_dashes<'c, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetDashesRequest<'input> {
+    pub gc: Gcontext,
+    pub dash_offset: u16,
+    pub dashes: &'input [u8],
+}
+impl<'input> SetDashesRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let gc_bytes = self.gc.serialize();
+        let dash_offset_bytes = self.dash_offset.serialize();
+        let dashes_len = u16::try_from(self.dashes.len()).expect("`dashes` has too many elements");
+        let dashes_len_bytes = dashes_len.serialize();
+        let mut request0 = vec![
+            SET_DASHES_REQUEST,
+            0,
+            0,
+            0,
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            dash_offset_bytes[0],
+            dash_offset_bytes[1],
+            dashes_len_bytes[0],
+            dashes_len_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.dashes[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.dashes[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_dashes<'c, 'input, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let gc_bytes = gc.serialize();
-    let dash_offset_bytes = dash_offset.serialize();
-    let dashes_len = u16::try_from(dashes.len()).expect("`dashes` has too many elements");
-    let dashes_len_bytes = dashes_len.serialize();
-    let mut request0 = [
-        SET_DASHES_REQUEST,
-        0,
-        0,
-        0,
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        dash_offset_bytes[0],
-        dash_offset_bytes[1],
-        dashes_len_bytes[0],
-        dashes_len_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + dashes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(dashes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetDashesRequest {
+        gc,
+        dash_offset,
+        dashes,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -13326,38 +15845,65 @@ impl TryFrom<u32> for ClipOrdering {
 
 /// Opcode for the SetClipRectangles request
 pub const SET_CLIP_RECTANGLES_REQUEST: u8 = 59;
-pub fn set_clip_rectangles<'c, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetClipRectanglesRequest<'input> {
+    pub ordering: ClipOrdering,
+    pub gc: Gcontext,
+    pub clip_x_origin: i16,
+    pub clip_y_origin: i16,
+    pub rectangles: &'input [Rectangle],
+}
+impl<'input> SetClipRectanglesRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let ordering_bytes = u8::from(self.ordering).serialize();
+        let gc_bytes = self.gc.serialize();
+        let clip_x_origin_bytes = self.clip_x_origin.serialize();
+        let clip_y_origin_bytes = self.clip_y_origin.serialize();
+        let mut request0 = vec![
+            SET_CLIP_RECTANGLES_REQUEST,
+            ordering_bytes[0],
+            0,
+            0,
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            clip_x_origin_bytes[0],
+            clip_x_origin_bytes[1],
+            clip_y_origin_bytes[0],
+            clip_y_origin_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let rectangles_bytes = self.rectangles.serialize();
+        let length_so_far = length_so_far + rectangles_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_clip_rectangles<'c, 'input, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let ordering_bytes = u8::from(ordering).serialize();
-    let gc_bytes = gc.serialize();
-    let clip_x_origin_bytes = clip_x_origin.serialize();
-    let clip_y_origin_bytes = clip_y_origin.serialize();
-    let mut request0 = [
-        SET_CLIP_RECTANGLES_REQUEST,
-        ordering_bytes[0],
-        0,
-        0,
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        clip_x_origin_bytes[0],
-        clip_x_origin_bytes[1],
-        clip_y_origin_bytes[0],
-        clip_y_origin_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let rectangles_bytes = rectangles.serialize();
-    let length_so_far = length_so_far + rectangles_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetClipRectanglesRequest {
+        ordering,
+        gc,
+        clip_x_origin,
+        clip_y_origin,
+        rectangles,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the FreeGC request
@@ -13373,65 +15919,124 @@ pub const FREE_GC_REQUEST: u8 = 60;
 /// # Errors
 ///
 /// * `GContext` - The specified graphics context does not exist.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FreeGCRequest {
+    pub gc: Gcontext,
+}
+impl FreeGCRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let gc_bytes = self.gc.serialize();
+        let mut request0 = vec![
+            FREE_GC_REQUEST,
+            0,
+            0,
+            0,
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Destroys a graphics context.
+///
+/// Destroys the specified `gc` and all associated storage.
+///
+/// # Fields
+///
+/// * `gc` - The graphics context to destroy.
+///
+/// # Errors
+///
+/// * `GContext` - The specified graphics context does not exist.
 pub fn free_gc<Conn>(conn: &Conn, gc: Gcontext) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let gc_bytes = gc.serialize();
-    let mut request0 = [
-        FREE_GC_REQUEST,
-        0,
-        0,
-        0,
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = FreeGCRequest {
+        gc,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ClearArea request
 pub const CLEAR_AREA_REQUEST: u8 = 61;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ClearAreaRequest {
+    pub exposures: bool,
+    pub window: Window,
+    pub x: i16,
+    pub y: i16,
+    pub width: u16,
+    pub height: u16,
+}
+impl ClearAreaRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let exposures_bytes = self.exposures.serialize();
+        let window_bytes = self.window.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let mut request0 = vec![
+            CLEAR_AREA_REQUEST,
+            exposures_bytes[0],
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn clear_area<Conn>(conn: &Conn, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let exposures_bytes = exposures.serialize();
-    let window_bytes = window.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let mut request0 = [
-        CLEAR_AREA_REQUEST,
-        exposures_bytes[0],
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ClearAreaRequest {
+        exposures,
+        window,
+        x,
+        y,
+        width,
+        height,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the CopyArea request
@@ -13457,113 +16062,206 @@ pub const COPY_AREA_REQUEST: u8 = 62;
 /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Match` - `src_drawable` has a different root or depth than `dst_drawable`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CopyAreaRequest {
+    pub src_drawable: Drawable,
+    pub dst_drawable: Drawable,
+    pub gc: Gcontext,
+    pub src_x: i16,
+    pub src_y: i16,
+    pub dst_x: i16,
+    pub dst_y: i16,
+    pub width: u16,
+    pub height: u16,
+}
+impl CopyAreaRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let src_drawable_bytes = self.src_drawable.serialize();
+        let dst_drawable_bytes = self.dst_drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let src_x_bytes = self.src_x.serialize();
+        let src_y_bytes = self.src_y.serialize();
+        let dst_x_bytes = self.dst_x.serialize();
+        let dst_y_bytes = self.dst_y.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let mut request0 = vec![
+            COPY_AREA_REQUEST,
+            0,
+            0,
+            0,
+            src_drawable_bytes[0],
+            src_drawable_bytes[1],
+            src_drawable_bytes[2],
+            src_drawable_bytes[3],
+            dst_drawable_bytes[0],
+            dst_drawable_bytes[1],
+            dst_drawable_bytes[2],
+            dst_drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            src_x_bytes[0],
+            src_x_bytes[1],
+            src_y_bytes[0],
+            src_y_bytes[1],
+            dst_x_bytes[0],
+            dst_x_bytes[1],
+            dst_y_bytes[0],
+            dst_y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// copy areas.
+///
+/// Copies the specified rectangle from `src_drawable` to `dst_drawable`.
+///
+/// # Fields
+///
+/// * `dst_drawable` - The destination drawable (Window or Pixmap).
+/// * `src_drawable` - The source drawable (Window or Pixmap).
+/// * `gc` - The graphics context to use.
+/// * `src_x` - The source X coordinate.
+/// * `src_y` - The source Y coordinate.
+/// * `dst_x` - The destination X coordinate.
+/// * `dst_y` - The destination Y coordinate.
+/// * `width` - The width of the area to copy (in pixels).
+/// * `height` - The height of the area to copy (in pixels).
+///
+/// # Errors
+///
+/// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
+/// * `GContext` - The specified graphics context does not exist.
+/// * `Match` - `src_drawable` has a different root or depth than `dst_drawable`.
 pub fn copy_area<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let src_drawable_bytes = src_drawable.serialize();
-    let dst_drawable_bytes = dst_drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let src_x_bytes = src_x.serialize();
-    let src_y_bytes = src_y.serialize();
-    let dst_x_bytes = dst_x.serialize();
-    let dst_y_bytes = dst_y.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let mut request0 = [
-        COPY_AREA_REQUEST,
-        0,
-        0,
-        0,
-        src_drawable_bytes[0],
-        src_drawable_bytes[1],
-        src_drawable_bytes[2],
-        src_drawable_bytes[3],
-        dst_drawable_bytes[0],
-        dst_drawable_bytes[1],
-        dst_drawable_bytes[2],
-        dst_drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        src_x_bytes[0],
-        src_x_bytes[1],
-        src_y_bytes[0],
-        src_y_bytes[1],
-        dst_x_bytes[0],
-        dst_x_bytes[1],
-        dst_y_bytes[0],
-        dst_y_bytes[1],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CopyAreaRequest {
+        src_drawable,
+        dst_drawable,
+        gc,
+        src_x,
+        src_y,
+        dst_x,
+        dst_y,
+        width,
+        height,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the CopyPlane request
 pub const COPY_PLANE_REQUEST: u8 = 63;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CopyPlaneRequest {
+    pub src_drawable: Drawable,
+    pub dst_drawable: Drawable,
+    pub gc: Gcontext,
+    pub src_x: i16,
+    pub src_y: i16,
+    pub dst_x: i16,
+    pub dst_y: i16,
+    pub width: u16,
+    pub height: u16,
+    pub bit_plane: u32,
+}
+impl CopyPlaneRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let src_drawable_bytes = self.src_drawable.serialize();
+        let dst_drawable_bytes = self.dst_drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let src_x_bytes = self.src_x.serialize();
+        let src_y_bytes = self.src_y.serialize();
+        let dst_x_bytes = self.dst_x.serialize();
+        let dst_y_bytes = self.dst_y.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let bit_plane_bytes = self.bit_plane.serialize();
+        let mut request0 = vec![
+            COPY_PLANE_REQUEST,
+            0,
+            0,
+            0,
+            src_drawable_bytes[0],
+            src_drawable_bytes[1],
+            src_drawable_bytes[2],
+            src_drawable_bytes[3],
+            dst_drawable_bytes[0],
+            dst_drawable_bytes[1],
+            dst_drawable_bytes[2],
+            dst_drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            src_x_bytes[0],
+            src_x_bytes[1],
+            src_y_bytes[0],
+            src_y_bytes[1],
+            dst_x_bytes[0],
+            dst_x_bytes[1],
+            dst_y_bytes[0],
+            dst_y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            bit_plane_bytes[0],
+            bit_plane_bytes[1],
+            bit_plane_bytes[2],
+            bit_plane_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn copy_plane<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let src_drawable_bytes = src_drawable.serialize();
-    let dst_drawable_bytes = dst_drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let src_x_bytes = src_x.serialize();
-    let src_y_bytes = src_y.serialize();
-    let dst_x_bytes = dst_x.serialize();
-    let dst_y_bytes = dst_y.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let bit_plane_bytes = bit_plane.serialize();
-    let mut request0 = [
-        COPY_PLANE_REQUEST,
-        0,
-        0,
-        0,
-        src_drawable_bytes[0],
-        src_drawable_bytes[1],
-        src_drawable_bytes[2],
-        src_drawable_bytes[3],
-        dst_drawable_bytes[0],
-        dst_drawable_bytes[1],
-        dst_drawable_bytes[2],
-        dst_drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        src_x_bytes[0],
-        src_x_bytes[1],
-        src_y_bytes[0],
-        src_y_bytes[1],
-        dst_x_bytes[0],
-        dst_x_bytes[1],
-        dst_y_bytes[0],
-        dst_y_bytes[1],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-        bit_plane_bytes[0],
-        bit_plane_bytes[1],
-        bit_plane_bytes[2],
-        bit_plane_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CopyPlaneRequest {
+        src_drawable,
+        dst_drawable,
+        gc,
+        src_x,
+        src_y,
+        dst_x,
+        dst_y,
+        width,
+        height,
+        bit_plane,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -13642,37 +16340,62 @@ impl TryFrom<u32> for CoordMode {
 
 /// Opcode for the PolyPoint request
 pub const POLY_POINT_REQUEST: u8 = 64;
-pub fn poly_point<'c, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolyPointRequest<'input> {
+    pub coordinate_mode: CoordMode,
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub points: &'input [Point],
+}
+impl<'input> PolyPointRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let mut request0 = vec![
+            POLY_POINT_REQUEST,
+            coordinate_mode_bytes[0],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let points_bytes = self.points.serialize();
+        let length_so_far = length_so_far + points_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn poly_point<'c, 'input, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let mut request0 = [
-        POLY_POINT_REQUEST,
-        coordinate_mode_bytes[0],
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let points_bytes = points.serialize();
-    let length_so_far = length_so_far + points_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PolyPointRequest {
+        coordinate_mode,
+        drawable,
+        gc,
+        points,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PolyLine request
@@ -13716,37 +16439,101 @@ pub const POLY_LINE_REQUEST: u8 = 65;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn poly_line<'c, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolyLineRequest<'input> {
+    pub coordinate_mode: CoordMode,
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub points: &'input [Point],
+}
+impl<'input> PolyLineRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let mut request0 = vec![
+            POLY_LINE_REQUEST,
+            coordinate_mode_bytes[0],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let points_bytes = self.points.serialize();
+        let length_so_far = length_so_far + points_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// draw lines.
+///
+/// Draws `points_len`-1 lines between each pair of points (point[i], point[i+1])
+/// in the `points` array. The lines are drawn in the order listed in the array.
+/// They join correctly at all intermediate points, and if the first and last
+/// points coincide, the first and last lines also join correctly. For any given
+/// line, a pixel is not drawn more than once. If thin (zero line-width) lines
+/// intersect, the intersecting pixels are drawn multiple times. If wide lines
+/// intersect, the intersecting pixels are drawn only once, as though the entire
+/// request were a single, filled shape.
+///
+/// # Fields
+///
+/// * `drawable` - The drawable to draw the line(s) on.
+/// * `gc` - The graphics context to use.
+/// * `points_len` - The number of `xcb_point_t` structures in `points`.
+/// * `points` - An array of points.
+/// * `coordinate_mode` -
+///
+/// # Errors
+///
+/// * `Drawable` - TODO: reasons?
+/// * `GContext` - TODO: reasons?
+/// * `Match` - TODO: reasons?
+/// * `Value` - TODO: reasons?
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Draw a straight line.
+///  *
+///  */
+/// void my_example(xcb_connection_t *conn, xcb_drawable_t drawable, xcb_gcontext_t gc) {
+///     xcb_poly_line(conn, XCB_COORD_MODE_ORIGIN, drawable, gc, 2,
+///                   (xcb_point_t[]) { {10, 10}, {100, 10} });
+///     xcb_flush(conn);
+/// }
+/// ```
+pub fn poly_line<'c, 'input, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let mut request0 = [
-        POLY_LINE_REQUEST,
-        coordinate_mode_bytes[0],
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let points_bytes = points.serialize();
-    let length_so_far = length_so_far + points_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PolyLineRequest {
+        coordinate_mode,
+        drawable,
+        gc,
+        points,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -13827,104 +16614,199 @@ pub const POLY_SEGMENT_REQUEST: u8 = 66;
 /// * `Drawable` - The specified `drawable` does not exist.
 /// * `GContext` - The specified `gc` does not exist.
 /// * `Match` - TODO: reasons?
-pub fn poly_segment<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, segments: &[Segment]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolySegmentRequest<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub segments: &'input [Segment],
+}
+impl<'input> PolySegmentRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let mut request0 = vec![
+            POLY_SEGMENT_REQUEST,
+            0,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let segments_bytes = self.segments.serialize();
+        let length_so_far = length_so_far + segments_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), segments_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// draw lines.
+///
+/// Draws multiple, unconnected lines. For each segment, a line is drawn between
+/// (x1, y1) and (x2, y2). The lines are drawn in the order listed in the array of
+/// `xcb_segment_t` structures and does not perform joining at coincident
+/// endpoints. For any given line, a pixel is not drawn more than once. If lines
+/// intersect, the intersecting pixels are drawn multiple times.
+///
+/// TODO: include the xcb_segment_t data structure
+///
+/// TODO: an example
+///
+/// # Fields
+///
+/// * `drawable` - A drawable (Window or Pixmap) to draw on.
+/// * `gc` - The graphics context to use.
+///
+/// TODO: document which attributes of a gc are used
+/// * `segments_len` - The number of `xcb_segment_t` structures in `segments`.
+/// * `segments` - An array of `xcb_segment_t` structures.
+///
+/// # Errors
+///
+/// * `Drawable` - The specified `drawable` does not exist.
+/// * `GContext` - The specified `gc` does not exist.
+/// * `Match` - TODO: reasons?
+pub fn poly_segment<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, segments: &'input [Segment]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let mut request0 = [
-        POLY_SEGMENT_REQUEST,
-        0,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let segments_bytes = segments.serialize();
-    let length_so_far = length_so_far + segments_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&segments_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PolySegmentRequest {
+        drawable,
+        gc,
+        segments,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PolyRectangle request
 pub const POLY_RECTANGLE_REQUEST: u8 = 67;
-pub fn poly_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolyRectangleRequest<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub rectangles: &'input [Rectangle],
+}
+impl<'input> PolyRectangleRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let mut request0 = vec![
+            POLY_RECTANGLE_REQUEST,
+            0,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let rectangles_bytes = self.rectangles.serialize();
+        let length_so_far = length_so_far + rectangles_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn poly_rectangle<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let mut request0 = [
-        POLY_RECTANGLE_REQUEST,
-        0,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let rectangles_bytes = rectangles.serialize();
-    let length_so_far = length_so_far + rectangles_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PolyRectangleRequest {
+        drawable,
+        gc,
+        rectangles,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PolyArc request
 pub const POLY_ARC_REQUEST: u8 = 68;
-pub fn poly_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolyArcRequest<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub arcs: &'input [Arc],
+}
+impl<'input> PolyArcRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let mut request0 = vec![
+            POLY_ARC_REQUEST,
+            0,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let arcs_bytes = self.arcs.serialize();
+        let length_so_far = length_so_far + arcs_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn poly_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let mut request0 = [
-        POLY_ARC_REQUEST,
-        0,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let arcs_bytes = arcs.serialize();
-    let length_so_far = length_so_far + arcs_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&arcs_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PolyArcRequest {
+        drawable,
+        gc,
+        arcs,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -13994,42 +16876,69 @@ impl TryFrom<u32> for PolyShape {
 
 /// Opcode for the FillPoly request
 pub const FILL_POLY_REQUEST: u8 = 69;
-pub fn fill_poly<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FillPolyRequest<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub shape: PolyShape,
+    pub coordinate_mode: CoordMode,
+    pub points: &'input [Point],
+}
+impl<'input> FillPolyRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let shape_bytes = u8::from(self.shape).serialize();
+        let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
+        let mut request0 = vec![
+            FILL_POLY_REQUEST,
+            0,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            shape_bytes[0],
+            coordinate_mode_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let points_bytes = self.points.serialize();
+        let length_so_far = length_so_far + points_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn fill_poly<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let shape_bytes = u8::from(shape).serialize();
-    let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
-    let mut request0 = [
-        FILL_POLY_REQUEST,
-        0,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        shape_bytes[0],
-        coordinate_mode_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let points_bytes = points.serialize();
-    let length_so_far = length_so_far + points_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = FillPolyRequest {
+        drawable,
+        gc,
+        shape,
+        coordinate_mode,
+        points,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PolyFillRectangle request
@@ -14059,70 +16968,141 @@ pub const POLY_FILL_RECTANGLE_REQUEST: u8 = 70;
 /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Match` - TODO: reasons?
-pub fn poly_fill_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolyFillRectangleRequest<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub rectangles: &'input [Rectangle],
+}
+impl<'input> PolyFillRectangleRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let mut request0 = vec![
+            POLY_FILL_RECTANGLE_REQUEST,
+            0,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let rectangles_bytes = self.rectangles.serialize();
+        let length_so_far = length_so_far + rectangles_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// Fills rectangles.
+///
+/// Fills the specified rectangle(s) in the order listed in the array. For any
+/// given rectangle, each pixel is not drawn more than once. If rectangles
+/// intersect, the intersecting pixels are drawn multiple times.
+///
+/// # Fields
+///
+/// * `drawable` - The drawable (Window or Pixmap) to draw on.
+/// * `gc` - The graphics context to use.
+///
+/// The following graphics context components are used: function, plane-mask,
+/// fill-style, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+///
+/// The following graphics context mode-dependent components are used:
+/// foreground, background, tile, stipple, tile-stipple-x-origin, and
+/// tile-stipple-y-origin.
+/// * `rectangles_len` - The number of `xcb_rectangle_t` structures in `rectangles`.
+/// * `rectangles` - The rectangles to fill.
+///
+/// # Errors
+///
+/// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
+/// * `GContext` - The specified graphics context does not exist.
+/// * `Match` - TODO: reasons?
+pub fn poly_fill_rectangle<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let mut request0 = [
-        POLY_FILL_RECTANGLE_REQUEST,
-        0,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let rectangles_bytes = rectangles.serialize();
-    let length_so_far = length_so_far + rectangles_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PolyFillRectangleRequest {
+        drawable,
+        gc,
+        rectangles,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PolyFillArc request
 pub const POLY_FILL_ARC_REQUEST: u8 = 71;
-pub fn poly_fill_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolyFillArcRequest<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub arcs: &'input [Arc],
+}
+impl<'input> PolyFillArcRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let mut request0 = vec![
+            POLY_FILL_ARC_REQUEST,
+            0,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let arcs_bytes = self.arcs.serialize();
+        let length_so_far = length_so_far + arcs_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn poly_fill_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let mut request0 = [
-        POLY_FILL_ARC_REQUEST,
-        0,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let arcs_bytes = arcs.serialize();
-    let length_so_far = length_so_far + arcs_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&arcs_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PolyFillArcRequest {
+        drawable,
+        gc,
+        arcs,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -14192,97 +17172,165 @@ impl TryFrom<u32> for ImageFormat {
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 72;
-pub fn put_image<'c, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PutImageRequest<'input> {
+    pub format: ImageFormat,
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub width: u16,
+    pub height: u16,
+    pub dst_x: i16,
+    pub dst_y: i16,
+    pub left_pad: u8,
+    pub depth: u8,
+    pub data: &'input [u8],
+}
+impl<'input> PutImageRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let format_bytes = u8::from(self.format).serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let dst_x_bytes = self.dst_x.serialize();
+        let dst_y_bytes = self.dst_y.serialize();
+        let left_pad_bytes = self.left_pad.serialize();
+        let depth_bytes = self.depth.serialize();
+        let mut request0 = vec![
+            PUT_IMAGE_REQUEST,
+            format_bytes[0],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            dst_x_bytes[0],
+            dst_x_bytes[1],
+            dst_y_bytes[0],
+            dst_y_bytes[1],
+            left_pad_bytes[0],
+            depth_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.data[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let format_bytes = u8::from(format).serialize();
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let dst_x_bytes = dst_x.serialize();
-    let dst_y_bytes = dst_y.serialize();
-    let left_pad_bytes = left_pad.serialize();
-    let depth_bytes = depth.serialize();
-    let mut request0 = [
-        PUT_IMAGE_REQUEST,
-        format_bytes[0],
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-        dst_x_bytes[0],
-        dst_x_bytes[1],
-        dst_y_bytes[0],
-        dst_y_bytes[1],
-        left_pad_bytes[0],
-        depth_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + data.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PutImageRequest {
+        format,
+        drawable,
+        gc,
+        width,
+        height,
+        dst_x,
+        dst_y,
+        left_pad,
+        depth,
+        data,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 73;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetImageRequest {
+    pub format: ImageFormat,
+    pub drawable: Drawable,
+    pub x: i16,
+    pub y: i16,
+    pub width: u16,
+    pub height: u16,
+    pub plane_mask: u32,
+}
+impl GetImageRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let format_bytes = u8::from(self.format).serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let plane_mask_bytes = self.plane_mask.serialize();
+        let mut request0 = vec![
+            GET_IMAGE_REQUEST,
+            format_bytes[0],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            plane_mask_bytes[0],
+            plane_mask_bytes[1],
+            plane_mask_bytes[2],
+            plane_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_image<Conn>(conn: &Conn, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let format_bytes = u8::from(format).serialize();
-    let drawable_bytes = drawable.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let plane_mask_bytes = plane_mask.serialize();
-    let mut request0 = [
-        GET_IMAGE_REQUEST,
-        format_bytes[0],
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-        plane_mask_bytes[0],
-        plane_mask_bytes[1],
-        plane_mask_bytes[2],
-        plane_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetImageRequest {
+        format,
+        drawable,
+        x,
+        y,
+        width,
+        height,
+        plane_mask,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -14332,80 +17380,134 @@ impl GetImageReply {
 
 /// Opcode for the PolyText8 request
 pub const POLY_TEXT8_REQUEST: u8 = 74;
-pub fn poly_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolyText8Request<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub x: i16,
+    pub y: i16,
+    pub items: &'input [u8],
+}
+impl<'input> PolyText8Request<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let mut request0 = vec![
+            POLY_TEXT8_REQUEST,
+            0,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.items[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.items[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn poly_text8<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let mut request0 = [
-        POLY_TEXT8_REQUEST,
-        0,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + items.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(items), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PolyText8Request {
+        drawable,
+        gc,
+        x,
+        y,
+        items,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the PolyText16 request
 pub const POLY_TEXT16_REQUEST: u8 = 75;
-pub fn poly_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolyText16Request<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub x: i16,
+    pub y: i16,
+    pub items: &'input [u8],
+}
+impl<'input> PolyText16Request<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let mut request0 = vec![
+            POLY_TEXT16_REQUEST,
+            0,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.items[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.items[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn poly_text16<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let mut request0 = [
-        POLY_TEXT16_REQUEST,
-        0,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + items.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(items), IoSlice::new(&padding0)], vec![])?)
+    let request0 = PolyText16Request {
+        drawable,
+        gc,
+        x,
+        y,
+        items,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ImageText8 request
@@ -14444,43 +17546,104 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 /// # See
 ///
 /// * `ImageText16`: request
-pub fn image_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ImageText8Request<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub x: i16,
+    pub y: i16,
+    pub string: &'input [u8],
+}
+impl<'input> ImageText8Request<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let string_len = u8::try_from(self.string.len()).expect("`string` has too many elements");
+        let string_len_bytes = string_len.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let mut request0 = vec![
+            IMAGE_TEXT8_REQUEST,
+            string_len_bytes[0],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.string[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.string[..]).into(), padding0.into()], vec![]))
+    }
+}
+/// Draws text.
+///
+/// Fills the destination rectangle with the background pixel from `gc`, then
+/// paints the text with the foreground pixel from `gc`. The upper-left corner of
+/// the filled rectangle is at [x, y - font-ascent]. The width is overall-width,
+/// the height is font-ascent + font-descent. The overall-width, font-ascent and
+/// font-descent are as returned by `xcb_query_text_extents` (TODO).
+///
+/// Note that using X core fonts is deprecated (but still supported) in favor of
+/// client-side rendering using Xft.
+///
+/// # Fields
+///
+/// * `drawable` - The drawable (Window or Pixmap) to draw text on.
+/// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
+/// using 8 bits!
+/// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
+/// type of `string_len`.
+/// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
+/// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
+/// * `gc` - The graphics context to use.
+///
+/// The following graphics context components are used: plane-mask, foreground,
+/// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+///
+/// # Errors
+///
+/// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
+/// * `GContext` - The specified graphics context does not exist.
+/// * `Match` - TODO: reasons?
+///
+/// # See
+///
+/// * `ImageText16`: request
+pub fn image_text8<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let string_len = u8::try_from(string.len()).expect("`string` has too many elements");
-    let string_len_bytes = string_len.serialize();
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let mut request0 = [
-        IMAGE_TEXT8_REQUEST,
-        string_len_bytes[0],
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + string.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(string), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ImageText8Request {
+        drawable,
+        gc,
+        x,
+        y,
+        string,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ImageText16 request
@@ -14520,44 +17683,106 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 /// # See
 ///
 /// * `ImageText8`: request
-pub fn image_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ImageText16Request<'input> {
+    pub drawable: Drawable,
+    pub gc: Gcontext,
+    pub x: i16,
+    pub y: i16,
+    pub string: &'input [Char2b],
+}
+impl<'input> ImageText16Request<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let string_len = u8::try_from(self.string.len()).expect("`string` has too many elements");
+        let string_len_bytes = string_len.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let mut request0 = vec![
+            IMAGE_TEXT16_REQUEST,
+            string_len_bytes[0],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let string_bytes = self.string.serialize();
+        let length_so_far = length_so_far + string_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), string_bytes.into(), padding0.into()], vec![]))
+    }
+}
+/// Draws text.
+///
+/// Fills the destination rectangle with the background pixel from `gc`, then
+/// paints the text with the foreground pixel from `gc`. The upper-left corner of
+/// the filled rectangle is at [x, y - font-ascent]. The width is overall-width,
+/// the height is font-ascent + font-descent. The overall-width, font-ascent and
+/// font-descent are as returned by `xcb_query_text_extents` (TODO).
+///
+/// Note that using X core fonts is deprecated (but still supported) in favor of
+/// client-side rendering using Xft.
+///
+/// # Fields
+///
+/// * `drawable` - The drawable (Window or Pixmap) to draw text on.
+/// * `string_len` - The length of the `string` in characters. Note that this parameter limited by
+/// 255 due to using 8 bits!
+/// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
+/// type of `string_len`. Every character uses 2 bytes (hence the 16 in this
+/// request's name).
+/// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
+/// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
+/// * `gc` - The graphics context to use.
+///
+/// The following graphics context components are used: plane-mask, foreground,
+/// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+///
+/// # Errors
+///
+/// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
+/// * `GContext` - The specified graphics context does not exist.
+/// * `Match` - TODO: reasons?
+///
+/// # See
+///
+/// * `ImageText8`: request
+pub fn image_text16<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &'input [Char2b]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let string_len = u8::try_from(string.len()).expect("`string` has too many elements");
-    let string_len_bytes = string_len.serialize();
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let mut request0 = [
-        IMAGE_TEXT16_REQUEST,
-        string_len_bytes[0],
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let string_bytes = string.serialize();
-    let length_so_far = length_so_far + string_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&string_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ImageText16Request {
+        drawable,
+        gc,
+        x,
+        y,
+        string,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -14632,168 +17857,290 @@ impl TryFrom<u32> for ColormapAlloc {
 
 /// Opcode for the CreateColormap request
 pub const CREATE_COLORMAP_REQUEST: u8 = 78;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateColormapRequest {
+    pub alloc: ColormapAlloc,
+    pub mid: Colormap,
+    pub window: Window,
+    pub visual: Visualid,
+}
+impl CreateColormapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let alloc_bytes = u8::from(self.alloc).serialize();
+        let mid_bytes = self.mid.serialize();
+        let window_bytes = self.window.serialize();
+        let visual_bytes = self.visual.serialize();
+        let mut request0 = vec![
+            CREATE_COLORMAP_REQUEST,
+            alloc_bytes[0],
+            0,
+            0,
+            mid_bytes[0],
+            mid_bytes[1],
+            mid_bytes[2],
+            mid_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            visual_bytes[0],
+            visual_bytes[1],
+            visual_bytes[2],
+            visual_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn create_colormap<Conn>(conn: &Conn, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let alloc_bytes = u8::from(alloc).serialize();
-    let mid_bytes = mid.serialize();
-    let window_bytes = window.serialize();
-    let visual_bytes = visual.serialize();
-    let mut request0 = [
-        CREATE_COLORMAP_REQUEST,
-        alloc_bytes[0],
-        0,
-        0,
-        mid_bytes[0],
-        mid_bytes[1],
-        mid_bytes[2],
-        mid_bytes[3],
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        visual_bytes[0],
-        visual_bytes[1],
-        visual_bytes[2],
-        visual_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CreateColormapRequest {
+        alloc,
+        mid,
+        window,
+        visual,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the FreeColormap request
 pub const FREE_COLORMAP_REQUEST: u8 = 79;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FreeColormapRequest {
+    pub cmap: Colormap,
+}
+impl FreeColormapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cmap_bytes = self.cmap.serialize();
+        let mut request0 = vec![
+            FREE_COLORMAP_REQUEST,
+            0,
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn free_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cmap_bytes = cmap.serialize();
-    let mut request0 = [
-        FREE_COLORMAP_REQUEST,
-        0,
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = FreeColormapRequest {
+        cmap,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the CopyColormapAndFree request
 pub const COPY_COLORMAP_AND_FREE_REQUEST: u8 = 80;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CopyColormapAndFreeRequest {
+    pub mid: Colormap,
+    pub src_cmap: Colormap,
+}
+impl CopyColormapAndFreeRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mid_bytes = self.mid.serialize();
+        let src_cmap_bytes = self.src_cmap.serialize();
+        let mut request0 = vec![
+            COPY_COLORMAP_AND_FREE_REQUEST,
+            0,
+            0,
+            0,
+            mid_bytes[0],
+            mid_bytes[1],
+            mid_bytes[2],
+            mid_bytes[3],
+            src_cmap_bytes[0],
+            src_cmap_bytes[1],
+            src_cmap_bytes[2],
+            src_cmap_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mid_bytes = mid.serialize();
-    let src_cmap_bytes = src_cmap.serialize();
-    let mut request0 = [
-        COPY_COLORMAP_AND_FREE_REQUEST,
-        0,
-        0,
-        0,
-        mid_bytes[0],
-        mid_bytes[1],
-        mid_bytes[2],
-        mid_bytes[3],
-        src_cmap_bytes[0],
-        src_cmap_bytes[1],
-        src_cmap_bytes[2],
-        src_cmap_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CopyColormapAndFreeRequest {
+        mid,
+        src_cmap,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the InstallColormap request
 pub const INSTALL_COLORMAP_REQUEST: u8 = 81;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct InstallColormapRequest {
+    pub cmap: Colormap,
+}
+impl InstallColormapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cmap_bytes = self.cmap.serialize();
+        let mut request0 = vec![
+            INSTALL_COLORMAP_REQUEST,
+            0,
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn install_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cmap_bytes = cmap.serialize();
-    let mut request0 = [
-        INSTALL_COLORMAP_REQUEST,
-        0,
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = InstallColormapRequest {
+        cmap,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the UninstallColormap request
 pub const UNINSTALL_COLORMAP_REQUEST: u8 = 82;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UninstallColormapRequest {
+    pub cmap: Colormap,
+}
+impl UninstallColormapRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cmap_bytes = self.cmap.serialize();
+        let mut request0 = vec![
+            UNINSTALL_COLORMAP_REQUEST,
+            0,
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cmap_bytes = cmap.serialize();
-    let mut request0 = [
-        UNINSTALL_COLORMAP_REQUEST,
-        0,
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = UninstallColormapRequest {
+        cmap,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ListInstalledColormaps request
 pub const LIST_INSTALLED_COLORMAPS_REQUEST: u8 = 83;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ListInstalledColormapsRequest {
+    pub window: Window,
+}
+impl ListInstalledColormapsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let mut request0 = vec![
+            LIST_INSTALLED_COLORMAPS_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn list_installed_colormaps<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListInstalledColormapsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let mut request0 = [
-        LIST_INSTALLED_COLORMAPS_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ListInstalledColormapsRequest {
+        window,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -14858,38 +18205,81 @@ pub const ALLOC_COLOR_REQUEST: u8 = 84;
 /// # Errors
 ///
 /// * `Colormap` - The specified colormap `cmap` does not exist.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AllocColorRequest {
+    pub cmap: Colormap,
+    pub red: u16,
+    pub green: u16,
+    pub blue: u16,
+}
+impl AllocColorRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cmap_bytes = self.cmap.serialize();
+        let red_bytes = self.red.serialize();
+        let green_bytes = self.green.serialize();
+        let blue_bytes = self.blue.serialize();
+        let mut request0 = vec![
+            ALLOC_COLOR_REQUEST,
+            0,
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+            red_bytes[0],
+            red_bytes[1],
+            green_bytes[0],
+            green_bytes[1],
+            blue_bytes[0],
+            blue_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Allocate a color.
+///
+/// Allocates a read-only colormap entry corresponding to the closest RGB value
+/// supported by the hardware. If you are using TrueColor, you can take a shortcut
+/// and directly calculate the color pixel value to avoid the round trip. But, for
+/// example, on 16-bit color setups (VNC), you can easily get the closest supported
+/// RGB value to the RGB value you are specifying.
+///
+/// # Fields
+///
+/// * `cmap` - TODO
+/// * `red` - The red value of your color.
+/// * `green` - The green value of your color.
+/// * `blue` - The blue value of your color.
+///
+/// # Errors
+///
+/// * `Colormap` - The specified colormap `cmap` does not exist.
 pub fn alloc_color<Conn>(conn: &Conn, cmap: Colormap, red: u16, green: u16, blue: u16) -> Result<Cookie<'_, Conn, AllocColorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cmap_bytes = cmap.serialize();
-    let red_bytes = red.serialize();
-    let green_bytes = green.serialize();
-    let blue_bytes = blue.serialize();
-    let mut request0 = [
-        ALLOC_COLOR_REQUEST,
-        0,
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-        red_bytes[0],
-        red_bytes[1],
-        green_bytes[0],
-        green_bytes[1],
-        blue_bytes[0],
-        blue_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = AllocColorRequest {
+        cmap,
+        red,
+        green,
+        blue,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -14926,36 +18316,57 @@ impl TryFrom<&[u8]> for AllocColorReply {
 
 /// Opcode for the AllocNamedColor request
 pub const ALLOC_NAMED_COLOR_REQUEST: u8 = 85;
-pub fn alloc_named_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AllocNamedColorRequest<'input> {
+    pub cmap: Colormap,
+    pub name: &'input [u8],
+}
+impl<'input> AllocNamedColorRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cmap_bytes = self.cmap.serialize();
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
+        let name_len_bytes = name_len.serialize();
+        let mut request0 = vec![
+            ALLOC_NAMED_COLOR_REQUEST,
+            0,
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+            name_len_bytes[0],
+            name_len_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.name[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn alloc_named_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cmap_bytes = cmap.serialize();
-    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
-    let name_len_bytes = name_len.serialize();
-    let mut request0 = [
-        ALLOC_NAMED_COLOR_REQUEST,
-        0,
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-        name_len_bytes[0],
-        name_len_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + name.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
+    let request0 = AllocNamedColorRequest {
+        cmap,
+        name,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -14997,34 +18408,59 @@ impl TryFrom<&[u8]> for AllocNamedColorReply {
 
 /// Opcode for the AllocColorCells request
 pub const ALLOC_COLOR_CELLS_REQUEST: u8 = 86;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AllocColorCellsRequest {
+    pub contiguous: bool,
+    pub cmap: Colormap,
+    pub colors: u16,
+    pub planes: u16,
+}
+impl AllocColorCellsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let contiguous_bytes = self.contiguous.serialize();
+        let cmap_bytes = self.cmap.serialize();
+        let colors_bytes = self.colors.serialize();
+        let planes_bytes = self.planes.serialize();
+        let mut request0 = vec![
+            ALLOC_COLOR_CELLS_REQUEST,
+            contiguous_bytes[0],
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+            colors_bytes[0],
+            colors_bytes[1],
+            planes_bytes[0],
+            planes_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn alloc_color_cells<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Conn, AllocColorCellsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let contiguous_bytes = contiguous.serialize();
-    let cmap_bytes = cmap.serialize();
-    let colors_bytes = colors.serialize();
-    let planes_bytes = planes.serialize();
-    let mut request0 = [
-        ALLOC_COLOR_CELLS_REQUEST,
-        contiguous_bytes[0],
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-        colors_bytes[0],
-        colors_bytes[1],
-        planes_bytes[0],
-        planes_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = AllocColorCellsRequest {
+        contiguous,
+        cmap,
+        colors,
+        planes,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -15087,40 +18523,69 @@ impl AllocColorCellsReply {
 
 /// Opcode for the AllocColorPlanes request
 pub const ALLOC_COLOR_PLANES_REQUEST: u8 = 87;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AllocColorPlanesRequest {
+    pub contiguous: bool,
+    pub cmap: Colormap,
+    pub colors: u16,
+    pub reds: u16,
+    pub greens: u16,
+    pub blues: u16,
+}
+impl AllocColorPlanesRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let contiguous_bytes = self.contiguous.serialize();
+        let cmap_bytes = self.cmap.serialize();
+        let colors_bytes = self.colors.serialize();
+        let reds_bytes = self.reds.serialize();
+        let greens_bytes = self.greens.serialize();
+        let blues_bytes = self.blues.serialize();
+        let mut request0 = vec![
+            ALLOC_COLOR_PLANES_REQUEST,
+            contiguous_bytes[0],
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+            colors_bytes[0],
+            colors_bytes[1],
+            reds_bytes[0],
+            reds_bytes[1],
+            greens_bytes[0],
+            greens_bytes[1],
+            blues_bytes[0],
+            blues_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn alloc_color_planes<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Conn, AllocColorPlanesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let contiguous_bytes = contiguous.serialize();
-    let cmap_bytes = cmap.serialize();
-    let colors_bytes = colors.serialize();
-    let reds_bytes = reds.serialize();
-    let greens_bytes = greens.serialize();
-    let blues_bytes = blues.serialize();
-    let mut request0 = [
-        ALLOC_COLOR_PLANES_REQUEST,
-        contiguous_bytes[0],
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-        colors_bytes[0],
-        colors_bytes[1],
-        reds_bytes[0],
-        reds_bytes[1],
-        greens_bytes[0],
-        greens_bytes[1],
-        blues_bytes[0],
-        blues_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = AllocColorPlanesRequest {
+        contiguous,
+        cmap,
+        colors,
+        reds,
+        greens,
+        blues,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -15174,36 +18639,59 @@ impl AllocColorPlanesReply {
 
 /// Opcode for the FreeColors request
 pub const FREE_COLORS_REQUEST: u8 = 88;
-pub fn free_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FreeColorsRequest<'input> {
+    pub cmap: Colormap,
+    pub plane_mask: u32,
+    pub pixels: &'input [u32],
+}
+impl<'input> FreeColorsRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cmap_bytes = self.cmap.serialize();
+        let plane_mask_bytes = self.plane_mask.serialize();
+        let mut request0 = vec![
+            FREE_COLORS_REQUEST,
+            0,
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+            plane_mask_bytes[0],
+            plane_mask_bytes[1],
+            plane_mask_bytes[2],
+            plane_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let pixels_bytes = self.pixels.serialize();
+        let length_so_far = length_so_far + pixels_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn free_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cmap_bytes = cmap.serialize();
-    let plane_mask_bytes = plane_mask.serialize();
-    let mut request0 = [
-        FREE_COLORS_REQUEST,
-        0,
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-        plane_mask_bytes[0],
-        plane_mask_bytes[1],
-        plane_mask_bytes[2],
-        plane_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let pixels_bytes = pixels.serialize();
-    let length_so_far = length_so_far + pixels_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&pixels_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = FreeColorsRequest {
+        cmap,
+        plane_mask,
+        pixels,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -15334,73 +18822,119 @@ impl Serialize for Coloritem {
 
 /// Opcode for the StoreColors request
 pub const STORE_COLORS_REQUEST: u8 = 89;
-pub fn store_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, items: &[Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StoreColorsRequest<'input> {
+    pub cmap: Colormap,
+    pub items: &'input [Coloritem],
+}
+impl<'input> StoreColorsRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cmap_bytes = self.cmap.serialize();
+        let mut request0 = vec![
+            STORE_COLORS_REQUEST,
+            0,
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let items_bytes = self.items.serialize();
+        let length_so_far = length_so_far + items_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), items_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn store_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, items: &'input [Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cmap_bytes = cmap.serialize();
-    let mut request0 = [
-        STORE_COLORS_REQUEST,
-        0,
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let items_bytes = items.serialize();
-    let length_so_far = length_so_far + items_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&items_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = StoreColorsRequest {
+        cmap,
+        items,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the StoreNamedColor request
 pub const STORE_NAMED_COLOR_REQUEST: u8 = 90;
-pub fn store_named_color<'c, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StoreNamedColorRequest<'input> {
+    pub flags: u8,
+    pub cmap: Colormap,
+    pub pixel: u32,
+    pub name: &'input [u8],
+}
+impl<'input> StoreNamedColorRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let flags_bytes = self.flags.serialize();
+        let cmap_bytes = self.cmap.serialize();
+        let pixel_bytes = self.pixel.serialize();
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
+        let name_len_bytes = name_len.serialize();
+        let mut request0 = vec![
+            STORE_NAMED_COLOR_REQUEST,
+            flags_bytes[0],
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+            pixel_bytes[0],
+            pixel_bytes[1],
+            pixel_bytes[2],
+            pixel_bytes[3],
+            name_len_bytes[0],
+            name_len_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.name[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn store_named_color<'c, 'input, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
     let flags: u8 = flags.into();
-    let length_so_far = 0;
-    let flags_bytes = flags.serialize();
-    let cmap_bytes = cmap.serialize();
-    let pixel_bytes = pixel.serialize();
-    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
-    let name_len_bytes = name_len.serialize();
-    let mut request0 = [
-        STORE_NAMED_COLOR_REQUEST,
-        flags_bytes[0],
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-        pixel_bytes[0],
-        pixel_bytes[1],
-        pixel_bytes[2],
-        pixel_bytes[3],
-        name_len_bytes[0],
-        name_len_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + name.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
+    let request0 = StoreNamedColorRequest {
+        flags,
+        cmap,
+        pixel,
+        name,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -15453,31 +18987,52 @@ impl Serialize for Rgb {
 
 /// Opcode for the QueryColors request
 pub const QUERY_COLORS_REQUEST: u8 = 91;
-pub fn query_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &[u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct QueryColorsRequest<'input> {
+    pub cmap: Colormap,
+    pub pixels: &'input [u32],
+}
+impl<'input> QueryColorsRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cmap_bytes = self.cmap.serialize();
+        let mut request0 = vec![
+            QUERY_COLORS_REQUEST,
+            0,
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let pixels_bytes = self.pixels.serialize();
+        let length_so_far = length_so_far + pixels_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn query_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &'input [u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cmap_bytes = cmap.serialize();
-    let mut request0 = [
-        QUERY_COLORS_REQUEST,
-        0,
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let pixels_bytes = pixels.serialize();
-    let length_so_far = length_so_far + pixels_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&pixels_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = QueryColorsRequest {
+        cmap,
+        pixels,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -15524,36 +19079,57 @@ impl QueryColorsReply {
 
 /// Opcode for the LookupColor request
 pub const LOOKUP_COLOR_REQUEST: u8 = 92;
-pub fn lookup_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LookupColorRequest<'input> {
+    pub cmap: Colormap,
+    pub name: &'input [u8],
+}
+impl<'input> LookupColorRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cmap_bytes = self.cmap.serialize();
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
+        let name_len_bytes = name_len.serialize();
+        let mut request0 = vec![
+            LOOKUP_COLOR_REQUEST,
+            0,
+            0,
+            0,
+            cmap_bytes[0],
+            cmap_bytes[1],
+            cmap_bytes[2],
+            cmap_bytes[3],
+            name_len_bytes[0],
+            name_len_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.name[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn lookup_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cmap_bytes = cmap.serialize();
-    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
-    let name_len_bytes = name_len.serialize();
-    let mut request0 = [
-        LOOKUP_COLOR_REQUEST,
-        0,
-        0,
-        0,
-        cmap_bytes[0],
-        cmap_bytes[1],
-        cmap_bytes[2],
-        cmap_bytes[3],
-        name_len_bytes[0],
-        name_len_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + name.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
+    let request0 = LookupColorRequest {
+        cmap,
+        name,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -15652,63 +19228,102 @@ impl TryFrom<u32> for PixmapEnum {
 
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 93;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateCursorRequest {
+    pub cid: Cursor,
+    pub source: Pixmap,
+    pub mask: Pixmap,
+    pub fore_red: u16,
+    pub fore_green: u16,
+    pub fore_blue: u16,
+    pub back_red: u16,
+    pub back_green: u16,
+    pub back_blue: u16,
+    pub x: u16,
+    pub y: u16,
+}
+impl CreateCursorRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cid_bytes = self.cid.serialize();
+        let source_bytes = self.source.serialize();
+        let mask_bytes = self.mask.serialize();
+        let fore_red_bytes = self.fore_red.serialize();
+        let fore_green_bytes = self.fore_green.serialize();
+        let fore_blue_bytes = self.fore_blue.serialize();
+        let back_red_bytes = self.back_red.serialize();
+        let back_green_bytes = self.back_green.serialize();
+        let back_blue_bytes = self.back_blue.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let mut request0 = vec![
+            CREATE_CURSOR_REQUEST,
+            0,
+            0,
+            0,
+            cid_bytes[0],
+            cid_bytes[1],
+            cid_bytes[2],
+            cid_bytes[3],
+            source_bytes[0],
+            source_bytes[1],
+            source_bytes[2],
+            source_bytes[3],
+            mask_bytes[0],
+            mask_bytes[1],
+            mask_bytes[2],
+            mask_bytes[3],
+            fore_red_bytes[0],
+            fore_red_bytes[1],
+            fore_green_bytes[0],
+            fore_green_bytes[1],
+            fore_blue_bytes[0],
+            fore_blue_bytes[1],
+            back_red_bytes[0],
+            back_red_bytes[1],
+            back_green_bytes[0],
+            back_green_bytes[1],
+            back_blue_bytes[0],
+            back_blue_bytes[1],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn create_cursor<Conn, A>(conn: &Conn, cid: Cursor, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Pixmap>,
 {
     let mask: Pixmap = mask.into();
-    let length_so_far = 0;
-    let cid_bytes = cid.serialize();
-    let source_bytes = source.serialize();
-    let mask_bytes = mask.serialize();
-    let fore_red_bytes = fore_red.serialize();
-    let fore_green_bytes = fore_green.serialize();
-    let fore_blue_bytes = fore_blue.serialize();
-    let back_red_bytes = back_red.serialize();
-    let back_green_bytes = back_green.serialize();
-    let back_blue_bytes = back_blue.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let mut request0 = [
-        CREATE_CURSOR_REQUEST,
-        0,
-        0,
-        0,
-        cid_bytes[0],
-        cid_bytes[1],
-        cid_bytes[2],
-        cid_bytes[3],
-        source_bytes[0],
-        source_bytes[1],
-        source_bytes[2],
-        source_bytes[3],
-        mask_bytes[0],
-        mask_bytes[1],
-        mask_bytes[2],
-        mask_bytes[3],
-        fore_red_bytes[0],
-        fore_red_bytes[1],
-        fore_green_bytes[0],
-        fore_green_bytes[1],
-        fore_blue_bytes[0],
-        fore_blue_bytes[1],
-        back_red_bytes[0],
-        back_red_bytes[1],
-        back_green_bytes[0],
-        back_green_bytes[1],
-        back_blue_bytes[0],
-        back_blue_bytes[1],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CreateCursorRequest {
+        cid,
+        source,
+        mask,
+        fore_red,
+        fore_green,
+        fore_blue,
+        back_red,
+        back_green,
+        back_blue,
+        x,
+        y,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -15805,63 +19420,135 @@ pub const CREATE_GLYPH_CURSOR_REQUEST: u8 = 94;
 /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 /// * `Font` - The specified `source_font` or `mask_font` does not exist.
 /// * `Value` - Either `source_char` or `mask_char` are not defined in `source_font` or `mask_font`, respectively.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateGlyphCursorRequest {
+    pub cid: Cursor,
+    pub source_font: Font,
+    pub mask_font: Font,
+    pub source_char: u16,
+    pub mask_char: u16,
+    pub fore_red: u16,
+    pub fore_green: u16,
+    pub fore_blue: u16,
+    pub back_red: u16,
+    pub back_green: u16,
+    pub back_blue: u16,
+}
+impl CreateGlyphCursorRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cid_bytes = self.cid.serialize();
+        let source_font_bytes = self.source_font.serialize();
+        let mask_font_bytes = self.mask_font.serialize();
+        let source_char_bytes = self.source_char.serialize();
+        let mask_char_bytes = self.mask_char.serialize();
+        let fore_red_bytes = self.fore_red.serialize();
+        let fore_green_bytes = self.fore_green.serialize();
+        let fore_blue_bytes = self.fore_blue.serialize();
+        let back_red_bytes = self.back_red.serialize();
+        let back_green_bytes = self.back_green.serialize();
+        let back_blue_bytes = self.back_blue.serialize();
+        let mut request0 = vec![
+            CREATE_GLYPH_CURSOR_REQUEST,
+            0,
+            0,
+            0,
+            cid_bytes[0],
+            cid_bytes[1],
+            cid_bytes[2],
+            cid_bytes[3],
+            source_font_bytes[0],
+            source_font_bytes[1],
+            source_font_bytes[2],
+            source_font_bytes[3],
+            mask_font_bytes[0],
+            mask_font_bytes[1],
+            mask_font_bytes[2],
+            mask_font_bytes[3],
+            source_char_bytes[0],
+            source_char_bytes[1],
+            mask_char_bytes[0],
+            mask_char_bytes[1],
+            fore_red_bytes[0],
+            fore_red_bytes[1],
+            fore_green_bytes[0],
+            fore_green_bytes[1],
+            fore_blue_bytes[0],
+            fore_blue_bytes[1],
+            back_red_bytes[0],
+            back_red_bytes[1],
+            back_green_bytes[0],
+            back_green_bytes[1],
+            back_blue_bytes[0],
+            back_blue_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// create cursor.
+///
+/// Creates a cursor from a font glyph. X provides a set of standard cursor shapes
+/// in a special font named cursor. Applications are encouraged to use this
+/// interface for their cursors because the font can be customized for the
+/// individual display type.
+///
+/// All pixels which are set to 1 in the source will use the foreground color (as
+/// specified by `fore_red`, `fore_green` and `fore_blue`). All pixels set to 0
+/// will use the background color (as specified by `back_red`, `back_green` and
+/// `back_blue`).
+///
+/// # Fields
+///
+/// * `cid` - The ID with which you will refer to the cursor, created by `xcb_generate_id`.
+/// * `source_font` - In which font to look for the cursor glyph.
+/// * `mask_font` - In which font to look for the mask glyph.
+/// * `source_char` - The glyph of `source_font` to use.
+/// * `mask_char` - The glyph of `mask_font` to use as a mask: Pixels which are set to 1 define
+/// which source pixels are displayed. All pixels which are set to 0 are not
+/// displayed.
+/// * `fore_red` - The red value of the foreground color.
+/// * `fore_green` - The green value of the foreground color.
+/// * `fore_blue` - The blue value of the foreground color.
+/// * `back_red` - The red value of the background color.
+/// * `back_green` - The green value of the background color.
+/// * `back_blue` - The blue value of the background color.
+///
+/// # Errors
+///
+/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
+/// * `Font` - The specified `source_font` or `mask_font` does not exist.
+/// * `Value` - Either `source_char` or `mask_char` are not defined in `source_font` or `mask_font`, respectively.
 pub fn create_glyph_cursor<Conn, A>(conn: &Conn, cid: Cursor, source_font: Font, mask_font: A, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Font>,
 {
     let mask_font: Font = mask_font.into();
-    let length_so_far = 0;
-    let cid_bytes = cid.serialize();
-    let source_font_bytes = source_font.serialize();
-    let mask_font_bytes = mask_font.serialize();
-    let source_char_bytes = source_char.serialize();
-    let mask_char_bytes = mask_char.serialize();
-    let fore_red_bytes = fore_red.serialize();
-    let fore_green_bytes = fore_green.serialize();
-    let fore_blue_bytes = fore_blue.serialize();
-    let back_red_bytes = back_red.serialize();
-    let back_green_bytes = back_green.serialize();
-    let back_blue_bytes = back_blue.serialize();
-    let mut request0 = [
-        CREATE_GLYPH_CURSOR_REQUEST,
-        0,
-        0,
-        0,
-        cid_bytes[0],
-        cid_bytes[1],
-        cid_bytes[2],
-        cid_bytes[3],
-        source_font_bytes[0],
-        source_font_bytes[1],
-        source_font_bytes[2],
-        source_font_bytes[3],
-        mask_font_bytes[0],
-        mask_font_bytes[1],
-        mask_font_bytes[2],
-        mask_font_bytes[3],
-        source_char_bytes[0],
-        source_char_bytes[1],
-        mask_char_bytes[0],
-        mask_char_bytes[1],
-        fore_red_bytes[0],
-        fore_red_bytes[1],
-        fore_green_bytes[0],
-        fore_green_bytes[1],
-        fore_blue_bytes[0],
-        fore_blue_bytes[1],
-        back_red_bytes[0],
-        back_red_bytes[1],
-        back_green_bytes[0],
-        back_green_bytes[1],
-        back_blue_bytes[0],
-        back_blue_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CreateGlyphCursorRequest {
+        cid,
+        source_font,
+        mask_font,
+        source_char,
+        mask_char,
+        fore_red,
+        fore_green,
+        fore_blue,
+        back_red,
+        back_green,
+        back_blue,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the FreeCursor request
@@ -15878,70 +19565,132 @@ pub const FREE_CURSOR_REQUEST: u8 = 95;
 /// # Errors
 ///
 /// * `Cursor` - The specified cursor does not exist.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FreeCursorRequest {
+    pub cursor: Cursor,
+}
+impl FreeCursorRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cursor_bytes = self.cursor.serialize();
+        let mut request0 = vec![
+            FREE_CURSOR_REQUEST,
+            0,
+            0,
+            0,
+            cursor_bytes[0],
+            cursor_bytes[1],
+            cursor_bytes[2],
+            cursor_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// Deletes a cursor.
+///
+/// Deletes the association between the cursor resource ID and the specified
+/// cursor. The cursor is freed when no other resource references it.
+///
+/// # Fields
+///
+/// * `cursor` - The cursor to destroy.
+///
+/// # Errors
+///
+/// * `Cursor` - The specified cursor does not exist.
 pub fn free_cursor<Conn>(conn: &Conn, cursor: Cursor) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cursor_bytes = cursor.serialize();
-    let mut request0 = [
-        FREE_CURSOR_REQUEST,
-        0,
-        0,
-        0,
-        cursor_bytes[0],
-        cursor_bytes[1],
-        cursor_bytes[2],
-        cursor_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = FreeCursorRequest {
+        cursor,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the RecolorCursor request
 pub const RECOLOR_CURSOR_REQUEST: u8 = 96;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RecolorCursorRequest {
+    pub cursor: Cursor,
+    pub fore_red: u16,
+    pub fore_green: u16,
+    pub fore_blue: u16,
+    pub back_red: u16,
+    pub back_green: u16,
+    pub back_blue: u16,
+}
+impl RecolorCursorRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let cursor_bytes = self.cursor.serialize();
+        let fore_red_bytes = self.fore_red.serialize();
+        let fore_green_bytes = self.fore_green.serialize();
+        let fore_blue_bytes = self.fore_blue.serialize();
+        let back_red_bytes = self.back_red.serialize();
+        let back_green_bytes = self.back_green.serialize();
+        let back_blue_bytes = self.back_blue.serialize();
+        let mut request0 = vec![
+            RECOLOR_CURSOR_REQUEST,
+            0,
+            0,
+            0,
+            cursor_bytes[0],
+            cursor_bytes[1],
+            cursor_bytes[2],
+            cursor_bytes[3],
+            fore_red_bytes[0],
+            fore_red_bytes[1],
+            fore_green_bytes[0],
+            fore_green_bytes[1],
+            fore_blue_bytes[0],
+            fore_blue_bytes[1],
+            back_red_bytes[0],
+            back_red_bytes[1],
+            back_green_bytes[0],
+            back_green_bytes[1],
+            back_blue_bytes[0],
+            back_blue_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn recolor_cursor<Conn>(conn: &Conn, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let cursor_bytes = cursor.serialize();
-    let fore_red_bytes = fore_red.serialize();
-    let fore_green_bytes = fore_green.serialize();
-    let fore_blue_bytes = fore_blue.serialize();
-    let back_red_bytes = back_red.serialize();
-    let back_green_bytes = back_green.serialize();
-    let back_blue_bytes = back_blue.serialize();
-    let mut request0 = [
-        RECOLOR_CURSOR_REQUEST,
-        0,
-        0,
-        0,
-        cursor_bytes[0],
-        cursor_bytes[1],
-        cursor_bytes[2],
-        cursor_bytes[3],
-        fore_red_bytes[0],
-        fore_red_bytes[1],
-        fore_green_bytes[0],
-        fore_green_bytes[1],
-        fore_blue_bytes[0],
-        fore_blue_bytes[1],
-        back_red_bytes[0],
-        back_red_bytes[1],
-        back_green_bytes[0],
-        back_green_bytes[1],
-        back_blue_bytes[0],
-        back_blue_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = RecolorCursorRequest {
+        cursor,
+        fore_red,
+        fore_green,
+        fore_blue,
+        back_red,
+        back_green,
+        back_blue,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16011,34 +19760,59 @@ impl TryFrom<u32> for QueryShapeOf {
 
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 97;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryBestSizeRequest {
+    pub class: QueryShapeOf,
+    pub drawable: Drawable,
+    pub width: u16,
+    pub height: u16,
+}
+impl QueryBestSizeRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let class_bytes = u8::from(self.class).serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let mut request0 = vec![
+            QUERY_BEST_SIZE_REQUEST,
+            class_bytes[0],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_best_size<Conn>(conn: &Conn, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let class_bytes = u8::from(class).serialize();
-    let drawable_bytes = drawable.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let mut request0 = [
-        QUERY_BEST_SIZE_REQUEST,
-        class_bytes[0],
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryBestSizeRequest {
+        class,
+        drawable,
+        width,
+        height,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16092,31 +19866,72 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 ///
 /// * `xdpyinfo`: program
 /// * `xcb_get_extension_data`: function
-pub fn query_extension<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'c, Conn, QueryExtensionReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct QueryExtensionRequest<'input> {
+    pub name: &'input [u8],
+}
+impl<'input> QueryExtensionRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
+        let name_len_bytes = name_len.serialize();
+        let mut request0 = vec![
+            QUERY_EXTENSION_REQUEST,
+            0,
+            0,
+            0,
+            name_len_bytes[0],
+            name_len_bytes[1],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.name[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+    }
+}
+/// check if extension is present.
+///
+/// Determines if the specified extension is present on this X11 server.
+///
+/// Every extension has a unique `major_opcode` to identify requests, the minor
+/// opcodes and request formats are extension-specific. If the extension provides
+/// events and errors, the `first_event` and `first_error` fields in the reply are
+/// set accordingly.
+///
+/// There should rarely be a need to use this request directly, XCB provides the
+/// `xcb_get_extension_data` function instead.
+///
+/// # Fields
+///
+/// * `name_len` - The length of `name` in bytes.
+/// * `name` - The name of the extension to query, for example "RANDR". This is case
+/// sensitive!
+///
+/// # See
+///
+/// * `xdpyinfo`: program
+/// * `xcb_get_extension_data`: function
+pub fn query_extension<'c, 'input, Conn>(conn: &'c Conn, name: &'input [u8]) -> Result<Cookie<'c, Conn, QueryExtensionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
-    let name_len_bytes = name_len.serialize();
-    let mut request0 = [
-        QUERY_EXTENSION_REQUEST,
-        0,
-        0,
-        0,
-        name_len_bytes[0],
-        name_len_bytes[1],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + name.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
+    let request0 = QueryExtensionRequest {
+        name,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 /// # Fields
@@ -16158,22 +19973,37 @@ impl TryFrom<&[u8]> for QueryExtensionReply {
 
 /// Opcode for the ListExtensions request
 pub const LIST_EXTENSIONS_REQUEST: u8 = 99;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ListExtensionsRequest;
+impl ListExtensionsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            LIST_EXTENSIONS_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn list_extensions<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListExtensionsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        LIST_EXTENSIONS_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ListExtensionsRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16219,60 +20049,106 @@ impl ListExtensionsReply {
 
 /// Opcode for the ChangeKeyboardMapping request
 pub const CHANGE_KEYBOARD_MAPPING_REQUEST: u8 = 100;
-pub fn change_keyboard_mapping<'c, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ChangeKeyboardMappingRequest<'input> {
+    pub keycode_count: u8,
+    pub first_keycode: Keycode,
+    pub keysyms_per_keycode: u8,
+    pub keysyms: &'input [Keysym],
+}
+impl<'input> ChangeKeyboardMappingRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let keycode_count_bytes = self.keycode_count.serialize();
+        let first_keycode_bytes = self.first_keycode.serialize();
+        let keysyms_per_keycode_bytes = self.keysyms_per_keycode.serialize();
+        let mut request0 = vec![
+            CHANGE_KEYBOARD_MAPPING_REQUEST,
+            keycode_count_bytes[0],
+            0,
+            0,
+            first_keycode_bytes[0],
+            keysyms_per_keycode_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(self.keysyms.len(), usize::try_from(u32::from(self.keycode_count).checked_mul(u32::from(self.keysyms_per_keycode)).unwrap()).unwrap(), "`keysyms` has an incorrect length");
+        let keysyms_bytes = self.keysyms.serialize();
+        let length_so_far = length_so_far + keysyms_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), keysyms_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn change_keyboard_mapping<'c, 'input, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &'input [Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let keycode_count_bytes = keycode_count.serialize();
-    let first_keycode_bytes = first_keycode.serialize();
-    let keysyms_per_keycode_bytes = keysyms_per_keycode.serialize();
-    let mut request0 = [
-        CHANGE_KEYBOARD_MAPPING_REQUEST,
-        keycode_count_bytes[0],
-        0,
-        0,
-        first_keycode_bytes[0],
-        keysyms_per_keycode_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(keysyms.len(), usize::try_from(u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).unwrap()).unwrap(), "`keysyms` has an incorrect length");
-    let keysyms_bytes = keysyms.serialize();
-    let length_so_far = length_so_far + keysyms_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&keysyms_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ChangeKeyboardMappingRequest {
+        keycode_count,
+        first_keycode,
+        keysyms_per_keycode,
+        keysyms,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetKeyboardMapping request
 pub const GET_KEYBOARD_MAPPING_REQUEST: u8 = 101;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetKeyboardMappingRequest {
+    pub first_keycode: Keycode,
+    pub count: u8,
+}
+impl GetKeyboardMappingRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let first_keycode_bytes = self.first_keycode.serialize();
+        let count_bytes = self.count.serialize();
+        let mut request0 = vec![
+            GET_KEYBOARD_MAPPING_REQUEST,
+            0,
+            0,
+            0,
+            first_keycode_bytes[0],
+            count_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Conn, GetKeyboardMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let first_keycode_bytes = first_keycode.serialize();
-    let count_bytes = count.serialize();
-    let mut request0 = [
-        GET_KEYBOARD_MAPPING_REQUEST,
-        0,
-        0,
-        0,
-        first_keycode_bytes[0],
-        count_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetKeyboardMappingRequest {
+        first_keycode,
+        count,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16532,8 +20408,6 @@ impl TryFrom<u32> for AutoRepeatMode {
     }
 }
 
-/// Opcode for the ChangeKeyboardControl request
-pub const CHANGE_KEYBOARD_CONTROL_REQUEST: u8 = 102;
 /// Auxiliary and optional information for the `change_keyboard_control` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeKeyboardControlAux {
@@ -16657,52 +20531,88 @@ impl ChangeKeyboardControlAux {
     }
 }
 
-pub fn change_keyboard_control<'c, Conn>(conn: &'c Conn, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+/// Opcode for the ChangeKeyboardControl request
+pub const CHANGE_KEYBOARD_CONTROL_REQUEST: u8 = 102;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChangeKeyboardControlRequest<'input> {
+    pub value_list: &'input ChangeKeyboardControlAux,
+}
+impl<'input> ChangeKeyboardControlRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask_bytes = value_mask.serialize();
+        let mut request0 = vec![
+            CHANGE_KEYBOARD_CONTROL_REQUEST,
+            0,
+            0,
+            0,
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            value_mask_bytes[2],
+            value_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let value_list_bytes = self.value_list.serialize(value_mask);
+        let length_so_far = length_so_far + value_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn change_keyboard_control<'c, 'input, Conn>(conn: &'c Conn, value_list: &'input ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
-    let value_mask_bytes = value_mask.serialize();
-    let mut request0 = [
-        CHANGE_KEYBOARD_CONTROL_REQUEST,
-        0,
-        0,
-        0,
-        value_mask_bytes[0],
-        value_mask_bytes[1],
-        value_mask_bytes[2],
-        value_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize(value_mask);
-    let length_so_far = length_so_far + value_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ChangeKeyboardControlRequest {
+        value_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetKeyboardControl request
 pub const GET_KEYBOARD_CONTROL_REQUEST: u8 = 103;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetKeyboardControlRequest;
+impl GetKeyboardControlRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            GET_KEYBOARD_CONTROL_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_keyboard_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetKeyboardControlReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        GET_KEYBOARD_CONTROL_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetKeyboardControlRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16746,76 +20656,137 @@ impl TryFrom<&[u8]> for GetKeyboardControlReply {
 
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 104;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BellRequest {
+    pub percent: i8,
+}
+impl BellRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let percent_bytes = self.percent.serialize();
+        let mut request0 = vec![
+            BELL_REQUEST,
+            percent_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn bell<Conn>(conn: &Conn, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let percent_bytes = percent.serialize();
-    let mut request0 = [
-        BELL_REQUEST,
-        percent_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = BellRequest {
+        percent,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ChangePointerControl request
 pub const CHANGE_POINTER_CONTROL_REQUEST: u8 = 105;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChangePointerControlRequest {
+    pub acceleration_numerator: i16,
+    pub acceleration_denominator: i16,
+    pub threshold: i16,
+    pub do_acceleration: bool,
+    pub do_threshold: bool,
+}
+impl ChangePointerControlRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let acceleration_numerator_bytes = self.acceleration_numerator.serialize();
+        let acceleration_denominator_bytes = self.acceleration_denominator.serialize();
+        let threshold_bytes = self.threshold.serialize();
+        let do_acceleration_bytes = self.do_acceleration.serialize();
+        let do_threshold_bytes = self.do_threshold.serialize();
+        let mut request0 = vec![
+            CHANGE_POINTER_CONTROL_REQUEST,
+            0,
+            0,
+            0,
+            acceleration_numerator_bytes[0],
+            acceleration_numerator_bytes[1],
+            acceleration_denominator_bytes[0],
+            acceleration_denominator_bytes[1],
+            threshold_bytes[0],
+            threshold_bytes[1],
+            do_acceleration_bytes[0],
+            do_threshold_bytes[0],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn change_pointer_control<Conn>(conn: &Conn, acceleration_numerator: i16, acceleration_denominator: i16, threshold: i16, do_acceleration: bool, do_threshold: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let acceleration_numerator_bytes = acceleration_numerator.serialize();
-    let acceleration_denominator_bytes = acceleration_denominator.serialize();
-    let threshold_bytes = threshold.serialize();
-    let do_acceleration_bytes = do_acceleration.serialize();
-    let do_threshold_bytes = do_threshold.serialize();
-    let mut request0 = [
-        CHANGE_POINTER_CONTROL_REQUEST,
-        0,
-        0,
-        0,
-        acceleration_numerator_bytes[0],
-        acceleration_numerator_bytes[1],
-        acceleration_denominator_bytes[0],
-        acceleration_denominator_bytes[1],
-        threshold_bytes[0],
-        threshold_bytes[1],
-        do_acceleration_bytes[0],
-        do_threshold_bytes[0],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ChangePointerControlRequest {
+        acceleration_numerator,
+        acceleration_denominator,
+        threshold,
+        do_acceleration,
+        do_threshold,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetPointerControl request
 pub const GET_POINTER_CONTROL_REQUEST: u8 = 106;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetPointerControlRequest;
+impl GetPointerControlRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            GET_POINTER_CONTROL_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_pointer_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerControlReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        GET_POINTER_CONTROL_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetPointerControlRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16980,54 +20951,94 @@ impl TryFrom<u32> for Exposures {
 
 /// Opcode for the SetScreenSaver request
 pub const SET_SCREEN_SAVER_REQUEST: u8 = 107;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetScreenSaverRequest {
+    pub timeout: i16,
+    pub interval: i16,
+    pub prefer_blanking: Blanking,
+    pub allow_exposures: Exposures,
+}
+impl SetScreenSaverRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let timeout_bytes = self.timeout.serialize();
+        let interval_bytes = self.interval.serialize();
+        let prefer_blanking_bytes = u8::from(self.prefer_blanking).serialize();
+        let allow_exposures_bytes = u8::from(self.allow_exposures).serialize();
+        let mut request0 = vec![
+            SET_SCREEN_SAVER_REQUEST,
+            0,
+            0,
+            0,
+            timeout_bytes[0],
+            timeout_bytes[1],
+            interval_bytes[0],
+            interval_bytes[1],
+            prefer_blanking_bytes[0],
+            allow_exposures_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn set_screen_saver<Conn>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let timeout_bytes = timeout.serialize();
-    let interval_bytes = interval.serialize();
-    let prefer_blanking_bytes = u8::from(prefer_blanking).serialize();
-    let allow_exposures_bytes = u8::from(allow_exposures).serialize();
-    let mut request0 = [
-        SET_SCREEN_SAVER_REQUEST,
-        0,
-        0,
-        0,
-        timeout_bytes[0],
-        timeout_bytes[1],
-        interval_bytes[0],
-        interval_bytes[1],
-        prefer_blanking_bytes[0],
-        allow_exposures_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetScreenSaverRequest {
+        timeout,
+        interval,
+        prefer_blanking,
+        allow_exposures,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetScreenSaver request
 pub const GET_SCREEN_SAVER_REQUEST: u8 = 108;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetScreenSaverRequest;
+impl GetScreenSaverRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            GET_SCREEN_SAVER_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_screen_saver<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetScreenSaverReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        GET_SCREEN_SAVER_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetScreenSaverRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17207,33 +21218,56 @@ impl TryFrom<u32> for Family {
 
 /// Opcode for the ChangeHosts request
 pub const CHANGE_HOSTS_REQUEST: u8 = 109;
-pub fn change_hosts<'c, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ChangeHostsRequest<'input> {
+    pub mode: HostMode,
+    pub family: Family,
+    pub address: &'input [u8],
+}
+impl<'input> ChangeHostsRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mode_bytes = u8::from(self.mode).serialize();
+        let family_bytes = u8::from(self.family).serialize();
+        let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
+        let address_len_bytes = address_len.serialize();
+        let mut request0 = vec![
+            CHANGE_HOSTS_REQUEST,
+            mode_bytes[0],
+            0,
+            0,
+            family_bytes[0],
+            0,
+            address_len_bytes[0],
+            address_len_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.address[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.address[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn change_hosts<'c, 'input, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mode_bytes = u8::from(mode).serialize();
-    let family_bytes = u8::from(family).serialize();
-    let address_len = u16::try_from(address.len()).expect("`address` has too many elements");
-    let address_len_bytes = address_len.serialize();
-    let mut request0 = [
-        CHANGE_HOSTS_REQUEST,
-        mode_bytes[0],
-        0,
-        0,
-        family_bytes[0],
-        0,
-        address_len_bytes[0],
-        address_len_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + address.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(address), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ChangeHostsRequest {
+        mode,
+        family,
+        address,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -17299,22 +21333,37 @@ impl Host {
 
 /// Opcode for the ListHosts request
 pub const LIST_HOSTS_REQUEST: u8 = 110;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ListHostsRequest;
+impl ListHostsRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            LIST_HOSTS_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn list_hosts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListHostsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        LIST_HOSTS_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ListHostsRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -17433,23 +21482,42 @@ impl TryFrom<u32> for AccessControl {
 
 /// Opcode for the SetAccessControl request
 pub const SET_ACCESS_CONTROL_REQUEST: u8 = 111;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetAccessControlRequest {
+    pub mode: AccessControl,
+}
+impl SetAccessControlRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mode_bytes = u8::from(self.mode).serialize();
+        let mut request0 = vec![
+            SET_ACCESS_CONTROL_REQUEST,
+            mode_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn set_access_control<Conn>(conn: &Conn, mode: AccessControl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mode_bytes = u8::from(mode).serialize();
-    let mut request0 = [
-        SET_ACCESS_CONTROL_REQUEST,
-        mode_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetAccessControlRequest {
+        mode,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17519,23 +21587,42 @@ impl TryFrom<u32> for CloseDown {
 
 /// Opcode for the SetCloseDownMode request
 pub const SET_CLOSE_DOWN_MODE_REQUEST: u8 = 112;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetCloseDownModeRequest {
+    pub mode: CloseDown,
+}
+impl SetCloseDownModeRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mode_bytes = u8::from(self.mode).serialize();
+        let mut request0 = vec![
+            SET_CLOSE_DOWN_MODE_REQUEST,
+            mode_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn set_close_down_mode<Conn>(conn: &Conn, mode: CloseDown) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mode_bytes = u8::from(mode).serialize();
-    let mut request0 = [
-        SET_CLOSE_DOWN_MODE_REQUEST,
-        mode_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetCloseDownModeRequest {
+        mode,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17618,65 +21705,126 @@ pub const KILL_CLIENT_REQUEST: u8 = 113;
 /// # See
 ///
 /// * `xkill`: program
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct KillClientRequest {
+    pub resource: u32,
+}
+impl KillClientRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let resource_bytes = self.resource.serialize();
+        let mut request0 = vec![
+            KILL_CLIENT_REQUEST,
+            0,
+            0,
+            0,
+            resource_bytes[0],
+            resource_bytes[1],
+            resource_bytes[2],
+            resource_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
+/// kills a client.
+///
+/// Forces a close down of the client that created the specified `resource`.
+///
+/// # Fields
+///
+/// * `resource` - Any resource belonging to the client (for example a Window), used to identify
+/// the client connection.
+///
+/// The special value of `XCB_KILL_ALL_TEMPORARY`, the resources of all clients
+/// that have terminated in `RetainTemporary` (TODO) are destroyed.
+///
+/// # Errors
+///
+/// * `Value` - The specified `resource` does not exist.
+///
+/// # See
+///
+/// * `xkill`: program
 pub fn kill_client<Conn, A>(conn: &Conn, resource: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u32>,
 {
     let resource: u32 = resource.into();
-    let length_so_far = 0;
-    let resource_bytes = resource.serialize();
-    let mut request0 = [
-        KILL_CLIENT_REQUEST,
-        0,
-        0,
-        0,
-        resource_bytes[0],
-        resource_bytes[1],
-        resource_bytes[2],
-        resource_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = KillClientRequest {
+        resource,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the RotateProperties request
 pub const ROTATE_PROPERTIES_REQUEST: u8 = 114;
-pub fn rotate_properties<'c, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &[Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RotatePropertiesRequest<'input> {
+    pub window: Window,
+    pub delta: i16,
+    pub atoms: &'input [Atom],
+}
+impl<'input> RotatePropertiesRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let atoms_len = u16::try_from(self.atoms.len()).expect("`atoms` has too many elements");
+        let atoms_len_bytes = atoms_len.serialize();
+        let delta_bytes = self.delta.serialize();
+        let mut request0 = vec![
+            ROTATE_PROPERTIES_REQUEST,
+            0,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            atoms_len_bytes[0],
+            atoms_len_bytes[1],
+            delta_bytes[0],
+            delta_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let atoms_bytes = self.atoms.serialize();
+        let length_so_far = length_so_far + atoms_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), atoms_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn rotate_properties<'c, 'input, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &'input [Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let window_bytes = window.serialize();
-    let atoms_len = u16::try_from(atoms.len()).expect("`atoms` has too many elements");
-    let atoms_len_bytes = atoms_len.serialize();
-    let delta_bytes = delta.serialize();
-    let mut request0 = [
-        ROTATE_PROPERTIES_REQUEST,
-        0,
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        atoms_len_bytes[0],
-        atoms_len_bytes[1],
-        delta_bytes[0],
-        delta_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let atoms_bytes = atoms.serialize();
-    let length_so_far = length_so_far + atoms_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&atoms_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = RotatePropertiesRequest {
+        window,
+        delta,
+        atoms,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17751,23 +21899,42 @@ impl TryFrom<u32> for ScreenSaver {
 
 /// Opcode for the ForceScreenSaver request
 pub const FORCE_SCREEN_SAVER_REQUEST: u8 = 115;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ForceScreenSaverRequest {
+    pub mode: ScreenSaver,
+}
+impl ForceScreenSaverRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mode_bytes = u8::from(self.mode).serialize();
+        let mut request0 = vec![
+            FORCE_SCREEN_SAVER_REQUEST,
+            mode_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn force_screen_saver<Conn>(conn: &Conn, mode: ScreenSaver) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mode_bytes = u8::from(mode).serialize();
-    let mut request0 = [
-        FORCE_SCREEN_SAVER_REQUEST,
-        mode_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ForceScreenSaverRequest {
+        mode,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17837,27 +22004,46 @@ impl TryFrom<u32> for MappingStatus {
 
 /// Opcode for the SetPointerMapping request
 pub const SET_POINTER_MAPPING_REQUEST: u8 = 116;
-pub fn set_pointer_mapping<'c, Conn>(conn: &'c Conn, map: &[u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetPointerMappingRequest<'input> {
+    pub map: &'input [u8],
+}
+impl<'input> SetPointerMappingRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let map_len = u8::try_from(self.map.len()).expect("`map` has too many elements");
+        let map_len_bytes = map_len.serialize();
+        let mut request0 = vec![
+            SET_POINTER_MAPPING_REQUEST,
+            map_len_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.map[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.map[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_pointer_mapping<'c, 'input, Conn>(conn: &'c Conn, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let map_len = u8::try_from(map.len()).expect("`map` has too many elements");
-    let map_len_bytes = map_len.serialize();
-    let mut request0 = [
-        SET_POINTER_MAPPING_REQUEST,
-        map_len_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + map.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(map), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetPointerMappingRequest {
+        map,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17887,22 +22073,37 @@ impl TryFrom<&[u8]> for SetPointerMappingReply {
 
 /// Opcode for the GetPointerMapping request
 pub const GET_POINTER_MAPPING_REQUEST: u8 = 117;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetPointerMappingRequest;
+impl GetPointerMappingRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            GET_POINTER_MAPPING_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_pointer_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        GET_POINTER_MAPPING_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetPointerMappingRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -18029,28 +22230,47 @@ impl TryFrom<u32> for MapIndex {
 
 /// Opcode for the SetModifierMapping request
 pub const SET_MODIFIER_MAPPING_REQUEST: u8 = 118;
-pub fn set_modifier_mapping<'c, Conn>(conn: &'c Conn, keycodes: &[Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetModifierMappingRequest<'input> {
+    pub keycodes: &'input [Keycode],
+}
+impl<'input> SetModifierMappingRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        assert_eq!(self.keycodes.len() % 8, 0, "`keycodes` has an incorrect length, must be a multiple of 8");
+        let keycodes_per_modifier = u8::try_from(self.keycodes.len() / 8).expect("`keycodes` has too many elements");
+        let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
+        let mut request0 = vec![
+            SET_MODIFIER_MAPPING_REQUEST,
+            keycodes_per_modifier_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let length_so_far = length_so_far + (&self.keycodes[..]).len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), (&self.keycodes[..]).into(), padding0.into()], vec![]))
+    }
+}
+pub fn set_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, keycodes: &'input [Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    assert_eq!(keycodes.len() % 8, 0, "`keycodes` has an incorrect length, must be a multiple of 8");
-    let keycodes_per_modifier = u8::try_from(keycodes.len() / 8).expect("`keycodes` has too many elements");
-    let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
-    let mut request0 = [
-        SET_MODIFIER_MAPPING_REQUEST,
-        keycodes_per_modifier_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let length_so_far = length_so_far + keycodes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(keycodes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = SetModifierMappingRequest {
+        keycodes,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -18080,22 +22300,37 @@ impl TryFrom<&[u8]> for SetModifierMappingReply {
 
 /// Opcode for the GetModifierMapping request
 pub const GET_MODIFIER_MAPPING_REQUEST: u8 = 119;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetModifierMappingRequest;
+impl GetModifierMappingRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            GET_MODIFIER_MAPPING_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_modifier_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetModifierMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        GET_MODIFIER_MAPPING_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetModifierMappingRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -18143,22 +22378,37 @@ impl GetModifierMappingReply {
 
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct NoOperationRequest;
+impl NoOperationRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let _ = conn;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            NO_OPERATION_REQUEST,
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length_so_far = 0;
-    let mut request0 = [
-        NO_OPERATION_REQUEST,
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = NoOperationRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Extension trait defining the requests of this extension.
@@ -18217,7 +22467,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * `xcb_generate_id`: function
     /// * `MapWindow`: request
     /// * `CreateNotify`: event
-    fn create_window<'c>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn create_window<'c, 'input>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &'input CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)
     }
@@ -18242,7 +22492,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Pixmap` - TODO: reasons?
     /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
-    fn change_window_attributes<'c>(&'c self, window: Window, value_list: &ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_window_attributes<'c, 'input>(&'c self, window: Window, value_list: &'input ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_window_attributes(self, window, value_list)
     }
@@ -18476,7 +22726,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(c);
     /// }
     /// ```
-    fn configure_window<'c>(&'c self, window: Window, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn configure_window<'c, 'input>(&'c self, window: Window, value_list: &'input ConfigureWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_window(self, window, value_list)
     }
@@ -18627,7 +22877,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn intern_atom<'c>(&'c self, only_if_exists: bool, name: &[u8]) -> Result<Cookie<'c, Self, InternAtomReply>, ConnectionError>
+    fn intern_atom<'c, 'input>(&'c self, only_if_exists: bool, name: &'input [u8]) -> Result<Cookie<'c, Self, InternAtomReply>, ConnectionError>
     {
         intern_atom(self, only_if_exists, name)
     }
@@ -18686,7 +22936,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn change_property<'c, A, B>(&'c self, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_property<'c, 'input, A, B>(&'c self, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<Atom>,
         B: Into<Atom>,
@@ -19462,7 +23712,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `xcb_generate_id`: function
-    fn open_font<'c>(&'c self, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn open_font<'c, 'input>(&'c self, fid: Font, name: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         open_font(self, fid, name)
     }
@@ -19515,7 +23765,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `GContext` - The specified graphics context does not exist.
     /// * `Font` - The specified `font` does not exist.
-    fn query_text_extents<'c>(&'c self, font: Fontable, string: &[Char2b]) -> Result<Cookie<'c, Self, QueryTextExtentsReply>, ConnectionError>
+    fn query_text_extents<'c, 'input>(&'c self, font: Fontable, string: &'input [Char2b]) -> Result<Cookie<'c, Self, QueryTextExtentsReply>, ConnectionError>
     {
         query_text_extents(self, font, string)
     }
@@ -19532,7 +23782,7 @@ pub trait ConnectionExt: RequestConnection {
     /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
     /// not matter.
     /// * `max_names` - The maximum number of fonts to be returned.
-    fn list_fonts<'c>(&'c self, max_names: u16, pattern: &[u8]) -> Result<Cookie<'c, Self, ListFontsReply>, ConnectionError>
+    fn list_fonts<'c, 'input>(&'c self, max_names: u16, pattern: &'input [u8]) -> Result<Cookie<'c, Self, ListFontsReply>, ConnectionError>
     {
         list_fonts(self, max_names, pattern)
     }
@@ -19549,11 +23799,11 @@ pub trait ConnectionExt: RequestConnection {
     /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
     /// not matter.
     /// * `max_names` - The maximum number of fonts to be returned.
-    fn list_fonts_with_info<'c>(&'c self, max_names: u16, pattern: &[u8]) -> Result<ListFontsWithInfoCookie<'c, Self>, ConnectionError>
+    fn list_fonts_with_info<'c, 'input>(&'c self, max_names: u16, pattern: &'input [u8]) -> Result<ListFontsWithInfoCookie<'c, Self>, ConnectionError>
     {
         list_fonts_with_info(self, max_names, pattern)
     }
-    fn set_font_path<'c>(&'c self, font: &[Str]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn set_font_path<'c, 'input>(&'c self, font: &'input [Str]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_font_path(self, font)
     }
@@ -19627,7 +23877,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `xcb_generate_id`: function
-    fn create_gc<'c>(&'c self, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn create_gc<'c, 'input>(&'c self, cid: Gcontext, drawable: Drawable, value_list: &'input CreateGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_gc(self, cid, drawable, value_list)
     }
@@ -19676,7 +23926,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn change_gc<'c>(&'c self, gc: Gcontext, value_list: &ChangeGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_gc<'c, 'input>(&'c self, gc: Gcontext, value_list: &'input ChangeGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_gc(self, gc, value_list)
     }
@@ -19686,11 +23936,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         copy_gc(self, src_gc, dst_gc, value_mask)
     }
-    fn set_dashes<'c>(&'c self, gc: Gcontext, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn set_dashes<'c, 'input>(&'c self, gc: Gcontext, dash_offset: u16, dashes: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_dashes(self, gc, dash_offset, dashes)
     }
-    fn set_clip_rectangles<'c>(&'c self, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn set_clip_rectangles<'c, 'input>(&'c self, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_clip_rectangles(self, ordering, gc, clip_x_origin, clip_y_origin, rectangles)
     }
@@ -19742,7 +23992,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         copy_plane(self, src_drawable, dst_drawable, gc, src_x, src_y, dst_x, dst_y, width, height, bit_plane)
     }
-    fn poly_point<'c>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_point<'c, 'input>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_point(self, coordinate_mode, drawable, gc, points)
     }
@@ -19785,7 +24035,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn poly_line<'c>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_line<'c, 'input>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_line(self, coordinate_mode, drawable, gc, points)
     }
@@ -19815,19 +24065,19 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Drawable` - The specified `drawable` does not exist.
     /// * `GContext` - The specified `gc` does not exist.
     /// * `Match` - TODO: reasons?
-    fn poly_segment<'c>(&'c self, drawable: Drawable, gc: Gcontext, segments: &[Segment]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_segment<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, segments: &'input [Segment]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_segment(self, drawable, gc, segments)
     }
-    fn poly_rectangle<'c>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_rectangle<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_rectangle(self, drawable, gc, rectangles)
     }
-    fn poly_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_arc<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_arc(self, drawable, gc, arcs)
     }
-    fn fill_poly<'c>(&'c self, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn fill_poly<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &'input [Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         fill_poly(self, drawable, gc, shape, coordinate_mode, points)
     }
@@ -19856,15 +24106,15 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
     /// * `GContext` - The specified graphics context does not exist.
     /// * `Match` - TODO: reasons?
-    fn poly_fill_rectangle<'c>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_fill_rectangle<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_fill_rectangle(self, drawable, gc, rectangles)
     }
-    fn poly_fill_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_fill_arc<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_fill_arc(self, drawable, gc, arcs)
     }
-    fn put_image<'c>(&'c self, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn put_image<'c, 'input>(&'c self, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         put_image(self, format, drawable, gc, width, height, dst_x, dst_y, left_pad, depth, data)
     }
@@ -19872,11 +24122,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_image(self, format, drawable, x, y, width, height, plane_mask)
     }
-    fn poly_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_text8<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text8(self, drawable, gc, x, y, items)
     }
-    fn poly_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_text16<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text16(self, drawable, gc, x, y, items)
     }
@@ -19914,7 +24164,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `ImageText16`: request
-    fn image_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn image_text8<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text8(self, drawable, gc, x, y, string)
     }
@@ -19953,7 +24203,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `ImageText8`: request
-    fn image_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn image_text16<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &'input [Char2b]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text16(self, drawable, gc, x, y, string)
     }
@@ -20003,7 +24253,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         alloc_color(self, cmap, red, green, blue)
     }
-    fn alloc_named_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, AllocNamedColorReply>, ConnectionError>
+    fn alloc_named_color<'c, 'input>(&'c self, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Self, AllocNamedColorReply>, ConnectionError>
     {
         alloc_named_color(self, cmap, name)
     }
@@ -20015,25 +24265,25 @@ pub trait ConnectionExt: RequestConnection {
     {
         alloc_color_planes(self, contiguous, cmap, colors, reds, greens, blues)
     }
-    fn free_colors<'c>(&'c self, cmap: Colormap, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn free_colors<'c, 'input>(&'c self, cmap: Colormap, plane_mask: u32, pixels: &'input [u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         free_colors(self, cmap, plane_mask, pixels)
     }
-    fn store_colors<'c>(&'c self, cmap: Colormap, items: &[Coloritem]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn store_colors<'c, 'input>(&'c self, cmap: Colormap, items: &'input [Coloritem]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         store_colors(self, cmap, items)
     }
-    fn store_named_color<'c, A>(&'c self, flags: A, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn store_named_color<'c, 'input, A>(&'c self, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u8>,
     {
         store_named_color(self, flags, cmap, pixel, name)
     }
-    fn query_colors<'c>(&'c self, cmap: Colormap, pixels: &[u32]) -> Result<Cookie<'c, Self, QueryColorsReply>, ConnectionError>
+    fn query_colors<'c, 'input>(&'c self, cmap: Colormap, pixels: &'input [u32]) -> Result<Cookie<'c, Self, QueryColorsReply>, ConnectionError>
     {
         query_colors(self, cmap, pixels)
     }
-    fn lookup_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, LookupColorReply>, ConnectionError>
+    fn lookup_color<'c, 'input>(&'c self, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Self, LookupColorReply>, ConnectionError>
     {
         lookup_color(self, cmap, name)
     }
@@ -20128,7 +24378,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `xdpyinfo`: program
     /// * `xcb_get_extension_data`: function
-    fn query_extension<'c>(&'c self, name: &[u8]) -> Result<Cookie<'c, Self, QueryExtensionReply>, ConnectionError>
+    fn query_extension<'c, 'input>(&'c self, name: &'input [u8]) -> Result<Cookie<'c, Self, QueryExtensionReply>, ConnectionError>
     {
         query_extension(self, name)
     }
@@ -20136,7 +24386,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         list_extensions(self)
     }
-    fn change_keyboard_mapping<'c>(&'c self, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_keyboard_mapping<'c, 'input>(&'c self, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &'input [Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_keyboard_mapping(self, keycode_count, first_keycode, keysyms_per_keycode, keysyms)
     }
@@ -20144,7 +24394,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_keyboard_mapping(self, first_keycode, count)
     }
-    fn change_keyboard_control<'c>(&'c self, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_keyboard_control<'c, 'input>(&'c self, value_list: &'input ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_keyboard_control(self, value_list)
     }
@@ -20172,7 +24422,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_screen_saver(self)
     }
-    fn change_hosts<'c>(&'c self, mode: HostMode, family: Family, address: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_hosts<'c, 'input>(&'c self, mode: HostMode, family: Family, address: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_hosts(self, mode, family, address)
     }
@@ -20213,7 +24463,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         kill_client(self, resource)
     }
-    fn rotate_properties<'c>(&'c self, window: Window, delta: i16, atoms: &[Atom]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn rotate_properties<'c, 'input>(&'c self, window: Window, delta: i16, atoms: &'input [Atom]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         rotate_properties(self, window, delta, atoms)
     }
@@ -20221,7 +24471,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         force_screen_saver(self, mode)
     }
-    fn set_pointer_mapping<'c>(&'c self, map: &[u8]) -> Result<Cookie<'c, Self, SetPointerMappingReply>, ConnectionError>
+    fn set_pointer_mapping<'c, 'input>(&'c self, map: &'input [u8]) -> Result<Cookie<'c, Self, SetPointerMappingReply>, ConnectionError>
     {
         set_pointer_mapping(self, map)
     }
@@ -20229,7 +24479,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_pointer_mapping(self)
     }
-    fn set_modifier_mapping<'c>(&'c self, keycodes: &[Keycode]) -> Result<Cookie<'c, Self, SetModifierMappingReply>, ConnectionError>
+    fn set_modifier_mapping<'c, 'input>(&'c self, keycodes: &'input [Keycode]) -> Result<Cookie<'c, Self, SetModifierMappingReply>, ConnectionError>
     {
         set_modifier_mapping(self, keycodes)
     }

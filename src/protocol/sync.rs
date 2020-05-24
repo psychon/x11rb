@@ -16,7 +16,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
-use crate::connection::RequestConnection;
+use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
@@ -708,30 +708,50 @@ impl From<AlarmError> for [u8; 32] {
 
 /// Opcode for the Initialize request
 pub const INITIALIZE_REQUEST: u8 = 0;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct InitializeRequest {
+    pub desired_major_version: u8,
+    pub desired_minor_version: u8,
+}
+impl InitializeRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let desired_major_version_bytes = self.desired_major_version.serialize();
+        let desired_minor_version_bytes = self.desired_minor_version.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            INITIALIZE_REQUEST,
+            0,
+            0,
+            desired_major_version_bytes[0],
+            desired_minor_version_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn initialize<Conn>(conn: &Conn, desired_major_version: u8, desired_minor_version: u8) -> Result<Cookie<'_, Conn, InitializeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let desired_major_version_bytes = desired_major_version.serialize();
-    let desired_minor_version_bytes = desired_minor_version.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        INITIALIZE_REQUEST,
-        0,
-        0,
-        desired_major_version_bytes[0],
-        desired_minor_version_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = InitializeRequest {
+        desired_major_version,
+        desired_minor_version,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -764,24 +784,38 @@ impl TryFrom<&[u8]> for InitializeReply {
 
 /// Opcode for the ListSystemCounters request
 pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ListSystemCountersRequest;
+impl ListSystemCountersRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            LIST_SYSTEM_COUNTERS_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn list_system_counters<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListSystemCountersReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        LIST_SYSTEM_COUNTERS_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ListSystemCountersRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -828,92 +862,148 @@ impl ListSystemCountersReply {
 
 /// Opcode for the CreateCounter request
 pub const CREATE_COUNTER_REQUEST: u8 = 2;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateCounterRequest {
+    pub id: Counter,
+    pub initial_value: Int64,
+}
+impl CreateCounterRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let id_bytes = self.id.serialize();
+        let initial_value_bytes = self.initial_value.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            CREATE_COUNTER_REQUEST,
+            0,
+            0,
+            id_bytes[0],
+            id_bytes[1],
+            id_bytes[2],
+            id_bytes[3],
+            initial_value_bytes[0],
+            initial_value_bytes[1],
+            initial_value_bytes[2],
+            initial_value_bytes[3],
+            initial_value_bytes[4],
+            initial_value_bytes[5],
+            initial_value_bytes[6],
+            initial_value_bytes[7],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn create_counter<Conn>(conn: &Conn, id: Counter, initial_value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let id_bytes = id.serialize();
-    let initial_value_bytes = initial_value.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        CREATE_COUNTER_REQUEST,
-        0,
-        0,
-        id_bytes[0],
-        id_bytes[1],
-        id_bytes[2],
-        id_bytes[3],
-        initial_value_bytes[0],
-        initial_value_bytes[1],
-        initial_value_bytes[2],
-        initial_value_bytes[3],
-        initial_value_bytes[4],
-        initial_value_bytes[5],
-        initial_value_bytes[6],
-        initial_value_bytes[7],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CreateCounterRequest {
+        id,
+        initial_value,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the DestroyCounter request
 pub const DESTROY_COUNTER_REQUEST: u8 = 6;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DestroyCounterRequest {
+    pub counter: Counter,
+}
+impl DestroyCounterRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let counter_bytes = self.counter.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            DESTROY_COUNTER_REQUEST,
+            0,
+            0,
+            counter_bytes[0],
+            counter_bytes[1],
+            counter_bytes[2],
+            counter_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn destroy_counter<Conn>(conn: &Conn, counter: Counter) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let counter_bytes = counter.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        DESTROY_COUNTER_REQUEST,
-        0,
-        0,
-        counter_bytes[0],
-        counter_bytes[1],
-        counter_bytes[2],
-        counter_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = DestroyCounterRequest {
+        counter,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the QueryCounter request
 pub const QUERY_COUNTER_REQUEST: u8 = 5;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryCounterRequest {
+    pub counter: Counter,
+}
+impl QueryCounterRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let counter_bytes = self.counter.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QUERY_COUNTER_REQUEST,
+            0,
+            0,
+            counter_bytes[0],
+            counter_bytes[1],
+            counter_bytes[2],
+            counter_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_counter<Conn>(conn: &Conn, counter: Counter) -> Result<Cookie<'_, Conn, QueryCounterReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let counter_bytes = counter.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_COUNTER_REQUEST,
-        0,
-        0,
-        counter_bytes[0],
-        counter_bytes[1],
-        counter_bytes[2],
-        counter_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryCounterRequest {
+        counter,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -943,104 +1033,160 @@ impl TryFrom<&[u8]> for QueryCounterReply {
 
 /// Opcode for the Await request
 pub const AWAIT_REQUEST: u8 = 7;
-pub fn await_<'c, Conn>(conn: &'c Conn, wait_list: &[Waitcondition]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AwaitRequest<'input> {
+    pub wait_list: &'input [Waitcondition],
+}
+impl<'input> AwaitRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            AWAIT_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let wait_list_bytes = self.wait_list.serialize();
+        let length_so_far = length_so_far + wait_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), wait_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn await_<'c, 'input, Conn>(conn: &'c Conn, wait_list: &'input [Waitcondition]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        AWAIT_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let wait_list_bytes = wait_list.serialize();
-    let length_so_far = length_so_far + wait_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&wait_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = AwaitRequest {
+        wait_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ChangeCounter request
 pub const CHANGE_COUNTER_REQUEST: u8 = 4;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChangeCounterRequest {
+    pub counter: Counter,
+    pub amount: Int64,
+}
+impl ChangeCounterRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let counter_bytes = self.counter.serialize();
+        let amount_bytes = self.amount.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            CHANGE_COUNTER_REQUEST,
+            0,
+            0,
+            counter_bytes[0],
+            counter_bytes[1],
+            counter_bytes[2],
+            counter_bytes[3],
+            amount_bytes[0],
+            amount_bytes[1],
+            amount_bytes[2],
+            amount_bytes[3],
+            amount_bytes[4],
+            amount_bytes[5],
+            amount_bytes[6],
+            amount_bytes[7],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn change_counter<Conn>(conn: &Conn, counter: Counter, amount: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let counter_bytes = counter.serialize();
-    let amount_bytes = amount.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        CHANGE_COUNTER_REQUEST,
-        0,
-        0,
-        counter_bytes[0],
-        counter_bytes[1],
-        counter_bytes[2],
-        counter_bytes[3],
-        amount_bytes[0],
-        amount_bytes[1],
-        amount_bytes[2],
-        amount_bytes[3],
-        amount_bytes[4],
-        amount_bytes[5],
-        amount_bytes[6],
-        amount_bytes[7],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ChangeCounterRequest {
+        counter,
+        amount,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the SetCounter request
 pub const SET_COUNTER_REQUEST: u8 = 3;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetCounterRequest {
+    pub counter: Counter,
+    pub value: Int64,
+}
+impl SetCounterRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let counter_bytes = self.counter.serialize();
+        let value_bytes = self.value.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_COUNTER_REQUEST,
+            0,
+            0,
+            counter_bytes[0],
+            counter_bytes[1],
+            counter_bytes[2],
+            counter_bytes[3],
+            value_bytes[0],
+            value_bytes[1],
+            value_bytes[2],
+            value_bytes[3],
+            value_bytes[4],
+            value_bytes[5],
+            value_bytes[6],
+            value_bytes[7],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn set_counter<Conn>(conn: &Conn, counter: Counter, value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let counter_bytes = counter.serialize();
-    let value_bytes = value.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_COUNTER_REQUEST,
-        0,
-        0,
-        counter_bytes[0],
-        counter_bytes[1],
-        counter_bytes[2],
-        counter_bytes[3],
-        value_bytes[0],
-        value_bytes[1],
-        value_bytes[2],
-        value_bytes[3],
-        value_bytes[4],
-        value_bytes[5],
-        value_bytes[6],
-        value_bytes[7],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetCounterRequest {
+        counter,
+        value,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the CreateAlarm request
-pub const CREATE_ALARM_REQUEST: u8 = 8;
 /// Auxiliary and optional information for the `create_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateAlarmAux {
@@ -1140,43 +1286,63 @@ impl CreateAlarmAux {
     }
 }
 
-pub fn create_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+/// Opcode for the CreateAlarm request
+pub const CREATE_ALARM_REQUEST: u8 = 8;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateAlarmRequest<'input> {
+    pub id: Alarm,
+    pub value_list: &'input CreateAlarmAux,
+}
+impl<'input> CreateAlarmRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let id_bytes = self.id.serialize();
+        let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask_bytes = value_mask.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            CREATE_ALARM_REQUEST,
+            0,
+            0,
+            id_bytes[0],
+            id_bytes[1],
+            id_bytes[2],
+            id_bytes[3],
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            value_mask_bytes[2],
+            value_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let value_list_bytes = self.value_list.serialize(value_mask);
+        let length_so_far = length_so_far + value_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn create_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let id_bytes = id.serialize();
-    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
-    let value_mask_bytes = value_mask.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        CREATE_ALARM_REQUEST,
-        0,
-        0,
-        id_bytes[0],
-        id_bytes[1],
-        id_bytes[2],
-        id_bytes[3],
-        value_mask_bytes[0],
-        value_mask_bytes[1],
-        value_mask_bytes[2],
-        value_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize(value_mask);
-    let length_so_far = length_so_far + value_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = CreateAlarmRequest {
+        id,
+        value_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the ChangeAlarm request
-pub const CHANGE_ALARM_REQUEST: u8 = 9;
 /// Auxiliary and optional information for the `change_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeAlarmAux {
@@ -1276,93 +1442,151 @@ impl ChangeAlarmAux {
     }
 }
 
-pub fn change_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+/// Opcode for the ChangeAlarm request
+pub const CHANGE_ALARM_REQUEST: u8 = 9;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChangeAlarmRequest<'input> {
+    pub id: Alarm,
+    pub value_list: &'input ChangeAlarmAux,
+}
+impl<'input> ChangeAlarmRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let id_bytes = self.id.serialize();
+        let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask_bytes = value_mask.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            CHANGE_ALARM_REQUEST,
+            0,
+            0,
+            id_bytes[0],
+            id_bytes[1],
+            id_bytes[2],
+            id_bytes[3],
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            value_mask_bytes[2],
+            value_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let value_list_bytes = self.value_list.serialize(value_mask);
+        let length_so_far = length_so_far + value_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn change_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let id_bytes = id.serialize();
-    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
-    let value_mask_bytes = value_mask.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        CHANGE_ALARM_REQUEST,
-        0,
-        0,
-        id_bytes[0],
-        id_bytes[1],
-        id_bytes[2],
-        id_bytes[3],
-        value_mask_bytes[0],
-        value_mask_bytes[1],
-        value_mask_bytes[2],
-        value_mask_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize(value_mask);
-    let length_so_far = length_so_far + value_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = ChangeAlarmRequest {
+        id,
+        value_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the DestroyAlarm request
 pub const DESTROY_ALARM_REQUEST: u8 = 11;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DestroyAlarmRequest {
+    pub alarm: Alarm,
+}
+impl DestroyAlarmRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let alarm_bytes = self.alarm.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            DESTROY_ALARM_REQUEST,
+            0,
+            0,
+            alarm_bytes[0],
+            alarm_bytes[1],
+            alarm_bytes[2],
+            alarm_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn destroy_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let alarm_bytes = alarm.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        DESTROY_ALARM_REQUEST,
-        0,
-        0,
-        alarm_bytes[0],
-        alarm_bytes[1],
-        alarm_bytes[2],
-        alarm_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = DestroyAlarmRequest {
+        alarm,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the QueryAlarm request
 pub const QUERY_ALARM_REQUEST: u8 = 10;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryAlarmRequest {
+    pub alarm: Alarm,
+}
+impl QueryAlarmRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let alarm_bytes = self.alarm.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QUERY_ALARM_REQUEST,
+            0,
+            0,
+            alarm_bytes[0],
+            alarm_bytes[1],
+            alarm_bytes[2],
+            alarm_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<Cookie<'_, Conn, QueryAlarmReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let alarm_bytes = alarm.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_ALARM_REQUEST,
-        0,
-        0,
-        alarm_bytes[0],
-        alarm_bytes[1],
-        alarm_bytes[2],
-        alarm_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryAlarmRequest {
+        alarm,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1400,61 +1624,99 @@ impl TryFrom<&[u8]> for QueryAlarmReply {
 
 /// Opcode for the SetPriority request
 pub const SET_PRIORITY_REQUEST: u8 = 12;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetPriorityRequest {
+    pub id: u32,
+    pub priority: i32,
+}
+impl SetPriorityRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let id_bytes = self.id.serialize();
+        let priority_bytes = self.priority.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            SET_PRIORITY_REQUEST,
+            0,
+            0,
+            id_bytes[0],
+            id_bytes[1],
+            id_bytes[2],
+            id_bytes[3],
+            priority_bytes[0],
+            priority_bytes[1],
+            priority_bytes[2],
+            priority_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn set_priority<Conn>(conn: &Conn, id: u32, priority: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let id_bytes = id.serialize();
-    let priority_bytes = priority.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        SET_PRIORITY_REQUEST,
-        0,
-        0,
-        id_bytes[0],
-        id_bytes[1],
-        id_bytes[2],
-        id_bytes[3],
-        priority_bytes[0],
-        priority_bytes[1],
-        priority_bytes[2],
-        priority_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = SetPriorityRequest {
+        id,
+        priority,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the GetPriority request
 pub const GET_PRIORITY_REQUEST: u8 = 13;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetPriorityRequest {
+    pub id: u32,
+}
+impl GetPriorityRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let id_bytes = self.id.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GET_PRIORITY_REQUEST,
+            0,
+            0,
+            id_bytes[0],
+            id_bytes[1],
+            id_bytes[2],
+            id_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_priority<Conn>(conn: &Conn, id: u32) -> Result<Cookie<'_, Conn, GetPriorityReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let id_bytes = id.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_PRIORITY_REQUEST,
-        0,
-        0,
-        id_bytes[0],
-        id_bytes[1],
-        id_bytes[2],
-        id_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetPriorityRequest {
+        id,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1484,147 +1746,241 @@ impl TryFrom<&[u8]> for GetPriorityReply {
 
 /// Opcode for the CreateFence request
 pub const CREATE_FENCE_REQUEST: u8 = 14;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateFenceRequest {
+    pub drawable: xproto::Drawable,
+    pub fence: Fence,
+    pub initially_triggered: bool,
+}
+impl CreateFenceRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let fence_bytes = self.fence.serialize();
+        let initially_triggered_bytes = self.initially_triggered.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            CREATE_FENCE_REQUEST,
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            fence_bytes[0],
+            fence_bytes[1],
+            fence_bytes[2],
+            fence_bytes[3],
+            initially_triggered_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn create_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let fence_bytes = fence.serialize();
-    let initially_triggered_bytes = initially_triggered.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        CREATE_FENCE_REQUEST,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        fence_bytes[0],
-        fence_bytes[1],
-        fence_bytes[2],
-        fence_bytes[3],
-        initially_triggered_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CreateFenceRequest {
+        drawable,
+        fence,
+        initially_triggered,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the TriggerFence request
 pub const TRIGGER_FENCE_REQUEST: u8 = 15;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TriggerFenceRequest {
+    pub fence: Fence,
+}
+impl TriggerFenceRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let fence_bytes = self.fence.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            TRIGGER_FENCE_REQUEST,
+            0,
+            0,
+            fence_bytes[0],
+            fence_bytes[1],
+            fence_bytes[2],
+            fence_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn trigger_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let fence_bytes = fence.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        TRIGGER_FENCE_REQUEST,
-        0,
-        0,
-        fence_bytes[0],
-        fence_bytes[1],
-        fence_bytes[2],
-        fence_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = TriggerFenceRequest {
+        fence,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the ResetFence request
 pub const RESET_FENCE_REQUEST: u8 = 16;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ResetFenceRequest {
+    pub fence: Fence,
+}
+impl ResetFenceRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let fence_bytes = self.fence.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            RESET_FENCE_REQUEST,
+            0,
+            0,
+            fence_bytes[0],
+            fence_bytes[1],
+            fence_bytes[2],
+            fence_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn reset_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let fence_bytes = fence.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        RESET_FENCE_REQUEST,
-        0,
-        0,
-        fence_bytes[0],
-        fence_bytes[1],
-        fence_bytes[2],
-        fence_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = ResetFenceRequest {
+        fence,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the DestroyFence request
 pub const DESTROY_FENCE_REQUEST: u8 = 17;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DestroyFenceRequest {
+    pub fence: Fence,
+}
+impl DestroyFenceRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let fence_bytes = self.fence.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            DESTROY_FENCE_REQUEST,
+            0,
+            0,
+            fence_bytes[0],
+            fence_bytes[1],
+            fence_bytes[2],
+            fence_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn destroy_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let fence_bytes = fence.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        DESTROY_FENCE_REQUEST,
-        0,
-        0,
-        fence_bytes[0],
-        fence_bytes[1],
-        fence_bytes[2],
-        fence_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = DestroyFenceRequest {
+        fence,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the QueryFence request
 pub const QUERY_FENCE_REQUEST: u8 = 18;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryFenceRequest {
+    pub fence: Fence,
+}
+impl QueryFenceRequest {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let fence_bytes = self.fence.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QUERY_FENCE_REQUEST,
+            0,
+            0,
+            fence_bytes[0],
+            fence_bytes[1],
+            fence_bytes[2],
+            fence_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_fence<Conn>(conn: &Conn, fence: Fence) -> Result<Cookie<'_, Conn, QueryFenceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let fence_bytes = fence.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_FENCE_REQUEST,
-        0,
-        0,
-        fence_bytes[0],
-        fence_bytes[1],
-        fence_bytes[2],
-        fence_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryFenceRequest {
+        fence,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1655,28 +2011,46 @@ impl TryFrom<&[u8]> for QueryFenceReply {
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
-pub fn await_fence<'c, Conn>(conn: &'c Conn, fence_list: &[Fence]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AwaitFenceRequest<'input> {
+    pub fence_list: &'input [Fence],
+}
+impl<'input> AwaitFenceRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            AWAIT_FENCE_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let fence_list_bytes = self.fence_list.serialize();
+        let length_so_far = length_so_far + fence_list_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), fence_list_bytes.into(), padding0.into()], vec![]))
+    }
+}
+pub fn await_fence<'c, 'input, Conn>(conn: &'c Conn, fence_list: &'input [Fence]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        AWAIT_FENCE_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let fence_list_bytes = fence_list.serialize();
-    let length_so_far = length_so_far + fence_list_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&fence_list_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = AwaitFenceRequest {
+        fence_list,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Opcode for the CounterNotify event
@@ -1877,7 +2251,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_counter(self, counter)
     }
-    fn sync_await_<'c>(&'c self, wait_list: &[Waitcondition]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_await_<'c, 'input>(&'c self, wait_list: &'input [Waitcondition]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         await_(self, wait_list)
     }
@@ -1889,11 +2263,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         set_counter(self, counter, value)
     }
-    fn sync_create_alarm<'c>(&'c self, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_create_alarm<'c, 'input>(&'c self, id: Alarm, value_list: &'input CreateAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_alarm(self, id, value_list)
     }
-    fn sync_change_alarm<'c>(&'c self, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_change_alarm<'c, 'input>(&'c self, id: Alarm, value_list: &'input ChangeAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_alarm(self, id, value_list)
     }
@@ -1933,7 +2307,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_fence(self, fence)
     }
-    fn sync_await_fence<'c>(&'c self, fence_list: &[Fence]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_await_fence<'c, 'input>(&'c self, fence_list: &'input [Fence]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         await_fence(self, fence_list)
     }

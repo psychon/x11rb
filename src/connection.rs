@@ -40,6 +40,7 @@
 //! | Get    | `Cookie::reply`                    | `Cookie::reply_unchecked` |
 //! | Ignore | `Cookie::discard_reply_and_errors` | Just drop the cookie      |
 
+use std::borrow::Cow;
 use std::convert::{TryFrom, TryInto};
 use std::io::IoSlice;
 
@@ -63,6 +64,7 @@ pub type SequenceNumber = u64;
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
 pub type EventAndSeqNumber = (Event, SequenceNumber);
 pub type RawEventAndSeqNumber<B> = (B, SequenceNumber);
+pub type PiecewiseBuf<'a> = Vec<Cow<'a, [u8]>>;
 
 /// Either a raw reply or a raw error response to an X11 request.
 #[derive(Debug)]
