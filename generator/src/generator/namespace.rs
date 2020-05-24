@@ -567,7 +567,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     bytes_name,
                                     rust_field_name,
                                 );
-                                next_slice = Some(format!("{}", bytes_name));
+                                next_slice = Some(bytes_name);
                             }
                         }
                     }
@@ -607,7 +607,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     bytes_name,
                                     rust_field_name,
                                 );
-                                next_slice = Some(format!("{}", bytes_name));
+                                next_slice = Some(bytes_name);
                             } else {
                                 let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                 outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
@@ -622,7 +622,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     );
                                 });
                                 outln!(tmp_out, "}}");
-                                next_slice = Some(format!("{}", bytes_name));
+                                next_slice = Some(bytes_name);
                             }
                         }
                     }
@@ -651,7 +651,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
                             }
                         } else {
-                            next_slice = Some(format!("{}", bytes_name));
+                            next_slice = Some(bytes_name);
                         }
                     }
                     xcbdefs::FieldDef::Fd(_) => {}
