@@ -271,8 +271,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        client_major_version: client_major_version,
-        client_minor_version: client_minor_version,
+        client_major_version,
+        client_minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -346,7 +346,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryInfoRequest {
-        drawable: drawable,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -436,8 +436,8 @@ where
 {
     let event_mask: u32 = event_mask.into();
     let request0 = SelectInputRequest {
-        drawable: drawable,
-        event_mask: event_mask,
+        drawable,
+        event_mask,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -733,16 +733,16 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetAttributesRequest {
-        drawable: drawable,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        border_width: border_width,
-        class: class,
-        depth: depth,
-        visual: visual,
-        value_list: value_list,
+        drawable,
+        x,
+        y,
+        width,
+        height,
+        border_width,
+        class,
+        depth,
+        visual,
+        value_list,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -788,7 +788,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = UnsetAttributesRequest {
-        drawable: drawable,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -834,7 +834,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SuspendRequest {
-        suspend: suspend,
+        suspend,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

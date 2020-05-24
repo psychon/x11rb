@@ -150,8 +150,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        client_major_version: client_major_version,
-        client_minor_version: client_minor_version,
+        client_major_version,
+        client_minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -231,8 +231,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = RedirectWindowRequest {
-        window: window,
-        update: update,
+        window,
+        update,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -284,8 +284,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = RedirectSubwindowsRequest {
-        window: window,
-        update: update,
+        window,
+        update,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -337,8 +337,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = UnredirectWindowRequest {
-        window: window,
-        update: update,
+        window,
+        update,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -390,8 +390,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = UnredirectSubwindowsRequest {
-        window: window,
-        update: update,
+        window,
+        update,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -443,8 +443,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateRegionFromBorderClipRequest {
-        region: region,
-        window: window,
+        region,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -496,8 +496,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = NameWindowPixmapRequest {
-        window: window,
-        pixmap: pixmap,
+        window,
+        pixmap,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -543,7 +543,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetOverlayWindowRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -615,7 +615,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ReleaseOverlayWindowRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

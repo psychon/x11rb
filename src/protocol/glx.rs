@@ -512,8 +512,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = RenderRequest {
-        context_tag: context_tag,
-        data: data,
+        context_tag,
+        data,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -577,10 +577,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = RenderLargeRequest {
-        context_tag: context_tag,
-        request_num: request_num,
-        request_total: request_total,
-        data: data,
+        context_tag,
+        request_num,
+        request_total,
+        data,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -650,11 +650,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateContextRequest {
-        context: context,
-        visual: visual,
-        screen: screen,
-        share_list: share_list,
-        is_direct: is_direct,
+        context,
+        visual,
+        screen,
+        share_list,
+        is_direct,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -700,7 +700,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -758,9 +758,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = MakeCurrentRequest {
-        drawable: drawable,
-        context: context,
-        old_context_tag: old_context_tag,
+        drawable,
+        context,
+        old_context_tag,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -832,7 +832,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = IsDirectRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -910,8 +910,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        major_version: major_version,
-        minor_version: minor_version,
+        major_version,
+        minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -985,7 +985,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = WaitGLRequest {
-        context_tag: context_tag,
+        context_tag,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1031,7 +1031,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = WaitXRequest {
-        context_tag: context_tag,
+        context_tag,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1095,10 +1095,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CopyContextRequest {
-        src: src,
-        dest: dest,
-        mask: mask,
-        src_context_tag: src_context_tag,
+        src,
+        dest,
+        mask,
+        src_context_tag,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1238,8 +1238,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SwapBuffersRequest {
-        context_tag: context_tag,
-        drawable: drawable,
+        context_tag,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1309,11 +1309,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = UseXFontRequest {
-        context_tag: context_tag,
-        font: font,
-        first: first,
-        count: count,
-        list_base: list_base,
+        context_tag,
+        font,
+        first,
+        count,
+        list_base,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1377,10 +1377,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateGLXPixmapRequest {
-        screen: screen,
-        visual: visual,
-        pixmap: pixmap,
-        glx_pixmap: glx_pixmap,
+        screen,
+        visual,
+        pixmap,
+        glx_pixmap,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1426,7 +1426,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetVisualConfigsRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1516,7 +1516,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyGLXPixmapRequest {
-        glx_pixmap: glx_pixmap,
+        glx_pixmap,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1572,9 +1572,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = VendorPrivateRequest {
-        vendor_code: vendor_code,
-        context_tag: context_tag,
-        data: data,
+        vendor_code,
+        context_tag,
+        data,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1630,9 +1630,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = VendorPrivateWithReplyRequest {
-        vendor_code: vendor_code,
-        context_tag: context_tag,
-        data: data,
+        vendor_code,
+        context_tag,
+        data,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1724,7 +1724,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryExtensionsStringRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1803,8 +1803,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryServerStringRequest {
-        screen: screen,
-        name: name,
+        screen,
+        name,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1910,9 +1910,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ClientInfoRequest {
-        major_version: major_version,
-        minor_version: minor_version,
-        string: string,
+        major_version,
+        minor_version,
+        string,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1958,7 +1958,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetFBConfigsRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2078,11 +2078,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreatePixmapRequest {
-        screen: screen,
-        fbconfig: fbconfig,
-        pixmap: pixmap,
-        glx_pixmap: glx_pixmap,
-        attribs: attribs,
+        screen,
+        fbconfig,
+        pixmap,
+        glx_pixmap,
+        attribs,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2128,7 +2128,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyPixmapRequest {
-        glx_pixmap: glx_pixmap,
+        glx_pixmap,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2204,12 +2204,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateNewContextRequest {
-        context: context,
-        fbconfig: fbconfig,
-        screen: screen,
-        render_type: render_type,
-        share_list: share_list,
-        is_direct: is_direct,
+        context,
+        fbconfig,
+        screen,
+        render_type,
+        share_list,
+        is_direct,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2255,7 +2255,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2362,10 +2362,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = MakeContextCurrentRequest {
-        old_context_tag: old_context_tag,
-        drawable: drawable,
-        read_drawable: read_drawable,
-        context: context,
+        old_context_tag,
+        drawable,
+        read_drawable,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2461,10 +2461,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreatePbufferRequest {
-        screen: screen,
-        fbconfig: fbconfig,
-        pbuffer: pbuffer,
-        attribs: attribs,
+        screen,
+        fbconfig,
+        pbuffer,
+        attribs,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2510,7 +2510,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyPbufferRequest {
-        pbuffer: pbuffer,
+        pbuffer,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2556,7 +2556,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDrawableAttributesRequest {
-        drawable: drawable,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2657,8 +2657,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeDrawableAttributesRequest {
-        drawable: drawable,
-        attribs: attribs,
+        drawable,
+        attribs,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2734,11 +2734,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateWindowRequest {
-        screen: screen,
-        fbconfig: fbconfig,
-        window: window,
-        glx_window: glx_window,
-        attribs: attribs,
+        screen,
+        fbconfig,
+        window,
+        glx_window,
+        attribs,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2784,7 +2784,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DeleteWindowRequest {
-        glxwindow: glxwindow,
+        glxwindow,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2864,11 +2864,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetClientInfoARBRequest {
-        major_version: major_version,
-        minor_version: minor_version,
-        gl_versions: gl_versions,
-        gl_extension_string: gl_extension_string,
-        glx_extension_string: glx_extension_string,
+        major_version,
+        minor_version,
+        gl_versions,
+        gl_extension_string,
+        glx_extension_string,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2950,12 +2950,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateContextAttribsARBRequest {
-        context: context,
-        fbconfig: fbconfig,
-        screen: screen,
-        share_list: share_list,
-        is_direct: is_direct,
-        attribs: attribs,
+        context,
+        fbconfig,
+        screen,
+        share_list,
+        is_direct,
+        attribs,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3035,11 +3035,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetClientInfo2ARBRequest {
-        major_version: major_version,
-        minor_version: minor_version,
-        gl_versions: gl_versions,
-        gl_extension_string: gl_extension_string,
-        glx_extension_string: glx_extension_string,
+        major_version,
+        minor_version,
+        gl_versions,
+        gl_extension_string,
+        glx_extension_string,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3097,9 +3097,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = NewListRequest {
-        context_tag: context_tag,
-        list: list,
-        mode: mode,
+        context_tag,
+        list,
+        mode,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3145,7 +3145,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = EndListRequest {
-        context_tag: context_tag,
+        context_tag,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3203,9 +3203,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DeleteListsRequest {
-        context_tag: context_tag,
-        list: list,
-        range: range,
+        context_tag,
+        list,
+        range,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3257,8 +3257,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GenListsRequest {
-        context_tag: context_tag,
-        range: range,
+        context_tag,
+        range,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3341,9 +3341,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FeedbackBufferRequest {
-        context_tag: context_tag,
-        size: size,
-        type_: type_,
+        context_tag,
+        size,
+        type_,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3395,8 +3395,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SelectBufferRequest {
-        context_tag: context_tag,
-        size: size,
+        context_tag,
+        size,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3448,8 +3448,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = RenderModeRequest {
-        context_tag: context_tag,
-        mode: mode,
+        context_tag,
+        mode,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3591,7 +3591,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FinishRequest {
-        context_tag: context_tag,
+        context_tag,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3672,9 +3672,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PixelStorefRequest {
-        context_tag: context_tag,
-        pname: pname,
-        datum: datum,
+        context_tag,
+        pname,
+        datum,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3732,9 +3732,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PixelStoreiRequest {
-        context_tag: context_tag,
-        pname: pname,
-        datum: datum,
+        context_tag,
+        pname,
+        datum,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3824,15 +3824,15 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ReadPixelsRequest {
-        context_tag: context_tag,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        format: format,
-        type_: type_,
-        swap_bytes: swap_bytes,
-        lsb_first: lsb_first,
+        context_tag,
+        x,
+        y,
+        width,
+        height,
+        format,
+        type_,
+        swap_bytes,
+        lsb_first,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3926,8 +3926,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetBooleanvRequest {
-        context_tag: context_tag,
-        pname: pname,
+        context_tag,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4024,8 +4024,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetClipPlaneRequest {
-        context_tag: context_tag,
-        plane: plane,
+        context_tag,
+        plane,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4118,8 +4118,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDoublevRequest {
-        context_tag: context_tag,
-        pname: pname,
+        context_tag,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4210,7 +4210,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetErrorRequest {
-        context_tag: context_tag,
+        context_tag,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4287,8 +4287,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetFloatvRequest {
-        context_tag: context_tag,
-        pname: pname,
+        context_tag,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4385,8 +4385,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetIntegervRequest {
-        context_tag: context_tag,
-        pname: pname,
+        context_tag,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4489,9 +4489,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetLightfvRequest {
-        context_tag: context_tag,
-        light: light,
-        pname: pname,
+        context_tag,
+        light,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4594,9 +4594,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetLightivRequest {
-        context_tag: context_tag,
-        light: light,
-        pname: pname,
+        context_tag,
+        light,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4699,9 +4699,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMapdvRequest {
-        context_tag: context_tag,
-        target: target,
-        query: query,
+        context_tag,
+        target,
+        query,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4804,9 +4804,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMapfvRequest {
-        context_tag: context_tag,
-        target: target,
-        query: query,
+        context_tag,
+        target,
+        query,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4909,9 +4909,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMapivRequest {
-        context_tag: context_tag,
-        target: target,
-        query: query,
+        context_tag,
+        target,
+        query,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5014,9 +5014,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMaterialfvRequest {
-        context_tag: context_tag,
-        face: face,
-        pname: pname,
+        context_tag,
+        face,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5119,9 +5119,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMaterialivRequest {
-        context_tag: context_tag,
-        face: face,
-        pname: pname,
+        context_tag,
+        face,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5218,8 +5218,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPixelMapfvRequest {
-        context_tag: context_tag,
-        map: map,
+        context_tag,
+        map,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5316,8 +5316,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPixelMapuivRequest {
-        context_tag: context_tag,
-        map: map,
+        context_tag,
+        map,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5414,8 +5414,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPixelMapusvRequest {
-        context_tag: context_tag,
-        map: map,
+        context_tag,
+        map,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5512,8 +5512,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPolygonStippleRequest {
-        context_tag: context_tag,
-        lsb_first: lsb_first,
+        context_tag,
+        lsb_first,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5607,8 +5607,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetStringRequest {
-        context_tag: context_tag,
-        name: name,
+        context_tag,
+        name,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5710,9 +5710,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexEnvfvRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5815,9 +5815,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexEnvivRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5920,9 +5920,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexGendvRequest {
-        context_tag: context_tag,
-        coord: coord,
-        pname: pname,
+        context_tag,
+        coord,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6025,9 +6025,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexGenfvRequest {
-        context_tag: context_tag,
-        coord: coord,
-        pname: pname,
+        context_tag,
+        coord,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6130,9 +6130,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexGenivRequest {
-        context_tag: context_tag,
-        coord: coord,
-        pname: pname,
+        context_tag,
+        coord,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6253,12 +6253,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexImageRequest {
-        context_tag: context_tag,
-        target: target,
-        level: level,
-        format: format,
-        type_: type_,
-        swap_bytes: swap_bytes,
+        context_tag,
+        target,
+        level,
+        format,
+        type_,
+        swap_bytes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6365,9 +6365,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexParameterfvRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6470,9 +6470,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexParameterivRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6581,10 +6581,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexLevelParameterfvRequest {
-        context_tag: context_tag,
-        target: target,
-        level: level,
-        pname: pname,
+        context_tag,
+        target,
+        level,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6693,10 +6693,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetTexLevelParameterivRequest {
-        context_tag: context_tag,
-        target: target,
-        level: level,
-        pname: pname,
+        context_tag,
+        target,
+        level,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6793,8 +6793,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = IsEnabledRequest {
-        context_tag: context_tag,
-        capability: capability,
+        context_tag,
+        capability,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6871,8 +6871,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = IsListRequest {
-        context_tag: context_tag,
-        list: list,
+        context_tag,
+        list,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6943,7 +6943,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FlushRequest {
-        context_tag: context_tag,
+        context_tag,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7000,8 +7000,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AreTexturesResidentRequest {
-        context_tag: context_tag,
-        textures: textures,
+        context_tag,
+        textures,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7101,8 +7101,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DeleteTexturesRequest {
-        context_tag: context_tag,
-        textures: textures,
+        context_tag,
+        textures,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7154,8 +7154,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GenTexturesRequest {
-        context_tag: context_tag,
-        n: n,
+        context_tag,
+        n,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7247,8 +7247,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = IsTextureRequest {
-        context_tag: context_tag,
-        texture: texture,
+        context_tag,
+        texture,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7343,11 +7343,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetColorTableRequest {
-        context_tag: context_tag,
-        target: target,
-        format: format,
-        type_: type_,
-        swap_bytes: swap_bytes,
+        context_tag,
+        target,
+        format,
+        type_,
+        swap_bytes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7450,9 +7450,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetColorTableParameterfvRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7555,9 +7555,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetColorTableParameterivRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7672,11 +7672,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetConvolutionFilterRequest {
-        context_tag: context_tag,
-        target: target,
-        format: format,
-        type_: type_,
-        swap_bytes: swap_bytes,
+        context_tag,
+        target,
+        format,
+        type_,
+        swap_bytes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7781,9 +7781,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetConvolutionParameterfvRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7886,9 +7886,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetConvolutionParameterivRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8003,11 +8003,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetSeparableFilterRequest {
-        context_tag: context_tag,
-        target: target,
-        format: format,
-        type_: type_,
-        swap_bytes: swap_bytes,
+        context_tag,
+        target,
+        format,
+        type_,
+        swap_bytes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8126,12 +8126,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetHistogramRequest {
-        context_tag: context_tag,
-        target: target,
-        format: format,
-        type_: type_,
-        swap_bytes: swap_bytes,
-        reset: reset,
+        context_tag,
+        target,
+        format,
+        type_,
+        swap_bytes,
+        reset,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8234,9 +8234,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetHistogramParameterfvRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8339,9 +8339,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetHistogramParameterivRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8458,12 +8458,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMinmaxRequest {
-        context_tag: context_tag,
-        target: target,
-        format: format,
-        type_: type_,
-        swap_bytes: swap_bytes,
-        reset: reset,
+        context_tag,
+        target,
+        format,
+        type_,
+        swap_bytes,
+        reset,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8563,9 +8563,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMinmaxParameterfvRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8668,9 +8668,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMinmaxParameterivRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8773,9 +8773,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetCompressedTexImageARBRequest {
-        context_tag: context_tag,
-        target: target,
-        level: level,
+        context_tag,
+        target,
+        level,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8877,8 +8877,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DeleteQueriesARBRequest {
-        context_tag: context_tag,
-        ids: ids,
+        context_tag,
+        ids,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8930,8 +8930,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GenQueriesARBRequest {
-        context_tag: context_tag,
-        n: n,
+        context_tag,
+        n,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9023,8 +9023,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = IsQueryARBRequest {
-        context_tag: context_tag,
-        id: id,
+        context_tag,
+        id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9107,9 +9107,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetQueryivARBRequest {
-        context_tag: context_tag,
-        target: target,
-        pname: pname,
+        context_tag,
+        target,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9212,9 +9212,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetQueryObjectivARBRequest {
-        context_tag: context_tag,
-        id: id,
-        pname: pname,
+        context_tag,
+        id,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9317,9 +9317,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetQueryObjectuivARBRequest {
-        context_tag: context_tag,
-        id: id,
-        pname: pname,
+        context_tag,
+        id,
+        pname,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

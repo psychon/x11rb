@@ -1649,7 +1649,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryAdaptorsRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1737,7 +1737,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryEncodingsRequest {
-        port: port,
+        port,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1833,8 +1833,8 @@ where
 {
     let time: xproto::Timestamp = time.into();
     let request0 = GrabPortRequest {
-        port: port,
-        time: time,
+        port,
+        time,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1913,8 +1913,8 @@ where
 {
     let time: xproto::Timestamp = time.into();
     let request0 = UngrabPortRequest {
-        port: port,
-        time: time,
+        port,
+        time,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2004,17 +2004,17 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PutVideoRequest {
-        port: port,
-        drawable: drawable,
-        gc: gc,
-        vid_x: vid_x,
-        vid_y: vid_y,
-        vid_w: vid_w,
-        vid_h: vid_h,
-        drw_x: drw_x,
-        drw_y: drw_y,
-        drw_w: drw_w,
-        drw_h: drw_h,
+        port,
+        drawable,
+        gc,
+        vid_x,
+        vid_y,
+        vid_w,
+        vid_h,
+        drw_x,
+        drw_y,
+        drw_w,
+        drw_h,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2104,17 +2104,17 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PutStillRequest {
-        port: port,
-        drawable: drawable,
-        gc: gc,
-        vid_x: vid_x,
-        vid_y: vid_y,
-        vid_w: vid_w,
-        vid_h: vid_h,
-        drw_x: drw_x,
-        drw_y: drw_y,
-        drw_w: drw_w,
-        drw_h: drw_h,
+        port,
+        drawable,
+        gc,
+        vid_x,
+        vid_y,
+        vid_w,
+        vid_h,
+        drw_x,
+        drw_y,
+        drw_w,
+        drw_h,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2204,17 +2204,17 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetVideoRequest {
-        port: port,
-        drawable: drawable,
-        gc: gc,
-        vid_x: vid_x,
-        vid_y: vid_y,
-        vid_w: vid_w,
-        vid_h: vid_h,
-        drw_x: drw_x,
-        drw_y: drw_y,
-        drw_w: drw_w,
-        drw_h: drw_h,
+        port,
+        drawable,
+        gc,
+        vid_x,
+        vid_y,
+        vid_w,
+        vid_h,
+        drw_x,
+        drw_y,
+        drw_w,
+        drw_h,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2304,17 +2304,17 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetStillRequest {
-        port: port,
-        drawable: drawable,
-        gc: gc,
-        vid_x: vid_x,
-        vid_y: vid_y,
-        vid_w: vid_w,
-        vid_h: vid_h,
-        drw_x: drw_x,
-        drw_y: drw_y,
-        drw_w: drw_w,
-        drw_h: drw_h,
+        port,
+        drawable,
+        gc,
+        vid_x,
+        vid_y,
+        vid_w,
+        vid_h,
+        drw_x,
+        drw_y,
+        drw_w,
+        drw_h,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2366,8 +2366,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = StopVideoRequest {
-        port: port,
-        drawable: drawable,
+        port,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2419,8 +2419,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SelectVideoNotifyRequest {
-        drawable: drawable,
-        onoff: onoff,
+        drawable,
+        onoff,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2472,8 +2472,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SelectPortNotifyRequest {
-        port: port,
-        onoff: onoff,
+        port,
+        onoff,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2541,12 +2541,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryBestSizeRequest {
-        port: port,
-        vid_w: vid_w,
-        vid_h: vid_h,
-        drw_w: drw_w,
-        drw_h: drw_h,
-        motion: motion,
+        port,
+        vid_w,
+        vid_h,
+        drw_w,
+        drw_h,
+        motion,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2631,9 +2631,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPortAttributeRequest {
-        port: port,
-        attribute: attribute,
-        value: value,
+        port,
+        attribute,
+        value,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2685,8 +2685,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPortAttributeRequest {
-        port: port,
-        attribute: attribute,
+        port,
+        attribute,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2757,7 +2757,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryPortAttributesRequest {
-        port: port,
+        port,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2847,7 +2847,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ListImageFormatsRequest {
-        port: port,
+        port,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2949,10 +2949,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryImageAttributesRequest {
-        port: port,
-        id: id,
-        width: width,
-        height: height,
+        port,
+        id,
+        width,
+        height,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3110,21 +3110,21 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PutImageRequest {
-        port: port,
-        drawable: drawable,
-        gc: gc,
-        id: id,
-        src_x: src_x,
-        src_y: src_y,
-        src_w: src_w,
-        src_h: src_h,
-        drw_x: drw_x,
-        drw_y: drw_y,
-        drw_w: drw_w,
-        drw_h: drw_h,
-        width: width,
-        height: height,
-        data: data,
+        port,
+        drawable,
+        gc,
+        id,
+        src_x,
+        src_y,
+        src_w,
+        src_h,
+        drw_x,
+        drw_y,
+        drw_w,
+        drw_h,
+        width,
+        height,
+        data,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3246,23 +3246,23 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ShmPutImageRequest {
-        port: port,
-        drawable: drawable,
-        gc: gc,
-        shmseg: shmseg,
-        id: id,
-        offset: offset,
-        src_x: src_x,
-        src_y: src_y,
-        src_w: src_w,
-        src_h: src_h,
-        drw_x: drw_x,
-        drw_y: drw_y,
-        drw_w: drw_w,
-        drw_h: drw_h,
-        width: width,
-        height: height,
-        send_event: send_event,
+        port,
+        drawable,
+        gc,
+        shmseg,
+        id,
+        offset,
+        src_x,
+        src_y,
+        src_w,
+        src_h,
+        drw_x,
+        drw_y,
+        drw_w,
+        drw_h,
+        width,
+        height,
+        send_event,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

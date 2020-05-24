@@ -74,8 +74,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetVersionRequest {
-        client_major_version: client_major_version,
-        client_minor_version: client_minor_version,
+        client_major_version,
+        client_minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -212,7 +212,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetXIDListRequest {
-        count: count,
+        count,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

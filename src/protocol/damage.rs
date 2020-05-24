@@ -221,8 +221,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        client_major_version: client_major_version,
-        client_minor_version: client_minor_version,
+        client_major_version,
+        client_minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -308,9 +308,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateRequest {
-        damage: damage,
-        drawable: drawable,
-        level: level,
+        damage,
+        drawable,
+        level,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -356,7 +356,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyRequest {
-        damage: damage,
+        damage,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -418,9 +418,9 @@ where
     let repair: xfixes::Region = repair.into();
     let parts: xfixes::Region = parts.into();
     let request0 = SubtractRequest {
-        damage: damage,
-        repair: repair,
-        parts: parts,
+        damage,
+        repair,
+        parts,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -472,8 +472,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AddRequest {
-        drawable: drawable,
-        region: region,
+        drawable,
+        region,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

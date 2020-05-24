@@ -128,7 +128,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetExtensionVersionRequest {
-        name: name,
+        name,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1111,7 +1111,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = OpenDeviceRequest {
-        device_id: device_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1205,7 +1205,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CloseDeviceRequest {
-        device_id: device_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1253,8 +1253,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetDeviceModeRequest {
-        device_id: device_id,
-        mode: mode,
+        device_id,
+        mode,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1339,8 +1339,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SelectExtensionEventRequest {
-        window: window,
-        classes: classes,
+        window,
+        classes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1386,7 +1386,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetSelectedExtensionEventsRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1574,9 +1574,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeDeviceDontPropagateListRequest {
-        window: window,
-        mode: mode,
-        classes: classes,
+        window,
+        mode,
+        classes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1622,7 +1622,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDeviceDontPropagateListRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1753,9 +1753,9 @@ where
 {
     let stop: xproto::Timestamp = stop.into();
     let request0 = GetDeviceMotionEventsRequest {
-        start: start,
-        stop: stop,
-        device_id: device_id,
+        start,
+        stop,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1856,7 +1856,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeKeyboardDeviceRequest {
-        device_id: device_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1934,9 +1934,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangePointerDeviceRequest {
-        x_axis: x_axis,
-        y_axis: y_axis,
-        device_id: device_id,
+        x_axis,
+        y_axis,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2041,13 +2041,13 @@ where
 {
     let time: xproto::Timestamp = time.into();
     let request0 = GrabDeviceRequest {
-        grab_window: grab_window,
-        time: time,
-        this_device_mode: this_device_mode,
-        other_device_mode: other_device_mode,
-        owner_events: owner_events,
-        device_id: device_id,
-        classes: classes,
+        grab_window,
+        time,
+        this_device_mode,
+        other_device_mode,
+        owner_events,
+        device_id,
+        classes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2129,8 +2129,8 @@ where
 {
     let time: xproto::Timestamp = time.into();
     let request0 = UngrabDeviceRequest {
-        time: time,
-        device_id: device_id,
+        time,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2274,15 +2274,15 @@ where
     let modifier_device: u8 = modifier_device.into();
     let key: u8 = key.into();
     let request0 = GrabDeviceKeyRequest {
-        grab_window: grab_window,
-        modifiers: modifiers,
-        modifier_device: modifier_device,
-        grabbed_device: grabbed_device,
-        key: key,
-        this_device_mode: this_device_mode,
-        other_device_mode: other_device_mode,
-        owner_events: owner_events,
-        classes: classes,
+        grab_window,
+        modifiers,
+        modifier_device,
+        grabbed_device,
+        key,
+        this_device_mode,
+        other_device_mode,
+        owner_events,
+        classes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2350,11 +2350,11 @@ where
     let modifier_device: u8 = modifier_device.into();
     let key: u8 = key.into();
     let request0 = UngrabDeviceKeyRequest {
-        grab_window: grab_window,
-        modifiers: modifiers,
-        modifier_device: modifier_device,
-        key: key,
-        grabbed_device: grabbed_device,
+        grab_window,
+        modifiers,
+        modifier_device,
+        key,
+        grabbed_device,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2439,15 +2439,15 @@ where
     let modifiers: u16 = modifiers.into();
     let button: u8 = button.into();
     let request0 = GrabDeviceButtonRequest {
-        grab_window: grab_window,
-        grabbed_device: grabbed_device,
-        modifier_device: modifier_device,
-        modifiers: modifiers,
-        this_device_mode: this_device_mode,
-        other_device_mode: other_device_mode,
-        button: button,
-        owner_events: owner_events,
-        classes: classes,
+        grab_window,
+        grabbed_device,
+        modifier_device,
+        modifiers,
+        this_device_mode,
+        other_device_mode,
+        button,
+        owner_events,
+        classes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2515,11 +2515,11 @@ where
     let modifier_device: u8 = modifier_device.into();
     let button: u8 = button.into();
     let request0 = UngrabDeviceButtonRequest {
-        grab_window: grab_window,
-        modifiers: modifiers,
-        modifier_device: modifier_device,
-        button: button,
-        grabbed_device: grabbed_device,
+        grab_window,
+        modifiers,
+        modifier_device,
+        button,
+        grabbed_device,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2649,9 +2649,9 @@ where
 {
     let time: xproto::Timestamp = time.into();
     let request0 = AllowDeviceEventsRequest {
-        time: time,
-        mode: mode,
-        device_id: device_id,
+        time,
+        mode,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2697,7 +2697,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDeviceFocusRequest {
-        device_id: device_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2793,10 +2793,10 @@ where
     let focus: xproto::Window = focus.into();
     let time: xproto::Timestamp = time.into();
     let request0 = SetDeviceFocusRequest {
-        focus: focus,
-        time: time,
-        revert_to: revert_to,
-        device_id: device_id,
+        focus,
+        time,
+        revert_to,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3863,7 +3863,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetFeedbackControlRequest {
-        device_id: device_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4874,10 +4874,10 @@ where
 {
     let mask: u32 = mask.into();
     let request0 = ChangeFeedbackControlRequest {
-        mask: mask,
-        device_id: device_id,
-        feedback_id: feedback_id,
-        feedback: feedback,
+        mask,
+        device_id,
+        feedback_id,
+        feedback,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4927,9 +4927,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDeviceKeyMappingRequest {
-        device_id: device_id,
-        first_keycode: first_keycode,
-        count: count,
+        device_id,
+        first_keycode,
+        count,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5030,11 +5030,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeDeviceKeyMappingRequest {
-        device_id: device_id,
-        first_keycode: first_keycode,
-        keysyms_per_keycode: keysyms_per_keycode,
-        keycode_count: keycode_count,
-        keysyms: keysyms,
+        device_id,
+        first_keycode,
+        keysyms_per_keycode,
+        keycode_count,
+        keysyms,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5080,7 +5080,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDeviceModifierMappingRequest {
-        device_id: device_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5178,8 +5178,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetDeviceModifierMappingRequest {
-        device_id: device_id,
-        keymaps: keymaps,
+        device_id,
+        keymaps,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5253,7 +5253,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDeviceButtonMappingRequest {
-        device_id: device_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5354,8 +5354,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetDeviceButtonMappingRequest {
-        device_id: device_id,
-        map: map,
+        device_id,
+        map,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6016,7 +6016,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryDeviceStateRequest {
-        device_id: device_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6111,10 +6111,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DeviceBellRequest {
-        device_id: device_id,
-        feedback_id: feedback_id,
-        feedback_class: feedback_class,
-        percent: percent,
+        device_id,
+        feedback_id,
+        feedback_class,
+        percent,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6169,9 +6169,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetDeviceValuatorsRequest {
-        device_id: device_id,
-        first_valuator: first_valuator,
-        valuators: valuators,
+        device_id,
+        first_valuator,
+        valuators,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7080,8 +7080,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDeviceControlRequest {
-        control_id: control_id,
-        device_id: device_id,
+        control_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7912,9 +7912,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeDeviceControlRequest {
-        control_id: control_id,
-        device_id: device_id,
-        control: control,
+        control_id,
+        device_id,
+        control,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7987,7 +7987,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ListDevicePropertiesRequest {
-        device_id: device_id,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8230,12 +8230,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeDevicePropertyRequest {
-        property: property,
-        type_: type_,
-        device_id: device_id,
-        mode: mode,
-        num_items: num_items,
-        items: items,
+        property,
+        type_,
+        device_id,
+        mode,
+        num_items,
+        items,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8287,8 +8287,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DeleteDevicePropertyRequest {
-        property: property,
-        device_id: device_id,
+        property,
+        device_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8360,12 +8360,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDevicePropertyRequest {
-        property: property,
-        type_: type_,
-        offset: offset,
-        len: len,
-        device_id: device_id,
-        delete: delete,
+        property,
+        type_,
+        offset,
+        len,
+        device_id,
+        delete,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8699,8 +8699,8 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIQueryPointerRequest {
-        window: window,
-        deviceid: deviceid,
+        window,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8852,15 +8852,15 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIWarpPointerRequest {
-        src_win: src_win,
-        dst_win: dst_win,
-        src_x: src_x,
-        src_y: src_y,
-        src_width: src_width,
-        src_height: src_height,
-        dst_x: dst_x,
-        dst_y: dst_y,
-        deviceid: deviceid,
+        src_win,
+        dst_win,
+        src_x,
+        src_y,
+        src_width,
+        src_height,
+        dst_x,
+        dst_y,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8920,9 +8920,9 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIChangeCursorRequest {
-        window: window,
-        cursor: cursor,
-        deviceid: deviceid,
+        window,
+        cursor,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9652,7 +9652,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = XIChangeHierarchyRequest {
-        changes: changes,
+        changes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9706,8 +9706,8 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XISetClientPointerRequest {
-        window: window,
-        deviceid: deviceid,
+        window,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9753,7 +9753,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = XIGetClientPointerRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9993,8 +9993,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = XISelectEventsRequest {
-        window: window,
-        masks: masks,
+        window,
+        masks,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -10042,8 +10042,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = XIQueryVersionRequest {
-        major_version: major_version,
-        minor_version: minor_version,
+        major_version,
+        minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -11346,7 +11346,7 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIQueryDeviceRequest {
-        deviceid: deviceid,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -11450,9 +11450,9 @@ where
     let time: xproto::Timestamp = time.into();
     let deviceid: DeviceId = deviceid.into();
     let request0 = XISetFocusRequest {
-        window: window,
-        time: time,
-        deviceid: deviceid,
+        window,
+        time,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -11500,7 +11500,7 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIGetFocusRequest {
-        deviceid: deviceid,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -11681,14 +11681,14 @@ where
     let time: xproto::Timestamp = time.into();
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIGrabDeviceRequest {
-        window: window,
-        time: time,
-        cursor: cursor,
-        deviceid: deviceid,
-        mode: mode,
-        paired_device_mode: paired_device_mode,
-        owner_events: owner_events,
-        mask: mask,
+        window,
+        time,
+        cursor,
+        deviceid,
+        mode,
+        paired_device_mode,
+        owner_events,
+        mask,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -11771,8 +11771,8 @@ where
     let time: xproto::Timestamp = time.into();
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIUngrabDeviceRequest {
-        time: time,
-        deviceid: deviceid,
+        time,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -11922,11 +11922,11 @@ where
     let time: xproto::Timestamp = time.into();
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIAllowEventsRequest {
-        time: time,
-        deviceid: deviceid,
-        event_mode: event_mode,
-        touchid: touchid,
-        grab_window: grab_window,
+        time,
+        deviceid,
+        event_mode,
+        touchid,
+        grab_window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12237,17 +12237,17 @@ where
     let time: xproto::Timestamp = time.into();
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIPassiveGrabDeviceRequest {
-        time: time,
-        grab_window: grab_window,
-        cursor: cursor,
-        detail: detail,
-        deviceid: deviceid,
-        grab_type: grab_type,
-        grab_mode: grab_mode,
-        paired_device_mode: paired_device_mode,
-        owner_events: owner_events,
-        mask: mask,
-        modifiers: modifiers,
+        time,
+        grab_window,
+        cursor,
+        detail,
+        deviceid,
+        grab_type,
+        grab_mode,
+        paired_device_mode,
+        owner_events,
+        mask,
+        modifiers,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12362,11 +12362,11 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIPassiveUngrabDeviceRequest {
-        grab_window: grab_window,
-        detail: detail,
-        deviceid: deviceid,
-        grab_type: grab_type,
-        modifiers: modifiers,
+        grab_window,
+        detail,
+        deviceid,
+        grab_type,
+        modifiers,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12414,7 +12414,7 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIListPropertiesRequest {
-        deviceid: deviceid,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12593,12 +12593,12 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIChangePropertyRequest {
-        deviceid: deviceid,
-        mode: mode,
-        property: property,
-        type_: type_,
-        num_items: num_items,
-        items: items,
+        deviceid,
+        mode,
+        property,
+        type_,
+        num_items,
+        items,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12652,8 +12652,8 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIDeletePropertyRequest {
-        deviceid: deviceid,
-        property: property,
+        deviceid,
+        property,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12727,12 +12727,12 @@ where
 {
     let deviceid: DeviceId = deviceid.into();
     let request0 = XIGetPropertyRequest {
-        deviceid: deviceid,
-        delete: delete,
-        property: property,
-        type_: type_,
-        offset: offset,
-        len: len,
+        deviceid,
+        delete,
+        property,
+        type_,
+        offset,
+        len,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12881,7 +12881,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = XIGetSelectedEventsRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -13026,7 +13026,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = XIBarrierReleasePointerRequest {
-        barriers: barriers,
+        barriers,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -15951,11 +15951,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SendExtensionEventRequest {
-        destination: destination,
-        device_id: device_id,
-        propagate: propagate,
-        events: events,
-        classes: classes,
+        destination,
+        device_id,
+        propagate,
+        events,
+        classes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

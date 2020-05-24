@@ -469,7 +469,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetModeLineRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -649,18 +649,18 @@ where
 {
     let flags: u32 = flags.into();
     let request0 = ModModeLineRequest {
-        screen: screen,
-        hdisplay: hdisplay,
-        hsyncstart: hsyncstart,
-        hsyncend: hsyncend,
-        htotal: htotal,
-        hskew: hskew,
-        vdisplay: vdisplay,
-        vsyncstart: vsyncstart,
-        vsyncend: vsyncend,
-        vtotal: vtotal,
-        flags: flags,
-        private: private,
+        screen,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        private,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -708,8 +708,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SwitchModeRequest {
-        screen: screen,
-        zoom: zoom,
+        screen,
+        zoom,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -755,7 +755,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMonitorRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -898,8 +898,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = LockModeSwitchRequest {
-        screen: screen,
-        lock: lock,
+        screen,
+        lock,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -945,7 +945,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetAllModeLinesRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1171,30 +1171,30 @@ where
     let flags: u32 = flags.into();
     let after_flags: u32 = after_flags.into();
     let request0 = AddModeLineRequest {
-        screen: screen,
-        dotclock: dotclock,
-        hdisplay: hdisplay,
-        hsyncstart: hsyncstart,
-        hsyncend: hsyncend,
-        htotal: htotal,
-        hskew: hskew,
-        vdisplay: vdisplay,
-        vsyncstart: vsyncstart,
-        vsyncend: vsyncend,
-        vtotal: vtotal,
-        flags: flags,
-        after_dotclock: after_dotclock,
-        after_hdisplay: after_hdisplay,
-        after_hsyncstart: after_hsyncstart,
-        after_hsyncend: after_hsyncend,
-        after_htotal: after_htotal,
-        after_hskew: after_hskew,
-        after_vdisplay: after_vdisplay,
-        after_vsyncstart: after_vsyncstart,
-        after_vsyncend: after_vsyncend,
-        after_vtotal: after_vtotal,
-        after_flags: after_flags,
-        private: private,
+        screen,
+        dotclock,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        after_dotclock,
+        after_hdisplay,
+        after_hsyncstart,
+        after_hsyncend,
+        after_htotal,
+        after_hskew,
+        after_vdisplay,
+        after_vsyncstart,
+        after_vsyncend,
+        after_vtotal,
+        after_flags,
+        private,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1314,19 +1314,19 @@ where
 {
     let flags: u32 = flags.into();
     let request0 = DeleteModeLineRequest {
-        screen: screen,
-        dotclock: dotclock,
-        hdisplay: hdisplay,
-        hsyncstart: hsyncstart,
-        hsyncend: hsyncend,
-        htotal: htotal,
-        hskew: hskew,
-        vdisplay: vdisplay,
-        vsyncstart: vsyncstart,
-        vsyncend: vsyncend,
-        vtotal: vtotal,
-        flags: flags,
-        private: private,
+        screen,
+        dotclock,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        private,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1446,19 +1446,19 @@ where
 {
     let flags: u32 = flags.into();
     let request0 = ValidateModeLineRequest {
-        screen: screen,
-        dotclock: dotclock,
-        hdisplay: hdisplay,
-        hsyncstart: hsyncstart,
-        hsyncend: hsyncend,
-        htotal: htotal,
-        hskew: hskew,
-        vdisplay: vdisplay,
-        vsyncstart: vsyncstart,
-        vsyncend: vsyncend,
-        vtotal: vtotal,
-        flags: flags,
-        private: private,
+        screen,
+        dotclock,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        private,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1604,19 +1604,19 @@ where
 {
     let flags: u32 = flags.into();
     let request0 = SwitchToModeRequest {
-        screen: screen,
-        dotclock: dotclock,
-        hdisplay: hdisplay,
-        hsyncstart: hsyncstart,
-        hsyncend: hsyncend,
-        htotal: htotal,
-        hskew: hskew,
-        vdisplay: vdisplay,
-        vsyncstart: vsyncstart,
-        vsyncend: vsyncend,
-        vtotal: vtotal,
-        flags: flags,
-        private: private,
+        screen,
+        dotclock,
+        hdisplay,
+        hsyncstart,
+        hsyncend,
+        htotal,
+        hskew,
+        vdisplay,
+        vsyncstart,
+        vsyncend,
+        vtotal,
+        flags,
+        private,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1662,7 +1662,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetViewPortRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1748,9 +1748,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetViewPortRequest {
-        screen: screen,
-        x: x,
-        y: y,
+        screen,
+        x,
+        y,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1796,7 +1796,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDotClocksRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1876,8 +1876,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetClientVersionRequest {
-        major: major,
-        minor: minor,
+        major,
+        minor,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1953,10 +1953,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetGammaRequest {
-        screen: screen,
-        red: red,
-        green: green,
-        blue: blue,
+        screen,
+        red,
+        green,
+        blue,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2026,7 +2026,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetGammaRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2104,8 +2104,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetGammaRampRequest {
-        screen: screen,
-        size: size,
+        screen,
+        size,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2199,11 +2199,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetGammaRampRequest {
-        screen: screen,
-        size: size,
-        red: red,
-        green: green,
-        blue: blue,
+        screen,
+        size,
+        red,
+        green,
+        blue,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2249,7 +2249,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetGammaRampSizeRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2321,7 +2321,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPermissionsRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

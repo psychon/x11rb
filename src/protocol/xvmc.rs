@@ -229,7 +229,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ListSurfaceTypesRequest {
-        port_id: port_id,
+        port_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -343,12 +343,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateContextRequest {
-        context_id: context_id,
-        port_id: port_id,
-        surface_id: surface_id,
-        width: width,
-        height: height,
-        flags: flags,
+        context_id,
+        port_id,
+        surface_id,
+        width,
+        height,
+        flags,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -440,7 +440,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyContextRequest {
-        context_id: context_id,
+        context_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -492,8 +492,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateSurfaceRequest {
-        surface_id: surface_id,
-        context_id: context_id,
+        surface_id,
+        context_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -579,7 +579,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroySurfaceRequest {
-        surface_id: surface_id,
+        surface_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -645,11 +645,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateSubpictureRequest {
-        subpicture_id: subpicture_id,
-        context: context,
-        xvimage_id: xvimage_id,
-        width: width,
-        height: height,
+        subpicture_id,
+        context,
+        xvimage_id,
+        width,
+        height,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -746,7 +746,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroySubpictureRequest {
-        subpicture_id: subpicture_id,
+        subpicture_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -798,8 +798,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ListSubpictureTypesRequest {
-        port_id: port_id,
-        surface_id: surface_id,
+        port_id,
+        surface_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

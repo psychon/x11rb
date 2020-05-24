@@ -75,8 +75,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        client_major: client_major,
-        client_minor: client_minor,
+        client_major,
+        client_minor,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -153,7 +153,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetDeviceCreateContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -289,8 +289,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetDeviceContextRequest {
-        device: device,
-        context: context,
+        device,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -336,7 +336,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDeviceContextRequest {
-        device: device,
+        device,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -429,7 +429,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetWindowCreateContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -555,7 +555,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetWindowContextRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -731,7 +731,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPropertyCreateContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -861,7 +861,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPropertyUseContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -993,8 +993,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPropertyContextRequest {
-        window: window,
-        property: property,
+        window,
+        property,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1089,8 +1089,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPropertyDataContextRequest {
-        window: window,
-        property: property,
+        window,
+        property,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1179,7 +1179,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ListPropertiesRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1271,7 +1271,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetSelectionCreateContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1401,7 +1401,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetSelectionUseContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1527,7 +1527,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetSelectionContextRequest {
-        selection: selection,
+        selection,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1616,7 +1616,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetSelectionDataContextRequest {
-        selection: selection,
+        selection,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1784,7 +1784,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetClientContextRequest {
-        resource: resource,
+        resource,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

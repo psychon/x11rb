@@ -1855,8 +1855,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        client_major_version: client_major_version,
-        client_minor_version: client_minor_version,
+        client_major_version,
+        client_minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2053,7 +2053,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryPictIndexValuesRequest {
-        format: format,
+        format,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2347,10 +2347,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreatePictureRequest {
-        pid: pid,
-        drawable: drawable,
-        format: format,
-        value_list: value_list,
+        pid,
+        drawable,
+        format,
+        value_list,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2590,8 +2590,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangePictureRequest {
-        picture: picture,
-        value_list: value_list,
+        picture,
+        value_list,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2650,10 +2650,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPictureClipRectanglesRequest {
-        picture: picture,
-        clip_x_origin: clip_x_origin,
-        clip_y_origin: clip_y_origin,
-        rectangles: rectangles,
+        picture,
+        clip_x_origin,
+        clip_y_origin,
+        rectangles,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2699,7 +2699,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FreePictureRequest {
-        picture: picture,
+        picture,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2797,18 +2797,18 @@ where
 {
     let mask: Picture = mask.into();
     let request0 = CompositeRequest {
-        op: op,
-        src: src,
-        mask: mask,
-        dst: dst,
-        src_x: src_x,
-        src_y: src_y,
-        mask_x: mask_x,
-        mask_y: mask_y,
-        dst_x: dst_x,
-        dst_y: dst_y,
-        width: width,
-        height: height,
+        op,
+        src,
+        mask,
+        dst,
+        src_x,
+        src_y,
+        mask_x,
+        mask_y,
+        dst_x,
+        dst_y,
+        width,
+        height,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2885,13 +2885,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = TrapezoidsRequest {
-        op: op,
-        src: src,
-        dst: dst,
-        mask_format: mask_format,
-        src_x: src_x,
-        src_y: src_y,
-        traps: traps,
+        op,
+        src,
+        dst,
+        mask_format,
+        src_x,
+        src_y,
+        traps,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2968,13 +2968,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = TrianglesRequest {
-        op: op,
-        src: src,
-        dst: dst,
-        mask_format: mask_format,
-        src_x: src_x,
-        src_y: src_y,
-        triangles: triangles,
+        op,
+        src,
+        dst,
+        mask_format,
+        src_x,
+        src_y,
+        triangles,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3051,13 +3051,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = TriStripRequest {
-        op: op,
-        src: src,
-        dst: dst,
-        mask_format: mask_format,
-        src_x: src_x,
-        src_y: src_y,
-        points: points,
+        op,
+        src,
+        dst,
+        mask_format,
+        src_x,
+        src_y,
+        points,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3134,13 +3134,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = TriFanRequest {
-        op: op,
-        src: src,
-        dst: dst,
-        mask_format: mask_format,
-        src_x: src_x,
-        src_y: src_y,
-        points: points,
+        op,
+        src,
+        dst,
+        mask_format,
+        src_x,
+        src_y,
+        points,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3192,8 +3192,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateGlyphSetRequest {
-        gsid: gsid,
-        format: format,
+        gsid,
+        format,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3245,8 +3245,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ReferenceGlyphSetRequest {
-        gsid: gsid,
-        existing: existing,
+        gsid,
+        existing,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3292,7 +3292,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FreeGlyphSetRequest {
-        glyphset: glyphset,
+        glyphset,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3355,10 +3355,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AddGlyphsRequest {
-        glyphset: glyphset,
-        glyphids: glyphids,
-        glyphs: glyphs,
-        data: data,
+        glyphset,
+        glyphids,
+        glyphs,
+        data,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3409,8 +3409,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FreeGlyphsRequest {
-        glyphset: glyphset,
-        glyphs: glyphs,
+        glyphset,
+        glyphs,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3492,14 +3492,14 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CompositeGlyphs8Request {
-        op: op,
-        src: src,
-        dst: dst,
-        mask_format: mask_format,
-        glyphset: glyphset,
-        src_x: src_x,
-        src_y: src_y,
-        glyphcmds: glyphcmds,
+        op,
+        src,
+        dst,
+        mask_format,
+        glyphset,
+        src_x,
+        src_y,
+        glyphcmds,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3581,14 +3581,14 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CompositeGlyphs16Request {
-        op: op,
-        src: src,
-        dst: dst,
-        mask_format: mask_format,
-        glyphset: glyphset,
-        src_x: src_x,
-        src_y: src_y,
-        glyphcmds: glyphcmds,
+        op,
+        src,
+        dst,
+        mask_format,
+        glyphset,
+        src_x,
+        src_y,
+        glyphcmds,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3670,14 +3670,14 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CompositeGlyphs32Request {
-        op: op,
-        src: src,
-        dst: dst,
-        mask_format: mask_format,
-        glyphset: glyphset,
-        src_x: src_x,
-        src_y: src_y,
-        glyphcmds: glyphcmds,
+        op,
+        src,
+        dst,
+        mask_format,
+        glyphset,
+        src_x,
+        src_y,
+        glyphcmds,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3744,10 +3744,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FillRectanglesRequest {
-        op: op,
-        dst: dst,
-        color: color,
-        rects: rects,
+        op,
+        dst,
+        color,
+        rects,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3807,10 +3807,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateCursorRequest {
-        cid: cid,
-        source: source,
-        x: x,
-        y: y,
+        cid,
+        source,
+        x,
+        y,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3992,8 +3992,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPictureTransformRequest {
-        picture: picture,
-        transform: transform,
+        picture,
+        transform,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4039,7 +4039,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryFiltersRequest {
-        drawable: drawable,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4158,9 +4158,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPictureFilterRequest {
-        picture: picture,
-        filter: filter,
-        values: values,
+        picture,
+        filter,
+        values,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4253,8 +4253,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateAnimCursorRequest {
-        cid: cid,
-        cursors: cursors,
+        cid,
+        cursors,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4421,10 +4421,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AddTrapsRequest {
-        picture: picture,
-        x_off: x_off,
-        y_off: y_off,
-        traps: traps,
+        picture,
+        x_off,
+        y_off,
+        traps,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4480,8 +4480,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateSolidFillRequest {
-        picture: picture,
-        color: color,
+        picture,
+        color,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4562,11 +4562,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateLinearGradientRequest {
-        picture: picture,
-        p1: p1,
-        p2: p2,
-        stops: stops,
-        colors: colors,
+        picture,
+        p1,
+        p2,
+        stops,
+        colors,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4659,13 +4659,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateRadialGradientRequest {
-        picture: picture,
-        inner: inner,
-        outer: outer,
-        inner_radius: inner_radius,
-        outer_radius: outer_radius,
-        stops: stops,
-        colors: colors,
+        picture,
+        inner,
+        outer,
+        inner_radius,
+        outer_radius,
+        stops,
+        colors,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4742,11 +4742,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateConicalGradientRequest {
-        picture: picture,
-        center: center,
-        angle: angle,
-        stops: stops,
-        colors: colors,
+        picture,
+        center,
+        angle,
+        stops,
+        colors,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

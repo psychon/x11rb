@@ -6349,8 +6349,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = UseExtensionRequest {
-        wanted_major: wanted_major,
-        wanted_minor: wanted_minor,
+        wanted_major,
+        wanted_minor,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6877,13 +6877,13 @@ where
     let affect_map: u16 = affect_map.into();
     let map: u16 = map.into();
     let request0 = SelectEventsRequest {
-        device_spec: device_spec,
-        affect_which: affect_which,
-        clear: clear,
-        select_all: select_all,
-        affect_map: affect_map,
-        map: map,
-        details: details,
+        device_spec,
+        affect_which,
+        clear,
+        select_all,
+        affect_map,
+        map,
+        details,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6967,16 +6967,16 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = BellRequest {
-        device_spec: device_spec,
-        bell_class: bell_class,
-        bell_id: bell_id,
-        percent: percent,
-        force_sound: force_sound,
-        event_only: event_only,
-        pitch: pitch,
-        duration: duration,
-        name: name,
-        window: window,
+        device_spec,
+        bell_class,
+        bell_id,
+        percent,
+        force_sound,
+        event_only,
+        pitch,
+        duration,
+        name,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7022,7 +7022,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetStateRequest {
-        device_spec: device_spec,
+        device_spec,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7152,14 +7152,14 @@ where
     let mod_locks: u8 = mod_locks.into();
     let affect_mod_latches: u8 = affect_mod_latches.into();
     let request0 = LatchLockStateRequest {
-        device_spec: device_spec,
-        affect_mod_locks: affect_mod_locks,
-        mod_locks: mod_locks,
-        lock_group: lock_group,
-        group_lock: group_lock,
-        affect_mod_latches: affect_mod_latches,
-        latch_group: latch_group,
-        group_latch: group_latch,
+        device_spec,
+        affect_mod_locks,
+        mod_locks,
+        lock_group,
+        group_lock,
+        affect_mod_latches,
+        latch_group,
+        group_latch,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7205,7 +7205,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetControlsRequest {
-        device_spec: device_spec,
+        device_spec,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7480,36 +7480,36 @@ where
     let access_x_timeout_options_mask: u16 = access_x_timeout_options_mask.into();
     let access_x_timeout_options_values: u16 = access_x_timeout_options_values.into();
     let request0 = SetControlsRequest {
-        device_spec: device_spec,
-        affect_internal_real_mods: affect_internal_real_mods,
-        internal_real_mods: internal_real_mods,
-        affect_ignore_lock_real_mods: affect_ignore_lock_real_mods,
-        ignore_lock_real_mods: ignore_lock_real_mods,
-        affect_internal_virtual_mods: affect_internal_virtual_mods,
-        internal_virtual_mods: internal_virtual_mods,
-        affect_ignore_lock_virtual_mods: affect_ignore_lock_virtual_mods,
-        ignore_lock_virtual_mods: ignore_lock_virtual_mods,
-        mouse_keys_dflt_btn: mouse_keys_dflt_btn,
-        groups_wrap: groups_wrap,
-        access_x_options: access_x_options,
-        affect_enabled_controls: affect_enabled_controls,
-        enabled_controls: enabled_controls,
-        change_controls: change_controls,
-        repeat_delay: repeat_delay,
-        repeat_interval: repeat_interval,
-        slow_keys_delay: slow_keys_delay,
-        debounce_delay: debounce_delay,
-        mouse_keys_delay: mouse_keys_delay,
-        mouse_keys_interval: mouse_keys_interval,
-        mouse_keys_time_to_max: mouse_keys_time_to_max,
-        mouse_keys_max_speed: mouse_keys_max_speed,
-        mouse_keys_curve: mouse_keys_curve,
-        access_x_timeout: access_x_timeout,
-        access_x_timeout_mask: access_x_timeout_mask,
-        access_x_timeout_values: access_x_timeout_values,
-        access_x_timeout_options_mask: access_x_timeout_options_mask,
-        access_x_timeout_options_values: access_x_timeout_options_values,
-        per_key_repeat: per_key_repeat,
+        device_spec,
+        affect_internal_real_mods,
+        internal_real_mods,
+        affect_ignore_lock_real_mods,
+        ignore_lock_real_mods,
+        affect_internal_virtual_mods,
+        internal_virtual_mods,
+        affect_ignore_lock_virtual_mods,
+        ignore_lock_virtual_mods,
+        mouse_keys_dflt_btn,
+        groups_wrap,
+        access_x_options,
+        affect_enabled_controls,
+        enabled_controls,
+        change_controls,
+        repeat_delay,
+        repeat_interval,
+        slow_keys_delay,
+        debounce_delay,
+        mouse_keys_delay,
+        mouse_keys_interval,
+        mouse_keys_time_to_max,
+        mouse_keys_max_speed,
+        mouse_keys_curve,
+        access_x_timeout,
+        access_x_timeout_mask,
+        access_x_timeout_values,
+        access_x_timeout_options_mask,
+        access_x_timeout_options_values,
+        per_key_repeat,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7615,24 +7615,24 @@ where
     let partial: u16 = partial.into();
     let virtual_mods: u16 = virtual_mods.into();
     let request0 = GetMapRequest {
-        device_spec: device_spec,
-        full: full,
-        partial: partial,
-        first_type: first_type,
-        n_types: n_types,
-        first_key_sym: first_key_sym,
-        n_key_syms: n_key_syms,
-        first_key_action: first_key_action,
-        n_key_actions: n_key_actions,
-        first_key_behavior: first_key_behavior,
-        n_key_behaviors: n_key_behaviors,
-        virtual_mods: virtual_mods,
-        first_key_explicit: first_key_explicit,
-        n_key_explicit: n_key_explicit,
-        first_mod_map_key: first_mod_map_key,
-        n_mod_map_keys: n_mod_map_keys,
-        first_v_mod_map_key: first_v_mod_map_key,
-        n_v_mod_map_keys: n_v_mod_map_keys,
+        device_spec,
+        full,
+        partial,
+        first_type,
+        n_types,
+        first_key_sym,
+        n_key_syms,
+        first_key_action,
+        n_key_actions,
+        first_key_behavior,
+        n_key_behaviors,
+        virtual_mods,
+        first_key_explicit,
+        n_key_explicit,
+        first_mod_map_key,
+        n_mod_map_keys,
+        first_v_mod_map_key,
+        n_v_mod_map_keys,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8112,32 +8112,32 @@ where
     let flags: u16 = flags.into();
     let virtual_mods: u16 = virtual_mods.into();
     let request0 = SetMapRequest {
-        device_spec: device_spec,
-        flags: flags,
-        min_key_code: min_key_code,
-        max_key_code: max_key_code,
-        first_type: first_type,
-        n_types: n_types,
-        first_key_sym: first_key_sym,
-        n_key_syms: n_key_syms,
-        total_syms: total_syms,
-        first_key_action: first_key_action,
-        n_key_actions: n_key_actions,
-        total_actions: total_actions,
-        first_key_behavior: first_key_behavior,
-        n_key_behaviors: n_key_behaviors,
-        total_key_behaviors: total_key_behaviors,
-        first_key_explicit: first_key_explicit,
-        n_key_explicit: n_key_explicit,
-        total_key_explicit: total_key_explicit,
-        first_mod_map_key: first_mod_map_key,
-        n_mod_map_keys: n_mod_map_keys,
-        total_mod_map_keys: total_mod_map_keys,
-        first_v_mod_map_key: first_v_mod_map_key,
-        n_v_mod_map_keys: n_v_mod_map_keys,
-        total_v_mod_map_keys: total_v_mod_map_keys,
-        virtual_mods: virtual_mods,
-        values: values,
+        device_spec,
+        flags,
+        min_key_code,
+        max_key_code,
+        first_type,
+        n_types,
+        first_key_sym,
+        n_key_syms,
+        total_syms,
+        first_key_action,
+        n_key_actions,
+        total_actions,
+        first_key_behavior,
+        n_key_behaviors,
+        total_key_behaviors,
+        first_key_explicit,
+        n_key_explicit,
+        total_key_explicit,
+        first_mod_map_key,
+        n_mod_map_keys,
+        total_mod_map_keys,
+        first_v_mod_map_key,
+        n_v_mod_map_keys,
+        total_v_mod_map_keys,
+        virtual_mods,
+        values,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8197,11 +8197,11 @@ where
 {
     let groups: u8 = groups.into();
     let request0 = GetCompatMapRequest {
-        device_spec: device_spec,
-        groups: groups,
-        get_all_si: get_all_si,
-        first_si: first_si,
-        n_si: n_si,
+        device_spec,
+        groups,
+        get_all_si,
+        first_si,
+        n_si,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8328,13 +8328,13 @@ where
 {
     let groups: u8 = groups.into();
     let request0 = SetCompatMapRequest {
-        device_spec: device_spec,
-        recompute_actions: recompute_actions,
-        truncate_si: truncate_si,
-        groups: groups,
-        first_si: first_si,
-        si: si,
-        group_maps: group_maps,
+        device_spec,
+        recompute_actions,
+        truncate_si,
+        groups,
+        first_si,
+        si,
+        group_maps,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8380,7 +8380,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetIndicatorStateRequest {
-        device_spec: device_spec,
+        device_spec,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8459,8 +8459,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetIndicatorMapRequest {
-        device_spec: device_spec,
-        which: which,
+        device_spec,
+        which,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8551,9 +8551,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetIndicatorMapRequest {
-        device_spec: device_spec,
-        which: which,
-        maps: maps,
+        device_spec,
+        which,
+        maps,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8615,10 +8615,10 @@ where
 {
     let led_id: IDSpec = led_id.into();
     let request0 = GetNamedIndicatorRequest {
-        device_spec: device_spec,
-        led_class: led_class,
-        led_id: led_id,
-        indicator: indicator,
+        device_spec,
+        led_class,
+        led_id,
+        indicator,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8785,21 +8785,21 @@ where
     let map_vmods: u16 = map_vmods.into();
     let map_ctrls: u32 = map_ctrls.into();
     let request0 = SetNamedIndicatorRequest {
-        device_spec: device_spec,
-        led_class: led_class,
-        led_id: led_id,
-        indicator: indicator,
-        set_state: set_state,
-        on: on,
-        set_map: set_map,
-        create_map: create_map,
-        map_flags: map_flags,
-        map_which_groups: map_which_groups,
-        map_groups: map_groups,
-        map_which_mods: map_which_mods,
-        map_real_mods: map_real_mods,
-        map_vmods: map_vmods,
-        map_ctrls: map_ctrls,
+        device_spec,
+        led_class,
+        led_id,
+        indicator,
+        set_state,
+        on,
+        set_map,
+        create_map,
+        map_flags,
+        map_which_groups,
+        map_groups,
+        map_which_mods,
+        map_real_mods,
+        map_vmods,
+        map_ctrls,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8853,8 +8853,8 @@ where
 {
     let which: u32 = which.into();
     let request0 = GetNamesRequest {
-        device_spec: device_spec,
-        which: which,
+        device_spec,
+        which,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9384,20 +9384,20 @@ where
     let virtual_mods: u16 = virtual_mods.into();
     let group_names: u8 = group_names.into();
     let request0 = SetNamesRequest {
-        device_spec: device_spec,
-        virtual_mods: virtual_mods,
-        first_type: first_type,
-        n_types: n_types,
-        first_kt_levelt: first_kt_levelt,
-        n_kt_levels: n_kt_levels,
-        indicators: indicators,
-        group_names: group_names,
-        n_radio_groups: n_radio_groups,
-        first_key: first_key,
-        n_keys: n_keys,
-        n_key_aliases: n_key_aliases,
-        total_kt_level_names: total_kt_level_names,
-        values: values,
+        device_spec,
+        virtual_mods,
+        first_type,
+        n_types,
+        first_kt_levelt,
+        n_kt_levels,
+        indicators,
+        group_names,
+        n_radio_groups,
+        first_key,
+        n_keys,
+        n_key_aliases,
+        total_kt_level_names,
+        values,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9483,12 +9483,12 @@ where
     let auto_ctrls: u32 = auto_ctrls.into();
     let auto_ctrls_values: u32 = auto_ctrls_values.into();
     let request0 = PerClientFlagsRequest {
-        device_spec: device_spec,
-        change: change,
-        value: value,
-        ctrls_to_change: ctrls_to_change,
-        auto_ctrls: auto_ctrls,
-        auto_ctrls_values: auto_ctrls_values,
+        device_spec,
+        change,
+        value,
+        ctrls_to_change,
+        auto_ctrls,
+        auto_ctrls_values,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9569,8 +9569,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ListComponentsRequest {
-        device_spec: device_spec,
-        max_names: max_names,
+        device_spec,
+        max_names,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9755,10 +9755,10 @@ where
     let need: u16 = need.into();
     let want: u16 = want.into();
     let request0 = GetKbdByNameRequest {
-        device_spec: device_spec,
-        need: need,
-        want: want,
-        load: load,
+        device_spec,
+        need,
+        want,
+        load,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -10467,13 +10467,13 @@ where
     let wanted: u16 = wanted.into();
     let led_id: IDSpec = led_id.into();
     let request0 = GetDeviceInfoRequest {
-        device_spec: device_spec,
-        wanted: wanted,
-        all_buttons: all_buttons,
-        first_button: first_button,
-        n_buttons: n_buttons,
-        led_class: led_class,
-        led_id: led_id,
+        device_spec,
+        wanted,
+        all_buttons,
+        first_button,
+        n_buttons,
+        led_class,
+        led_id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -10644,11 +10644,11 @@ where
 {
     let change: u16 = change.into();
     let request0 = SetDeviceInfoRequest {
-        device_spec: device_spec,
-        first_btn: first_btn,
-        change: change,
-        btn_actions: btn_actions,
-        leds: leds,
+        device_spec,
+        first_btn,
+        change,
+        btn_actions,
+        leds,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -10722,11 +10722,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetDebuggingFlagsRequest {
-        affect_flags: affect_flags,
-        flags: flags,
-        affect_ctrls: affect_ctrls,
-        ctrls: ctrls,
-        message: message,
+        affect_flags,
+        flags,
+        affect_ctrls,
+        ctrls,
+        message,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

@@ -748,8 +748,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = InitializeRequest {
-        desired_major_version: desired_major_version,
-        desired_minor_version: desired_minor_version,
+        desired_major_version,
+        desired_minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -912,8 +912,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateCounterRequest {
-        id: id,
-        initial_value: initial_value,
+        id,
+        initial_value,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -959,7 +959,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyCounterRequest {
-        counter: counter,
+        counter,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1005,7 +1005,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryCounterRequest {
-        counter: counter,
+        counter,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1075,7 +1075,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AwaitRequest {
-        wait_list: wait_list,
+        wait_list,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1131,8 +1131,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeCounterRequest {
-        counter: counter,
-        amount: amount,
+        counter,
+        amount,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1188,8 +1188,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetCounterRequest {
-        counter: counter,
-        value: value,
+        counter,
+        value,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1345,8 +1345,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateAlarmRequest {
-        id: id,
-        value_list: value_list,
+        id,
+        value_list,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1502,8 +1502,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeAlarmRequest {
-        id: id,
-        value_list: value_list,
+        id,
+        value_list,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1549,7 +1549,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyAlarmRequest {
-        alarm: alarm,
+        alarm,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1595,7 +1595,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryAlarmRequest {
-        alarm: alarm,
+        alarm,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1680,8 +1680,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPriorityRequest {
-        id: id,
-        priority: priority,
+        id,
+        priority,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1727,7 +1727,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPriorityRequest {
-        id: id,
+        id,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1810,9 +1810,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateFenceRequest {
-        drawable: drawable,
-        fence: fence,
-        initially_triggered: initially_triggered,
+        drawable,
+        fence,
+        initially_triggered,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1858,7 +1858,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = TriggerFenceRequest {
-        fence: fence,
+        fence,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1904,7 +1904,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ResetFenceRequest {
-        fence: fence,
+        fence,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1950,7 +1950,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyFenceRequest {
-        fence: fence,
+        fence,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1996,7 +1996,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryFenceRequest {
-        fence: fence,
+        fence,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2067,7 +2067,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AwaitFenceRequest {
-        fence_list: fence_list,
+        fence_list,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

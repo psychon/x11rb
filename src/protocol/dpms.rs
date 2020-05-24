@@ -74,8 +74,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetVersionRequest {
-        client_major_version: client_major_version,
-        client_minor_version: client_minor_version,
+        client_major_version,
+        client_minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -286,9 +286,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetTimeoutsRequest {
-        standby_timeout: standby_timeout,
-        suspend_timeout: suspend_timeout,
-        off_timeout: off_timeout,
+        standby_timeout,
+        suspend_timeout,
+        off_timeout,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -476,7 +476,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ForceLevelRequest {
-        power_level: power_level,
+        power_level,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

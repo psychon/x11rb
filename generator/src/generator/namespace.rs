@@ -899,7 +899,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "let request0 = {}Request{}", name, members_start);
             out.indented(|out| {
                 for (arg_name, _) in gathered.args.iter() {
-                    outln!(out, "{}: {},", arg_name, arg_name);
+                    outln!(out, "{},", arg_name);
                 }
             });
             if has_members {

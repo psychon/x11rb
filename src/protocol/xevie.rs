@@ -74,8 +74,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        client_major_version: client_major_version,
-        client_minor_version: client_minor_version,
+        client_major_version,
+        client_minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -149,7 +149,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = StartRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -219,7 +219,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = EndRequest {
-        cmap: cmap,
+        cmap,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -517,8 +517,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SendRequest {
-        event: event,
-        data_type: data_type,
+        event,
+        data_type,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -588,7 +588,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SelectInputRequest {
-        event_mask: event_mask,
+        event_mask,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

@@ -519,8 +519,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintGetPrinterListRequest {
-        printer_name: printer_name,
-        locale: locale,
+        printer_name,
+        locale,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -663,9 +663,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateContextRequest {
-        context_id: context_id,
-        printer_name: printer_name,
-        locale: locale,
+        context_id,
+        printer_name,
+        locale,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -711,7 +711,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintSetContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -819,7 +819,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintDestroyContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -927,7 +927,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintStartJobRequest {
-        output_mode: output_mode,
+        output_mode,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -973,7 +973,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintEndJobRequest {
-        cancel: cancel,
+        cancel,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1019,7 +1019,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintStartDocRequest {
-        driver_mode: driver_mode,
+        driver_mode,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1065,7 +1065,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintEndDocRequest {
-        cancel: cancel,
+        cancel,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1133,10 +1133,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintPutDocumentDataRequest {
-        drawable: drawable,
-        data: data,
-        doc_format: doc_format,
-        options: options,
+        drawable,
+        data,
+        doc_format,
+        options,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1188,8 +1188,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintGetDocumentDataRequest {
-        context: context,
-        max_bytes: max_bytes,
+        context,
+        max_bytes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1282,7 +1282,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintStartPageRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1328,7 +1328,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintEndPageRequest {
-        cancel: cancel,
+        cancel,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1380,8 +1380,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintSelectInputRequest {
-        context: context,
-        event_mask: event_mask,
+        context,
+        event_mask,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1427,7 +1427,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintInputSelectedRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1506,8 +1506,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintGetAttributesRequest {
-        context: context,
-        pool: pool,
+        context,
+        pool,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1612,9 +1612,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintGetOneAttributesRequest {
-        context: context,
-        pool: pool,
-        name: name,
+        context,
+        pool,
+        name,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1721,11 +1721,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintSetAttributesRequest {
-        context: context,
-        string_len: string_len,
-        pool: pool,
-        rule: rule,
-        attributes: attributes,
+        context,
+        string_len,
+        pool,
+        rule,
+        attributes,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1771,7 +1771,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintGetPageDimensionsRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1937,8 +1937,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintSetImageResolutionRequest {
-        context: context,
-        image_resolution: image_resolution,
+        context,
+        image_resolution,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2010,7 +2010,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintGetImageResolutionRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

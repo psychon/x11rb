@@ -75,8 +75,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetVersionRequest {
-        major_version: major_version,
-        minor_version: minor_version,
+        major_version,
+        minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -224,8 +224,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CompareCursorRequest {
-        window: window,
-        cursor: cursor,
+        window,
+        cursor,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -335,13 +335,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FakeInputRequest {
-        type_: type_,
-        detail: detail,
-        time: time,
-        root: root,
-        root_x: root_x,
-        root_y: root_y,
-        deviceid: deviceid,
+        type_,
+        detail,
+        time,
+        root,
+        root_x,
+        root_y,
+        deviceid,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -387,7 +387,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GrabControlRequest {
-        impervious: impervious,
+        impervious,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

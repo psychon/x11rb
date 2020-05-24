@@ -81,8 +81,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        client_major_version: client_major_version,
-        client_minor_version: client_minor_version,
+        client_major_version,
+        client_minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -376,10 +376,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeSaveSetRequest {
-        mode: mode,
-        target: target,
-        map: map,
-        window: window,
+        mode,
+        target,
+        map,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -657,9 +657,9 @@ where
 {
     let event_mask: u32 = event_mask.into();
     let request0 = SelectSelectionInputRequest {
-        window: window,
-        selection: selection,
-        event_mask: event_mask,
+        window,
+        selection,
+        event_mask,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -916,8 +916,8 @@ where
 {
     let event_mask: u32 = event_mask.into();
     let request0 = SelectCursorInputRequest {
-        window: window,
-        event_mask: event_mask,
+        window,
+        event_mask,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1177,8 +1177,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateRegionRequest {
-        region: region,
-        rectangles: rectangles,
+        region,
+        rectangles,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1230,8 +1230,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateRegionFromBitmapRequest {
-        region: region,
-        bitmap: bitmap,
+        region,
+        bitmap,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1289,9 +1289,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateRegionFromWindowRequest {
-        region: region,
-        window: window,
-        kind: kind,
+        region,
+        window,
+        kind,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1343,8 +1343,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateRegionFromGCRequest {
-        region: region,
-        gc: gc,
+        region,
+        gc,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1396,8 +1396,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateRegionFromPictureRequest {
-        region: region,
-        picture: picture,
+        region,
+        picture,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1443,7 +1443,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyRegionRequest {
-        region: region,
+        region,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1494,8 +1494,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetRegionRequest {
-        region: region,
-        rectangles: rectangles,
+        region,
+        rectangles,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1547,8 +1547,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CopyRegionRequest {
-        source: source,
-        destination: destination,
+        source,
+        destination,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1606,9 +1606,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = UnionRegionRequest {
-        source1: source1,
-        source2: source2,
-        destination: destination,
+        source1,
+        source2,
+        destination,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1666,9 +1666,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = IntersectRegionRequest {
-        source1: source1,
-        source2: source2,
-        destination: destination,
+        source1,
+        source2,
+        destination,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1726,9 +1726,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SubtractRegionRequest {
-        source1: source1,
-        source2: source2,
-        destination: destination,
+        source1,
+        source2,
+        destination,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1790,9 +1790,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = InvertRegionRequest {
-        source: source,
-        bounds: bounds,
-        destination: destination,
+        source,
+        bounds,
+        destination,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1846,9 +1846,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = TranslateRegionRequest {
-        region: region,
-        dx: dx,
-        dy: dy,
+        region,
+        dx,
+        dy,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1900,8 +1900,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = RegionExtentsRequest {
-        source: source,
-        destination: destination,
+        source,
+        destination,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1947,7 +1947,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FetchRegionRequest {
-        region: region,
+        region,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2052,10 +2052,10 @@ where
 {
     let region: Region = region.into();
     let request0 = SetGCClipRegionRequest {
-        gc: gc,
-        region: region,
-        x_origin: x_origin,
-        y_origin: y_origin,
+        gc,
+        region,
+        x_origin,
+        y_origin,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2123,11 +2123,11 @@ where
 {
     let region: Region = region.into();
     let request0 = SetWindowShapeRegionRequest {
-        dest: dest,
-        dest_kind: dest_kind,
-        x_offset: x_offset,
-        y_offset: y_offset,
-        region: region,
+        dest,
+        dest_kind,
+        x_offset,
+        y_offset,
+        region,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2189,10 +2189,10 @@ where
 {
     let region: Region = region.into();
     let request0 = SetPictureClipRegionRequest {
-        picture: picture,
-        region: region,
-        x_origin: x_origin,
-        y_origin: y_origin,
+        picture,
+        region,
+        x_origin,
+        y_origin,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2248,8 +2248,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetCursorNameRequest {
-        cursor: cursor,
-        name: name,
+        cursor,
+        name,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2295,7 +2295,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetCursorNameRequest {
-        cursor: cursor,
+        cursor,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2490,8 +2490,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeCursorRequest {
-        source: source,
-        destination: destination,
+        source,
+        destination,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2547,8 +2547,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeCursorByNameRequest {
-        src: src,
-        name: name,
+        src,
+        name,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2616,12 +2616,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ExpandRegionRequest {
-        source: source,
-        destination: destination,
-        left: left,
-        right: right,
-        top: top,
-        bottom: bottom,
+        source,
+        destination,
+        left,
+        right,
+        top,
+        bottom,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2667,7 +2667,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = HideCursorRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2713,7 +2713,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ShowCursorRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2871,14 +2871,14 @@ where
 {
     let directions: u32 = directions.into();
     let request0 = CreatePointerBarrierRequest {
-        barrier: barrier,
-        window: window,
-        x1: x1,
-        y1: y1,
-        x2: x2,
-        y2: y2,
-        directions: directions,
-        devices: devices,
+        barrier,
+        window,
+        x1,
+        y1,
+        x2,
+        y2,
+        directions,
+        devices,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2924,7 +2924,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DeletePointerBarrierRequest {
-        barrier: barrier,
+        barrier,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

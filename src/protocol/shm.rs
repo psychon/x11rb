@@ -248,9 +248,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AttachRequest {
-        shmseg: shmseg,
-        shmid: shmid,
-        read_only: read_only,
+        shmseg,
+        shmid,
+        read_only,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -296,7 +296,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DetachRequest {
-        shmseg: shmseg,
+        shmseg,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -402,21 +402,21 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PutImageRequest {
-        drawable: drawable,
-        gc: gc,
-        total_width: total_width,
-        total_height: total_height,
-        src_x: src_x,
-        src_y: src_y,
-        src_width: src_width,
-        src_height: src_height,
-        dst_x: dst_x,
-        dst_y: dst_y,
-        depth: depth,
-        format: format,
-        send_event: send_event,
-        shmseg: shmseg,
-        offset: offset,
+        drawable,
+        gc,
+        total_width,
+        total_height,
+        src_x,
+        src_y,
+        src_width,
+        src_height,
+        dst_x,
+        dst_y,
+        depth,
+        format,
+        send_event,
+        shmseg,
+        offset,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -502,15 +502,15 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetImageRequest {
-        drawable: drawable,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        plane_mask: plane_mask,
-        format: format,
-        shmseg: shmseg,
-        offset: offset,
+        drawable,
+        x,
+        y,
+        width,
+        height,
+        plane_mask,
+        format,
+        shmseg,
+        offset,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -616,13 +616,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreatePixmapRequest {
-        pid: pid,
-        drawable: drawable,
-        width: width,
-        height: height,
-        depth: depth,
-        shmseg: shmseg,
-        offset: offset,
+        pid,
+        drawable,
+        width,
+        height,
+        depth,
+        shmseg,
+        offset,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -677,9 +677,9 @@ where
 {
     let shm_fd: RawFdContainer = shm_fd.into();
     let request0 = AttachFdRequest {
-        shmseg: shmseg,
-        shm_fd: shm_fd,
-        read_only: read_only,
+        shmseg,
+        shm_fd,
+        read_only,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -737,9 +737,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateSegmentRequest {
-        shmseg: shmseg,
-        size: size,
-        read_only: read_only,
+        shmseg,
+        size,
+        read_only,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

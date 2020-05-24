@@ -414,8 +414,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        major_version: major_version,
-        minor_version: minor_version,
+        major_version,
+        minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -494,8 +494,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ConnectRequest {
-        window: window,
-        driver_type: driver_type,
+        window,
+        driver_type,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -610,8 +610,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AuthenticateRequest {
-        window: window,
-        magic: magic,
+        window,
+        magic,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -682,7 +682,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateDrawableRequest {
-        drawable: drawable,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -728,7 +728,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyDrawableRequest {
-        drawable: drawable,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -785,9 +785,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetBuffersRequest {
-        drawable: drawable,
-        count: count,
-        attachments: attachments,
+        drawable,
+        count,
+        attachments,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -897,10 +897,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CopyRegionRequest {
-        drawable: drawable,
-        region: region,
-        dest: dest,
-        src: src,
+        drawable,
+        region,
+        dest,
+        src,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -980,9 +980,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetBuffersWithFormatRequest {
-        drawable: drawable,
-        count: count,
-        attachments: attachments,
+        drawable,
+        count,
+        attachments,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1110,13 +1110,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SwapBuffersRequest {
-        drawable: drawable,
-        target_msc_hi: target_msc_hi,
-        target_msc_lo: target_msc_lo,
-        divisor_hi: divisor_hi,
-        divisor_lo: divisor_lo,
-        remainder_hi: remainder_hi,
-        remainder_lo: remainder_lo,
+        drawable,
+        target_msc_hi,
+        target_msc_lo,
+        divisor_hi,
+        divisor_lo,
+        remainder_hi,
+        remainder_lo,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1189,7 +1189,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetMSCRequest {
-        drawable: drawable,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1306,13 +1306,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = WaitMSCRequest {
-        drawable: drawable,
-        target_msc_hi: target_msc_hi,
-        target_msc_lo: target_msc_lo,
-        divisor_hi: divisor_hi,
-        divisor_lo: divisor_lo,
-        remainder_hi: remainder_hi,
-        remainder_lo: remainder_lo,
+        drawable,
+        target_msc_hi,
+        target_msc_lo,
+        divisor_hi,
+        divisor_lo,
+        remainder_hi,
+        remainder_lo,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1405,9 +1405,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = WaitSBCRequest {
-        drawable: drawable,
-        target_sbc_hi: target_sbc_hi,
-        target_sbc_lo: target_sbc_lo,
+        drawable,
+        target_sbc_hi,
+        target_sbc_lo,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1494,8 +1494,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SwapIntervalRequest {
-        drawable: drawable,
-        interval: interval,
+        drawable,
+        interval,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1547,8 +1547,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetParamRequest {
-        drawable: drawable,
-        param: param,
+        drawable,
+        param,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

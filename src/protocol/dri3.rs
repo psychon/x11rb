@@ -79,8 +79,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        major_version: major_version,
-        minor_version: minor_version,
+        major_version,
+        minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -159,8 +159,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = OpenRequest {
-        drawable: drawable,
-        provider: provider,
+        drawable,
+        provider,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -268,15 +268,15 @@ where
 {
     let pixmap_fd: RawFdContainer = pixmap_fd.into();
     let request0 = PixmapFromBufferRequest {
-        pixmap: pixmap,
-        drawable: drawable,
-        size: size,
-        width: width,
-        height: height,
-        stride: stride,
-        depth: depth,
-        bpp: bpp,
-        pixmap_fd: pixmap_fd,
+        pixmap,
+        drawable,
+        size,
+        width,
+        height,
+        stride,
+        depth,
+        bpp,
+        pixmap_fd,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -322,7 +322,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = BufferFromPixmapRequest {
-        pixmap: pixmap,
+        pixmap,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -424,10 +424,10 @@ where
 {
     let fence_fd: RawFdContainer = fence_fd.into();
     let request0 = FenceFromFDRequest {
-        drawable: drawable,
-        fence: fence,
-        initially_triggered: initially_triggered,
-        fence_fd: fence_fd,
+        drawable,
+        fence,
+        initially_triggered,
+        fence_fd,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -479,8 +479,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FDFromFenceRequest {
-        drawable: drawable,
-        fence: fence,
+        drawable,
+        fence,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -563,9 +563,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetSupportedModifiersRequest {
-        window: window,
-        depth: depth,
-        bpp: bpp,
+        window,
+        depth,
+        bpp,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -756,22 +756,22 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PixmapFromBuffersRequest {
-        pixmap: pixmap,
-        window: window,
-        width: width,
-        height: height,
-        stride0: stride0,
-        offset0: offset0,
-        stride1: stride1,
-        offset1: offset1,
-        stride2: stride2,
-        offset2: offset2,
-        stride3: stride3,
-        offset3: offset3,
-        depth: depth,
-        bpp: bpp,
-        modifier: modifier,
-        buffers: buffers,
+        pixmap,
+        window,
+        width,
+        height,
+        stride0,
+        offset0,
+        stride1,
+        offset1,
+        stride2,
+        offset2,
+        stride3,
+        offset3,
+        depth,
+        bpp,
+        modifier,
+        buffers,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -817,7 +817,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = BuffersFromPixmapRequest {
-        pixmap: pixmap,
+        pixmap,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

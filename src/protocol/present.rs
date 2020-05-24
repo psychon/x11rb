@@ -545,8 +545,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        major_version: major_version,
-        minor_version: minor_version,
+        major_version,
+        minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -714,21 +714,21 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PixmapRequest {
-        window: window,
-        pixmap: pixmap,
-        serial: serial,
-        valid: valid,
-        update: update,
-        x_off: x_off,
-        y_off: y_off,
-        target_crtc: target_crtc,
-        wait_fence: wait_fence,
-        idle_fence: idle_fence,
-        options: options,
-        target_msc: target_msc,
-        divisor: divisor,
-        remainder: remainder,
-        notifies: notifies,
+        window,
+        pixmap,
+        serial,
+        valid,
+        update,
+        x_off,
+        y_off,
+        target_crtc,
+        wait_fence,
+        idle_fence,
+        options,
+        target_msc,
+        divisor,
+        remainder,
+        notifies,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -814,11 +814,11 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = NotifyMSCRequest {
-        window: window,
-        serial: serial,
-        target_msc: target_msc,
-        divisor: divisor,
-        remainder: remainder,
+        window,
+        serial,
+        target_msc,
+        divisor,
+        remainder,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -880,9 +880,9 @@ where
 {
     let event_mask: u32 = event_mask.into();
     let request0 = SelectInputRequest {
-        eid: eid,
-        window: window,
-        event_mask: event_mask,
+        eid,
+        window,
+        event_mask,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -928,7 +928,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryCapabilitiesRequest {
-        target: target,
+        target,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

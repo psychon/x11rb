@@ -188,7 +188,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryDirectRenderingCapableRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -259,7 +259,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = OpenConnectionRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -352,7 +352,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CloseConnectionRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -398,7 +398,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetClientDriverNameRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -505,9 +505,9 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateContextRequest {
-        screen: screen,
-        visual: visual,
-        context: context,
+        screen,
+        visual,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -584,8 +584,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyContextRequest {
-        screen: screen,
-        context: context,
+        screen,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -637,8 +637,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateDrawableRequest {
-        screen: screen,
-        drawable: drawable,
+        screen,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -715,8 +715,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DestroyDrawableRequest {
-        screen: screen,
-        drawable: drawable,
+        screen,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -768,8 +768,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDrawableInfoRequest {
-        screen: screen,
-        drawable: drawable,
+        screen,
+        drawable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -888,7 +888,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetDeviceInfoRequest {
-        screen: screen,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -991,8 +991,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AuthConnectionRequest {
-        screen: screen,
-        magic: magic,
+        screen,
+        magic,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

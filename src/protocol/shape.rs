@@ -393,13 +393,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = RectanglesRequest {
-        operation: operation,
-        destination_kind: destination_kind,
-        ordering: ordering,
-        destination_window: destination_window,
-        x_offset: x_offset,
-        y_offset: y_offset,
-        rectangles: rectangles,
+        operation,
+        destination_kind,
+        ordering,
+        destination_window,
+        x_offset,
+        y_offset,
+        rectangles,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -469,12 +469,12 @@ where
 {
     let source_bitmap: xproto::Pixmap = source_bitmap.into();
     let request0 = MaskRequest {
-        operation: operation,
-        destination_kind: destination_kind,
-        destination_window: destination_window,
-        x_offset: x_offset,
-        y_offset: y_offset,
-        source_bitmap: source_bitmap,
+        operation,
+        destination_kind,
+        destination_window,
+        x_offset,
+        y_offset,
+        source_bitmap,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -544,13 +544,13 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CombineRequest {
-        operation: operation,
-        destination_kind: destination_kind,
-        source_kind: source_kind,
-        destination_window: destination_window,
-        x_offset: x_offset,
-        y_offset: y_offset,
-        source_window: source_window,
+        operation,
+        destination_kind,
+        source_kind,
+        destination_window,
+        x_offset,
+        y_offset,
+        source_window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -610,10 +610,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = OffsetRequest {
-        destination_kind: destination_kind,
-        destination_window: destination_window,
-        x_offset: x_offset,
-        y_offset: y_offset,
+        destination_kind,
+        destination_window,
+        x_offset,
+        y_offset,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -659,7 +659,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryExtentsRequest {
-        destination_window: destination_window,
+        destination_window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -755,8 +755,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SelectInputRequest {
-        destination_window: destination_window,
-        enable: enable,
+        destination_window,
+        enable,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -802,7 +802,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = InputSelectedRequest {
-        destination_window: destination_window,
+        destination_window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -878,8 +878,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetRectanglesRequest {
-        window: window,
-        source_kind: source_kind,
+        window,
+        source_kind,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

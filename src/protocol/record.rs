@@ -536,8 +536,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        major_version: major_version,
-        minor_version: minor_version,
+        major_version,
+        minor_version,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -636,10 +636,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = CreateContextRequest {
-        context: context,
-        element_header: element_header,
-        client_specs: client_specs,
-        ranges: ranges,
+        context,
+        element_header,
+        client_specs,
+        ranges,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -711,10 +711,10 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = RegisterClientsRequest {
-        context: context,
-        element_header: element_header,
-        client_specs: client_specs,
-        ranges: ranges,
+        context,
+        element_header,
+        client_specs,
+        ranges,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -771,8 +771,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = UnregisterClientsRequest {
-        context: context,
-        client_specs: client_specs,
+        context,
+        client_specs,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -818,7 +818,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -910,7 +910,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = EnableContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1010,7 +1010,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = DisableContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1056,7 +1056,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = FreeContextRequest {
-        context: context,
+        context,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

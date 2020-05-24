@@ -125,8 +125,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryVersionRequest {
-        major: major,
-        minor: minor,
+        major,
+        minor,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -199,7 +199,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetStateRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -271,7 +271,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetScreenCountRequest {
-        window: window,
+        window,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -349,8 +349,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetScreenSizeRequest {
-        window: window,
-        screen: screen,
+        window,
+        screen,
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
