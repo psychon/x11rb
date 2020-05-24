@@ -9981,7 +9981,7 @@ impl<'input> SendEventRequest<'input> {
 ///     free(event);
 /// }
 /// ```
-pub fn send_event<'c, 'input, Conn, A, B, C>(conn: &'c Conn, propagate: bool, destination: A, event_mask: B, event: C) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn send_event<Conn, A, B, C>(conn: &Conn, propagate: bool, destination: A, event_mask: B, event: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Window>,
