@@ -4433,8 +4433,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let mut fd_lists = Vec::new();
 
         let ns = request_def.namespace.upgrade().unwrap();
-        let is_change_propery = request_def.name == "ChangeProperty" && ns.header == "xproto";
-        let is_get_propery = request_def.name == "GetProperty" && ns.header == "xproto";
+        let is_change_property = request_def.name == "ChangeProperty" && ns.header == "xproto";
+        let is_get_property = request_def.name == "GetProperty" && ns.header == "xproto";
         let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
 
         for field in request_def.fields.borrow().iter() {
@@ -4451,9 +4451,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 xcbdefs::FieldDef::Normal(normal_field) => {
                     let rust_field_name = to_rust_variable_name(&normal_field.name);
                     let rust_field_type = self.field_value_type_to_rust_type(&normal_field.type_);
-                    let use_into = if ((is_change_propery || is_get_propery)
+                    let use_into = if ((is_change_property || is_get_property)
                         && normal_field.name == "property")
-                        || (is_change_propery && normal_field.name == "type")
+                        || (is_change_property && normal_field.name == "type")
                     {
                         true
                     } else if self.use_enum_type_in_field(&normal_field.type_).is_none() {
