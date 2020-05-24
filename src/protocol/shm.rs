@@ -8,6 +8,7 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -124,26 +125,41 @@ impl From<CompletionEvent> for [u8; 32] {
 pub const BAD_SEG_ERROR: u8 = 0;
 pub type BadSegError = xproto::ValueError;
 
-/// Opcode for the QueryVersion request
-pub const QUERY_VERSION_REQUEST: u8 = 0;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryVersionRequest;
+impl QueryVersionRequest {
+    /// Opcode for the QueryVersion request
+    pub const fn opcode() -> u8 { 0 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QueryVersionRequest::opcode(),
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_VERSION_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryVersionRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -181,200 +197,324 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
-/// Opcode for the Attach request
-pub const ATTACH_REQUEST: u8 = 1;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AttachRequest {
+    pub shmseg: Seg,
+    pub shmid: u32,
+    pub read_only: bool,
+}
+impl AttachRequest {
+    /// Opcode for the Attach request
+    pub const fn opcode() -> u8 { 1 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let shmseg_bytes = self.shmseg.serialize();
+        let shmid_bytes = self.shmid.serialize();
+        let read_only_bytes = self.read_only.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            AttachRequest::opcode(),
+            0,
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+            shmid_bytes[0],
+            shmid_bytes[1],
+            shmid_bytes[2],
+            shmid_bytes[3],
+            read_only_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn attach<Conn>(conn: &Conn, shmseg: Seg, shmid: u32, read_only: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let shmseg_bytes = shmseg.serialize();
-    let shmid_bytes = shmid.serialize();
-    let read_only_bytes = read_only.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        ATTACH_REQUEST,
-        0,
-        0,
-        shmseg_bytes[0],
-        shmseg_bytes[1],
-        shmseg_bytes[2],
-        shmseg_bytes[3],
-        shmid_bytes[0],
-        shmid_bytes[1],
-        shmid_bytes[2],
-        shmid_bytes[3],
-        read_only_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = AttachRequest {
+        shmseg: shmseg,
+        shmid: shmid,
+        read_only: read_only,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the Detach request
-pub const DETACH_REQUEST: u8 = 2;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DetachRequest {
+    pub shmseg: Seg,
+}
+impl DetachRequest {
+    /// Opcode for the Detach request
+    pub const fn opcode() -> u8 { 2 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let shmseg_bytes = self.shmseg.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            DetachRequest::opcode(),
+            0,
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn detach<Conn>(conn: &Conn, shmseg: Seg) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let shmseg_bytes = shmseg.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        DETACH_REQUEST,
-        0,
-        0,
-        shmseg_bytes[0],
-        shmseg_bytes[1],
-        shmseg_bytes[2],
-        shmseg_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = DetachRequest {
+        shmseg: shmseg,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the PutImage request
-pub const PUT_IMAGE_REQUEST: u8 = 3;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PutImageRequest {
+    pub drawable: xproto::Drawable,
+    pub gc: xproto::Gcontext,
+    pub total_width: u16,
+    pub total_height: u16,
+    pub src_x: u16,
+    pub src_y: u16,
+    pub src_width: u16,
+    pub src_height: u16,
+    pub dst_x: i16,
+    pub dst_y: i16,
+    pub depth: u8,
+    pub format: u8,
+    pub send_event: bool,
+    pub shmseg: Seg,
+    pub offset: u32,
+}
+impl PutImageRequest {
+    /// Opcode for the PutImage request
+    pub const fn opcode() -> u8 { 3 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let gc_bytes = self.gc.serialize();
+        let total_width_bytes = self.total_width.serialize();
+        let total_height_bytes = self.total_height.serialize();
+        let src_x_bytes = self.src_x.serialize();
+        let src_y_bytes = self.src_y.serialize();
+        let src_width_bytes = self.src_width.serialize();
+        let src_height_bytes = self.src_height.serialize();
+        let dst_x_bytes = self.dst_x.serialize();
+        let dst_y_bytes = self.dst_y.serialize();
+        let depth_bytes = self.depth.serialize();
+        let format_bytes = self.format.serialize();
+        let send_event_bytes = self.send_event.serialize();
+        let shmseg_bytes = self.shmseg.serialize();
+        let offset_bytes = self.offset.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            PutImageRequest::opcode(),
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            gc_bytes[0],
+            gc_bytes[1],
+            gc_bytes[2],
+            gc_bytes[3],
+            total_width_bytes[0],
+            total_width_bytes[1],
+            total_height_bytes[0],
+            total_height_bytes[1],
+            src_x_bytes[0],
+            src_x_bytes[1],
+            src_y_bytes[0],
+            src_y_bytes[1],
+            src_width_bytes[0],
+            src_width_bytes[1],
+            src_height_bytes[0],
+            src_height_bytes[1],
+            dst_x_bytes[0],
+            dst_x_bytes[1],
+            dst_y_bytes[0],
+            dst_y_bytes[1],
+            depth_bytes[0],
+            format_bytes[0],
+            send_event_bytes[0],
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+            offset_bytes[0],
+            offset_bytes[1],
+            offset_bytes[2],
+            offset_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn put_image<Conn>(conn: &Conn, drawable: xproto::Drawable, gc: xproto::Gcontext, total_width: u16, total_height: u16, src_x: u16, src_y: u16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16, depth: u8, format: u8, send_event: bool, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let gc_bytes = gc.serialize();
-    let total_width_bytes = total_width.serialize();
-    let total_height_bytes = total_height.serialize();
-    let src_x_bytes = src_x.serialize();
-    let src_y_bytes = src_y.serialize();
-    let src_width_bytes = src_width.serialize();
-    let src_height_bytes = src_height.serialize();
-    let dst_x_bytes = dst_x.serialize();
-    let dst_y_bytes = dst_y.serialize();
-    let depth_bytes = depth.serialize();
-    let format_bytes = format.serialize();
-    let send_event_bytes = send_event.serialize();
-    let shmseg_bytes = shmseg.serialize();
-    let offset_bytes = offset.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        PUT_IMAGE_REQUEST,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        gc_bytes[0],
-        gc_bytes[1],
-        gc_bytes[2],
-        gc_bytes[3],
-        total_width_bytes[0],
-        total_width_bytes[1],
-        total_height_bytes[0],
-        total_height_bytes[1],
-        src_x_bytes[0],
-        src_x_bytes[1],
-        src_y_bytes[0],
-        src_y_bytes[1],
-        src_width_bytes[0],
-        src_width_bytes[1],
-        src_height_bytes[0],
-        src_height_bytes[1],
-        dst_x_bytes[0],
-        dst_x_bytes[1],
-        dst_y_bytes[0],
-        dst_y_bytes[1],
-        depth_bytes[0],
-        format_bytes[0],
-        send_event_bytes[0],
-        0,
-        shmseg_bytes[0],
-        shmseg_bytes[1],
-        shmseg_bytes[2],
-        shmseg_bytes[3],
-        offset_bytes[0],
-        offset_bytes[1],
-        offset_bytes[2],
-        offset_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = PutImageRequest {
+        drawable: drawable,
+        gc: gc,
+        total_width: total_width,
+        total_height: total_height,
+        src_x: src_x,
+        src_y: src_y,
+        src_width: src_width,
+        src_height: src_height,
+        dst_x: dst_x,
+        dst_y: dst_y,
+        depth: depth,
+        format: format,
+        send_event: send_event,
+        shmseg: shmseg,
+        offset: offset,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the GetImage request
-pub const GET_IMAGE_REQUEST: u8 = 4;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetImageRequest {
+    pub drawable: xproto::Drawable,
+    pub x: i16,
+    pub y: i16,
+    pub width: u16,
+    pub height: u16,
+    pub plane_mask: u32,
+    pub format: u8,
+    pub shmseg: Seg,
+    pub offset: u32,
+}
+impl GetImageRequest {
+    /// Opcode for the GetImage request
+    pub const fn opcode() -> u8 { 4 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let drawable_bytes = self.drawable.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let plane_mask_bytes = self.plane_mask.serialize();
+        let format_bytes = self.format.serialize();
+        let shmseg_bytes = self.shmseg.serialize();
+        let offset_bytes = self.offset.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GetImageRequest::opcode(),
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            plane_mask_bytes[0],
+            plane_mask_bytes[1],
+            plane_mask_bytes[2],
+            plane_mask_bytes[3],
+            format_bytes[0],
+            0,
+            0,
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+            offset_bytes[0],
+            offset_bytes[1],
+            offset_bytes[2],
+            offset_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_image<Conn>(conn: &Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32, format: u8, shmseg: Seg, offset: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let drawable_bytes = drawable.serialize();
-    let x_bytes = x.serialize();
-    let y_bytes = y.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let plane_mask_bytes = plane_mask.serialize();
-    let format_bytes = format.serialize();
-    let shmseg_bytes = shmseg.serialize();
-    let offset_bytes = offset.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_IMAGE_REQUEST,
-        0,
-        0,
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        x_bytes[0],
-        x_bytes[1],
-        y_bytes[0],
-        y_bytes[1],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-        plane_mask_bytes[0],
-        plane_mask_bytes[1],
-        plane_mask_bytes[2],
-        plane_mask_bytes[3],
-        format_bytes[0],
-        0,
-        0,
-        0,
-        shmseg_bytes[0],
-        shmseg_bytes[1],
-        shmseg_bytes[2],
-        shmseg_bytes[3],
-        offset_bytes[0],
-        offset_bytes[1],
-        offset_bytes[2],
-        offset_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetImageRequest {
+        drawable: drawable,
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        plane_mask: plane_mask,
+        format: format,
+        shmseg: shmseg,
+        offset: offset,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -405,128 +545,205 @@ impl TryFrom<&[u8]> for GetImageReply {
     }
 }
 
-/// Opcode for the CreatePixmap request
-pub const CREATE_PIXMAP_REQUEST: u8 = 5;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreatePixmapRequest {
+    pub pid: xproto::Pixmap,
+    pub drawable: xproto::Drawable,
+    pub width: u16,
+    pub height: u16,
+    pub depth: u8,
+    pub shmseg: Seg,
+    pub offset: u32,
+}
+impl CreatePixmapRequest {
+    /// Opcode for the CreatePixmap request
+    pub const fn opcode() -> u8 { 5 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let pid_bytes = self.pid.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let depth_bytes = self.depth.serialize();
+        let shmseg_bytes = self.shmseg.serialize();
+        let offset_bytes = self.offset.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            CreatePixmapRequest::opcode(),
+            0,
+            0,
+            pid_bytes[0],
+            pid_bytes[1],
+            pid_bytes[2],
+            pid_bytes[3],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            depth_bytes[0],
+            0,
+            0,
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+            offset_bytes[0],
+            offset_bytes[1],
+            offset_bytes[2],
+            offset_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn create_pixmap<Conn>(conn: &Conn, pid: xproto::Pixmap, drawable: xproto::Drawable, width: u16, height: u16, depth: u8, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let pid_bytes = pid.serialize();
-    let drawable_bytes = drawable.serialize();
-    let width_bytes = width.serialize();
-    let height_bytes = height.serialize();
-    let depth_bytes = depth.serialize();
-    let shmseg_bytes = shmseg.serialize();
-    let offset_bytes = offset.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        CREATE_PIXMAP_REQUEST,
-        0,
-        0,
-        pid_bytes[0],
-        pid_bytes[1],
-        pid_bytes[2],
-        pid_bytes[3],
-        drawable_bytes[0],
-        drawable_bytes[1],
-        drawable_bytes[2],
-        drawable_bytes[3],
-        width_bytes[0],
-        width_bytes[1],
-        height_bytes[0],
-        height_bytes[1],
-        depth_bytes[0],
-        0,
-        0,
-        0,
-        shmseg_bytes[0],
-        shmseg_bytes[1],
-        shmseg_bytes[2],
-        shmseg_bytes[3],
-        offset_bytes[0],
-        offset_bytes[1],
-        offset_bytes[2],
-        offset_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CreatePixmapRequest {
+        pid: pid,
+        drawable: drawable,
+        width: width,
+        height: height,
+        depth: depth,
+        shmseg: shmseg,
+        offset: offset,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the AttachFd request
-pub const ATTACH_FD_REQUEST: u8 = 6;
+#[derive(Debug, PartialEq, Eq)]
+pub struct AttachFdRequest {
+    pub shmseg: Seg,
+    pub shm_fd: RawFdContainer,
+    pub read_only: bool,
+}
+impl AttachFdRequest {
+    /// Opcode for the AttachFd request
+    pub const fn opcode() -> u8 { 6 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let shmseg_bytes = self.shmseg.serialize();
+        let read_only_bytes = self.read_only.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            AttachFdRequest::opcode(),
+            0,
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+            read_only_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![self.shm_fd]))
+    }
+}
 pub fn attach_fd<Conn, A>(conn: &Conn, shmseg: Seg, shm_fd: A, read_only: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<RawFdContainer>,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
     let shm_fd: RawFdContainer = shm_fd.into();
-    let length_so_far = 0;
-    let shmseg_bytes = shmseg.serialize();
-    let read_only_bytes = read_only.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        ATTACH_FD_REQUEST,
-        0,
-        0,
-        shmseg_bytes[0],
-        shmseg_bytes[1],
-        shmseg_bytes[2],
-        shmseg_bytes[3],
-        read_only_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![shm_fd])?)
+    let request0 = AttachFdRequest {
+        shmseg: shmseg,
+        shm_fd: shm_fd,
+        read_only: read_only,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the CreateSegment request
-pub const CREATE_SEGMENT_REQUEST: u8 = 7;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateSegmentRequest {
+    pub shmseg: Seg,
+    pub size: u32,
+    pub read_only: bool,
+}
+impl CreateSegmentRequest {
+    /// Opcode for the CreateSegment request
+    pub const fn opcode() -> u8 { 7 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let shmseg_bytes = self.shmseg.serialize();
+        let size_bytes = self.size.serialize();
+        let read_only_bytes = self.read_only.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            CreateSegmentRequest::opcode(),
+            0,
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+            size_bytes[0],
+            size_bytes[1],
+            size_bytes[2],
+            size_bytes[3],
+            read_only_bytes[0],
+            0,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn create_segment<Conn>(conn: &Conn, shmseg: Seg, size: u32, read_only: bool) -> Result<CookieWithFds<'_, Conn, CreateSegmentReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let shmseg_bytes = shmseg.serialize();
-    let size_bytes = size.serialize();
-    let read_only_bytes = read_only.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        CREATE_SEGMENT_REQUEST,
-        0,
-        0,
-        shmseg_bytes[0],
-        shmseg_bytes[1],
-        shmseg_bytes[2],
-        shmseg_bytes[3],
-        size_bytes[0],
-        size_bytes[1],
-        size_bytes[2],
-        size_bytes[3],
-        read_only_bytes[0],
-        0,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = CreateSegmentRequest {
+        shmseg: shmseg,
+        size: size,
+        read_only: read_only,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply_with_fds(&slices, fds)?)
 }
 
 #[derive(Debug, PartialEq, Eq)]

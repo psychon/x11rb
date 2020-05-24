@@ -8,6 +8,7 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -429,32 +430,53 @@ impl ResourceSizeValue {
     }
 }
 
-/// Opcode for the QueryVersion request
-pub const QUERY_VERSION_REQUEST: u8 = 0;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryVersionRequest {
+    pub client_major: u8,
+    pub client_minor: u8,
+}
+impl QueryVersionRequest {
+    /// Opcode for the QueryVersion request
+    pub const fn opcode() -> u8 { 0 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let client_major_bytes = self.client_major.serialize();
+        let client_minor_bytes = self.client_minor.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QueryVersionRequest::opcode(),
+            0,
+            0,
+            client_major_bytes[0],
+            client_minor_bytes[0],
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_version<Conn>(conn: &Conn, client_major: u8, client_minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let client_major_bytes = client_major.serialize();
-    let client_minor_bytes = client_minor.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_VERSION_REQUEST,
-        0,
-        0,
-        client_major_bytes[0],
-        client_minor_bytes[0],
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryVersionRequest {
+        client_major: client_major,
+        client_minor: client_minor,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -484,26 +506,41 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
-/// Opcode for the QueryClients request
-pub const QUERY_CLIENTS_REQUEST: u8 = 1;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryClientsRequest;
+impl QueryClientsRequest {
+    /// Opcode for the QueryClients request
+    pub const fn opcode() -> u8 { 1 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QueryClientsRequest::opcode(),
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_clients<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryClientsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_CLIENTS_REQUEST,
-        0,
-        0,
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryClientsRequest;
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -548,31 +585,50 @@ impl QueryClientsReply {
     }
 }
 
-/// Opcode for the QueryClientResources request
-pub const QUERY_CLIENT_RESOURCES_REQUEST: u8 = 2;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryClientResourcesRequest {
+    pub xid: u32,
+}
+impl QueryClientResourcesRequest {
+    /// Opcode for the QueryClientResources request
+    pub const fn opcode() -> u8 { 2 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let xid_bytes = self.xid.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QueryClientResourcesRequest::opcode(),
+            0,
+            0,
+            xid_bytes[0],
+            xid_bytes[1],
+            xid_bytes[2],
+            xid_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_client_resources<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientResourcesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let xid_bytes = xid.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_CLIENT_RESOURCES_REQUEST,
-        0,
-        0,
-        xid_bytes[0],
-        xid_bytes[1],
-        xid_bytes[2],
-        xid_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryClientResourcesRequest {
+        xid: xid,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -617,31 +673,50 @@ impl QueryClientResourcesReply {
     }
 }
 
-/// Opcode for the QueryClientPixmapBytes request
-pub const QUERY_CLIENT_PIXMAP_BYTES_REQUEST: u8 = 3;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryClientPixmapBytesRequest {
+    pub xid: u32,
+}
+impl QueryClientPixmapBytesRequest {
+    /// Opcode for the QueryClientPixmapBytes request
+    pub const fn opcode() -> u8 { 3 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let xid_bytes = self.xid.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QueryClientPixmapBytesRequest::opcode(),
+            0,
+            0,
+            xid_bytes[0],
+            xid_bytes[1],
+            xid_bytes[2],
+            xid_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_client_pixmap_bytes<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientPixmapBytesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let xid_bytes = xid.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_CLIENT_PIXMAP_BYTES_REQUEST,
-        0,
-        0,
-        xid_bytes[0],
-        xid_bytes[1],
-        xid_bytes[2],
-        xid_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryClientPixmapBytesRequest {
+        xid: xid,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -671,36 +746,55 @@ impl TryFrom<&[u8]> for QueryClientPixmapBytesReply {
     }
 }
 
-/// Opcode for the QueryClientIds request
-pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct QueryClientIdsRequest<'input> {
+    pub specs: &'input [ClientIdSpec],
+}
+impl<'input> QueryClientIdsRequest<'input> {
+    /// Opcode for the QueryClientIds request
+    pub const fn opcode() -> u8 { 4 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let num_specs = u32::try_from(self.specs.len()).expect("`specs` has too many elements");
+        let num_specs_bytes = num_specs.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QueryClientIdsRequest::opcode(),
+            0,
+            0,
+            num_specs_bytes[0],
+            num_specs_bytes[1],
+            num_specs_bytes[2],
+            num_specs_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let specs_bytes = self.specs.serialize();
+        let length_so_far = length_so_far + specs_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), specs_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+    }
+}
 pub fn query_client_ids<'c, 'input, Conn>(conn: &'c Conn, specs: &'input [ClientIdSpec]) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let num_specs = u32::try_from(specs.len()).expect("`specs` has too many elements");
-    let num_specs_bytes = num_specs.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_CLIENT_IDS_REQUEST,
-        0,
-        0,
-        num_specs_bytes[0],
-        num_specs_bytes[1],
-        num_specs_bytes[2],
-        num_specs_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let specs_bytes = specs.serialize();
-    let length_so_far = length_so_far + specs_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&specs_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = QueryClientIdsRequest {
+        specs: specs,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -745,41 +839,62 @@ impl QueryClientIdsReply {
     }
 }
 
-/// Opcode for the QueryResourceBytes request
-pub const QUERY_RESOURCE_BYTES_REQUEST: u8 = 5;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct QueryResourceBytesRequest<'input> {
+    pub client: u32,
+    pub specs: &'input [ResourceIdSpec],
+}
+impl<'input> QueryResourceBytesRequest<'input> {
+    /// Opcode for the QueryResourceBytes request
+    pub const fn opcode() -> u8 { 5 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let client_bytes = self.client.serialize();
+        let num_specs = u32::try_from(self.specs.len()).expect("`specs` has too many elements");
+        let num_specs_bytes = num_specs.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QueryResourceBytesRequest::opcode(),
+            0,
+            0,
+            client_bytes[0],
+            client_bytes[1],
+            client_bytes[2],
+            client_bytes[3],
+            num_specs_bytes[0],
+            num_specs_bytes[1],
+            num_specs_bytes[2],
+            num_specs_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let specs_bytes = self.specs.serialize();
+        let length_so_far = length_so_far + specs_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), specs_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+    }
+}
 pub fn query_resource_bytes<'c, 'input, Conn>(conn: &'c Conn, client: u32, specs: &'input [ResourceIdSpec]) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let client_bytes = client.serialize();
-    let num_specs = u32::try_from(specs.len()).expect("`specs` has too many elements");
-    let num_specs_bytes = num_specs.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_RESOURCE_BYTES_REQUEST,
-        0,
-        0,
-        client_bytes[0],
-        client_bytes[1],
-        client_bytes[2],
-        client_bytes[3],
-        num_specs_bytes[0],
-        num_specs_bytes[1],
-        num_specs_bytes[2],
-        num_specs_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let specs_bytes = specs.serialize();
-    let length_so_far = length_so_far + specs_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&specs_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = QueryResourceBytesRequest {
+        client: client,
+        specs: specs,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -62,7 +62,7 @@ mod fake_stream {
     use x11rb::connection::SequenceNumber;
     use x11rb::errors::ConnectError;
     use x11rb::protocol::xproto::{
-        ImageOrder, Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST,
+        GetInputFocusRequest, ImageOrder, SendEventRequest, Setup, CLIENT_MESSAGE_EVENT,
     };
     use x11rb::rust_connection::{Poll, ReadFD, RustConnection, WriteFD};
     use x11rb::utils::RawFdContainer;
@@ -194,13 +194,15 @@ mod fake_stream {
             }
 
             self.seqno += 1;
-            match buf[0] {
-                GET_INPUT_FOCUS_REQUEST => self
-                    .send
+            // Can't use match here until https://github.com/rust-lang/rust/issues/57240 is fixed.
+            if buf[0] == GetInputFocusRequest::opcode() {
+                self.send
                     .send(Packet::GetInputFocusReply(self.seqno))
-                    .unwrap(),
-                SEND_EVENT_REQUEST => self.send.send(Packet::Event).unwrap(),
-                _ => unimplemented!(),
+                    .unwrap()
+            } else if buf[0] == SendEventRequest::opcode() {
+                self.send.send(Packet::Event).unwrap()
+            } else {
+                unimplemented!()
             }
             // Compute how much of the package was not yet received
             self.skip = usize::from(u16::from_ne_bytes([buf[2], buf[3]])) * 4 - buf.len();

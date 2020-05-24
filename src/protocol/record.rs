@@ -8,6 +8,7 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -494,32 +495,53 @@ impl From<BadContextError> for [u8; 32] {
     }
 }
 
-/// Opcode for the QueryVersion request
-pub const QUERY_VERSION_REQUEST: u8 = 0;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryVersionRequest {
+    pub major_version: u16,
+    pub minor_version: u16,
+}
+impl QueryVersionRequest {
+    /// Opcode for the QueryVersion request
+    pub const fn opcode() -> u8 { 0 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            QueryVersionRequest::opcode(),
+            0,
+            0,
+            major_version_bytes[0],
+            major_version_bytes[1],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn query_version<Conn>(conn: &Conn, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let major_version_bytes = major_version.serialize();
-    let minor_version_bytes = minor_version.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        QUERY_VERSION_REQUEST,
-        0,
-        0,
-        major_version_bytes[0],
-        major_version_bytes[1],
-        minor_version_bytes[0],
-        minor_version_bytes[1],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = QueryVersionRequest {
+        major_version: major_version,
+        minor_version: minor_version,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -549,168 +571,258 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
-/// Opcode for the CreateContext request
-pub const CREATE_CONTEXT_REQUEST: u8 = 1;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CreateContextRequest<'input> {
+    pub context: Context,
+    pub element_header: ElementHeader,
+    pub client_specs: &'input [ClientSpec],
+    pub ranges: &'input [Range],
+}
+impl<'input> CreateContextRequest<'input> {
+    /// Opcode for the CreateContext request
+    pub const fn opcode() -> u8 { 1 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let element_header_bytes = self.element_header.serialize();
+        let num_client_specs = u32::try_from(self.client_specs.len()).expect("`client_specs` has too many elements");
+        let num_client_specs_bytes = num_client_specs.serialize();
+        let num_ranges = u32::try_from(self.ranges.len()).expect("`ranges` has too many elements");
+        let num_ranges_bytes = num_ranges.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            CreateContextRequest::opcode(),
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            element_header_bytes[0],
+            0,
+            0,
+            0,
+            num_client_specs_bytes[0],
+            num_client_specs_bytes[1],
+            num_client_specs_bytes[2],
+            num_client_specs_bytes[3],
+            num_ranges_bytes[0],
+            num_ranges_bytes[1],
+            num_ranges_bytes[2],
+            num_ranges_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let client_specs_bytes = self.client_specs.serialize();
+        let length_so_far = length_so_far + client_specs_bytes.len();
+        let ranges_bytes = self.ranges.serialize();
+        let length_so_far = length_so_far + ranges_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), client_specs_bytes.into(), ranges_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+    }
+}
 pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let element_header_bytes = element_header.serialize();
-    let num_client_specs = u32::try_from(client_specs.len()).expect("`client_specs` has too many elements");
-    let num_client_specs_bytes = num_client_specs.serialize();
-    let num_ranges = u32::try_from(ranges.len()).expect("`ranges` has too many elements");
-    let num_ranges_bytes = num_ranges.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        CREATE_CONTEXT_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-        element_header_bytes[0],
-        0,
-        0,
-        0,
-        num_client_specs_bytes[0],
-        num_client_specs_bytes[1],
-        num_client_specs_bytes[2],
-        num_client_specs_bytes[3],
-        num_ranges_bytes[0],
-        num_ranges_bytes[1],
-        num_ranges_bytes[2],
-        num_ranges_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let client_specs_bytes = client_specs.serialize();
-    let length_so_far = length_so_far + client_specs_bytes.len();
-    let ranges_bytes = ranges.serialize();
-    let length_so_far = length_so_far + ranges_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&client_specs_bytes), IoSlice::new(&ranges_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = CreateContextRequest {
+        context: context,
+        element_header: element_header,
+        client_specs: client_specs,
+        ranges: ranges,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the RegisterClients request
-pub const REGISTER_CLIENTS_REQUEST: u8 = 2;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RegisterClientsRequest<'input> {
+    pub context: Context,
+    pub element_header: ElementHeader,
+    pub client_specs: &'input [ClientSpec],
+    pub ranges: &'input [Range],
+}
+impl<'input> RegisterClientsRequest<'input> {
+    /// Opcode for the RegisterClients request
+    pub const fn opcode() -> u8 { 2 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let element_header_bytes = self.element_header.serialize();
+        let num_client_specs = u32::try_from(self.client_specs.len()).expect("`client_specs` has too many elements");
+        let num_client_specs_bytes = num_client_specs.serialize();
+        let num_ranges = u32::try_from(self.ranges.len()).expect("`ranges` has too many elements");
+        let num_ranges_bytes = num_ranges.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            RegisterClientsRequest::opcode(),
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            element_header_bytes[0],
+            0,
+            0,
+            0,
+            num_client_specs_bytes[0],
+            num_client_specs_bytes[1],
+            num_client_specs_bytes[2],
+            num_client_specs_bytes[3],
+            num_ranges_bytes[0],
+            num_ranges_bytes[1],
+            num_ranges_bytes[2],
+            num_ranges_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let client_specs_bytes = self.client_specs.serialize();
+        let length_so_far = length_so_far + client_specs_bytes.len();
+        let ranges_bytes = self.ranges.serialize();
+        let length_so_far = length_so_far + ranges_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), client_specs_bytes.into(), ranges_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+    }
+}
 pub fn register_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let element_header_bytes = element_header.serialize();
-    let num_client_specs = u32::try_from(client_specs.len()).expect("`client_specs` has too many elements");
-    let num_client_specs_bytes = num_client_specs.serialize();
-    let num_ranges = u32::try_from(ranges.len()).expect("`ranges` has too many elements");
-    let num_ranges_bytes = num_ranges.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        REGISTER_CLIENTS_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-        element_header_bytes[0],
-        0,
-        0,
-        0,
-        num_client_specs_bytes[0],
-        num_client_specs_bytes[1],
-        num_client_specs_bytes[2],
-        num_client_specs_bytes[3],
-        num_ranges_bytes[0],
-        num_ranges_bytes[1],
-        num_ranges_bytes[2],
-        num_ranges_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let client_specs_bytes = client_specs.serialize();
-    let length_so_far = length_so_far + client_specs_bytes.len();
-    let ranges_bytes = ranges.serialize();
-    let length_so_far = length_so_far + ranges_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&client_specs_bytes), IoSlice::new(&ranges_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = RegisterClientsRequest {
+        context: context,
+        element_header: element_header,
+        client_specs: client_specs,
+        ranges: ranges,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the UnregisterClients request
-pub const UNREGISTER_CLIENTS_REQUEST: u8 = 3;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UnregisterClientsRequest<'input> {
+    pub context: Context,
+    pub client_specs: &'input [ClientSpec],
+}
+impl<'input> UnregisterClientsRequest<'input> {
+    /// Opcode for the UnregisterClients request
+    pub const fn opcode() -> u8 { 3 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let num_client_specs = u32::try_from(self.client_specs.len()).expect("`client_specs` has too many elements");
+        let num_client_specs_bytes = num_client_specs.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            UnregisterClientsRequest::opcode(),
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            num_client_specs_bytes[0],
+            num_client_specs_bytes[1],
+            num_client_specs_bytes[2],
+            num_client_specs_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let client_specs_bytes = self.client_specs.serialize();
+        let length_so_far = length_so_far + client_specs_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into(), client_specs_bytes.into(), Cow::Borrowed(&padding0)], vec![]))
+    }
+}
 pub fn unregister_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, client_specs: &'input [ClientSpec]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let num_client_specs = u32::try_from(client_specs.len()).expect("`client_specs` has too many elements");
-    let num_client_specs_bytes = num_client_specs.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        UNREGISTER_CLIENTS_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-        num_client_specs_bytes[0],
-        num_client_specs_bytes[1],
-        num_client_specs_bytes[2],
-        num_client_specs_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    let client_specs_bytes = client_specs.serialize();
-    let length_so_far = length_so_far + client_specs_bytes.len();
-    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + padding0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&client_specs_bytes), IoSlice::new(&padding0)], vec![])?)
+    let request0 = UnregisterClientsRequest {
+        context: context,
+        client_specs: client_specs,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the GetContext request
-pub const GET_CONTEXT_REQUEST: u8 = 4;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetContextRequest {
+    pub context: Context,
+}
+impl GetContextRequest {
+    /// Opcode for the GetContext request
+    pub const fn opcode() -> u8 { 4 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            GetContextRequest::opcode(),
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn get_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, GetContextReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        GET_CONTEXT_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = GetContextRequest {
+        context: context,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -759,31 +871,50 @@ impl GetContextReply {
     }
 }
 
-/// Opcode for the EnableContext request
-pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct EnableContextRequest {
+    pub context: Context,
+}
+impl EnableContextRequest {
+    /// Opcode for the EnableContext request
+    pub const fn opcode() -> u8 { 5 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            EnableContextRequest::opcode(),
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn enable_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, EnableContextReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        ENABLE_CONTEXT_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = EnableContextRequest {
+        context: context,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_with_reply(&slices, fds)?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -840,58 +971,96 @@ impl EnableContextReply {
     }
 }
 
-/// Opcode for the DisableContext request
-pub const DISABLE_CONTEXT_REQUEST: u8 = 6;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DisableContextRequest {
+    pub context: Context,
+}
+impl DisableContextRequest {
+    /// Opcode for the DisableContext request
+    pub const fn opcode() -> u8 { 6 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            DisableContextRequest::opcode(),
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn disable_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        DISABLE_CONTEXT_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = DisableContextRequest {
+        context: context,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
-/// Opcode for the FreeContext request
-pub const FREE_CONTEXT_REQUEST: u8 = 7;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FreeContextRequest {
+    pub context: Context,
+}
+impl FreeContextRequest {
+    /// Opcode for the FreeContext request
+    pub const fn opcode() -> u8 { 7 }
+    /// Serialize this request into bytes for the provided connection
+    #[allow(unused)]
+    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+            .ok_or(ConnectionError::UnsupportedExtension)?;
+        let length_so_far = 0;
+        let context_bytes = self.context.serialize();
+        let mut request0 = vec![
+            extension_information.major_opcode,
+            FreeContextRequest::opcode(),
+            0,
+            0,
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        Ok((vec![request0.into()], vec![]))
+    }
+}
 pub fn free_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-        .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length_so_far = 0;
-    let context_bytes = context.serialize();
-    let mut request0 = [
-        extension_information.major_opcode,
-        FREE_CONTEXT_REQUEST,
-        0,
-        0,
-        context_bytes[0],
-        context_bytes[1],
-        context_bytes[2],
-        context_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
+    let request0 = FreeContextRequest {
+        context: context,
+    };
+    let (bytes, fds) = request0.serialize(conn)?;
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(conn.send_request_without_reply(&slices, fds)?)
 }
 
 /// Extension trait defining the requests of this extension.
