@@ -87,7 +87,10 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
             out,
             "/// Parse a generic X11 error into a concrete error type."
         );
-        outln!(out, "#[allow(clippy::cognitive_complexity)]");
+        outln!(
+            out,
+            "#[allow(clippy::cognitive_complexity, clippy::match_single_binding)]",
+        );
         outln!(out, "pub fn parse(");
         outln!(out.indent(), "error: &[u8],");
         outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
@@ -290,7 +293,10 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
             out,
             "/// Parse a generic X11 event into a concrete event type."
         );
-        outln!(out, "#[allow(clippy::cognitive_complexity)]");
+        outln!(
+            out,
+            "#[allow(clippy::cognitive_complexity, clippy::match_single_binding)]",
+        );
         outln!(out, "pub fn parse(");
         outln!(out.indent(), "event: &[u8],");
         outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
@@ -393,6 +399,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
         outln!(out, "}}");
         outln!(out, "");
 
+        outln!(out, "#[allow(clippy::match_single_binding)]");
         outln!(out, "fn from_generic_event(");
         outln!(out.indent(), "event: &[u8],");
         outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
