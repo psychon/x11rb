@@ -23163,7 +23163,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     free(event);
     /// }
     /// ```
-    fn send_event<'c, 'input, A, B, C>(&'c self, propagate: bool, destination: A, event_mask: B, event: C) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn send_event<A, B, C>(&self, propagate: bool, destination: A, event_mask: B, event: C) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<Window>,
         B: Into<u32>,

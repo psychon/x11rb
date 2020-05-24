@@ -950,14 +950,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         gathered: &GatheredRequestFields,
         out: &mut Output,
     ) {
+        let ns = request_def.namespace.upgrade().unwrap();
+        let is_list_fonts_with_info =
+            request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
+        let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
+        let needs_lifetime = gathered.needs_lifetime && !is_send_event;
+
         let mut generic_params = String::new();
-        if gathered.needs_lifetime || !gathered.generics.is_empty() {
+        if needs_lifetime || !gathered.generics.is_empty() {
             generic_params.push('<');
-            if gathered.needs_lifetime {
+            if needs_lifetime {
                 generic_params.push_str("'c, 'input");
             }
             for (i, (param_name, _)) in gathered.generics.iter().enumerate() {
-                if i != 0 || gathered.needs_lifetime {
+                if i != 0 || needs_lifetime {
                     generic_params.push_str(", ");
                 }
                 generic_params.push_str(param_name);
@@ -965,11 +971,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             generic_params.push('>');
         }
 
-        let ns = request_def.namespace.upgrade().unwrap();
-        let is_list_fonts_with_info =
-            request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
-
-        let ret_lifetime = if gathered.needs_lifetime { "'c" } else { "'_" };
+        let ret_lifetime = if needs_lifetime { "'c" } else { "'_" };
         let ret_type = if is_list_fonts_with_info {
             assert!(request_def.reply.is_some());
             assert!(!gathered.reply_has_fds);
@@ -983,7 +985,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         };
 
         let mut args = String::new();
-        if gathered.needs_lifetime {
+        if needs_lifetime {
             args.push_str("&'c self");
         } else {
             args.push_str("&self");
@@ -995,7 +997,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             args.push_str(arg_type);
         }
 
-        let ns = request_def.namespace.upgrade().unwrap();
         let func_name_prefix = if ns.ext_info.is_some() {
             format!("{}_", ns.header)
         } else {
