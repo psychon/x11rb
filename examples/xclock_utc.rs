@@ -181,7 +181,7 @@ fn do_poll(conn: &RustConnection) -> nix::Result<()> {
 }
 
 #[cfg(not(unix))]
-fn do_poll(conn: &RustConnection) -> Result<(), Box<dyn std::error::Error>> {
+fn do_poll(_conn: &RustConnection) -> Result<(), Box<dyn std::error::Error>> {
     panic!("This function is only implemented on unix")
 }
 
