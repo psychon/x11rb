@@ -42,7 +42,6 @@ impl GetVersionRequest {
     /// Opcode for the GetVersion request
     pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -115,7 +114,6 @@ impl CapableRequest {
     /// Opcode for the Capable request
     pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -178,7 +176,6 @@ impl GetTimeoutsRequest {
     /// Opcode for the GetTimeouts request
     pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -249,7 +246,6 @@ impl SetTimeoutsRequest {
     /// Opcode for the SetTimeouts request
     pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -301,7 +297,6 @@ impl EnableRequest {
     /// Opcode for the Enable request
     pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -338,7 +333,6 @@ impl DisableRequest {
     /// Opcode for the Disable request
     pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -445,7 +439,6 @@ impl ForceLevelRequest {
     /// Opcode for the ForceLevel request
     pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -489,7 +482,6 @@ impl InfoRequest {
     /// Opcode for the Info request
     pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,

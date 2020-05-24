@@ -372,7 +372,6 @@ impl QueryVersionRequest {
     /// Opcode for the QueryVersion request
     pub const fn opcode() -> u8 { 0 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -438,7 +437,6 @@ impl GetModeLineRequest {
     /// Opcode for the GetModeLine request
     pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -561,7 +559,6 @@ impl<'input> ModModeLineRequest<'input> {
     /// Opcode for the ModModeLine request
     pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -676,7 +673,6 @@ impl SwitchModeRequest {
     /// Opcode for the SwitchMode request
     pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -724,7 +720,6 @@ impl GetMonitorRequest {
     /// Opcode for the GetMonitor request
     pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -866,7 +861,6 @@ impl LockModeSwitchRequest {
     /// Opcode for the LockModeSwitch request
     pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -914,7 +908,6 @@ impl GetAllModeLinesRequest {
     /// Opcode for the GetAllModeLines request
     pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1025,7 +1018,6 @@ impl<'input> AddModeLineRequest<'input> {
     /// Opcode for the AddModeLine request
     pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1221,7 +1213,6 @@ impl<'input> DeleteModeLineRequest<'input> {
     /// Opcode for the DeleteModeLine request
     pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1353,7 +1344,6 @@ impl<'input> ValidateModeLineRequest<'input> {
     /// Opcode for the ValidateModeLine request
     pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1511,7 +1501,6 @@ impl<'input> SwitchToModeRequest<'input> {
     /// Opcode for the SwitchToMode request
     pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1631,7 +1620,6 @@ impl GetViewPortRequest {
     /// Opcode for the GetViewPort request
     pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1707,7 +1695,6 @@ impl SetViewPortRequest {
     /// Opcode for the SetViewPort request
     pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1765,7 +1752,6 @@ impl GetDotClocksRequest {
     /// Opcode for the GetDotClocks request
     pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1844,7 +1830,6 @@ impl SetClientVersionRequest {
     /// Opcode for the SetClientVersion request
     pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1895,7 +1880,6 @@ impl SetGammaRequest {
     /// Opcode for the SetGamma request
     pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -1971,7 +1955,6 @@ impl GetGammaRequest {
     /// Opcode for the GetGamma request
     pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -2072,7 +2055,6 @@ impl GetGammaRampRequest {
     /// Opcode for the GetGammaRamp request
     pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -2156,7 +2138,6 @@ impl<'input> SetGammaRampRequest<'input> {
     /// Opcode for the SetGammaRamp request
     pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -2218,7 +2199,6 @@ impl GetGammaRampSizeRequest {
     /// Opcode for the GetGammaRampSize request
     pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
@@ -2290,7 +2270,6 @@ impl GetPermissionsRequest {
     /// Opcode for the GetPermissions request
     pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,

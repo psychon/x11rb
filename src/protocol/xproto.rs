@@ -6030,11 +6030,11 @@ impl<'input> CreateWindowRequest<'input> {
     /// Opcode for the CreateWindow request
     pub const fn opcode() -> u8 { 1 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let depth_bytes = self.depth.serialize();
         let wid_bytes = self.wid.serialize();
@@ -6406,11 +6406,11 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
     /// Opcode for the ChangeWindowAttributes request
     pub const fn opcode() -> u8 { 2 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
@@ -6559,11 +6559,11 @@ impl GetWindowAttributesRequest {
     /// Opcode for the GetWindowAttributes request
     pub const fn opcode() -> u8 { 3 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -6711,11 +6711,11 @@ impl DestroyWindowRequest {
     /// Opcode for the DestroyWindow request
     pub const fn opcode() -> u8 { 4 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -6777,11 +6777,11 @@ impl DestroySubwindowsRequest {
     /// Opcode for the DestroySubwindows request
     pub const fn opcode() -> u8 { 5 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -6914,11 +6914,11 @@ impl ChangeSaveSetRequest {
     /// Opcode for the ChangeSaveSet request
     pub const fn opcode() -> u8 { 6 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let window_bytes = self.window.serialize();
@@ -7017,11 +7017,11 @@ impl ReparentWindowRequest {
     /// Opcode for the ReparentWindow request
     pub const fn opcode() -> u8 { 7 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let parent_bytes = self.parent.serialize();
@@ -7142,11 +7142,11 @@ impl MapWindowRequest {
     /// Opcode for the MapWindow request
     pub const fn opcode() -> u8 { 8 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -7221,11 +7221,11 @@ impl MapSubwindowsRequest {
     /// Opcode for the MapSubwindows request
     pub const fn opcode() -> u8 { 9 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -7286,11 +7286,11 @@ impl UnmapWindowRequest {
     /// Opcode for the UnmapWindow request
     pub const fn opcode() -> u8 { 10 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -7351,11 +7351,11 @@ impl UnmapSubwindowsRequest {
     /// Opcode for the UnmapSubwindows request
     pub const fn opcode() -> u8 { 11 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -7707,11 +7707,11 @@ impl<'input> ConfigureWindowRequest<'input> {
     /// Opcode for the ConfigureWindow request
     pub const fn opcode() -> u8 { 12 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let value_mask = u16::try_from(self.value_list.switch_expr()).unwrap();
@@ -7900,11 +7900,11 @@ impl CirculateWindowRequest {
     /// Opcode for the CirculateWindow request
     pub const fn opcode() -> u8 { 13 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let direction_bytes = u8::from(self.direction).serialize();
         let window_bytes = self.window.serialize();
@@ -7999,11 +7999,11 @@ impl GetGeometryRequest {
     /// Opcode for the GetGeometry request
     pub const fn opcode() -> u8 { 14 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
@@ -8166,11 +8166,11 @@ impl QueryTreeRequest {
     /// Opcode for the QueryTree request
     pub const fn opcode() -> u8 { 15 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -8344,11 +8344,11 @@ impl<'input> InternAtomRequest<'input> {
     /// Opcode for the InternAtom request
     pub const fn opcode() -> u8 { 16 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let only_if_exists_bytes = self.only_if_exists.serialize();
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
@@ -8464,11 +8464,11 @@ impl GetAtomNameRequest {
     /// Opcode for the GetAtomName request
     pub const fn opcode() -> u8 { 17 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let atom_bytes = self.atom.serialize();
         let mut request0 = vec![
@@ -8682,11 +8682,11 @@ impl<'input> ChangePropertyRequest<'input> {
     /// Opcode for the ChangeProperty request
     pub const fn opcode() -> u8 { 18 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let window_bytes = self.window.serialize();
@@ -8813,11 +8813,11 @@ impl DeletePropertyRequest {
     /// Opcode for the DeleteProperty request
     pub const fn opcode() -> u8 { 19 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let property_bytes = self.property.serialize();
@@ -8995,11 +8995,11 @@ impl GetPropertyRequest {
     /// Opcode for the GetProperty request
     pub const fn opcode() -> u8 { 20 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let delete_bytes = self.delete.serialize();
         let window_bytes = self.window.serialize();
@@ -9344,11 +9344,11 @@ impl ListPropertiesRequest {
     /// Opcode for the ListProperties request
     pub const fn opcode() -> u8 { 21 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -9461,11 +9461,11 @@ impl SetSelectionOwnerRequest {
     /// Opcode for the SetSelectionOwner request
     pub const fn opcode() -> u8 { 22 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let owner_bytes = self.owner.serialize();
         let selection_bytes = self.selection.serialize();
@@ -9567,11 +9567,11 @@ impl GetSelectionOwnerRequest {
     /// Opcode for the GetSelectionOwner request
     pub const fn opcode() -> u8 { 23 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let selection_bytes = self.selection.serialize();
         let mut request0 = vec![
@@ -9660,11 +9660,11 @@ impl ConvertSelectionRequest {
     /// Opcode for the ConvertSelection request
     pub const fn opcode() -> u8 { 24 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let requestor_bytes = self.requestor.serialize();
         let selection_bytes = self.selection.serialize();
@@ -9878,11 +9878,11 @@ impl<'input> SendEventRequest<'input> {
     /// Opcode for the SendEvent request
     pub const fn opcode() -> u8 { 25 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let propagate_bytes = self.propagate.serialize();
         let destination_bytes = self.destination.serialize();
@@ -10296,11 +10296,11 @@ impl GrabPointerRequest {
     /// Opcode for the GrabPointer request
     pub const fn opcode() -> u8 { 26 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
@@ -10497,11 +10497,11 @@ impl UngrabPointerRequest {
     /// Opcode for the UngrabPointer request
     pub const fn opcode() -> u8 { 27 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
@@ -10723,11 +10723,11 @@ impl GrabButtonRequest {
     /// Opcode for the GrabButton request
     pub const fn opcode() -> u8 { 28 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
@@ -10876,11 +10876,11 @@ impl UngrabButtonRequest {
     /// Opcode for the UngrabButton request
     pub const fn opcode() -> u8 { 29 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let button_bytes = u8::from(self.button).serialize();
         let grab_window_bytes = self.grab_window.serialize();
@@ -10932,11 +10932,11 @@ impl ChangeActivePointerGrabRequest {
     /// Opcode for the ChangeActivePointerGrab request
     pub const fn opcode() -> u8 { 30 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cursor_bytes = self.cursor.serialize();
         let time_bytes = self.time.serialize();
@@ -11060,11 +11060,11 @@ impl GrabKeyboardRequest {
     /// Opcode for the GrabKeyboard request
     pub const fn opcode() -> u8 { 31 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
@@ -11209,11 +11209,11 @@ impl UngrabKeyboardRequest {
     /// Opcode for the UngrabKeyboard request
     pub const fn opcode() -> u8 { 32 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
@@ -11379,11 +11379,11 @@ impl GrabKeyRequest {
     /// Opcode for the GrabKey request
     pub const fn opcode() -> u8 { 33 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
@@ -11532,11 +11532,11 @@ impl UngrabKeyRequest {
     /// Opcode for the UngrabKey request
     pub const fn opcode() -> u8 { 34 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let key_bytes = self.key.serialize();
         let grab_window_bytes = self.grab_window.serialize();
@@ -11771,11 +11771,11 @@ impl AllowEventsRequest {
     /// Opcode for the AllowEvents request
     pub const fn opcode() -> u8 { 35 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let time_bytes = self.time.serialize();
@@ -11835,11 +11835,11 @@ impl GrabServerRequest {
     /// Opcode for the GrabServer request
     pub const fn opcode() -> u8 { 36 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -11870,11 +11870,11 @@ impl UngrabServerRequest {
     /// Opcode for the UngrabServer request
     pub const fn opcode() -> u8 { 37 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -11920,11 +11920,11 @@ impl QueryPointerRequest {
     /// Opcode for the QueryPointer request
     pub const fn opcode() -> u8 { 38 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -12083,11 +12083,11 @@ impl GetMotionEventsRequest {
     /// Opcode for the GetMotionEvents request
     pub const fn opcode() -> u8 { 39 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let start_bytes = self.start.serialize();
@@ -12188,11 +12188,11 @@ impl TranslateCoordinatesRequest {
     /// Opcode for the TranslateCoordinates request
     pub const fn opcode() -> u8 { 40 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let src_window_bytes = self.src_window.serialize();
         let dst_window_bytes = self.dst_window.serialize();
@@ -12315,11 +12315,11 @@ impl WarpPointerRequest {
     /// Opcode for the WarpPointer request
     pub const fn opcode() -> u8 { 41 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let src_window_bytes = self.src_window.serialize();
         let dst_window_bytes = self.dst_window.serialize();
@@ -12539,11 +12539,11 @@ impl SetInputFocusRequest {
     /// Opcode for the SetInputFocus request
     pub const fn opcode() -> u8 { 42 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let revert_to_bytes = u8::from(self.revert_to).serialize();
         let focus_bytes = self.focus.serialize();
@@ -12628,11 +12628,11 @@ impl GetInputFocusRequest {
     /// Opcode for the GetInputFocus request
     pub const fn opcode() -> u8 { 43 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -12690,11 +12690,11 @@ impl QueryKeymapRequest {
     /// Opcode for the QueryKeymap request
     pub const fn opcode() -> u8 { 44 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -12774,11 +12774,11 @@ impl<'input> OpenFontRequest<'input> {
     /// Opcode for the OpenFont request
     pub const fn opcode() -> u8 { 45 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let fid_bytes = self.fid.serialize();
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
@@ -12848,11 +12848,11 @@ impl CloseFontRequest {
     /// Opcode for the CloseFont request
     pub const fn opcode() -> u8 { 46 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
@@ -13073,11 +13073,11 @@ impl QueryFontRequest {
     /// Opcode for the QueryFont request
     pub const fn opcode() -> u8 { 47 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
@@ -13253,11 +13253,11 @@ impl<'input> QueryTextExtentsRequest<'input> {
     /// Opcode for the QueryTextExtents request
     pub const fn opcode() -> u8 { 48 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let string_len = u32::try_from(self.string.len()).unwrap();
         let length_so_far = 0;
         let odd_length = (string_len & 1u32) != 0;
@@ -13440,11 +13440,11 @@ impl<'input> ListFontsRequest<'input> {
     /// Opcode for the ListFonts request
     pub const fn opcode() -> u8 { 49 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let max_names_bytes = self.max_names.serialize();
         let pattern_len = u16::try_from(self.pattern.len()).expect("`pattern` has too many elements");
@@ -13562,11 +13562,11 @@ impl<'input> ListFontsWithInfoRequest<'input> {
     /// Opcode for the ListFontsWithInfo request
     pub const fn opcode() -> u8 { 50 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let max_names_bytes = self.max_names.serialize();
         let pattern_len = u16::try_from(self.pattern.len()).expect("`pattern` has too many elements");
@@ -13725,11 +13725,11 @@ impl<'input> SetFontPathRequest<'input> {
     /// Opcode for the SetFontPath request
     pub const fn opcode() -> u8 { 51 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let font_qty = u16::try_from(self.font.len()).expect("`font` has too many elements");
         let font_qty_bytes = font_qty.serialize();
@@ -13772,11 +13772,11 @@ impl GetFontPathRequest {
     /// Opcode for the GetFontPath request
     pub const fn opcode() -> u8 { 52 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -13878,11 +13878,11 @@ impl CreatePixmapRequest {
     /// Opcode for the CreatePixmap request
     pub const fn opcode() -> u8 { 53 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let depth_bytes = self.depth.serialize();
         let pid_bytes = self.pid.serialize();
@@ -13973,11 +13973,11 @@ impl FreePixmapRequest {
     /// Opcode for the FreePixmap request
     pub const fn opcode() -> u8 { 54 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let pixmap_bytes = self.pixmap.serialize();
         let mut request0 = vec![
@@ -15133,11 +15133,11 @@ impl<'input> CreateGCRequest<'input> {
     /// Opcode for the CreateGC request
     pub const fn opcode() -> u8 { 55 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cid_bytes = self.cid.serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -15566,11 +15566,11 @@ impl<'input> ChangeGCRequest<'input> {
     /// Opcode for the ChangeGC request
     pub const fn opcode() -> u8 { 56 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let gc_bytes = self.gc.serialize();
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
@@ -15668,11 +15668,11 @@ impl CopyGCRequest {
     /// Opcode for the CopyGC request
     pub const fn opcode() -> u8 { 57 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let src_gc_bytes = self.src_gc.serialize();
         let dst_gc_bytes = self.dst_gc.serialize();
@@ -15728,11 +15728,11 @@ impl<'input> SetDashesRequest<'input> {
     /// Opcode for the SetDashes request
     pub const fn opcode() -> u8 { 58 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let gc_bytes = self.gc.serialize();
         let dash_offset_bytes = self.dash_offset.serialize();
@@ -15856,11 +15856,11 @@ impl<'input> SetClipRectanglesRequest<'input> {
     /// Opcode for the SetClipRectangles request
     pub const fn opcode() -> u8 { 59 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let ordering_bytes = u8::from(self.ordering).serialize();
         let gc_bytes = self.gc.serialize();
@@ -15926,11 +15926,11 @@ impl FreeGCRequest {
     /// Opcode for the FreeGC request
     pub const fn opcode() -> u8 { 60 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
@@ -15986,11 +15986,11 @@ impl ClearAreaRequest {
     /// Opcode for the ClearArea request
     pub const fn opcode() -> u8 { 61 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let exposures_bytes = self.exposures.serialize();
         let window_bytes = self.window.serialize();
@@ -16077,11 +16077,11 @@ impl CopyAreaRequest {
     /// Opcode for the CopyArea request
     pub const fn opcode() -> u8 { 62 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let src_drawable_bytes = self.src_drawable.serialize();
         let dst_drawable_bytes = self.dst_drawable.serialize();
@@ -16187,11 +16187,11 @@ impl CopyPlaneRequest {
     /// Opcode for the CopyPlane request
     pub const fn opcode() -> u8 { 63 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let src_drawable_bytes = self.src_drawable.serialize();
         let dst_drawable_bytes = self.dst_drawable.serialize();
@@ -16350,11 +16350,11 @@ impl<'input> PolyPointRequest<'input> {
     /// Opcode for the PolyPoint request
     pub const fn opcode() -> u8 { 64 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -16449,11 +16449,11 @@ impl<'input> PolyLineRequest<'input> {
     /// Opcode for the PolyLine request
     pub const fn opcode() -> u8 { 65 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -16623,11 +16623,11 @@ impl<'input> PolySegmentRequest<'input> {
     /// Opcode for the PolySegment request
     pub const fn opcode() -> u8 { 66 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
@@ -16706,11 +16706,11 @@ impl<'input> PolyRectangleRequest<'input> {
     /// Opcode for the PolyRectangle request
     pub const fn opcode() -> u8 { 67 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
@@ -16763,11 +16763,11 @@ impl<'input> PolyArcRequest<'input> {
     /// Opcode for the PolyArc request
     pub const fn opcode() -> u8 { 68 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
@@ -16887,11 +16887,11 @@ impl<'input> FillPolyRequest<'input> {
     /// Opcode for the FillPoly request
     pub const fn opcode() -> u8 { 69 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
@@ -16977,11 +16977,11 @@ impl<'input> PolyFillRectangleRequest<'input> {
     /// Opcode for the PolyFillRectangle request
     pub const fn opcode() -> u8 { 70 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
@@ -17059,11 +17059,11 @@ impl<'input> PolyFillArcRequest<'input> {
     /// Opcode for the PolyFillArc request
     pub const fn opcode() -> u8 { 71 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
@@ -17188,11 +17188,11 @@ impl<'input> PutImageRequest<'input> {
     /// Opcode for the PutImage request
     pub const fn opcode() -> u8 { 72 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let format_bytes = u8::from(self.format).serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -17274,11 +17274,11 @@ impl GetImageRequest {
     /// Opcode for the GetImage request
     pub const fn opcode() -> u8 { 73 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let format_bytes = u8::from(self.format).serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -17391,11 +17391,11 @@ impl<'input> PolyText8Request<'input> {
     /// Opcode for the PolyText8 request
     pub const fn opcode() -> u8 { 74 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
@@ -17457,11 +17457,11 @@ impl<'input> PolyText16Request<'input> {
     /// Opcode for the PolyText16 request
     pub const fn opcode() -> u8 { 75 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
@@ -17557,11 +17557,11 @@ impl<'input> ImageText8Request<'input> {
     /// Opcode for the ImageText8 request
     pub const fn opcode() -> u8 { 76 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let string_len = u8::try_from(self.string.len()).expect("`string` has too many elements");
         let string_len_bytes = string_len.serialize();
@@ -17694,11 +17694,11 @@ impl<'input> ImageText16Request<'input> {
     /// Opcode for the ImageText16 request
     pub const fn opcode() -> u8 { 77 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let string_len = u8::try_from(self.string.len()).expect("`string` has too many elements");
         let string_len_bytes = string_len.serialize();
@@ -17867,11 +17867,11 @@ impl CreateColormapRequest {
     /// Opcode for the CreateColormap request
     pub const fn opcode() -> u8 { 78 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let alloc_bytes = u8::from(self.alloc).serialize();
         let mid_bytes = self.mid.serialize();
@@ -17925,11 +17925,11 @@ impl FreeColormapRequest {
     /// Opcode for the FreeColormap request
     pub const fn opcode() -> u8 { 79 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
@@ -17970,11 +17970,11 @@ impl CopyColormapAndFreeRequest {
     /// Opcode for the CopyColormapAndFree request
     pub const fn opcode() -> u8 { 80 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mid_bytes = self.mid.serialize();
         let src_cmap_bytes = self.src_cmap.serialize();
@@ -18020,11 +18020,11 @@ impl InstallColormapRequest {
     /// Opcode for the InstallColormap request
     pub const fn opcode() -> u8 { 81 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
@@ -18064,11 +18064,11 @@ impl UninstallColormapRequest {
     /// Opcode for the UninstallColormap request
     pub const fn opcode() -> u8 { 82 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
@@ -18108,11 +18108,11 @@ impl ListInstalledColormapsRequest {
     /// Opcode for the ListInstalledColormaps request
     pub const fn opcode() -> u8 { 83 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -18215,11 +18215,11 @@ impl AllocColorRequest {
     /// Opcode for the AllocColor request
     pub const fn opcode() -> u8 { 84 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let red_bytes = self.red.serialize();
@@ -18324,11 +18324,11 @@ impl<'input> AllocNamedColorRequest<'input> {
     /// Opcode for the AllocNamedColor request
     pub const fn opcode() -> u8 { 85 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
@@ -18418,11 +18418,11 @@ impl AllocColorCellsRequest {
     /// Opcode for the AllocColorCells request
     pub const fn opcode() -> u8 { 86 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let contiguous_bytes = self.contiguous.serialize();
         let cmap_bytes = self.cmap.serialize();
@@ -18535,11 +18535,11 @@ impl AllocColorPlanesRequest {
     /// Opcode for the AllocColorPlanes request
     pub const fn opcode() -> u8 { 87 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let contiguous_bytes = self.contiguous.serialize();
         let cmap_bytes = self.cmap.serialize();
@@ -18648,11 +18648,11 @@ impl<'input> FreeColorsRequest<'input> {
     /// Opcode for the FreeColors request
     pub const fn opcode() -> u8 { 88 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let plane_mask_bytes = self.plane_mask.serialize();
@@ -18830,11 +18830,11 @@ impl<'input> StoreColorsRequest<'input> {
     /// Opcode for the StoreColors request
     pub const fn opcode() -> u8 { 89 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
@@ -18882,11 +18882,11 @@ impl<'input> StoreNamedColorRequest<'input> {
     /// Opcode for the StoreNamedColor request
     pub const fn opcode() -> u8 { 90 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let flags_bytes = self.flags.serialize();
         let cmap_bytes = self.cmap.serialize();
@@ -18995,11 +18995,11 @@ impl<'input> QueryColorsRequest<'input> {
     /// Opcode for the QueryColors request
     pub const fn opcode() -> u8 { 91 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let mut request0 = vec![
@@ -19087,11 +19087,11 @@ impl<'input> LookupColorRequest<'input> {
     /// Opcode for the LookupColor request
     pub const fn opcode() -> u8 { 92 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cmap_bytes = self.cmap.serialize();
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
@@ -19245,11 +19245,11 @@ impl CreateCursorRequest {
     /// Opcode for the CreateCursor request
     pub const fn opcode() -> u8 { 93 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cid_bytes = self.cid.serialize();
         let source_bytes = self.source.serialize();
@@ -19437,11 +19437,11 @@ impl CreateGlyphCursorRequest {
     /// Opcode for the CreateGlyphCursor request
     pub const fn opcode() -> u8 { 94 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cid_bytes = self.cid.serialize();
         let source_font_bytes = self.source_font.serialize();
@@ -19572,11 +19572,11 @@ impl FreeCursorRequest {
     /// Opcode for the FreeCursor request
     pub const fn opcode() -> u8 { 95 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cursor_bytes = self.cursor.serialize();
         let mut request0 = vec![
@@ -19634,11 +19634,11 @@ impl RecolorCursorRequest {
     /// Opcode for the RecolorCursor request
     pub const fn opcode() -> u8 { 96 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let cursor_bytes = self.cursor.serialize();
         let fore_red_bytes = self.fore_red.serialize();
@@ -19770,11 +19770,11 @@ impl QueryBestSizeRequest {
     /// Opcode for the QueryBestSize request
     pub const fn opcode() -> u8 { 97 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let class_bytes = u8::from(self.class).serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -19873,11 +19873,11 @@ impl<'input> QueryExtensionRequest<'input> {
     /// Opcode for the QueryExtension request
     pub const fn opcode() -> u8 { 98 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         let name_len_bytes = name_len.serialize();
@@ -19978,11 +19978,11 @@ impl ListExtensionsRequest {
     /// Opcode for the ListExtensions request
     pub const fn opcode() -> u8 { 99 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -20059,11 +20059,11 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
     /// Opcode for the ChangeKeyboardMapping request
     pub const fn opcode() -> u8 { 100 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let keycode_count_bytes = self.keycode_count.serialize();
         let first_keycode_bytes = self.first_keycode.serialize();
@@ -20114,11 +20114,11 @@ impl GetKeyboardMappingRequest {
     /// Opcode for the GetKeyboardMapping request
     pub const fn opcode() -> u8 { 101 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let first_keycode_bytes = self.first_keycode.serialize();
         let count_bytes = self.count.serialize();
@@ -20540,11 +20540,11 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
     /// Opcode for the ChangeKeyboardControl request
     pub const fn opcode() -> u8 { 102 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
         let value_mask_bytes = value_mask.serialize();
@@ -20587,11 +20587,11 @@ impl GetKeyboardControlRequest {
     /// Opcode for the GetKeyboardControl request
     pub const fn opcode() -> u8 { 103 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -20663,11 +20663,11 @@ impl BellRequest {
     /// Opcode for the Bell request
     pub const fn opcode() -> u8 { 104 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let percent_bytes = self.percent.serialize();
         let mut request0 = vec![
@@ -20707,11 +20707,11 @@ impl ChangePointerControlRequest {
     /// Opcode for the ChangePointerControl request
     pub const fn opcode() -> u8 { 105 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let acceleration_numerator_bytes = self.acceleration_numerator.serialize();
         let acceleration_denominator_bytes = self.acceleration_denominator.serialize();
@@ -20761,11 +20761,11 @@ impl GetPointerControlRequest {
     /// Opcode for the GetPointerControl request
     pub const fn opcode() -> u8 { 106 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -20961,11 +20961,11 @@ impl SetScreenSaverRequest {
     /// Opcode for the SetScreenSaver request
     pub const fn opcode() -> u8 { 107 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let timeout_bytes = self.timeout.serialize();
         let interval_bytes = self.interval.serialize();
@@ -21013,11 +21013,11 @@ impl GetScreenSaverRequest {
     /// Opcode for the GetScreenSaver request
     pub const fn opcode() -> u8 { 108 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -21227,11 +21227,11 @@ impl<'input> ChangeHostsRequest<'input> {
     /// Opcode for the ChangeHosts request
     pub const fn opcode() -> u8 { 109 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let family_bytes = u8::from(self.family).serialize();
@@ -21338,11 +21338,11 @@ impl ListHostsRequest {
     /// Opcode for the ListHosts request
     pub const fn opcode() -> u8 { 110 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -21489,11 +21489,11 @@ impl SetAccessControlRequest {
     /// Opcode for the SetAccessControl request
     pub const fn opcode() -> u8 { 111 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
@@ -21594,11 +21594,11 @@ impl SetCloseDownModeRequest {
     /// Opcode for the SetCloseDownMode request
     pub const fn opcode() -> u8 { 112 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
@@ -21712,11 +21712,11 @@ impl KillClientRequest {
     /// Opcode for the KillClient request
     pub const fn opcode() -> u8 { 113 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let resource_bytes = self.resource.serialize();
         let mut request0 = vec![
@@ -21779,11 +21779,11 @@ impl<'input> RotatePropertiesRequest<'input> {
     /// Opcode for the RotateProperties request
     pub const fn opcode() -> u8 { 114 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let atoms_len = u16::try_from(self.atoms.len()).expect("`atoms` has too many elements");
@@ -21906,11 +21906,11 @@ impl ForceScreenSaverRequest {
     /// Opcode for the ForceScreenSaver request
     pub const fn opcode() -> u8 { 115 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
@@ -22011,11 +22011,11 @@ impl<'input> SetPointerMappingRequest<'input> {
     /// Opcode for the SetPointerMapping request
     pub const fn opcode() -> u8 { 116 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let map_len = u8::try_from(self.map.len()).expect("`map` has too many elements");
         let map_len_bytes = map_len.serialize();
@@ -22078,11 +22078,11 @@ impl GetPointerMappingRequest {
     /// Opcode for the GetPointerMapping request
     pub const fn opcode() -> u8 { 117 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -22237,11 +22237,11 @@ impl<'input> SetModifierMappingRequest<'input> {
     /// Opcode for the SetModifierMapping request
     pub const fn opcode() -> u8 { 118 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         assert_eq!(self.keycodes.len() % 8, 0, "`keycodes` has an incorrect length, must be a multiple of 8");
         let keycodes_per_modifier = u8::try_from(self.keycodes.len() / 8).expect("`keycodes` has too many elements");
@@ -22305,11 +22305,11 @@ impl GetModifierMappingRequest {
     /// Opcode for the GetModifierMapping request
     pub const fn opcode() -> u8 { 119 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),
@@ -22383,11 +22383,11 @@ impl NoOperationRequest {
     /// Opcode for the NoOperation request
     pub const fn opcode() -> u8 { 127 }
     /// Serialize this request into bytes for the provided connection
-    #[allow(unused)]
     fn serialize<'input, Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
+        let _ = conn;
         let length_so_far = 0;
         let mut request0 = vec![
             Self::opcode(),

@@ -425,7 +425,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             );
 
             outln!(out, "/// Serialize this request into bytes for the provided connection");
-            outln!(out, "#[allow(unused)]");
             outln!(out, "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> Result<(Vec<Cow<'input, [u8]>>, Vec<RawFdContainer>), ConnectionError>",
                    lifetime=serialize_lifetime_block);
             outln!(out, "where");
@@ -441,6 +440,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         out.indent(),
                         ".ok_or(ConnectionError::UnsupportedExtension)?;"
                     );
+                } else {
+                    // Silence a warning about an unused `conn`.
+                    outln!(out, "let _ = conn;");
                 }
 
                 let fields = request_def.fields.borrow();
