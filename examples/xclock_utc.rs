@@ -1,6 +1,6 @@
-#[cfg(unix)]
-use nix::poll::{poll, PollFd, PollFlags};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::convert::TryFrom;
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+
 use x11rb::atom_manager;
 use x11rb::connection::Connection;
 use x11rb::errors::{ConnectionError, ReplyOrIdError};
@@ -167,22 +167,86 @@ fn redraw(
 }
 
 #[cfg(unix)]
-fn do_poll(conn: &RustConnection) -> nix::Result<()> {
+fn poll_with_timeout(
+    conn: &RustConnection,
+    timeout: Duration,
+) -> Result<(), Box<dyn std::error::Error>> {
+    use std::os::raw::c_int;
     use std::os::unix::io::AsRawFd;
 
-    let fd = conn.with_read(|r| r.as_raw_fd());
+    use nix::poll::{poll, PollFd, PollFlags};
 
+    let start_instant = Instant::now();
+    let fd = conn.with_read(|r| r.as_raw_fd());
+    let mut poll_fds = [PollFd::new(fd, PollFlags::POLLIN)];
+    loop {
+        let timeout_millis = timeout
+            .checked_sub(start_instant.elapsed())
+            .map(|remaining| c_int::try_from(remaining.as_millis()).unwrap_or(c_int::max_value()))
+            .unwrap_or(0);
+        match poll(&mut poll_fds, timeout_millis) {
+            Ok(_) => {
+                if poll_fds[0]
+                    .revents()
+                    .unwrap_or_else(PollFlags::empty)
+                    .contains(PollFlags::POLLIN)
+                {
+                    break;
+                }
+            }
+            // try again
+            Err(nix::Error::Sys(nix::errno::Errno::EINTR)) => {}
+            Err(e) => return Err(e.into()),
+        }
+        if start_instant.elapsed() >= timeout {
+            break;
+        }
+    }
     // We do not really care about the result of poll. Either there was a timeout, in which case we
     // try to handle events (there are none) and then redraw. Or there was an event, in which case
     // we handle it and then still redraw.
-    poll(&mut [PollFd::new(fd, PollFlags::POLLIN)], 1_000)?;
-
     Ok(())
 }
 
-#[cfg(not(unix))]
-fn do_poll(_conn: &RustConnection) -> Result<(), Box<dyn std::error::Error>> {
-    panic!("This function is only implemented on unix")
+#[cfg(windows)]
+fn poll_with_timeout(
+    conn: &RustConnection,
+    timeout: Duration,
+) -> Result<(), Box<dyn std::error::Error>> {
+    use std::os::windows::io::AsRawSocket;
+
+    use winapi::shared::minwindef::INT;
+    use winapi::um::winsock2::{POLLRDNORM, SOCKET, WSAPOLLFD};
+    use winapi_wsapoll::wsa_poll;
+
+    let start_instant = Instant::now();
+    let raw_socket = conn.with_read(|r| r.as_raw_socket());
+    let mut poll_fds = [WSAPOLLFD {
+        fd: raw_socket as SOCKET,
+        events: POLLRDNORM,
+        revents: 0,
+    }];
+    loop {
+        let timeout_millis = timeout
+            .checked_sub(start_instant.elapsed())
+            .map(|remaining| INT::try_from(remaining.as_millis()).unwrap_or(INT::max_value()))
+            .unwrap_or(0);
+        match wsa_poll(&mut poll_fds, timeout_millis) {
+            Ok(_) => {
+                if (poll_fds[0].revents & POLLRDNORM) != 0 {
+                    break;
+                }
+            }
+            Err(e) => return Err(e.into()),
+        }
+        if start_instant.elapsed() >= timeout {
+            break;
+        }
+    }
+    // We do not really care about the result of poll. Either there was a timeout, in which case we
+    // try to handle events (there are none) and then redraw. Or there was an event, in which case
+    // we handle it and then still redraw.
+    Ok(())
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -206,7 +270,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     conn.flush()?;
 
     loop {
-        do_poll(conn)?;
+        poll_with_timeout(conn, Duration::from_millis(1_000))?;
         while let Some(event) = conn.poll_for_event()? {
             println!("{:?})", event);
             match event {
