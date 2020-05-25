@@ -468,9 +468,6 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize client_major
         // TODO: deserialize client_minor
         let _ = body;
@@ -546,9 +543,6 @@ impl QueryClientsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_CLIENTS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -641,9 +635,6 @@ impl QueryClientResourcesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_CLIENT_RESOURCES_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize xid
         let _ = body;
         // TODO: produce final struct
@@ -739,9 +730,6 @@ impl QueryClientPixmapBytesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_CLIENT_PIXMAP_BYTES_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize xid
         let _ = body;
         // TODO: produce final struct
@@ -827,9 +815,6 @@ impl<'input> QueryClientIdsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_CLIENT_IDS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize num_specs
         // TODO: deserialize specs
         let _ = body;
@@ -937,9 +922,6 @@ impl<'input> QueryResourceBytesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_RESOURCE_BYTES_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize client
         // TODO: deserialize num_specs
         // TODO: deserialize specs

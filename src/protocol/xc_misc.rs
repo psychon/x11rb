@@ -71,9 +71,6 @@ impl GetVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_VERSION_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize client_major_version
         // TODO: deserialize client_minor_version
         let _ = body;
@@ -149,9 +146,6 @@ impl GetXIDRangeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_XID_RANGE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -229,9 +223,6 @@ impl GetXIDListRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_XID_LIST_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize count
         let _ = body;
         // TODO: produce final struct

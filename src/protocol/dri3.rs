@@ -76,9 +76,6 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize major_version
         // TODO: deserialize minor_version
         let _ = body;
@@ -167,9 +164,6 @@ impl OpenRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(OPEN_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize provider
         let _ = body;
@@ -285,9 +279,6 @@ impl PixmapFromBufferRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, body: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(PIXMAP_FROM_BUFFER_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize pixmap
         // TODO: deserialize drawable
         // TODO: deserialize size
@@ -359,9 +350,6 @@ impl BufferFromPixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(BUFFER_FROM_PIXMAP_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize pixmap
         let _ = body;
         // TODO: produce final struct
@@ -469,9 +457,6 @@ impl FenceFromFDRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, body: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(FENCE_FROM_FD_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize fence
         // TODO: deserialize initially_triggered
@@ -540,9 +525,6 @@ impl FDFromFenceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(FD_FROM_FENCE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize fence
         let _ = body;
@@ -635,9 +617,6 @@ impl GetSupportedModifiersRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_SUPPORTED_MODIFIERS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize depth
         // TODO: deserialize bpp
@@ -841,9 +820,6 @@ impl PixmapFromBuffersRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, body: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(PIXMAP_FROM_BUFFERS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize pixmap
         // TODO: deserialize window
         // TODO: deserialize num_buffers
@@ -930,9 +906,6 @@ impl BuffersFromPixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(BUFFERS_FROM_PIXMAP_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize pixmap
         let _ = body;
         // TODO: produce final struct

@@ -1575,9 +1575,6 @@ impl QueryExtensionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_EXTENSION_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -1655,9 +1652,6 @@ impl QueryAdaptorsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_ADAPTORS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -1753,9 +1747,6 @@ impl QueryEncodingsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_ENCODINGS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         let _ = body;
         // TODO: produce final struct
@@ -1857,9 +1848,6 @@ impl GrabPortRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GRAB_PORT_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize time
         let _ = body;
@@ -1948,9 +1936,6 @@ impl UngrabPortRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(UNGRAB_PORT_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize time
         let _ = body;
@@ -2052,9 +2037,6 @@ impl PutVideoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(PUT_VIDEO_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize drawable
         // TODO: deserialize gc
@@ -2172,9 +2154,6 @@ impl PutStillRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(PUT_STILL_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize drawable
         // TODO: deserialize gc
@@ -2292,9 +2271,6 @@ impl GetVideoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_VIDEO_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize drawable
         // TODO: deserialize gc
@@ -2412,9 +2388,6 @@ impl GetStillRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_STILL_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize drawable
         // TODO: deserialize gc
@@ -2494,9 +2467,6 @@ impl StopVideoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(STOP_VIDEO_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize drawable
         let _ = body;
@@ -2558,9 +2528,6 @@ impl SelectVideoNotifyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SELECT_VIDEO_NOTIFY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize onoff
         // TODO: deserialize <unnamed field>
@@ -2623,9 +2590,6 @@ impl SelectPortNotifyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SELECT_PORT_NOTIFY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize onoff
         // TODO: deserialize <unnamed field>
@@ -2704,9 +2668,6 @@ impl QueryBestSizeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_BEST_SIZE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize vid_w
         // TODO: deserialize vid_h
@@ -2810,9 +2771,6 @@ impl SetPortAttributeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SET_PORT_ATTRIBUTE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize attribute
         // TODO: deserialize value
@@ -2876,9 +2834,6 @@ impl GetPortAttributeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_PORT_ATTRIBUTE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize attribute
         let _ = body;
@@ -2959,9 +2914,6 @@ impl QueryPortAttributesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_PORT_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         let _ = body;
         // TODO: produce final struct
@@ -3059,9 +3011,6 @@ impl ListImageFormatsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(LIST_IMAGE_FORMATS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         let _ = body;
         // TODO: produce final struct
@@ -3171,9 +3120,6 @@ impl QueryImageAttributesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_IMAGE_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize id
         // TODO: deserialize width
@@ -3345,9 +3291,6 @@ impl<'input> PutImageRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(PUT_IMAGE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize drawable
         // TODO: deserialize gc
@@ -3506,9 +3449,6 @@ impl ShmPutImageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SHM_PUT_IMAGE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize port
         // TODO: deserialize drawable
         // TODO: deserialize gc

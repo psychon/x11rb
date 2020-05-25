@@ -125,9 +125,6 @@ impl<'input> GetExtensionVersionRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_EXTENSION_VERSION_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize name_len
         // TODO: deserialize <unnamed field>
         // TODO: deserialize name
@@ -985,9 +982,6 @@ impl ListInputDevicesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(LIST_INPUT_DEVICES_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -1129,9 +1123,6 @@ impl OpenDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(OPEN_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -1234,9 +1225,6 @@ impl CloseDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(CLOSE_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -1293,9 +1281,6 @@ impl SetDeviceModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SET_DEVICE_MODE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize mode
         // TODO: deserialize <unnamed field>
@@ -1391,9 +1376,6 @@ impl<'input> SelectExtensionEventRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SELECT_EXTENSION_EVENT_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize num_classes
         // TODO: deserialize <unnamed field>
@@ -1451,9 +1433,6 @@ impl GetSelectedExtensionEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_SELECTED_EXTENSION_EVENTS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -1649,9 +1628,6 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize num_classes
         // TODO: deserialize mode
@@ -1711,9 +1687,6 @@ impl GetDeviceDontPropagateListRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -1850,9 +1823,6 @@ impl GetDeviceMotionEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_DEVICE_MOTION_EVENTS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize start
         // TODO: deserialize stop
         // TODO: deserialize device_id
@@ -1968,9 +1938,6 @@ impl ChangeKeyboardDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(CHANGE_KEYBOARD_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -2057,9 +2024,6 @@ impl ChangePointerDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(CHANGE_POINTER_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize x_axis
         // TODO: deserialize y_axis
         // TODO: deserialize device_id
@@ -2175,9 +2139,6 @@ impl<'input> GrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GRAB_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize time
         // TODO: deserialize num_classes
@@ -2281,9 +2242,6 @@ impl UngrabDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(UNGRAB_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize time
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
@@ -2434,9 +2392,6 @@ impl<'input> GrabDeviceKeyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GRAB_DEVICE_KEY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize num_classes
         // TODO: deserialize modifiers
@@ -2530,9 +2485,6 @@ impl UngrabDeviceKeyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(UNGRAB_DEVICE_KEY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize modifiers
         // TODO: deserialize modifier_device
@@ -2633,9 +2585,6 @@ impl<'input> GrabDeviceButtonRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GRAB_DEVICE_BUTTON_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize grabbed_device
         // TODO: deserialize modifier_device
@@ -2729,9 +2678,6 @@ impl UngrabDeviceButtonRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(UNGRAB_DEVICE_BUTTON_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize modifiers
         // TODO: deserialize modifier_device
@@ -2882,9 +2828,6 @@ impl AllowDeviceEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(ALLOW_DEVICE_EVENTS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize time
         // TODO: deserialize mode
         // TODO: deserialize device_id
@@ -2945,9 +2888,6 @@ impl GetDeviceFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_DEVICE_FOCUS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -3048,9 +2988,6 @@ impl SetDeviceFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SET_DEVICE_FOCUS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize focus
         // TODO: deserialize time
         // TODO: deserialize revert_to
@@ -4136,9 +4073,6 @@ impl GetFeedbackControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_FEEDBACK_CONTROL_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -5156,9 +5090,6 @@ impl ChangeFeedbackControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(CHANGE_FEEDBACK_CONTROL_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize mask
         // TODO: deserialize device_id
         // TODO: deserialize feedback_id
@@ -5225,9 +5156,6 @@ impl GetDeviceKeyMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_DEVICE_KEY_MAPPING_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize first_keycode
         // TODO: deserialize count
@@ -5341,9 +5269,6 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(CHANGE_DEVICE_KEY_MAPPING_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize first_keycode
         // TODO: deserialize keysyms_per_keycode
@@ -5405,9 +5330,6 @@ impl GetDeviceModifierMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_DEVICE_MODIFIER_MAPPING_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -5514,9 +5436,6 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SET_DEVICE_MODIFIER_MAPPING_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize keycodes_per_modifier
         // TODO: deserialize <unnamed field>
@@ -5602,9 +5521,6 @@ impl GetDeviceButtonMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_DEVICE_BUTTON_MAPPING_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -5714,9 +5630,6 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SET_DEVICE_BUTTON_MAPPING_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize map_size
         // TODO: deserialize <unnamed field>
@@ -6389,9 +6302,6 @@ impl QueryDeviceStateRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(QUERY_DEVICE_STATE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -6495,9 +6405,6 @@ impl DeviceBellRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(DEVICE_BELL_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize feedback_id
         // TODO: deserialize feedback_class
@@ -6566,9 +6473,6 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SET_DEVICE_VALUATORS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize first_valuator
         // TODO: deserialize num_valuators
@@ -7491,9 +7395,6 @@ impl GetDeviceControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_DEVICE_CONTROL_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize control_id
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
@@ -8335,9 +8236,6 @@ impl ChangeDeviceControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(CHANGE_DEVICE_CONTROL_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize control_id
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
@@ -8423,9 +8321,6 @@ impl ListDevicePropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(LIST_DEVICE_PROPERTIES_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -8677,9 +8572,6 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(CHANGE_DEVICE_PROPERTY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize property
         // TODO: deserialize type_
         // TODO: deserialize device_id
@@ -8751,9 +8643,6 @@ impl DeleteDevicePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(DELETE_DEVICE_PROPERTY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize property
         // TODO: deserialize device_id
         // TODO: deserialize <unnamed field>
@@ -8836,9 +8725,6 @@ impl GetDevicePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(GET_DEVICE_PROPERTY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize property
         // TODO: deserialize type_
         // TODO: deserialize offset
@@ -9189,9 +9075,6 @@ impl XIQueryPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_QUERY_POINTER_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize deviceid
         // TODO: deserialize <unnamed field>
@@ -9354,9 +9237,6 @@ impl XIWarpPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_WARP_POINTER_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize src_win
         // TODO: deserialize dst_win
         // TODO: deserialize src_x
@@ -9441,9 +9321,6 @@ impl XIChangeCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_CHANGE_CURSOR_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize cursor
         // TODO: deserialize deviceid
@@ -10188,9 +10065,6 @@ impl<'input> XIChangeHierarchyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_CHANGE_HIERARCHY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize num_changes
         // TODO: deserialize <unnamed field>
         // TODO: deserialize changes
@@ -10252,9 +10126,6 @@ impl XISetClientPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_SET_CLIENT_POINTER_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize deviceid
         // TODO: deserialize <unnamed field>
@@ -10313,9 +10184,6 @@ impl XIGetClientPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_GET_CLIENT_POINTER_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -10563,9 +10431,6 @@ impl<'input> XISelectEventsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_SELECT_EVENTS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize num_mask
         // TODO: deserialize <unnamed field>
@@ -10625,9 +10490,6 @@ impl XIQueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_QUERY_VERSION_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize major_version
         // TODO: deserialize minor_version
         let _ = body;
@@ -11938,9 +11800,6 @@ impl XIQueryDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_QUERY_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize deviceid
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -12051,9 +11910,6 @@ impl XISetFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_SET_FOCUS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize time
         // TODO: deserialize deviceid
@@ -12116,9 +11972,6 @@ impl XIGetFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_GET_FOCUS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize deviceid
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -12306,9 +12159,6 @@ impl<'input> XIGrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_GRAB_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize time
         // TODO: deserialize cursor
@@ -12415,9 +12265,6 @@ impl XIUngrabDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_UNGRAB_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize time
         // TODO: deserialize deviceid
         // TODO: deserialize <unnamed field>
@@ -12578,9 +12425,6 @@ impl XIAllowEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_ALLOW_EVENTS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize time
         // TODO: deserialize deviceid
         // TODO: deserialize event_mode
@@ -12908,9 +12752,6 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_PASSIVE_GRAB_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize time
         // TODO: deserialize grab_window
         // TODO: deserialize cursor
@@ -13058,9 +12899,6 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_PASSIVE_UNGRAB_DEVICE_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize detail
         // TODO: deserialize deviceid
@@ -13126,9 +12964,6 @@ impl XIListPropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_LIST_PROPERTIES_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize deviceid
         // TODO: deserialize <unnamed field>
         let _ = body;
@@ -13316,9 +13151,6 @@ impl<'input> XIChangePropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_CHANGE_PROPERTY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize deviceid
         // TODO: deserialize mode
         // TODO: deserialize format
@@ -13391,9 +13223,6 @@ impl XIDeletePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_DELETE_PROPERTY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize deviceid
         // TODO: deserialize <unnamed field>
         // TODO: deserialize property
@@ -13478,9 +13307,6 @@ impl XIGetPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_GET_PROPERTY_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize deviceid
         // TODO: deserialize delete
         // TODO: deserialize <unnamed field>
@@ -13650,9 +13476,6 @@ impl XIGetSelectedEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_GET_SELECTED_EVENTS_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -13805,9 +13628,6 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(XI_BARRIER_RELEASE_POINTER_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize num_barriers
         // TODO: deserialize barriers
         let _ = body;
@@ -16741,9 +16561,6 @@ impl<'input> SendExtensionEventRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, None, Some(SEND_EXTENSION_EVENT_REQUEST))?;
-        // TODO: deserialize major_opcode
-        // TODO: deserialize minor_opcode
-        // TODO: deserialize length
         // TODO: deserialize destination
         // TODO: deserialize device_id
         // TODO: deserialize propagate

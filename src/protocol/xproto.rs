@@ -6096,9 +6096,7 @@ impl<'input> CreateWindowRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CREATE_WINDOW_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize depth
-        // TODO: deserialize length
         // TODO: deserialize wid
         // TODO: deserialize parent
         // TODO: deserialize x
@@ -6464,9 +6462,7 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CHANGE_WINDOW_ATTRIBUTES_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize value_mask
         // TODO: deserialize value_list
@@ -6620,9 +6616,7 @@ impl GetWindowAttributesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_WINDOW_ATTRIBUTES_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -6783,9 +6777,7 @@ impl DestroyWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(DESTROY_WINDOW_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -6860,9 +6852,7 @@ impl DestroySubwindowsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(DESTROY_SUBWINDOWS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -7009,9 +6999,7 @@ impl ChangeSaveSetRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CHANGE_SAVE_SET_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize mode
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -7133,9 +7121,7 @@ impl ReparentWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(REPARENT_WINDOW_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize parent
         // TODO: deserialize x
@@ -7261,9 +7247,7 @@ impl MapWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(MAP_WINDOW_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -7351,9 +7335,7 @@ impl MapSubwindowsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(MAP_SUBWINDOWS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -7427,9 +7409,7 @@ impl UnmapWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(UNMAP_WINDOW_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -7503,9 +7483,7 @@ impl UnmapSubwindowsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(UNMAP_SUBWINDOWS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -7880,9 +7858,7 @@ impl<'input> ConfigureWindowRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CONFIGURE_WINDOW_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize value_mask
         // TODO: deserialize <unnamed field>
@@ -8078,9 +8054,7 @@ impl CirculateWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CIRCULATE_WINDOW_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize direction
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -8187,9 +8161,7 @@ impl GetGeometryRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_GEOMETRY_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize drawable
         let _ = body;
         // TODO: produce final struct
@@ -8365,9 +8337,7 @@ impl QueryTreeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(QUERY_TREE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -8559,9 +8529,7 @@ impl<'input> InternAtomRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(INTERN_ATOM_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize only_if_exists
-        // TODO: deserialize length
         // TODO: deserialize name_len
         // TODO: deserialize <unnamed field>
         // TODO: deserialize name
@@ -8687,9 +8655,7 @@ impl GetAtomNameRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_ATOM_NAME_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize atom
         let _ = body;
         // TODO: produce final struct
@@ -8941,9 +8907,7 @@ impl<'input> ChangePropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CHANGE_PROPERTY_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize mode
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize property
         // TODO: deserialize type_
@@ -9069,9 +9033,7 @@ impl DeletePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(DELETE_PROPERTY_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize property
         let _ = body;
@@ -9279,9 +9241,7 @@ impl GetPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_PROPERTY_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize delete
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize property
         // TODO: deserialize type_
@@ -9622,9 +9582,7 @@ impl ListPropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(LIST_PROPERTIES_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -9760,9 +9718,7 @@ impl SetSelectionOwnerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_SELECTION_OWNER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize owner
         // TODO: deserialize selection
         // TODO: deserialize time
@@ -9869,9 +9825,7 @@ impl GetSelectionOwnerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_SELECTION_OWNER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize selection
         let _ = body;
         // TODO: produce final struct
@@ -9993,9 +9947,7 @@ impl ConvertSelectionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CONVERT_SELECTION_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize requestor
         // TODO: deserialize selection
         // TODO: deserialize target
@@ -10213,9 +10165,7 @@ impl<'input> SendEventRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SEND_EVENT_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize propagate
-        // TODO: deserialize length
         // TODO: deserialize destination
         // TODO: deserialize event_mask
         // TODO: deserialize event
@@ -10660,9 +10610,7 @@ impl GrabPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GRAB_POINTER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize owner_events
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize event_mask
         // TODO: deserialize pointer_mode
@@ -10855,9 +10803,7 @@ impl UngrabPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(UNGRAB_POINTER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize time
         let _ = body;
         // TODO: produce final struct
@@ -11116,9 +11062,7 @@ impl GrabButtonRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GRAB_BUTTON_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize owner_events
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize event_mask
         // TODO: deserialize pointer_mode
@@ -11270,9 +11214,7 @@ impl UngrabButtonRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(UNGRAB_BUTTON_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize button
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize modifiers
         // TODO: deserialize <unnamed field>
@@ -11343,9 +11285,7 @@ impl ChangeActivePointerGrabRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CHANGE_ACTIVE_POINTER_GRAB_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cursor
         // TODO: deserialize time
         // TODO: deserialize event_mask
@@ -11487,9 +11427,7 @@ impl GrabKeyboardRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GRAB_KEYBOARD_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize owner_events
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize time
         // TODO: deserialize pointer_mode
@@ -11639,9 +11577,7 @@ impl UngrabKeyboardRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(UNGRAB_KEYBOARD_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize time
         let _ = body;
         // TODO: produce final struct
@@ -11833,9 +11769,7 @@ impl GrabKeyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GRAB_KEY_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize owner_events
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize modifiers
         // TODO: deserialize key
@@ -11995,9 +11929,7 @@ impl UngrabKeyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(UNGRAB_KEY_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize key
-        // TODO: deserialize length
         // TODO: deserialize grab_window
         // TODO: deserialize modifiers
         // TODO: deserialize <unnamed field>
@@ -12242,9 +12174,7 @@ impl AllowEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(ALLOW_EVENTS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize mode
-        // TODO: deserialize length
         // TODO: deserialize time
         let _ = body;
         // TODO: produce final struct
@@ -12311,9 +12241,7 @@ impl GrabServerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GRAB_SERVER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -12356,9 +12284,7 @@ impl UngrabServerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(UNGRAB_SERVER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -12421,9 +12347,7 @@ impl QueryPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(QUERY_POINTER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -12605,9 +12529,7 @@ impl GetMotionEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_MOTION_EVENTS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize start
         // TODO: deserialize stop
@@ -12724,9 +12646,7 @@ impl TranslateCoordinatesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(TRANSLATE_COORDINATES_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize src_window
         // TODO: deserialize dst_window
         // TODO: deserialize src_x
@@ -12877,9 +12797,7 @@ impl WarpPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(WARP_POINTER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize src_window
         // TODO: deserialize dst_window
         // TODO: deserialize src_x
@@ -13102,9 +13020,7 @@ impl SetInputFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_INPUT_FOCUS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize revert_to
-        // TODO: deserialize length
         // TODO: deserialize focus
         // TODO: deserialize time
         let _ = body;
@@ -13192,9 +13108,7 @@ impl GetInputFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_INPUT_FOCUS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -13264,9 +13178,7 @@ impl QueryKeymapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(QUERY_KEYMAP_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -13372,9 +13284,7 @@ impl<'input> OpenFontRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(OPEN_FONT_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize fid
         // TODO: deserialize name_len
         // TODO: deserialize <unnamed field>
@@ -13451,9 +13361,7 @@ impl CloseFontRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CLOSE_FONT_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize font
         let _ = body;
         // TODO: produce final struct
@@ -13687,9 +13595,7 @@ impl QueryFontRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(QUERY_FONT_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize font
         let _ = body;
         // TODO: produce final struct
@@ -13885,9 +13791,7 @@ impl<'input> QueryTextExtentsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(QUERY_TEXT_EXTENTS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize odd_length
-        // TODO: deserialize length
         // TODO: deserialize font
         // TODO: deserialize string
         // TODO: deserialize string_len
@@ -14083,9 +13987,7 @@ impl<'input> ListFontsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(LIST_FONTS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize max_names
         // TODO: deserialize pattern_len
         // TODO: deserialize pattern
@@ -14218,9 +14120,7 @@ impl<'input> ListFontsWithInfoRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(LIST_FONTS_WITH_INFO_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize max_names
         // TODO: deserialize pattern_len
         // TODO: deserialize pattern
@@ -14394,9 +14294,7 @@ impl<'input> SetFontPathRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_FONT_PATH_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize font_qty
         // TODO: deserialize <unnamed field>
         // TODO: deserialize font
@@ -14444,9 +14342,7 @@ impl GetFontPathRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_FONT_PATH_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -14577,9 +14473,7 @@ impl CreatePixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CREATE_PIXMAP_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize depth
-        // TODO: deserialize length
         // TODO: deserialize pid
         // TODO: deserialize drawable
         // TODO: deserialize width
@@ -14674,9 +14568,7 @@ impl FreePixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(FREE_PIXMAP_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize pixmap
         let _ = body;
         // TODO: produce final struct
@@ -15860,9 +15752,7 @@ impl<'input> CreateGCRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CREATE_GC_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cid
         // TODO: deserialize drawable
         // TODO: deserialize value_mask
@@ -16302,9 +16192,7 @@ impl<'input> ChangeGCRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CHANGE_GC_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize gc
         // TODO: deserialize value_mask
         // TODO: deserialize value_list
@@ -16417,9 +16305,7 @@ impl CopyGCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(COPY_GC_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize src_gc
         // TODO: deserialize dst_gc
         // TODO: deserialize value_mask
@@ -16490,9 +16376,7 @@ impl<'input> SetDashesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_DASHES_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize gc
         // TODO: deserialize dash_offset
         // TODO: deserialize dashes_len
@@ -16633,9 +16517,7 @@ impl<'input> SetClipRectanglesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_CLIP_RECTANGLES_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize ordering
-        // TODO: deserialize length
         // TODO: deserialize gc
         // TODO: deserialize clip_x_origin
         // TODO: deserialize clip_y_origin
@@ -16707,9 +16589,7 @@ impl FreeGCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(FREE_GC_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize gc
         let _ = body;
         // TODO: produce final struct
@@ -16791,9 +16671,7 @@ impl ClearAreaRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CLEAR_AREA_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize exposures
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize x
         // TODO: deserialize y
@@ -16912,9 +16790,7 @@ impl CopyAreaRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(COPY_AREA_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize src_drawable
         // TODO: deserialize dst_drawable
         // TODO: deserialize gc
@@ -17046,9 +16922,7 @@ impl CopyPlaneRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(COPY_PLANE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize src_drawable
         // TODO: deserialize dst_drawable
         // TODO: deserialize gc
@@ -17206,9 +17080,7 @@ impl<'input> PolyPointRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(POLY_POINT_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize coordinate_mode
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize points
@@ -17319,9 +17191,7 @@ impl<'input> PolyLineRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(POLY_LINE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize coordinate_mode
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize points
@@ -17506,9 +17376,7 @@ impl<'input> PolySegmentRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(POLY_SEGMENT_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize segments
@@ -17603,9 +17471,7 @@ impl<'input> PolyRectangleRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(POLY_RECTANGLE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize rectangles
@@ -17674,9 +17540,7 @@ impl<'input> PolyArcRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(POLY_ARC_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize arcs
@@ -17818,9 +17682,7 @@ impl<'input> FillPolyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(FILL_POLY_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize shape
@@ -17919,9 +17781,7 @@ impl<'input> PolyFillRectangleRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(POLY_FILL_RECTANGLE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize rectangles
@@ -18015,9 +17875,7 @@ impl<'input> PolyFillArcRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(POLY_FILL_ARC_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize arcs
@@ -18176,9 +18034,7 @@ impl<'input> PutImageRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(PUT_IMAGE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize format
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize width
@@ -18274,9 +18130,7 @@ impl GetImageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_IMAGE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize format
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize x
         // TODO: deserialize y
@@ -18403,9 +18257,7 @@ impl<'input> PolyText8Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(POLY_TEXT8_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize x
@@ -18485,9 +18337,7 @@ impl<'input> PolyText16Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(POLY_TEXT16_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize x
@@ -18603,9 +18453,7 @@ impl<'input> ImageText8Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(IMAGE_TEXT8_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize string_len
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize x
@@ -18756,9 +18604,7 @@ impl<'input> ImageText16Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(IMAGE_TEXT16_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize string_len
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize gc
         // TODO: deserialize x
@@ -18938,9 +18784,7 @@ impl CreateColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CREATE_COLORMAP_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize alloc
-        // TODO: deserialize length
         // TODO: deserialize mid
         // TODO: deserialize window
         // TODO: deserialize visual
@@ -18998,9 +18842,7 @@ impl FreeColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(FREE_COLORMAP_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cmap
         let _ = body;
         // TODO: produce final struct
@@ -19059,9 +18901,7 @@ impl CopyColormapAndFreeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(COPY_COLORMAP_AND_FREE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize mid
         // TODO: deserialize src_cmap
         let _ = body;
@@ -19116,9 +18956,7 @@ impl InstallColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(INSTALL_COLORMAP_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cmap
         let _ = body;
         // TODO: produce final struct
@@ -19171,9 +19009,7 @@ impl UninstallColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(UNINSTALL_COLORMAP_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cmap
         let _ = body;
         // TODO: produce final struct
@@ -19226,9 +19062,7 @@ impl ListInstalledColormapsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(LIST_INSTALLED_COLORMAPS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         let _ = body;
         // TODO: produce final struct
@@ -19355,9 +19189,7 @@ impl AllocColorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(ALLOC_COLOR_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cmap
         // TODO: deserialize red
         // TODO: deserialize green
@@ -19477,9 +19309,7 @@ impl<'input> AllocNamedColorRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(ALLOC_NAMED_COLOR_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cmap
         // TODO: deserialize name_len
         // TODO: deserialize <unnamed field>
@@ -19583,9 +19413,7 @@ impl AllocColorCellsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(ALLOC_COLOR_CELLS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize contiguous
-        // TODO: deserialize length
         // TODO: deserialize cmap
         // TODO: deserialize colors
         // TODO: deserialize planes
@@ -19719,9 +19547,7 @@ impl AllocColorPlanesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(ALLOC_COLOR_PLANES_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize contiguous
-        // TODO: deserialize length
         // TODO: deserialize cmap
         // TODO: deserialize colors
         // TODO: deserialize reds
@@ -19843,9 +19669,7 @@ impl<'input> FreeColorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(FREE_COLORS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cmap
         // TODO: deserialize plane_mask
         // TODO: deserialize pixels
@@ -20034,9 +19858,7 @@ impl<'input> StoreColorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(STORE_COLORS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cmap
         // TODO: deserialize items
         // TODO: deserialize items_len
@@ -20110,9 +19932,7 @@ impl<'input> StoreNamedColorRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(STORE_NAMED_COLOR_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize flags
-        // TODO: deserialize length
         // TODO: deserialize cmap
         // TODO: deserialize pixel
         // TODO: deserialize name_len
@@ -20227,9 +20047,7 @@ impl<'input> QueryColorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(QUERY_COLORS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cmap
         // TODO: deserialize pixels
         // TODO: deserialize pixels_len
@@ -20337,9 +20155,7 @@ impl<'input> LookupColorRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(LOOKUP_COLOR_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cmap
         // TODO: deserialize name_len
         // TODO: deserialize <unnamed field>
@@ -20534,9 +20350,7 @@ impl CreateCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CREATE_CURSOR_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cid
         // TODO: deserialize source
         // TODO: deserialize mask
@@ -20747,9 +20561,7 @@ impl CreateGlyphCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CREATE_GLYPH_CURSOR_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cid
         // TODO: deserialize source_font
         // TODO: deserialize mask_font
@@ -20869,9 +20681,7 @@ impl FreeCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(FREE_CURSOR_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cursor
         let _ = body;
         // TODO: produce final struct
@@ -20960,9 +20770,7 @@ impl RecolorCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(RECOLOR_CURSOR_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize cursor
         // TODO: deserialize fore_red
         // TODO: deserialize fore_green
@@ -21102,9 +20910,7 @@ impl QueryBestSizeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(QUERY_BEST_SIZE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize class
-        // TODO: deserialize length
         // TODO: deserialize drawable
         // TODO: deserialize width
         // TODO: deserialize height
@@ -21215,9 +21021,7 @@ impl<'input> QueryExtensionRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(QUERY_EXTENSION_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize name_len
         // TODO: deserialize <unnamed field>
         // TODO: deserialize name
@@ -21324,9 +21128,7 @@ impl ListExtensionsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(LIST_EXTENSIONS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -21427,9 +21229,7 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CHANGE_KEYBOARD_MAPPING_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize keycode_count
-        // TODO: deserialize length
         // TODO: deserialize first_keycode
         // TODO: deserialize keysyms_per_keycode
         // TODO: deserialize <unnamed field>
@@ -21490,9 +21290,7 @@ impl GetKeyboardMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_KEYBOARD_MAPPING_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize first_keycode
         // TODO: deserialize count
         let _ = body;
@@ -21932,9 +21730,7 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CHANGE_KEYBOARD_CONTROL_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize value_mask
         // TODO: deserialize value_list
         let _ = body;
@@ -21981,9 +21777,7 @@ impl GetKeyboardControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_KEYBOARD_CONTROL_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -22068,9 +21862,7 @@ impl BellRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(BELL_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize percent
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -22134,9 +21926,7 @@ impl ChangePointerControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CHANGE_POINTER_CONTROL_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize acceleration_numerator
         // TODO: deserialize acceleration_denominator
         // TODO: deserialize threshold
@@ -22190,9 +21980,7 @@ impl GetPointerControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_POINTER_CONTROL_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -22412,9 +22200,7 @@ impl SetScreenSaverRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_SCREEN_SAVER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize timeout
         // TODO: deserialize interval
         // TODO: deserialize prefer_blanking
@@ -22466,9 +22252,7 @@ impl GetScreenSaverRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_SCREEN_SAVER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -22701,9 +22485,7 @@ impl<'input> ChangeHostsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(CHANGE_HOSTS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize mode
-        // TODO: deserialize length
         // TODO: deserialize family
         // TODO: deserialize <unnamed field>
         // TODO: deserialize address_len
@@ -22815,9 +22597,7 @@ impl ListHostsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(LIST_HOSTS_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -22977,9 +22757,7 @@ impl SetAccessControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_ACCESS_CONTROL_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize mode
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -23092,9 +22870,7 @@ impl SetCloseDownModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_CLOSE_DOWN_MODE_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize mode
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -23224,9 +23000,7 @@ impl KillClientRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(KILL_CLIENT_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize resource
         let _ = body;
         // TODO: produce final struct
@@ -23313,9 +23087,7 @@ impl<'input> RotatePropertiesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(ROTATE_PROPERTIES_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         // TODO: deserialize window
         // TODO: deserialize atoms_len
         // TODO: deserialize delta
@@ -23439,9 +23211,7 @@ impl ForceScreenSaverRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(FORCE_SCREEN_SAVER_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize mode
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -23558,9 +23328,7 @@ impl<'input> SetPointerMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_POINTER_MAPPING_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize map_len
-        // TODO: deserialize length
         // TODO: deserialize map
         let _ = body;
         // TODO: produce final struct
@@ -23631,9 +23399,7 @@ impl GetPointerMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_POINTER_MAPPING_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -23806,9 +23572,7 @@ impl<'input> SetModifierMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(SET_MODIFIER_MAPPING_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize keycodes_per_modifier
-        // TODO: deserialize length
         // TODO: deserialize keycodes
         let _ = body;
         // TODO: produce final struct
@@ -23879,9 +23643,7 @@ impl GetModifierMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(GET_MODIFIER_MAPPING_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()
@@ -23967,9 +23729,7 @@ impl NoOperationRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, body, Some(NO_OPERATION_REQUEST), None)?;
-        // TODO: deserialize major_opcode
         // TODO: deserialize <unnamed field>
-        // TODO: deserialize length
         let _ = body;
         // TODO: produce final struct
         unimplemented!()

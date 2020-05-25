@@ -893,9 +893,23 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                        minor_opcode=minor_opcode);
 
                 let fields = request_def.fields.borrow();
+                let mut seen_complete_header = false;
                 for (_, field) in fields.iter().enumerate() {
-                    let rust_field_name = to_rust_variable_name(field.name().unwrap_or("<unnamed field>"));
-                    outln!(out, "// TODO: deserialize {}", rust_field_name);
+                    match field.name() {
+                        // These are all in the header. Ignore them.
+                        Some("major_opcode") | Some("minor_opcode") => continue,
+                        Some("length") => {
+                            seen_complete_header = true;
+                            continue;
+                        },
+                        _ => (),
+                    }
+                    match field {
+                        _ => {
+                            let rust_field_name = to_rust_variable_name(field.name().unwrap_or("<unnamed field>"));
+                            outln!(out, "// TODO: deserialize {}", rust_field_name);
+                        }
+                    }
                 }
 
                 // Suppress a warning about this being unused.
