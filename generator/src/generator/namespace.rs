@@ -484,267 +484,267 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let mut pad_count = 0;
 
                 for (field_i, field) in fields.iter().enumerate() {
-                let mut next_slice = None;
+                    let mut next_slice = None;
 
-                let mut tmp_out = Output::new();
-                self.emit_assert_for_field_serialize(field, deducible_fields, "self.", &mut tmp_out);
-                match field {
-                    xcbdefs::FieldDef::Pad(pad_field) => match pad_field.kind {
-                        xcbdefs::PadKind::Bytes(bytes) => {
-                            for _ in 0..bytes {
-                                fixed_fields_bytes.push(String::from("0"));
-                            }
-                        }
-                        xcbdefs::PadKind::Align(align) => {
-                            outln!(
-                                tmp_out,
-                                "let padding{} = &[0; {}][..({} - (length_so_far % {})) % {}];",
-                                pad_count,
-                                align - 1,
-                                align,
-                                align,
-                                align,
-                            );
-                            next_slice = Some(format!("padding{}", pad_count));
-                            pad_count += 1;
-                        }
-                    },
-                    xcbdefs::FieldDef::Normal(normal_field) => {
-                        if normal_field.name == "major_opcode" {
-                            if ns.ext_info.is_some() {
-                                fixed_fields_bytes
-                                    .push(String::from("extension_information.major_opcode"));
-                            } else {
-                                fixed_fields_bytes.push(format!("{}_REQUEST",
-                                                               super::camel_case_to_upper_snake(&name)));
-                            }
-                        } else if normal_field.name == "minor_opcode" {
-                            assert!(ns.ext_info.is_some());
-                            fixed_fields_bytes.push(format!("{}_REQUEST", super::camel_case_to_upper_snake(&name)));
-                        } else if normal_field.name == "length" {
-                            // the actual length will be calculated later
-                            fixed_fields_bytes.push(String::from("0"));
-                            fixed_fields_bytes.push(String::from("0"));
-                        } else {
-                            let rust_field_name = to_rust_variable_name(&normal_field.name);
-
-                            let was_deduced = if let Some(deducible_field) =
-                                deducible_fields.get(&normal_field.name)
-                            {
-                                self.emit_calc_deducible_field(
-                                    field,
-                                    deducible_field,
-                                    "self.",
-                                    &rust_field_name,
-                                    out,
-                                );
-                                true
-                            } else {
-                                false
-                            };
-
-                            let bytes_name = postfix_var_name(&rust_field_name, "bytes");
-                            if let Some(field_size) = normal_field.type_.size() {
-                                let field_name = if was_deduced {
-                                    // If we deduced this value it comes from a local.
-                                    rust_field_name
-                                } else {
-                                    // Otherwise a member.
-                                    format!("self.{}", rust_field_name)
-                                };
-
-                                outln!(
-                                    out,
-                                    "let {} = {};",
-                                    bytes_name,
-                                    self.emit_value_serialize(
-                                        &normal_field.type_,
-                                        &field_name,
-                                        was_deduced,
-                                    ),
-                                );
-                                for i in 0..field_size {
-                                    fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
+                    let mut tmp_out = Output::new();
+                    self.emit_assert_for_field_serialize(field, deducible_fields, "self.", &mut tmp_out);
+                    match field {
+                        xcbdefs::FieldDef::Pad(pad_field) => match pad_field.kind {
+                            xcbdefs::PadKind::Bytes(bytes) => {
+                                for _ in 0..bytes {
+                                    fixed_fields_bytes.push(String::from("0"));
                                 }
-                            } else {
+                            }
+                            xcbdefs::PadKind::Align(align) => {
                                 outln!(
                                     tmp_out,
-                                    "let {} = self.{}.serialize();",
-                                    bytes_name,
-                                    rust_field_name,
+                                    "let padding{} = &[0; {}][..({} - (length_so_far % {})) % {}];",
+                                    pad_count,
+                                    align - 1,
+                                    align,
+                                    align,
+                                    align,
                                 );
-                                next_slice = Some(bytes_name);
+                                next_slice = Some(format!("padding{}", pad_count));
+                                pad_count += 1;
                             }
-                        }
-                    }
-                    xcbdefs::FieldDef::List(list_field) => {
-                        let rust_field_name = to_rust_variable_name(&list_field.name);
-                        let list_length = list_field.length();
-                        if self.rust_value_type_is_u8(&list_field.element_type) {
-                            next_slice = Some(format!("(&self.{}[..])", rust_field_name));
-                        } else {
-                            let element_size = list_field.element_type.size();
-                            if let (Some(list_length), Some(element_size)) =
-                                (list_length, element_size)
-                            {
-                                for i in 0..list_length {
-                                    let src_value = format!("{}[{}]", rust_field_name, i);
-                                    let bytes_name =
-                                        postfix_var_name(&rust_field_name, &format!("{}_bytes", i));
+                        },
+                        xcbdefs::FieldDef::Normal(normal_field) => {
+                            if normal_field.name == "major_opcode" {
+                                if ns.ext_info.is_some() {
+                                    fixed_fields_bytes
+                                        .push(String::from("extension_information.major_opcode"));
+                                } else {
+                                    fixed_fields_bytes.push(format!("{}_REQUEST",
+                                                                    super::camel_case_to_upper_snake(&name)));
+                                }
+                            } else if normal_field.name == "minor_opcode" {
+                                assert!(ns.ext_info.is_some());
+                                fixed_fields_bytes.push(format!("{}_REQUEST", super::camel_case_to_upper_snake(&name)));
+                            } else if normal_field.name == "length" {
+                                // the actual length will be calculated later
+                                fixed_fields_bytes.push(String::from("0"));
+                                fixed_fields_bytes.push(String::from("0"));
+                            } else {
+                                let rust_field_name = to_rust_variable_name(&normal_field.name);
+
+                                let was_deduced = if let Some(deducible_field) =
+                                    deducible_fields.get(&normal_field.name)
+                                {
+                                    self.emit_calc_deducible_field(
+                                        field,
+                                        deducible_field,
+                                        "self.",
+                                        &rust_field_name,
+                                        out,
+                                    );
+                                    true
+                                } else {
+                                    false
+                                };
+
+                                let bytes_name = postfix_var_name(&rust_field_name, "bytes");
+                                if let Some(field_size) = normal_field.type_.size() {
+                                    let field_name = if was_deduced {
+                                        // If we deduced this value it comes from a local.
+                                        rust_field_name
+                                    } else {
+                                        // Otherwise a member.
+                                        format!("self.{}", rust_field_name)
+                                    };
+
                                     outln!(
                                         out,
                                         "let {} = {};",
                                         bytes_name,
                                         self.emit_value_serialize(
-                                            &list_field.element_type,
-                                            &src_value,
-                                            false,
+                                            &normal_field.type_,
+                                        &field_name,
+                                            was_deduced,
                                         ),
                                     );
-                                    for j in 0..element_size {
-                                        fixed_fields_bytes.push(format!("{}[{}]", bytes_name, j));
+                                    for i in 0..field_size {
+                                        fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
                                     }
-                                }
-                            } else if self.can_use_simple_list_parsing(&list_field.element_type) {
-                                let bytes_name = postfix_var_name(&rust_field_name, "bytes");
-                                outln!(
-                                    tmp_out,
-                                    "let {} = self.{}.serialize();",
-                                    bytes_name,
-                                    rust_field_name,
-                                );
-                                next_slice = Some(bytes_name);
-                            } else {
-                                let bytes_name = postfix_var_name(&rust_field_name, "bytes");
-                                outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
-                                outln!(tmp_out, "for element in {}.iter() {{", rust_field_name);
-                                tmp_out.indented(|tmp_out| {
-                                    self.emit_value_serialize_into(
-                                        &list_field.element_type,
-                                        "element",
-                                        false,
-                                        &bytes_name,
+                                } else {
+                                    outln!(
                                         tmp_out,
+                                        "let {} = self.{}.serialize();",
+                                        bytes_name,
+                                        rust_field_name,
                                     );
-                                });
-                                outln!(tmp_out, "}}");
+                                    next_slice = Some(bytes_name);
+                                }
+                            }
+                        }
+                        xcbdefs::FieldDef::List(list_field) => {
+                            let rust_field_name = to_rust_variable_name(&list_field.name);
+                            let list_length = list_field.length();
+                            if self.rust_value_type_is_u8(&list_field.element_type) {
+                                next_slice = Some(format!("(&self.{}[..])", rust_field_name));
+                            } else {
+                                let element_size = list_field.element_type.size();
+                                if let (Some(list_length), Some(element_size)) =
+                                    (list_length, element_size)
+                                {
+                                    for i in 0..list_length {
+                                        let src_value = format!("{}[{}]", rust_field_name, i);
+                                        let bytes_name =
+                                            postfix_var_name(&rust_field_name, &format!("{}_bytes", i));
+                                        outln!(
+                                            out,
+                                            "let {} = {};",
+                                            bytes_name,
+                                            self.emit_value_serialize(
+                                                &list_field.element_type,
+                                                &src_value,
+                                                false,
+                                            ),
+                                        );
+                                        for j in 0..element_size {
+                                            fixed_fields_bytes.push(format!("{}[{}]", bytes_name, j));
+                                        }
+                                    }
+                                } else if self.can_use_simple_list_parsing(&list_field.element_type) {
+                                    let bytes_name = postfix_var_name(&rust_field_name, "bytes");
+                                    outln!(
+                                        tmp_out,
+                                        "let {} = self.{}.serialize();",
+                                        bytes_name,
+                                        rust_field_name,
+                                    );
+                                    next_slice = Some(bytes_name);
+                                } else {
+                                    let bytes_name = postfix_var_name(&rust_field_name, "bytes");
+                                    outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
+                                    outln!(tmp_out, "for element in {}.iter() {{", rust_field_name);
+                                    tmp_out.indented(|tmp_out| {
+                                        self.emit_value_serialize_into(
+                                            &list_field.element_type,
+                                            "element",
+                                            false,
+                                            &bytes_name,
+                                            tmp_out,
+                                        );
+                                    });
+                                    outln!(tmp_out, "}}");
+                                    next_slice = Some(bytes_name);
+                                }
+                            }
+                        }
+                        xcbdefs::FieldDef::Switch(switch_field) => {
+                            let rust_field_name = to_rust_variable_name(&switch_field.name);
+                            let bytes_name = postfix_var_name(&rust_field_name, "bytes");
+                            outln!(
+                                tmp_out,
+                                "let {} = self.{}.serialize({});",
+                                bytes_name,
+                                rust_field_name,
+                                self.ext_params_to_call_args(
+                                    false,
+                                    |name| {
+                                        if deducible_fields.get(name).is_some() {
+                                            to_rust_variable_name(name)
+                                        } else {
+                                            format!("self.{}", to_rust_variable_name(name))
+                                        }
+                                    },
+                                    &*switch_field.external_params.borrow(),
+                                )
+                            );
+                            if let Some(field_size) = switch_field.size() {
+                                for i in 0..field_size {
+                                    fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
+                                }
+                            } else {
                                 next_slice = Some(bytes_name);
                             }
                         }
-                    }
-                    xcbdefs::FieldDef::Switch(switch_field) => {
-                        let rust_field_name = to_rust_variable_name(&switch_field.name);
-                        let bytes_name = postfix_var_name(&rust_field_name, "bytes");
-                        outln!(
-                            tmp_out,
-                            "let {} = self.{}.serialize({});",
-                            bytes_name,
-                            rust_field_name,
-                            self.ext_params_to_call_args(
-                                false,
-                                |name| {
-                                    if deducible_fields.get(name).is_some() {
-                                        to_rust_variable_name(name)
-                                    } else {
-                                        format!("self.{}", to_rust_variable_name(name))
-                                    }
-                                },
-                                &*switch_field.external_params.borrow(),
-                            )
-                        );
-                        if let Some(field_size) = switch_field.size() {
+                        xcbdefs::FieldDef::Fd(_) => {}
+                        xcbdefs::FieldDef::FdList(_) => {}
+                        xcbdefs::FieldDef::Expr(expr_field) => {
+                            let rust_field_name = to_rust_variable_name(&expr_field.name);
+                            let bytes_name = postfix_var_name(&rust_field_name, "bytes");
+                            let type_ = self.field_value_type_to_rust_type(&expr_field.type_);
+                            if type_ == "bool" {
+                                outln!(
+                                    out,
+                                    "let {} = {} != 0;",
+                                    rust_field_name,
+                                    self.expr_to_str(
+                                        &expr_field.expr,
+                                        to_rust_variable_name,
+                                        true,
+                                        true,
+                                        true,
+                                    ),
+                                );
+                            } else {
+                                // the only case found in the XML definitions is with a bool
+                                unreachable!();
+                            }
+                            let field_size = expr_field.type_.size().unwrap();
+                            outln!(
+                                out,
+                                "let {} = {};",
+                                bytes_name,
+                                self.emit_value_serialize(&expr_field.type_, &rust_field_name, false),
+                            );
                             for i in 0..field_size {
                                 fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
                             }
-                        } else {
-                            next_slice = Some(bytes_name);
+                        }
+                        xcbdefs::FieldDef::VirtualLen(_) => {}
+                    }
+
+                    // The XML does not describe trailing padding in requests. Requests
+                    // are implicitly padded to a four byte boundary.
+                    if next_slice.is_none() && field_i == (fields.len() - 1) {
+                        if let Some(ref mut request_size) = request_size {
+                            let req_size_rem = *request_size % 4;
+                            if req_size_rem != 0 {
+                                let pad_size = 4 - req_size_rem;
+                                for _ in 0..pad_size {
+                                    fixed_fields_bytes.push(String::from("0"));
+                                }
+                                *request_size += pad_size;
+                            }
                         }
                     }
-                    xcbdefs::FieldDef::Fd(_) => {}
-                    xcbdefs::FieldDef::FdList(_) => {}
-                    xcbdefs::FieldDef::Expr(expr_field) => {
-                        let rust_field_name = to_rust_variable_name(&expr_field.name);
-                        let bytes_name = postfix_var_name(&rust_field_name, "bytes");
-                        let type_ = self.field_value_type_to_rust_type(&expr_field.type_);
-                        if type_ == "bool" {
+
+                    if next_slice.is_some() || field_i == (fields.len() - 1) {
+                        if !fixed_fields_bytes.is_empty() {
+                            let maybe_mut = if num_fixed_len_slices == 0 {
+                                // contains the length field, which will be modified
+                                "mut "
+                            } else {
+                                ""
+                            };
+                            outln!(out, "let {}request{} = vec![", maybe_mut, num_fixed_len_slices);
+                            for byte in fixed_fields_bytes.iter() {
+                                outln!(out.indent(), "{},", byte);
+                            }
+                            outln!(out, "];");
                             outln!(
                                 out,
-                                "let {} = {} != 0;",
-                                rust_field_name,
-                                self.expr_to_str(
-                                    &expr_field.expr,
-                                    to_rust_variable_name,
-                                    true,
-                                    true,
-                                    true,
-                                ),
+                                "let length_so_far = length_so_far + request{}.len();",
+                                num_fixed_len_slices,
                             );
-                        } else {
-                            // the only case found in the XML definitions is with a bool
-                            unreachable!();
+                            request_slices.push(format!("request{}.into()", num_fixed_len_slices));
+                            fixed_fields_bytes.clear();
+                            num_fixed_len_slices += 1;
                         }
-                        let field_size = expr_field.type_.size().unwrap();
-                        outln!(
-                            out,
-                            "let {} = {};",
-                            bytes_name,
-                            self.emit_value_serialize(&expr_field.type_, &rust_field_name, false),
-                        );
-                        for i in 0..field_size {
-                            fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
+                        if let Some(next_slice) = next_slice {
+                            outln!(
+                                tmp_out,
+                                "let length_so_far = length_so_far + {}.len();",
+                                next_slice,
+                            );
+                            request_slices.push(format!("{}.into()", next_slice));
                         }
                     }
-                    xcbdefs::FieldDef::VirtualLen(_) => {}
-                }
 
-                // The XML does not describe trailing padding in requests. Requests
-                // are implicitly padded to a four byte boundary.
-                if next_slice.is_none() && field_i == (fields.len() - 1) {
-                    if let Some(ref mut request_size) = request_size {
-                        let req_size_rem = *request_size % 4;
-                        if req_size_rem != 0 {
-                            let pad_size = 4 - req_size_rem;
-                            for _ in 0..pad_size {
-                                fixed_fields_bytes.push(String::from("0"));
-                            }
-                            *request_size += pad_size;
-                        }
-                    }
-                }
-
-                if next_slice.is_some() || field_i == (fields.len() - 1) {
-                    if !fixed_fields_bytes.is_empty() {
-                        let maybe_mut = if num_fixed_len_slices == 0 {
-                            // contains the length field, which will be modified
-                            "mut "
-                        } else {
-                            ""
-                        };
-                        outln!(out, "let {}request{} = vec![", maybe_mut, num_fixed_len_slices);
-                        for byte in fixed_fields_bytes.iter() {
-                            outln!(out.indent(), "{},", byte);
-                        }
-                        outln!(out, "];");
-                        outln!(
-                            out,
-                            "let length_so_far = length_so_far + request{}.len();",
-                            num_fixed_len_slices,
-                        );
-                        request_slices.push(format!("request{}.into()", num_fixed_len_slices));
-                        fixed_fields_bytes.clear();
-                        num_fixed_len_slices += 1;
-                    }
-                    if let Some(next_slice) = next_slice {
-                        outln!(
-                            tmp_out,
-                            "let length_so_far = length_so_far + {}.len();",
-                            next_slice,
-                        );
-                        request_slices.push(format!("{}.into()", next_slice));
-                    }
-                }
-
-                out!(out, "{}", tmp_out.into_data());
+                    out!(out, "{}", tmp_out.into_data());
                 }
                 // The XML does not describe trailing padding in requests. Requests
                 // are implicitly padded to a four byte boundary.
