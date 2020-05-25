@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -339,7 +341,7 @@ pub struct RectanglesRequest<'input> {
     pub destination_window: xproto::Window,
     pub x_offset: i16,
     pub y_offset: i16,
-    pub rectangles: &'input [xproto::Rectangle],
+    pub rectangles: Cow<'input, [xproto::Rectangle]>,
 }
 impl<'input> RectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -396,7 +398,7 @@ where
         destination_window,
         x_offset,
         y_offset,
-        rectangles,
+        rectangles: Cow::Borrowed(rectangles),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -501,14 +503,14 @@ impl<'input> PrintGetPrinterListRequest<'input> {
             locale_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.printer_name[..]).len();
-        let length_so_far = length_so_far + (&self.locale[..]).len();
+        let length_so_far = length_so_far + self.printer_name.len();
+        let length_so_far = length_so_far + self.locale.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.printer_name[..]).into(), (&self.locale[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.printer_name.into(), self.locale.into(), padding0.into()], vec![]))
     }
 }
 pub fn print_get_printer_list<'c, 'input, Conn>(conn: &'c Conn, printer_name: &'input [String8], locale: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
@@ -643,14 +645,14 @@ impl<'input> CreateContextRequest<'input> {
             locale_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.printer_name[..]).len();
-        let length_so_far = length_so_far + (&self.locale[..]).len();
+        let length_so_far = length_so_far + self.printer_name.len();
+        let length_so_far = length_so_far + self.locale.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.printer_name[..]).into(), (&self.locale[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.printer_name.into(), self.locale.into(), padding0.into()], vec![]))
     }
 }
 pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context_id: u32, printer_name: &'input [String8], locale: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1103,15 +1105,15 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
             len_options_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.data[..]).len();
-        let length_so_far = length_so_far + (&self.doc_format[..]).len();
-        let length_so_far = length_so_far + (&self.options[..]).len();
+        let length_so_far = length_so_far + self.data.len();
+        let length_so_far = length_so_far + self.doc_format.len();
+        let length_so_far = length_so_far + self.options.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), (&self.doc_format[..]).into(), (&self.options[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data.into(), self.doc_format.into(), self.options.into(), padding0.into()], vec![]))
     }
 }
 pub fn print_put_document_data<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &'input [u8], doc_format: &'input [String8], options: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1577,13 +1579,13 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 pub fn print_get_one_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
@@ -1685,13 +1687,13 @@ impl<'input> PrintSetAttributesRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.attributes[..]).len();
+        let length_so_far = length_so_far + self.attributes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.attributes[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.attributes.into(), padding0.into()], vec![]))
     }
 }
 pub fn print_set_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>

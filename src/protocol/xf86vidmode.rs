@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -629,13 +631,13 @@ impl<'input> ModModeLineRequest<'input> {
             privsize_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.private[..]).len();
+        let length_so_far = length_so_far + self.private.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
 }
 pub fn mod_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1144,13 +1146,13 @@ impl<'input> AddModeLineRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.private[..]).len();
+        let length_so_far = length_so_far + self.private.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
 }
 pub fn add_mode_line<'c, 'input, Conn, A, B>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1288,13 +1290,13 @@ impl<'input> DeleteModeLineRequest<'input> {
             privsize_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.private[..]).len();
+        let length_so_far = length_so_far + self.private.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
 }
 pub fn delete_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1419,13 +1421,13 @@ impl<'input> ValidateModeLineRequest<'input> {
             privsize_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.private[..]).len();
+        let length_so_far = length_so_far + self.private.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
 }
 pub fn validate_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
@@ -1576,13 +1578,13 @@ impl<'input> SwitchToModeRequest<'input> {
             privsize_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.private[..]).len();
+        let length_so_far = length_so_far + self.private.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.private[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
 }
 pub fn switch_to_mode<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2131,9 +2133,9 @@ pub const SET_GAMMA_RAMP_REQUEST: u8 = 18;
 pub struct SetGammaRampRequest<'input> {
     pub screen: u16,
     pub size: u16,
-    pub red: &'input [u16],
-    pub green: &'input [u16],
-    pub blue: &'input [u16],
+    pub red: Cow<'input, [u16]>,
+    pub green: Cow<'input, [u16]>,
+    pub blue: Cow<'input, [u16]>,
 }
 impl<'input> SetGammaRampRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2181,9 +2183,9 @@ where
     let request0 = SetGammaRampRequest {
         screen,
         size,
-        red,
-        green,
-        blue,
+        red: Cow::Borrowed(red),
+        green: Cow::Borrowed(green),
+        blue: Cow::Borrowed(blue),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

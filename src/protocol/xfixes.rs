@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -1132,7 +1134,7 @@ pub const CREATE_REGION_REQUEST: u8 = 5;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateRegionRequest<'input> {
     pub region: Region,
-    pub rectangles: &'input [xproto::Rectangle],
+    pub rectangles: Cow<'input, [xproto::Rectangle]>,
 }
 impl<'input> CreateRegionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1171,7 +1173,7 @@ where
 {
     let request0 = CreateRegionRequest {
         region,
-        rectangles,
+        rectangles: Cow::Borrowed(rectangles),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1443,7 +1445,7 @@ pub const SET_REGION_REQUEST: u8 = 11;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetRegionRequest<'input> {
     pub region: Region,
-    pub rectangles: &'input [xproto::Rectangle],
+    pub rectangles: Cow<'input, [xproto::Rectangle]>,
 }
 impl<'input> SetRegionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1482,7 +1484,7 @@ where
 {
     let request0 = SetRegionRequest {
         region,
-        rectangles,
+        rectangles: Cow::Borrowed(rectangles),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2209,13 +2211,13 @@ impl<'input> SetCursorNameRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_cursor_name<'c, 'input, Conn>(conn: &'c Conn, cursor: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2504,13 +2506,13 @@ impl<'input> ChangeCursorByNameRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 pub fn change_cursor_by_name<'c, 'input, Conn>(conn: &'c Conn, src: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2770,7 +2772,7 @@ pub struct CreatePointerBarrierRequest<'input> {
     pub x2: u16,
     pub y2: u16,
     pub directions: u32,
-    pub devices: &'input [u16],
+    pub devices: Cow<'input, [u16]>,
 }
 impl<'input> CreatePointerBarrierRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2845,7 +2847,7 @@ where
         x2,
         y2,
         directions,
-        devices,
+        devices: Cow::Borrowed(devices),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

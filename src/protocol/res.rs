@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -745,7 +747,7 @@ impl TryFrom<&[u8]> for QueryClientPixmapBytesReply {
 pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientIdsRequest<'input> {
-    pub specs: &'input [ClientIdSpec],
+    pub specs: Cow<'input, [ClientIdSpec]>,
 }
 impl<'input> QueryClientIdsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -784,7 +786,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryClientIdsRequest {
-        specs,
+        specs: Cow::Borrowed(specs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -838,7 +840,7 @@ pub const QUERY_RESOURCE_BYTES_REQUEST: u8 = 5;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryResourceBytesRequest<'input> {
     pub client: u32,
-    pub specs: &'input [ResourceIdSpec],
+    pub specs: Cow<'input, [ResourceIdSpec]>,
 }
 impl<'input> QueryResourceBytesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -883,7 +885,7 @@ where
 {
     let request0 = QueryResourceBytesRequest {
         client,
-        specs,
+        specs: Cow::Borrowed(specs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

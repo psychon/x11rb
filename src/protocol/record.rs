@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -575,8 +577,8 @@ pub const CREATE_CONTEXT_REQUEST: u8 = 1;
 pub struct CreateContextRequest<'input> {
     pub context: Context,
     pub element_header: ElementHeader,
-    pub client_specs: &'input [ClientSpec],
-    pub ranges: &'input [Range],
+    pub client_specs: Cow<'input, [ClientSpec]>,
+    pub ranges: Cow<'input, [Range]>,
 }
 impl<'input> CreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -635,8 +637,8 @@ where
     let request0 = CreateContextRequest {
         context,
         element_header,
-        client_specs,
-        ranges,
+        client_specs: Cow::Borrowed(client_specs),
+        ranges: Cow::Borrowed(ranges),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -649,8 +651,8 @@ pub const REGISTER_CLIENTS_REQUEST: u8 = 2;
 pub struct RegisterClientsRequest<'input> {
     pub context: Context,
     pub element_header: ElementHeader,
-    pub client_specs: &'input [ClientSpec],
-    pub ranges: &'input [Range],
+    pub client_specs: Cow<'input, [ClientSpec]>,
+    pub ranges: Cow<'input, [Range]>,
 }
 impl<'input> RegisterClientsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -709,8 +711,8 @@ where
     let request0 = RegisterClientsRequest {
         context,
         element_header,
-        client_specs,
-        ranges,
+        client_specs: Cow::Borrowed(client_specs),
+        ranges: Cow::Borrowed(ranges),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -722,7 +724,7 @@ pub const UNREGISTER_CLIENTS_REQUEST: u8 = 3;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UnregisterClientsRequest<'input> {
     pub context: Context,
-    pub client_specs: &'input [ClientSpec],
+    pub client_specs: Cow<'input, [ClientSpec]>,
 }
 impl<'input> UnregisterClientsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -767,7 +769,7 @@ where
 {
     let request0 = UnregisterClientsRequest {
         context,
-        client_specs,
+        client_specs: Cow::Borrowed(client_specs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

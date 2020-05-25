@@ -13,6 +13,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -6013,7 +6015,7 @@ pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// * `xcb_generate_id`: function
 /// * `MapWindow`: request
 /// * `CreateNotify`: event
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateWindowRequest<'input> {
     pub depth: u8,
     pub wid: Window,
@@ -6025,7 +6027,7 @@ pub struct CreateWindowRequest<'input> {
     pub border_width: u16,
     pub class: WindowClass,
     pub visual: Visualid,
-    pub value_list: &'input CreateWindowAux,
+    pub value_list: Cow<'input, CreateWindowAux>,
 }
 impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -6161,7 +6163,7 @@ where
         border_width,
         class,
         visual,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6398,10 +6400,10 @@ pub const CHANGE_WINDOW_ATTRIBUTES_REQUEST: u8 = 2;
 /// * `Pixmap` - TODO: reasons?
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeWindowAttributesRequest<'input> {
     pub window: Window,
-    pub value_list: &'input ChangeWindowAttributesAux,
+    pub value_list: Cow<'input, ChangeWindowAttributesAux>,
 }
 impl<'input> ChangeWindowAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -6466,7 +6468,7 @@ where
 {
     let request0 = ChangeWindowAttributesRequest {
         window,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7699,10 +7701,10 @@ pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 ///     xcb_flush(c);
 /// }
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConfigureWindowRequest<'input> {
     pub window: Window,
-    pub value_list: &'input ConfigureWindowAux,
+    pub value_list: Cow<'input, ConfigureWindowAux>,
 }
 impl<'input> ConfigureWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -7796,7 +7798,7 @@ where
 {
     let request0 = ConfigureWindowRequest {
         window,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8363,13 +8365,13 @@ impl<'input> InternAtomRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 /// Get atom identifier by name.
@@ -8721,13 +8723,13 @@ impl<'input> ChangePropertyRequest<'input> {
         ];
         let length_so_far = length_so_far + request0.len();
         assert_eq!(self.data.len(), usize::try_from(self.data_len.checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
-        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
 }
 /// Changes a window property.
@@ -9868,7 +9870,7 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 ///     free(event);
 /// }
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SendEventRequest<'input> {
     pub propagate: bool,
     pub destination: Window,
@@ -12797,13 +12799,13 @@ impl<'input> OpenFontRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 /// opens a font.
@@ -13248,7 +13250,7 @@ pub const QUERY_TEXT_EXTENTS_REQUEST: u8 = 48;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryTextExtentsRequest<'input> {
     pub font: Fontable,
-    pub string: &'input [Char2b],
+    pub string: Cow<'input, [Char2b]>,
 }
 impl<'input> QueryTextExtentsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -13323,7 +13325,7 @@ where
 {
     let request0 = QueryTextExtentsRequest {
         font,
-        string,
+        string: Cow::Borrowed(string),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -13459,13 +13461,13 @@ impl<'input> ListFontsRequest<'input> {
             pattern_len_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.pattern[..]).len();
+        let length_so_far = length_so_far + self.pattern.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.pattern[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.pattern.into(), padding0.into()], vec![]))
     }
 }
 /// get matching font names.
@@ -13581,13 +13583,13 @@ impl<'input> ListFontsWithInfoRequest<'input> {
             pattern_len_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.pattern[..]).len();
+        let length_so_far = length_so_far + self.pattern.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.pattern[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.pattern.into(), padding0.into()], vec![]))
     }
 }
 /// get matching font names and information.
@@ -13720,7 +13722,7 @@ impl ListFontsWithInfoReply {
 pub const SET_FONT_PATH_REQUEST: u8 = 51;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetFontPathRequest<'input> {
-    pub font: &'input [Str],
+    pub font: Cow<'input, [Str]>,
 }
 impl<'input> SetFontPathRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -13758,7 +13760,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetFontPathRequest {
-        font,
+        font: Cow::Borrowed(font),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -15124,11 +15126,11 @@ pub const CREATE_GC_REQUEST: u8 = 55;
 /// # See
 ///
 /// * `xcb_generate_id`: function
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateGCRequest<'input> {
     pub cid: Gcontext,
     pub drawable: Drawable,
-    pub value_list: &'input CreateGCAux,
+    pub value_list: Cow<'input, CreateGCAux>,
 }
 impl<'input> CreateGCRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -15201,7 +15203,7 @@ where
     let request0 = CreateGCRequest {
         cid,
         drawable,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -15558,10 +15560,10 @@ pub const CHANGE_GC_REQUEST: u8 = 56;
 ///     xcb_flush(conn);
 /// }
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeGCRequest<'input> {
     pub gc: Gcontext,
-    pub value_list: &'input ChangeGCAux,
+    pub value_list: Cow<'input, ChangeGCAux>,
 }
 impl<'input> ChangeGCRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -15650,7 +15652,7 @@ where
 {
     let request0 = ChangeGCRequest {
         gc,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -15752,13 +15754,13 @@ impl<'input> SetDashesRequest<'input> {
             dashes_len_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.dashes[..]).len();
+        let length_so_far = length_so_far + self.dashes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.dashes[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.dashes.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_dashes<'c, 'input, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -15851,7 +15853,7 @@ pub struct SetClipRectanglesRequest<'input> {
     pub gc: Gcontext,
     pub clip_x_origin: i16,
     pub clip_y_origin: i16,
-    pub rectangles: &'input [Rectangle],
+    pub rectangles: Cow<'input, [Rectangle]>,
 }
 impl<'input> SetClipRectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -15899,7 +15901,7 @@ where
         gc,
         clip_x_origin,
         clip_y_origin,
-        rectangles,
+        rectangles: Cow::Borrowed(rectangles),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -16345,7 +16347,7 @@ pub struct PolyPointRequest<'input> {
     pub coordinate_mode: CoordMode,
     pub drawable: Drawable,
     pub gc: Gcontext,
-    pub points: &'input [Point],
+    pub points: Cow<'input, [Point]>,
 }
 impl<'input> PolyPointRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -16391,7 +16393,7 @@ where
         coordinate_mode,
         drawable,
         gc,
-        points,
+        points: Cow::Borrowed(points),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -16444,7 +16446,7 @@ pub struct PolyLineRequest<'input> {
     pub coordinate_mode: CoordMode,
     pub drawable: Drawable,
     pub gc: Gcontext,
-    pub points: &'input [Point],
+    pub points: Cow<'input, [Point]>,
 }
 impl<'input> PolyLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -16529,7 +16531,7 @@ where
         coordinate_mode,
         drawable,
         gc,
-        points,
+        points: Cow::Borrowed(points),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -16618,7 +16620,7 @@ pub const POLY_SEGMENT_REQUEST: u8 = 66;
 pub struct PolySegmentRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
-    pub segments: &'input [Segment],
+    pub segments: Cow<'input, [Segment]>,
 }
 impl<'input> PolySegmentRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -16688,7 +16690,7 @@ where
     let request0 = PolySegmentRequest {
         drawable,
         gc,
-        segments,
+        segments: Cow::Borrowed(segments),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -16701,7 +16703,7 @@ pub const POLY_RECTANGLE_REQUEST: u8 = 67;
 pub struct PolyRectangleRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
-    pub rectangles: &'input [Rectangle],
+    pub rectangles: Cow<'input, [Rectangle]>,
 }
 impl<'input> PolyRectangleRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -16745,7 +16747,7 @@ where
     let request0 = PolyRectangleRequest {
         drawable,
         gc,
-        rectangles,
+        rectangles: Cow::Borrowed(rectangles),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -16758,7 +16760,7 @@ pub const POLY_ARC_REQUEST: u8 = 68;
 pub struct PolyArcRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
-    pub arcs: &'input [Arc],
+    pub arcs: Cow<'input, [Arc]>,
 }
 impl<'input> PolyArcRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -16802,7 +16804,7 @@ where
     let request0 = PolyArcRequest {
         drawable,
         gc,
-        arcs,
+        arcs: Cow::Borrowed(arcs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -16882,7 +16884,7 @@ pub struct FillPolyRequest<'input> {
     pub gc: Gcontext,
     pub shape: PolyShape,
     pub coordinate_mode: CoordMode,
-    pub points: &'input [Point],
+    pub points: Cow<'input, [Point]>,
 }
 impl<'input> FillPolyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -16934,7 +16936,7 @@ where
         gc,
         shape,
         coordinate_mode,
-        points,
+        points: Cow::Borrowed(points),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -16972,7 +16974,7 @@ pub const POLY_FILL_RECTANGLE_REQUEST: u8 = 70;
 pub struct PolyFillRectangleRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
-    pub rectangles: &'input [Rectangle],
+    pub rectangles: Cow<'input, [Rectangle]>,
 }
 impl<'input> PolyFillRectangleRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -17041,7 +17043,7 @@ where
     let request0 = PolyFillRectangleRequest {
         drawable,
         gc,
-        rectangles,
+        rectangles: Cow::Borrowed(rectangles),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -17054,7 +17056,7 @@ pub const POLY_FILL_ARC_REQUEST: u8 = 71;
 pub struct PolyFillArcRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
-    pub arcs: &'input [Arc],
+    pub arcs: Cow<'input, [Arc]>,
 }
 impl<'input> PolyFillArcRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -17098,7 +17100,7 @@ where
     let request0 = PolyFillArcRequest {
         drawable,
         gc,
-        arcs,
+        arcs: Cow::Borrowed(arcs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -17229,13 +17231,13 @@ impl<'input> PutImageRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
 }
 pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -17419,13 +17421,13 @@ impl<'input> PolyText8Request<'input> {
             y_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.items[..]).len();
+        let length_so_far = length_so_far + self.items.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.items[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.items.into(), padding0.into()], vec![]))
     }
 }
 pub fn poly_text8<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -17485,13 +17487,13 @@ impl<'input> PolyText16Request<'input> {
             y_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.items[..]).len();
+        let length_so_far = length_so_far + self.items.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.items[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.items.into(), padding0.into()], vec![]))
     }
 }
 pub fn poly_text16<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -17587,13 +17589,13 @@ impl<'input> ImageText8Request<'input> {
             y_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.string[..]).len();
+        let length_so_far = length_so_far + self.string.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.string[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.string.into(), padding0.into()], vec![]))
     }
 }
 /// Draws text.
@@ -17689,7 +17691,7 @@ pub struct ImageText16Request<'input> {
     pub gc: Gcontext,
     pub x: i16,
     pub y: i16,
-    pub string: &'input [Char2b],
+    pub string: Cow<'input, [Char2b]>,
 }
 impl<'input> ImageText16Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -17778,7 +17780,7 @@ where
         gc,
         x,
         y,
-        string,
+        string: Cow::Borrowed(string),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -18347,13 +18349,13 @@ impl<'input> AllocNamedColorRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 pub fn alloc_named_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
@@ -18643,7 +18645,7 @@ pub const FREE_COLORS_REQUEST: u8 = 88;
 pub struct FreeColorsRequest<'input> {
     pub cmap: Colormap,
     pub plane_mask: u32,
-    pub pixels: &'input [u32],
+    pub pixels: Cow<'input, [u32]>,
 }
 impl<'input> FreeColorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -18687,7 +18689,7 @@ where
     let request0 = FreeColorsRequest {
         cmap,
         plane_mask,
-        pixels,
+        pixels: Cow::Borrowed(pixels),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -18825,7 +18827,7 @@ pub const STORE_COLORS_REQUEST: u8 = 89;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StoreColorsRequest<'input> {
     pub cmap: Colormap,
-    pub items: &'input [Coloritem],
+    pub items: Cow<'input, [Coloritem]>,
 }
 impl<'input> StoreColorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -18863,7 +18865,7 @@ where
 {
     let request0 = StoreColorsRequest {
         cmap,
-        items,
+        items: Cow::Borrowed(items),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -18911,13 +18913,13 @@ impl<'input> StoreNamedColorRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 pub fn store_named_color<'c, 'input, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -18990,7 +18992,7 @@ pub const QUERY_COLORS_REQUEST: u8 = 91;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryColorsRequest<'input> {
     pub cmap: Colormap,
-    pub pixels: &'input [u32],
+    pub pixels: Cow<'input, [u32]>,
 }
 impl<'input> QueryColorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -19028,7 +19030,7 @@ where
 {
     let request0 = QueryColorsRequest {
         cmap,
-        pixels,
+        pixels: Cow::Borrowed(pixels),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -19110,13 +19112,13 @@ impl<'input> LookupColorRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 pub fn lookup_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
@@ -19891,13 +19893,13 @@ impl<'input> QueryExtensionRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 /// check if extension is present.
@@ -20054,7 +20056,7 @@ pub struct ChangeKeyboardMappingRequest<'input> {
     pub keycode_count: u8,
     pub first_keycode: Keycode,
     pub keysyms_per_keycode: u8,
-    pub keysyms: &'input [Keysym],
+    pub keysyms: Cow<'input, [Keysym]>,
 }
 impl<'input> ChangeKeyboardMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -20097,7 +20099,7 @@ where
         keycode_count,
         first_keycode,
         keysyms_per_keycode,
-        keysyms,
+        keysyms: Cow::Borrowed(keysyms),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -20533,9 +20535,9 @@ impl ChangeKeyboardControlAux {
 
 /// Opcode for the ChangeKeyboardControl request
 pub const CHANGE_KEYBOARD_CONTROL_REQUEST: u8 = 102;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeKeyboardControlRequest<'input> {
-    pub value_list: &'input ChangeKeyboardControlAux,
+    pub value_list: Cow<'input, ChangeKeyboardControlAux>,
 }
 impl<'input> ChangeKeyboardControlRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -20573,7 +20575,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ChangeKeyboardControlRequest {
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -21247,13 +21249,13 @@ impl<'input> ChangeHostsRequest<'input> {
             address_len_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.address[..]).len();
+        let length_so_far = length_so_far + self.address.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.address[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.address.into(), padding0.into()], vec![]))
     }
 }
 pub fn change_hosts<'c, 'input, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -21774,7 +21776,7 @@ pub const ROTATE_PROPERTIES_REQUEST: u8 = 114;
 pub struct RotatePropertiesRequest<'input> {
     pub window: Window,
     pub delta: i16,
-    pub atoms: &'input [Atom],
+    pub atoms: Cow<'input, [Atom]>,
 }
 impl<'input> RotatePropertiesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -21820,7 +21822,7 @@ where
     let request0 = RotatePropertiesRequest {
         window,
         delta,
-        atoms,
+        atoms: Cow::Borrowed(atoms),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -22025,13 +22027,13 @@ impl<'input> SetPointerMappingRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.map[..]).len();
+        let length_so_far = length_so_far + self.map.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.map[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.map.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_pointer_mapping<'c, 'input, Conn>(conn: &'c Conn, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
@@ -22252,13 +22254,13 @@ impl<'input> SetModifierMappingRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.keycodes[..]).len();
+        let length_so_far = length_so_far + self.keycodes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.keycodes[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.keycodes.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, keycodes: &'input [Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>

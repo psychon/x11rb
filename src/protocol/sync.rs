@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -1035,7 +1037,7 @@ impl TryFrom<&[u8]> for QueryCounterReply {
 pub const AWAIT_REQUEST: u8 = 7;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AwaitRequest<'input> {
-    pub wait_list: &'input [Waitcondition],
+    pub wait_list: Cow<'input, [Waitcondition]>,
 }
 impl<'input> AwaitRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1068,7 +1070,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AwaitRequest {
-        wait_list,
+        wait_list: Cow::Borrowed(wait_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1288,10 +1290,10 @@ impl CreateAlarmAux {
 
 /// Opcode for the CreateAlarm request
 pub const CREATE_ALARM_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateAlarmRequest<'input> {
     pub id: Alarm,
-    pub value_list: &'input CreateAlarmAux,
+    pub value_list: Cow<'input, CreateAlarmAux>,
 }
 impl<'input> CreateAlarmRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1336,7 +1338,7 @@ where
 {
     let request0 = CreateAlarmRequest {
         id,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1444,10 +1446,10 @@ impl ChangeAlarmAux {
 
 /// Opcode for the ChangeAlarm request
 pub const CHANGE_ALARM_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeAlarmRequest<'input> {
     pub id: Alarm,
-    pub value_list: &'input ChangeAlarmAux,
+    pub value_list: Cow<'input, ChangeAlarmAux>,
 }
 impl<'input> ChangeAlarmRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1492,7 +1494,7 @@ where
 {
     let request0 = ChangeAlarmRequest {
         id,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2013,7 +2015,7 @@ impl TryFrom<&[u8]> for QueryFenceReply {
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AwaitFenceRequest<'input> {
-    pub fence_list: &'input [Fence],
+    pub fence_list: Cow<'input, [Fence]>,
 }
 impl<'input> AwaitFenceRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2046,7 +2048,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = AwaitFenceRequest {
-        fence_list,
+        fence_list: Cow::Borrowed(fence_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

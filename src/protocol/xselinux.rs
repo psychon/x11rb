@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -136,13 +138,13 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
             context_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.context[..]).len();
+        let length_so_far = length_so_far + self.context.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.context[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_device_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -270,13 +272,13 @@ impl<'input> SetDeviceContextRequest<'input> {
             context_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.context[..]).len();
+        let length_so_far = length_so_far + self.context.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.context[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_device_context<'c, 'input, Conn>(conn: &'c Conn, device: u32, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -408,13 +410,13 @@ impl<'input> SetWindowCreateContextRequest<'input> {
             context_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.context[..]).len();
+        let length_so_far = length_so_far + self.context.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.context[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_window_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -707,13 +709,13 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
             context_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.context[..]).len();
+        let length_so_far = length_so_far + self.context.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.context[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_property_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -835,13 +837,13 @@ impl<'input> SetPropertyUseContextRequest<'input> {
             context_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.context[..]).len();
+        let length_so_far = length_so_far + self.context.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.context[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_property_use_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1240,13 +1242,13 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
             context_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.context[..]).len();
+        let length_so_far = length_so_far + self.context.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.context[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_selection_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1368,13 +1370,13 @@ impl<'input> SetSelectionUseContextRequest<'input> {
             context_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.context[..]).len();
+        let length_so_far = length_so_far + self.context.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.context[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_selection_use_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>

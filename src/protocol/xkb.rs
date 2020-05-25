@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -6805,7 +6807,7 @@ impl SelectEventsAux {
 
 /// Opcode for the SelectEvents request
 pub const SELECT_EVENTS_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SelectEventsRequest<'input> {
     pub device_spec: DeviceSpec,
     pub affect_which: u16,
@@ -6813,7 +6815,7 @@ pub struct SelectEventsRequest<'input> {
     pub select_all: u16,
     pub affect_map: u16,
     pub map: u16,
-    pub details: &'input SelectEventsAux,
+    pub details: Cow<'input, SelectEventsAux>,
 }
 impl<'input> SelectEventsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -6880,7 +6882,7 @@ where
         select_all,
         affect_map,
         map,
-        details,
+        details: Cow::Borrowed(details),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -7286,7 +7288,7 @@ impl TryFrom<&[u8]> for GetControlsReply {
 
 /// Opcode for the SetControls request
 pub const SET_CONTROLS_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetControlsRequest<'input> {
     pub device_spec: DeviceSpec,
     pub affect_internal_real_mods: u8,
@@ -8006,7 +8008,7 @@ pub struct SetMapRequest<'input> {
     pub n_v_mod_map_keys: u8,
     pub total_v_mod_map_keys: u8,
     pub virtual_mods: u16,
-    pub values: &'input SetMapAux,
+    pub values: Cow<'input, SetMapAux>,
 }
 impl<'input> SetMapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -8127,7 +8129,7 @@ where
         n_v_mod_map_keys,
         total_v_mod_map_keys,
         virtual_mods,
-        values,
+        values: Cow::Borrowed(values),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8258,8 +8260,8 @@ pub struct SetCompatMapRequest<'input> {
     pub truncate_si: bool,
     pub groups: u8,
     pub first_si: u16,
-    pub si: &'input [SymInterpret],
-    pub group_maps: &'input [ModDef],
+    pub si: Cow<'input, [SymInterpret]>,
+    pub group_maps: Cow<'input, [ModDef]>,
 }
 impl<'input> SetCompatMapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -8321,8 +8323,8 @@ where
         truncate_si,
         groups,
         first_si,
-        si,
-        group_maps,
+        si: Cow::Borrowed(si),
+        group_maps: Cow::Borrowed(group_maps),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8492,7 +8494,7 @@ pub const SET_INDICATOR_MAP_REQUEST: u8 = 14;
 pub struct SetIndicatorMapRequest<'input> {
     pub device_spec: DeviceSpec,
     pub which: u32,
-    pub maps: &'input [IndicatorMap],
+    pub maps: Cow<'input, [IndicatorMap]>,
 }
 impl<'input> SetIndicatorMapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -8538,7 +8540,7 @@ where
     let request0 = SetIndicatorMapRequest {
         device_spec,
         which,
-        maps,
+        maps: Cow::Borrowed(maps),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9289,7 +9291,7 @@ pub struct SetNamesRequest<'input> {
     pub n_keys: u8,
     pub n_key_aliases: u8,
     pub total_kt_level_names: u16,
-    pub values: &'input SetNamesAux,
+    pub values: Cow<'input, SetNamesAux>,
 }
 impl<'input> SetNamesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -9378,7 +9380,7 @@ where
         n_keys,
         n_key_aliases,
         total_kt_level_names,
-        values,
+        values: Cow::Borrowed(values),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -10567,8 +10569,8 @@ pub struct SetDeviceInfoRequest<'input> {
     pub device_spec: DeviceSpec,
     pub first_btn: u8,
     pub change: u16,
-    pub btn_actions: &'input [Action],
-    pub leds: &'input [DeviceLedInfo],
+    pub btn_actions: Cow<'input, [Action]>,
+    pub leds: Cow<'input, [DeviceLedInfo]>,
 }
 impl<'input> SetDeviceInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -10623,8 +10625,8 @@ where
         device_spec,
         first_btn,
         change,
-        btn_actions,
-        leds,
+        btn_actions: Cow::Borrowed(btn_actions),
+        leds: Cow::Borrowed(leds),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -10683,13 +10685,13 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
             ctrls_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.message[..]).len();
+        let length_so_far = length_so_far + self.message.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.message[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.message.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_debugging_flags<'c, 'input, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>

@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -649,7 +651,7 @@ impl SetAttributesAux {
 
 /// Opcode for the SetAttributes request
 pub const SET_ATTRIBUTES_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetAttributesRequest<'input> {
     pub drawable: xproto::Drawable,
     pub x: i16,
@@ -660,7 +662,7 @@ pub struct SetAttributesRequest<'input> {
     pub class: xproto::WindowClass,
     pub depth: u8,
     pub visual: xproto::Visualid,
-    pub value_list: &'input SetAttributesAux,
+    pub value_list: Cow<'input, SetAttributesAux>,
 }
 impl<'input> SetAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -737,7 +739,7 @@ where
         class,
         depth,
         visual,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

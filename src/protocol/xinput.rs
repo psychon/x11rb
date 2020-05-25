@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -112,13 +114,13 @@ impl<'input> GetExtensionVersionRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 pub fn get_extension_version<'c, 'input, Conn>(conn: &'c Conn, name: &'input [u8]) -> Result<Cookie<'c, Conn, GetExtensionVersionReply>, ConnectionError>
@@ -1288,7 +1290,7 @@ pub const SELECT_EXTENSION_EVENT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SelectExtensionEventRequest<'input> {
     pub window: xproto::Window,
-    pub classes: &'input [EventClass],
+    pub classes: Cow<'input, [EventClass]>,
 }
 impl<'input> SelectExtensionEventRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1333,7 +1335,7 @@ where
 {
     let request0 = SelectExtensionEventRequest {
         window,
-        classes,
+        classes: Cow::Borrowed(classes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1520,7 +1522,7 @@ pub const CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 8;
 pub struct ChangeDeviceDontPropagateListRequest<'input> {
     pub window: xproto::Window,
     pub mode: PropagateMode,
-    pub classes: &'input [EventClass],
+    pub classes: Cow<'input, [EventClass]>,
 }
 impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1567,7 +1569,7 @@ where
     let request0 = ChangeDeviceDontPropagateListRequest {
         window,
         mode,
-        classes,
+        classes: Cow::Borrowed(classes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1968,7 +1970,7 @@ pub struct GrabDeviceRequest<'input> {
     pub other_device_mode: xproto::GrabMode,
     pub owner_events: bool,
     pub device_id: u8,
-    pub classes: &'input [EventClass],
+    pub classes: Cow<'input, [EventClass]>,
 }
 impl<'input> GrabDeviceRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2033,7 +2035,7 @@ where
         other_device_mode,
         owner_events,
         device_id,
-        classes,
+        classes: Cow::Borrowed(classes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2193,7 +2195,7 @@ pub struct GrabDeviceKeyRequest<'input> {
     pub this_device_mode: xproto::GrabMode,
     pub other_device_mode: xproto::GrabMode,
     pub owner_events: bool,
-    pub classes: &'input [EventClass],
+    pub classes: Cow<'input, [EventClass]>,
 }
 impl<'input> GrabDeviceKeyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2266,7 +2268,7 @@ where
         this_device_mode,
         other_device_mode,
         owner_events,
-        classes,
+        classes: Cow::Borrowed(classes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2356,7 +2358,7 @@ pub struct GrabDeviceButtonRequest<'input> {
     pub other_device_mode: xproto::GrabMode,
     pub button: u8,
     pub owner_events: bool,
-    pub classes: &'input [EventClass],
+    pub classes: Cow<'input, [EventClass]>,
 }
 impl<'input> GrabDeviceButtonRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2429,7 +2431,7 @@ where
         other_device_mode,
         button,
         owner_events,
-        classes,
+        classes: Cow::Borrowed(classes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4962,7 +4964,7 @@ pub struct ChangeDeviceKeyMappingRequest<'input> {
     pub first_keycode: KeyCode,
     pub keysyms_per_keycode: u8,
     pub keycode_count: u8,
-    pub keysyms: &'input [xproto::Keysym],
+    pub keysyms: Cow<'input, [xproto::Keysym]>,
 }
 impl<'input> ChangeDeviceKeyMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -5008,7 +5010,7 @@ where
         first_keycode,
         keysyms_per_keycode,
         keycode_count,
-        keysyms,
+        keysyms: Cow::Borrowed(keysyms),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5136,13 +5138,13 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.keymaps[..]).len();
+        let length_so_far = length_so_far + self.keymaps.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.keymaps[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.keymaps.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_device_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, keymaps: &'input [u8]) -> Result<Cookie<'c, Conn, SetDeviceModifierMappingReply>, ConnectionError>
@@ -5310,13 +5312,13 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.map[..]).len();
+        let length_so_far = length_so_far + self.map.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.map[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.map.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_device_button_mapping<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetDeviceButtonMappingReply>, ConnectionError>
@@ -6095,7 +6097,7 @@ pub const SET_DEVICE_VALUATORS_REQUEST: u8 = 33;
 pub struct SetDeviceValuatorsRequest<'input> {
     pub device_id: u8,
     pub first_valuator: u8,
-    pub valuators: &'input [i32],
+    pub valuators: Cow<'input, [i32]>,
 }
 impl<'input> SetDeviceValuatorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -6138,7 +6140,7 @@ where
     let request0 = SetDeviceValuatorsRequest {
         device_id,
         first_valuator,
-        valuators,
+        valuators: Cow::Borrowed(valuators),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8137,7 +8139,7 @@ pub struct ChangeDevicePropertyRequest<'input> {
     pub device_id: u8,
     pub mode: xproto::PropMode,
     pub num_items: u32,
-    pub items: &'input ChangeDevicePropertyAux,
+    pub items: Cow<'input, ChangeDevicePropertyAux>,
 }
 impl<'input> ChangeDevicePropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -8198,7 +8200,7 @@ where
         device_id,
         mode,
         num_items,
-        items,
+        items: Cow::Borrowed(items),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9570,7 +9572,7 @@ impl Serialize for HierarchyChange {
 pub const XI_CHANGE_HIERARCHY_REQUEST: u8 = 43;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIChangeHierarchyRequest<'input> {
-    pub changes: &'input [HierarchyChange],
+    pub changes: Cow<'input, [HierarchyChange]>,
 }
 impl<'input> XIChangeHierarchyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -9609,7 +9611,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = XIChangeHierarchyRequest {
-        changes,
+        changes: Cow::Borrowed(changes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9903,7 +9905,7 @@ pub const XI_SELECT_EVENTS_REQUEST: u8 = 46;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XISelectEventsRequest<'input> {
     pub window: xproto::Window,
-    pub masks: &'input [EventMask],
+    pub masks: Cow<'input, [EventMask]>,
 }
 impl<'input> XISelectEventsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -9948,7 +9950,7 @@ where
 {
     let request0 = XISelectEventsRequest {
         window,
-        masks,
+        masks: Cow::Borrowed(masks),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -11564,7 +11566,7 @@ pub struct XIGrabDeviceRequest<'input> {
     pub mode: xproto::GrabMode,
     pub paired_device_mode: xproto::GrabMode,
     pub owner_events: GrabOwner,
-    pub mask: &'input [u32],
+    pub mask: Cow<'input, [u32]>,
 }
 impl<'input> XIGrabDeviceRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -11637,7 +11639,7 @@ where
         mode,
         paired_device_mode,
         owner_events,
-        mask,
+        mask: Cow::Borrowed(mask),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12102,8 +12104,8 @@ pub struct XIPassiveGrabDeviceRequest<'input> {
     pub grab_mode: GrabMode22,
     pub paired_device_mode: xproto::GrabMode,
     pub owner_events: GrabOwner,
-    pub mask: &'input [u32],
-    pub modifiers: &'input [u32],
+    pub mask: Cow<'input, [u32]>,
+    pub modifiers: Cow<'input, [u32]>,
 }
 impl<'input> XIPassiveGrabDeviceRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -12192,8 +12194,8 @@ where
         grab_mode,
         paired_device_mode,
         owner_events,
-        mask,
-        modifiers,
+        mask: Cow::Borrowed(mask),
+        modifiers: Cow::Borrowed(modifiers),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12250,7 +12252,7 @@ pub struct XIPassiveUngrabDeviceRequest<'input> {
     pub detail: u32,
     pub deviceid: DeviceId,
     pub grab_type: GrabType,
-    pub modifiers: &'input [u32],
+    pub modifiers: Cow<'input, [u32]>,
 }
 impl<'input> XIPassiveUngrabDeviceRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -12311,7 +12313,7 @@ where
         detail,
         deviceid,
         grab_type,
-        modifiers,
+        modifiers: Cow::Borrowed(modifiers),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12478,7 +12480,7 @@ pub struct XIChangePropertyRequest<'input> {
     pub property: xproto::Atom,
     pub type_: xproto::Atom,
     pub num_items: u32,
-    pub items: &'input XIChangePropertyAux,
+    pub items: Cow<'input, XIChangePropertyAux>,
 }
 impl<'input> XIChangePropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -12541,7 +12543,7 @@ where
         property,
         type_,
         num_items,
-        items,
+        items: Cow::Borrowed(items),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -12926,7 +12928,7 @@ impl Serialize for BarrierReleasePointerInfo {
 pub const XI_BARRIER_RELEASE_POINTER_REQUEST: u8 = 61;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIBarrierReleasePointerRequest<'input> {
-    pub barriers: &'input [BarrierReleasePointerInfo],
+    pub barriers: Cow<'input, [BarrierReleasePointerInfo]>,
 }
 impl<'input> XIBarrierReleasePointerRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -12965,7 +12967,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = XIBarrierReleasePointerRequest {
-        barriers,
+        barriers: Cow::Borrowed(barriers),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -15834,8 +15836,8 @@ pub struct SendExtensionEventRequest<'input> {
     pub destination: xproto::Window,
     pub device_id: u8,
     pub propagate: bool,
-    pub events: &'input [EventForSend],
-    pub classes: &'input [EventClass],
+    pub events: Cow<'input, [EventForSend]>,
+    pub classes: Cow<'input, [EventClass]>,
 }
 impl<'input> SendExtensionEventRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -15892,8 +15894,8 @@ where
         destination,
         device_id,
         propagate,
-        events,
-        classes,
+        events: Cow::Borrowed(events),
+        classes: Cow::Borrowed(classes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
