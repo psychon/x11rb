@@ -30,16 +30,29 @@ test_script:
   - set "DISPLAY=127.0.0.1:0"
   - set "X11RB_EXAMPLE_TIMEOUT=1"
 
-  # FIXME: Can this list be automated? somehow?
-  - cargo run --verbose --features all-extensions --example check_unchecked_requests
-  - cargo run --verbose --features all-extensions --example generic_events
-  - cargo run --verbose --features all-extensions --example hypnomoire
-  - cargo run --verbose --features all-extensions --example list_fonts
-  - cargo run --verbose --features all-extensions --example simple_window
-  - cargo run --verbose --features all-extensions --example simple_window_manager
-  #- cargo run --verbose --features all-extensions --example tutorial
-  - cargo run --verbose --features all-extensions --example xclock_utc
-  - cargo run --verbose --features all-extensions --example xeyes
+  # Run the examples as integration tests.
+  # If you know some PowerShell programming, feel free to simplify this. This is
+  # the first time I touched PowerShell and I hope not to touch it again any
+  # time soon. Requirements include "must fail if the command fails".
+  - ps: >-
+      Get-ChildItem examples | Where {$_.extension -eq ".rs"} | Where {$_.BaseName -ne "tutorial"} | Where {$_.BaseName -ne "shared_memory"} | Foreach-Object {
+        $cmd = "cargo run --verbose --features all-extensions --example $($_.BaseName) 2>&1"
+        Write-Host -ForegroundColor Yellow $cmd
+        $backupErrorActionPreference = $script:ErrorActionPreference
+        $script:ErrorActionPreference = "Continue"
+        try
+        {
+          cmd /c "$cmd" | ForEach-Object { "$_" }
+          if ($LASTEXITCODE -ne 0)
+          {
+            throw "Execution failed with exit code $LASTEXITCODE for $cmd"
+          }
+        }
+        finally
+        {
+          $script:ErrorActionPreference = $backupErrorActionPreference
+        }
+      }
 
 on_finish:
   - ps: Stop-Process -Id $Server.Id
