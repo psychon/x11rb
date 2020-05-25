@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -1849,6 +1849,18 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize client_major_version
+        // TODO: deserialize client_minor_version
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -1915,6 +1927,16 @@ impl QueryPictFormatsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(QUERY_PICT_FORMATS_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn query_pict_formats<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryPictFormatsReply>, ConnectionError>
@@ -2044,6 +2066,17 @@ impl QueryPictIndexValuesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(QUERY_PICT_INDEX_VALUES_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize format
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn query_pict_index_values<Conn>(conn: &Conn, format: Pictformat) -> Result<Cookie<'_, Conn, QueryPictIndexValuesReply>, ConnectionError>
@@ -2338,6 +2371,21 @@ impl<'input> CreatePictureRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(CREATE_PICTURE_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize pid
+        // TODO: deserialize drawable
+        // TODO: deserialize format
+        // TODO: deserialize value_mask
+        // TODO: deserialize value_list
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn create_picture<'c, 'input, Conn>(conn: &'c Conn, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &'input CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2580,6 +2628,19 @@ impl<'input> ChangePictureRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(CHANGE_PICTURE_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        // TODO: deserialize value_mask
+        // TODO: deserialize value_list
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn change_picture<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, value_list: &'input ChangePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2639,6 +2700,21 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(SET_PICTURE_CLIP_RECTANGLES_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        // TODO: deserialize clip_x_origin
+        // TODO: deserialize clip_y_origin
+        // TODO: deserialize rectangles
+        // TODO: deserialize rectangles_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn set_picture_clip_rectangles<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2686,6 +2762,17 @@ impl FreePictureRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(FREE_PICTURE_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn free_picture<Conn>(conn: &Conn, picture: Picture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2782,6 +2869,29 @@ impl CompositeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(COMPOSITE_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize op
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize src
+        // TODO: deserialize mask
+        // TODO: deserialize dst
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize mask_x
+        // TODO: deserialize mask_y
+        // TODO: deserialize dst_x
+        // TODO: deserialize dst_y
+        // TODO: deserialize width
+        // TODO: deserialize height
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn composite<Conn, A>(conn: &Conn, op: PictOp, src: Picture, mask: A, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2871,6 +2981,25 @@ impl<'input> TrapezoidsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), traps_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(TRAPEZOIDS_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize op
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize src
+        // TODO: deserialize dst
+        // TODO: deserialize mask_format
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize traps
+        // TODO: deserialize traps_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn trapezoids<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &'input [Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2952,6 +3081,25 @@ impl<'input> TrianglesRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), triangles_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(TRIANGLES_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize op
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize src
+        // TODO: deserialize dst
+        // TODO: deserialize mask_format
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize triangles
+        // TODO: deserialize triangles_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn triangles<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &'input [Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3035,6 +3183,25 @@ impl<'input> TriStripRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(TRI_STRIP_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize op
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize src
+        // TODO: deserialize dst
+        // TODO: deserialize mask_format
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize points
+        // TODO: deserialize points_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn tri_strip<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &'input [Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -3117,6 +3284,25 @@ impl<'input> TriFanRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(TRI_FAN_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize op
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize src
+        // TODO: deserialize dst
+        // TODO: deserialize mask_format
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize points
+        // TODO: deserialize points_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn tri_fan<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &'input [Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -3174,6 +3360,18 @@ impl CreateGlyphSetRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(CREATE_GLYPH_SET_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize gsid
+        // TODO: deserialize format
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn create_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, format: Pictformat) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -3226,6 +3424,18 @@ impl ReferenceGlyphSetRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(REFERENCE_GLYPH_SET_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize gsid
+        // TODO: deserialize existing
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn reference_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, existing: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -3271,6 +3481,17 @@ impl FreeGlyphSetRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(FREE_GLYPH_SET_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize glyphset
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn free_glyph_set<Conn>(conn: &Conn, glyphset: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -3334,6 +3555,22 @@ impl<'input> AddGlyphsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), glyphids_bytes.into(), glyphs_bytes.into(), self.data.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(ADD_GLYPHS_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize glyphset
+        // TODO: deserialize glyphs_len
+        // TODO: deserialize glyphids
+        // TODO: deserialize glyphs
+        // TODO: deserialize data
+        // TODO: deserialize data_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn add_glyphs<'c, 'input, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphids: &'input [u32], glyphs: &'input [Glyphinfo], data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -3386,6 +3623,19 @@ impl<'input> FreeGlyphsRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), glyphs_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(FREE_GLYPHS_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize glyphset
+        // TODO: deserialize glyphs
+        // TODO: deserialize glyphs_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn free_glyphs<'c, 'input, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphs: &'input [Glyph]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3468,6 +3718,26 @@ impl<'input> CompositeGlyphs8Request<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.glyphcmds.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(COMPOSITE_GLYPHS8_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize op
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize src
+        // TODO: deserialize dst
+        // TODO: deserialize mask_format
+        // TODO: deserialize glyphset
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize glyphcmds
+        // TODO: deserialize glyphcmds_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn composite_glyphs8<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3557,6 +3827,26 @@ impl<'input> CompositeGlyphs16Request<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.glyphcmds.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(COMPOSITE_GLYPHS16_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize op
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize src
+        // TODO: deserialize dst
+        // TODO: deserialize mask_format
+        // TODO: deserialize glyphset
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize glyphcmds
+        // TODO: deserialize glyphcmds_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn composite_glyphs16<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -3645,6 +3935,26 @@ impl<'input> CompositeGlyphs32Request<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.glyphcmds.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(COMPOSITE_GLYPHS32_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize op
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize src
+        // TODO: deserialize dst
+        // TODO: deserialize mask_format
+        // TODO: deserialize glyphset
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize glyphcmds
+        // TODO: deserialize glyphcmds_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn composite_glyphs32<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -3718,6 +4028,22 @@ impl<'input> FillRectanglesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rects_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(FILL_RECTANGLES_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize op
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize dst
+        // TODO: deserialize color
+        // TODO: deserialize rects
+        // TODO: deserialize rects_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn fill_rectangles<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, dst: Picture, color: Color, rects: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -3779,6 +4105,20 @@ impl CreateCursorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(CREATE_CURSOR_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize cid
+        // TODO: deserialize source
+        // TODO: deserialize x
+        // TODO: deserialize y
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn create_cursor<Conn>(conn: &Conn, cid: xproto::Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -3964,6 +4304,18 @@ impl SetPictureTransformRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(SET_PICTURE_TRANSFORM_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        // TODO: deserialize transform
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn set_picture_transform<Conn>(conn: &Conn, picture: Picture, transform: Transform) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -4009,6 +4361,17 @@ impl QueryFiltersRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(QUERY_FILTERS_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn query_filters<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryFiltersReply>, ConnectionError>
@@ -4128,6 +4491,23 @@ impl<'input> SetPictureFilterRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.filter.into(), padding0.into(), values_bytes.into(), padding1.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(SET_PICTURE_FILTER_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        // TODO: deserialize filter_len
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize filter
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize values
+        // TODO: deserialize values_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn set_picture_filter<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, filter: &'input [u8], values: &'input [Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -4221,6 +4601,19 @@ impl<'input> CreateAnimCursorRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), cursors_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(CREATE_ANIM_CURSOR_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize cid
+        // TODO: deserialize cursors
+        // TODO: deserialize cursors_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn create_anim_cursor<'c, 'input, Conn>(conn: &'c Conn, cid: xproto::Cursor, cursors: &'input [Animcursorelt]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -4389,6 +4782,21 @@ impl<'input> AddTrapsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), traps_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(ADD_TRAPS_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        // TODO: deserialize x_off
+        // TODO: deserialize y_off
+        // TODO: deserialize traps
+        // TODO: deserialize traps_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn add_traps<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, x_off: i16, y_off: i16, traps: &'input [Trap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -4446,6 +4854,18 @@ impl CreateSolidFillRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(CREATE_SOLID_FILL_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        // TODO: deserialize color
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn create_solid_fill<Conn>(conn: &Conn, picture: Picture, color: Color) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -4527,6 +4947,22 @@ impl<'input> CreateLinearGradientRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), stops_bytes.into(), colors_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(CREATE_LINEAR_GRADIENT_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        // TODO: deserialize p1
+        // TODO: deserialize p2
+        // TODO: deserialize num_stops
+        // TODO: deserialize stops
+        // TODO: deserialize colors
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn create_linear_gradient<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, p1: Pointfix, p2: Pointfix, stops: &'input [Fixed], colors: &'input [Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -4624,6 +5060,24 @@ impl<'input> CreateRadialGradientRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), stops_bytes.into(), colors_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(CREATE_RADIAL_GRADIENT_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        // TODO: deserialize inner
+        // TODO: deserialize outer
+        // TODO: deserialize inner_radius
+        // TODO: deserialize outer_radius
+        // TODO: deserialize num_stops
+        // TODO: deserialize stops
+        // TODO: deserialize colors
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn create_radial_gradient<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, stops: &'input [Fixed], colors: &'input [Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -4705,6 +5159,22 @@ impl<'input> CreateConicalGradientRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), stops_bytes.into(), colors_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(CREATE_CONICAL_GRADIENT_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize picture
+        // TODO: deserialize center
+        // TODO: deserialize angle
+        // TODO: deserialize num_stops
+        // TODO: deserialize stops
+        // TODO: deserialize colors
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn create_conical_gradient<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, center: Pointfix, angle: Fixed, stops: &'input [Fixed], colors: &'input [Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>

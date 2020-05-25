@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -67,6 +67,18 @@ impl QueryVersionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize client_major_version
+        // TODO: deserialize client_minor_version
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>

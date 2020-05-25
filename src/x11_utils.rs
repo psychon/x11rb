@@ -37,6 +37,47 @@ pub trait TryParse: Sized {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>;
 }
 
+/// A representation of the header of a request.
+#[derive(Debug, Clone, Copy)]
+pub struct RequestHeader {
+    /// The major opcode of the request.
+    pub major_opcode: u8,
+    /// The minor opcode of the request (which, for some requests, may not be an
+    /// opcode at all).
+    pub minor_opcode: u8,
+    /// The remaining length of the request, in units of 4 bytes. Unlike the wire format,
+    /// this does *not* include the header itself. If the BigRequests extension is enabled
+    /// this can be greater than u16::max_value - 1.
+    pub remaining_length: u32,
+}
+
+/// Validates that the header and value lengths match and that the major (for xproto requests)
+/// or minor (for extension requests) match what is expected. For extension requests it is the
+/// responsibility of the try_parse_request caller to validate the major opcode.
+pub(crate) fn validate_request_pieces(
+    header: RequestHeader,
+    value: &[u8],
+    expected_major_opcode: Option<u8>,
+    expected_minor_opcode: Option<u8>,
+) -> Result<(), ParseError> {
+    if header.remaining_length as usize * 4 != value.len() {
+        return Err(ParseError::ParseError);
+    }
+    if expected_major_opcode
+        .map(|major| major != header.major_opcode)
+        .unwrap_or(false)
+    {
+        return Err(ParseError::ParseError);
+    }
+    if expected_minor_opcode
+        .map(|minor| minor != header.minor_opcode)
+        .unwrap_or(false)
+    {
+        return Err(ParseError::ParseError);
+    }
+    Ok(())
+}
+
 /// A type implementing this trait can be serialized into X11 raw bytes.
 pub trait Serialize {
     /// The value returned by `serialize`.

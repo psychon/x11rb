@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -68,6 +68,19 @@ impl GetVersionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(GET_VERSION_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize major_version
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize minor_version
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_version<Conn>(conn: &Conn, major_version: u8, minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
@@ -217,6 +230,18 @@ impl CompareCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(COMPARE_CURSOR_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize cursor
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn compare_cursor<Conn>(conn: &Conn, window: xproto::Window, cursor: xproto::Cursor) -> Result<Cookie<'_, Conn, CompareCursorReply>, ConnectionError>
 where
@@ -327,6 +352,26 @@ impl FakeInputRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(FAKE_INPUT_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize type_
+        // TODO: deserialize detail
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize time
+        // TODO: deserialize root
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize root_x
+        // TODO: deserialize root_y
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize deviceid
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn fake_input<Conn>(conn: &Conn, type_: u8, detail: u8, time: u32, root: xproto::Window, root_x: i16, root_y: i16, deviceid: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -377,6 +422,18 @@ impl GrabControlRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, None, Some(GRAB_CONTROL_REQUEST))?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize minor_opcode
+        // TODO: deserialize length
+        // TODO: deserialize impervious
+        // TODO: deserialize <unnamed field>
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn grab_control<Conn>(conn: &Conn, impervious: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>

@@ -83,7 +83,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::utils::RawFdContainer;");
         outln!(out, "#[allow(unused_imports)]");
-        outln!(out, "use crate::x11_utils::{{Serialize, TryParse}};");
+        outln!(
+            out,
+            "use crate::x11_utils::{{validate_request_pieces, RequestHeader, Serialize, TryParse}};"
+        );
         outln!(
             out,
             "use crate::connection::{{BufWithFds, PiecewiseBuf, RequestConnection}};"
@@ -258,7 +261,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let gathered = self.gather_request_fields(request_def, &deducible_fields);
 
         self.emit_request_struct(request_def, &name, &deducible_fields, &gathered, out);
-
         self.emit_request_function(request_def, &name, &function_name, &gathered, out);
         self.emit_request_trait_function(request_def, &name, &function_name, &gathered, trait_out);
 
@@ -400,11 +402,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "#[derive({})]", derives.join(", "));
         }
 
-        let (struct_lifetime_block, serialize_lifetime_block) = if gathered.needs_lifetime {
-            ("<'input>", "")
-        } else {
-            ("", "'input, ")
-        };
+        let (struct_lifetime_block, serialize_lifetime_block, parse_lifetime_block) =
+            if gathered.needs_lifetime {
+                ("<'input>", "", "'input ")
+            } else {
+                ("", "'input, ", "")
+            };
 
         let has_members = !gathered.request_args.is_empty();
         let members_start = if has_members { " {" } else { ";" };
@@ -868,8 +871,41 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 );
             });
             outln!(out, "}}");
+
+            // Parsing implementation.
+            outln!(out, "/// Parse this request given its header, its body, and any fds that go along with it");
+            if !(gathered.single_fds.is_empty() && gathered.fd_lists.is_empty()) {
+                outln!(out, "pub fn try_parse_request_fd(header: RequestHeader, body: &{lifetime}[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {{",
+                       lifetime = parse_lifetime_block);
+            } else {
+                outln!(out, "pub fn try_parse_request(header: RequestHeader, body: &{lifetime}[u8]) -> Result<Self, ParseError> {{",
+                       lifetime = parse_lifetime_block);
+            }
+            out.indented(|out| {
+                let opcode = format!("Some({}_REQUEST)", super::camel_case_to_upper_snake(&name));
+                let (major_opcode, minor_opcode) = if ns.ext_info.is_some() {
+                    ("None".into(), opcode)
+                } else {
+                    (opcode, "None".into())
+                };
+                outln!(out, "validate_request_pieces(header, body, {major_opcode}, {minor_opcode})?;",
+                       major_opcode=major_opcode,
+                       minor_opcode=minor_opcode);
+
+                let fields = request_def.fields.borrow();
+                for (_, field) in fields.iter().enumerate() {
+                    let rust_field_name = to_rust_variable_name(field.name().unwrap_or("<unnamed field>"));
+                    outln!(out, "// TODO: deserialize {}", rust_field_name);
+                }
+
+                // Suppress a warning about this being unused.
+                outln!(out, "let _ = body;");
+                outln!(out, "// TODO: produce final struct");
+                outln!(out, "unimplemented!()");
+            });
+            outln!(out, "}}");
         });
-        outln!(out, "}}",);
+        outln!(out, "}}");
     }
 
     fn emit_request_function(

@@ -22,7 +22,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -6093,6 +6093,27 @@ impl<'input> CreateWindowRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CREATE_WINDOW_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize depth
+        // TODO: deserialize length
+        // TODO: deserialize wid
+        // TODO: deserialize parent
+        // TODO: deserialize x
+        // TODO: deserialize y
+        // TODO: deserialize width
+        // TODO: deserialize height
+        // TODO: deserialize border_width
+        // TODO: deserialize class
+        // TODO: deserialize visual
+        // TODO: deserialize value_mask
+        // TODO: deserialize value_list
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Creates a window.
 ///
@@ -6440,6 +6461,19 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CHANGE_WINDOW_ATTRIBUTES_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize value_mask
+        // TODO: deserialize value_list
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// change window attributes.
 ///
@@ -6582,6 +6616,17 @@ impl GetWindowAttributesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_WINDOW_ATTRIBUTES_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Gets window attributes.
@@ -6735,6 +6780,17 @@ impl DestroyWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(DESTROY_WINDOW_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Destroys a window.
 ///
@@ -6800,6 +6856,17 @@ impl DestroySubwindowsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(DESTROY_SUBWINDOWS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn destroy_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -6939,6 +7006,17 @@ impl ChangeSaveSetRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CHANGE_SAVE_SET_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize mode
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Changes a client's save set.
 ///
@@ -7051,6 +7129,20 @@ impl ReparentWindowRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(REPARENT_WINDOW_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize parent
+        // TODO: deserialize x
+        // TODO: deserialize y
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Reparents a window.
@@ -7166,6 +7258,17 @@ impl MapWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(MAP_WINDOW_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Makes a window visible.
 ///
@@ -7245,6 +7348,17 @@ impl MapSubwindowsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(MAP_SUBWINDOWS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn map_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -7310,6 +7424,17 @@ impl UnmapWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(UNMAP_WINDOW_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Makes a window invisible.
 ///
@@ -7374,6 +7499,17 @@ impl UnmapSubwindowsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(UNMAP_SUBWINDOWS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn unmap_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -7741,6 +7877,20 @@ impl<'input> ConfigureWindowRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CONFIGURE_WINDOW_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize value_mask
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize value_list
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Configures window attributes.
 ///
@@ -7925,6 +8075,17 @@ impl CirculateWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CIRCULATE_WINDOW_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize direction
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Change window stacking order.
 ///
@@ -8022,6 +8183,17 @@ impl GetGeometryRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_GEOMETRY_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Get current window geometry.
@@ -8189,6 +8361,17 @@ impl QueryTreeRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(QUERY_TREE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// query the window tree.
@@ -8373,6 +8556,19 @@ impl<'input> InternAtomRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(INTERN_ATOM_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize only_if_exists
+        // TODO: deserialize length
+        // TODO: deserialize name_len
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize name
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Get atom identifier by name.
 ///
@@ -8487,6 +8683,17 @@ impl GetAtomNameRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_ATOM_NAME_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize atom
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_atom_name<Conn>(conn: &Conn, atom: Atom) -> Result<Cookie<'_, Conn, GetAtomNameReply>, ConnectionError>
@@ -8731,6 +8938,23 @@ impl<'input> ChangePropertyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CHANGE_PROPERTY_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize mode
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize property
+        // TODO: deserialize type_
+        // TODO: deserialize format
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize data_len
+        // TODO: deserialize data
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Changes a window property.
 ///
@@ -8841,6 +9065,18 @@ impl DeletePropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(DELETE_PROPERTY_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize property
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn delete_property<Conn>(conn: &Conn, window: Window, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -9039,6 +9275,21 @@ impl GetPropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_PROPERTY_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize delete
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize property
+        // TODO: deserialize type_
+        // TODO: deserialize long_offset
+        // TODO: deserialize long_length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Gets a window property.
@@ -9368,6 +9619,17 @@ impl ListPropertiesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(LIST_PROPERTIES_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
 where
@@ -9495,6 +9757,19 @@ impl SetSelectionOwnerRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_SELECTION_OWNER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize owner
+        // TODO: deserialize selection
+        // TODO: deserialize time
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Sets the owner of a selection.
 ///
@@ -9590,6 +9865,17 @@ impl GetSelectionOwnerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_SELECTION_OWNER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize selection
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Gets the owner of a selection.
@@ -9703,6 +9989,21 @@ impl ConvertSelectionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CONVERT_SELECTION_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize requestor
+        // TODO: deserialize selection
+        // TODO: deserialize target
+        // TODO: deserialize property
+        // TODO: deserialize time
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn convert_selection<Conn, A, B>(conn: &Conn, requestor: Window, selection: Atom, target: Atom, property: A, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -9908,6 +10209,19 @@ impl<'input> SendEventRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), (&self.event[..]).into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SEND_EVENT_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize propagate
+        // TODO: deserialize length
+        // TODO: deserialize destination
+        // TODO: deserialize event_mask
+        // TODO: deserialize event
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// send an event.
@@ -10343,6 +10657,23 @@ impl GrabPointerRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GRAB_POINTER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize owner_events
+        // TODO: deserialize length
+        // TODO: deserialize grab_window
+        // TODO: deserialize event_mask
+        // TODO: deserialize pointer_mode
+        // TODO: deserialize keyboard_mode
+        // TODO: deserialize confine_to
+        // TODO: deserialize cursor
+        // TODO: deserialize time
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Grab the pointer.
 ///
@@ -10520,6 +10851,17 @@ impl UngrabPointerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(UNGRAB_POINTER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize time
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// release the pointer.
@@ -10771,6 +11113,25 @@ impl GrabButtonRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GRAB_BUTTON_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize owner_events
+        // TODO: deserialize length
+        // TODO: deserialize grab_window
+        // TODO: deserialize event_mask
+        // TODO: deserialize pointer_mode
+        // TODO: deserialize keyboard_mode
+        // TODO: deserialize confine_to
+        // TODO: deserialize cursor
+        // TODO: deserialize button
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize modifiers
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Grab pointer button(s).
 ///
@@ -10906,6 +11267,19 @@ impl UngrabButtonRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(UNGRAB_BUTTON_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize button
+        // TODO: deserialize length
+        // TODO: deserialize grab_window
+        // TODO: deserialize modifiers
+        // TODO: deserialize <unnamed field>
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn ungrab_button<Conn, A>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -10965,6 +11339,20 @@ impl ChangeActivePointerGrabRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CHANGE_ACTIVE_POINTER_GRAB_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cursor
+        // TODO: deserialize time
+        // TODO: deserialize event_mask
+        // TODO: deserialize <unnamed field>
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn change_active_pointer_grab<Conn, A, B, C>(conn: &Conn, cursor: A, time: B, event_mask: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -11095,6 +11483,21 @@ impl GrabKeyboardRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GRAB_KEYBOARD_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize owner_events
+        // TODO: deserialize length
+        // TODO: deserialize grab_window
+        // TODO: deserialize time
+        // TODO: deserialize pointer_mode
+        // TODO: deserialize keyboard_mode
+        // TODO: deserialize <unnamed field>
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Grab the keyboard.
@@ -11232,6 +11635,17 @@ impl UngrabKeyboardRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(UNGRAB_KEYBOARD_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize time
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn ungrab_keyboard<Conn, A>(conn: &Conn, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -11416,6 +11830,22 @@ impl GrabKeyRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GRAB_KEY_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize owner_events
+        // TODO: deserialize length
+        // TODO: deserialize grab_window
+        // TODO: deserialize modifiers
+        // TODO: deserialize key
+        // TODO: deserialize pointer_mode
+        // TODO: deserialize keyboard_mode
+        // TODO: deserialize <unnamed field>
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Grab keyboard key(s).
 ///
@@ -11561,6 +11991,19 @@ impl UngrabKeyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(UNGRAB_KEY_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize key
+        // TODO: deserialize length
+        // TODO: deserialize grab_window
+        // TODO: deserialize modifiers
+        // TODO: deserialize <unnamed field>
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// release a key combination.
@@ -11796,6 +12239,17 @@ impl AllowEventsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(ALLOW_EVENTS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize mode
+        // TODO: deserialize length
+        // TODO: deserialize time
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// release queued events.
 ///
@@ -11854,6 +12308,16 @@ impl GrabServerRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GRAB_SERVER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn grab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -11888,6 +12352,16 @@ impl UngrabServerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(UNGRAB_SERVER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn ungrab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -11943,6 +12417,17 @@ impl QueryPointerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(QUERY_POINTER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// get pointer coordinates.
@@ -12117,6 +12602,19 @@ impl GetMotionEventsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_MOTION_EVENTS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize start
+        // TODO: deserialize stop
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn get_motion_events<Conn, A, B>(conn: &Conn, window: Window, start: A, stop: B) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
 where
@@ -12222,6 +12720,20 @@ impl TranslateCoordinatesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(TRANSLATE_COORDINATES_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize src_window
+        // TODO: deserialize dst_window
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn translate_coordinates<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Conn, TranslateCoordinatesReply>, ConnectionError>
@@ -12361,6 +12873,24 @@ impl WarpPointerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(WARP_POINTER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize src_window
+        // TODO: deserialize dst_window
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize src_width
+        // TODO: deserialize src_height
+        // TODO: deserialize dst_x
+        // TODO: deserialize dst_y
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// move mouse pointer.
@@ -12569,6 +13099,18 @@ impl SetInputFocusRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_INPUT_FOCUS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize revert_to
+        // TODO: deserialize length
+        // TODO: deserialize focus
+        // TODO: deserialize time
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Sets input focus.
 ///
@@ -12647,6 +13189,16 @@ impl GetInputFocusRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_INPUT_FOCUS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
 where
@@ -12708,6 +13260,16 @@ impl QueryKeymapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(QUERY_KEYMAP_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn query_keymap<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryKeymapReply>, ConnectionError>
@@ -12807,6 +13369,20 @@ impl<'input> OpenFontRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(OPEN_FONT_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize fid
+        // TODO: deserialize name_len
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize name
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// opens a font.
 ///
@@ -12871,6 +13447,17 @@ impl CloseFontRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CLOSE_FONT_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize font
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn close_font<Conn>(conn: &Conn, font: Font) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -13097,6 +13684,17 @@ impl QueryFontRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(QUERY_FONT_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize font
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// query font metrics.
 ///
@@ -13284,6 +13882,19 @@ impl<'input> QueryTextExtentsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), string_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(QUERY_TEXT_EXTENTS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize odd_length
+        // TODO: deserialize length
+        // TODO: deserialize font
+        // TODO: deserialize string
+        // TODO: deserialize string_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// get text extents.
 ///
@@ -13469,6 +14080,19 @@ impl<'input> ListFontsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.pattern.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(LIST_FONTS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize max_names
+        // TODO: deserialize pattern_len
+        // TODO: deserialize pattern
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// get matching font names.
 ///
@@ -13590,6 +14214,19 @@ impl<'input> ListFontsWithInfoRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.pattern.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(LIST_FONTS_WITH_INFO_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize max_names
+        // TODO: deserialize pattern_len
+        // TODO: deserialize pattern
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// get matching font names and information.
@@ -13754,6 +14391,19 @@ impl<'input> SetFontPathRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), font_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_FONT_PATH_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize font_qty
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize font
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn set_font_path<'c, 'input, Conn>(conn: &'c Conn, font: &'input [Str]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -13790,6 +14440,16 @@ impl GetFontPathRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_FONT_PATH_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_font_path<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetFontPathReply>, ConnectionError>
@@ -13914,6 +14574,20 @@ impl CreatePixmapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CREATE_PIXMAP_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize depth
+        // TODO: deserialize length
+        // TODO: deserialize pid
+        // TODO: deserialize drawable
+        // TODO: deserialize width
+        // TODO: deserialize height
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Creates a pixmap.
 ///
@@ -13996,6 +14670,17 @@ impl FreePixmapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(FREE_PIXMAP_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize pixmap
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Destroys a pixmap.
@@ -15172,6 +15857,20 @@ impl<'input> CreateGCRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CREATE_GC_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cid
+        // TODO: deserialize drawable
+        // TODO: deserialize value_mask
+        // TODO: deserialize value_list
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Creates a graphics context.
 ///
@@ -15600,6 +16299,19 @@ impl<'input> ChangeGCRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CHANGE_GC_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize gc
+        // TODO: deserialize value_mask
+        // TODO: deserialize value_list
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// change graphics context components.
 ///
@@ -15702,6 +16414,19 @@ impl CopyGCRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(COPY_GC_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize src_gc
+        // TODO: deserialize dst_gc
+        // TODO: deserialize value_mask
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn copy_gc<Conn, A>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -15761,6 +16486,20 @@ impl<'input> SetDashesRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.dashes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_DASHES_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize gc
+        // TODO: deserialize dash_offset
+        // TODO: deserialize dashes_len
+        // TODO: deserialize dashes
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn set_dashes<'c, 'input, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -15891,6 +16630,21 @@ impl<'input> SetClipRectanglesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_CLIP_RECTANGLES_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize ordering
+        // TODO: deserialize length
+        // TODO: deserialize gc
+        // TODO: deserialize clip_x_origin
+        // TODO: deserialize clip_y_origin
+        // TODO: deserialize rectangles
+        // TODO: deserialize rectangles_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn set_clip_rectangles<'c, 'input, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -15949,6 +16703,17 @@ impl FreeGCRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(FREE_GC_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize gc
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Destroys a graphics context.
@@ -16022,6 +16787,21 @@ impl ClearAreaRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CLEAR_AREA_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize exposures
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize x
+        // TODO: deserialize y
+        // TODO: deserialize width
+        // TODO: deserialize height
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn clear_area<Conn>(conn: &Conn, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -16128,6 +16908,25 @@ impl CopyAreaRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(COPY_AREA_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize src_drawable
+        // TODO: deserialize dst_drawable
+        // TODO: deserialize gc
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize dst_x
+        // TODO: deserialize dst_y
+        // TODO: deserialize width
+        // TODO: deserialize height
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// copy areas.
@@ -16243,6 +17042,26 @@ impl CopyPlaneRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(COPY_PLANE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize src_drawable
+        // TODO: deserialize dst_drawable
+        // TODO: deserialize gc
+        // TODO: deserialize src_x
+        // TODO: deserialize src_y
+        // TODO: deserialize dst_x
+        // TODO: deserialize dst_y
+        // TODO: deserialize width
+        // TODO: deserialize height
+        // TODO: deserialize bit_plane
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn copy_plane<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -16384,6 +17203,20 @@ impl<'input> PolyPointRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(POLY_POINT_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize coordinate_mode
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize points
+        // TODO: deserialize points_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn poly_point<'c, 'input, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -16482,6 +17315,20 @@ impl<'input> PolyLineRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(POLY_LINE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize coordinate_mode
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize points
+        // TODO: deserialize points_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// draw lines.
@@ -16656,6 +17503,20 @@ impl<'input> PolySegmentRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), segments_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(POLY_SEGMENT_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize segments
+        // TODO: deserialize segments_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// draw lines.
 ///
@@ -16739,6 +17600,20 @@ impl<'input> PolyRectangleRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(POLY_RECTANGLE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize rectangles
+        // TODO: deserialize rectangles_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn poly_rectangle<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -16795,6 +17670,20 @@ impl<'input> PolyArcRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(POLY_ARC_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize arcs
+        // TODO: deserialize arcs_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn poly_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -16926,6 +17815,23 @@ impl<'input> FillPolyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(FILL_POLY_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize shape
+        // TODO: deserialize coordinate_mode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize points
+        // TODO: deserialize points_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn fill_poly<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -17010,6 +17916,20 @@ impl<'input> PolyFillRectangleRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(POLY_FILL_RECTANGLE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize rectangles
+        // TODO: deserialize rectangles_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Fills rectangles.
 ///
@@ -17091,6 +18011,20 @@ impl<'input> PolyFillArcRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(POLY_FILL_ARC_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize arcs
+        // TODO: deserialize arcs_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn poly_fill_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -17239,6 +18173,27 @@ impl<'input> PutImageRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(PUT_IMAGE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize format
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize width
+        // TODO: deserialize height
+        // TODO: deserialize dst_x
+        // TODO: deserialize dst_y
+        // TODO: deserialize left_pad
+        // TODO: deserialize depth
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize data
+        // TODO: deserialize data_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -17315,6 +18270,22 @@ impl GetImageRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_IMAGE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize format
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize x
+        // TODO: deserialize y
+        // TODO: deserialize width
+        // TODO: deserialize height
+        // TODO: deserialize plane_mask
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_image<Conn>(conn: &Conn, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
@@ -17429,6 +18400,22 @@ impl<'input> PolyText8Request<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.items.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(POLY_TEXT8_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize x
+        // TODO: deserialize y
+        // TODO: deserialize items
+        // TODO: deserialize items_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn poly_text8<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -17494,6 +18481,22 @@ impl<'input> PolyText16Request<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.items.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(POLY_TEXT16_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize x
+        // TODO: deserialize y
+        // TODO: deserialize items
+        // TODO: deserialize items_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn poly_text16<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -17596,6 +18599,21 @@ impl<'input> ImageText8Request<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.string.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(IMAGE_TEXT8_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize string_len
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize x
+        // TODO: deserialize y
+        // TODO: deserialize string
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Draws text.
@@ -17734,6 +18752,21 @@ impl<'input> ImageText16Request<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), string_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(IMAGE_TEXT16_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize string_len
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize gc
+        // TODO: deserialize x
+        // TODO: deserialize y
+        // TODO: deserialize string
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 /// Draws text.
@@ -17902,6 +18935,19 @@ impl CreateColormapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CREATE_COLORMAP_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize alloc
+        // TODO: deserialize length
+        // TODO: deserialize mid
+        // TODO: deserialize window
+        // TODO: deserialize visual
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn create_colormap<Conn>(conn: &Conn, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -17948,6 +18994,17 @@ impl FreeColormapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(FREE_COLORMAP_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn free_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -17999,6 +19056,18 @@ impl CopyColormapAndFreeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(COPY_COLORMAP_AND_FREE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize mid
+        // TODO: deserialize src_cmap
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -18044,6 +19113,17 @@ impl InstallColormapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(INSTALL_COLORMAP_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn install_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -18088,6 +19168,17 @@ impl UninstallColormapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(UNINSTALL_COLORMAP_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -18131,6 +19222,17 @@ impl ListInstalledColormapsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(LIST_INSTALLED_COLORMAPS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn list_installed_colormaps<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListInstalledColormapsReply>, ConnectionError>
@@ -18250,6 +19352,21 @@ impl AllocColorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(ALLOC_COLOR_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        // TODO: deserialize red
+        // TODO: deserialize green
+        // TODO: deserialize blue
+        // TODO: deserialize <unnamed field>
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Allocate a color.
 ///
@@ -18357,6 +19474,20 @@ impl<'input> AllocNamedColorRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(ALLOC_NAMED_COLOR_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        // TODO: deserialize name_len
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize name
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn alloc_named_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
 where
@@ -18448,6 +19579,19 @@ impl AllocColorCellsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(ALLOC_COLOR_CELLS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize contiguous
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        // TODO: deserialize colors
+        // TODO: deserialize planes
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn alloc_color_cells<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Conn, AllocColorCellsReply>, ConnectionError>
@@ -18572,6 +19716,21 @@ impl AllocColorPlanesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(ALLOC_COLOR_PLANES_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize contiguous
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        // TODO: deserialize colors
+        // TODO: deserialize reds
+        // TODO: deserialize greens
+        // TODO: deserialize blues
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn alloc_color_planes<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Conn, AllocColorPlanesReply>, ConnectionError>
 where
@@ -18680,6 +19839,20 @@ impl<'input> FreeColorsRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(FREE_COLORS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        // TODO: deserialize plane_mask
+        // TODO: deserialize pixels
+        // TODO: deserialize pixels_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn free_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -18858,6 +20031,19 @@ impl<'input> StoreColorsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), items_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(STORE_COLORS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        // TODO: deserialize items
+        // TODO: deserialize items_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn store_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, items: &'input [Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -18920,6 +20106,21 @@ impl<'input> StoreNamedColorRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(STORE_NAMED_COLOR_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize flags
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        // TODO: deserialize pixel
+        // TODO: deserialize name_len
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize name
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn store_named_color<'c, 'input, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -19023,6 +20224,19 @@ impl<'input> QueryColorsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(QUERY_COLORS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        // TODO: deserialize pixels
+        // TODO: deserialize pixels_len
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn query_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &'input [u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
 where
@@ -19119,6 +20333,20 @@ impl<'input> LookupColorRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(LOOKUP_COLOR_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cmap
+        // TODO: deserialize name_len
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize name
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn lookup_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
@@ -19302,6 +20530,27 @@ impl CreateCursorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CREATE_CURSOR_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cid
+        // TODO: deserialize source
+        // TODO: deserialize mask
+        // TODO: deserialize fore_red
+        // TODO: deserialize fore_green
+        // TODO: deserialize fore_blue
+        // TODO: deserialize back_red
+        // TODO: deserialize back_green
+        // TODO: deserialize back_blue
+        // TODO: deserialize x
+        // TODO: deserialize y
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn create_cursor<Conn, A>(conn: &Conn, cid: Cursor, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -19495,6 +20744,27 @@ impl CreateGlyphCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CREATE_GLYPH_CURSOR_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cid
+        // TODO: deserialize source_font
+        // TODO: deserialize mask_font
+        // TODO: deserialize source_char
+        // TODO: deserialize mask_char
+        // TODO: deserialize fore_red
+        // TODO: deserialize fore_green
+        // TODO: deserialize fore_blue
+        // TODO: deserialize back_red
+        // TODO: deserialize back_green
+        // TODO: deserialize back_blue
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// create cursor.
 ///
@@ -19596,6 +20866,17 @@ impl FreeCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(FREE_CURSOR_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cursor
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// Deletes a cursor.
 ///
@@ -19675,6 +20956,23 @@ impl RecolorCursorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(RECOLOR_CURSOR_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize cursor
+        // TODO: deserialize fore_red
+        // TODO: deserialize fore_green
+        // TODO: deserialize fore_blue
+        // TODO: deserialize back_red
+        // TODO: deserialize back_green
+        // TODO: deserialize back_blue
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn recolor_cursor<Conn>(conn: &Conn, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -19801,6 +21099,19 @@ impl QueryBestSizeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(QUERY_BEST_SIZE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize class
+        // TODO: deserialize length
+        // TODO: deserialize drawable
+        // TODO: deserialize width
+        // TODO: deserialize height
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn query_best_size<Conn>(conn: &Conn, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
 where
@@ -19901,6 +21212,19 @@ impl<'input> QueryExtensionRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(QUERY_EXTENSION_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize name_len
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize name
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// check if extension is present.
 ///
@@ -19997,6 +21321,16 @@ impl ListExtensionsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(LIST_EXTENSIONS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn list_extensions<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListExtensionsReply>, ConnectionError>
 where
@@ -20090,6 +21424,20 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), keysyms_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CHANGE_KEYBOARD_MAPPING_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize keycode_count
+        // TODO: deserialize length
+        // TODO: deserialize first_keycode
+        // TODO: deserialize keysyms_per_keycode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize keysyms
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn change_keyboard_mapping<'c, 'input, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &'input [Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -20138,6 +21486,18 @@ impl GetKeyboardMappingRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_KEYBOARD_MAPPING_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize first_keycode
+        // TODO: deserialize count
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Conn, GetKeyboardMappingReply>, ConnectionError>
@@ -20569,6 +21929,18 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CHANGE_KEYBOARD_CONTROL_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize value_mask
+        // TODO: deserialize value_list
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn change_keyboard_control<'c, 'input, Conn>(conn: &'c Conn, value_list: &'input ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -20605,6 +21977,16 @@ impl GetKeyboardControlRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_KEYBOARD_CONTROL_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_keyboard_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetKeyboardControlReply>, ConnectionError>
@@ -20683,6 +22065,16 @@ impl BellRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(BELL_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize percent
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn bell<Conn>(conn: &Conn, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -20739,6 +22131,21 @@ impl ChangePointerControlRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CHANGE_POINTER_CONTROL_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize acceleration_numerator
+        // TODO: deserialize acceleration_denominator
+        // TODO: deserialize threshold
+        // TODO: deserialize do_acceleration
+        // TODO: deserialize do_threshold
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn change_pointer_control<Conn>(conn: &Conn, acceleration_numerator: i16, acceleration_denominator: i16, threshold: i16, do_acceleration: bool, do_threshold: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -20779,6 +22186,16 @@ impl GetPointerControlRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_POINTER_CONTROL_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_pointer_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerControlReply>, ConnectionError>
@@ -20992,6 +22409,20 @@ impl SetScreenSaverRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_SCREEN_SAVER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize timeout
+        // TODO: deserialize interval
+        // TODO: deserialize prefer_blanking
+        // TODO: deserialize allow_exposures
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn set_screen_saver<Conn>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -21031,6 +22462,16 @@ impl GetScreenSaverRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_SCREEN_SAVER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_screen_saver<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetScreenSaverReply>, ConnectionError>
@@ -21257,6 +22698,20 @@ impl<'input> ChangeHostsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.address.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(CHANGE_HOSTS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize mode
+        // TODO: deserialize length
+        // TODO: deserialize family
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize address_len
+        // TODO: deserialize address
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn change_hosts<'c, 'input, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -21356,6 +22811,16 @@ impl ListHostsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(LIST_HOSTS_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn list_hosts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListHostsReply>, ConnectionError>
@@ -21509,6 +22974,16 @@ impl SetAccessControlRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_ACCESS_CONTROL_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize mode
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn set_access_control<Conn>(conn: &Conn, mode: AccessControl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -21613,6 +23088,16 @@ impl SetCloseDownModeRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_CLOSE_DOWN_MODE_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize mode
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn set_close_down_mode<Conn>(conn: &Conn, mode: CloseDown) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -21736,6 +23221,17 @@ impl KillClientRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(KILL_CLIENT_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize resource
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 /// kills a client.
 ///
@@ -21813,6 +23309,20 @@ impl<'input> RotatePropertiesRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), atoms_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(ROTATE_PROPERTIES_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        // TODO: deserialize window
+        // TODO: deserialize atoms_len
+        // TODO: deserialize delta
+        // TODO: deserialize atoms
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn rotate_properties<'c, 'input, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &'input [Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -21926,6 +23436,16 @@ impl ForceScreenSaverRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(FORCE_SCREEN_SAVER_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize mode
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn force_screen_saver<Conn>(conn: &Conn, mode: ScreenSaver) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -22035,6 +23555,17 @@ impl<'input> SetPointerMappingRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.map.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_POINTER_MAPPING_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize map_len
+        // TODO: deserialize length
+        // TODO: deserialize map
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn set_pointer_mapping<'c, 'input, Conn>(conn: &'c Conn, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
 where
@@ -22096,6 +23627,16 @@ impl GetPointerMappingRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_POINTER_MAPPING_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_pointer_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerMappingReply>, ConnectionError>
@@ -22262,6 +23803,17 @@ impl<'input> SetModifierMappingRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.keycodes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(SET_MODIFIER_MAPPING_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize keycodes_per_modifier
+        // TODO: deserialize length
+        // TODO: deserialize keycodes
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
+    }
 }
 pub fn set_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, keycodes: &'input [Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
 where
@@ -22323,6 +23875,16 @@ impl GetModifierMappingRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(GET_MODIFIER_MAPPING_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn get_modifier_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetModifierMappingReply>, ConnectionError>
@@ -22401,6 +23963,16 @@ impl NoOperationRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, body, Some(NO_OPERATION_REQUEST), None)?;
+        // TODO: deserialize major_opcode
+        // TODO: deserialize <unnamed field>
+        // TODO: deserialize length
+        let _ = body;
+        // TODO: produce final struct
+        unimplemented!()
     }
 }
 pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
