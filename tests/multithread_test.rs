@@ -58,18 +58,18 @@ fn multithread_test() {
 mod fake_stream {
     use std::io::{Error, ErrorKind};
     use std::sync::mpsc::{channel, Receiver, Sender};
+    use std::sync::{Condvar, Mutex};
 
     use x11rb::connection::SequenceNumber;
     use x11rb::errors::ConnectError;
     use x11rb::protocol::xproto::{
         ImageOrder, Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST,
     };
-    use x11rb::rust_connection::{Poll, ReadFD, RustConnection, WriteFD};
+    use x11rb::rust_connection::{RustConnection, Stream};
     use x11rb::utils::RawFdContainer;
 
     /// Create a new `RustConnection` connected to a fake stream
-    pub(crate) fn connect() -> Result<RustConnection<FakeStreamRead, FakeStreamWrite>, ConnectError>
-    {
+    pub(crate) fn connect() -> Result<RustConnection<FakeStream>, ConnectError> {
         let setup = Setup {
             status: 0,
             protocol_major_version: 0,
@@ -90,21 +90,25 @@ mod fake_stream {
             pixmap_formats: Vec::new(),
             roots: Vec::new(),
         };
-        let (read, write) = fake_stream();
-        RustConnection::for_connected_stream(read, write, setup)
+        let stream = fake_stream();
+        RustConnection::for_connected_stream(stream, setup)
     }
 
     /// Get a pair of fake streams that are connected to each other
-    fn fake_stream() -> (FakeStreamRead, FakeStreamWrite) {
+    fn fake_stream() -> FakeStream {
         let (send, recv) = channel();
         let pending = Vec::new();
-        let read = FakeStreamRead { recv, pending };
-        let write = FakeStreamWrite {
-            send,
-            seqno: 0,
-            skip: 0,
-        };
-        (read, write)
+        FakeStream {
+            inner: Mutex::new(FakeStreamInner {
+                read: FakeStreamRead { recv, pending },
+                write: FakeStreamWrite {
+                    send,
+                    seqno: 0,
+                    skip: 0,
+                },
+            }),
+            condvar: Condvar::new(),
+        }
     }
 
     /// A packet that still needs to be read from FakeStreamRead
@@ -134,47 +138,21 @@ mod fake_stream {
     }
 
     #[derive(Debug)]
-    pub(crate) struct FakeStreamRead {
+    pub(crate) struct FakeStream {
+        inner: Mutex<FakeStreamInner>,
+        condvar: Condvar,
+    }
+
+    #[derive(Debug)]
+    struct FakeStreamInner {
+        read: FakeStreamRead,
+        write: FakeStreamWrite,
+    }
+
+    #[derive(Debug)]
+    struct FakeStreamRead {
         recv: Receiver<Packet>,
         pending: Vec<u8>,
-    }
-
-    impl ReadFD for FakeStreamRead {
-        fn read(
-            &mut self,
-            buf: &mut [u8],
-            _fd_storage: &mut Vec<RawFdContainer>,
-        ) -> Result<usize, Error> {
-            if self.pending.is_empty() {
-                // The actual read from `recv` is done in `poll`
-                Err(Error::new(ErrorKind::WouldBlock, "Would block"))
-            } else {
-                let len = self.pending.len().min(buf.len());
-                buf[..len].copy_from_slice(&self.pending[..len]);
-                self.pending.drain(..len);
-                Ok(len)
-            }
-        }
-    }
-
-    impl Poll for FakeStreamRead {
-        fn poll(&mut self, read: bool, write: bool) -> std::io::Result<(bool, bool)> {
-            assert!(
-                read || write,
-                "at least one of `read` and `write` must be true",
-            );
-            if read {
-                if self.pending.is_empty() {
-                    let packet = self.recv.recv().unwrap();
-                    self.pending.extend(packet.to_raw());
-                    Ok((!self.pending.is_empty(), false))
-                } else {
-                    Ok((true, false))
-                }
-            } else {
-                Ok((false, false))
-            }
-        }
     }
 
     #[derive(Debug)]
@@ -184,41 +162,84 @@ mod fake_stream {
         skip: usize,
     }
 
-    impl WriteFD for FakeStreamWrite {
-        fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize, Error> {
-            assert!(fds.is_empty());
-            if self.skip > 0 {
-                assert_eq!(self.skip, buf.len());
-                self.skip = 0;
-                return Ok(buf.len());
-            }
-
-            self.seqno += 1;
-            match buf[0] {
-                GET_INPUT_FOCUS_REQUEST => self
-                    .send
-                    .send(Packet::GetInputFocusReply(self.seqno))
-                    .unwrap(),
-                SEND_EVENT_REQUEST => self.send.send(Packet::Event).unwrap(),
-                _ => unimplemented!(),
-            }
-            // Compute how much of the package was not yet received
-            self.skip = usize::from(u16::from_ne_bytes([buf[2], buf[3]])) * 4 - buf.len();
-            Ok(buf.len())
-        }
-
-        fn flush(&mut self) -> Result<(), Error> {
-            Ok(())
-        }
-    }
-
-    impl Poll for FakeStreamWrite {
-        fn poll(&mut self, read: bool, write: bool) -> std::io::Result<(bool, bool)> {
+    impl Stream for FakeStream {
+        fn poll(&self, read: bool, write: bool) -> std::io::Result<()> {
             assert!(
                 read || write,
                 "at least one of `read` and `write` must be true",
             );
-            Ok((false, write))
+            if write {
+                Ok(())
+            } else {
+                let mut inner = self.inner.lock().unwrap();
+                loop {
+                    if inner.read.pending.is_empty() {
+                        match inner.read.recv.try_recv() {
+                            Ok(packet) => {
+                                inner.read.pending.extend(packet.to_raw());
+                                return Ok(());
+                            }
+                            Err(std::sync::mpsc::TryRecvError::Empty) => {
+                                inner = self.condvar.wait(inner).unwrap();
+                            }
+                            Err(std::sync::mpsc::TryRecvError::Disconnected) => unreachable!(),
+                        }
+                    } else {
+                        return Ok(());
+                    }
+                }
+            }
+        }
+
+        fn read(
+            &self,
+            buf: &mut [u8],
+            _fd_storage: &mut Vec<RawFdContainer>,
+        ) -> std::io::Result<usize> {
+            let mut inner = self.inner.lock().unwrap();
+            if inner.read.pending.is_empty() {
+                match inner.read.recv.try_recv() {
+                    Ok(packet) => inner.read.pending.extend(packet.to_raw()),
+                    Err(std::sync::mpsc::TryRecvError::Empty) => {
+                        return Err(Error::new(ErrorKind::WouldBlock, "Would block"));
+                    }
+                    Err(std::sync::mpsc::TryRecvError::Disconnected) => unreachable!(),
+                }
+            }
+
+            let len = inner.read.pending.len().min(buf.len());
+            buf[..len].copy_from_slice(&inner.read.pending[..len]);
+            inner.read.pending.drain(..len);
+            Ok(len)
+        }
+
+        fn write(&self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> std::io::Result<usize> {
+            assert!(fds.is_empty());
+
+            let mut inner = self.inner.lock().unwrap();
+
+            if inner.write.skip > 0 {
+                assert_eq!(inner.write.skip, buf.len());
+                inner.write.skip = 0;
+                return Ok(buf.len());
+            }
+
+            inner.write.seqno += 1;
+            match buf[0] {
+                GET_INPUT_FOCUS_REQUEST => inner
+                    .write
+                    .send
+                    .send(Packet::GetInputFocusReply(inner.write.seqno))
+                    .unwrap(),
+                SEND_EVENT_REQUEST => inner.write.send.send(Packet::Event).unwrap(),
+                _ => unimplemented!(),
+            }
+            // Compute how much of the package was not yet received
+            inner.write.skip = usize::from(u16::from_ne_bytes([buf[2], buf[3]])) * 4 - buf.len();
+
+            self.condvar.notify_all();
+
+            Ok(buf.len())
         }
     }
 }

@@ -177,7 +177,7 @@ fn poll_with_timeout(
     use nix::poll::{poll, PollFd, PollFlags};
 
     let start_instant = Instant::now();
-    let fd = conn.with_read(|r| r.as_raw_fd());
+    let fd = conn.stream().as_raw_fd();
     let mut poll_fds = [PollFd::new(fd, PollFlags::POLLIN)];
     loop {
         let timeout_millis = timeout
@@ -220,7 +220,7 @@ fn poll_with_timeout(
     use winapi_wsapoll::wsa_poll;
 
     let start_instant = Instant::now();
-    let raw_socket = conn.with_read(|r| r.as_raw_socket());
+    let raw_socket = conn.stream().as_raw_socket();
     let mut poll_fds = [WSAPOLLFD {
         fd: raw_socket as SOCKET,
         events: POLLRDNORM,

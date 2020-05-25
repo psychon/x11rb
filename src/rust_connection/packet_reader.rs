@@ -3,8 +3,7 @@
 use std::convert::TryInto;
 use std::io::{Error, ErrorKind, Result};
 
-use super::fd_read_write::ReadFD;
-use super::Poll;
+use super::Stream;
 use crate::utils::RawFdContainer;
 
 /// Minimal length of an X11 packet
@@ -12,8 +11,7 @@ const MINIMAL_PACKET_LENGTH: usize = 32;
 
 /// A wrapper around a reader that reads X11 packet.
 #[derive(Debug)]
-pub(crate) struct PacketReader<R: ReadFD + Poll> {
-    inner: R,
+pub(crate) struct PacketReader {
     read_buffer: Box<[u8]>,
 
     // A packet that was partially read.
@@ -22,21 +20,15 @@ pub(crate) struct PacketReader<R: ReadFD + Poll> {
     already_read: usize,
 }
 
-impl<R: ReadFD + Poll> PacketReader<R> {
+impl PacketReader {
     /// Create a new `PacketReader` that reads from the given stream.
-    pub(crate) fn new(inner: R) -> Self {
+    pub(crate) fn new() -> Self {
         Self {
-            inner,
             // Buffer size chosen by checking what libxcb does
             read_buffer: vec![0; 4096].into_boxed_slice(),
             pending_packet: vec![0; MINIMAL_PACKET_LENGTH],
             already_read: 0,
         }
-    }
-
-    /// Get access to the inner reader
-    pub(crate) fn get_mut(&mut self) -> &mut R {
-        &mut self.inner
     }
 
     /// To be called after `nread` bytes have been writen into `pending_packet`.
@@ -67,23 +59,25 @@ impl<R: ReadFD + Poll> PacketReader<R> {
         }
     }
 
-    /// Block and read at least one packet from the inner reader and
-    /// read as many as possible without blocking.
+    /// Block and read at least one packet from stream and read as many as
+    /// possible without blocking.
     pub(crate) fn read_at_least_one_packet(
         &mut self,
+        stream: &impl Stream,
         out_packets: &mut Vec<Vec<u8>>,
         fd_storage: &mut Vec<RawFdContainer>,
     ) -> Result<()> {
         while out_packets.is_empty() {
-            let _ = self.inner.poll(true, false)?;
-            self.try_read_packets(out_packets, fd_storage)?;
+            stream.poll(true, false)?;
+            self.try_read_packets(stream, out_packets, fd_storage)?;
         }
         Ok(())
     }
 
-    /// Reads as many packets as possible from the inner reader without blocking.
+    /// Reads as many packets as possible from stream reader without blocking.
     pub(crate) fn try_read_packets(
         &mut self,
+        stream: &impl Stream,
         out_packets: &mut Vec<Vec<u8>>,
         fd_storage: &mut Vec<RawFdContainer>,
     ) -> Result<()> {
@@ -91,10 +85,7 @@ impl<R: ReadFD + Poll> PacketReader<R> {
             if (self.pending_packet.len() - self.already_read) >= self.read_buffer.len() {
                 assert_ne!(self.already_read, self.pending_packet.len());
                 // Bypass the read buffer
-                match self
-                    .inner
-                    .read(&mut self.pending_packet[self.already_read..], fd_storage)
-                {
+                match stream.read(&mut self.pending_packet[self.already_read..], fd_storage) {
                     Ok(0) => {
                         return Err(Error::new(
                             ErrorKind::UnexpectedEof,
@@ -107,7 +98,7 @@ impl<R: ReadFD + Poll> PacketReader<R> {
                 }
             } else {
                 // Fill the read buffer
-                match self.inner.read(&mut self.read_buffer, fd_storage) {
+                match stream.read(&mut self.read_buffer, fd_storage) {
                     Ok(0) => {
                         return Err(Error::new(
                             ErrorKind::UnexpectedEof,
