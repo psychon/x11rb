@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -2283,12 +2285,12 @@ impl CreatePictureAux {
 
 /// Opcode for the CreatePicture request
 pub const CREATE_PICTURE_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreatePictureRequest<'input> {
     pub pid: Picture,
     pub drawable: xproto::Drawable,
     pub format: Pictformat,
-    pub value_list: &'input CreatePictureAux,
+    pub value_list: Cow<'input, CreatePictureAux>,
 }
 impl<'input> CreatePictureRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2345,7 +2347,7 @@ where
         pid,
         drawable,
         format,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2537,10 +2539,10 @@ impl ChangePictureAux {
 
 /// Opcode for the ChangePicture request
 pub const CHANGE_PICTURE_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangePictureRequest<'input> {
     pub picture: Picture,
-    pub value_list: &'input ChangePictureAux,
+    pub value_list: Cow<'input, ChangePictureAux>,
 }
 impl<'input> ChangePictureRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2585,7 +2587,7 @@ where
 {
     let request0 = ChangePictureRequest {
         picture,
-        value_list,
+        value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2599,7 +2601,7 @@ pub struct SetPictureClipRectanglesRequest<'input> {
     pub picture: Picture,
     pub clip_x_origin: i16,
     pub clip_y_origin: i16,
-    pub rectangles: &'input [xproto::Rectangle],
+    pub rectangles: Cow<'input, [xproto::Rectangle]>,
 }
 impl<'input> SetPictureClipRectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2646,7 +2648,7 @@ where
         picture,
         clip_x_origin,
         clip_y_origin,
-        rectangles,
+        rectangles: Cow::Borrowed(rectangles),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2816,7 +2818,7 @@ pub struct TrapezoidsRequest<'input> {
     pub mask_format: Pictformat,
     pub src_x: i16,
     pub src_y: i16,
-    pub traps: &'input [Trapezoid],
+    pub traps: Cow<'input, [Trapezoid]>,
 }
 impl<'input> TrapezoidsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2881,7 +2883,7 @@ where
         mask_format,
         src_x,
         src_y,
-        traps,
+        traps: Cow::Borrowed(traps),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2898,7 +2900,7 @@ pub struct TrianglesRequest<'input> {
     pub mask_format: Pictformat,
     pub src_x: i16,
     pub src_y: i16,
-    pub triangles: &'input [Triangle],
+    pub triangles: Cow<'input, [Triangle]>,
 }
 impl<'input> TrianglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2963,7 +2965,7 @@ where
         mask_format,
         src_x,
         src_y,
-        triangles,
+        triangles: Cow::Borrowed(triangles),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2980,7 +2982,7 @@ pub struct TriStripRequest<'input> {
     pub mask_format: Pictformat,
     pub src_x: i16,
     pub src_y: i16,
-    pub points: &'input [Pointfix],
+    pub points: Cow<'input, [Pointfix]>,
 }
 impl<'input> TriStripRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3045,7 +3047,7 @@ where
         mask_format,
         src_x,
         src_y,
-        points,
+        points: Cow::Borrowed(points),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3062,7 +3064,7 @@ pub struct TriFanRequest<'input> {
     pub mask_format: Pictformat,
     pub src_x: i16,
     pub src_y: i16,
-    pub points: &'input [Pointfix],
+    pub points: Cow<'input, [Pointfix]>,
 }
 impl<'input> TriFanRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3127,7 +3129,7 @@ where
         mask_format,
         src_x,
         src_y,
-        points,
+        points: Cow::Borrowed(points),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3288,8 +3290,8 @@ pub const ADD_GLYPHS_REQUEST: u8 = 20;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddGlyphsRequest<'input> {
     pub glyphset: Glyphset,
-    pub glyphids: &'input [u32],
-    pub glyphs: &'input [Glyphinfo],
+    pub glyphids: Cow<'input, [u32]>,
+    pub glyphs: Cow<'input, [Glyphinfo]>,
     pub data: &'input [u8],
 }
 impl<'input> AddGlyphsRequest<'input> {
@@ -3324,13 +3326,13 @@ impl<'input> AddGlyphsRequest<'input> {
         assert_eq!(self.glyphs.len(), usize::try_from(glyphs_len).unwrap(), "`glyphs` has an incorrect length");
         let glyphs_bytes = self.glyphs.serialize();
         let length_so_far = length_so_far + glyphs_bytes.len();
-        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), glyphids_bytes.into(), glyphs_bytes.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), glyphids_bytes.into(), glyphs_bytes.into(), self.data.into(), padding0.into()], vec![]))
     }
 }
 pub fn add_glyphs<'c, 'input, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphids: &'input [u32], glyphs: &'input [Glyphinfo], data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3339,8 +3341,8 @@ where
 {
     let request0 = AddGlyphsRequest {
         glyphset,
-        glyphids,
-        glyphs,
+        glyphids: Cow::Borrowed(glyphids),
+        glyphs: Cow::Borrowed(glyphs),
         data,
     };
     let (bytes, fds) = request0.serialize(conn)?;
@@ -3353,7 +3355,7 @@ pub const FREE_GLYPHS_REQUEST: u8 = 22;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FreeGlyphsRequest<'input> {
     pub glyphset: Glyphset,
-    pub glyphs: &'input [Glyph],
+    pub glyphs: Cow<'input, [Glyph]>,
 }
 impl<'input> FreeGlyphsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3392,7 +3394,7 @@ where
 {
     let request0 = FreeGlyphsRequest {
         glyphset,
-        glyphs,
+        glyphs: Cow::Borrowed(glyphs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3459,13 +3461,13 @@ impl<'input> CompositeGlyphs8Request<'input> {
             src_y_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.glyphcmds[..]).len();
+        let length_so_far = length_so_far + self.glyphcmds.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.glyphcmds[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.glyphcmds.into(), padding0.into()], vec![]))
     }
 }
 pub fn composite_glyphs8<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3547,13 +3549,13 @@ impl<'input> CompositeGlyphs16Request<'input> {
             src_y_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.glyphcmds[..]).len();
+        let length_so_far = length_so_far + self.glyphcmds.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.glyphcmds[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.glyphcmds.into(), padding0.into()], vec![]))
     }
 }
 pub fn composite_glyphs16<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3635,13 +3637,13 @@ impl<'input> CompositeGlyphs32Request<'input> {
             src_y_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.glyphcmds[..]).len();
+        let length_so_far = length_so_far + self.glyphcmds.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.glyphcmds[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.glyphcmds.into(), padding0.into()], vec![]))
     }
 }
 pub fn composite_glyphs32<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3670,7 +3672,7 @@ pub struct FillRectanglesRequest<'input> {
     pub op: PictOp,
     pub dst: Picture,
     pub color: Color,
-    pub rects: &'input [xproto::Rectangle],
+    pub rects: Cow<'input, [xproto::Rectangle]>,
 }
 impl<'input> FillRectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3725,7 +3727,7 @@ where
         op,
         dst,
         color,
-        rects,
+        rects: Cow::Borrowed(rects),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4085,7 +4087,7 @@ pub const SET_PICTURE_FILTER_REQUEST: u8 = 30;
 pub struct SetPictureFilterRequest<'input> {
     pub picture: Picture,
     pub filter: &'input [u8],
-    pub values: &'input [Fixed],
+    pub values: Cow<'input, [Fixed]>,
 }
 impl<'input> SetPictureFilterRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4114,7 +4116,7 @@ impl<'input> SetPictureFilterRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.filter[..]).len();
+        let length_so_far = length_so_far + self.filter.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         let values_bytes = self.values.serialize();
@@ -4124,7 +4126,7 @@ impl<'input> SetPictureFilterRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.filter[..]).into(), padding0.into(), values_bytes.into(), padding1.into()], vec![]))
+        Ok((vec![request0.into(), self.filter.into(), padding0.into(), values_bytes.into(), padding1.into()], vec![]))
     }
 }
 pub fn set_picture_filter<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, filter: &'input [u8], values: &'input [Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -4134,7 +4136,7 @@ where
     let request0 = SetPictureFilterRequest {
         picture,
         filter,
-        values,
+        values: Cow::Borrowed(values),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4188,7 +4190,7 @@ pub const CREATE_ANIM_CURSOR_REQUEST: u8 = 31;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateAnimCursorRequest<'input> {
     pub cid: xproto::Cursor,
-    pub cursors: &'input [Animcursorelt],
+    pub cursors: Cow<'input, [Animcursorelt]>,
 }
 impl<'input> CreateAnimCursorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4227,7 +4229,7 @@ where
 {
     let request0 = CreateAnimCursorRequest {
         cid,
-        cursors,
+        cursors: Cow::Borrowed(cursors),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4349,7 +4351,7 @@ pub struct AddTrapsRequest<'input> {
     pub picture: Picture,
     pub x_off: i16,
     pub y_off: i16,
-    pub traps: &'input [Trap],
+    pub traps: Cow<'input, [Trap]>,
 }
 impl<'input> AddTrapsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4396,7 +4398,7 @@ where
         picture,
         x_off,
         y_off,
-        traps,
+        traps: Cow::Borrowed(traps),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4466,8 +4468,8 @@ pub struct CreateLinearGradientRequest<'input> {
     pub picture: Picture,
     pub p1: Pointfix,
     pub p2: Pointfix,
-    pub stops: &'input [Fixed],
-    pub colors: &'input [Color],
+    pub stops: Cow<'input, [Fixed]>,
+    pub colors: Cow<'input, [Color]>,
 }
 impl<'input> CreateLinearGradientRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4535,8 +4537,8 @@ where
         picture,
         p1,
         p2,
-        stops,
-        colors,
+        stops: Cow::Borrowed(stops),
+        colors: Cow::Borrowed(colors),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4552,8 +4554,8 @@ pub struct CreateRadialGradientRequest<'input> {
     pub outer: Pointfix,
     pub inner_radius: Fixed,
     pub outer_radius: Fixed,
-    pub stops: &'input [Fixed],
-    pub colors: &'input [Color],
+    pub stops: Cow<'input, [Fixed]>,
+    pub colors: Cow<'input, [Color]>,
 }
 impl<'input> CreateRadialGradientRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4633,8 +4635,8 @@ where
         outer,
         inner_radius,
         outer_radius,
-        stops,
-        colors,
+        stops: Cow::Borrowed(stops),
+        colors: Cow::Borrowed(colors),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4648,8 +4650,8 @@ pub struct CreateConicalGradientRequest<'input> {
     pub picture: Picture,
     pub center: Pointfix,
     pub angle: Fixed,
-    pub stops: &'input [Fixed],
-    pub colors: &'input [Color],
+    pub stops: Cow<'input, [Fixed]>,
+    pub colors: Cow<'input, [Color]>,
 }
 impl<'input> CreateConicalGradientRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4713,8 +4715,8 @@ where
         picture,
         center,
         angle,
-        stops,
-        colors,
+        stops: Cow::Borrowed(stops),
+        colors: Cow::Borrowed(colors),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -1897,7 +1899,7 @@ pub struct ConfigureOutputPropertyRequest<'input> {
     pub property: xproto::Atom,
     pub pending: bool,
     pub range: bool,
-    pub values: &'input [i32],
+    pub values: Cow<'input, [i32]>,
 }
 impl<'input> ConfigureOutputPropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1950,7 +1952,7 @@ where
         property,
         pending,
         range,
-        values,
+        values: Cow::Borrowed(values),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2012,13 +2014,13 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         ];
         let length_so_far = length_so_far + request0.len();
         assert_eq!(self.data.len(), usize::try_from(self.num_units.checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
-        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
 }
 pub fn change_output_property<'c, 'input, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2272,13 +2274,13 @@ impl<'input> CreateModeRequest<'input> {
             mode_info_bytes[31],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.name[..]).len();
+        let length_so_far = length_so_far + self.name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.name[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
 }
 pub fn create_mode<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, mode_info: ModeInfo, name: &'input [u8]) -> Result<Cookie<'c, Conn, CreateModeReply>, ConnectionError>
@@ -2608,7 +2610,7 @@ pub struct SetCrtcConfigRequest<'input> {
     pub y: i16,
     pub mode: Mode,
     pub rotation: u16,
-    pub outputs: &'input [Output],
+    pub outputs: Cow<'input, [Output]>,
 }
 impl<'input> SetCrtcConfigRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2681,7 +2683,7 @@ where
         y,
         mode,
         rotation,
-        outputs,
+        outputs: Cow::Borrowed(outputs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2883,9 +2885,9 @@ pub const SET_CRTC_GAMMA_REQUEST: u8 = 24;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetCrtcGammaRequest<'input> {
     pub crtc: Crtc,
-    pub red: &'input [u16],
-    pub green: &'input [u16],
-    pub blue: &'input [u16],
+    pub red: Cow<'input, [u16]>,
+    pub green: Cow<'input, [u16]>,
+    pub blue: Cow<'input, [u16]>,
 }
 impl<'input> SetCrtcGammaRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2936,9 +2938,9 @@ where
 {
     let request0 = SetCrtcGammaRequest {
         crtc,
-        red,
-        green,
-        blue,
+        red: Cow::Borrowed(red),
+        green: Cow::Borrowed(green),
+        blue: Cow::Borrowed(blue),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3161,7 +3163,7 @@ pub struct SetCrtcTransformRequest<'input> {
     pub crtc: Crtc,
     pub transform: render::Transform,
     pub filter_name: &'input [u8],
-    pub filter_params: &'input [render::Fixed],
+    pub filter_params: Cow<'input, [render::Fixed]>,
 }
 impl<'input> SetCrtcTransformRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3227,7 +3229,7 @@ impl<'input> SetCrtcTransformRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.filter_name[..]).len();
+        let length_so_far = length_so_far + self.filter_name.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         let filter_params_bytes = self.filter_params.serialize();
@@ -3237,7 +3239,7 @@ impl<'input> SetCrtcTransformRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.filter_name[..]).into(), padding0.into(), filter_params_bytes.into(), padding1.into()], vec![]))
+        Ok((vec![request0.into(), self.filter_name.into(), padding0.into(), filter_params_bytes.into(), padding1.into()], vec![]))
     }
 }
 pub fn set_crtc_transform<'c, 'input, Conn>(conn: &'c Conn, crtc: Crtc, transform: render::Transform, filter_name: &'input [u8], filter_params: &'input [render::Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3248,7 +3250,7 @@ where
         crtc,
         transform,
         filter_name,
-        filter_params,
+        filter_params: Cow::Borrowed(filter_params),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4384,7 +4386,7 @@ pub struct ConfigureProviderPropertyRequest<'input> {
     pub property: xproto::Atom,
     pub pending: bool,
     pub range: bool,
-    pub values: &'input [i32],
+    pub values: Cow<'input, [i32]>,
 }
 impl<'input> ConfigureProviderPropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4437,7 +4439,7 @@ where
         property,
         pending,
         range,
-        values,
+        values: Cow::Borrowed(values),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4499,13 +4501,13 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         ];
         let length_so_far = length_so_far + request0.len();
         assert_eq!(self.data.len(), usize::try_from(self.num_items.checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
-        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
 }
 pub fn change_provider_property<'c, 'input, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -5624,8 +5626,8 @@ pub const CREATE_LEASE_REQUEST: u8 = 45;
 pub struct CreateLeaseRequest<'input> {
     pub window: xproto::Window,
     pub lid: Lease,
-    pub crtcs: &'input [Crtc],
-    pub outputs: &'input [Output],
+    pub crtcs: Cow<'input, [Crtc]>,
+    pub outputs: Cow<'input, [Output]>,
 }
 impl<'input> CreateLeaseRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -5680,8 +5682,8 @@ where
     let request0 = CreateLeaseRequest {
         window,
         lid,
-        crtcs,
-        outputs,
+        crtcs: Cow::Borrowed(crtcs),
+        outputs: Cow::Borrowed(outputs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

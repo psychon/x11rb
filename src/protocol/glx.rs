@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -496,13 +498,13 @@ impl<'input> RenderRequest<'input> {
             context_tag_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
 }
 pub fn render<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -560,13 +562,13 @@ impl<'input> RenderLargeRequest<'input> {
             data_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
 }
 pub fn render_large<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, request_num: u16, request_total: u16, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1541,13 +1543,13 @@ impl<'input> VendorPrivateRequest<'input> {
             context_tag_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
 }
 pub fn vendor_private<'c, 'input, Conn>(conn: &'c Conn, vendor_code: u32, context_tag: ContextTag, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1598,13 +1600,13 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
             context_tag_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.data[..]).len();
+        let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.data[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
 }
 pub fn vendor_private_with_reply<'c, 'input, Conn>(conn: &'c Conn, vendor_code: u32, context_tag: ContextTag, data: &'input [u8]) -> Result<Cookie<'c, Conn, VendorPrivateWithReplyReply>, ConnectionError>
@@ -1875,13 +1877,13 @@ impl<'input> ClientInfoRequest<'input> {
             str_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.string[..]).len();
+        let length_so_far = length_so_far + self.string.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.string[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.string.into(), padding0.into()], vec![]))
     }
 }
 pub fn client_info<'c, 'input, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1995,7 +1997,7 @@ pub struct CreatePixmapRequest<'input> {
     pub fbconfig: Fbconfig,
     pub pixmap: xproto::Pixmap,
     pub glx_pixmap: Pixmap,
-    pub attribs: &'input [u32],
+    pub attribs: Cow<'input, [u32]>,
 }
 impl<'input> CreatePixmapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2059,7 +2061,7 @@ where
         fbconfig,
         pixmap,
         glx_pixmap,
-        attribs,
+        attribs: Cow::Borrowed(attribs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2378,7 +2380,7 @@ pub struct CreatePbufferRequest<'input> {
     pub screen: u32,
     pub fbconfig: Fbconfig,
     pub pbuffer: Pbuffer,
-    pub attribs: &'input [u32],
+    pub attribs: Cow<'input, [u32]>,
 }
 impl<'input> CreatePbufferRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2436,7 +2438,7 @@ where
         screen,
         fbconfig,
         pbuffer,
-        attribs,
+        attribs: Cow::Borrowed(attribs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2581,7 +2583,7 @@ pub const CHANGE_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 30;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeDrawableAttributesRequest<'input> {
     pub drawable: Drawable,
-    pub attribs: &'input [u32],
+    pub attribs: Cow<'input, [u32]>,
 }
 impl<'input> ChangeDrawableAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2627,7 +2629,7 @@ where
 {
     let request0 = ChangeDrawableAttributesRequest {
         drawable,
-        attribs,
+        attribs: Cow::Borrowed(attribs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2642,7 +2644,7 @@ pub struct CreateWindowRequest<'input> {
     pub fbconfig: Fbconfig,
     pub window: xproto::Window,
     pub glx_window: Window,
-    pub attribs: &'input [u32],
+    pub attribs: Cow<'input, [u32]>,
 }
 impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2706,7 +2708,7 @@ where
         fbconfig,
         window,
         glx_window,
-        attribs,
+        attribs: Cow::Borrowed(attribs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2764,7 +2766,7 @@ pub const SET_CLIENT_INFO_ARB_REQUEST: u8 = 33;
 pub struct SetClientInfoARBRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
-    pub gl_versions: &'input [u32],
+    pub gl_versions: Cow<'input, [u32]>,
     pub gl_extension_string: &'input [u8],
     pub glx_extension_string: &'input [u8],
 }
@@ -2815,14 +2817,14 @@ impl<'input> SetClientInfoARBRequest<'input> {
         let length_so_far = length_so_far + request0.len();
         let gl_versions_bytes = self.gl_versions.serialize();
         let length_so_far = length_so_far + gl_versions_bytes.len();
-        let length_so_far = length_so_far + (&self.gl_extension_string[..]).len();
-        let length_so_far = length_so_far + (&self.glx_extension_string[..]).len();
+        let length_so_far = length_so_far + self.gl_extension_string.len();
+        let length_so_far = length_so_far + self.glx_extension_string.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), gl_versions_bytes.into(), (&self.gl_extension_string[..]).into(), (&self.glx_extension_string[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string.into(), self.glx_extension_string.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_client_info_arb<'c, 'input, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, gl_versions: &'input [u32], gl_extension_string: &'input [u8], glx_extension_string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2832,7 +2834,7 @@ where
     let request0 = SetClientInfoARBRequest {
         major_version,
         minor_version,
-        gl_versions,
+        gl_versions: Cow::Borrowed(gl_versions),
         gl_extension_string,
         glx_extension_string,
     };
@@ -2850,7 +2852,7 @@ pub struct CreateContextAttribsARBRequest<'input> {
     pub screen: u32,
     pub share_list: Context,
     pub is_direct: bool,
-    pub attribs: &'input [u32],
+    pub attribs: Cow<'input, [u32]>,
 }
 impl<'input> CreateContextAttribsARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2920,7 +2922,7 @@ where
         screen,
         share_list,
         is_direct,
-        attribs,
+        attribs: Cow::Borrowed(attribs),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2933,7 +2935,7 @@ pub const SET_CLIENT_INFO2_ARB_REQUEST: u8 = 35;
 pub struct SetClientInfo2ARBRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
-    pub gl_versions: &'input [u32],
+    pub gl_versions: Cow<'input, [u32]>,
     pub gl_extension_string: &'input [u8],
     pub glx_extension_string: &'input [u8],
 }
@@ -2984,14 +2986,14 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         let length_so_far = length_so_far + request0.len();
         let gl_versions_bytes = self.gl_versions.serialize();
         let length_so_far = length_so_far + gl_versions_bytes.len();
-        let length_so_far = length_so_far + (&self.gl_extension_string[..]).len();
-        let length_so_far = length_so_far + (&self.glx_extension_string[..]).len();
+        let length_so_far = length_so_far + self.gl_extension_string.len();
+        let length_so_far = length_so_far + self.glx_extension_string.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), gl_versions_bytes.into(), (&self.gl_extension_string[..]).into(), (&self.glx_extension_string[..]).into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string.into(), self.glx_extension_string.into(), padding0.into()], vec![]))
     }
 }
 pub fn set_client_info2_arb<'c, 'input, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, gl_versions: &'input [u32], gl_extension_string: &'input [u8], glx_extension_string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3001,7 +3003,7 @@ where
     let request0 = SetClientInfo2ARBRequest {
         major_version,
         minor_version,
-        gl_versions,
+        gl_versions: Cow::Borrowed(gl_versions),
         gl_extension_string,
         glx_extension_string,
     };
@@ -6877,7 +6879,7 @@ pub const ARE_TEXTURES_RESIDENT_REQUEST: u8 = 143;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AreTexturesResidentRequest<'input> {
     pub context_tag: ContextTag,
-    pub textures: &'input [u32],
+    pub textures: Cow<'input, [u32]>,
 }
 impl<'input> AreTexturesResidentRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -6922,7 +6924,7 @@ where
 {
     let request0 = AreTexturesResidentRequest {
         context_tag,
-        textures,
+        textures: Cow::Borrowed(textures),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6977,7 +6979,7 @@ pub const DELETE_TEXTURES_REQUEST: u8 = 144;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeleteTexturesRequest<'input> {
     pub context_tag: ContextTag,
-    pub textures: &'input [u32],
+    pub textures: Cow<'input, [u32]>,
 }
 impl<'input> DeleteTexturesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -7022,7 +7024,7 @@ where
 {
     let request0 = DeleteTexturesRequest {
         context_tag,
-        textures,
+        textures: Cow::Borrowed(textures),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8736,7 +8738,7 @@ pub const DELETE_QUERIES_ARB_REQUEST: u8 = 161;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeleteQueriesARBRequest<'input> {
     pub context_tag: ContextTag,
-    pub ids: &'input [u32],
+    pub ids: Cow<'input, [u32]>,
 }
 impl<'input> DeleteQueriesARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -8781,7 +8783,7 @@ where
 {
     let request0 = DeleteQueriesARBRequest {
         context_tag,
-        ids,
+        ids: Cow::Borrowed(ids),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

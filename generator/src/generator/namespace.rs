@@ -1,5 +1,6 @@
 #![allow(clippy::cognitive_complexity, clippy::option_as_ref_deref, clippy::too_many_arguments)]
 
+use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry as HashMapEntry;
 use std::rc::Rc;
@@ -73,6 +74,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#![allow(clippy::trivially_copy_pass_by_ref)]");
         outln!(out, "#![allow(clippy::eq_op)]");
         outln!(out, "");
+        outln!(out, "#[allow(unused_imports)]");
+        outln!(out, "use std::borrow::Cow;");
         outln!(out, "use std::convert::TryFrom;");
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use std::convert::TryInto;");
@@ -267,7 +270,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             let reply_struct_name = format!("{}Reply", name);
             let reply_fields = reply.fields.borrow();
             let mut reply_derives = Derives::all();
-            self.filter_derives_for_fields(&mut reply_derives, &*reply_fields);
+            self.filter_derives_for_fields(&mut reply_derives, &*reply_fields, false);
             self.emit_struct_type(
                 &reply_struct_name,
                 &name,
@@ -391,7 +394,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
 
         let mut derives = Derives::all();
-        self.filter_derives_for_fields(&mut derives, &request_def.fields.borrow());
+        self.filter_derives_for_fields(&mut derives, &request_def.fields.borrow(), true);
         let derives = derives.to_list();
         if !derives.is_empty() {
             outln!(out, "#[derive({})]", derives.join(", "));
@@ -416,7 +419,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             for (member_name, member_type) in gathered.request_args.iter() {
                 outln!(out, "pub {name}: {type},",
                        name=member_name,
-                       type=member_type);
+                       type=member_type.as_field());
             }
         });
         if has_members {
@@ -603,35 +606,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             let rust_field_name = to_rust_variable_name(&list_field.name);
                             let list_length = list_field.length();
                             if self.rust_value_type_is_u8(&list_field.element_type) {
-                                next_slice = Some(format!("(&self.{}[..])", rust_field_name));
+                                if list_length.is_some() {
+                                    // If this is a fixed length array we need to erase its length.
+                                    next_slice = Some(format!("(&self.{}[..])", rust_field_name));
+                                } else {
+                                    next_slice = Some(format!("self.{}", rust_field_name));
+                                }
                             } else {
-                                let element_size = list_field.element_type.size();
-                                if let (Some(list_length), Some(element_size)) =
-                                    (list_length, element_size)
-                                {
-                                    for i in 0..list_length {
-                                        let src_value = format!("{}[{}]", rust_field_name, i);
-                                        let bytes_name = postfix_var_name(
-                                            &rust_field_name,
-                                            &format!("{}_bytes", i),
-                                        );
-                                        outln!(
-                                            out,
-                                            "let {} = {};",
-                                            bytes_name,
-                                            self.emit_value_serialize(
-                                                &list_field.element_type,
-                                                &src_value,
-                                                false,
-                                            ),
-                                        );
-                                        for j in 0..element_size {
-                                            fixed_fields_bytes
-                                                .push(format!("{}[{}]", bytes_name, j));
-                                        }
-                                    }
-                                } else if self.can_use_simple_list_parsing(&list_field.element_type)
-                                {
+                                assert_eq!(
+                                    list_length, None,
+                                    "fixed length arrays in requests must be [u8; N]"
+                                );
+                                if self.can_use_simple_list_parsing(&list_field.element_type) {
                                     let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                     outln!(
                                         tmp_out,
@@ -921,7 +907,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             args.push_str(", ");
             args.push_str(arg_name);
             args.push_str(": ");
-            args.push_str(arg_type);
+            args.push_str(&arg_type.as_argument());
         }
 
         if let Some(ref doc) = request_def.doc {
@@ -951,8 +937,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             let members_start = if has_members { " {" } else { ";" };
             outln!(out, "let request0 = {}Request{}", name, members_start);
             out.indented(|out| {
-                for (arg_name, _) in gathered.args.iter() {
-                    outln!(out, "{},", arg_name);
+                for (arg_name, arg_type) in gathered.args.iter() {
+                    if arg_type.needs_cow() {
+                        outln!(out, "{name}: Cow::Borrowed({name}),", name = arg_name);
+                    } else {
+                        outln!(out, "{name},", name = arg_name);
+                    }
                 }
             });
             if has_members {
@@ -1038,7 +1028,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             args.push_str(", ");
             args.push_str(arg_name);
             args.push_str(": ");
-            args.push_str(arg_type);
+            args.push_str(&arg_type.as_argument());
         }
 
         let func_name_prefix = if ns.ext_info.is_some() {
@@ -1118,7 +1108,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let fields = event_full_def.fields.borrow();
         let mut derives = Derives::all();
-        self.filter_derives_for_fields(&mut derives, &*fields);
+        self.filter_derives_for_fields(&mut derives, &*fields, false);
 
         self.emit_struct_type(
             &full_name,
@@ -1198,7 +1188,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let fields = error_full_def.fields.borrow();
         let mut derives = Derives::all();
-        self.filter_derives_for_fields(&mut derives, &*fields);
+        self.filter_derives_for_fields(&mut derives, &*fields, false);
 
         self.emit_struct_type(
             &full_name,
@@ -2428,7 +2418,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let case_fields = case.fields.borrow();
                 let ext_params = case.external_params.borrow();
 
-                self.filter_derives_for_fields(&mut derives, &*case_fields);
+                self.filter_derives_for_fields(&mut derives, &*case_fields, false);
                 self.emit_struct_type(
                     &type_name,
                     &type_name,
@@ -2453,7 +2443,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let mut derives = Derives::all();
         for case in switch.cases.iter() {
-            self.filter_derives_for_fields(&mut derives, &*case.fields.borrow());
+            self.filter_derives_for_fields(&mut derives, &*case.fields.borrow(), false);
         }
         let mut derives = derives.to_list();
         if switch.kind == xcbdefs::SwitchKind::BitCase {
@@ -4539,20 +4529,26 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         );
                         let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
                         let where_ = format!("Into<{}>", rust_field_type);
-                        args.push((rust_field_name.clone(), generic_param.clone()));
-                        request_args.push((rust_field_name, rust_field_type));
+                        args.push((rust_field_name.clone(), Type::Simple(generic_param.clone())));
+                        request_args.push((rust_field_name, Type::Simple(rust_field_type)));
                         generics.push((generic_param, where_));
                         preamble.push(preamble_part);
                     } else {
-                        args.push((rust_field_name.clone(), rust_field_type.clone()));
-                        request_args.push((rust_field_name, rust_field_type));
+                        args.push((
+                            rust_field_name.clone(),
+                            Type::Simple(rust_field_type.clone()),
+                        ));
+                        request_args.push((rust_field_name, Type::Simple(rust_field_type)));
                     }
                 }
                 xcbdefs::FieldDef::List(list_field) => {
                     if is_send_event && list_field.name == "event" {
                         let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
-                        args.push((list_field.name.clone(), generic_param.clone()));
-                        request_args.push((list_field.name.clone(), "&'input [u8; 32]".into()));
+                        args.push((list_field.name.clone(), Type::Simple(generic_param.clone())));
+                        request_args.push((
+                            list_field.name.clone(),
+                            Type::Simple("&'input [u8; 32]".into()),
+                        ));
                         generics.push((generic_param, String::from("Into<[u8; 32]>")));
                         preamble.push(String::from("let event: [u8; 32] = event.into();"));
                         preamble.push(String::from("let event = &event;"));
@@ -4561,10 +4557,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         let element_type =
                             self.field_value_type_to_rust_type(&list_field.element_type);
                         let rust_field_name = to_rust_variable_name(&list_field.name);
-                        let rust_field_type = if let Some(list_len) = list_field.length() {
-                            format!("&'input [{}; {}]", element_type, list_len)
+                        let rust_field_type = if self
+                            .rust_value_type_is_u8(&list_field.element_type)
+                        {
+                            if let Some(list_len) = list_field.length() {
+                                Type::Simple(format!("&'input [{}; {}]", element_type, list_len))
+                            } else {
+                                Type::Simple(format!("&'input [{}]", element_type))
+                            }
                         } else {
-                            format!("&'input [{}]", element_type)
+                            assert_eq!(
+                                list_field.length(),
+                                None,
+                                "Fixed length arrays of types other than u8 are not implemented"
+                            );
+
+                            Type::VariableOwnership(format!("[{}]", element_type))
                         };
                         args.push((rust_field_name.clone(), rust_field_type.clone()));
                         request_args.push((rust_field_name, rust_field_type));
@@ -4573,8 +4581,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
                 xcbdefs::FieldDef::Switch(switch_field) => {
                     let rust_field_name = to_rust_variable_name(&switch_field.name);
-                    let rust_field_type =
-                        format!("&'input {}Aux", to_rust_type_name(&request_def.name));
+                    let rust_field_type = Type::VariableOwnership(format!(
+                        "{}Aux",
+                        to_rust_type_name(&request_def.name)
+                    ));
                     args.push((rust_field_name.clone(), rust_field_type.clone()));
                     request_args.push((rust_field_name, rust_field_type));
                     needs_lifetime = true;
@@ -4586,16 +4596,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         "let {}: RawFdContainer = {}.into();",
                         rust_field_name, rust_field_name,
                     );
-                    args.push((rust_field_name.clone(), generic_param.clone()));
-                    request_args.push((rust_field_name, "RawFdContainer".into()));
+                    args.push((rust_field_name.clone(), Type::Simple(generic_param.clone())));
+                    request_args.push((rust_field_name, Type::Simple("RawFdContainer".into())));
                     generics.push((generic_param, "Into<RawFdContainer>".into()));
                     preamble.push(preamble_part);
                     single_fds.push(fd_field.name.clone());
                 }
                 xcbdefs::FieldDef::FdList(fd_list_field) => {
                     let rust_field_name = to_rust_variable_name(&fd_list_field.name);
-                    args.push((rust_field_name.clone(), "Vec<RawFdContainer>".into()));
-                    request_args.push((rust_field_name, "Vec<RawFdContainer>".into()));
+                    args.push((
+                        rust_field_name.clone(),
+                        Type::Simple("Vec<RawFdContainer>".into()),
+                    ));
+                    request_args
+                        .push((rust_field_name, Type::Simple("Vec<RawFdContainer>".into())));
                     fd_lists.push(fd_list_field.name.clone());
                 }
                 xcbdefs::FieldDef::Expr(_) => unreachable!(),
@@ -4822,7 +4836,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         } else {
             drop(caches);
             let mut derives = Derives::all();
-            self.filter_derives_for_fields(&mut derives, &*struct_def.fields.borrow());
+            self.filter_derives_for_fields(&mut derives, &*struct_def.fields.borrow(), false);
             self.caches.borrow_mut().derives.insert(id, derives);
             derives
         }
@@ -4830,7 +4844,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     /// Clears traits from `derives` that cannot be implemented by
     /// `fields`.
-    fn filter_derives_for_fields(&self, derives: &mut Derives, fields: &[xcbdefs::FieldDef]) {
+    fn filter_derives_for_fields(
+        &self,
+        derives: &mut Derives,
+        fields: &[xcbdefs::FieldDef],
+        will_use_cows: bool,
+    ) {
         for field in fields.iter() {
             match field {
                 xcbdefs::FieldDef::Pad(_) => {}
@@ -4850,10 +4869,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         // Variable length list, represented as Vec
                         derives.copy = false;
                     }
+                    if will_use_cows {
+                        // Lists will all be CoWs which are not Copy.
+                        derives.copy = false;
+                    }
                 }
                 xcbdefs::FieldDef::Switch(switch_field) => {
                     for case in switch_field.cases.iter() {
-                        self.filter_derives_for_fields(derives, &*case.fields.borrow());
+                        self.filter_derives_for_fields(
+                            derives,
+                            &*case.fields.borrow(),
+                            will_use_cows,
+                        );
+                    }
+                    if will_use_cows {
+                        // Switches will be CoWs for the Aux struct so it cannot be Copy.
+                        derives.copy = false;
                     }
                 }
                 xcbdefs::FieldDef::Fd(_) | xcbdefs::FieldDef::FdList(_) => {
@@ -5152,6 +5183,43 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, De
     deducible_fields
 }
 
+/// A helper to represent either simple or borrowed types.
+#[derive(Debug, Clone)]
+enum Type {
+    /// This type is simple can we can just use the string provided.
+    Simple(String),
+    /// This type has a lifetime and needs to be a borrow or a Cow, depending
+    /// on the context. Note that a type that is *always* a borrow is
+    /// `Simple`.
+    VariableOwnership(String),
+}
+
+impl Type {
+    /// Does this type need a Cow?
+    fn needs_cow(&self) -> bool {
+        match self {
+            Type::Simple(_) => false,
+            Type::VariableOwnership(_) => true,
+        }
+    }
+
+    /// Render this type in a form suitable for function arguments.
+    fn as_argument(&self) -> Cow<'_, str> {
+        match self {
+            Type::Simple(ref type_) => type_.into(),
+            Type::VariableOwnership(ref type_) => format!("&'input {}", type_).into(),
+        }
+    }
+
+    /// Render this type in a form suitable for struct fields.
+    fn as_field(&self) -> Cow<'_, str> {
+        match self {
+            Type::Simple(ref type_) => type_.into(),
+            Type::VariableOwnership(ref type_) => format!("Cow<'input, {}>", type_).into(),
+        }
+    }
+}
+
 /// Some information about the fields of a request.
 struct GatheredRequestFields {
     reply_has_fds: bool,
@@ -5162,11 +5230,11 @@ struct GatheredRequestFields {
     needs_lifetime: bool,
     /// Function arguments
     /// `(name, type)`
-    args: Vec<(String, String)>,
+    args: Vec<(String, Type)>,
     /// Request arguments
     /// The type here has been converted as necessary.
     /// `(name, type)`
-    request_args: Vec<(String, String)>,
+    request_args: Vec<(String, Type)>,
     /// Generic type parameters
     ///
     /// `(name, where clause)`

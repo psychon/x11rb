@@ -8,6 +8,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
 
+#[allow(unused_imports)]
+use std::borrow::Cow;
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
