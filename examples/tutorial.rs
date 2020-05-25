@@ -1305,8 +1305,8 @@ fn example7() -> Result<(), Box<dyn Error>> {
         match event {
             Event::Expose(event) => {
                 println!(
-                    "Window {} exposed. Region to be redrawn at location ({},{}) \
-                         with dimensions ({},{})",
+                    "Window {} exposed. Region to be redrawn at location ({},{}) with dimensions \
+                     ({},{})",
                     event.window, event.x, event.y, event.width, event.height
                 );
             }
