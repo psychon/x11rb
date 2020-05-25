@@ -59,8 +59,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "Got a Present ConfigureNotify event for event ID 0x{:x} and window 0x{:x}.",
         event.event, event.window
     );
-    println!("x={}, y={}, width={}, height={}, off_x={}, off_y={}, pixmap_width={}, pixmap_height={}, pixmap_flags={:x}",
-             event.x, event.y, event.width, event.height, event.off_x, event.off_y, event.pixmap_width, event.pixmap_height, event.pixmap_flags);
+    println!(
+        "x={}, y={}, width={}, height={}, off_x={}, off_y={}, pixmap_width={}, pixmap_height={}, \
+         pixmap_flags={:x}",
+        event.x,
+        event.y,
+        event.width,
+        event.height,
+        event.off_x,
+        event.off_y,
+        event.pixmap_width,
+        event.pixmap_height,
+        event.pixmap_flags,
+    );
     assert_eq!(
         (20, 10, 0),
         (event.pixmap_width, event.pixmap_height, event.pixmap_flags)

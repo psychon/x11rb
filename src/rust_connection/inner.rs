@@ -205,7 +205,10 @@ impl ConnectionInner {
                     // FIXME Turn this into some kind of "permanent error state" (so that
                     // everything fails with said error) instead of using a panic (this panic will
                     // likely poison some Mutex and produce an error state that way).
-                    panic!("FIXME: The server sent us too few FDs. The connection is now unusable since we will never be sure again which FD belongs to which reply.");
+                    panic!(
+                        "FIXME: The server sent us too few FDs. The connection is now unusable \
+                         since we will never be sure again which FD belongs to which reply."
+                    );
                 }
                 self.pending_fds.drain(..num_fds).collect()
             } else {

@@ -129,7 +129,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 out,
                 "/// by this build of x11rb. For most things, it does not make sense to use this",
             );
-            outln!(out, "/// information. If you need to send a `QueryVersion`, it is recommended to instead");
+            outln!(
+                out,
+                "/// information. If you need to send a `QueryVersion`, it is recommended to \
+                 instead"
+            );
             outln!(
                 out,
                 "/// send the maximum version of the extension that you need.",
@@ -427,9 +431,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             name = name
         );
         out.indented(|out| {
-            outln!(out, "/// Serialize this request into bytes for the provided connection");
-            outln!(out, "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>",
-                   lifetime=serialize_lifetime_block);
+            outln!(
+                out,
+                "/// Serialize this request into bytes for the provided connection",
+            );
+            outln!(
+                out,
+                "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> \
+                 Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>",
+                lifetime = serialize_lifetime_block,
+            );
             outln!(out, "where");
             outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
             outln!(out, "{{");
@@ -437,7 +448,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 if ns.ext_info.is_some() {
                     outln!(
                         out,
-                        "let extension_information = conn.extension_information(X11_EXTENSION_NAME)?",
+                        "let extension_information = \
+                         conn.extension_information(X11_EXTENSION_NAME)?",
                     );
                     outln!(
                         out.indent(),
@@ -487,7 +499,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let mut next_slice = None;
 
                     let mut tmp_out = Output::new();
-                    self.emit_assert_for_field_serialize(field, deducible_fields, "self.", &mut tmp_out);
+                    self.emit_assert_for_field_serialize(
+                        field,
+                        deducible_fields,
+                        "self.",
+                        &mut tmp_out,
+                    );
                     match field {
                         xcbdefs::FieldDef::Pad(pad_field) => match pad_field.kind {
                             xcbdefs::PadKind::Bytes(bytes) => {
@@ -515,12 +532,17 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     fixed_fields_bytes
                                         .push(String::from("extension_information.major_opcode"));
                                 } else {
-                                    fixed_fields_bytes.push(format!("{}_REQUEST",
-                                                                    super::camel_case_to_upper_snake(&name)));
+                                    fixed_fields_bytes.push(format!(
+                                        "{}_REQUEST",
+                                        super::camel_case_to_upper_snake(&name),
+                                    ));
                                 }
                             } else if normal_field.name == "minor_opcode" {
                                 assert!(ns.ext_info.is_some());
-                                fixed_fields_bytes.push(format!("{}_REQUEST", super::camel_case_to_upper_snake(&name)));
+                                fixed_fields_bytes.push(format!(
+                                    "{}_REQUEST",
+                                    super::camel_case_to_upper_snake(&name),
+                                ));
                             } else if normal_field.name == "length" {
                                 // the actual length will be calculated later
                                 fixed_fields_bytes.push(String::from("0"));
@@ -559,7 +581,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         bytes_name,
                                         self.emit_value_serialize(
                                             &normal_field.type_,
-                                        &field_name,
+                                            &field_name,
                                             was_deduced,
                                         ),
                                     );
@@ -589,8 +611,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 {
                                     for i in 0..list_length {
                                         let src_value = format!("{}[{}]", rust_field_name, i);
-                                        let bytes_name =
-                                            postfix_var_name(&rust_field_name, &format!("{}_bytes", i));
+                                        let bytes_name = postfix_var_name(
+                                            &rust_field_name,
+                                            &format!("{}_bytes", i),
+                                        );
                                         outln!(
                                             out,
                                             "let {} = {};",
@@ -602,10 +626,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                             ),
                                         );
                                         for j in 0..element_size {
-                                            fixed_fields_bytes.push(format!("{}[{}]", bytes_name, j));
+                                            fixed_fields_bytes
+                                                .push(format!("{}[{}]", bytes_name, j));
                                         }
                                     }
-                                } else if self.can_use_simple_list_parsing(&list_field.element_type) {
+                                } else if self.can_use_simple_list_parsing(&list_field.element_type)
+                                {
                                     let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                     outln!(
                                         tmp_out,
@@ -688,7 +714,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 out,
                                 "let {} = {};",
                                 bytes_name,
-                                self.emit_value_serialize(&expr_field.type_, &rust_field_name, false),
+                                self.emit_value_serialize(
+                                    &expr_field.type_,
+                                    &rust_field_name,
+                                    false,
+                                ),
                             );
                             for i in 0..field_size {
                                 fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
@@ -720,7 +750,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             } else {
                                 ""
                             };
-                            outln!(out, "let {}request{} = vec![", maybe_mut, num_fixed_len_slices);
+                            outln!(
+                                out,
+                                "let {}request{} = vec![",
+                                maybe_mut,
+                                num_fixed_len_slices,
+                            );
                             for byte in fixed_fields_bytes.iter() {
                                 outln!(out.indent(), "{},", byte);
                             }
@@ -783,14 +818,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 );
 
                 let fds_arg = if gathered.fd_lists.is_empty() {
-                    format!("vec![{}]", gathered.single_fds.iter().enumerate().map(|(i, single_fd)| {
-                        let sep = if i == 0 {
-                            ""
-                        } else {
-                            ", "
-                        };
-                        format!("{}self.{}", sep, single_fd)
-                    }).collect::<String>())
+                    format!(
+                        "vec![{}]",
+                        gathered
+                            .single_fds
+                            .iter()
+                            .enumerate()
+                            .map(|(i, single_fd)| {
+                                let sep = if i == 0 { "" } else { ", " };
+                                format!("{}self.{}", sep, single_fd)
+                            })
+                            .collect::<String>(),
+                    )
                 } else if gathered.fd_lists.len() == 1 && gathered.single_fds.is_empty() {
                     format!("self.{}", gathered.fd_lists[0])
                 } else {
@@ -821,7 +860,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     slices_arg.push_str(request_slices);
                 }
 
-                outln!(out, "Ok((vec![{slices}], {fds}))", slices=slices_arg, fds=fds_arg);
+                outln!(
+                    out,
+                    "Ok((vec![{slices}], {fds}))",
+                    slices = slices_arg,
+                    fds = fds_arg,
+                );
             });
             outln!(out, "}}");
         });
@@ -1740,7 +1784,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let largest_type = larger_types.last().unwrap();
                     outln!(
                         out,
-                        "fn try_from(value: impl Into<{}>, value_for_zero: Self) -> Result<Self, ParseError> {{",
+                        "fn try_from(value: impl Into<{}>, value_for_zero: Self) -> Result<Self, \
+                         ParseError> {{",
                         largest_type,
                     );
                     outln!(out.indent(), "let value = value.into();");
@@ -1964,8 +2009,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     .collect::<Vec<_>>();
                 outln!(
                     out.indent(),
-                    "pub fn try_parse(remaining: &[u8], {}) \
-                    -> Result<(Self, &[u8]), ParseError> {{",
+                    "pub fn try_parse(remaining: &[u8], {}) -> Result<(Self, &[u8]), ParseError> \
+                     {{",
                     p.join(", "),
                 );
             } else {
@@ -2109,20 +2154,44 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 out.indented(|out| {
                     outln!(out, "/// Get the value of the `{}` field.", &name);
                     outln!(out, "///");
-                    outln!(out, "/// The `{}` field is used as the length field of the `{}` field.", &name, &list_name);
-                    outln!(out, "/// This function computes the field's value again based on the length of the list.");
+                    outln!(
+                        out,
+                        "/// The `{}` field is used as the length field of the `{}` field.",
+                        &name,
+                        &list_name,
+                    );
+                    outln!(
+                        out,
+                        "/// This function computes the field's value again based on the length \
+                         of the list.",
+                    );
                     outln!(out, "///");
                     outln!(out, "/// # Panics");
                     outln!(out, "///");
-                    outln!(out, "/// Panics if the value cannot be represented in the target type. This");
-                    outln!(out, "/// cannot happen with values of the struct received from the X11 server.");
-                    outln!(out, "pub fn {}(&self) -> {} {{", to_rust_variable_name(&name), field_type);
+                    outln!(
+                        out,
+                        "/// Panics if the value cannot be represented in the target type. This",
+                    );
+                    outln!(
+                        out,
+                        "/// cannot happen with values of the struct received from the X11 server.",
+                    );
+                    outln!(
+                        out,
+                        "pub fn {}(&self) -> {} {{",
+                        to_rust_variable_name(&name),
+                        field_type
+                    );
                     out.indented(|out| {
                         outln!(out, "self.{}.len()", to_rust_variable_name(&list_name));
                         match op {
-                            DeducibleLengthFieldOp::None => {},
-                            DeducibleLengthFieldOp::Mul(n) => outln!(out.indent(), ".checked_mul({}).unwrap()", n),
-                            DeducibleLengthFieldOp::Div(n) => outln!(out.indent(), ".checked_div({}).unwrap()", n),
+                            DeducibleLengthFieldOp::None => {}
+                            DeducibleLengthFieldOp::Mul(n) => {
+                                outln!(out.indent(), ".checked_mul({}).unwrap()", n);
+                            }
+                            DeducibleLengthFieldOp::Div(n) => {
+                                outln!(out.indent(), ".checked_div({}).unwrap()", n);
+                            }
                         }
                         outln!(out.indent(), ".try_into().unwrap()");
                     });
@@ -3211,7 +3280,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if let Some(list_length) = list_field.length() {
                         outln!(
                             out,
-                            "let ({}, remaining) = crate::x11_utils::parse_u8_list(remaining, {})?;",
+                            "let ({}, remaining) = crate::x11_utils::parse_u8_list(remaining, \
+                             {})?;",
                             rust_field_name,
                             list_length,
                         );
@@ -3225,9 +3295,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     } else if let Some(ref length_expr) = list_field.length_expr {
                         outln!(
                             out,
-                            "let ({}, remaining) = crate::x11_utils\
-                            ::parse_u8_list(remaining, \
-                            {}.try_into().or(Err(ParseError::ParseError))?)?;",
+                            "let ({}, remaining) = crate::x11_utils::parse_u8_list(remaining, \
+                             {}.try_into().or(Err(ParseError::ParseError))?)?;",
                             rust_field_name,
                             self.expr_to_str(
                                 length_expr,
@@ -3255,9 +3324,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         self.type_to_rust_type(list_field.element_type.type_.def.get().unwrap());
                     outln!(
                         out,
-                        "let ({}, remaining) = crate::x11_utils\
-                        ::parse_list::<{}>(remaining, \
-                        {}.try_into().or(Err(ParseError::ParseError))?)?;",
+                        "let ({}, remaining) = crate::x11_utils::parse_list::<{}>(remaining, \
+                         {}.try_into().or(Err(ParseError::ParseError))?)?;",
                         rust_field_name,
                         rust_element_type,
                         self.expr_to_str(
@@ -3291,7 +3359,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(
                             out,
                             "let list_length = \
-                            usize::try_from({}).or(Err(ParseError::ParseError))?;",
+                             usize::try_from({}).or(Err(ParseError::ParseError))?;",
                             self.expr_to_str(
                                 length_expr,
                                 to_rust_variable_name,
@@ -3710,9 +3778,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     );
                     outln!(
                         out,
-                        "assert_eq!({}{}.len(), \
-                        usize::try_from({}).unwrap(), \
-                        \"`{}` has an incorrect length\");",
+                        "assert_eq!({}{}.len(), usize::try_from({}).unwrap(), \"`{}` has an \
+                         incorrect length\");",
                         obj_prefix,
                         rust_field_name,
                         length_expr_str,
@@ -3746,9 +3813,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     );
                     outln!(
                         out,
-                        "assert_eq!({}{}.len(), \
-                        usize::try_from({}).unwrap(), \
-                        \"`{}` has an incorrect length\");",
+                        "assert_eq!({}{}.len(), usize::try_from({}).unwrap(), \"`{}` has an \
+                         incorrect length\");",
                         obj_prefix,
                         rust_field_name,
                         length_expr_str,
@@ -3783,8 +3849,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 self.expr_to_str(&switch.expr, to_rust_variable_name, true, true, false);
             outln!(
                 out,
-                "assert_eq!(self.switch_expr(), {}, \
-                \"switch `{}` has an inconsistent discriminant\");",
+                "assert_eq!(self.switch_expr(), {}, \"switch `{}` has an inconsistent \
+                 discriminant\");",
                 switch_expr_str,
                 rust_field_name,
             );
@@ -3849,15 +3915,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             format!("{}::try_from({}).expect(\"{}\")", rust_type, list_len, msg)
                         }
                         DeducibleLengthFieldOp::Mul(n) => format!(
-                            "{}::try_from({}).ok()\
-                            .and_then(|len| len.checked_mul({})).expect(\"{}\")",
-                            rust_type, list_len, n, msg
+                            "{}::try_from({}).ok().and_then(|len| \
+                             len.checked_mul({})).expect(\"{}\")",
+                            rust_type, list_len, n, msg,
                         ),
                         DeducibleLengthFieldOp::Div(n) => {
                             outln!(
                                 out,
-                                "assert_eq!({} % {}, 0, \
-                                \"`{}` has an incorrect length, must be a multiple of {}\");",
+                                "assert_eq!({} % {}, 0, \"`{}` has an incorrect length, must be a \
+                                 multiple of {}\");",
                                 list_len,
                                 n,
                                 rust_list_field_name,
@@ -4269,7 +4335,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 } else {
                     format!(
                         "{}.iter().try_fold(0u32, |acc, x| \
-                        acc.checked_add({}).ok_or(ParseError::ParseError))?",
+                         acc.checked_add({}).ok_or(ParseError::ParseError))?",
                         field_value,
                         self.expr_to_str_impl(
                             &sum_of_expr.operand,
