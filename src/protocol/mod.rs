@@ -188,7 +188,7 @@ pub enum Error {
 
 impl Error {
     /// Parse a generic X11 error into a concrete error type.
-    #[allow(clippy::cognitive_complexity)]
+    #[allow(clippy::cognitive_complexity, clippy::match_single_binding)]
     pub fn parse(
         error: &[u8],
         ext_info_provider: &dyn ExtInfoProvider,
@@ -905,7 +905,7 @@ pub enum Event {
 
 impl Event {
     /// Parse a generic X11 event into a concrete event type.
-    #[allow(clippy::cognitive_complexity)]
+    #[allow(clippy::cognitive_complexity, clippy::match_single_binding)]
     pub fn parse(
         event: &[u8],
         ext_info_provider: &dyn ExtInfoProvider,
@@ -1093,6 +1093,7 @@ impl Event {
         }
     }
 
+    #[allow(clippy::match_single_binding)]
     fn from_generic_event(
         event: &[u8],
         ext_info_provider: &dyn ExtInfoProvider,
