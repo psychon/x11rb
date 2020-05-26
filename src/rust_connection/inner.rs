@@ -2,7 +2,7 @@
 
 use std::collections::VecDeque;
 
-use super::{BufWithFds, RawEventAndSeqNumber, ReplyFDKind};
+use super::{BufWithFds, RawEventAndSeqNumber, ReplyFDKind, WriteBuffer};
 use crate::connection::{DiscardMode, SequenceNumber};
 use crate::utils::RawFdContainer;
 
@@ -42,6 +42,9 @@ pub(crate) struct ConnectionInner {
 
     // FDs that were read, but not yet assigned to any reply
     pending_fds: VecDeque<RawFdContainer>,
+
+    // Buffer used for writing into the stream.
+    pub(super) write_buffer: WriteBuffer,
 }
 
 impl ConnectionInner {
@@ -58,6 +61,7 @@ impl ConnectionInner {
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
             pending_fds: VecDeque::new(),
+            write_buffer: WriteBuffer::new(),
         }
     }
 

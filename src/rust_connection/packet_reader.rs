@@ -59,21 +59,6 @@ impl PacketReader {
         }
     }
 
-    /// Block and read at least one packet from stream and read as many as
-    /// possible without blocking.
-    pub(crate) fn read_at_least_one_packet(
-        &mut self,
-        stream: &impl Stream,
-        out_packets: &mut Vec<Vec<u8>>,
-        fd_storage: &mut Vec<RawFdContainer>,
-    ) -> Result<()> {
-        while out_packets.is_empty() {
-            stream.poll(true, false)?;
-            self.try_read_packets(stream, out_packets, fd_storage)?;
-        }
-        Ok(())
-    }
-
     /// Reads as many packets as possible from stream reader without blocking.
     pub(crate) fn try_read_packets(
         &mut self,

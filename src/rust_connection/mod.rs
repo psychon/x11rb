@@ -70,8 +70,9 @@ pub(crate) enum BlockingMode {
 pub struct RustConnection<S: Stream = DefaultStream> {
     inner: Mutex<inner::ConnectionInner>,
     stream: S,
+    // This mutex is only locked with `try_lock` (never blocks), so a simpler
+    // lock based only on a atomic variable would be more efficient.
     packet_reader: Mutex<PacketReader>,
-    write_buffer: Mutex<WriteBuffer>,
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
@@ -89,20 +90,19 @@ pub struct RustConnection<S: Stream = DefaultStream> {
 // - extension_manager
 // - id_allocator
 //
-// Next level is 'write_buffer'. Anything wanting to write something to the X11 server has to
-// lock this mutex. The mutex has to be locked until writing the request if finished. This is
-// necessary to ensure correct sync insertion without threads interfering with each other. At
-// the same time, threads not wanting to write anything should not be blocked.
-//
 // Then comes `inner`. This mutex protects the information about in-flight requests and packets
-// that were already read from the connection but not given out to callers. This mutex should only
-// be locked for short time.
+// that were already read from the connection but not given out to callers. This mutex also
+// contains the write buffer and has to be locked in order to write something to the X11 server.
+// In this case, the mutex has to be kept locked until writing the request has finished. This is
+// necessary to ensure correct sync insertion without threads interfering with each other. When
+// this mutex is locked for operations other than writing, the lock should be kept only for a
+// short time.
 //
-// The inner level is `read`. This mutex is only locked when `inner` is already held and only with
-// `try_lock()`. This ensures that there is only one reader. While actually reading, the lock on
-// `inner` is released so that other threads can make progress. If more threads want to read while
-// `read` is already locked, they sleep on `reader_condition`. The actual reader will then notify
-// this condition variable once it is done reading.
+// The inner level is `packet_reader`. This mutex is only locked when `inner` is already held and
+// only with `try_lock()`. This ensures that there is only one reader. While actually reading, the
+// lock on `inner` is released so that other threads can make progress. If more threads want to
+// read while `read` is already locked, they sleep on `reader_condition`. The actual reader will
+// then notify this condition variable once it is done reading.
 //
 // The condition variable is necessary since one thread may read packets that another thread waits
 // for. Thus, after reading something from the connection, all threads that wait for something have
@@ -193,7 +193,6 @@ impl<S: Stream> RustConnection<S> {
             inner: Mutex::new(inner),
             stream,
             packet_reader: Mutex::new(PacketReader::new()),
-            write_buffer: Mutex::new(WriteBuffer::new()),
             reader_condition: Condvar::new(),
             id_allocator: Mutex::new(allocator),
             setup,
@@ -215,18 +214,17 @@ impl<S: Stream> RustConnection<S> {
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
 
-        let mut write_buffer = self.write_buffer.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
 
         loop {
             match inner.send_request(kind) {
                 Some(seqno) => {
                     // Now actually send the buffers
-                    let _inner = self.write_all_vectored(inner, &mut write_buffer, bufs, fds)?;
+                    let _inner = self.write_all_vectored(inner, bufs, fds)?;
                     return Ok(seqno);
                 }
                 None => {
-                    inner = self.send_sync(inner, &mut *write_buffer)?;
+                    inner = self.send_sync(inner)?;
                 }
             }
         }
@@ -240,7 +238,6 @@ impl<S: Stream> RustConnection<S> {
     fn send_sync<'a>(
         &'a self,
         mut inner: MutexGuardInner<'a>,
-        write_buffer: &mut WriteBuffer,
     ) -> Result<MutexGuardInner<'a>, std::io::Error> {
         let length = 1u16.to_ne_bytes();
         let request = [
@@ -254,8 +251,7 @@ impl<S: Stream> RustConnection<S> {
             .send_request(ReplyFDKind::ReplyWithoutFDs)
             .expect("Sending a HasResponse request should not be blocked by syncs");
         inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
-        let inner =
-            self.write_all_vectored(inner, write_buffer, &[IoSlice::new(&request)], Vec::new())?;
+        let inner = self.write_all_vectored(inner, &[IoSlice::new(&request)], Vec::new())?;
 
         Ok(inner)
     }
@@ -265,7 +261,6 @@ impl<S: Stream> RustConnection<S> {
     fn write_all_vectored<'a>(
         &'a self,
         mut inner: MutexGuardInner<'a>,
-        write_buffer: &mut WriteBuffer,
         mut bufs: &[IoSlice<'_>],
         mut fds: Vec<RawFdContainer>,
     ) -> std::io::Result<MutexGuardInner<'a>> {
@@ -273,9 +268,13 @@ impl<S: Stream> RustConnection<S> {
         while !partial_buf.is_empty() || !bufs.is_empty() || !fds.is_empty() {
             self.stream.poll(true, true)?;
             let write_result = if !partial_buf.is_empty() {
-                write_buffer.write(&self.stream, partial_buf, &mut fds)
+                inner
+                    .write_buffer
+                    .write(&self.stream, partial_buf, &mut fds)
             } else {
-                write_buffer.write_vectored(&self.stream, bufs, &mut fds)
+                inner
+                    .write_buffer
+                    .write_vectored(&self.stream, bufs, &mut fds)
             };
             match write_result {
                 Ok(0) => {
@@ -322,11 +321,10 @@ impl<S: Stream> RustConnection<S> {
     fn flush_impl<'a>(
         &'a self,
         mut inner: MutexGuardInner<'a>,
-        write_buffer: &mut WriteBuffer,
     ) -> std::io::Result<MutexGuardInner<'a>> {
-        while write_buffer.needs_flush() {
+        while inner.write_buffer.needs_flush() {
             self.stream.poll(true, true)?;
-            match write_buffer.flush(&self.stream) {
+            match inner.write_buffer.flush(&self.stream) {
                 // Flush completed
                 Ok(()) => break,
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
@@ -347,6 +345,11 @@ impl<S: Stream> RustConnection<S> {
     /// inner data while waiting for a packet so that other threads can make progress. For this
     /// reason, you need to pass in a `MutexGuard` to be dropped. This function locks the mutex
     /// again and returns a new `MutexGuard`.
+    ///
+    /// Note: If `mode` is `BlockingMode::Blocking`, the lock on `inner` will be temporarily
+    /// released. While sending a request, `inner` must be kept locked to avoid sending the data
+    /// of different requests interleaved. So, when `read_packet_and_enqueue` is called as part
+    /// of a write, it must always be done with `mode` set to `BlockingMode::NonBlocking`.
     fn read_packet_and_enqueue<'a>(
         &'a self,
         mut inner: MutexGuardInner<'a>,
@@ -363,7 +366,7 @@ impl<S: Stream> RustConnection<S> {
 
                 // 1.1. Someone else is reading (other thread is at 2.2);
                 // wait for it. `Condvar::wait` will unlock `inner`, so
-                // the other thread can relock `inner` at 2.3 (and to allow
+                // the other thread can relock `inner` at 2.1.3 (and to allow
                 // other threads to arrive 0.1).
                 //
                 // When `wait` finishes, other thread has enqueued a packet,
@@ -373,43 +376,46 @@ impl<S: Stream> RustConnection<S> {
             }
             Err(TryLockError::Poisoned(e)) => panic!("{}", e),
             Ok(mut packet_reader) => {
-                // 2.1. Drop inner so other threads can use it while
-                // `read_packet` is blocking.
-                drop(inner);
-
                 // Make sure sleeping readers are woken up when we return
                 // (Even in case of errors)
-                let _notify = NotifyOnDrop(&self.reader_condition);
+                let notify_on_drop = NotifyOnDrop(&self.reader_condition);
 
-                // 2.2. Read packets, possibly blocking on the first one.
-                let mut fds = Vec::new();
-                let mut packets = Vec::new();
-
+                // 2.1. Poll for read if mode is blocking.
                 if mode == BlockingMode::Blocking {
-                    // Read at least one packet blocking
-                    packet_reader.read_at_least_one_packet(&self.stream, &mut packets, &mut fds)?;
-                } else {
-                    // Read packets without blocking.
-                    packet_reader.try_read_packets(&self.stream, &mut packets, &mut fds)?;
+                    // 2.1.1. Unlock `inner`, so other threads can use it while
+                    // during the poll.
+                    drop(inner);
+                    // 2.1.2. Do the actual poll
+                    self.stream.poll(true, false)?;
+                    // 2.1.3. Relock inner
+                    inner = self.inner.lock().unwrap();
                 }
 
-                // 2.3. Relock `inner` to enqueue the packets.
-                inner = self.inner.lock().unwrap();
+                // 2.2. Try to read as many packets as possible without blocking.
+                let mut fds = Vec::new();
+                let mut packets = Vec::new();
+                packet_reader.try_read_packets(&self.stream, &mut packets, &mut fds)?;
 
-                // 2.4. Once `inner` has been relocked, drop the
+                // 2.3. Once `inner` has been relocked, drop the
                 // lock on `packet_reader`. While inner is locked, other
                 // threads cannot arrive at 0.1 anyways.
                 //
-                // `read` cannot unlocked before `inner` is relocked
-                // because it could let another thread wait on 2.2
+                // `packet_reader` must be unlocked with `inner` is locked,
+                // otherwise it could let another thread wait on 2.1
                 // for a reply that has been read but not enqueued yet.
                 drop(packet_reader);
 
-                // 2.5. Actually enqueue the read packets.
+                // 2.4. Actually enqueue the read packets.
                 inner.enqueue_fds(fds);
                 packets
                     .into_iter()
                     .for_each(|packet| inner.enqueue_packet(packet));
+
+                // 2.5. Notify the condvar by dropping the `notify_on_drop` object.
+                // The object would have been dropped when the function returns, so
+                // the explicit drop is not really needed. The purpose of having a
+                // explicit drop is to... make it explicit.
+                drop(notify_on_drop);
 
                 // 2.6. Return the locked `inner` back to the caller.
                 Ok(inner)
@@ -510,10 +516,8 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Vec<u8>>, ConnectionError> {
-        let mut write_buffer = self.write_buffer.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
-        inner = self.flush_impl(inner, &mut write_buffer)?;
-        drop(write_buffer);
+        inner = self.flush_impl(inner)?;
         loop {
             match inner.poll_for_reply(sequence) {
                 PollReply::TryAgain => {}
@@ -528,15 +532,13 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<Buffer>, ConnectionError> {
-        let mut write_buffer = self.write_buffer.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
         if inner.prepare_check_for_reply_or_error(sequence) {
-            inner = self.send_sync(inner, &mut write_buffer)?;
+            inner = self.send_sync(inner)?;
             assert!(!inner.prepare_check_for_reply_or_error(sequence));
         }
         // Ensure the request is sent
-        inner = self.flush_impl(inner, &mut write_buffer)?;
-        drop(write_buffer);
+        inner = self.flush_impl(inner)?;
         loop {
             match inner.poll_check_for_reply_or_error(sequence) {
                 PollReply::TryAgain => {}
@@ -551,11 +553,9 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
-        let mut write_buffer = self.write_buffer.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
         // Ensure the request is sent
-        inner = self.flush_impl(inner, &mut write_buffer)?;
-        drop(write_buffer);
+        inner = self.flush_impl(inner)?;
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply.0[0] == 0 {
@@ -637,9 +637,8 @@ impl<S: Stream> Connection for RustConnection<S> {
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {
-        let mut write_buffer = self.write_buffer.lock().unwrap();
         let inner = self.inner.lock().unwrap();
-        let _inner = self.flush_impl(inner, &mut write_buffer)?;
+        let _inner = self.flush_impl(inner)?;
         Ok(())
     }
 

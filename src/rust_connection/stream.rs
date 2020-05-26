@@ -26,9 +26,9 @@ pub trait Stream {
     /// This function is allowed to spuriously return even if the stream
     /// is neither readable nor writable. However, it shall not do it
     /// continuously, which would cause a 100% CPU usage.
-    /// 
+    ///
     /// # Multithreading
-    /// 
+    ///
     /// If `Self` is `Send + Sync` and `poll` is used concurrently from more than
     /// one thread, all threads should wake when the stream becomes readable (when
     /// `read` is `true`) or writable (when `write` is `true`).
@@ -50,9 +50,9 @@ pub trait Stream {
     /// with which they are received. However, file descriptors may not be received later than the
     /// data that was sent at the same time. Instead, file descriptors may only be received
     /// earlier.
-    /// 
+    ///
     /// # Multithreading
-    /// 
+    ///
     /// If `Self` is `Send + Sync` and `read` is used concurrently from more than one thread:
     ///
     /// * Both the data and the file descriptors shall be read in order, but possibly
@@ -73,9 +73,9 @@ pub trait Stream {
     /// with which they are received. However, file descriptors may not be received later than the
     /// data that was sent at the same time. Instead, file descriptors may only be received
     /// earlier.
-    /// 
+    ///
     /// # Multithreading
-    /// 
+    ///
     /// Same as `read`. In any case, if this function returns without error, `buf.len()` bytes
     /// should have been read into `buf`.
     fn read_exact(&self, mut buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<()> {
@@ -113,11 +113,11 @@ pub trait Stream {
     /// data. File descriptors might be received earlier than their corresponding data. It is not
     /// allowed for file descriptors to be received later than the bytes that were sent at the same
     /// time.
-    /// 
+    ///
     /// # Multithreading
-    /// 
+    ///
     /// If `Self` is `Send + Sync` and `write` is used concurrently from more than one thread:
-    /// 
+    ///
     /// * Both the data and the file descriptors shall be written in order, but possibly
     /// interleaved across threads.
     /// * Neither the data nor the file descriptors shall be duplicated.
@@ -130,9 +130,9 @@ pub trait Stream {
     /// This method must behave as a call to `write` with the buffers concatenated would.
     ///
     /// The default implementation calls `write` with the first nonempty buffer provided.
-    /// 
+    ///
     /// # Multithreading
-    /// 
+    ///
     /// Same as `write`.
     fn write_vectored(&self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         for buf in bufs {
