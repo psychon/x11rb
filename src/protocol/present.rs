@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -544,7 +544,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             major_version,
             minor_version,
@@ -744,7 +745,8 @@ impl<'input> PixmapRequest<'input> {
             remaining = new_remaining;
             notifies.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PixmapRequest {
             window,
             pixmap,
@@ -871,7 +873,8 @@ impl NotifyMSCRequest {
         let (target_msc, remaining) = u64::try_parse(remaining)?;
         let (divisor, remaining) = u64::try_parse(remaining)?;
         let (remainder, remaining) = u64::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(NotifyMSCRequest {
             window,
             serial,
@@ -949,7 +952,8 @@ impl SelectInputRequest {
         let (eid, remaining) = Event::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SelectInputRequest {
             eid,
             window,
@@ -1009,7 +1013,8 @@ impl QueryCapabilitiesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_CAPABILITIES_REQUEST))?;
         let (target, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryCapabilitiesRequest {
             target,
         })

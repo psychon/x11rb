@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -6348,7 +6348,8 @@ impl UseExtensionRequest {
         validate_request_pieces(header, value, None, Some(USE_EXTENSION_REQUEST))?;
         let (wanted_major, remaining) = u16::try_parse(value)?;
         let (wanted_minor, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UseExtensionRequest {
             wanted_major,
             wanted_minor,
@@ -7120,7 +7121,8 @@ impl<'input> SelectEventsRequest<'input> {
         let (affect_map, remaining) = u16::try_parse(remaining)?;
         let (map, remaining) = u16::try_parse(remaining)?;
         let (details, remaining) = SelectEventsAux::try_parse(remaining, affect_which, clear, select_all)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SelectEventsRequest {
             device_spec,
             clear,
@@ -7241,7 +7243,8 @@ impl BellRequest {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(BellRequest {
             device_spec,
             bell_class,
@@ -7314,7 +7317,8 @@ impl GetStateRequest {
         validate_request_pieces(header, value, None, Some(GET_STATE_REQUEST))?;
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetStateRequest {
             device_spec,
         })
@@ -7456,7 +7460,8 @@ impl LatchLockStateRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (latch_group, remaining) = bool::try_parse(remaining)?;
         let (group_latch, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(LatchLockStateRequest {
             device_spec,
             affect_mod_locks,
@@ -7531,7 +7536,8 @@ impl GetControlsRequest {
         validate_request_pieces(header, value, None, Some(GET_CONTROLS_REQUEST))?;
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetControlsRequest {
             device_spec,
         })
@@ -7813,7 +7819,8 @@ impl<'input> SetControlsRequest<'input> {
         let (access_x_timeout_options_values, remaining) = u16::try_parse(remaining)?;
         let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let per_key_repeat = <&[u8; 32]>::try_from(per_key_repeat).unwrap();
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetControlsRequest {
             device_spec,
             affect_internal_real_mods,
@@ -8029,7 +8036,8 @@ impl GetMapRequest {
         let (first_v_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMapRequest {
             device_spec,
             full,
@@ -8671,7 +8679,8 @@ impl<'input> SetMapRequest<'input> {
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let (values, remaining) = SetMapAux::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetMapRequest {
             device_spec,
             flags,
@@ -8795,7 +8804,8 @@ impl GetCompatMapRequest {
         let (get_all_si, remaining) = bool::try_parse(remaining)?;
         let (first_si, remaining) = u16::try_parse(remaining)?;
         let (n_si, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetCompatMapRequest {
             device_spec,
             groups,
@@ -8947,7 +8957,8 @@ impl<'input> SetCompatMapRequest<'input> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (si, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si.try_into().or(Err(ParseError::ParseError))?)?;
         let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetCompatMapRequest {
             device_spec,
             recompute_actions,
@@ -9016,7 +9027,8 @@ impl GetIndicatorStateRequest {
         validate_request_pieces(header, value, None, Some(GET_INDICATOR_STATE_REQUEST))?;
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetIndicatorStateRequest {
             device_spec,
         })
@@ -9105,7 +9117,8 @@ impl GetIndicatorMapRequest {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (which, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetIndicatorMapRequest {
             device_spec,
             which,
@@ -9209,7 +9222,8 @@ impl<'input> SetIndicatorMapRequest<'input> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (which, remaining) = u32::try_parse(remaining)?;
         let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetIndicatorMapRequest {
             device_spec,
             which,
@@ -9286,7 +9300,8 @@ impl GetNamedIndicatorRequest {
         let (led_id, remaining) = IDSpec::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (indicator, remaining) = xproto::Atom::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetNamedIndicatorRequest {
             device_spec,
             led_class,
@@ -9470,7 +9485,8 @@ impl SetNamedIndicatorRequest {
         let (map_real_mods, remaining) = u8::try_parse(remaining)?;
         let (map_vmods, remaining) = u16::try_parse(remaining)?;
         let (map_ctrls, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetNamedIndicatorRequest {
             device_spec,
             led_class,
@@ -9576,7 +9592,8 @@ impl GetNamesRequest {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (which, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetNamesRequest {
             device_spec,
             which,
@@ -10263,7 +10280,8 @@ impl<'input> SetNamesRequest<'input> {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (total_kt_level_names, remaining) = u16::try_parse(remaining)?;
         let (values, remaining) = SetNamesAux::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetNamesRequest {
             device_spec,
             virtual_mods,
@@ -10383,7 +10401,8 @@ impl PerClientFlagsRequest {
         let (ctrls_to_change, remaining) = u32::try_parse(remaining)?;
         let (auto_ctrls, remaining) = u32::try_parse(remaining)?;
         let (auto_ctrls_values, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PerClientFlagsRequest {
             device_spec,
             change,
@@ -10493,7 +10512,8 @@ impl ListComponentsRequest {
         validate_request_pieces(header, value, None, Some(LIST_COMPONENTS_REQUEST))?;
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (max_names, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ListComponentsRequest {
             device_spec,
             max_names,
@@ -10688,7 +10708,8 @@ impl GetKbdByNameRequest {
         let (want, remaining) = u16::try_parse(remaining)?;
         let (load, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetKbdByNameRequest {
             device_spec,
             need,
@@ -11419,7 +11440,8 @@ impl GetDeviceInfoRequest {
         let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
         let led_class = led_class.try_into()?;
         let (led_id, remaining) = IDSpec::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetDeviceInfoRequest {
             device_spec,
             wanted,
@@ -11618,7 +11640,8 @@ impl<'input> SetDeviceInfoRequest<'input> {
         let (n_device_led_f_bs, remaining) = u16::try_parse(remaining)?;
         let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns.try_into().or(Err(ParseError::ParseError))?)?;
         let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetDeviceInfoRequest {
             device_spec,
             first_btn,
@@ -11716,7 +11739,8 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
         let (ctrls, remaining) = u32::try_parse(remaining)?;
         let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, msg_length.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetDebuggingFlagsRequest {
             affect_flags,
             flags,

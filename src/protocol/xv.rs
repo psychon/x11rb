@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -1575,7 +1575,6 @@ impl QueryExtensionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_EXTENSION_REQUEST))?;
-        let _ = value;
         Ok(QueryExtensionRequest
         )
     }
@@ -1653,7 +1652,8 @@ impl QueryAdaptorsRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_ADAPTORS_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryAdaptorsRequest {
             window,
         })
@@ -1749,7 +1749,8 @@ impl QueryEncodingsRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_ENCODINGS_REQUEST))?;
         let (port, remaining) = Port::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryEncodingsRequest {
             port,
         })
@@ -1852,7 +1853,8 @@ impl GrabPortRequest {
         validate_request_pieces(header, value, None, Some(GRAB_PORT_REQUEST))?;
         let (port, remaining) = Port::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GrabPortRequest {
             port,
             time,
@@ -1942,7 +1944,8 @@ impl UngrabPortRequest {
         validate_request_pieces(header, value, None, Some(UNGRAB_PORT_REQUEST))?;
         let (port, remaining) = Port::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UngrabPortRequest {
             port,
             time,
@@ -2054,7 +2057,8 @@ impl PutVideoRequest {
         let (drw_y, remaining) = i16::try_parse(remaining)?;
         let (drw_w, remaining) = u16::try_parse(remaining)?;
         let (drw_h, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PutVideoRequest {
             port,
             drawable,
@@ -2182,7 +2186,8 @@ impl PutStillRequest {
         let (drw_y, remaining) = i16::try_parse(remaining)?;
         let (drw_w, remaining) = u16::try_parse(remaining)?;
         let (drw_h, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PutStillRequest {
             port,
             drawable,
@@ -2310,7 +2315,8 @@ impl GetVideoRequest {
         let (drw_y, remaining) = i16::try_parse(remaining)?;
         let (drw_w, remaining) = u16::try_parse(remaining)?;
         let (drw_h, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetVideoRequest {
             port,
             drawable,
@@ -2438,7 +2444,8 @@ impl GetStillRequest {
         let (drw_y, remaining) = i16::try_parse(remaining)?;
         let (drw_w, remaining) = u16::try_parse(remaining)?;
         let (drw_h, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetStillRequest {
             port,
             drawable,
@@ -2519,7 +2526,8 @@ impl StopVideoRequest {
         validate_request_pieces(header, value, None, Some(STOP_VIDEO_REQUEST))?;
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(StopVideoRequest {
             port,
             drawable,
@@ -2583,7 +2591,8 @@ impl SelectVideoNotifyRequest {
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (onoff, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SelectVideoNotifyRequest {
             drawable,
             onoff,
@@ -2647,7 +2656,8 @@ impl SelectPortNotifyRequest {
         let (port, remaining) = Port::try_parse(value)?;
         let (onoff, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SelectPortNotifyRequest {
             port,
             onoff,
@@ -2731,7 +2741,8 @@ impl QueryBestSizeRequest {
         let (drw_h, remaining) = u16::try_parse(remaining)?;
         let (motion, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryBestSizeRequest {
             port,
             vid_w,
@@ -2836,7 +2847,8 @@ impl SetPortAttributeRequest {
         let (port, remaining) = Port::try_parse(value)?;
         let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
         let (value, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetPortAttributeRequest {
             port,
             attribute,
@@ -2901,7 +2913,8 @@ impl GetPortAttributeRequest {
         validate_request_pieces(header, value, None, Some(GET_PORT_ATTRIBUTE_REQUEST))?;
         let (port, remaining) = Port::try_parse(value)?;
         let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetPortAttributeRequest {
             port,
             attribute,
@@ -2982,7 +2995,8 @@ impl QueryPortAttributesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_PORT_ATTRIBUTES_REQUEST))?;
         let (port, remaining) = Port::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryPortAttributesRequest {
             port,
         })
@@ -3080,7 +3094,8 @@ impl ListImageFormatsRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(LIST_IMAGE_FORMATS_REQUEST))?;
         let (port, remaining) = Port::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ListImageFormatsRequest {
             port,
         })
@@ -3193,7 +3208,8 @@ impl QueryImageAttributesRequest {
         let (id, remaining) = u32::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryImageAttributesRequest {
             port,
             id,
@@ -3379,7 +3395,8 @@ impl<'input> PutImageRequest<'input> {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (data, remaining) = remaining.split_at(remaining.len());
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PutImageRequest {
             port,
             drawable,
@@ -3554,7 +3571,8 @@ impl ShmPutImageRequest {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (send_event, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ShmPutImageRequest {
             port,
             drawable,

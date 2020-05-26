@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -296,7 +296,6 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
-        let _ = value;
         Ok(QueryVersionRequest
         )
     }
@@ -414,7 +413,8 @@ impl<'input> RectanglesRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(RectanglesRequest {
             operation,
             destination_kind,
@@ -510,7 +510,8 @@ impl MaskRequest {
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
         let (source_bitmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(MaskRequest {
             operation,
             destination_kind,
@@ -610,7 +611,8 @@ impl CombineRequest {
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
         let (source_window, remaining) = xproto::Window::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CombineRequest {
             operation,
             destination_kind,
@@ -695,7 +697,8 @@ impl OffsetRequest {
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(OffsetRequest {
             destination_kind,
             destination_window,
@@ -755,7 +758,8 @@ impl QueryExtentsRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_EXTENTS_REQUEST))?;
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryExtentsRequest {
             destination_window,
         })
@@ -861,7 +865,8 @@ impl SelectInputRequest {
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SelectInputRequest {
             destination_window,
             enable,
@@ -917,7 +922,8 @@ impl InputSelectedRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(INPUT_SELECTED_REQUEST))?;
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(InputSelectedRequest {
             destination_window,
         })
@@ -1004,7 +1010,8 @@ impl GetRectanglesRequest {
         let (source_kind, remaining) = Kind::try_parse(remaining)?;
         let source_kind = source_kind.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetRectanglesRequest {
             window,
             source_kind,

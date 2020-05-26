@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -747,7 +747,8 @@ impl InitializeRequest {
         validate_request_pieces(header, value, None, Some(INITIALIZE_REQUEST))?;
         let (desired_major_version, remaining) = u8::try_parse(value)?;
         let (desired_minor_version, remaining) = u8::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(InitializeRequest {
             desired_major_version,
             desired_minor_version,
@@ -823,7 +824,6 @@ impl ListSystemCountersRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(LIST_SYSTEM_COUNTERS_REQUEST))?;
-        let _ = value;
         Ok(ListSystemCountersRequest
         )
     }
@@ -927,7 +927,8 @@ impl CreateCounterRequest {
         validate_request_pieces(header, value, None, Some(CREATE_COUNTER_REQUEST))?;
         let (id, remaining) = Counter::try_parse(value)?;
         let (initial_value, remaining) = Int64::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateCounterRequest {
             id,
             initial_value,
@@ -983,7 +984,8 @@ impl DestroyCounterRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_COUNTER_REQUEST))?;
         let (counter, remaining) = Counter::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyCounterRequest {
             counter,
         })
@@ -1037,7 +1039,8 @@ impl QueryCounterRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_COUNTER_REQUEST))?;
         let (counter, remaining) = Counter::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryCounterRequest {
             counter,
         })
@@ -1122,7 +1125,8 @@ impl<'input> AwaitRequest<'input> {
             remaining = new_remaining;
             wait_list.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AwaitRequest {
             wait_list: Cow::Owned(wait_list),
         })
@@ -1187,7 +1191,8 @@ impl ChangeCounterRequest {
         validate_request_pieces(header, value, None, Some(CHANGE_COUNTER_REQUEST))?;
         let (counter, remaining) = Counter::try_parse(value)?;
         let (amount, remaining) = Int64::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeCounterRequest {
             counter,
             amount,
@@ -1254,7 +1259,8 @@ impl SetCounterRequest {
         validate_request_pieces(header, value, None, Some(SET_COUNTER_REQUEST))?;
         let (counter, remaining) = Counter::try_parse(value)?;
         let (value, remaining) = Int64::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetCounterRequest {
             counter,
             value,
@@ -1480,7 +1486,8 @@ impl<'input> CreateAlarmRequest<'input> {
         let (id, remaining) = Alarm::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = CreateAlarmAux::try_parse(remaining, value_mask)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateAlarmRequest {
             id,
             value_list: Cow::Owned(value_list),
@@ -1706,7 +1713,8 @@ impl<'input> ChangeAlarmRequest<'input> {
         let (id, remaining) = Alarm::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = ChangeAlarmAux::try_parse(remaining, value_mask)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeAlarmRequest {
             id,
             value_list: Cow::Owned(value_list),
@@ -1762,7 +1770,8 @@ impl DestroyAlarmRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_ALARM_REQUEST))?;
         let (alarm, remaining) = Alarm::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyAlarmRequest {
             alarm,
         })
@@ -1816,7 +1825,8 @@ impl QueryAlarmRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_ALARM_REQUEST))?;
         let (alarm, remaining) = Alarm::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryAlarmRequest {
             alarm,
         })
@@ -1910,7 +1920,8 @@ impl SetPriorityRequest {
         validate_request_pieces(header, value, None, Some(SET_PRIORITY_REQUEST))?;
         let (id, remaining) = u32::try_parse(value)?;
         let (priority, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetPriorityRequest {
             id,
             priority,
@@ -1966,7 +1977,8 @@ impl GetPriorityRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_PRIORITY_REQUEST))?;
         let (id, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetPriorityRequest {
             id,
         })
@@ -2059,7 +2071,8 @@ impl CreateFenceRequest {
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (fence, remaining) = Fence::try_parse(remaining)?;
         let (initially_triggered, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateFenceRequest {
             drawable,
             fence,
@@ -2117,7 +2130,8 @@ impl TriggerFenceRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(TRIGGER_FENCE_REQUEST))?;
         let (fence, remaining) = Fence::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(TriggerFenceRequest {
             fence,
         })
@@ -2171,7 +2185,8 @@ impl ResetFenceRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(RESET_FENCE_REQUEST))?;
         let (fence, remaining) = Fence::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ResetFenceRequest {
             fence,
         })
@@ -2225,7 +2240,8 @@ impl DestroyFenceRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_FENCE_REQUEST))?;
         let (fence, remaining) = Fence::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyFenceRequest {
             fence,
         })
@@ -2279,7 +2295,8 @@ impl QueryFenceRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_FENCE_REQUEST))?;
         let (fence, remaining) = Fence::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryFenceRequest {
             fence,
         })
@@ -2365,7 +2382,8 @@ impl<'input> AwaitFenceRequest<'input> {
             remaining = new_remaining;
             fence_list.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AwaitFenceRequest {
             fence_list: Cow::Owned(fence_list),
         })

@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -149,7 +149,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (client_major_version, remaining) = u32::try_parse(value)?;
         let (client_minor_version, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             client_major_version,
             client_minor_version,
@@ -242,7 +243,8 @@ impl RedirectWindowRequest {
         let (update, remaining) = u8::try_parse(remaining)?;
         let update = update.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(RedirectWindowRequest {
             window,
             update,
@@ -307,7 +309,8 @@ impl RedirectSubwindowsRequest {
         let (update, remaining) = u8::try_parse(remaining)?;
         let update = update.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(RedirectSubwindowsRequest {
             window,
             update,
@@ -372,7 +375,8 @@ impl UnredirectWindowRequest {
         let (update, remaining) = u8::try_parse(remaining)?;
         let update = update.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UnredirectWindowRequest {
             window,
             update,
@@ -437,7 +441,8 @@ impl UnredirectSubwindowsRequest {
         let (update, remaining) = u8::try_parse(remaining)?;
         let update = update.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UnredirectSubwindowsRequest {
             window,
             update,
@@ -500,7 +505,8 @@ impl CreateRegionFromBorderClipRequest {
         validate_request_pieces(header, value, None, Some(CREATE_REGION_FROM_BORDER_CLIP_REQUEST))?;
         let (region, remaining) = xfixes::Region::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateRegionFromBorderClipRequest {
             region,
             window,
@@ -563,7 +569,8 @@ impl NameWindowPixmapRequest {
         validate_request_pieces(header, value, None, Some(NAME_WINDOW_PIXMAP_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(NameWindowPixmapRequest {
             window,
             pixmap,
@@ -619,7 +626,8 @@ impl GetOverlayWindowRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_OVERLAY_WINDOW_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetOverlayWindowRequest {
             window,
         })
@@ -699,7 +707,8 @@ impl ReleaseOverlayWindowRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(RELEASE_OVERLAY_WINDOW_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ReleaseOverlayWindowRequest {
             window,
         })

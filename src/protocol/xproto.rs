@@ -22,7 +22,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -6227,7 +6227,9 @@ impl<'input> CreateWindowRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CREATE_WINDOW_REQUEST), None)?;
-        let (depth, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (wid, remaining) = Window::try_parse(value)?;
         let (parent, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
@@ -6240,7 +6242,8 @@ impl<'input> CreateWindowRequest<'input> {
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = CreateWindowAux::try_parse(remaining, value_mask)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateWindowRequest {
             depth,
             wid,
@@ -6736,11 +6739,14 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CHANGE_WINDOW_ATTRIBUTES_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = ChangeWindowAttributesAux::try_parse(remaining, value_mask)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeWindowAttributesRequest {
             window,
             value_list: Cow::Owned(value_list),
@@ -6892,9 +6898,12 @@ impl GetWindowAttributesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_WINDOW_ATTRIBUTES_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetWindowAttributesRequest {
             window,
         })
@@ -7054,9 +7063,12 @@ impl DestroyWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(DESTROY_WINDOW_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyWindowRequest {
             window,
         })
@@ -7130,9 +7142,12 @@ impl DestroySubwindowsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(DESTROY_SUBWINDOWS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroySubwindowsRequest {
             window,
         })
@@ -7278,10 +7293,13 @@ impl ChangeSaveSetRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CHANGE_SAVE_SET_REQUEST), None)?;
-        let (mode, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeSaveSetRequest {
             mode,
             window,
@@ -7403,12 +7421,15 @@ impl ReparentWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(REPARENT_WINDOW_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (parent, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ReparentWindowRequest {
             window,
             parent,
@@ -7533,9 +7554,12 @@ impl MapWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(MAP_WINDOW_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(MapWindowRequest {
             window,
         })
@@ -7622,9 +7646,12 @@ impl MapSubwindowsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(MAP_SUBWINDOWS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(MapSubwindowsRequest {
             window,
         })
@@ -7697,9 +7724,12 @@ impl UnmapWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(UNMAP_WINDOW_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UnmapWindowRequest {
             window,
         })
@@ -7772,9 +7802,12 @@ impl UnmapSubwindowsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(UNMAP_SUBWINDOWS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UnmapSubwindowsRequest {
             window,
         })
@@ -8213,12 +8246,15 @@ impl<'input> ConfigureWindowRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CONFIGURE_WINDOW_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (value_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (value_list, remaining) = ConfigureWindowAux::try_parse(remaining, value_mask)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ConfigureWindowRequest {
             window,
             value_list: Cow::Owned(value_list),
@@ -8411,10 +8447,13 @@ impl CirculateWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CIRCULATE_WINDOW_REQUEST), None)?;
-        let (direction, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (direction, remaining) = u8::try_parse(remaining)?;
         let direction = direction.try_into()?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CirculateWindowRequest {
             direction,
             window,
@@ -8521,9 +8560,12 @@ impl GetGeometryRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_GEOMETRY_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetGeometryRequest {
             drawable,
         })
@@ -8698,9 +8740,12 @@ impl QueryTreeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_TREE_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryTreeRequest {
             window,
         })
@@ -8891,11 +8936,14 @@ impl<'input> InternAtomRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(INTERN_ATOM_REQUEST), None)?;
-        let (only_if_exists, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (only_if_exists, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(InternAtomRequest {
             only_if_exists,
             name,
@@ -9019,9 +9067,12 @@ impl GetAtomNameRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_ATOM_NAME_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (atom, remaining) = Atom::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetAtomNameRequest {
             atom,
         })
@@ -9272,8 +9323,10 @@ impl<'input> ChangePropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CHANGE_PROPERTY_REQUEST), None)?;
-        let (mode, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (property, remaining) = Atom::try_parse(remaining)?;
         let (type_, remaining) = Atom::try_parse(remaining)?;
@@ -9281,7 +9334,8 @@ impl<'input> ChangePropertyRequest<'input> {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::ParseError)?.checked_div(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangePropertyRequest {
             mode,
             window,
@@ -9406,10 +9460,13 @@ impl DeletePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(DELETE_PROPERTY_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (property, remaining) = Atom::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DeletePropertyRequest {
             window,
             property,
@@ -9616,13 +9673,16 @@ impl GetPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_PROPERTY_REQUEST), None)?;
-        let (delete, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (delete, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (property, remaining) = Atom::try_parse(remaining)?;
         let (type_, remaining) = Atom::try_parse(remaining)?;
         let (long_offset, remaining) = u32::try_parse(remaining)?;
         let (long_length, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetPropertyRequest {
             delete,
             window,
@@ -9963,9 +10023,12 @@ impl ListPropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(LIST_PROPERTIES_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ListPropertiesRequest {
             window,
         })
@@ -10100,11 +10163,14 @@ impl SetSelectionOwnerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_SELECTION_OWNER_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (owner, remaining) = Window::try_parse(value)?;
         let (selection, remaining) = Atom::try_parse(remaining)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetSelectionOwnerRequest {
             owner,
             selection,
@@ -10210,9 +10276,12 @@ impl GetSelectionOwnerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_SELECTION_OWNER_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (selection, remaining) = Atom::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetSelectionOwnerRequest {
             selection,
         })
@@ -10333,13 +10402,16 @@ impl ConvertSelectionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CONVERT_SELECTION_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (requestor, remaining) = Window::try_parse(value)?;
         let (selection, remaining) = Atom::try_parse(remaining)?;
         let (target, remaining) = Atom::try_parse(remaining)?;
         let (property, remaining) = Atom::try_parse(remaining)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ConvertSelectionRequest {
             requestor,
             selection,
@@ -10556,12 +10628,15 @@ impl<'input> SendEventRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SEND_EVENT_REQUEST), None)?;
-        let (propagate, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (propagate, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (destination, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let (event, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let event = <&[u8; 32]>::try_from(event).unwrap();
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SendEventRequest {
             propagate,
             destination,
@@ -11006,7 +11081,9 @@ impl GrabPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GRAB_POINTER_REQUEST), None)?;
-        let (owner_events, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
@@ -11016,7 +11093,8 @@ impl GrabPointerRequest {
         let (confine_to, remaining) = Window::try_parse(remaining)?;
         let (cursor, remaining) = Cursor::try_parse(remaining)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GrabPointerRequest {
             owner_events,
             grab_window,
@@ -11209,9 +11287,12 @@ impl UngrabPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(UNGRAB_POINTER_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (time, remaining) = Timestamp::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UngrabPointerRequest {
             time,
         })
@@ -11469,7 +11550,9 @@ impl GrabButtonRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GRAB_BUTTON_REQUEST), None)?;
-        let (owner_events, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
@@ -11482,7 +11565,8 @@ impl GrabButtonRequest {
         let button = button.try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GrabButtonRequest {
             owner_events,
             grab_window,
@@ -11633,12 +11717,15 @@ impl UngrabButtonRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(UNGRAB_BUTTON_REQUEST), None)?;
-        let (button, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (button, remaining) = u8::try_parse(remaining)?;
         let button = button.try_into()?;
+        check_exhausted(remaining)?;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UngrabButtonRequest {
             button,
             grab_window,
@@ -11708,12 +11795,15 @@ impl ChangeActivePointerGrabRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CHANGE_ACTIVE_POINTER_GRAB_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cursor, remaining) = Cursor::try_parse(value)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeActivePointerGrabRequest {
             cursor,
             time,
@@ -11853,7 +11943,9 @@ impl GrabKeyboardRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GRAB_KEYBOARD_REQUEST), None)?;
-        let (owner_events, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
@@ -11861,7 +11953,8 @@ impl GrabKeyboardRequest {
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
         let keyboard_mode = keyboard_mode.try_into()?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GrabKeyboardRequest {
             owner_events,
             grab_window,
@@ -12010,9 +12103,12 @@ impl UngrabKeyboardRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(UNGRAB_KEYBOARD_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (time, remaining) = Timestamp::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UngrabKeyboardRequest {
             time,
         })
@@ -12203,7 +12299,9 @@ impl GrabKeyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GRAB_KEY_REQUEST), None)?;
-        let (owner_events, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let (key, remaining) = Keycode::try_parse(remaining)?;
@@ -12212,7 +12310,8 @@ impl GrabKeyRequest {
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
         let keyboard_mode = keyboard_mode.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GrabKeyRequest {
             owner_events,
             grab_window,
@@ -12371,11 +12470,14 @@ impl UngrabKeyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(UNGRAB_KEY_REQUEST), None)?;
-        let (key, remaining) = Keycode::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (key, remaining) = Keycode::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UngrabKeyRequest {
             key,
             grab_window,
@@ -12619,10 +12721,13 @@ impl AllowEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(ALLOW_EVENTS_REQUEST), None)?;
-        let (mode, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
+        check_exhausted(remaining)?;
         let (time, remaining) = Timestamp::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AllowEventsRequest {
             mode,
             time,
@@ -12689,8 +12794,9 @@ impl GrabServerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GRAB_SERVER_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(GrabServerRequest
         )
     }
@@ -12732,8 +12838,9 @@ impl UngrabServerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(UNGRAB_SERVER_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(UngrabServerRequest
         )
     }
@@ -12795,9 +12902,12 @@ impl QueryPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_POINTER_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryPointerRequest {
             window,
         })
@@ -12978,11 +13088,14 @@ impl GetMotionEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_MOTION_EVENTS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (start, remaining) = Timestamp::try_parse(remaining)?;
         let (stop, remaining) = Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMotionEventsRequest {
             window,
             start,
@@ -13098,12 +13211,15 @@ impl TranslateCoordinatesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(TRANSLATE_COORDINATES_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (src_window, remaining) = Window::try_parse(value)?;
         let (dst_window, remaining) = Window::try_parse(remaining)?;
         let (src_x, remaining) = i16::try_parse(remaining)?;
         let (src_y, remaining) = i16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(TranslateCoordinatesRequest {
             src_window,
             dst_window,
@@ -13253,7 +13369,9 @@ impl WarpPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(WARP_POINTER_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (src_window, remaining) = Window::try_parse(value)?;
         let (dst_window, remaining) = Window::try_parse(remaining)?;
         let (src_x, remaining) = i16::try_parse(remaining)?;
@@ -13262,7 +13380,8 @@ impl WarpPointerRequest {
         let (src_height, remaining) = u16::try_parse(remaining)?;
         let (dst_x, remaining) = i16::try_parse(remaining)?;
         let (dst_y, remaining) = i16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(WarpPointerRequest {
             src_window,
             dst_window,
@@ -13484,11 +13603,14 @@ impl SetInputFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_INPUT_FOCUS_REQUEST), None)?;
-        let (revert_to, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (revert_to, remaining) = u8::try_parse(remaining)?;
         let revert_to = revert_to.try_into()?;
+        check_exhausted(remaining)?;
         let (focus, remaining) = Window::try_parse(value)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetInputFocusRequest {
             revert_to,
             focus,
@@ -13576,8 +13698,9 @@ impl GetInputFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_INPUT_FOCUS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(GetInputFocusRequest
         )
     }
@@ -13646,8 +13769,9 @@ impl QueryKeymapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_KEYMAP_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(QueryKeymapRequest
         )
     }
@@ -13752,12 +13876,15 @@ impl<'input> OpenFontRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(OPEN_FONT_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (fid, remaining) = Font::try_parse(value)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(OpenFontRequest {
             fid,
             name,
@@ -13831,9 +13958,12 @@ impl CloseFontRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CLOSE_FONT_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (font, remaining) = Font::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CloseFontRequest {
             font,
         })
@@ -14066,9 +14196,12 @@ impl QueryFontRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_FONT_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (font, remaining) = Fontable::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryFontRequest {
             font,
         })
@@ -14263,7 +14396,9 @@ impl<'input> QueryTextExtentsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_TEXT_EXTENTS_REQUEST), None)?;
-        let remaining = &[];
+        let remaining = &[header.minor_opcode];
+        let remaining = &remaining[1..];
+        check_exhausted(remaining)?;
         let (font, remaining) = Fontable::try_parse(value)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
@@ -14273,7 +14408,8 @@ impl<'input> QueryTextExtentsRequest<'input> {
             remaining = new_remaining;
             string.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryTextExtentsRequest {
             font,
             string: Cow::Owned(string),
@@ -14467,11 +14603,14 @@ impl<'input> ListFontsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(LIST_FONTS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (max_names, remaining) = u16::try_parse(value)?;
         let (pattern_len, remaining) = u16::try_parse(remaining)?;
         let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ListFontsRequest {
             max_names,
             pattern,
@@ -14602,11 +14741,14 @@ impl<'input> ListFontsWithInfoRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(LIST_FONTS_WITH_INFO_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (max_names, remaining) = u16::try_parse(value)?;
         let (pattern_len, remaining) = u16::try_parse(remaining)?;
         let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ListFontsWithInfoRequest {
             max_names,
             pattern,
@@ -14778,11 +14920,14 @@ impl<'input> SetFontPathRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_FONT_PATH_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (font_qty, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (font, remaining) = crate::x11_utils::parse_list::<Str>(remaining, font_qty.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetFontPathRequest {
             font: Cow::Owned(font),
         })
@@ -14827,8 +14972,9 @@ impl GetFontPathRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_FONT_PATH_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(GetFontPathRequest
         )
     }
@@ -14958,12 +15104,15 @@ impl CreatePixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CREATE_PIXMAP_REQUEST), None)?;
-        let (depth, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (pid, remaining) = Pixmap::try_parse(value)?;
         let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreatePixmapRequest {
             depth,
             pid,
@@ -15058,9 +15207,12 @@ impl FreePixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(FREE_PIXMAP_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (pixmap, remaining) = Pixmap::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FreePixmapRequest {
             pixmap,
         })
@@ -16443,12 +16595,15 @@ impl<'input> CreateGCRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CREATE_GC_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cid, remaining) = Gcontext::try_parse(value)?;
         let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = CreateGCAux::try_parse(remaining, value_mask)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateGCRequest {
             cid,
             drawable,
@@ -17086,11 +17241,14 @@ impl<'input> ChangeGCRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CHANGE_GC_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (gc, remaining) = Gcontext::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = ChangeGCAux::try_parse(remaining, value_mask)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeGCRequest {
             gc,
             value_list: Cow::Owned(value_list),
@@ -17201,11 +17359,14 @@ impl CopyGCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(COPY_GC_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (src_gc, remaining) = Gcontext::try_parse(value)?;
         let (dst_gc, remaining) = Gcontext::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CopyGCRequest {
             src_gc,
             dst_gc,
@@ -17275,12 +17436,15 @@ impl<'input> SetDashesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_DASHES_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (gc, remaining) = Gcontext::try_parse(value)?;
         let (dash_offset, remaining) = u16::try_parse(remaining)?;
         let (dashes_len, remaining) = u16::try_parse(remaining)?;
         let (dashes, remaining) = crate::x11_utils::parse_u8_list(remaining, dashes_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetDashesRequest {
             gc,
             dash_offset,
@@ -17419,8 +17583,10 @@ impl<'input> SetClipRectanglesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_CLIP_RECTANGLES_REQUEST), None)?;
-        let (ordering, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (ordering, remaining) = u8::try_parse(remaining)?;
         let ordering = ordering.try_into()?;
+        check_exhausted(remaining)?;
         let (gc, remaining) = Gcontext::try_parse(value)?;
         let (clip_x_origin, remaining) = i16::try_parse(remaining)?;
         let (clip_y_origin, remaining) = i16::try_parse(remaining)?;
@@ -17432,7 +17598,8 @@ impl<'input> SetClipRectanglesRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetClipRectanglesRequest {
             ordering,
             gc,
@@ -17503,9 +17670,12 @@ impl FreeGCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(FREE_GC_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (gc, remaining) = Gcontext::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FreeGCRequest {
             gc,
         })
@@ -17586,13 +17756,16 @@ impl ClearAreaRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CLEAR_AREA_REQUEST), None)?;
-        let (exposures, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (exposures, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ClearAreaRequest {
             exposures,
             window,
@@ -17711,7 +17884,9 @@ impl CopyAreaRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(COPY_AREA_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (src_drawable, remaining) = Drawable::try_parse(value)?;
         let (dst_drawable, remaining) = Drawable::try_parse(remaining)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
@@ -17721,7 +17896,8 @@ impl CopyAreaRequest {
         let (dst_y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CopyAreaRequest {
             src_drawable,
             dst_drawable,
@@ -17852,7 +18028,9 @@ impl CopyPlaneRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(COPY_PLANE_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (src_drawable, remaining) = Drawable::try_parse(value)?;
         let (dst_drawable, remaining) = Drawable::try_parse(remaining)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
@@ -17863,7 +18041,8 @@ impl CopyPlaneRequest {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (bit_plane, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CopyPlaneRequest {
             src_drawable,
             dst_drawable,
@@ -18020,8 +18199,10 @@ impl<'input> PolyPointRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(POLY_POINT_REQUEST), None)?;
-        let (coordinate_mode, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
         let coordinate_mode = coordinate_mode.try_into()?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -18032,7 +18213,8 @@ impl<'input> PolyPointRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PolyPointRequest {
             coordinate_mode,
             drawable,
@@ -18142,8 +18324,10 @@ impl<'input> PolyLineRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(POLY_LINE_REQUEST), None)?;
-        let (coordinate_mode, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
         let coordinate_mode = coordinate_mode.try_into()?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -18154,7 +18338,8 @@ impl<'input> PolyLineRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PolyLineRequest {
             coordinate_mode,
             drawable,
@@ -18338,7 +18523,9 @@ impl<'input> PolySegmentRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(POLY_SEGMENT_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -18349,7 +18536,8 @@ impl<'input> PolySegmentRequest<'input> {
             remaining = new_remaining;
             segments.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PolySegmentRequest {
             drawable,
             gc,
@@ -18442,7 +18630,9 @@ impl<'input> PolyRectangleRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(POLY_RECTANGLE_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -18453,7 +18643,8 @@ impl<'input> PolyRectangleRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PolyRectangleRequest {
             drawable,
             gc,
@@ -18520,7 +18711,9 @@ impl<'input> PolyArcRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(POLY_ARC_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -18531,7 +18724,8 @@ impl<'input> PolyArcRequest<'input> {
             remaining = new_remaining;
             arcs.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PolyArcRequest {
             drawable,
             gc,
@@ -18671,7 +18865,9 @@ impl<'input> FillPolyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(FILL_POLY_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (shape, remaining) = u8::try_parse(remaining)?;
@@ -18687,7 +18883,8 @@ impl<'input> FillPolyRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FillPolyRequest {
             drawable,
             gc,
@@ -18783,7 +18980,9 @@ impl<'input> PolyFillRectangleRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(POLY_FILL_RECTANGLE_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -18794,7 +18993,8 @@ impl<'input> PolyFillRectangleRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PolyFillRectangleRequest {
             drawable,
             gc,
@@ -18886,7 +19086,9 @@ impl<'input> PolyFillArcRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(POLY_FILL_ARC_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -18897,7 +19099,8 @@ impl<'input> PolyFillArcRequest<'input> {
             remaining = new_remaining;
             arcs.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PolyFillArcRequest {
             drawable,
             gc,
@@ -19054,8 +19257,10 @@ impl<'input> PutImageRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(PUT_IMAGE_REQUEST), None)?;
-        let (format, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (format, remaining) = u8::try_parse(remaining)?;
         let format = format.try_into()?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -19066,7 +19271,8 @@ impl<'input> PutImageRequest<'input> {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = remaining.split_at(remaining.len());
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PutImageRequest {
             format,
             drawable,
@@ -19160,15 +19366,18 @@ impl GetImageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_IMAGE_REQUEST), None)?;
-        let (format, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (format, remaining) = u8::try_parse(remaining)?;
         let format = format.try_into()?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (plane_mask, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetImageRequest {
             format,
             drawable,
@@ -19295,13 +19504,16 @@ impl<'input> PolyText8Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(POLY_TEXT8_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (items, remaining) = remaining.split_at(remaining.len());
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PolyText8Request {
             drawable,
             gc,
@@ -19379,13 +19591,16 @@ impl<'input> PolyText16Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(POLY_TEXT16_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (items, remaining) = remaining.split_at(remaining.len());
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PolyText16Request {
             drawable,
             gc,
@@ -19499,13 +19714,16 @@ impl<'input> ImageText8Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(IMAGE_TEXT8_REQUEST), None)?;
-        let (string_len, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (string_len, remaining) = u8::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ImageText8Request {
             drawable,
             gc,
@@ -19655,13 +19873,16 @@ impl<'input> ImageText16Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(IMAGE_TEXT16_REQUEST), None)?;
-        let (string_len, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (string_len, remaining) = u8::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (string, remaining) = crate::x11_utils::parse_list::<Char2b>(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ImageText16Request {
             drawable,
             gc,
@@ -19840,12 +20061,15 @@ impl CreateColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CREATE_COLORMAP_REQUEST), None)?;
-        let (alloc, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (alloc, remaining) = u8::try_parse(remaining)?;
         let alloc = alloc.try_into()?;
+        check_exhausted(remaining)?;
         let (mid, remaining) = Colormap::try_parse(value)?;
         let (window, remaining) = Window::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateColormapRequest {
             alloc,
             mid,
@@ -19903,9 +20127,12 @@ impl FreeColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(FREE_COLORMAP_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FreeColormapRequest {
             cmap,
         })
@@ -19963,10 +20190,13 @@ impl CopyColormapAndFreeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(COPY_COLORMAP_AND_FREE_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (mid, remaining) = Colormap::try_parse(value)?;
         let (src_cmap, remaining) = Colormap::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CopyColormapAndFreeRequest {
             mid,
             src_cmap,
@@ -20020,9 +20250,12 @@ impl InstallColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(INSTALL_COLORMAP_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(InstallColormapRequest {
             cmap,
         })
@@ -20074,9 +20307,12 @@ impl UninstallColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(UNINSTALL_COLORMAP_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UninstallColormapRequest {
             cmap,
         })
@@ -20128,9 +20364,12 @@ impl ListInstalledColormapsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(LIST_INSTALLED_COLORMAPS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ListInstalledColormapsRequest {
             window,
         })
@@ -20256,13 +20495,16 @@ impl AllocColorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(ALLOC_COLOR_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (red, remaining) = u16::try_parse(remaining)?;
         let (green, remaining) = u16::try_parse(remaining)?;
         let (blue, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AllocColorRequest {
             cmap,
             red,
@@ -20380,12 +20622,15 @@ impl<'input> AllocNamedColorRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(ALLOC_NAMED_COLOR_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AllocNamedColorRequest {
             cmap,
             name,
@@ -20486,11 +20731,14 @@ impl AllocColorCellsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(ALLOC_COLOR_CELLS_REQUEST), None)?;
-        let (contiguous, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (contiguous, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (colors, remaining) = u16::try_parse(remaining)?;
         let (planes, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AllocColorCellsRequest {
             contiguous,
             cmap,
@@ -20624,13 +20872,16 @@ impl AllocColorPlanesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(ALLOC_COLOR_PLANES_REQUEST), None)?;
-        let (contiguous, remaining) = bool::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (contiguous, remaining) = bool::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (colors, remaining) = u16::try_parse(remaining)?;
         let (reds, remaining) = u16::try_parse(remaining)?;
         let (greens, remaining) = u16::try_parse(remaining)?;
         let (blues, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AllocColorPlanesRequest {
             contiguous,
             cmap,
@@ -20752,7 +21003,9 @@ impl<'input> FreeColorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(FREE_COLORS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (plane_mask, remaining) = u32::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -20763,7 +21016,8 @@ impl<'input> FreeColorsRequest<'input> {
             remaining = new_remaining;
             pixels.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FreeColorsRequest {
             cmap,
             plane_mask,
@@ -20950,7 +21204,9 @@ impl<'input> StoreColorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(STORE_COLORS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
@@ -20960,7 +21216,8 @@ impl<'input> StoreColorsRequest<'input> {
             remaining = new_remaining;
             items.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(StoreColorsRequest {
             cmap,
             items: Cow::Owned(items),
@@ -21032,13 +21289,16 @@ impl<'input> StoreNamedColorRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(STORE_NAMED_COLOR_REQUEST), None)?;
-        let (flags, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (pixel, remaining) = u32::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(StoreNamedColorRequest {
             flags,
             cmap,
@@ -21151,7 +21411,9 @@ impl<'input> QueryColorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_COLORS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
@@ -21161,7 +21423,8 @@ impl<'input> QueryColorsRequest<'input> {
             remaining = new_remaining;
             pixels.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryColorsRequest {
             cmap,
             pixels: Cow::Owned(pixels),
@@ -21267,12 +21530,15 @@ impl<'input> LookupColorRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(LOOKUP_COLOR_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(LookupColorRequest {
             cmap,
             name,
@@ -21464,7 +21730,9 @@ impl CreateCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CREATE_CURSOR_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cid, remaining) = Cursor::try_parse(value)?;
         let (source, remaining) = Pixmap::try_parse(remaining)?;
         let (mask, remaining) = Pixmap::try_parse(remaining)?;
@@ -21476,7 +21744,8 @@ impl CreateCursorRequest {
         let (back_blue, remaining) = u16::try_parse(remaining)?;
         let (x, remaining) = u16::try_parse(remaining)?;
         let (y, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateCursorRequest {
             cid,
             source,
@@ -21686,7 +21955,9 @@ impl CreateGlyphCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CREATE_GLYPH_CURSOR_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cid, remaining) = Cursor::try_parse(value)?;
         let (source_font, remaining) = Font::try_parse(remaining)?;
         let (mask_font, remaining) = Font::try_parse(remaining)?;
@@ -21698,7 +21969,8 @@ impl CreateGlyphCursorRequest {
         let (back_red, remaining) = u16::try_parse(remaining)?;
         let (back_green, remaining) = u16::try_parse(remaining)?;
         let (back_blue, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateGlyphCursorRequest {
             cid,
             source_font,
@@ -21817,9 +22089,12 @@ impl FreeCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(FREE_CURSOR_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cursor, remaining) = Cursor::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FreeCursorRequest {
             cursor,
         })
@@ -21907,7 +22182,9 @@ impl RecolorCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(RECOLOR_CURSOR_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (cursor, remaining) = Cursor::try_parse(value)?;
         let (fore_red, remaining) = u16::try_parse(remaining)?;
         let (fore_green, remaining) = u16::try_parse(remaining)?;
@@ -21915,7 +22192,8 @@ impl RecolorCursorRequest {
         let (back_red, remaining) = u16::try_parse(remaining)?;
         let (back_green, remaining) = u16::try_parse(remaining)?;
         let (back_blue, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(RecolorCursorRequest {
             cursor,
             fore_red,
@@ -22054,12 +22332,15 @@ impl QueryBestSizeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_BEST_SIZE_REQUEST), None)?;
-        let (class, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (class, remaining) = u8::try_parse(remaining)?;
         let class = class.try_into()?;
+        check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryBestSizeRequest {
             class,
             drawable,
@@ -22170,11 +22451,14 @@ impl<'input> QueryExtensionRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_EXTENSION_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryExtensionRequest {
             name,
         })
@@ -22278,8 +22562,9 @@ impl ListExtensionsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(LIST_EXTENSIONS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(ListExtensionsRequest
         )
     }
@@ -22379,12 +22664,15 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CHANGE_KEYBOARD_MAPPING_REQUEST), None)?;
-        let (keycode_count, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (keycode_count, remaining) = u8::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (first_keycode, remaining) = Keycode::try_parse(value)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeKeyboardMappingRequest {
             keycode_count,
             first_keycode,
@@ -22444,10 +22732,13 @@ impl GetKeyboardMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_KEYBOARD_MAPPING_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (first_keycode, remaining) = Keycode::try_parse(value)?;
         let (count, remaining) = u8::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetKeyboardMappingRequest {
             first_keycode,
             count,
@@ -22960,10 +23251,13 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CHANGE_KEYBOARD_CONTROL_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (value_mask, remaining) = u32::try_parse(value)?;
         let (value_list, remaining) = ChangeKeyboardControlAux::try_parse(remaining, value_mask)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeKeyboardControlRequest {
             value_list: Cow::Owned(value_list),
         })
@@ -23008,8 +23302,9 @@ impl GetKeyboardControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_KEYBOARD_CONTROL_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(GetKeyboardControlRequest
         )
     }
@@ -23093,8 +23388,9 @@ impl BellRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(BELL_REQUEST), None)?;
-        let (percent, remaining) = i8::try_parse(&[header.minor_opcode])?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let (percent, remaining) = i8::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         Ok(BellRequest {
             percent,
         })
@@ -23158,13 +23454,16 @@ impl ChangePointerControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CHANGE_POINTER_CONTROL_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (acceleration_numerator, remaining) = i16::try_parse(value)?;
         let (acceleration_denominator, remaining) = i16::try_parse(remaining)?;
         let (threshold, remaining) = i16::try_parse(remaining)?;
         let (do_acceleration, remaining) = bool::try_parse(remaining)?;
         let (do_threshold, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangePointerControlRequest {
             acceleration_numerator,
             acceleration_denominator,
@@ -23217,8 +23516,9 @@ impl GetPointerControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_POINTER_CONTROL_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(GetPointerControlRequest
         )
     }
@@ -23437,14 +23737,17 @@ impl SetScreenSaverRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_SCREEN_SAVER_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (timeout, remaining) = i16::try_parse(value)?;
         let (interval, remaining) = i16::try_parse(remaining)?;
         let (prefer_blanking, remaining) = u8::try_parse(remaining)?;
         let prefer_blanking = prefer_blanking.try_into()?;
         let (allow_exposures, remaining) = u8::try_parse(remaining)?;
         let allow_exposures = allow_exposures.try_into()?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetScreenSaverRequest {
             timeout,
             interval,
@@ -23495,8 +23798,9 @@ impl GetScreenSaverRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_SCREEN_SAVER_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(GetScreenSaverRequest
         )
     }
@@ -23728,14 +24032,17 @@ impl<'input> ChangeHostsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(CHANGE_HOSTS_REQUEST), None)?;
-        let (mode, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
+        check_exhausted(remaining)?;
         let (family, remaining) = u8::try_parse(value)?;
         let family = family.try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (address_len, remaining) = u16::try_parse(remaining)?;
         let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeHostsRequest {
             mode,
             family,
@@ -23845,8 +24152,9 @@ impl ListHostsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(LIST_HOSTS_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(ListHostsRequest
         )
     }
@@ -24005,9 +24313,10 @@ impl SetAccessControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_ACCESS_CONTROL_REQUEST), None)?;
-        let (mode, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
-        let _ = value;
+        check_exhausted(remaining)?;
         Ok(SetAccessControlRequest {
             mode,
         })
@@ -24120,9 +24429,10 @@ impl SetCloseDownModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_CLOSE_DOWN_MODE_REQUEST), None)?;
-        let (mode, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
-        let _ = value;
+        check_exhausted(remaining)?;
         Ok(SetCloseDownModeRequest {
             mode,
         })
@@ -24252,9 +24562,12 @@ impl KillClientRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(KILL_CLIENT_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (resource, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(KillClientRequest {
             resource,
         })
@@ -24340,12 +24653,15 @@ impl<'input> RotatePropertiesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(ROTATE_PROPERTIES_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (atoms_len, remaining) = u16::try_parse(remaining)?;
         let (delta, remaining) = i16::try_parse(remaining)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(RotatePropertiesRequest {
             window,
             delta,
@@ -24467,9 +24783,10 @@ impl ForceScreenSaverRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(FORCE_SCREEN_SAVER_REQUEST), None)?;
-        let (mode, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
-        let _ = value;
+        check_exhausted(remaining)?;
         Ok(ForceScreenSaverRequest {
             mode,
         })
@@ -24586,9 +24903,12 @@ impl<'input> SetPointerMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_POINTER_MAPPING_REQUEST), None)?;
-        let (map_len, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (map_len, remaining) = u8::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (map, remaining) = crate::x11_utils::parse_u8_list(value, map_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetPointerMappingRequest {
             map,
         })
@@ -24658,8 +24978,9 @@ impl GetPointerMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_POINTER_MAPPING_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(GetPointerMappingRequest
         )
     }
@@ -24831,9 +25152,12 @@ impl<'input> SetModifierMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(SET_MODIFIER_MAPPING_REQUEST), None)?;
-        let (keycodes_per_modifier, remaining) = u8::try_parse(&[header.minor_opcode])?;
+        let remaining = &[header.minor_opcode];
+        let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
+        check_exhausted(remaining)?;
         let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetModifierMappingRequest {
             keycodes,
         })
@@ -24903,8 +25227,9 @@ impl GetModifierMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(GET_MODIFIER_MAPPING_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(GetModifierMappingRequest
         )
     }
@@ -24989,8 +25314,9 @@ impl NoOperationRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(NO_OPERATION_REQUEST), None)?;
-        let remaining = &[header.minor_opcode].get(1..).ok_or(ParseError::ParseError)?;
-        let _ = value;
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        check_exhausted(remaining)?;
         Ok(NoOperationRequest
         )
     }

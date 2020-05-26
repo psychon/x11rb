@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -545,7 +545,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             major_version,
             minor_version,
@@ -729,7 +730,8 @@ impl SetScreenConfigRequest {
         let (rotation, remaining) = u16::try_parse(remaining)?;
         let (rate, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetScreenConfigRequest {
             window,
             timestamp,
@@ -919,7 +921,8 @@ impl SelectInputRequest {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (enable, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SelectInputRequest {
             window,
             enable,
@@ -977,7 +980,8 @@ impl GetScreenInfoRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_SCREEN_INFO_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetScreenInfoRequest {
             window,
         })
@@ -1090,7 +1094,8 @@ impl GetScreenSizeRangeRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_SCREEN_SIZE_RANGE_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetScreenSizeRangeRequest {
             window,
         })
@@ -1200,7 +1205,8 @@ impl SetScreenSizeRequest {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (mm_width, remaining) = u32::try_parse(remaining)?;
         let (mm_height, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetScreenSizeRequest {
             window,
             width,
@@ -1455,7 +1461,8 @@ impl GetScreenResourcesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_SCREEN_RESOURCES_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetScreenResourcesRequest {
             window,
         })
@@ -1676,7 +1683,8 @@ impl GetOutputInfoRequest {
         validate_request_pieces(header, value, None, Some(GET_OUTPUT_INFO_REQUEST))?;
         let (output, remaining) = Output::try_parse(value)?;
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetOutputInfoRequest {
             output,
             config_timestamp,
@@ -1840,7 +1848,8 @@ impl ListOutputPropertiesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(LIST_OUTPUT_PROPERTIES_REQUEST))?;
         let (output, remaining) = Output::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ListOutputPropertiesRequest {
             output,
         })
@@ -1943,7 +1952,8 @@ impl QueryOutputPropertyRequest {
         validate_request_pieces(header, value, None, Some(QUERY_OUTPUT_PROPERTY_REQUEST))?;
         let (output, remaining) = Output::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryOutputPropertyRequest {
             output,
             property,
@@ -2076,7 +2086,8 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
             remaining = new_remaining;
             values.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ConfigureOutputPropertyRequest {
             output,
             property,
@@ -2177,7 +2188,8 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (num_units, remaining) = u32::try_parse(remaining)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_units.checked_mul(u32::from(format)).ok_or(ParseError::ParseError)?.checked_div(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeOutputPropertyRequest {
             output,
             property,
@@ -2250,7 +2262,8 @@ impl DeleteOutputPropertyRequest {
         validate_request_pieces(header, value, None, Some(DELETE_OUTPUT_PROPERTY_REQUEST))?;
         let (output, remaining) = Output::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DeleteOutputPropertyRequest {
             output,
             property,
@@ -2345,7 +2358,8 @@ impl GetOutputPropertyRequest {
         let (delete, remaining) = bool::try_parse(remaining)?;
         let (pending, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetOutputPropertyRequest {
             output,
             property,
@@ -2487,7 +2501,8 @@ impl<'input> CreateModeRequest<'input> {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (mode_info, remaining) = ModeInfo::try_parse(remaining)?;
         let (name, remaining) = remaining.split_at(remaining.len());
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateModeRequest {
             window,
             mode_info,
@@ -2571,7 +2586,8 @@ impl DestroyModeRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_MODE_REQUEST))?;
         let (mode, remaining) = Mode::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyModeRequest {
             mode,
         })
@@ -2632,7 +2648,8 @@ impl AddOutputModeRequest {
         validate_request_pieces(header, value, None, Some(ADD_OUTPUT_MODE_REQUEST))?;
         let (output, remaining) = Output::try_parse(value)?;
         let (mode, remaining) = Mode::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AddOutputModeRequest {
             output,
             mode,
@@ -2695,7 +2712,8 @@ impl DeleteOutputModeRequest {
         validate_request_pieces(header, value, None, Some(DELETE_OUTPUT_MODE_REQUEST))?;
         let (output, remaining) = Output::try_parse(value)?;
         let (mode, remaining) = Mode::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DeleteOutputModeRequest {
             output,
             mode,
@@ -2758,7 +2776,8 @@ impl GetCrtcInfoRequest {
         validate_request_pieces(header, value, None, Some(GET_CRTC_INFO_REQUEST))?;
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetCrtcInfoRequest {
             crtc,
             config_timestamp,
@@ -2941,7 +2960,8 @@ impl<'input> SetCrtcConfigRequest<'input> {
             remaining = new_remaining;
             outputs.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetCrtcConfigRequest {
             crtc,
             timestamp,
@@ -3039,7 +3059,8 @@ impl GetCrtcGammaSizeRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_CRTC_GAMMA_SIZE_REQUEST))?;
         let (crtc, remaining) = Crtc::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetCrtcGammaSizeRequest {
             crtc,
         })
@@ -3119,7 +3140,8 @@ impl GetCrtcGammaRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_CRTC_GAMMA_REQUEST))?;
         let (crtc, remaining) = Crtc::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetCrtcGammaRequest {
             crtc,
         })
@@ -3243,7 +3265,8 @@ impl<'input> SetCrtcGammaRequest<'input> {
         let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
         let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
         let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetCrtcGammaRequest {
             crtc,
             red: Cow::Owned(red),
@@ -3303,7 +3326,8 @@ impl GetScreenResourcesCurrentRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_SCREEN_RESOURCES_CURRENT_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetScreenResourcesCurrentRequest {
             window,
         })
@@ -3590,7 +3614,8 @@ impl<'input> SetCrtcTransformRequest<'input> {
             remaining = new_remaining;
             filter_params.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetCrtcTransformRequest {
             crtc,
             transform,
@@ -3650,7 +3675,8 @@ impl GetCrtcTransformRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_CRTC_TRANSFORM_REQUEST))?;
         let (crtc, remaining) = Crtc::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetCrtcTransformRequest {
             crtc,
         })
@@ -3812,7 +3838,8 @@ impl GetPanningRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_PANNING_REQUEST))?;
         let (crtc, remaining) = Crtc::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetPanningRequest {
             crtc,
         })
@@ -3984,7 +4011,8 @@ impl SetPanningRequest {
         let (border_top, remaining) = i16::try_parse(remaining)?;
         let (border_right, remaining) = i16::try_parse(remaining)?;
         let (border_bottom, remaining) = i16::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetPanningRequest {
             crtc,
             timestamp,
@@ -4098,7 +4126,8 @@ impl SetOutputPrimaryRequest {
         validate_request_pieces(header, value, None, Some(SET_OUTPUT_PRIMARY_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (output, remaining) = Output::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetOutputPrimaryRequest {
             window,
             output,
@@ -4154,7 +4183,8 @@ impl GetOutputPrimaryRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_OUTPUT_PRIMARY_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetOutputPrimaryRequest {
             window,
         })
@@ -4233,7 +4263,8 @@ impl GetProvidersRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_PROVIDERS_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetProvidersRequest {
             window,
         })
@@ -4407,7 +4438,8 @@ impl GetProviderInfoRequest {
         validate_request_pieces(header, value, None, Some(GET_PROVIDER_INFO_REQUEST))?;
         let (provider, remaining) = Provider::try_parse(value)?;
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetProviderInfoRequest {
             provider,
             config_timestamp,
@@ -4575,7 +4607,8 @@ impl SetProviderOffloadSinkRequest {
         let (provider, remaining) = Provider::try_parse(value)?;
         let (sink_provider, remaining) = Provider::try_parse(remaining)?;
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetProviderOffloadSinkRequest {
             provider,
             sink_provider,
@@ -4647,7 +4680,8 @@ impl SetProviderOutputSourceRequest {
         let (provider, remaining) = Provider::try_parse(value)?;
         let (source_provider, remaining) = Provider::try_parse(remaining)?;
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetProviderOutputSourceRequest {
             provider,
             source_provider,
@@ -4705,7 +4739,8 @@ impl ListProviderPropertiesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(LIST_PROVIDER_PROPERTIES_REQUEST))?;
         let (provider, remaining) = Provider::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ListProviderPropertiesRequest {
             provider,
         })
@@ -4808,7 +4843,8 @@ impl QueryProviderPropertyRequest {
         validate_request_pieces(header, value, None, Some(QUERY_PROVIDER_PROPERTY_REQUEST))?;
         let (provider, remaining) = Provider::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryProviderPropertyRequest {
             provider,
             property,
@@ -4941,7 +4977,8 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
             remaining = new_remaining;
             values.push(v);
         }
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ConfigureProviderPropertyRequest {
             provider,
             property,
@@ -5041,7 +5078,8 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeProviderPropertyRequest {
             provider,
             property,
@@ -5114,7 +5152,8 @@ impl DeleteProviderPropertyRequest {
         validate_request_pieces(header, value, None, Some(DELETE_PROVIDER_PROPERTY_REQUEST))?;
         let (provider, remaining) = Provider::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DeleteProviderPropertyRequest {
             provider,
             property,
@@ -5209,7 +5248,8 @@ impl GetProviderPropertyRequest {
         let (delete, remaining) = bool::try_parse(remaining)?;
         let (pending, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetProviderPropertyRequest {
             provider,
             property,
@@ -6038,7 +6078,8 @@ impl GetMonitorsRequest {
         validate_request_pieces(header, value, None, Some(GET_MONITORS_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (get_active, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMonitorsRequest {
             window,
             get_active,
@@ -6146,7 +6187,8 @@ impl SetMonitorRequest {
         validate_request_pieces(header, value, None, Some(SET_MONITOR_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (monitorinfo, remaining) = MonitorInfo::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetMonitorRequest {
             window,
             monitorinfo,
@@ -6209,7 +6251,8 @@ impl DeleteMonitorRequest {
         validate_request_pieces(header, value, None, Some(DELETE_MONITOR_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DeleteMonitorRequest {
             window,
             name,
@@ -6292,7 +6335,8 @@ impl<'input> CreateLeaseRequest<'input> {
         let (num_outputs, remaining) = u16::try_parse(remaining)?;
         let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs.try_into().or(Err(ParseError::ParseError))?)?;
         let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateLeaseRequest {
             window,
             lid,
@@ -6388,7 +6432,8 @@ impl FreeLeaseRequest {
         validate_request_pieces(header, value, None, Some(FREE_LEASE_REQUEST))?;
         let (lid, remaining) = Lease::try_parse(value)?;
         let (terminate, remaining) = u8::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FreeLeaseRequest {
             lid,
             terminate,

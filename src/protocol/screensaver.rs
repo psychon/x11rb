@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -271,7 +271,8 @@ impl QueryVersionRequest {
         let (client_major_version, remaining) = u8::try_parse(value)?;
         let (client_minor_version, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             client_major_version,
             client_minor_version,
@@ -355,7 +356,8 @@ impl QueryInfoRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_INFO_REQUEST))?;
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryInfoRequest {
             drawable,
         })
@@ -452,7 +454,8 @@ impl SelectInputRequest {
         validate_request_pieces(header, value, None, Some(SELECT_INPUT_REQUEST))?;
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SelectInputRequest {
             drawable,
             event_mask,
@@ -902,7 +905,8 @@ impl<'input> SetAttributesRequest<'input> {
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = SetAttributesAux::try_parse(remaining, value_mask)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetAttributesRequest {
             drawable,
             x,
@@ -974,7 +978,8 @@ impl UnsetAttributesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(UNSET_ATTRIBUTES_REQUEST))?;
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UnsetAttributesRequest {
             drawable,
         })
@@ -1028,7 +1033,8 @@ impl SuspendRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(SUSPEND_REQUEST))?;
         let (suspend, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SuspendRequest {
             suspend,
         })

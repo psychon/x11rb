@@ -292,6 +292,15 @@ pub fn parse_u8_list(data: &[u8], list_length: usize) -> Result<(&[u8], &[u8]), 
     }
 }
 
+/// Returns a ParseError if the input slice is not finished.
+pub fn check_exhausted(data: &[u8]) -> Result<(), ParseError> {
+    if data.is_empty() {
+        return Ok(());
+    }
+
+    Err(ParseError::ParseError)
+}
+
 impl<T: Serialize> Serialize for [T] {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Self::Bytes {

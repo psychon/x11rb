@@ -85,7 +85,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
-            "use crate::x11_utils::{{validate_request_pieces, RequestHeader, Serialize, TryParse}};"
+            "use crate::x11_utils::{{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse}};"
         );
         outln!(
             out,
@@ -908,7 +908,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
                     let from = if !seen_complete_header {
                         assert_eq!(field.size(), Some(1));
-                        "&[header.minor_opcode]"
+                        outln!(out, "let remaining = &[header.minor_opcode];");
+                        "remaining"
                     } else if is_first_body_field {
                         is_first_body_field = false;
                         "value"
@@ -917,13 +918,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     };
                     self.emit_field_parse(field, "", from, FieldContainer::Request(name.to_string()), out);
                     self.emit_field_post_parse(field, out);
+
+                    if !seen_complete_header {
+                        // Dispose of the "remaining" variable just generated.
+                        outln!(out, "check_exhausted(remaining)?;");
+                    }
                 }
 
-                // Suppress a warning about this being unused.
-                if is_first_body_field {
-                    outln!(out, "let _ = value;");
-                } else {
-                    outln!(out, "let _ = remaining;");
+                // If there's a `remaining` variable from parsing the body we should check it.
+                if !is_first_body_field {
+                    // Trailing padding is not described in the XML. Round this slice off to 4 bytes.
+                    outln!(out, "let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];");
+                    outln!(out, "check_exhausted(remaining)?;");
                 }
 
                 let has_members = !gathered.request_args.is_empty();
@@ -3635,7 +3641,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 // and because we can calculate how much padding we need from the
                 // string length directly.
                 assert_eq!(expr_ref.name, "odd_length");
-                outln!(out, "let remaining = &[];");
+                outln!(out, "let remaining = &remaining[1..];");
             }
             xcbdefs::FieldDef::VirtualLen(_) => {}
         }

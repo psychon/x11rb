@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -511,7 +511,8 @@ impl<'input> RenderRequest<'input> {
         validate_request_pieces(header, value, None, Some(RENDER_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (data, remaining) = remaining.split_at(remaining.len());
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(RenderRequest {
             context_tag,
             data,
@@ -589,7 +590,8 @@ impl<'input> RenderLargeRequest<'input> {
         let (request_total, remaining) = u16::try_parse(remaining)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(RenderLargeRequest {
             context_tag,
             request_num,
@@ -678,7 +680,8 @@ impl CreateContextRequest {
         let (share_list, remaining) = Context::try_parse(remaining)?;
         let (is_direct, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateContextRequest {
             context,
             visual,
@@ -740,7 +743,8 @@ impl DestroyContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_CONTEXT_REQUEST))?;
         let (context, remaining) = Context::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyContextRequest {
             context,
         })
@@ -808,7 +812,8 @@ impl MakeCurrentRequest {
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (context, remaining) = Context::try_parse(remaining)?;
         let (old_context_tag, remaining) = ContextTag::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(MakeCurrentRequest {
             drawable,
             context,
@@ -892,7 +897,8 @@ impl IsDirectRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(IS_DIRECT_REQUEST))?;
         let (context, remaining) = Context::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(IsDirectRequest {
             context,
         })
@@ -979,7 +985,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             major_version,
             minor_version,
@@ -1063,7 +1070,8 @@ impl WaitGLRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(WAIT_GL_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(WaitGLRequest {
             context_tag,
         })
@@ -1117,7 +1125,8 @@ impl WaitXRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(WAIT_X_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(WaitXRequest {
             context_tag,
         })
@@ -1192,7 +1201,8 @@ impl CopyContextRequest {
         let (dest, remaining) = Context::try_parse(remaining)?;
         let (mask, remaining) = u32::try_parse(remaining)?;
         let (src_context_tag, remaining) = ContextTag::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CopyContextRequest {
             src,
             dest,
@@ -1347,7 +1357,8 @@ impl SwapBuffersRequest {
         validate_request_pieces(header, value, None, Some(SWAP_BUFFERS_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (drawable, remaining) = Drawable::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SwapBuffersRequest {
             context_tag,
             drawable,
@@ -1431,7 +1442,8 @@ impl UseXFontRequest {
         let (first, remaining) = u32::try_parse(remaining)?;
         let (count, remaining) = u32::try_parse(remaining)?;
         let (list_base, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(UseXFontRequest {
             context_tag,
             font,
@@ -1514,7 +1526,8 @@ impl CreateGLXPixmapRequest {
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
         let (glx_pixmap, remaining) = Pixmap::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateGLXPixmapRequest {
             screen,
             visual,
@@ -1574,7 +1587,8 @@ impl GetVisualConfigsRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_VISUAL_CONFIGS_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetVisualConfigsRequest {
             screen,
         })
@@ -1672,7 +1686,8 @@ impl DestroyGLXPixmapRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_GLX_PIXMAP_REQUEST))?;
         let (glx_pixmap, remaining) = Pixmap::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyGLXPixmapRequest {
             glx_pixmap,
         })
@@ -1738,7 +1753,8 @@ impl<'input> VendorPrivateRequest<'input> {
         let (vendor_code, remaining) = u32::try_parse(value)?;
         let (context_tag, remaining) = ContextTag::try_parse(remaining)?;
         let (data, remaining) = remaining.split_at(remaining.len());
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(VendorPrivateRequest {
             vendor_code,
             context_tag,
@@ -1808,7 +1824,8 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
         let (vendor_code, remaining) = u32::try_parse(value)?;
         let (context_tag, remaining) = ContextTag::try_parse(remaining)?;
         let (data, remaining) = remaining.split_at(remaining.len());
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(VendorPrivateWithReplyRequest {
             vendor_code,
             context_tag,
@@ -1912,7 +1929,8 @@ impl QueryExtensionsStringRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_EXTENSIONS_STRING_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryExtensionsStringRequest {
             screen,
         })
@@ -2000,7 +2018,8 @@ impl QueryServerStringRequest {
         validate_request_pieces(header, value, None, Some(QUERY_SERVER_STRING_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
         let (name, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryServerStringRequest {
             screen,
             name,
@@ -2119,7 +2138,8 @@ impl<'input> ClientInfoRequest<'input> {
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let (str_len, remaining) = u32::try_parse(remaining)?;
         let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, str_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ClientInfoRequest {
             major_version,
             minor_version,
@@ -2177,7 +2197,8 @@ impl GetFBConfigsRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_FB_CONFIGS_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetFBConfigsRequest {
             screen,
         })
@@ -2310,7 +2331,8 @@ impl<'input> CreatePixmapRequest<'input> {
         let (glx_pixmap, remaining) = Pixmap::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
         let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreatePixmapRequest {
             screen,
             fbconfig,
@@ -2372,7 +2394,8 @@ impl DestroyPixmapRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_PIXMAP_REQUEST))?;
         let (glx_pixmap, remaining) = Pixmap::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyPixmapRequest {
             glx_pixmap,
         })
@@ -2462,7 +2485,8 @@ impl CreateNewContextRequest {
         let (share_list, remaining) = Context::try_parse(remaining)?;
         let (is_direct, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateNewContextRequest {
             context,
             fbconfig,
@@ -2526,7 +2550,8 @@ impl QueryContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_CONTEXT_REQUEST))?;
         let (context, remaining) = Context::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryContextRequest {
             context,
         })
@@ -2644,7 +2669,8 @@ impl MakeContextCurrentRequest {
         let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (read_drawable, remaining) = Drawable::try_parse(remaining)?;
         let (context, remaining) = Context::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(MakeContextCurrentRequest {
             old_context_tag,
             drawable,
@@ -2758,7 +2784,8 @@ impl<'input> CreatePbufferRequest<'input> {
         let (pbuffer, remaining) = Pbuffer::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
         let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreatePbufferRequest {
             screen,
             fbconfig,
@@ -2818,7 +2845,8 @@ impl DestroyPbufferRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_PBUFFER_REQUEST))?;
         let (pbuffer, remaining) = Pbuffer::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyPbufferRequest {
             pbuffer,
         })
@@ -2872,7 +2900,8 @@ impl GetDrawableAttributesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_DRAWABLE_ATTRIBUTES_REQUEST))?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetDrawableAttributesRequest {
             drawable,
         })
@@ -2983,7 +3012,8 @@ impl<'input> ChangeDrawableAttributesRequest<'input> {
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
         let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ChangeDrawableAttributesRequest {
             drawable,
             attribs: Cow::Owned(attribs),
@@ -3074,7 +3104,8 @@ impl<'input> CreateWindowRequest<'input> {
         let (glx_window, remaining) = Window::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
         let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateWindowRequest {
             screen,
             fbconfig,
@@ -3136,7 +3167,8 @@ impl DeleteWindowRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DELETE_WINDOW_REQUEST))?;
         let (glxwindow, remaining) = Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DeleteWindowRequest {
             glxwindow,
         })
@@ -3231,7 +3263,8 @@ impl<'input> SetClientInfoARBRequest<'input> {
         let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_versions.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetClientInfoARBRequest {
             major_version,
             minor_version,
@@ -3336,7 +3369,8 @@ impl<'input> CreateContextAttribsARBRequest<'input> {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
         let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateContextAttribsARBRequest {
             context,
             fbconfig,
@@ -3441,7 +3475,8 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_versions.checked_mul(3u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SetClientInfo2ARBRequest {
             major_version,
             minor_version,
@@ -3517,7 +3552,8 @@ impl NewListRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (list, remaining) = u32::try_parse(remaining)?;
         let (mode, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(NewListRequest {
             context_tag,
             list,
@@ -3575,7 +3611,8 @@ impl EndListRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(END_LIST_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(EndListRequest {
             context_tag,
         })
@@ -3643,7 +3680,8 @@ impl DeleteListsRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (list, remaining) = u32::try_parse(remaining)?;
         let (range, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DeleteListsRequest {
             context_tag,
             list,
@@ -3708,7 +3746,8 @@ impl GenListsRequest {
         validate_request_pieces(header, value, None, Some(GEN_LISTS_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (range, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GenListsRequest {
             context_tag,
             range,
@@ -3803,7 +3842,8 @@ impl FeedbackBufferRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (size, remaining) = i32::try_parse(remaining)?;
         let (type_, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FeedbackBufferRequest {
             context_tag,
             size,
@@ -3868,7 +3908,8 @@ impl SelectBufferRequest {
         validate_request_pieces(header, value, None, Some(SELECT_BUFFER_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (size, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(SelectBufferRequest {
             context_tag,
             size,
@@ -3931,7 +3972,8 @@ impl RenderModeRequest {
         validate_request_pieces(header, value, None, Some(RENDER_MODE_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (mode, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(RenderModeRequest {
             context_tag,
             mode,
@@ -4083,7 +4125,8 @@ impl FinishRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(FINISH_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FinishRequest {
             context_tag,
         })
@@ -4174,7 +4217,8 @@ impl PixelStorefRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PixelStorefRequest {
             context_tag,
             pname,
@@ -4246,7 +4290,8 @@ impl PixelStoreiRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(PixelStoreiRequest {
             context_tag,
             pname,
@@ -4356,7 +4401,8 @@ impl ReadPixelsRequest {
         let (type_, remaining) = u32::try_parse(remaining)?;
         let (swap_bytes, remaining) = bool::try_parse(remaining)?;
         let (lsb_first, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(ReadPixelsRequest {
             context_tag,
             x,
@@ -4475,7 +4521,8 @@ impl GetBooleanvRequest {
         validate_request_pieces(header, value, None, Some(GET_BOOLEANV_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (pname, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetBooleanvRequest {
             context_tag,
             pname,
@@ -4583,7 +4630,8 @@ impl GetClipPlaneRequest {
         validate_request_pieces(header, value, None, Some(GET_CLIP_PLANE_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (plane, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetClipPlaneRequest {
             context_tag,
             plane,
@@ -4687,7 +4735,8 @@ impl GetDoublevRequest {
         validate_request_pieces(header, value, None, Some(GET_DOUBLEV_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetDoublevRequest {
             context_tag,
             pname,
@@ -4788,7 +4837,8 @@ impl GetErrorRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_ERROR_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetErrorRequest {
             context_tag,
         })
@@ -4874,7 +4924,8 @@ impl GetFloatvRequest {
         validate_request_pieces(header, value, None, Some(GET_FLOATV_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetFloatvRequest {
             context_tag,
             pname,
@@ -4982,7 +5033,8 @@ impl GetIntegervRequest {
         validate_request_pieces(header, value, None, Some(GET_INTEGERV_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetIntegervRequest {
             context_tag,
             pname,
@@ -5097,7 +5149,8 @@ impl GetLightfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (light, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetLightfvRequest {
             context_tag,
             light,
@@ -5214,7 +5267,8 @@ impl GetLightivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (light, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetLightivRequest {
             context_tag,
             light,
@@ -5331,7 +5385,8 @@ impl GetMapdvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (query, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMapdvRequest {
             context_tag,
             target,
@@ -5448,7 +5503,8 @@ impl GetMapfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (query, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMapfvRequest {
             context_tag,
             target,
@@ -5565,7 +5621,8 @@ impl GetMapivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (query, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMapivRequest {
             context_tag,
             target,
@@ -5682,7 +5739,8 @@ impl GetMaterialfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (face, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMaterialfvRequest {
             context_tag,
             face,
@@ -5799,7 +5857,8 @@ impl GetMaterialivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (face, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMaterialivRequest {
             context_tag,
             face,
@@ -5909,7 +5968,8 @@ impl GetPixelMapfvRequest {
         validate_request_pieces(header, value, None, Some(GET_PIXEL_MAPFV_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (map, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetPixelMapfvRequest {
             context_tag,
             map,
@@ -6017,7 +6077,8 @@ impl GetPixelMapuivRequest {
         validate_request_pieces(header, value, None, Some(GET_PIXEL_MAPUIV_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (map, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetPixelMapuivRequest {
             context_tag,
             map,
@@ -6125,7 +6186,8 @@ impl GetPixelMapusvRequest {
         validate_request_pieces(header, value, None, Some(GET_PIXEL_MAPUSV_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (map, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetPixelMapusvRequest {
             context_tag,
             map,
@@ -6233,7 +6295,8 @@ impl GetPolygonStippleRequest {
         validate_request_pieces(header, value, None, Some(GET_POLYGON_STIPPLE_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (lsb_first, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetPolygonStippleRequest {
             context_tag,
             lsb_first,
@@ -6338,7 +6401,8 @@ impl GetStringRequest {
         validate_request_pieces(header, value, None, Some(GET_STRING_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (name, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetStringRequest {
             context_tag,
             name,
@@ -6452,7 +6516,8 @@ impl GetTexEnvfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexEnvfvRequest {
             context_tag,
             target,
@@ -6569,7 +6634,8 @@ impl GetTexEnvivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexEnvivRequest {
             context_tag,
             target,
@@ -6686,7 +6752,8 @@ impl GetTexGendvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (coord, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexGendvRequest {
             context_tag,
             coord,
@@ -6803,7 +6870,8 @@ impl GetTexGenfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (coord, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexGenfvRequest {
             context_tag,
             coord,
@@ -6920,7 +6988,8 @@ impl GetTexGenivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (coord, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexGenivRequest {
             context_tag,
             coord,
@@ -7058,7 +7127,8 @@ impl GetTexImageRequest {
         let (format, remaining) = u32::try_parse(remaining)?;
         let (type_, remaining) = u32::try_parse(remaining)?;
         let (swap_bytes, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexImageRequest {
             context_tag,
             target,
@@ -7185,7 +7255,8 @@ impl GetTexParameterfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexParameterfvRequest {
             context_tag,
             target,
@@ -7302,7 +7373,8 @@ impl GetTexParameterivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexParameterivRequest {
             context_tag,
             target,
@@ -7426,7 +7498,8 @@ impl GetTexLevelParameterfvRequest {
         let (target, remaining) = u32::try_parse(remaining)?;
         let (level, remaining) = i32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexLevelParameterfvRequest {
             context_tag,
             target,
@@ -7552,7 +7625,8 @@ impl GetTexLevelParameterivRequest {
         let (target, remaining) = u32::try_parse(remaining)?;
         let (level, remaining) = i32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetTexLevelParameterivRequest {
             context_tag,
             target,
@@ -7664,7 +7738,8 @@ impl IsEnabledRequest {
         validate_request_pieces(header, value, None, Some(IS_ENABLED_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (capability, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(IsEnabledRequest {
             context_tag,
             capability,
@@ -7752,7 +7827,8 @@ impl IsListRequest {
         validate_request_pieces(header, value, None, Some(IS_LIST_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (list, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(IsListRequest {
             context_tag,
             list,
@@ -7833,7 +7909,8 @@ impl FlushRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(FLUSH_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(FlushRequest {
             context_tag,
         })
@@ -7900,7 +7977,8 @@ impl<'input> AreTexturesResidentRequest<'input> {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (n, remaining) = i32::try_parse(remaining)?;
         let (textures, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AreTexturesResidentRequest {
             context_tag,
             textures: Cow::Owned(textures),
@@ -8012,7 +8090,8 @@ impl<'input> DeleteTexturesRequest<'input> {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (n, remaining) = i32::try_parse(remaining)?;
         let (textures, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DeleteTexturesRequest {
             context_tag,
             textures: Cow::Owned(textures),
@@ -8075,7 +8154,8 @@ impl GenTexturesRequest {
         validate_request_pieces(header, value, None, Some(GEN_TEXTURES_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (n, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GenTexturesRequest {
             context_tag,
             n,
@@ -8178,7 +8258,8 @@ impl IsTextureRequest {
         validate_request_pieces(header, value, None, Some(IS_TEXTURE_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (texture, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(IsTextureRequest {
             context_tag,
             texture,
@@ -8287,7 +8368,8 @@ impl GetColorTableRequest {
         let (format, remaining) = u32::try_parse(remaining)?;
         let (type_, remaining) = u32::try_parse(remaining)?;
         let (swap_bytes, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetColorTableRequest {
             context_tag,
             target,
@@ -8408,7 +8490,8 @@ impl GetColorTableParameterfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetColorTableParameterfvRequest {
             context_tag,
             target,
@@ -8525,7 +8608,8 @@ impl GetColorTableParameterivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetColorTableParameterivRequest {
             context_tag,
             target,
@@ -8656,7 +8740,8 @@ impl GetConvolutionFilterRequest {
         let (format, remaining) = u32::try_parse(remaining)?;
         let (type_, remaining) = u32::try_parse(remaining)?;
         let (swap_bytes, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetConvolutionFilterRequest {
             context_tag,
             target,
@@ -8779,7 +8864,8 @@ impl GetConvolutionParameterfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetConvolutionParameterfvRequest {
             context_tag,
             target,
@@ -8896,7 +8982,8 @@ impl GetConvolutionParameterivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetConvolutionParameterivRequest {
             context_tag,
             target,
@@ -9027,7 +9114,8 @@ impl GetSeparableFilterRequest {
         let (format, remaining) = u32::try_parse(remaining)?;
         let (type_, remaining) = u32::try_parse(remaining)?;
         let (swap_bytes, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetSeparableFilterRequest {
             context_tag,
             target,
@@ -9167,7 +9255,8 @@ impl GetHistogramRequest {
         let (type_, remaining) = u32::try_parse(remaining)?;
         let (swap_bytes, remaining) = bool::try_parse(remaining)?;
         let (reset, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetHistogramRequest {
             context_tag,
             target,
@@ -9290,7 +9379,8 @@ impl GetHistogramParameterfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetHistogramParameterfvRequest {
             context_tag,
             target,
@@ -9407,7 +9497,8 @@ impl GetHistogramParameterivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetHistogramParameterivRequest {
             context_tag,
             target,
@@ -9541,7 +9632,8 @@ impl GetMinmaxRequest {
         let (type_, remaining) = u32::try_parse(remaining)?;
         let (swap_bytes, remaining) = bool::try_parse(remaining)?;
         let (reset, remaining) = bool::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMinmaxRequest {
             context_tag,
             target,
@@ -9661,7 +9753,8 @@ impl GetMinmaxParameterfvRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMinmaxParameterfvRequest {
             context_tag,
             target,
@@ -9778,7 +9871,8 @@ impl GetMinmaxParameterivRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetMinmaxParameterivRequest {
             context_tag,
             target,
@@ -9895,7 +9989,8 @@ impl GetCompressedTexImageARBRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (level, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetCompressedTexImageARBRequest {
             context_tag,
             target,
@@ -10011,7 +10106,8 @@ impl<'input> DeleteQueriesARBRequest<'input> {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (n, remaining) = i32::try_parse(remaining)?;
         let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DeleteQueriesARBRequest {
             context_tag,
             ids: Cow::Owned(ids),
@@ -10074,7 +10170,8 @@ impl GenQueriesARBRequest {
         validate_request_pieces(header, value, None, Some(GEN_QUERIES_ARB_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (n, remaining) = i32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GenQueriesARBRequest {
             context_tag,
             n,
@@ -10177,7 +10274,8 @@ impl IsQueryARBRequest {
         validate_request_pieces(header, value, None, Some(IS_QUERY_ARB_REQUEST))?;
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (id, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(IsQueryARBRequest {
             context_tag,
             id,
@@ -10272,7 +10370,8 @@ impl GetQueryivARBRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (target, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetQueryivARBRequest {
             context_tag,
             target,
@@ -10389,7 +10488,8 @@ impl GetQueryObjectivARBRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (id, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetQueryObjectivARBRequest {
             context_tag,
             id,
@@ -10506,7 +10606,8 @@ impl GetQueryObjectuivARBRequest {
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (id, remaining) = u32::try_parse(remaining)?;
         let (pname, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetQueryObjectuivARBRequest {
             context_tag,
             id,

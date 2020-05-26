@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -112,7 +112,6 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
-        let _ = value;
         Ok(QueryVersionRequest
         )
     }
@@ -192,7 +191,8 @@ impl QueryDirectRenderingCapableRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_DIRECT_RENDERING_CAPABLE_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryDirectRenderingCapableRequest {
             screen,
         })
@@ -271,7 +271,8 @@ impl OpenConnectionRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(OPEN_CONNECTION_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(OpenConnectionRequest {
             screen,
         })
@@ -372,7 +373,8 @@ impl CloseConnectionRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(CLOSE_CONNECTION_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CloseConnectionRequest {
             screen,
         })
@@ -426,7 +428,8 @@ impl GetClientDriverNameRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_CLIENT_DRIVER_NAME_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetClientDriverNameRequest {
             screen,
         })
@@ -543,7 +546,8 @@ impl CreateContextRequest {
         let (screen, remaining) = u32::try_parse(value)?;
         let (visual, remaining) = u32::try_parse(remaining)?;
         let (context, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateContextRequest {
             screen,
             visual,
@@ -633,7 +637,8 @@ impl DestroyContextRequest {
         validate_request_pieces(header, value, None, Some(DESTROY_CONTEXT_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
         let (context, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyContextRequest {
             screen,
             context,
@@ -696,7 +701,8 @@ impl CreateDrawableRequest {
         validate_request_pieces(header, value, None, Some(CREATE_DRAWABLE_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
         let (drawable, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(CreateDrawableRequest {
             screen,
             drawable,
@@ -784,7 +790,8 @@ impl DestroyDrawableRequest {
         validate_request_pieces(header, value, None, Some(DESTROY_DRAWABLE_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
         let (drawable, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(DestroyDrawableRequest {
             screen,
             drawable,
@@ -847,7 +854,8 @@ impl GetDrawableInfoRequest {
         validate_request_pieces(header, value, None, Some(GET_DRAWABLE_INFO_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
         let (drawable, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetDrawableInfoRequest {
             screen,
             drawable,
@@ -976,7 +984,8 @@ impl GetDeviceInfoRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_DEVICE_INFO_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetDeviceInfoRequest {
             screen,
         })
@@ -1088,7 +1097,8 @@ impl AuthConnectionRequest {
         validate_request_pieces(header, value, None, Some(AUTH_CONNECTION_REQUEST))?;
         let (screen, remaining) = u32::try_parse(value)?;
         let (magic, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(AuthConnectionRequest {
             screen,
             magic,

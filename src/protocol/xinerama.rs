@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -124,7 +124,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (major, remaining) = u8::try_parse(value)?;
         let (minor, remaining) = u8::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             major,
             minor,
@@ -207,7 +208,8 @@ impl GetStateRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_STATE_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetStateRequest {
             window,
         })
@@ -287,7 +289,8 @@ impl GetScreenCountRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_SCREEN_COUNT_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetScreenCountRequest {
             window,
         })
@@ -374,7 +377,8 @@ impl GetScreenSizeRequest {
         validate_request_pieces(header, value, None, Some(GET_SCREEN_SIZE_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (screen, remaining) = u32::try_parse(remaining)?;
-        let _ = remaining;
+        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        check_exhausted(remaining)?;
         Ok(GetScreenSizeRequest {
             window,
             screen,
@@ -453,7 +457,6 @@ impl IsActiveRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(IS_ACTIVE_REQUEST))?;
-        let _ = value;
         Ok(IsActiveRequest
         )
     }
@@ -521,7 +524,6 @@ impl QueryScreensRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_SCREENS_REQUEST))?;
-        let _ = value;
         Ok(QueryScreensRequest
         )
     }
