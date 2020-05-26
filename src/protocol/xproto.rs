@@ -5733,7 +5733,7 @@ impl From<Gravity> for Option<u32> {
     }
 }
 impl Gravity {
-    fn try_from(value: impl Into<u32>, value_for_zero: Self) -> Result<Self, ParseError> {
+    pub fn try_from(value: impl Into<u32>, value_for_zero: Self) -> Result<Self, ParseError> {
         let value = value.into();
         match value {
             0 => Ok(value_for_zero),

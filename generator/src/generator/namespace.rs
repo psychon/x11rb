@@ -1845,7 +1845,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let largest_type = larger_types.last().unwrap();
                     outln!(
                         out,
-                        "fn try_from(value: impl Into<{}>, value_for_zero: Self) -> Result<Self, \
+                        "pub fn try_from(value: impl Into<{}>, value_for_zero: Self) -> Result<Self, \
                          ParseError> {{",
                         largest_type,
                     );
@@ -3575,17 +3575,23 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "let {} = {}.try_into()?;", var_name, var_name);
             }
             if is_xproto_gravity(&enum_def) {
+                let enum_ns = enum_def.namespace.upgrade().unwrap();
+                let ns = if enum_ns.header != self.ns.header {
+                    format!("{}::", enum_ns.header)
+                } else {
+                    String::new()
+                };
                 let zero_type = match var_name {
-                    "bit_gravity" => "Gravity::BitForget",
-                    "win_gravity" => "Gravity::WinUnmap",
+                    "bit_gravity" => "BitForget",
+                    "win_gravity" => "WinUnmap",
                     _ => unreachable!(),
                 };
                 outln!(
                     out,
-                    "let {} = Gravity::try_from({}, {})?;",
-                    var_name,
-                    var_name,
-                    zero_type,
+                    "let {var} = {ns}Gravity::try_from({var}, {ns}Gravity::{zero})?;",
+                    var = var_name,
+                    ns = ns,
+                    zero = zero_type,
                 );
             }
         }
