@@ -3629,13 +3629,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "let mut {} = fds.split_off(fds_len);", rust_field_name);
                 outln!(out, "std::mem::swap(fds, &mut {});", rust_field_name);
             }
-            xcbdefs::FieldDef::Expr(_) => {
-                // Only supported in requests
-                outln!(
-                    out,
-                    "// TODO: Parse {}",
-                    field.name().unwrap_or("<unnamed field>")
-                );
+            xcbdefs::FieldDef::Expr(expr_ref) => {
+                // The only expr field we ever need to parse is odd_length, which
+                // can just be ignored because it's in the minor_opcode slot,
+                // and because we can calculate how much padding we need from the
+                // string length directly.
+                assert_eq!(expr_ref.name, "odd_length");
+                outln!(out, "let remaining = &[];");
             }
             xcbdefs::FieldDef::VirtualLen(_) => {}
         }

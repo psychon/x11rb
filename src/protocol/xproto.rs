@@ -14263,7 +14263,7 @@ impl<'input> QueryTextExtentsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_TEXT_EXTENTS_REQUEST), None)?;
-        // TODO: Parse odd_length
+        let remaining = &[];
         let (font, remaining) = Fontable::try_parse(value)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
