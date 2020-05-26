@@ -311,7 +311,7 @@ impl IntoRawSocket for DefaultStream {
 
 #[cfg(unix)]
 fn do_write(
-    inner: &DefaultStreamInner,
+    stream: &DefaultStream,
     bufs: &[nix::sys::uio::IoVec<&[u8]>],
     fds: &mut Vec<RawFdContainer>,
 ) -> Result<usize> {
@@ -334,10 +334,7 @@ fn do_write(
         }
     }
 
-    let fd = match *inner {
-        DefaultStreamInner::TcpStream(ref stream) => stream.as_raw_fd(),
-        DefaultStreamInner::UnixStream(ref stream) => stream.as_raw_fd(),
-    };
+    let fd = stream.as_raw_fd();
 
     let res = if !fds.is_empty() {
         let fds = fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
@@ -450,8 +447,8 @@ impl Stream for DefaultStream {
             loop {
                 let read_result = match self.inner {
                     DefaultStreamInner::TcpStream(ref stream) => {
-                        let mut stream = stream;
-                        stream.read(buf)
+                        // Use `impl Read for &TcpStream` to avoid needing a mutable `TcpStream`.
+                        (&mut &*stream).read(buf)
                     }
                 };
                 match read_result {
@@ -467,7 +464,7 @@ impl Stream for DefaultStream {
     fn write(&self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            do_write(&self.inner, &[nix::sys::uio::IoVec::from_slice(buf)], fds)
+            do_write(self, &[nix::sys::uio::IoVec::from_slice(buf)], fds)
         }
         #[cfg(not(unix))]
         {
@@ -478,8 +475,8 @@ impl Stream for DefaultStream {
             loop {
                 let write_result = match self.inner {
                     DefaultStreamInner::TcpStream(ref stream) => {
-                        let mut stream = stream;
-                        stream.write(buf)
+                        // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
+                        (&mut &*stream).write(buf)
                     }
                 };
                 match write_result {
@@ -499,7 +496,7 @@ impl Stream for DefaultStream {
                 .iter()
                 .map(|b| nix::sys::uio::IoVec::from_slice(&**b))
                 .collect::<Vec<_>>();
-            do_write(&self.inner, &bufs, fds)
+            do_write(self, &bufs, fds)
         }
         #[cfg(not(unix))]
         {
@@ -510,8 +507,8 @@ impl Stream for DefaultStream {
             loop {
                 let write_result = match self.inner {
                     DefaultStreamInner::TcpStream(ref stream) => {
-                        let mut stream = stream;
-                        stream.write_vectored(bufs)
+                        // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
+                        (&mut &*stream).write_vectored(bufs)
                     }
                 };
                 match write_result {

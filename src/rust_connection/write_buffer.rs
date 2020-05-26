@@ -18,16 +18,15 @@ impl WriteBuffer {
 
     fn with_capacity(capacity: usize) -> Self {
         Self {
-            // Buffer size chosen by checking what libxcb does
             data_buf: VecDeque::with_capacity(capacity),
             fd_buf: Vec::new(),
         }
     }
 
     fn flush_buffer(&mut self, stream: &impl Stream) -> std::io::Result<()> {
-        while !self.data_buf.is_empty() || !self.fd_buf.is_empty() {
-            let data_bufs = self.data_buf.as_slices();
-            let data_bufs = [IoSlice::new(data_bufs.0), IoSlice::new(data_bufs.1)];
+        while self.needs_flush() {
+            let (data_buf_1, data_buf_2) = self.data_buf.as_slices();
+            let data_bufs = [IoSlice::new(data_buf_1), IoSlice::new(data_buf_2)];
             match stream.write_vectored(&data_bufs, &mut self.fd_buf) {
                 Ok(0) => {
                     if self.data_buf.is_empty() {

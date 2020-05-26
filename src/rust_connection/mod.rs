@@ -214,6 +214,10 @@ impl<S: Stream> RustConnection<S> {
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
 
+        // Note: `inner` must be kept blocked until the request has been completely written
+        // or buffered to avoid sending the data of different requests interleaved. For this
+        // reason, `read_packet_and_enqueue` must always be called with `BlockingMode::NonBlocking`
+        // during a write, otherise `inner` would be temporarily released.
         let mut inner = self.inner.lock().unwrap();
 
         loop {
