@@ -8455,6 +8455,49 @@ pub enum ChangeDevicePropertyAux {
     Data32(Vec<u32>),
 }
 impl ChangeDevicePropertyAux {
+    fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(format);
+        let mut outer_remaining = value;
+        let mut parse_result = None;
+        if switch_expr == u32::from(PropertyFormat::M8Bits) {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let data8 = data8.to_vec();
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(ChangeDevicePropertyAux::Data8(data8));
+        }
+        if switch_expr == u32::from(PropertyFormat::M16Bits) {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(ChangeDevicePropertyAux::Data16(data16));
+        }
+        if switch_expr == u32::from(PropertyFormat::M32Bits) {
+            let remaining = outer_remaining;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(ChangeDevicePropertyAux::Data32(data32));
+        }
+        match parse_result {
+            None => Err(ParseError::ParseError),
+            Some(result) => Ok((result, outer_remaining)),
+        }
+    }
+}
+impl ChangeDevicePropertyAux {
     pub fn as_data8(&self) -> Option<&Vec<u8>> {
         match self {
             ChangeDevicePropertyAux::Data8(value) => Some(value),
@@ -13032,6 +13075,49 @@ pub enum XIChangePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+}
+impl XIChangePropertyAux {
+    fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(format);
+        let mut outer_remaining = value;
+        let mut parse_result = None;
+        if switch_expr == u32::from(PropertyFormat::M8Bits) {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let data8 = data8.to_vec();
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(XIChangePropertyAux::Data8(data8));
+        }
+        if switch_expr == u32::from(PropertyFormat::M16Bits) {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(XIChangePropertyAux::Data16(data16));
+        }
+        if switch_expr == u32::from(PropertyFormat::M32Bits) {
+            let remaining = outer_remaining;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(XIChangePropertyAux::Data32(data32));
+        }
+        match parse_result {
+            None => Err(ParseError::ParseError),
+            Some(result) => Ok((result, outer_remaining)),
+        }
+    }
 }
 impl XIChangePropertyAux {
     pub fn as_data8(&self) -> Option<&Vec<u8>> {

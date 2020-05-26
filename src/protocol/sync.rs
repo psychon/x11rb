@@ -1267,6 +1267,64 @@ pub struct CreateAlarmAux {
     pub delta: Option<Int64>,
     pub events: Option<u32>,
 }
+impl CreateAlarmAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let counter = if switch_expr & u32::from(CA::Counter) != 0 {
+            let remaining = outer_remaining;
+            let (counter, remaining) = Counter::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(counter)
+        } else {
+            None
+        };
+        let value_type = if switch_expr & u32::from(CA::ValueType) != 0 {
+            let remaining = outer_remaining;
+            let (value_type, remaining) = u32::try_parse(remaining)?;
+            let value_type = value_type.try_into()?;
+            outer_remaining = remaining;
+            Some(value_type)
+        } else {
+            None
+        };
+        let value = if switch_expr & u32::from(CA::Value) != 0 {
+            let remaining = outer_remaining;
+            let (value, remaining) = Int64::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(value)
+        } else {
+            None
+        };
+        let test_type = if switch_expr & u32::from(CA::TestType) != 0 {
+            let remaining = outer_remaining;
+            let (test_type, remaining) = u32::try_parse(remaining)?;
+            let test_type = test_type.try_into()?;
+            outer_remaining = remaining;
+            Some(test_type)
+        } else {
+            None
+        };
+        let delta = if switch_expr & u32::from(CA::Delta) != 0 {
+            let remaining = outer_remaining;
+            let (delta, remaining) = Int64::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(delta)
+        } else {
+            None
+        };
+        let events = if switch_expr & u32::from(CA::Events) != 0 {
+            let remaining = outer_remaining;
+            let (events, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(events)
+        } else {
+            None
+        };
+        let result = CreateAlarmAux { counter, value_type, value, test_type, delta, events };
+        Ok((result, outer_remaining))
+    }
+}
 #[allow(dead_code, unused_variables)]
 impl CreateAlarmAux {
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
@@ -1432,6 +1490,64 @@ pub struct ChangeAlarmAux {
     pub test_type: Option<TESTTYPE>,
     pub delta: Option<Int64>,
     pub events: Option<u32>,
+}
+impl ChangeAlarmAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let counter = if switch_expr & u32::from(CA::Counter) != 0 {
+            let remaining = outer_remaining;
+            let (counter, remaining) = Counter::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(counter)
+        } else {
+            None
+        };
+        let value_type = if switch_expr & u32::from(CA::ValueType) != 0 {
+            let remaining = outer_remaining;
+            let (value_type, remaining) = u32::try_parse(remaining)?;
+            let value_type = value_type.try_into()?;
+            outer_remaining = remaining;
+            Some(value_type)
+        } else {
+            None
+        };
+        let value = if switch_expr & u32::from(CA::Value) != 0 {
+            let remaining = outer_remaining;
+            let (value, remaining) = Int64::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(value)
+        } else {
+            None
+        };
+        let test_type = if switch_expr & u32::from(CA::TestType) != 0 {
+            let remaining = outer_remaining;
+            let (test_type, remaining) = u32::try_parse(remaining)?;
+            let test_type = test_type.try_into()?;
+            outer_remaining = remaining;
+            Some(test_type)
+        } else {
+            None
+        };
+        let delta = if switch_expr & u32::from(CA::Delta) != 0 {
+            let remaining = outer_remaining;
+            let (delta, remaining) = Int64::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(delta)
+        } else {
+            None
+        };
+        let events = if switch_expr & u32::from(CA::Events) != 0 {
+            let remaining = outer_remaining;
+            let (events, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(events)
+        } else {
+            None
+        };
+        let result = ChangeAlarmAux { counter, value_type, value, test_type, delta, events };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ChangeAlarmAux {

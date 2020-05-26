@@ -2141,6 +2141,122 @@ pub struct CreatePictureAux {
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
+impl CreatePictureAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let repeat = if switch_expr & u32::from(CP::Repeat) != 0 {
+            let remaining = outer_remaining;
+            let (repeat, remaining) = u32::try_parse(remaining)?;
+            let repeat = repeat.try_into()?;
+            outer_remaining = remaining;
+            Some(repeat)
+        } else {
+            None
+        };
+        let alphamap = if switch_expr & u32::from(CP::AlphaMap) != 0 {
+            let remaining = outer_remaining;
+            let (alphamap, remaining) = Picture::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(alphamap)
+        } else {
+            None
+        };
+        let alphaxorigin = if switch_expr & u32::from(CP::AlphaXOrigin) != 0 {
+            let remaining = outer_remaining;
+            let (alphaxorigin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(alphaxorigin)
+        } else {
+            None
+        };
+        let alphayorigin = if switch_expr & u32::from(CP::AlphaYOrigin) != 0 {
+            let remaining = outer_remaining;
+            let (alphayorigin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(alphayorigin)
+        } else {
+            None
+        };
+        let clipxorigin = if switch_expr & u32::from(CP::ClipXOrigin) != 0 {
+            let remaining = outer_remaining;
+            let (clipxorigin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clipxorigin)
+        } else {
+            None
+        };
+        let clipyorigin = if switch_expr & u32::from(CP::ClipYOrigin) != 0 {
+            let remaining = outer_remaining;
+            let (clipyorigin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clipyorigin)
+        } else {
+            None
+        };
+        let clipmask = if switch_expr & u32::from(CP::ClipMask) != 0 {
+            let remaining = outer_remaining;
+            let (clipmask, remaining) = xproto::Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clipmask)
+        } else {
+            None
+        };
+        let graphicsexposure = if switch_expr & u32::from(CP::GraphicsExposure) != 0 {
+            let remaining = outer_remaining;
+            let (graphicsexposure, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(graphicsexposure)
+        } else {
+            None
+        };
+        let subwindowmode = if switch_expr & u32::from(CP::SubwindowMode) != 0 {
+            let remaining = outer_remaining;
+            let (subwindowmode, remaining) = u32::try_parse(remaining)?;
+            let subwindowmode = subwindowmode.try_into()?;
+            outer_remaining = remaining;
+            Some(subwindowmode)
+        } else {
+            None
+        };
+        let polyedge = if switch_expr & u32::from(CP::PolyEdge) != 0 {
+            let remaining = outer_remaining;
+            let (polyedge, remaining) = u32::try_parse(remaining)?;
+            let polyedge = polyedge.try_into()?;
+            outer_remaining = remaining;
+            Some(polyedge)
+        } else {
+            None
+        };
+        let polymode = if switch_expr & u32::from(CP::PolyMode) != 0 {
+            let remaining = outer_remaining;
+            let (polymode, remaining) = u32::try_parse(remaining)?;
+            let polymode = polymode.try_into()?;
+            outer_remaining = remaining;
+            Some(polymode)
+        } else {
+            None
+        };
+        let dither = if switch_expr & u32::from(CP::Dither) != 0 {
+            let remaining = outer_remaining;
+            let (dither, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dither)
+        } else {
+            None
+        };
+        let componentalpha = if switch_expr & u32::from(CP::ComponentAlpha) != 0 {
+            let remaining = outer_remaining;
+            let (componentalpha, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(componentalpha)
+        } else {
+            None
+        };
+        let result = CreatePictureAux { repeat, alphamap, alphaxorigin, alphayorigin, clipxorigin, clipyorigin, clipmask, graphicsexposure, subwindowmode, polyedge, polymode, dither, componentalpha };
+        Ok((result, outer_remaining))
+    }
+}
 #[allow(dead_code, unused_variables)]
 impl CreatePictureAux {
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
@@ -2406,6 +2522,122 @@ pub struct ChangePictureAux {
     pub polymode: Option<PolyMode>,
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
+}
+impl ChangePictureAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let repeat = if switch_expr & u32::from(CP::Repeat) != 0 {
+            let remaining = outer_remaining;
+            let (repeat, remaining) = u32::try_parse(remaining)?;
+            let repeat = repeat.try_into()?;
+            outer_remaining = remaining;
+            Some(repeat)
+        } else {
+            None
+        };
+        let alphamap = if switch_expr & u32::from(CP::AlphaMap) != 0 {
+            let remaining = outer_remaining;
+            let (alphamap, remaining) = Picture::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(alphamap)
+        } else {
+            None
+        };
+        let alphaxorigin = if switch_expr & u32::from(CP::AlphaXOrigin) != 0 {
+            let remaining = outer_remaining;
+            let (alphaxorigin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(alphaxorigin)
+        } else {
+            None
+        };
+        let alphayorigin = if switch_expr & u32::from(CP::AlphaYOrigin) != 0 {
+            let remaining = outer_remaining;
+            let (alphayorigin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(alphayorigin)
+        } else {
+            None
+        };
+        let clipxorigin = if switch_expr & u32::from(CP::ClipXOrigin) != 0 {
+            let remaining = outer_remaining;
+            let (clipxorigin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clipxorigin)
+        } else {
+            None
+        };
+        let clipyorigin = if switch_expr & u32::from(CP::ClipYOrigin) != 0 {
+            let remaining = outer_remaining;
+            let (clipyorigin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clipyorigin)
+        } else {
+            None
+        };
+        let clipmask = if switch_expr & u32::from(CP::ClipMask) != 0 {
+            let remaining = outer_remaining;
+            let (clipmask, remaining) = xproto::Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clipmask)
+        } else {
+            None
+        };
+        let graphicsexposure = if switch_expr & u32::from(CP::GraphicsExposure) != 0 {
+            let remaining = outer_remaining;
+            let (graphicsexposure, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(graphicsexposure)
+        } else {
+            None
+        };
+        let subwindowmode = if switch_expr & u32::from(CP::SubwindowMode) != 0 {
+            let remaining = outer_remaining;
+            let (subwindowmode, remaining) = u32::try_parse(remaining)?;
+            let subwindowmode = subwindowmode.try_into()?;
+            outer_remaining = remaining;
+            Some(subwindowmode)
+        } else {
+            None
+        };
+        let polyedge = if switch_expr & u32::from(CP::PolyEdge) != 0 {
+            let remaining = outer_remaining;
+            let (polyedge, remaining) = u32::try_parse(remaining)?;
+            let polyedge = polyedge.try_into()?;
+            outer_remaining = remaining;
+            Some(polyedge)
+        } else {
+            None
+        };
+        let polymode = if switch_expr & u32::from(CP::PolyMode) != 0 {
+            let remaining = outer_remaining;
+            let (polymode, remaining) = u32::try_parse(remaining)?;
+            let polymode = polymode.try_into()?;
+            outer_remaining = remaining;
+            Some(polymode)
+        } else {
+            None
+        };
+        let dither = if switch_expr & u32::from(CP::Dither) != 0 {
+            let remaining = outer_remaining;
+            let (dither, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dither)
+        } else {
+            None
+        };
+        let componentalpha = if switch_expr & u32::from(CP::ComponentAlpha) != 0 {
+            let remaining = outer_remaining;
+            let (componentalpha, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(componentalpha)
+        } else {
+            None
+        };
+        let result = ChangePictureAux { repeat, alphamap, alphaxorigin, alphayorigin, clipxorigin, clipyorigin, clipmask, graphicsexposure, subwindowmode, polyedge, polymode, dither, componentalpha };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ChangePictureAux {

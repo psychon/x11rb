@@ -6400,6 +6400,20 @@ pub struct SelectEventsAuxBitcase1 {
     pub affect_new_keyboard: u16,
     pub new_keyboard_details: u16,
 }
+impl TryParse for SelectEventsAuxBitcase1 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_new_keyboard, remaining) = u16::try_parse(remaining)?;
+        let (new_keyboard_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase1 { affect_new_keyboard, new_keyboard_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase1 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase1 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -6423,6 +6437,20 @@ pub struct SelectEventsAuxBitcase2 {
     pub affect_state: u16,
     pub state_details: u16,
 }
+impl TryParse for SelectEventsAuxBitcase2 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_state, remaining) = u16::try_parse(remaining)?;
+        let (state_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase2 { affect_state, state_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase2 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase2 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -6445,6 +6473,20 @@ impl Serialize for SelectEventsAuxBitcase2 {
 pub struct SelectEventsAuxBitcase3 {
     pub affect_ctrls: u32,
     pub ctrl_details: u32,
+}
+impl TryParse for SelectEventsAuxBitcase3 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
+        let (ctrl_details, remaining) = u32::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase3 { affect_ctrls, ctrl_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase3 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase3 {
     type Bytes = [u8; 8];
@@ -6473,6 +6515,20 @@ pub struct SelectEventsAuxBitcase4 {
     pub affect_indicator_state: u32,
     pub indicator_state_details: u32,
 }
+impl TryParse for SelectEventsAuxBitcase4 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_indicator_state, remaining) = u32::try_parse(remaining)?;
+        let (indicator_state_details, remaining) = u32::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase4 { affect_indicator_state, indicator_state_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase4 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase4 {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -6499,6 +6555,20 @@ impl Serialize for SelectEventsAuxBitcase4 {
 pub struct SelectEventsAuxBitcase5 {
     pub affect_indicator_map: u32,
     pub indicator_map_details: u32,
+}
+impl TryParse for SelectEventsAuxBitcase5 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_indicator_map, remaining) = u32::try_parse(remaining)?;
+        let (indicator_map_details, remaining) = u32::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase5 { affect_indicator_map, indicator_map_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase5 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase5 {
     type Bytes = [u8; 8];
@@ -6527,6 +6597,20 @@ pub struct SelectEventsAuxBitcase6 {
     pub affect_names: u16,
     pub names_details: u16,
 }
+impl TryParse for SelectEventsAuxBitcase6 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_names, remaining) = u16::try_parse(remaining)?;
+        let (names_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase6 { affect_names, names_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase6 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase6 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -6550,6 +6634,20 @@ pub struct SelectEventsAuxBitcase7 {
     pub affect_compat: u8,
     pub compat_details: u8,
 }
+impl TryParse for SelectEventsAuxBitcase7 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_compat, remaining) = u8::try_parse(remaining)?;
+        let (compat_details, remaining) = u8::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase7 { affect_compat, compat_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase7 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase7 {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -6570,6 +6668,20 @@ impl Serialize for SelectEventsAuxBitcase7 {
 pub struct SelectEventsAuxBitcase8 {
     pub affect_bell: u8,
     pub bell_details: u8,
+}
+impl TryParse for SelectEventsAuxBitcase8 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_bell, remaining) = u8::try_parse(remaining)?;
+        let (bell_details, remaining) = u8::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase8 { affect_bell, bell_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase8 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase8 {
     type Bytes = [u8; 2];
@@ -6592,6 +6704,20 @@ pub struct SelectEventsAuxBitcase9 {
     pub affect_msg_details: u8,
     pub msg_details: u8,
 }
+impl TryParse for SelectEventsAuxBitcase9 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_msg_details, remaining) = u8::try_parse(remaining)?;
+        let (msg_details, remaining) = u8::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase9 { affect_msg_details, msg_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase9 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase9 {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -6612,6 +6738,20 @@ impl Serialize for SelectEventsAuxBitcase9 {
 pub struct SelectEventsAuxBitcase10 {
     pub affect_access_x: u16,
     pub access_x_details: u16,
+}
+impl TryParse for SelectEventsAuxBitcase10 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_access_x, remaining) = u16::try_parse(remaining)?;
+        let (access_x_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase10 { affect_access_x, access_x_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase10 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase10 {
     type Bytes = [u8; 4];
@@ -6635,6 +6775,20 @@ impl Serialize for SelectEventsAuxBitcase10 {
 pub struct SelectEventsAuxBitcase11 {
     pub affect_ext_dev: u16,
     pub extdev_details: u16,
+}
+impl TryParse for SelectEventsAuxBitcase11 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_ext_dev, remaining) = u16::try_parse(remaining)?;
+        let (extdev_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase11 { affect_ext_dev, extdev_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase11 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase11 {
     type Bytes = [u8; 4];
@@ -6668,6 +6822,91 @@ pub struct SelectEventsAux {
     pub bitcase9: Option<SelectEventsAuxBitcase9>,
     pub bitcase10: Option<SelectEventsAuxBitcase10>,
     pub bitcase11: Option<SelectEventsAuxBitcase11>,
+}
+impl SelectEventsAux {
+    fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all)));
+        let mut outer_remaining = value;
+        let bitcase1 = if switch_expr & u32::from(EventType::NewKeyboardNotify) != 0 {
+            let (bitcase1, new_remaining) = SelectEventsAuxBitcase1::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase1)
+        } else {
+            None
+        };
+        let bitcase2 = if switch_expr & u32::from(EventType::StateNotify) != 0 {
+            let (bitcase2, new_remaining) = SelectEventsAuxBitcase2::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase2)
+        } else {
+            None
+        };
+        let bitcase3 = if switch_expr & u32::from(EventType::ControlsNotify) != 0 {
+            let (bitcase3, new_remaining) = SelectEventsAuxBitcase3::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase3)
+        } else {
+            None
+        };
+        let bitcase4 = if switch_expr & u32::from(EventType::IndicatorStateNotify) != 0 {
+            let (bitcase4, new_remaining) = SelectEventsAuxBitcase4::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase4)
+        } else {
+            None
+        };
+        let bitcase5 = if switch_expr & u32::from(EventType::IndicatorMapNotify) != 0 {
+            let (bitcase5, new_remaining) = SelectEventsAuxBitcase5::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase5)
+        } else {
+            None
+        };
+        let bitcase6 = if switch_expr & u32::from(EventType::NamesNotify) != 0 {
+            let (bitcase6, new_remaining) = SelectEventsAuxBitcase6::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase6)
+        } else {
+            None
+        };
+        let bitcase7 = if switch_expr & u32::from(EventType::CompatMapNotify) != 0 {
+            let (bitcase7, new_remaining) = SelectEventsAuxBitcase7::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase7)
+        } else {
+            None
+        };
+        let bitcase8 = if switch_expr & u32::from(EventType::BellNotify) != 0 {
+            let (bitcase8, new_remaining) = SelectEventsAuxBitcase8::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase8)
+        } else {
+            None
+        };
+        let bitcase9 = if switch_expr & u32::from(EventType::ActionMessage) != 0 {
+            let (bitcase9, new_remaining) = SelectEventsAuxBitcase9::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase9)
+        } else {
+            None
+        };
+        let bitcase10 = if switch_expr & u32::from(EventType::AccessXNotify) != 0 {
+            let (bitcase10, new_remaining) = SelectEventsAuxBitcase10::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase10)
+        } else {
+            None
+        };
+        let bitcase11 = if switch_expr & u32::from(EventType::ExtensionDeviceNotify) != 0 {
+            let (bitcase11, new_remaining) = SelectEventsAuxBitcase11::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase11)
+        } else {
+            None
+        };
+        let result = SelectEventsAux { bitcase1, bitcase2, bitcase3, bitcase4, bitcase5, bitcase6, bitcase7, bitcase8, bitcase9, bitcase10, bitcase11 };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl SelectEventsAux {
@@ -7971,6 +8210,21 @@ pub struct SetMapAuxBitcase3 {
     pub actions_count: Vec<u8>,
     pub actions: Vec<Action>,
 }
+impl SetMapAuxBitcase3 {
+    pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (actions_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ParseError))?)?;
+        let actions_count = actions_count.to_vec();
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_into().or(Err(ParseError::ParseError))?)?;
+        let result = SetMapAuxBitcase3 { actions_count, actions };
+        Ok((result, remaining))
+    }
+}
+// Skipping TryFrom implementations because of unresolved members
 #[allow(dead_code, unused_variables)]
 impl SetMapAuxBitcase3 {
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
@@ -7997,6 +8251,83 @@ pub struct SetMapAux {
     pub explicit: Option<Vec<SetExplicit>>,
     pub modmap: Option<Vec<KeyModMap>>,
     pub vmodmap: Option<Vec<KeyVModMap>>,
+}
+impl SetMapAux {
+    fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(present);
+        let mut outer_remaining = value;
+        let types = if switch_expr & u32::from(MapPart::KeyTypes) != 0 {
+            let remaining = outer_remaining;
+            let (types, remaining) = crate::x11_utils::parse_list::<SetKeyType>(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(types)
+        } else {
+            None
+        };
+        let syms = if switch_expr & u32::from(MapPart::KeySyms) != 0 {
+            let remaining = outer_remaining;
+            let (syms, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(syms)
+        } else {
+            None
+        };
+        let bitcase3 = if switch_expr & u32::from(MapPart::KeyActions) != 0 {
+            let (bitcase3, new_remaining) = SetMapAuxBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
+            outer_remaining = new_remaining;
+            Some(bitcase3)
+        } else {
+            None
+        };
+        let behaviors = if switch_expr & u32::from(MapPart::KeyBehaviors) != 0 {
+            let remaining = outer_remaining;
+            let (behaviors, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(behaviors)
+        } else {
+            None
+        };
+        let vmods = if switch_expr & u32::from(MapPart::VirtualMods) != 0 {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+            let vmods = vmods.to_vec();
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            Some(vmods)
+        } else {
+            None
+        };
+        let explicit = if switch_expr & u32::from(MapPart::ExplicitComponents) != 0 {
+            let remaining = outer_remaining;
+            let (explicit, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(explicit)
+        } else {
+            None
+        };
+        let modmap = if switch_expr & u32::from(MapPart::ModifierMap) != 0 {
+            let remaining = outer_remaining;
+            let (modmap, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(modmap)
+        } else {
+            None
+        };
+        let vmodmap = if switch_expr & u32::from(MapPart::VirtualModMap) != 0 {
+            let remaining = outer_remaining;
+            let (vmodmap, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(vmodmap)
+        } else {
+            None
+        };
+        let result = SetMapAux { types, syms, bitcase3, behaviors, vmods, explicit, modmap, vmodmap };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl SetMapAux {
@@ -9334,6 +9665,21 @@ pub struct SetNamesAuxBitcase8 {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
 }
+impl SetNamesAuxBitcase8 {
+    pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
+        let n_levels_per_type = n_levels_per_type.to_vec();
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let result = SetNamesAuxBitcase8 { n_levels_per_type, kt_level_names };
+        Ok((result, remaining))
+    }
+}
+// Skipping TryFrom implementations because of unresolved members
 #[allow(dead_code, unused_variables)]
 impl SetNamesAuxBitcase8 {
     fn serialize(&self, n_types: u8) -> Vec<u8> {
@@ -9366,6 +9712,125 @@ pub struct SetNamesAux {
     pub key_names: Option<Vec<KeyName>>,
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
+}
+impl SetNamesAux {
+    fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = which;
+        let mut outer_remaining = value;
+        let keycodes_name = if switch_expr & u32::from(NameDetail::Keycodes) != 0 {
+            let remaining = outer_remaining;
+            let (keycodes_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(keycodes_name)
+        } else {
+            None
+        };
+        let geometry_name = if switch_expr & u32::from(NameDetail::Geometry) != 0 {
+            let remaining = outer_remaining;
+            let (geometry_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(geometry_name)
+        } else {
+            None
+        };
+        let symbols_name = if switch_expr & u32::from(NameDetail::Symbols) != 0 {
+            let remaining = outer_remaining;
+            let (symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(symbols_name)
+        } else {
+            None
+        };
+        let phys_symbols_name = if switch_expr & u32::from(NameDetail::PhysSymbols) != 0 {
+            let remaining = outer_remaining;
+            let (phys_symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(phys_symbols_name)
+        } else {
+            None
+        };
+        let types_name = if switch_expr & u32::from(NameDetail::Types) != 0 {
+            let remaining = outer_remaining;
+            let (types_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(types_name)
+        } else {
+            None
+        };
+        let compat_name = if switch_expr & u32::from(NameDetail::Compat) != 0 {
+            let remaining = outer_remaining;
+            let (compat_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(compat_name)
+        } else {
+            None
+        };
+        let type_names = if switch_expr & u32::from(NameDetail::KeyTypeNames) != 0 {
+            let remaining = outer_remaining;
+            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(type_names)
+        } else {
+            None
+        };
+        let bitcase8 = if switch_expr & u32::from(NameDetail::KTLevelNames) != 0 {
+            let (bitcase8, new_remaining) = SetNamesAuxBitcase8::try_parse(outer_remaining, n_types)?;
+            outer_remaining = new_remaining;
+            Some(bitcase8)
+        } else {
+            None
+        };
+        let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
+            let remaining = outer_remaining;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(indicator_names)
+        } else {
+            None
+        };
+        let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
+            let remaining = outer_remaining;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(virtual_mod_names)
+        } else {
+            None
+        };
+        let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
+            let remaining = outer_remaining;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(groups)
+        } else {
+            None
+        };
+        let key_names = if switch_expr & u32::from(NameDetail::KeyNames) != 0 {
+            let remaining = outer_remaining;
+            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(key_names)
+        } else {
+            None
+        };
+        let key_aliases = if switch_expr & u32::from(NameDetail::KeyAliases) != 0 {
+            let remaining = outer_remaining;
+            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(key_aliases)
+        } else {
+            None
+        };
+        let radio_group_names = if switch_expr & u32::from(NameDetail::RGNames) != 0 {
+            let remaining = outer_remaining;
+            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(radio_group_names)
+        } else {
+            None
+        };
+        let result = SetNamesAux { keycodes_name, geometry_name, symbols_name, phys_symbols_name, types_name, compat_name, type_names, bitcase8, indicator_names, virtual_mod_names, groups, key_names, key_aliases, radio_group_names };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl SetNamesAux {

@@ -5771,6 +5771,137 @@ pub struct CreateWindowAux {
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
 }
+impl CreateWindowAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let background_pixmap = if switch_expr & u32::from(CW::BackPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixmap)
+        } else {
+            None
+        };
+        let background_pixel = if switch_expr & u32::from(CW::BackPixel) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixel)
+        } else {
+            None
+        };
+        let border_pixmap = if switch_expr & u32::from(CW::BorderPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixmap)
+        } else {
+            None
+        };
+        let border_pixel = if switch_expr & u32::from(CW::BorderPixel) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixel)
+        } else {
+            None
+        };
+        let bit_gravity = if switch_expr & u32::from(CW::BitGravity) != 0 {
+            let remaining = outer_remaining;
+            let (bit_gravity, remaining) = u32::try_parse(remaining)?;
+            let bit_gravity = Gravity::try_from(bit_gravity, Gravity::BitForget)?;
+            outer_remaining = remaining;
+            Some(bit_gravity)
+        } else {
+            None
+        };
+        let win_gravity = if switch_expr & u32::from(CW::WinGravity) != 0 {
+            let remaining = outer_remaining;
+            let (win_gravity, remaining) = u32::try_parse(remaining)?;
+            let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
+            outer_remaining = remaining;
+            Some(win_gravity)
+        } else {
+            None
+        };
+        let backing_store = if switch_expr & u32::from(CW::BackingStore) != 0 {
+            let remaining = outer_remaining;
+            let (backing_store, remaining) = u32::try_parse(remaining)?;
+            let backing_store = backing_store.try_into()?;
+            outer_remaining = remaining;
+            Some(backing_store)
+        } else {
+            None
+        };
+        let backing_planes = if switch_expr & u32::from(CW::BackingPlanes) != 0 {
+            let remaining = outer_remaining;
+            let (backing_planes, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_planes)
+        } else {
+            None
+        };
+        let backing_pixel = if switch_expr & u32::from(CW::BackingPixel) != 0 {
+            let remaining = outer_remaining;
+            let (backing_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_pixel)
+        } else {
+            None
+        };
+        let override_redirect = if switch_expr & u32::from(CW::OverrideRedirect) != 0 {
+            let remaining = outer_remaining;
+            let (override_redirect, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(override_redirect)
+        } else {
+            None
+        };
+        let save_under = if switch_expr & u32::from(CW::SaveUnder) != 0 {
+            let remaining = outer_remaining;
+            let (save_under, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(save_under)
+        } else {
+            None
+        };
+        let event_mask = if switch_expr & u32::from(CW::EventMask) != 0 {
+            let remaining = outer_remaining;
+            let (event_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(event_mask)
+        } else {
+            None
+        };
+        let do_not_propogate_mask = if switch_expr & u32::from(CW::DontPropagate) != 0 {
+            let remaining = outer_remaining;
+            let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(do_not_propogate_mask)
+        } else {
+            None
+        };
+        let colormap = if switch_expr & u32::from(CW::Colormap) != 0 {
+            let remaining = outer_remaining;
+            let (colormap, remaining) = Colormap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(colormap)
+        } else {
+            None
+        };
+        let cursor = if switch_expr & u32::from(CW::Cursor) != 0 {
+            let remaining = outer_remaining;
+            let (cursor, remaining) = Cursor::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(cursor)
+        } else {
+            None
+        };
+        let result = CreateWindowAux { background_pixmap, background_pixel, border_pixmap, border_pixel, bit_gravity, win_gravity, backing_store, backing_planes, backing_pixel, override_redirect, save_under, event_mask, do_not_propogate_mask, colormap, cursor };
+        Ok((result, outer_remaining))
+    }
+}
 #[allow(dead_code, unused_variables)]
 impl CreateWindowAux {
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
@@ -6207,6 +6338,137 @@ pub struct ChangeWindowAttributesAux {
     pub do_not_propogate_mask: Option<u32>,
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
+}
+impl ChangeWindowAttributesAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let background_pixmap = if switch_expr & u32::from(CW::BackPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixmap)
+        } else {
+            None
+        };
+        let background_pixel = if switch_expr & u32::from(CW::BackPixel) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixel)
+        } else {
+            None
+        };
+        let border_pixmap = if switch_expr & u32::from(CW::BorderPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixmap)
+        } else {
+            None
+        };
+        let border_pixel = if switch_expr & u32::from(CW::BorderPixel) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixel)
+        } else {
+            None
+        };
+        let bit_gravity = if switch_expr & u32::from(CW::BitGravity) != 0 {
+            let remaining = outer_remaining;
+            let (bit_gravity, remaining) = u32::try_parse(remaining)?;
+            let bit_gravity = Gravity::try_from(bit_gravity, Gravity::BitForget)?;
+            outer_remaining = remaining;
+            Some(bit_gravity)
+        } else {
+            None
+        };
+        let win_gravity = if switch_expr & u32::from(CW::WinGravity) != 0 {
+            let remaining = outer_remaining;
+            let (win_gravity, remaining) = u32::try_parse(remaining)?;
+            let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
+            outer_remaining = remaining;
+            Some(win_gravity)
+        } else {
+            None
+        };
+        let backing_store = if switch_expr & u32::from(CW::BackingStore) != 0 {
+            let remaining = outer_remaining;
+            let (backing_store, remaining) = u32::try_parse(remaining)?;
+            let backing_store = backing_store.try_into()?;
+            outer_remaining = remaining;
+            Some(backing_store)
+        } else {
+            None
+        };
+        let backing_planes = if switch_expr & u32::from(CW::BackingPlanes) != 0 {
+            let remaining = outer_remaining;
+            let (backing_planes, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_planes)
+        } else {
+            None
+        };
+        let backing_pixel = if switch_expr & u32::from(CW::BackingPixel) != 0 {
+            let remaining = outer_remaining;
+            let (backing_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_pixel)
+        } else {
+            None
+        };
+        let override_redirect = if switch_expr & u32::from(CW::OverrideRedirect) != 0 {
+            let remaining = outer_remaining;
+            let (override_redirect, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(override_redirect)
+        } else {
+            None
+        };
+        let save_under = if switch_expr & u32::from(CW::SaveUnder) != 0 {
+            let remaining = outer_remaining;
+            let (save_under, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(save_under)
+        } else {
+            None
+        };
+        let event_mask = if switch_expr & u32::from(CW::EventMask) != 0 {
+            let remaining = outer_remaining;
+            let (event_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(event_mask)
+        } else {
+            None
+        };
+        let do_not_propogate_mask = if switch_expr & u32::from(CW::DontPropagate) != 0 {
+            let remaining = outer_remaining;
+            let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(do_not_propogate_mask)
+        } else {
+            None
+        };
+        let colormap = if switch_expr & u32::from(CW::Colormap) != 0 {
+            let remaining = outer_remaining;
+            let (colormap, remaining) = Colormap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(colormap)
+        } else {
+            None
+        };
+        let cursor = if switch_expr & u32::from(CW::Cursor) != 0 {
+            let remaining = outer_remaining;
+            let (cursor, remaining) = Cursor::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(cursor)
+        } else {
+            None
+        };
+        let result = ChangeWindowAttributesAux { background_pixmap, background_pixel, border_pixmap, border_pixel, bit_gravity, win_gravity, backing_store, backing_planes, backing_pixel, override_redirect, save_under, event_mask, do_not_propogate_mask, colormap, cursor };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ChangeWindowAttributesAux {
@@ -7662,6 +7924,71 @@ pub struct ConfigureWindowAux {
     pub border_width: Option<u32>,
     pub sibling: Option<Window>,
     pub stack_mode: Option<StackMode>,
+}
+impl ConfigureWindowAux {
+    fn try_parse(value: &[u8], value_mask: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(value_mask);
+        let mut outer_remaining = value;
+        let x = if switch_expr & u32::from(ConfigWindow::X) != 0 {
+            let remaining = outer_remaining;
+            let (x, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(x)
+        } else {
+            None
+        };
+        let y = if switch_expr & u32::from(ConfigWindow::Y) != 0 {
+            let remaining = outer_remaining;
+            let (y, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(y)
+        } else {
+            None
+        };
+        let width = if switch_expr & u32::from(ConfigWindow::Width) != 0 {
+            let remaining = outer_remaining;
+            let (width, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(width)
+        } else {
+            None
+        };
+        let height = if switch_expr & u32::from(ConfigWindow::Height) != 0 {
+            let remaining = outer_remaining;
+            let (height, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(height)
+        } else {
+            None
+        };
+        let border_width = if switch_expr & u32::from(ConfigWindow::BorderWidth) != 0 {
+            let remaining = outer_remaining;
+            let (border_width, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_width)
+        } else {
+            None
+        };
+        let sibling = if switch_expr & u32::from(ConfigWindow::Sibling) != 0 {
+            let remaining = outer_remaining;
+            let (sibling, remaining) = Window::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(sibling)
+        } else {
+            None
+        };
+        let stack_mode = if switch_expr & u32::from(ConfigWindow::StackMode) != 0 {
+            let remaining = outer_remaining;
+            let (stack_mode, remaining) = u32::try_parse(remaining)?;
+            let stack_mode = stack_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(stack_mode)
+        } else {
+            None
+        };
+        let result = ConfigureWindowAux { x, y, width, height, border_width, sibling, stack_mode };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ConfigureWindowAux {
@@ -15402,6 +15729,206 @@ pub struct CreateGCAux {
     pub dashes: Option<u32>,
     pub arc_mode: Option<ArcMode>,
 }
+impl CreateGCAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let function = if switch_expr & u32::from(GC::Function) != 0 {
+            let remaining = outer_remaining;
+            let (function, remaining) = u32::try_parse(remaining)?;
+            let function = function.try_into()?;
+            outer_remaining = remaining;
+            Some(function)
+        } else {
+            None
+        };
+        let plane_mask = if switch_expr & u32::from(GC::PlaneMask) != 0 {
+            let remaining = outer_remaining;
+            let (plane_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(plane_mask)
+        } else {
+            None
+        };
+        let foreground = if switch_expr & u32::from(GC::Foreground) != 0 {
+            let remaining = outer_remaining;
+            let (foreground, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(foreground)
+        } else {
+            None
+        };
+        let background = if switch_expr & u32::from(GC::Background) != 0 {
+            let remaining = outer_remaining;
+            let (background, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background)
+        } else {
+            None
+        };
+        let line_width = if switch_expr & u32::from(GC::LineWidth) != 0 {
+            let remaining = outer_remaining;
+            let (line_width, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(line_width)
+        } else {
+            None
+        };
+        let line_style = if switch_expr & u32::from(GC::LineStyle) != 0 {
+            let remaining = outer_remaining;
+            let (line_style, remaining) = u32::try_parse(remaining)?;
+            let line_style = line_style.try_into()?;
+            outer_remaining = remaining;
+            Some(line_style)
+        } else {
+            None
+        };
+        let cap_style = if switch_expr & u32::from(GC::CapStyle) != 0 {
+            let remaining = outer_remaining;
+            let (cap_style, remaining) = u32::try_parse(remaining)?;
+            let cap_style = cap_style.try_into()?;
+            outer_remaining = remaining;
+            Some(cap_style)
+        } else {
+            None
+        };
+        let join_style = if switch_expr & u32::from(GC::JoinStyle) != 0 {
+            let remaining = outer_remaining;
+            let (join_style, remaining) = u32::try_parse(remaining)?;
+            let join_style = join_style.try_into()?;
+            outer_remaining = remaining;
+            Some(join_style)
+        } else {
+            None
+        };
+        let fill_style = if switch_expr & u32::from(GC::FillStyle) != 0 {
+            let remaining = outer_remaining;
+            let (fill_style, remaining) = u32::try_parse(remaining)?;
+            let fill_style = fill_style.try_into()?;
+            outer_remaining = remaining;
+            Some(fill_style)
+        } else {
+            None
+        };
+        let fill_rule = if switch_expr & u32::from(GC::FillRule) != 0 {
+            let remaining = outer_remaining;
+            let (fill_rule, remaining) = u32::try_parse(remaining)?;
+            let fill_rule = fill_rule.try_into()?;
+            outer_remaining = remaining;
+            Some(fill_rule)
+        } else {
+            None
+        };
+        let tile = if switch_expr & u32::from(GC::Tile) != 0 {
+            let remaining = outer_remaining;
+            let (tile, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile)
+        } else {
+            None
+        };
+        let stipple = if switch_expr & u32::from(GC::Stipple) != 0 {
+            let remaining = outer_remaining;
+            let (stipple, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(stipple)
+        } else {
+            None
+        };
+        let tile_stipple_x_origin = if switch_expr & u32::from(GC::TileStippleOriginX) != 0 {
+            let remaining = outer_remaining;
+            let (tile_stipple_x_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile_stipple_x_origin)
+        } else {
+            None
+        };
+        let tile_stipple_y_origin = if switch_expr & u32::from(GC::TileStippleOriginY) != 0 {
+            let remaining = outer_remaining;
+            let (tile_stipple_y_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile_stipple_y_origin)
+        } else {
+            None
+        };
+        let font = if switch_expr & u32::from(GC::Font) != 0 {
+            let remaining = outer_remaining;
+            let (font, remaining) = Font::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(font)
+        } else {
+            None
+        };
+        let subwindow_mode = if switch_expr & u32::from(GC::SubwindowMode) != 0 {
+            let remaining = outer_remaining;
+            let (subwindow_mode, remaining) = u32::try_parse(remaining)?;
+            let subwindow_mode = subwindow_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(subwindow_mode)
+        } else {
+            None
+        };
+        let graphics_exposures = if switch_expr & u32::from(GC::GraphicsExposures) != 0 {
+            let remaining = outer_remaining;
+            let (graphics_exposures, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(graphics_exposures)
+        } else {
+            None
+        };
+        let clip_x_origin = if switch_expr & u32::from(GC::ClipOriginX) != 0 {
+            let remaining = outer_remaining;
+            let (clip_x_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_x_origin)
+        } else {
+            None
+        };
+        let clip_y_origin = if switch_expr & u32::from(GC::ClipOriginY) != 0 {
+            let remaining = outer_remaining;
+            let (clip_y_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_y_origin)
+        } else {
+            None
+        };
+        let clip_mask = if switch_expr & u32::from(GC::ClipMask) != 0 {
+            let remaining = outer_remaining;
+            let (clip_mask, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_mask)
+        } else {
+            None
+        };
+        let dash_offset = if switch_expr & u32::from(GC::DashOffset) != 0 {
+            let remaining = outer_remaining;
+            let (dash_offset, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dash_offset)
+        } else {
+            None
+        };
+        let dashes = if switch_expr & u32::from(GC::DashList) != 0 {
+            let remaining = outer_remaining;
+            let (dashes, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dashes)
+        } else {
+            None
+        };
+        let arc_mode = if switch_expr & u32::from(GC::ArcMode) != 0 {
+            let remaining = outer_remaining;
+            let (arc_mode, remaining) = u32::try_parse(remaining)?;
+            let arc_mode = arc_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(arc_mode)
+        } else {
+            None
+        };
+        let result = CreateGCAux { function, plane_mask, foreground, background, line_width, line_style, cap_style, join_style, fill_style, fill_rule, tile, stipple, tile_stipple_x_origin, tile_stipple_y_origin, font, subwindow_mode, graphics_exposures, clip_x_origin, clip_y_origin, clip_mask, dash_offset, dashes, arc_mode };
+        Ok((result, outer_remaining))
+    }
+}
 #[allow(dead_code, unused_variables)]
 impl CreateGCAux {
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
@@ -15825,6 +16352,206 @@ pub struct ChangeGCAux {
     pub dash_offset: Option<u32>,
     pub dashes: Option<u32>,
     pub arc_mode: Option<ArcMode>,
+}
+impl ChangeGCAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let function = if switch_expr & u32::from(GC::Function) != 0 {
+            let remaining = outer_remaining;
+            let (function, remaining) = u32::try_parse(remaining)?;
+            let function = function.try_into()?;
+            outer_remaining = remaining;
+            Some(function)
+        } else {
+            None
+        };
+        let plane_mask = if switch_expr & u32::from(GC::PlaneMask) != 0 {
+            let remaining = outer_remaining;
+            let (plane_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(plane_mask)
+        } else {
+            None
+        };
+        let foreground = if switch_expr & u32::from(GC::Foreground) != 0 {
+            let remaining = outer_remaining;
+            let (foreground, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(foreground)
+        } else {
+            None
+        };
+        let background = if switch_expr & u32::from(GC::Background) != 0 {
+            let remaining = outer_remaining;
+            let (background, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background)
+        } else {
+            None
+        };
+        let line_width = if switch_expr & u32::from(GC::LineWidth) != 0 {
+            let remaining = outer_remaining;
+            let (line_width, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(line_width)
+        } else {
+            None
+        };
+        let line_style = if switch_expr & u32::from(GC::LineStyle) != 0 {
+            let remaining = outer_remaining;
+            let (line_style, remaining) = u32::try_parse(remaining)?;
+            let line_style = line_style.try_into()?;
+            outer_remaining = remaining;
+            Some(line_style)
+        } else {
+            None
+        };
+        let cap_style = if switch_expr & u32::from(GC::CapStyle) != 0 {
+            let remaining = outer_remaining;
+            let (cap_style, remaining) = u32::try_parse(remaining)?;
+            let cap_style = cap_style.try_into()?;
+            outer_remaining = remaining;
+            Some(cap_style)
+        } else {
+            None
+        };
+        let join_style = if switch_expr & u32::from(GC::JoinStyle) != 0 {
+            let remaining = outer_remaining;
+            let (join_style, remaining) = u32::try_parse(remaining)?;
+            let join_style = join_style.try_into()?;
+            outer_remaining = remaining;
+            Some(join_style)
+        } else {
+            None
+        };
+        let fill_style = if switch_expr & u32::from(GC::FillStyle) != 0 {
+            let remaining = outer_remaining;
+            let (fill_style, remaining) = u32::try_parse(remaining)?;
+            let fill_style = fill_style.try_into()?;
+            outer_remaining = remaining;
+            Some(fill_style)
+        } else {
+            None
+        };
+        let fill_rule = if switch_expr & u32::from(GC::FillRule) != 0 {
+            let remaining = outer_remaining;
+            let (fill_rule, remaining) = u32::try_parse(remaining)?;
+            let fill_rule = fill_rule.try_into()?;
+            outer_remaining = remaining;
+            Some(fill_rule)
+        } else {
+            None
+        };
+        let tile = if switch_expr & u32::from(GC::Tile) != 0 {
+            let remaining = outer_remaining;
+            let (tile, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile)
+        } else {
+            None
+        };
+        let stipple = if switch_expr & u32::from(GC::Stipple) != 0 {
+            let remaining = outer_remaining;
+            let (stipple, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(stipple)
+        } else {
+            None
+        };
+        let tile_stipple_x_origin = if switch_expr & u32::from(GC::TileStippleOriginX) != 0 {
+            let remaining = outer_remaining;
+            let (tile_stipple_x_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile_stipple_x_origin)
+        } else {
+            None
+        };
+        let tile_stipple_y_origin = if switch_expr & u32::from(GC::TileStippleOriginY) != 0 {
+            let remaining = outer_remaining;
+            let (tile_stipple_y_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile_stipple_y_origin)
+        } else {
+            None
+        };
+        let font = if switch_expr & u32::from(GC::Font) != 0 {
+            let remaining = outer_remaining;
+            let (font, remaining) = Font::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(font)
+        } else {
+            None
+        };
+        let subwindow_mode = if switch_expr & u32::from(GC::SubwindowMode) != 0 {
+            let remaining = outer_remaining;
+            let (subwindow_mode, remaining) = u32::try_parse(remaining)?;
+            let subwindow_mode = subwindow_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(subwindow_mode)
+        } else {
+            None
+        };
+        let graphics_exposures = if switch_expr & u32::from(GC::GraphicsExposures) != 0 {
+            let remaining = outer_remaining;
+            let (graphics_exposures, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(graphics_exposures)
+        } else {
+            None
+        };
+        let clip_x_origin = if switch_expr & u32::from(GC::ClipOriginX) != 0 {
+            let remaining = outer_remaining;
+            let (clip_x_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_x_origin)
+        } else {
+            None
+        };
+        let clip_y_origin = if switch_expr & u32::from(GC::ClipOriginY) != 0 {
+            let remaining = outer_remaining;
+            let (clip_y_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_y_origin)
+        } else {
+            None
+        };
+        let clip_mask = if switch_expr & u32::from(GC::ClipMask) != 0 {
+            let remaining = outer_remaining;
+            let (clip_mask, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_mask)
+        } else {
+            None
+        };
+        let dash_offset = if switch_expr & u32::from(GC::DashOffset) != 0 {
+            let remaining = outer_remaining;
+            let (dash_offset, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dash_offset)
+        } else {
+            None
+        };
+        let dashes = if switch_expr & u32::from(GC::DashList) != 0 {
+            let remaining = outer_remaining;
+            let (dashes, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dashes)
+        } else {
+            None
+        };
+        let arc_mode = if switch_expr & u32::from(GC::ArcMode) != 0 {
+            let remaining = outer_remaining;
+            let (arc_mode, remaining) = u32::try_parse(remaining)?;
+            let arc_mode = arc_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(arc_mode)
+        } else {
+            None
+        };
+        let result = ChangeGCAux { function, plane_mask, foreground, background, line_width, line_style, cap_style, join_style, fill_style, fill_rule, tile, stipple, tile_stipple_x_origin, tile_stipple_y_origin, font, subwindow_mode, graphics_exposures, clip_x_origin, clip_y_origin, clip_mask, dash_offset, dashes, arc_mode };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ChangeGCAux {
@@ -21579,6 +22306,80 @@ pub struct ChangeKeyboardControlAux {
     pub led_mode: Option<LedMode>,
     pub key: Option<Keycode32>,
     pub auto_repeat_mode: Option<AutoRepeatMode>,
+}
+impl ChangeKeyboardControlAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let key_click_percent = if switch_expr & u32::from(KB::KeyClickPercent) != 0 {
+            let remaining = outer_remaining;
+            let (key_click_percent, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(key_click_percent)
+        } else {
+            None
+        };
+        let bell_percent = if switch_expr & u32::from(KB::BellPercent) != 0 {
+            let remaining = outer_remaining;
+            let (bell_percent, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(bell_percent)
+        } else {
+            None
+        };
+        let bell_pitch = if switch_expr & u32::from(KB::BellPitch) != 0 {
+            let remaining = outer_remaining;
+            let (bell_pitch, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(bell_pitch)
+        } else {
+            None
+        };
+        let bell_duration = if switch_expr & u32::from(KB::BellDuration) != 0 {
+            let remaining = outer_remaining;
+            let (bell_duration, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(bell_duration)
+        } else {
+            None
+        };
+        let led = if switch_expr & u32::from(KB::Led) != 0 {
+            let remaining = outer_remaining;
+            let (led, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(led)
+        } else {
+            None
+        };
+        let led_mode = if switch_expr & u32::from(KB::LedMode) != 0 {
+            let remaining = outer_remaining;
+            let (led_mode, remaining) = u32::try_parse(remaining)?;
+            let led_mode = led_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(led_mode)
+        } else {
+            None
+        };
+        let key = if switch_expr & u32::from(KB::Key) != 0 {
+            let remaining = outer_remaining;
+            let (key, remaining) = Keycode32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(key)
+        } else {
+            None
+        };
+        let auto_repeat_mode = if switch_expr & u32::from(KB::AutoRepeatMode) != 0 {
+            let remaining = outer_remaining;
+            let (auto_repeat_mode, remaining) = u32::try_parse(remaining)?;
+            let auto_repeat_mode = auto_repeat_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(auto_repeat_mode)
+        } else {
+            None
+        };
+        let result = ChangeKeyboardControlAux { key_click_percent, bell_percent, bell_pitch, bell_duration, led, led_mode, key, auto_repeat_mode };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ChangeKeyboardControlAux {
