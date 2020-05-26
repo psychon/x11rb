@@ -69,13 +69,15 @@ impl GetVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_VERSION_REQUEST))?;
-        // TODO: deserialize client_major_version
-        // TODO: deserialize client_minor_version
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_VERSION_REQUEST))?;
+        let (client_major_version, remaining) = u16::try_parse(value)?;
+        let (client_minor_version, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetVersionRequest {
+            client_major_version,
+            client_minor_version,
+        })
     }
 }
 pub fn get_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
@@ -144,11 +146,11 @@ impl CapableRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CAPABLE_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CAPABLE_REQUEST))?;
+        let _ = value;
+        Ok(CapableRequest
+        )
     }
 }
 pub fn capable<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, CapableReply>, ConnectionError>
@@ -213,11 +215,11 @@ impl GetTimeoutsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TIMEOUTS_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TIMEOUTS_REQUEST))?;
+        let _ = value;
+        Ok(GetTimeoutsRequest
+        )
     }
 }
 pub fn get_timeouts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetTimeoutsReply>, ConnectionError>
@@ -301,14 +303,17 @@ impl SetTimeoutsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_TIMEOUTS_REQUEST))?;
-        // TODO: deserialize standby_timeout
-        // TODO: deserialize suspend_timeout
-        // TODO: deserialize off_timeout
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_TIMEOUTS_REQUEST))?;
+        let (standby_timeout, remaining) = u16::try_parse(value)?;
+        let (suspend_timeout, remaining) = u16::try_parse(remaining)?;
+        let (off_timeout, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetTimeoutsRequest {
+            standby_timeout,
+            suspend_timeout,
+            off_timeout,
+        })
     }
 }
 pub fn set_timeouts<Conn>(conn: &Conn, standby_timeout: u16, suspend_timeout: u16, off_timeout: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -351,11 +356,11 @@ impl EnableRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(ENABLE_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(ENABLE_REQUEST))?;
+        let _ = value;
+        Ok(EnableRequest
+        )
     }
 }
 pub fn enable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -394,11 +399,11 @@ impl DisableRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DISABLE_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DISABLE_REQUEST))?;
+        let _ = value;
+        Ok(DisableRequest
+        )
     }
 }
 pub fn disable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -512,12 +517,14 @@ impl ForceLevelRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(FORCE_LEVEL_REQUEST))?;
-        // TODO: deserialize power_level
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(FORCE_LEVEL_REQUEST))?;
+        let (power_level, remaining) = u16::try_parse(value)?;
+        let power_level = power_level.try_into()?;
+        let _ = remaining;
+        Ok(ForceLevelRequest {
+            power_level,
+        })
     }
 }
 pub fn force_level<Conn>(conn: &Conn, power_level: DPMSMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -558,11 +565,11 @@ impl InfoRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(INFO_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(INFO_REQUEST))?;
+        let _ = value;
+        Ok(InfoRequest
+        )
     }
 }
 pub fn info<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, InfoReply>, ConnectionError>

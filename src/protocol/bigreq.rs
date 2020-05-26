@@ -60,11 +60,11 @@ impl EnableRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(ENABLE_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(ENABLE_REQUEST))?;
+        let _ = value;
+        Ok(EnableRequest
+        )
     }
 }
 pub fn enable<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, EnableReply>, ConnectionError>

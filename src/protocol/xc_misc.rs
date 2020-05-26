@@ -69,13 +69,15 @@ impl GetVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_VERSION_REQUEST))?;
-        // TODO: deserialize client_major_version
-        // TODO: deserialize client_minor_version
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_VERSION_REQUEST))?;
+        let (client_major_version, remaining) = u16::try_parse(value)?;
+        let (client_minor_version, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetVersionRequest {
+            client_major_version,
+            client_minor_version,
+        })
     }
 }
 pub fn get_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
@@ -144,11 +146,11 @@ impl GetXIDRangeRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_XID_RANGE_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_XID_RANGE_REQUEST))?;
+        let _ = value;
+        Ok(GetXIDRangeRequest
+        )
     }
 }
 pub fn get_xid_range<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetXIDRangeReply>, ConnectionError>
@@ -221,12 +223,13 @@ impl GetXIDListRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_XID_LIST_REQUEST))?;
-        // TODO: deserialize count
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_XID_LIST_REQUEST))?;
+        let (count, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetXIDListRequest {
+            count,
+        })
     }
 }
 pub fn get_xid_list<Conn>(conn: &Conn, count: u32) -> Result<Cookie<'_, Conn, GetXIDListReply>, ConnectionError>

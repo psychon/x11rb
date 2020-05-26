@@ -266,14 +266,16 @@ impl QueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        // TODO: deserialize client_major_version
-        // TODO: deserialize client_minor_version
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        let (client_major_version, remaining) = u8::try_parse(value)?;
+        let (client_minor_version, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            client_major_version,
+            client_minor_version,
+        })
     }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u8, client_minor_version: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -350,12 +352,13 @@ impl QueryInfoRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_INFO_REQUEST))?;
-        // TODO: deserialize drawable
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_INFO_REQUEST))?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryInfoRequest {
+            drawable,
+        })
     }
 }
 pub fn query_info<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryInfoReply>, ConnectionError>
@@ -445,13 +448,15 @@ impl SelectInputRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SELECT_INPUT_REQUEST))?;
-        // TODO: deserialize drawable
-        // TODO: deserialize event_mask
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SELECT_INPUT_REQUEST))?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SelectInputRequest {
+            drawable,
+            event_mask,
+        })
     }
 }
 pub fn select_input<Conn, A>(conn: &Conn, drawable: xproto::Drawable, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -883,22 +888,33 @@ impl<'input> SetAttributesRequest<'input> {
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize drawable
-        // TODO: deserialize x
-        // TODO: deserialize y
-        // TODO: deserialize width
-        // TODO: deserialize height
-        // TODO: deserialize border_width
-        // TODO: deserialize class
-        // TODO: deserialize depth
-        // TODO: deserialize visual
-        // TODO: deserialize value_mask
-        // TODO: deserialize value_list
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_ATTRIBUTES_REQUEST))?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (border_width, remaining) = u16::try_parse(remaining)?;
+        let (class, remaining) = u8::try_parse(remaining)?;
+        let class = class.try_into()?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = SetAttributesAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(SetAttributesRequest {
+            drawable,
+            x,
+            y,
+            width,
+            height,
+            border_width,
+            class,
+            depth,
+            visual,
+            value_list: Cow::Owned(value_list),
+        })
     }
 }
 pub fn set_attributes<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &'input SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -955,12 +971,13 @@ impl UnsetAttributesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(UNSET_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize drawable
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(UNSET_ATTRIBUTES_REQUEST))?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let _ = remaining;
+        Ok(UnsetAttributesRequest {
+            drawable,
+        })
     }
 }
 pub fn unset_attributes<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1008,12 +1025,13 @@ impl SuspendRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SUSPEND_REQUEST))?;
-        // TODO: deserialize suspend
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SUSPEND_REQUEST))?;
+        let (suspend, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(SuspendRequest {
+            suspend,
+        })
     }
 }
 pub fn suspend<Conn>(conn: &Conn, suspend: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>

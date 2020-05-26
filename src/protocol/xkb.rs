@@ -6344,13 +6344,15 @@ impl UseExtensionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(USE_EXTENSION_REQUEST))?;
-        // TODO: deserialize wanted_major
-        // TODO: deserialize wanted_minor
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(USE_EXTENSION_REQUEST))?;
+        let (wanted_major, remaining) = u16::try_parse(value)?;
+        let (wanted_minor, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(UseExtensionRequest {
+            wanted_major,
+            wanted_minor,
+        })
     }
 }
 pub fn use_extension<Conn>(conn: &Conn, wanted_major: u16, wanted_minor: u16) -> Result<Cookie<'_, Conn, UseExtensionReply>, ConnectionError>
@@ -7109,18 +7111,24 @@ impl<'input> SelectEventsRequest<'input> {
         Ok((vec![request0.into(), details_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SELECT_EVENTS_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize affect_which
-        // TODO: deserialize clear
-        // TODO: deserialize select_all
-        // TODO: deserialize affect_map
-        // TODO: deserialize map
-        // TODO: deserialize details
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SELECT_EVENTS_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (affect_which, remaining) = u16::try_parse(remaining)?;
+        let (clear, remaining) = u16::try_parse(remaining)?;
+        let (select_all, remaining) = u16::try_parse(remaining)?;
+        let (affect_map, remaining) = u16::try_parse(remaining)?;
+        let (map, remaining) = u16::try_parse(remaining)?;
+        let (details, remaining) = SelectEventsAux::try_parse(remaining, affect_which, clear, select_all)?;
+        let _ = remaining;
+        Ok(SelectEventsRequest {
+            device_spec,
+            clear,
+            select_all,
+            affect_map,
+            map,
+            details: Cow::Owned(details),
+        })
     }
 }
 pub fn select_events<'c, 'input, Conn, A, B, C, D>(conn: &'c Conn, device_spec: DeviceSpec, clear: A, select_all: B, affect_map: C, map: D, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -7219,23 +7227,33 @@ impl BellRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(BELL_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize bell_class
-        // TODO: deserialize bell_id
-        // TODO: deserialize percent
-        // TODO: deserialize force_sound
-        // TODO: deserialize event_only
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize pitch
-        // TODO: deserialize duration
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize name
-        // TODO: deserialize window
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(BELL_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (bell_class, remaining) = BellClassSpec::try_parse(remaining)?;
+        let (bell_id, remaining) = IDSpec::try_parse(remaining)?;
+        let (percent, remaining) = i8::try_parse(remaining)?;
+        let (force_sound, remaining) = bool::try_parse(remaining)?;
+        let (event_only, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (pitch, remaining) = i16::try_parse(remaining)?;
+        let (duration, remaining) = i16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(BellRequest {
+            device_spec,
+            bell_class,
+            bell_id,
+            percent,
+            force_sound,
+            event_only,
+            pitch,
+            duration,
+            name,
+            window,
+        })
     }
 }
 pub fn bell<Conn>(conn: &Conn, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: xproto::Atom, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -7292,13 +7310,14 @@ impl GetStateRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_STATE_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_STATE_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetStateRequest {
+            device_spec,
+        })
     }
 }
 pub fn get_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
@@ -7424,21 +7443,30 @@ impl LatchLockStateRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(LATCH_LOCK_STATE_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize affect_mod_locks
-        // TODO: deserialize mod_locks
-        // TODO: deserialize lock_group
-        // TODO: deserialize group_lock
-        // TODO: deserialize affect_mod_latches
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize latch_group
-        // TODO: deserialize group_latch
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(LATCH_LOCK_STATE_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (affect_mod_locks, remaining) = u8::try_parse(remaining)?;
+        let (mod_locks, remaining) = u8::try_parse(remaining)?;
+        let (lock_group, remaining) = bool::try_parse(remaining)?;
+        let (group_lock, remaining) = u8::try_parse(remaining)?;
+        let group_lock = group_lock.try_into()?;
+        let (affect_mod_latches, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (latch_group, remaining) = bool::try_parse(remaining)?;
+        let (group_latch, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(LatchLockStateRequest {
+            device_spec,
+            affect_mod_locks,
+            mod_locks,
+            lock_group,
+            group_lock,
+            affect_mod_latches,
+            latch_group,
+            group_latch,
+        })
     }
 }
 pub fn latch_lock_state<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, affect_mod_locks: A, mod_locks: B, lock_group: bool, group_lock: Group, affect_mod_latches: C, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -7499,13 +7527,14 @@ impl GetControlsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_CONTROLS_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_CONTROLS_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetControlsRequest {
+            device_spec,
+        })
     }
 }
 pub fn get_controls<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetControlsReply>, ConnectionError>
@@ -7750,42 +7779,73 @@ impl<'input> SetControlsRequest<'input> {
         Ok((vec![request0.into(), (&self.per_key_repeat[..]).into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_CONTROLS_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize affect_internal_real_mods
-        // TODO: deserialize internal_real_mods
-        // TODO: deserialize affect_ignore_lock_real_mods
-        // TODO: deserialize ignore_lock_real_mods
-        // TODO: deserialize affect_internal_virtual_mods
-        // TODO: deserialize internal_virtual_mods
-        // TODO: deserialize affect_ignore_lock_virtual_mods
-        // TODO: deserialize ignore_lock_virtual_mods
-        // TODO: deserialize mouse_keys_dflt_btn
-        // TODO: deserialize groups_wrap
-        // TODO: deserialize access_x_options
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize affect_enabled_controls
-        // TODO: deserialize enabled_controls
-        // TODO: deserialize change_controls
-        // TODO: deserialize repeat_delay
-        // TODO: deserialize repeat_interval
-        // TODO: deserialize slow_keys_delay
-        // TODO: deserialize debounce_delay
-        // TODO: deserialize mouse_keys_delay
-        // TODO: deserialize mouse_keys_interval
-        // TODO: deserialize mouse_keys_time_to_max
-        // TODO: deserialize mouse_keys_max_speed
-        // TODO: deserialize mouse_keys_curve
-        // TODO: deserialize access_x_timeout
-        // TODO: deserialize access_x_timeout_mask
-        // TODO: deserialize access_x_timeout_values
-        // TODO: deserialize access_x_timeout_options_mask
-        // TODO: deserialize access_x_timeout_options_values
-        // TODO: deserialize per_key_repeat
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_CONTROLS_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (affect_internal_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (internal_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (affect_ignore_lock_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (ignore_lock_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (affect_internal_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (internal_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (affect_ignore_lock_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (ignore_lock_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_dflt_btn, remaining) = u8::try_parse(remaining)?;
+        let (groups_wrap, remaining) = u8::try_parse(remaining)?;
+        let (access_x_options, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (affect_enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let (enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let (change_controls, remaining) = u32::try_parse(remaining)?;
+        let (repeat_delay, remaining) = u16::try_parse(remaining)?;
+        let (repeat_interval, remaining) = u16::try_parse(remaining)?;
+        let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
+        let (debounce_delay, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_delay, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_interval, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_time_to_max, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_max_speed, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_curve, remaining) = i16::try_parse(remaining)?;
+        let (access_x_timeout, remaining) = u16::try_parse(remaining)?;
+        let (access_x_timeout_mask, remaining) = u32::try_parse(remaining)?;
+        let (access_x_timeout_values, remaining) = u32::try_parse(remaining)?;
+        let (access_x_timeout_options_mask, remaining) = u16::try_parse(remaining)?;
+        let (access_x_timeout_options_values, remaining) = u16::try_parse(remaining)?;
+        let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let per_key_repeat = <&[u8; 32]>::try_from(per_key_repeat).unwrap();
+        let _ = remaining;
+        Ok(SetControlsRequest {
+            device_spec,
+            affect_internal_real_mods,
+            internal_real_mods,
+            affect_ignore_lock_real_mods,
+            ignore_lock_real_mods,
+            affect_internal_virtual_mods,
+            internal_virtual_mods,
+            affect_ignore_lock_virtual_mods,
+            ignore_lock_virtual_mods,
+            mouse_keys_dflt_btn,
+            groups_wrap,
+            access_x_options,
+            affect_enabled_controls,
+            enabled_controls,
+            change_controls,
+            repeat_delay,
+            repeat_interval,
+            slow_keys_delay,
+            debounce_delay,
+            mouse_keys_delay,
+            mouse_keys_interval,
+            mouse_keys_time_to_max,
+            mouse_keys_max_speed,
+            mouse_keys_curve,
+            access_x_timeout,
+            access_x_timeout_mask,
+            access_x_timeout_values,
+            access_x_timeout_options_mask,
+            access_x_timeout_options_values,
+            per_key_repeat,
+        })
     }
 }
 pub fn set_controls<'c, 'input, Conn, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(conn: &'c Conn, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &'input [u8; 32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -7948,30 +8008,48 @@ impl GetMapRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MAP_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize full
-        // TODO: deserialize partial
-        // TODO: deserialize first_type
-        // TODO: deserialize n_types
-        // TODO: deserialize first_key_sym
-        // TODO: deserialize n_key_syms
-        // TODO: deserialize first_key_action
-        // TODO: deserialize n_key_actions
-        // TODO: deserialize first_key_behavior
-        // TODO: deserialize n_key_behaviors
-        // TODO: deserialize virtual_mods
-        // TODO: deserialize first_key_explicit
-        // TODO: deserialize n_key_explicit
-        // TODO: deserialize first_mod_map_key
-        // TODO: deserialize n_mod_map_keys
-        // TODO: deserialize first_v_mod_map_key
-        // TODO: deserialize n_v_mod_map_keys
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MAP_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (full, remaining) = u16::try_parse(remaining)?;
+        let (partial, remaining) = u16::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_key_sym, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_syms, remaining) = u8::try_parse(remaining)?;
+        let (first_key_action, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_actions, remaining) = u8::try_parse(remaining)?;
+        let (first_key_behavior, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_behaviors, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (first_key_explicit, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (first_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (first_v_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetMapRequest {
+            device_spec,
+            full,
+            partial,
+            first_type,
+            n_types,
+            first_key_sym,
+            n_key_syms,
+            first_key_action,
+            n_key_actions,
+            first_key_behavior,
+            n_key_behaviors,
+            virtual_mods,
+            first_key_explicit,
+            n_key_explicit,
+            first_mod_map_key,
+            n_mod_map_keys,
+            first_v_mod_map_key,
+            n_v_mod_map_keys,
+        })
     }
 }
 pub fn get_map<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, full: A, partial: B, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, first_key_action: xproto::Keycode, n_key_actions: u8, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, virtual_mods: C, first_key_explicit: xproto::Keycode, n_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Conn, GetMapReply>, ConnectionError>
@@ -8564,38 +8642,64 @@ impl<'input> SetMapRequest<'input> {
         Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_MAP_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize present
-        // TODO: deserialize flags
-        // TODO: deserialize min_key_code
-        // TODO: deserialize max_key_code
-        // TODO: deserialize first_type
-        // TODO: deserialize n_types
-        // TODO: deserialize first_key_sym
-        // TODO: deserialize n_key_syms
-        // TODO: deserialize total_syms
-        // TODO: deserialize first_key_action
-        // TODO: deserialize n_key_actions
-        // TODO: deserialize total_actions
-        // TODO: deserialize first_key_behavior
-        // TODO: deserialize n_key_behaviors
-        // TODO: deserialize total_key_behaviors
-        // TODO: deserialize first_key_explicit
-        // TODO: deserialize n_key_explicit
-        // TODO: deserialize total_key_explicit
-        // TODO: deserialize first_mod_map_key
-        // TODO: deserialize n_mod_map_keys
-        // TODO: deserialize total_mod_map_keys
-        // TODO: deserialize first_v_mod_map_key
-        // TODO: deserialize n_v_mod_map_keys
-        // TODO: deserialize total_v_mod_map_keys
-        // TODO: deserialize virtual_mods
-        // TODO: deserialize values
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_MAP_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (present, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u16::try_parse(remaining)?;
+        let (min_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (max_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_key_sym, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_syms, remaining) = u8::try_parse(remaining)?;
+        let (total_syms, remaining) = u16::try_parse(remaining)?;
+        let (first_key_action, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_actions, remaining) = u8::try_parse(remaining)?;
+        let (total_actions, remaining) = u16::try_parse(remaining)?;
+        let (first_key_behavior, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_behaviors, remaining) = u8::try_parse(remaining)?;
+        let (total_key_behaviors, remaining) = u8::try_parse(remaining)?;
+        let (first_key_explicit, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (total_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (first_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (total_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (first_v_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (values, remaining) = SetMapAux::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
+        let _ = remaining;
+        Ok(SetMapRequest {
+            device_spec,
+            flags,
+            min_key_code,
+            max_key_code,
+            first_type,
+            n_types,
+            first_key_sym,
+            n_key_syms,
+            total_syms,
+            first_key_action,
+            n_key_actions,
+            total_actions,
+            first_key_behavior,
+            n_key_behaviors,
+            total_key_behaviors,
+            first_key_explicit,
+            n_key_explicit,
+            total_key_explicit,
+            first_mod_map_key,
+            n_mod_map_keys,
+            total_mod_map_keys,
+            first_v_mod_map_key,
+            n_v_mod_map_keys,
+            total_v_mod_map_keys,
+            virtual_mods,
+            values: Cow::Owned(values),
+        })
     }
 }
 pub fn set_map<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &'input SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -8684,16 +8788,21 @@ impl GetCompatMapRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_COMPAT_MAP_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize groups
-        // TODO: deserialize get_all_si
-        // TODO: deserialize first_si
-        // TODO: deserialize n_si
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_COMPAT_MAP_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (groups, remaining) = u8::try_parse(remaining)?;
+        let (get_all_si, remaining) = bool::try_parse(remaining)?;
+        let (first_si, remaining) = u16::try_parse(remaining)?;
+        let (n_si, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetCompatMapRequest {
+            device_spec,
+            groups,
+            get_all_si,
+            first_si,
+            n_si,
+        })
     }
 }
 pub fn get_compat_map<Conn, A>(conn: &Conn, device_spec: DeviceSpec, groups: A, get_all_si: bool, first_si: u16, n_si: u16) -> Result<Cookie<'_, Conn, GetCompatMapReply>, ConnectionError>
@@ -8826,21 +8935,28 @@ impl<'input> SetCompatMapRequest<'input> {
         Ok((vec![request0.into(), si_bytes.into(), group_maps_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_COMPAT_MAP_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize recompute_actions
-        // TODO: deserialize truncate_si
-        // TODO: deserialize groups
-        // TODO: deserialize first_si
-        // TODO: deserialize n_si
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize si
-        // TODO: deserialize group_maps
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_COMPAT_MAP_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (recompute_actions, remaining) = bool::try_parse(remaining)?;
+        let (truncate_si, remaining) = bool::try_parse(remaining)?;
+        let (groups, remaining) = u8::try_parse(remaining)?;
+        let (first_si, remaining) = u16::try_parse(remaining)?;
+        let (n_si, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (si, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si.try_into().or(Err(ParseError::ParseError))?)?;
+        let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetCompatMapRequest {
+            device_spec,
+            recompute_actions,
+            truncate_si,
+            groups,
+            first_si,
+            si: Cow::Owned(si),
+            group_maps: Cow::Owned(group_maps),
+        })
     }
 }
 pub fn set_compat_map<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &'input [SymInterpret], group_maps: &'input [ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -8896,13 +9012,14 @@ impl GetIndicatorStateRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_INDICATOR_STATE_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_INDICATOR_STATE_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetIndicatorStateRequest {
+            device_spec,
+        })
     }
 }
 pub fn get_indicator_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetIndicatorStateReply>, ConnectionError>
@@ -8983,14 +9100,16 @@ impl GetIndicatorMapRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_INDICATOR_MAP_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize which
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_INDICATOR_MAP_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetIndicatorMapRequest {
+            device_spec,
+            which,
+        })
     }
 }
 pub fn get_indicator_map<Conn>(conn: &Conn, device_spec: DeviceSpec, which: u32) -> Result<Cookie<'_, Conn, GetIndicatorMapReply>, ConnectionError>
@@ -9084,15 +9203,18 @@ impl<'input> SetIndicatorMapRequest<'input> {
         Ok((vec![request0.into(), maps_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_INDICATOR_MAP_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize which
-        // TODO: deserialize maps
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_INDICATOR_MAP_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetIndicatorMapRequest {
+            device_spec,
+            which,
+            maps: Cow::Owned(maps),
+        })
     }
 }
 pub fn set_indicator_map<'c, 'input, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &'input [IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -9156,16 +9278,21 @@ impl GetNamedIndicatorRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_NAMED_INDICATOR_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize led_class
-        // TODO: deserialize led_id
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize indicator
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_NAMED_INDICATOR_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
+        let led_class = led_class.try_into()?;
+        let (led_id, remaining) = IDSpec::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (indicator, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetNamedIndicatorRequest {
+            device_spec,
+            led_class,
+            led_id,
+            indicator,
+        })
     }
 }
 pub fn get_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
@@ -9323,28 +9450,44 @@ impl SetNamedIndicatorRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_NAMED_INDICATOR_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize led_class
-        // TODO: deserialize led_id
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize indicator
-        // TODO: deserialize set_state
-        // TODO: deserialize on
-        // TODO: deserialize set_map
-        // TODO: deserialize create_map
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize map_flags
-        // TODO: deserialize map_which_groups
-        // TODO: deserialize map_groups
-        // TODO: deserialize map_which_mods
-        // TODO: deserialize map_real_mods
-        // TODO: deserialize map_vmods
-        // TODO: deserialize map_ctrls
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_NAMED_INDICATOR_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
+        let led_class = led_class.try_into()?;
+        let (led_id, remaining) = IDSpec::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (indicator, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (set_state, remaining) = bool::try_parse(remaining)?;
+        let (on, remaining) = bool::try_parse(remaining)?;
+        let (set_map, remaining) = bool::try_parse(remaining)?;
+        let (create_map, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (map_flags, remaining) = u8::try_parse(remaining)?;
+        let (map_which_groups, remaining) = u8::try_parse(remaining)?;
+        let (map_groups, remaining) = u8::try_parse(remaining)?;
+        let (map_which_mods, remaining) = u8::try_parse(remaining)?;
+        let (map_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (map_vmods, remaining) = u16::try_parse(remaining)?;
+        let (map_ctrls, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetNamedIndicatorRequest {
+            device_spec,
+            led_class,
+            led_id,
+            indicator,
+            set_state,
+            on,
+            set_map,
+            create_map,
+            map_flags,
+            map_which_groups,
+            map_groups,
+            map_which_mods,
+            map_real_mods,
+            map_vmods,
+            map_ctrls,
+        })
     }
 }
 pub fn set_named_indicator<Conn, A, B, C, D, E, F, G, H>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: B, map_which_groups: C, map_groups: D, map_which_mods: E, map_real_mods: F, map_vmods: G, map_ctrls: H) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -9428,14 +9571,16 @@ impl GetNamesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_NAMES_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize which
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_NAMES_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetNamesRequest {
+            device_spec,
+            which,
+        })
     }
 }
 pub fn get_names<Conn, A>(conn: &Conn, device_spec: DeviceSpec, which: A) -> Result<Cookie<'_, Conn, GetNamesReply>, ConnectionError>
@@ -10100,27 +10245,41 @@ impl<'input> SetNamesRequest<'input> {
         Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_NAMES_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize virtual_mods
-        // TODO: deserialize which
-        // TODO: deserialize first_type
-        // TODO: deserialize n_types
-        // TODO: deserialize first_kt_levelt
-        // TODO: deserialize n_kt_levels
-        // TODO: deserialize indicators
-        // TODO: deserialize group_names
-        // TODO: deserialize n_radio_groups
-        // TODO: deserialize first_key
-        // TODO: deserialize n_keys
-        // TODO: deserialize n_key_aliases
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize total_kt_level_names
-        // TODO: deserialize values
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_NAMES_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_kt_levelt, remaining) = u8::try_parse(remaining)?;
+        let (n_kt_levels, remaining) = u8::try_parse(remaining)?;
+        let (indicators, remaining) = u32::try_parse(remaining)?;
+        let (group_names, remaining) = u8::try_parse(remaining)?;
+        let (n_radio_groups, remaining) = u8::try_parse(remaining)?;
+        let (first_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_keys, remaining) = u8::try_parse(remaining)?;
+        let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (total_kt_level_names, remaining) = u16::try_parse(remaining)?;
+        let (values, remaining) = SetNamesAux::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
+        let _ = remaining;
+        Ok(SetNamesRequest {
+            device_spec,
+            virtual_mods,
+            first_type,
+            n_types,
+            first_kt_levelt,
+            n_kt_levels,
+            indicators,
+            group_names,
+            n_radio_groups,
+            first_key,
+            n_keys,
+            n_key_aliases,
+            total_kt_level_names,
+            values: Cow::Owned(values),
+        })
     }
 }
 pub fn set_names<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &'input SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -10215,18 +10374,24 @@ impl PerClientFlagsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PER_CLIENT_FLAGS_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize change
-        // TODO: deserialize value
-        // TODO: deserialize ctrls_to_change
-        // TODO: deserialize auto_ctrls
-        // TODO: deserialize auto_ctrls_values
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PER_CLIENT_FLAGS_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (change, remaining) = u32::try_parse(remaining)?;
+        let (value, remaining) = u32::try_parse(remaining)?;
+        let (ctrls_to_change, remaining) = u32::try_parse(remaining)?;
+        let (auto_ctrls, remaining) = u32::try_parse(remaining)?;
+        let (auto_ctrls_values, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PerClientFlagsRequest {
+            device_spec,
+            change,
+            value,
+            ctrls_to_change,
+            auto_ctrls,
+            auto_ctrls_values,
+        })
     }
 }
 pub fn per_client_flags<Conn, A, B, C, D, E>(conn: &Conn, device_spec: DeviceSpec, change: A, value: B, ctrls_to_change: C, auto_ctrls: D, auto_ctrls_values: E) -> Result<Cookie<'_, Conn, PerClientFlagsReply>, ConnectionError>
@@ -10324,13 +10489,15 @@ impl ListComponentsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(LIST_COMPONENTS_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize max_names
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(LIST_COMPONENTS_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (max_names, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ListComponentsRequest {
+            device_spec,
+            max_names,
+        })
     }
 }
 pub fn list_components<Conn>(conn: &Conn, device_spec: DeviceSpec, max_names: u16) -> Result<Cookie<'_, Conn, ListComponentsReply>, ConnectionError>
@@ -10514,16 +10681,20 @@ impl GetKbdByNameRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_KBD_BY_NAME_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize need
-        // TODO: deserialize want
-        // TODO: deserialize load
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_KBD_BY_NAME_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (need, remaining) = u16::try_parse(remaining)?;
+        let (want, remaining) = u16::try_parse(remaining)?;
+        let (load, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetKbdByNameRequest {
+            device_spec,
+            need,
+            want,
+            load,
+        })
     }
 }
 pub fn get_kbd_by_name<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, need: A, want: B, load: bool) -> Result<Cookie<'_, Conn, GetKbdByNameReply>, ConnectionError>
@@ -11237,19 +11408,27 @@ impl GetDeviceInfoRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_DEVICE_INFO_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize wanted
-        // TODO: deserialize all_buttons
-        // TODO: deserialize first_button
-        // TODO: deserialize n_buttons
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize led_class
-        // TODO: deserialize led_id
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_DEVICE_INFO_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (wanted, remaining) = u16::try_parse(remaining)?;
+        let (all_buttons, remaining) = bool::try_parse(remaining)?;
+        let (first_button, remaining) = u8::try_parse(remaining)?;
+        let (n_buttons, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
+        let led_class = led_class.try_into()?;
+        let (led_id, remaining) = IDSpec::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetDeviceInfoRequest {
+            device_spec,
+            wanted,
+            all_buttons,
+            first_button,
+            n_buttons,
+            led_class,
+            led_id,
+        })
     }
 }
 pub fn get_device_info<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, wanted: A, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: LedClass, led_id: B) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
@@ -11430,18 +11609,23 @@ impl<'input> SetDeviceInfoRequest<'input> {
         Ok((vec![request0.into(), btn_actions_bytes.into(), leds_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_DEVICE_INFO_REQUEST))?;
-        // TODO: deserialize device_spec
-        // TODO: deserialize first_btn
-        // TODO: deserialize n_btns
-        // TODO: deserialize change
-        // TODO: deserialize n_device_led_f_bs
-        // TODO: deserialize btn_actions
-        // TODO: deserialize leds
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_DEVICE_INFO_REQUEST))?;
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (first_btn, remaining) = u8::try_parse(remaining)?;
+        let (n_btns, remaining) = u8::try_parse(remaining)?;
+        let (change, remaining) = u16::try_parse(remaining)?;
+        let (n_device_led_f_bs, remaining) = u16::try_parse(remaining)?;
+        let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns.try_into().or(Err(ParseError::ParseError))?)?;
+        let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDeviceInfoRequest {
+            device_spec,
+            first_btn,
+            change,
+            btn_actions: Cow::Owned(btn_actions),
+            leds: Cow::Owned(leds),
+        })
     }
 }
 pub fn set_device_info<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &'input [Action], leds: &'input [DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -11523,18 +11707,23 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         Ok((vec![request0.into(), self.message.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_DEBUGGING_FLAGS_REQUEST))?;
-        // TODO: deserialize msg_length
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize affect_flags
-        // TODO: deserialize flags
-        // TODO: deserialize affect_ctrls
-        // TODO: deserialize ctrls
-        // TODO: deserialize message
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_DEBUGGING_FLAGS_REQUEST))?;
+        let (msg_length, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (affect_flags, remaining) = u32::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
+        let (ctrls, remaining) = u32::try_parse(remaining)?;
+        let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, msg_length.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDebuggingFlagsRequest {
+            affect_flags,
+            flags,
+            affect_ctrls,
+            ctrls,
+            message,
+        })
     }
 }
 pub fn set_debugging_flags<'c, 'input, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>

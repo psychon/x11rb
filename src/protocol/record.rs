@@ -531,13 +531,15 @@ impl QueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        // TODO: deserialize major_version
-        // TODO: deserialize minor_version
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        let (major_version, remaining) = u16::try_parse(value)?;
+        let (minor_version, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            major_version,
+            minor_version,
+        })
     }
 }
 pub fn query_version<Conn>(conn: &Conn, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -639,18 +641,22 @@ impl<'input> CreateContextRequest<'input> {
         Ok((vec![request0.into(), client_specs_bytes.into(), ranges_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize element_header
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize num_client_specs
-        // TODO: deserialize num_ranges
-        // TODO: deserialize client_specs
-        // TODO: deserialize ranges
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_CONTEXT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (num_client_specs, remaining) = u32::try_parse(remaining)?;
+        let (num_ranges, remaining) = u32::try_parse(remaining)?;
+        let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(CreateContextRequest {
+            context,
+            element_header,
+            client_specs: Cow::Owned(client_specs),
+            ranges: Cow::Owned(ranges),
+        })
     }
 }
 pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -727,18 +733,22 @@ impl<'input> RegisterClientsRequest<'input> {
         Ok((vec![request0.into(), client_specs_bytes.into(), ranges_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(REGISTER_CLIENTS_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize element_header
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize num_client_specs
-        // TODO: deserialize num_ranges
-        // TODO: deserialize client_specs
-        // TODO: deserialize ranges
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(REGISTER_CLIENTS_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (num_client_specs, remaining) = u32::try_parse(remaining)?;
+        let (num_ranges, remaining) = u32::try_parse(remaining)?;
+        let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(RegisterClientsRequest {
+            context,
+            element_header,
+            client_specs: Cow::Owned(client_specs),
+            ranges: Cow::Owned(ranges),
+        })
     }
 }
 pub fn register_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -800,14 +810,16 @@ impl<'input> UnregisterClientsRequest<'input> {
         Ok((vec![request0.into(), client_specs_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(UNREGISTER_CLIENTS_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize num_client_specs
-        // TODO: deserialize client_specs
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(UNREGISTER_CLIENTS_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let (num_client_specs, remaining) = u32::try_parse(remaining)?;
+        let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(UnregisterClientsRequest {
+            context,
+            client_specs: Cow::Owned(client_specs),
+        })
     }
 }
 pub fn unregister_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, client_specs: &'input [ClientSpec]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -856,12 +868,13 @@ impl GetContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_CONTEXT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetContextRequest {
+            context,
+        })
     }
 }
 pub fn get_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, GetContextReply>, ConnectionError>
@@ -955,12 +968,13 @@ impl EnableContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(ENABLE_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(ENABLE_CONTEXT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let _ = remaining;
+        Ok(EnableContextRequest {
+            context,
+        })
     }
 }
 pub fn enable_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, EnableContextReply>, ConnectionError>
@@ -1062,12 +1076,13 @@ impl DisableContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DISABLE_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DISABLE_CONTEXT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let _ = remaining;
+        Ok(DisableContextRequest {
+            context,
+        })
     }
 }
 pub fn disable_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1115,12 +1130,13 @@ impl FreeContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(FREE_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(FREE_CONTEXT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let _ = remaining;
+        Ok(FreeContextRequest {
+            context,
+        })
     }
 }
 pub fn free_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>

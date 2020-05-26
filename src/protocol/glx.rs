@@ -507,14 +507,15 @@ impl<'input> RenderRequest<'input> {
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(RENDER_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize data
-        // TODO: deserialize data_len
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(RENDER_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (data, remaining) = remaining.split_at(remaining.len());
+        let _ = remaining;
+        Ok(RenderRequest {
+            context_tag,
+            data,
+        })
     }
 }
 pub fn render<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -581,16 +582,20 @@ impl<'input> RenderLargeRequest<'input> {
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(RENDER_LARGE_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize request_num
-        // TODO: deserialize request_total
-        // TODO: deserialize data_len
-        // TODO: deserialize data
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(RENDER_LARGE_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (request_num, remaining) = u16::try_parse(remaining)?;
+        let (request_total, remaining) = u16::try_parse(remaining)?;
+        let (data_len, remaining) = u32::try_parse(remaining)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(RenderLargeRequest {
+            context_tag,
+            request_num,
+            request_total,
+            data,
+        })
     }
 }
 pub fn render_large<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, request_num: u16, request_total: u16, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -665,17 +670,22 @@ impl CreateContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize visual
-        // TODO: deserialize screen
-        // TODO: deserialize share_list
-        // TODO: deserialize is_direct
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_CONTEXT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
+        let (screen, remaining) = u32::try_parse(remaining)?;
+        let (share_list, remaining) = Context::try_parse(remaining)?;
+        let (is_direct, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(CreateContextRequest {
+            context,
+            visual,
+            screen,
+            share_list,
+            is_direct,
+        })
     }
 }
 pub fn create_context<Conn>(conn: &Conn, context: Context, visual: xproto::Visualid, screen: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -727,12 +737,13 @@ impl DestroyContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_CONTEXT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyContextRequest {
+            context,
+        })
     }
 }
 pub fn destroy_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -792,14 +803,17 @@ impl MakeCurrentRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(MAKE_CURRENT_REQUEST))?;
-        // TODO: deserialize drawable
-        // TODO: deserialize context
-        // TODO: deserialize old_context_tag
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(MAKE_CURRENT_REQUEST))?;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (context, remaining) = Context::try_parse(remaining)?;
+        let (old_context_tag, remaining) = ContextTag::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(MakeCurrentRequest {
+            drawable,
+            context,
+            old_context_tag,
+        })
     }
 }
 pub fn make_current<Conn>(conn: &Conn, drawable: Drawable, context: Context, old_context_tag: ContextTag) -> Result<Cookie<'_, Conn, MakeCurrentReply>, ConnectionError>
@@ -875,12 +889,13 @@ impl IsDirectRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(IS_DIRECT_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(IS_DIRECT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let _ = remaining;
+        Ok(IsDirectRequest {
+            context,
+        })
     }
 }
 pub fn is_direct<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, IsDirectReply>, ConnectionError>
@@ -960,13 +975,15 @@ impl QueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        // TODO: deserialize major_version
-        // TODO: deserialize minor_version
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        let (major_version, remaining) = u32::try_parse(value)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            major_version,
+            minor_version,
+        })
     }
 }
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -1043,12 +1060,13 @@ impl WaitGLRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(WAIT_GL_REQUEST))?;
-        // TODO: deserialize context_tag
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(WAIT_GL_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let _ = remaining;
+        Ok(WaitGLRequest {
+            context_tag,
+        })
     }
 }
 pub fn wait_gl<Conn>(conn: &Conn, context_tag: ContextTag) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1096,12 +1114,13 @@ impl WaitXRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(WAIT_X_REQUEST))?;
-        // TODO: deserialize context_tag
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(WAIT_X_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let _ = remaining;
+        Ok(WaitXRequest {
+            context_tag,
+        })
     }
 }
 pub fn wait_x<Conn>(conn: &Conn, context_tag: ContextTag) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1167,15 +1186,19 @@ impl CopyContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(COPY_CONTEXT_REQUEST))?;
-        // TODO: deserialize src
-        // TODO: deserialize dest
-        // TODO: deserialize mask
-        // TODO: deserialize src_context_tag
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(COPY_CONTEXT_REQUEST))?;
+        let (src, remaining) = Context::try_parse(value)?;
+        let (dest, remaining) = Context::try_parse(remaining)?;
+        let (mask, remaining) = u32::try_parse(remaining)?;
+        let (src_context_tag, remaining) = ContextTag::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CopyContextRequest {
+            src,
+            dest,
+            mask,
+            src_context_tag,
+        })
     }
 }
 pub fn copy_context<Conn>(conn: &Conn, src: Context, dest: Context, mask: u32, src_context_tag: ContextTag) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1320,13 +1343,15 @@ impl SwapBuffersRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SWAP_BUFFERS_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize drawable
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SWAP_BUFFERS_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SwapBuffersRequest {
+            context_tag,
+            drawable,
+        })
     }
 }
 pub fn swap_buffers<Conn>(conn: &Conn, context_tag: ContextTag, drawable: Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1399,16 +1424,21 @@ impl UseXFontRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(USE_X_FONT_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize font
-        // TODO: deserialize first
-        // TODO: deserialize count
-        // TODO: deserialize list_base
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(USE_X_FONT_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (font, remaining) = xproto::Font::try_parse(remaining)?;
+        let (first, remaining) = u32::try_parse(remaining)?;
+        let (count, remaining) = u32::try_parse(remaining)?;
+        let (list_base, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(UseXFontRequest {
+            context_tag,
+            font,
+            first,
+            count,
+            list_base,
+        })
     }
 }
 pub fn use_x_font<Conn>(conn: &Conn, context_tag: ContextTag, font: xproto::Font, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1478,15 +1508,19 @@ impl CreateGLXPixmapRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_GLX_PIXMAP_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize visual
-        // TODO: deserialize pixmap
-        // TODO: deserialize glx_pixmap
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_GLX_PIXMAP_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let (glx_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateGLXPixmapRequest {
+            screen,
+            visual,
+            pixmap,
+            glx_pixmap,
+        })
     }
 }
 pub fn create_glx_pixmap<Conn>(conn: &Conn, screen: u32, visual: xproto::Visualid, pixmap: xproto::Pixmap, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1537,12 +1571,13 @@ impl GetVisualConfigsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_VISUAL_CONFIGS_REQUEST))?;
-        // TODO: deserialize screen
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_VISUAL_CONFIGS_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetVisualConfigsRequest {
+            screen,
+        })
     }
 }
 pub fn get_visual_configs<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetVisualConfigsReply>, ConnectionError>
@@ -1634,12 +1669,13 @@ impl DestroyGLXPixmapRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_GLX_PIXMAP_REQUEST))?;
-        // TODO: deserialize glx_pixmap
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_GLX_PIXMAP_REQUEST))?;
+        let (glx_pixmap, remaining) = Pixmap::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyGLXPixmapRequest {
+            glx_pixmap,
+        })
     }
 }
 pub fn destroy_glx_pixmap<Conn>(conn: &Conn, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1697,15 +1733,17 @@ impl<'input> VendorPrivateRequest<'input> {
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(VENDOR_PRIVATE_REQUEST))?;
-        // TODO: deserialize vendor_code
-        // TODO: deserialize context_tag
-        // TODO: deserialize data
-        // TODO: deserialize data_len
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(VENDOR_PRIVATE_REQUEST))?;
+        let (vendor_code, remaining) = u32::try_parse(value)?;
+        let (context_tag, remaining) = ContextTag::try_parse(remaining)?;
+        let (data, remaining) = remaining.split_at(remaining.len());
+        let _ = remaining;
+        Ok(VendorPrivateRequest {
+            vendor_code,
+            context_tag,
+            data,
+        })
     }
 }
 pub fn vendor_private<'c, 'input, Conn>(conn: &'c Conn, vendor_code: u32, context_tag: ContextTag, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1765,15 +1803,17 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(VENDOR_PRIVATE_WITH_REPLY_REQUEST))?;
-        // TODO: deserialize vendor_code
-        // TODO: deserialize context_tag
-        // TODO: deserialize data
-        // TODO: deserialize data_len
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(VENDOR_PRIVATE_WITH_REPLY_REQUEST))?;
+        let (vendor_code, remaining) = u32::try_parse(value)?;
+        let (context_tag, remaining) = ContextTag::try_parse(remaining)?;
+        let (data, remaining) = remaining.split_at(remaining.len());
+        let _ = remaining;
+        Ok(VendorPrivateWithReplyRequest {
+            vendor_code,
+            context_tag,
+            data,
+        })
     }
 }
 pub fn vendor_private_with_reply<'c, 'input, Conn>(conn: &'c Conn, vendor_code: u32, context_tag: ContextTag, data: &'input [u8]) -> Result<Cookie<'c, Conn, VendorPrivateWithReplyReply>, ConnectionError>
@@ -1869,12 +1909,13 @@ impl QueryExtensionsStringRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_EXTENSIONS_STRING_REQUEST))?;
-        // TODO: deserialize screen
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_EXTENSIONS_STRING_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryExtensionsStringRequest {
+            screen,
+        })
     }
 }
 pub fn query_extensions_string<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, QueryExtensionsStringReply>, ConnectionError>
@@ -1955,13 +1996,15 @@ impl QueryServerStringRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_SERVER_STRING_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize name
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_SERVER_STRING_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (name, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryServerStringRequest {
+            screen,
+            name,
+        })
     }
 }
 pub fn query_server_string<Conn>(conn: &Conn, screen: u32, name: u32) -> Result<Cookie<'_, Conn, QueryServerStringReply>, ConnectionError>
@@ -2070,15 +2113,18 @@ impl<'input> ClientInfoRequest<'input> {
         Ok((vec![request0.into(), self.string.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CLIENT_INFO_REQUEST))?;
-        // TODO: deserialize major_version
-        // TODO: deserialize minor_version
-        // TODO: deserialize str_len
-        // TODO: deserialize string
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CLIENT_INFO_REQUEST))?;
+        let (major_version, remaining) = u32::try_parse(value)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let (str_len, remaining) = u32::try_parse(remaining)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, str_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ClientInfoRequest {
+            major_version,
+            minor_version,
+            string,
+        })
     }
 }
 pub fn client_info<'c, 'input, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2128,12 +2174,13 @@ impl GetFBConfigsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_FB_CONFIGS_REQUEST))?;
-        // TODO: deserialize screen
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_FB_CONFIGS_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetFBConfigsRequest {
+            screen,
+        })
     }
 }
 pub fn get_fb_configs<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetFBConfigsReply>, ConnectionError>
@@ -2255,17 +2302,22 @@ impl<'input> CreatePixmapRequest<'input> {
         Ok((vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_PIXMAP_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize fbconfig
-        // TODO: deserialize pixmap
-        // TODO: deserialize glx_pixmap
-        // TODO: deserialize num_attribs
-        // TODO: deserialize attribs
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_PIXMAP_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (fbconfig, remaining) = Fbconfig::try_parse(remaining)?;
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let (glx_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+        let (num_attribs, remaining) = u32::try_parse(remaining)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(CreatePixmapRequest {
+            screen,
+            fbconfig,
+            pixmap,
+            glx_pixmap,
+            attribs: Cow::Owned(attribs),
+        })
     }
 }
 pub fn create_pixmap<'c, 'input, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pixmap: xproto::Pixmap, glx_pixmap: Pixmap, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2317,12 +2369,13 @@ impl DestroyPixmapRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_PIXMAP_REQUEST))?;
-        // TODO: deserialize glx_pixmap
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_PIXMAP_REQUEST))?;
+        let (glx_pixmap, remaining) = Pixmap::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyPixmapRequest {
+            glx_pixmap,
+        })
     }
 }
 pub fn destroy_pixmap<Conn>(conn: &Conn, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2400,18 +2453,24 @@ impl CreateNewContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_NEW_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize fbconfig
-        // TODO: deserialize screen
-        // TODO: deserialize render_type
-        // TODO: deserialize share_list
-        // TODO: deserialize is_direct
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_NEW_CONTEXT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let (fbconfig, remaining) = Fbconfig::try_parse(remaining)?;
+        let (screen, remaining) = u32::try_parse(remaining)?;
+        let (render_type, remaining) = u32::try_parse(remaining)?;
+        let (share_list, remaining) = Context::try_parse(remaining)?;
+        let (is_direct, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(CreateNewContextRequest {
+            context,
+            fbconfig,
+            screen,
+            render_type,
+            share_list,
+            is_direct,
+        })
     }
 }
 pub fn create_new_context<Conn>(conn: &Conn, context: Context, fbconfig: Fbconfig, screen: u32, render_type: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2464,12 +2523,13 @@ impl QueryContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_CONTEXT_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryContextRequest {
+            context,
+        })
     }
 }
 pub fn query_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, QueryContextReply>, ConnectionError>
@@ -2578,15 +2638,19 @@ impl MakeContextCurrentRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(MAKE_CONTEXT_CURRENT_REQUEST))?;
-        // TODO: deserialize old_context_tag
-        // TODO: deserialize drawable
-        // TODO: deserialize read_drawable
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(MAKE_CONTEXT_CURRENT_REQUEST))?;
+        let (old_context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (read_drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (context, remaining) = Context::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(MakeContextCurrentRequest {
+            old_context_tag,
+            drawable,
+            read_drawable,
+            context,
+        })
     }
 }
 pub fn make_context_current<Conn>(conn: &Conn, old_context_tag: ContextTag, drawable: Drawable, read_drawable: Drawable, context: Context) -> Result<Cookie<'_, Conn, MakeContextCurrentReply>, ConnectionError>
@@ -2687,16 +2751,20 @@ impl<'input> CreatePbufferRequest<'input> {
         Ok((vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_PBUFFER_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize fbconfig
-        // TODO: deserialize pbuffer
-        // TODO: deserialize num_attribs
-        // TODO: deserialize attribs
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_PBUFFER_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (fbconfig, remaining) = Fbconfig::try_parse(remaining)?;
+        let (pbuffer, remaining) = Pbuffer::try_parse(remaining)?;
+        let (num_attribs, remaining) = u32::try_parse(remaining)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(CreatePbufferRequest {
+            screen,
+            fbconfig,
+            pbuffer,
+            attribs: Cow::Owned(attribs),
+        })
     }
 }
 pub fn create_pbuffer<'c, 'input, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pbuffer: Pbuffer, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2747,12 +2815,13 @@ impl DestroyPbufferRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_PBUFFER_REQUEST))?;
-        // TODO: deserialize pbuffer
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_PBUFFER_REQUEST))?;
+        let (pbuffer, remaining) = Pbuffer::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyPbufferRequest {
+            pbuffer,
+        })
     }
 }
 pub fn destroy_pbuffer<Conn>(conn: &Conn, pbuffer: Pbuffer) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2800,12 +2869,13 @@ impl GetDrawableAttributesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_DRAWABLE_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize drawable
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_DRAWABLE_ATTRIBUTES_REQUEST))?;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetDrawableAttributesRequest {
+            drawable,
+        })
     }
 }
 pub fn get_drawable_attributes<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, Conn, GetDrawableAttributesReply>, ConnectionError>
@@ -2908,14 +2978,16 @@ impl<'input> ChangeDrawableAttributesRequest<'input> {
         Ok((vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CHANGE_DRAWABLE_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize drawable
-        // TODO: deserialize num_attribs
-        // TODO: deserialize attribs
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CHANGE_DRAWABLE_ATTRIBUTES_REQUEST))?;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (num_attribs, remaining) = u32::try_parse(remaining)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ChangeDrawableAttributesRequest {
+            drawable,
+            attribs: Cow::Owned(attribs),
+        })
     }
 }
 pub fn change_drawable_attributes<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2994,17 +3066,22 @@ impl<'input> CreateWindowRequest<'input> {
         Ok((vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_WINDOW_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize fbconfig
-        // TODO: deserialize window
-        // TODO: deserialize glx_window
-        // TODO: deserialize num_attribs
-        // TODO: deserialize attribs
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_WINDOW_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (fbconfig, remaining) = Fbconfig::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (glx_window, remaining) = Window::try_parse(remaining)?;
+        let (num_attribs, remaining) = u32::try_parse(remaining)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(CreateWindowRequest {
+            screen,
+            fbconfig,
+            window,
+            glx_window,
+            attribs: Cow::Owned(attribs),
+        })
     }
 }
 pub fn create_window<'c, 'input, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, window: xproto::Window, glx_window: Window, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3056,12 +3133,13 @@ impl DeleteWindowRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DELETE_WINDOW_REQUEST))?;
-        // TODO: deserialize glxwindow
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DELETE_WINDOW_REQUEST))?;
+        let (glxwindow, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(DeleteWindowRequest {
+            glxwindow,
+        })
     }
 }
 pub fn delete_window<Conn>(conn: &Conn, glxwindow: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -3143,19 +3221,24 @@ impl<'input> SetClientInfoARBRequest<'input> {
         Ok((vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string.into(), self.glx_extension_string.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_CLIENT_INFO_ARB_REQUEST))?;
-        // TODO: deserialize major_version
-        // TODO: deserialize minor_version
-        // TODO: deserialize num_versions
-        // TODO: deserialize gl_str_len
-        // TODO: deserialize glx_str_len
-        // TODO: deserialize gl_versions
-        // TODO: deserialize gl_extension_string
-        // TODO: deserialize glx_extension_string
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_CLIENT_INFO_ARB_REQUEST))?;
+        let (major_version, remaining) = u32::try_parse(value)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let (num_versions, remaining) = u32::try_parse(remaining)?;
+        let (gl_str_len, remaining) = u32::try_parse(remaining)?;
+        let (glx_str_len, remaining) = u32::try_parse(remaining)?;
+        let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_versions.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetClientInfoARBRequest {
+            major_version,
+            minor_version,
+            gl_versions: Cow::Owned(gl_versions),
+            gl_extension_string,
+            glx_extension_string,
+        })
     }
 }
 pub fn set_client_info_arb<'c, 'input, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, gl_versions: &'input [u32], gl_extension_string: &'input [u8], glx_extension_string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3243,19 +3326,25 @@ impl<'input> CreateContextAttribsARBRequest<'input> {
         Ok((vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_CONTEXT_ATTRIBS_ARB_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize fbconfig
-        // TODO: deserialize screen
-        // TODO: deserialize share_list
-        // TODO: deserialize is_direct
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize num_attribs
-        // TODO: deserialize attribs
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_CONTEXT_ATTRIBS_ARB_REQUEST))?;
+        let (context, remaining) = Context::try_parse(value)?;
+        let (fbconfig, remaining) = Fbconfig::try_parse(remaining)?;
+        let (screen, remaining) = u32::try_parse(remaining)?;
+        let (share_list, remaining) = Context::try_parse(remaining)?;
+        let (is_direct, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (num_attribs, remaining) = u32::try_parse(remaining)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(CreateContextAttribsARBRequest {
+            context,
+            fbconfig,
+            screen,
+            share_list,
+            is_direct,
+            attribs: Cow::Owned(attribs),
+        })
     }
 }
 pub fn create_context_attribs_arb<'c, 'input, Conn>(conn: &'c Conn, context: Context, fbconfig: Fbconfig, screen: u32, share_list: Context, is_direct: bool, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3342,19 +3431,24 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         Ok((vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string.into(), self.glx_extension_string.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_CLIENT_INFO2_ARB_REQUEST))?;
-        // TODO: deserialize major_version
-        // TODO: deserialize minor_version
-        // TODO: deserialize num_versions
-        // TODO: deserialize gl_str_len
-        // TODO: deserialize glx_str_len
-        // TODO: deserialize gl_versions
-        // TODO: deserialize gl_extension_string
-        // TODO: deserialize glx_extension_string
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_CLIENT_INFO2_ARB_REQUEST))?;
+        let (major_version, remaining) = u32::try_parse(value)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let (num_versions, remaining) = u32::try_parse(remaining)?;
+        let (gl_str_len, remaining) = u32::try_parse(remaining)?;
+        let (glx_str_len, remaining) = u32::try_parse(remaining)?;
+        let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_versions.checked_mul(3u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetClientInfo2ARBRequest {
+            major_version,
+            minor_version,
+            gl_versions: Cow::Owned(gl_versions),
+            gl_extension_string,
+            glx_extension_string,
+        })
     }
 }
 pub fn set_client_info2_arb<'c, 'input, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, gl_versions: &'input [u32], gl_extension_string: &'input [u8], glx_extension_string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3418,14 +3512,17 @@ impl NewListRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(NEW_LIST_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize list
-        // TODO: deserialize mode
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(NEW_LIST_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (list, remaining) = u32::try_parse(remaining)?;
+        let (mode, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(NewListRequest {
+            context_tag,
+            list,
+            mode,
+        })
     }
 }
 pub fn new_list<Conn>(conn: &Conn, context_tag: ContextTag, list: u32, mode: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -3475,12 +3572,13 @@ impl EndListRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(END_LIST_REQUEST))?;
-        // TODO: deserialize context_tag
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(END_LIST_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let _ = remaining;
+        Ok(EndListRequest {
+            context_tag,
+        })
     }
 }
 pub fn end_list<Conn>(conn: &Conn, context_tag: ContextTag) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -3540,14 +3638,17 @@ impl DeleteListsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DELETE_LISTS_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize list
-        // TODO: deserialize range
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DELETE_LISTS_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (list, remaining) = u32::try_parse(remaining)?;
+        let (range, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(DeleteListsRequest {
+            context_tag,
+            list,
+            range,
+        })
     }
 }
 pub fn delete_lists<Conn>(conn: &Conn, context_tag: ContextTag, list: u32, range: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -3603,13 +3704,15 @@ impl GenListsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GEN_LISTS_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize range
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GEN_LISTS_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (range, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GenListsRequest {
+            context_tag,
+            range,
+        })
     }
 }
 pub fn gen_lists<Conn>(conn: &Conn, context_tag: ContextTag, range: i32) -> Result<Cookie<'_, Conn, GenListsReply>, ConnectionError>
@@ -3695,14 +3798,17 @@ impl FeedbackBufferRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(FEEDBACK_BUFFER_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize size
-        // TODO: deserialize type_
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(FEEDBACK_BUFFER_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (size, remaining) = i32::try_parse(remaining)?;
+        let (type_, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(FeedbackBufferRequest {
+            context_tag,
+            size,
+            type_,
+        })
     }
 }
 pub fn feedback_buffer<Conn>(conn: &Conn, context_tag: ContextTag, size: i32, type_: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -3758,13 +3864,15 @@ impl SelectBufferRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SELECT_BUFFER_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize size
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SELECT_BUFFER_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (size, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SelectBufferRequest {
+            context_tag,
+            size,
+        })
     }
 }
 pub fn select_buffer<Conn>(conn: &Conn, context_tag: ContextTag, size: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -3819,13 +3927,15 @@ impl RenderModeRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(RENDER_MODE_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize mode
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(RENDER_MODE_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (mode, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(RenderModeRequest {
+            context_tag,
+            mode,
+        })
     }
 }
 pub fn render_mode<Conn>(conn: &Conn, context_tag: ContextTag, mode: u32) -> Result<Cookie<'_, Conn, RenderModeReply>, ConnectionError>
@@ -3970,12 +4080,13 @@ impl FinishRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(FINISH_REQUEST))?;
-        // TODO: deserialize context_tag
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(FINISH_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let _ = remaining;
+        Ok(FinishRequest {
+            context_tag,
+        })
     }
 }
 pub fn finish<Conn>(conn: &Conn, context_tag: ContextTag) -> Result<Cookie<'_, Conn, FinishReply>, ConnectionError>
@@ -4058,14 +4169,17 @@ impl PixelStorefRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PIXEL_STOREF_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize pname
-        // TODO: deserialize datum
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PIXEL_STOREF_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PixelStorefRequest {
+            context_tag,
+            pname,
+            datum,
+        })
     }
 }
 pub fn pixel_storef<Conn>(conn: &Conn, context_tag: ContextTag, pname: u32, datum: Float32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -4127,14 +4241,17 @@ impl PixelStoreiRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PIXEL_STOREI_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize pname
-        // TODO: deserialize datum
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PIXEL_STOREI_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let (datum, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PixelStoreiRequest {
+            context_tag,
+            pname,
+            datum,
+        })
     }
 }
 pub fn pixel_storei<Conn>(conn: &Conn, context_tag: ContextTag, pname: u32, datum: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -4228,20 +4345,29 @@ impl ReadPixelsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(READ_PIXELS_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize x
-        // TODO: deserialize y
-        // TODO: deserialize width
-        // TODO: deserialize height
-        // TODO: deserialize format
-        // TODO: deserialize type_
-        // TODO: deserialize swap_bytes
-        // TODO: deserialize lsb_first
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(READ_PIXELS_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (x, remaining) = i32::try_parse(remaining)?;
+        let (y, remaining) = i32::try_parse(remaining)?;
+        let (width, remaining) = i32::try_parse(remaining)?;
+        let (height, remaining) = i32::try_parse(remaining)?;
+        let (format, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = u32::try_parse(remaining)?;
+        let (swap_bytes, remaining) = bool::try_parse(remaining)?;
+        let (lsb_first, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ReadPixelsRequest {
+            context_tag,
+            x,
+            y,
+            width,
+            height,
+            format,
+            type_,
+            swap_bytes,
+            lsb_first,
+        })
     }
 }
 pub fn read_pixels<Conn>(conn: &Conn, context_tag: ContextTag, x: i32, y: i32, width: i32, height: i32, format: u32, type_: u32, swap_bytes: bool, lsb_first: bool) -> Result<Cookie<'_, Conn, ReadPixelsReply>, ConnectionError>
@@ -4345,13 +4471,15 @@ impl GetBooleanvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_BOOLEANV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_BOOLEANV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (pname, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetBooleanvRequest {
+            context_tag,
+            pname,
+        })
     }
 }
 pub fn get_booleanv<Conn>(conn: &Conn, context_tag: ContextTag, pname: i32) -> Result<Cookie<'_, Conn, GetBooleanvReply>, ConnectionError>
@@ -4451,13 +4579,15 @@ impl GetClipPlaneRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_CLIP_PLANE_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize plane
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_CLIP_PLANE_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (plane, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetClipPlaneRequest {
+            context_tag,
+            plane,
+        })
     }
 }
 pub fn get_clip_plane<Conn>(conn: &Conn, context_tag: ContextTag, plane: i32) -> Result<Cookie<'_, Conn, GetClipPlaneReply>, ConnectionError>
@@ -4553,13 +4683,15 @@ impl GetDoublevRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_DOUBLEV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_DOUBLEV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetDoublevRequest {
+            context_tag,
+            pname,
+        })
     }
 }
 pub fn get_doublev<Conn>(conn: &Conn, context_tag: ContextTag, pname: u32) -> Result<Cookie<'_, Conn, GetDoublevReply>, ConnectionError>
@@ -4653,12 +4785,13 @@ impl GetErrorRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_ERROR_REQUEST))?;
-        // TODO: deserialize context_tag
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_ERROR_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetErrorRequest {
+            context_tag,
+        })
     }
 }
 pub fn get_error<Conn>(conn: &Conn, context_tag: ContextTag) -> Result<Cookie<'_, Conn, GetErrorReply>, ConnectionError>
@@ -4737,13 +4870,15 @@ impl GetFloatvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_FLOATV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_FLOATV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetFloatvRequest {
+            context_tag,
+            pname,
+        })
     }
 }
 pub fn get_floatv<Conn>(conn: &Conn, context_tag: ContextTag, pname: u32) -> Result<Cookie<'_, Conn, GetFloatvReply>, ConnectionError>
@@ -4843,13 +4978,15 @@ impl GetIntegervRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_INTEGERV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_INTEGERV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetIntegervRequest {
+            context_tag,
+            pname,
+        })
     }
 }
 pub fn get_integerv<Conn>(conn: &Conn, context_tag: ContextTag, pname: u32) -> Result<Cookie<'_, Conn, GetIntegervReply>, ConnectionError>
@@ -4955,14 +5092,17 @@ impl GetLightfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_LIGHTFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize light
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_LIGHTFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (light, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetLightfvRequest {
+            context_tag,
+            light,
+            pname,
+        })
     }
 }
 pub fn get_lightfv<Conn>(conn: &Conn, context_tag: ContextTag, light: u32, pname: u32) -> Result<Cookie<'_, Conn, GetLightfvReply>, ConnectionError>
@@ -5069,14 +5209,17 @@ impl GetLightivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_LIGHTIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize light
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_LIGHTIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (light, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetLightivRequest {
+            context_tag,
+            light,
+            pname,
+        })
     }
 }
 pub fn get_lightiv<Conn>(conn: &Conn, context_tag: ContextTag, light: u32, pname: u32) -> Result<Cookie<'_, Conn, GetLightivReply>, ConnectionError>
@@ -5183,14 +5326,17 @@ impl GetMapdvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MAPDV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize query
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MAPDV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (query, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMapdvRequest {
+            context_tag,
+            target,
+            query,
+        })
     }
 }
 pub fn get_mapdv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, query: u32) -> Result<Cookie<'_, Conn, GetMapdvReply>, ConnectionError>
@@ -5297,14 +5443,17 @@ impl GetMapfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MAPFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize query
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MAPFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (query, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMapfvRequest {
+            context_tag,
+            target,
+            query,
+        })
     }
 }
 pub fn get_mapfv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, query: u32) -> Result<Cookie<'_, Conn, GetMapfvReply>, ConnectionError>
@@ -5411,14 +5560,17 @@ impl GetMapivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MAPIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize query
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MAPIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (query, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMapivRequest {
+            context_tag,
+            target,
+            query,
+        })
     }
 }
 pub fn get_mapiv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, query: u32) -> Result<Cookie<'_, Conn, GetMapivReply>, ConnectionError>
@@ -5525,14 +5677,17 @@ impl GetMaterialfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MATERIALFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize face
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MATERIALFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (face, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMaterialfvRequest {
+            context_tag,
+            face,
+            pname,
+        })
     }
 }
 pub fn get_materialfv<Conn>(conn: &Conn, context_tag: ContextTag, face: u32, pname: u32) -> Result<Cookie<'_, Conn, GetMaterialfvReply>, ConnectionError>
@@ -5639,14 +5794,17 @@ impl GetMaterialivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MATERIALIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize face
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MATERIALIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (face, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMaterialivRequest {
+            context_tag,
+            face,
+            pname,
+        })
     }
 }
 pub fn get_materialiv<Conn>(conn: &Conn, context_tag: ContextTag, face: u32, pname: u32) -> Result<Cookie<'_, Conn, GetMaterialivReply>, ConnectionError>
@@ -5747,13 +5905,15 @@ impl GetPixelMapfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_PIXEL_MAPFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize map
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_PIXEL_MAPFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (map, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetPixelMapfvRequest {
+            context_tag,
+            map,
+        })
     }
 }
 pub fn get_pixel_mapfv<Conn>(conn: &Conn, context_tag: ContextTag, map: u32) -> Result<Cookie<'_, Conn, GetPixelMapfvReply>, ConnectionError>
@@ -5853,13 +6013,15 @@ impl GetPixelMapuivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_PIXEL_MAPUIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize map
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_PIXEL_MAPUIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (map, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetPixelMapuivRequest {
+            context_tag,
+            map,
+        })
     }
 }
 pub fn get_pixel_mapuiv<Conn>(conn: &Conn, context_tag: ContextTag, map: u32) -> Result<Cookie<'_, Conn, GetPixelMapuivReply>, ConnectionError>
@@ -5959,13 +6121,15 @@ impl GetPixelMapusvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_PIXEL_MAPUSV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize map
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_PIXEL_MAPUSV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (map, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetPixelMapusvRequest {
+            context_tag,
+            map,
+        })
     }
 }
 pub fn get_pixel_mapusv<Conn>(conn: &Conn, context_tag: ContextTag, map: u32) -> Result<Cookie<'_, Conn, GetPixelMapusvReply>, ConnectionError>
@@ -6065,13 +6229,15 @@ impl GetPolygonStippleRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_POLYGON_STIPPLE_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize lsb_first
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_POLYGON_STIPPLE_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (lsb_first, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetPolygonStippleRequest {
+            context_tag,
+            lsb_first,
+        })
     }
 }
 pub fn get_polygon_stipple<Conn>(conn: &Conn, context_tag: ContextTag, lsb_first: bool) -> Result<Cookie<'_, Conn, GetPolygonStippleReply>, ConnectionError>
@@ -6168,13 +6334,15 @@ impl GetStringRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_STRING_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize name
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_STRING_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (name, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetStringRequest {
+            context_tag,
+            name,
+        })
     }
 }
 pub fn get_string<Conn>(conn: &Conn, context_tag: ContextTag, name: u32) -> Result<Cookie<'_, Conn, GetStringReply>, ConnectionError>
@@ -6279,14 +6447,17 @@ impl GetTexEnvfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_ENVFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_ENVFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexEnvfvRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_tex_envfv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetTexEnvfvReply>, ConnectionError>
@@ -6393,14 +6564,17 @@ impl GetTexEnvivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_ENVIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_ENVIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexEnvivRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_tex_enviv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetTexEnvivReply>, ConnectionError>
@@ -6507,14 +6681,17 @@ impl GetTexGendvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_GENDV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize coord
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_GENDV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (coord, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexGendvRequest {
+            context_tag,
+            coord,
+            pname,
+        })
     }
 }
 pub fn get_tex_gendv<Conn>(conn: &Conn, context_tag: ContextTag, coord: u32, pname: u32) -> Result<Cookie<'_, Conn, GetTexGendvReply>, ConnectionError>
@@ -6621,14 +6798,17 @@ impl GetTexGenfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_GENFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize coord
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_GENFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (coord, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexGenfvRequest {
+            context_tag,
+            coord,
+            pname,
+        })
     }
 }
 pub fn get_tex_genfv<Conn>(conn: &Conn, context_tag: ContextTag, coord: u32, pname: u32) -> Result<Cookie<'_, Conn, GetTexGenfvReply>, ConnectionError>
@@ -6735,14 +6915,17 @@ impl GetTexGenivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_GENIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize coord
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_GENIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (coord, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexGenivRequest {
+            context_tag,
+            coord,
+            pname,
+        })
     }
 }
 pub fn get_tex_geniv<Conn>(conn: &Conn, context_tag: ContextTag, coord: u32, pname: u32) -> Result<Cookie<'_, Conn, GetTexGenivReply>, ConnectionError>
@@ -6867,17 +7050,23 @@ impl GetTexImageRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_IMAGE_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize level
-        // TODO: deserialize format
-        // TODO: deserialize type_
-        // TODO: deserialize swap_bytes
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_IMAGE_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (level, remaining) = i32::try_parse(remaining)?;
+        let (format, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = u32::try_parse(remaining)?;
+        let (swap_bytes, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexImageRequest {
+            context_tag,
+            target,
+            level,
+            format,
+            type_,
+            swap_bytes,
+        })
     }
 }
 pub fn get_tex_image<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, level: i32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Conn, GetTexImageReply>, ConnectionError>
@@ -6991,14 +7180,17 @@ impl GetTexParameterfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_PARAMETERFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_PARAMETERFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexParameterfvRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_tex_parameterfv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetTexParameterfvReply>, ConnectionError>
@@ -7105,14 +7297,17 @@ impl GetTexParameterivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_PARAMETERIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_PARAMETERIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexParameterivRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_tex_parameteriv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetTexParameterivReply>, ConnectionError>
@@ -7225,15 +7420,19 @@ impl GetTexLevelParameterfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_LEVEL_PARAMETERFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize level
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_LEVEL_PARAMETERFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (level, remaining) = i32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexLevelParameterfvRequest {
+            context_tag,
+            target,
+            level,
+            pname,
+        })
     }
 }
 pub fn get_tex_level_parameterfv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, level: i32, pname: u32) -> Result<Cookie<'_, Conn, GetTexLevelParameterfvReply>, ConnectionError>
@@ -7347,15 +7546,19 @@ impl GetTexLevelParameterivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_TEX_LEVEL_PARAMETERIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize level
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_TEX_LEVEL_PARAMETERIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (level, remaining) = i32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetTexLevelParameterivRequest {
+            context_tag,
+            target,
+            level,
+            pname,
+        })
     }
 }
 pub fn get_tex_level_parameteriv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, level: i32, pname: u32) -> Result<Cookie<'_, Conn, GetTexLevelParameterivReply>, ConnectionError>
@@ -7457,13 +7660,15 @@ impl IsEnabledRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(IS_ENABLED_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize capability
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(IS_ENABLED_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (capability, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(IsEnabledRequest {
+            context_tag,
+            capability,
+        })
     }
 }
 pub fn is_enabled<Conn>(conn: &Conn, context_tag: ContextTag, capability: u32) -> Result<Cookie<'_, Conn, IsEnabledReply>, ConnectionError>
@@ -7543,13 +7748,15 @@ impl IsListRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(IS_LIST_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize list
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(IS_LIST_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (list, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(IsListRequest {
+            context_tag,
+            list,
+        })
     }
 }
 pub fn is_list<Conn>(conn: &Conn, context_tag: ContextTag, list: u32) -> Result<Cookie<'_, Conn, IsListReply>, ConnectionError>
@@ -7623,12 +7830,13 @@ impl FlushRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(FLUSH_REQUEST))?;
-        // TODO: deserialize context_tag
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(FLUSH_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let _ = remaining;
+        Ok(FlushRequest {
+            context_tag,
+        })
     }
 }
 pub fn flush<Conn>(conn: &Conn, context_tag: ContextTag) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -7687,14 +7895,16 @@ impl<'input> AreTexturesResidentRequest<'input> {
         Ok((vec![request0.into(), textures_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(ARE_TEXTURES_RESIDENT_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize n
-        // TODO: deserialize textures
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(ARE_TEXTURES_RESIDENT_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (n, remaining) = i32::try_parse(remaining)?;
+        let (textures, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(AreTexturesResidentRequest {
+            context_tag,
+            textures: Cow::Owned(textures),
+        })
     }
 }
 pub fn are_textures_resident<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, textures: &'input [u32]) -> Result<Cookie<'c, Conn, AreTexturesResidentReply>, ConnectionError>
@@ -7797,14 +8007,16 @@ impl<'input> DeleteTexturesRequest<'input> {
         Ok((vec![request0.into(), textures_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DELETE_TEXTURES_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize n
-        // TODO: deserialize textures
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DELETE_TEXTURES_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (n, remaining) = i32::try_parse(remaining)?;
+        let (textures, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(DeleteTexturesRequest {
+            context_tag,
+            textures: Cow::Owned(textures),
+        })
     }
 }
 pub fn delete_textures<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, textures: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -7859,13 +8071,15 @@ impl GenTexturesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GEN_TEXTURES_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize n
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GEN_TEXTURES_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (n, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GenTexturesRequest {
+            context_tag,
+            n,
+        })
     }
 }
 pub fn gen_textures<Conn>(conn: &Conn, context_tag: ContextTag, n: i32) -> Result<Cookie<'_, Conn, GenTexturesReply>, ConnectionError>
@@ -7960,13 +8174,15 @@ impl IsTextureRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(IS_TEXTURE_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize texture
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(IS_TEXTURE_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (texture, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(IsTextureRequest {
+            context_tag,
+            texture,
+        })
     }
 }
 pub fn is_texture<Conn>(conn: &Conn, context_tag: ContextTag, texture: u32) -> Result<Cookie<'_, Conn, IsTextureReply>, ConnectionError>
@@ -8064,16 +8280,21 @@ impl GetColorTableRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_COLOR_TABLE_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize format
-        // TODO: deserialize type_
-        // TODO: deserialize swap_bytes
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_COLOR_TABLE_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (format, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = u32::try_parse(remaining)?;
+        let (swap_bytes, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetColorTableRequest {
+            context_tag,
+            target,
+            format,
+            type_,
+            swap_bytes,
+        })
     }
 }
 pub fn get_color_table<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Conn, GetColorTableReply>, ConnectionError>
@@ -8182,14 +8403,17 @@ impl GetColorTableParameterfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_COLOR_TABLE_PARAMETERFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_COLOR_TABLE_PARAMETERFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetColorTableParameterfvRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_color_table_parameterfv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetColorTableParameterfvReply>, ConnectionError>
@@ -8296,14 +8520,17 @@ impl GetColorTableParameterivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_COLOR_TABLE_PARAMETERIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_COLOR_TABLE_PARAMETERIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetColorTableParameterivRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_color_table_parameteriv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetColorTableParameterivReply>, ConnectionError>
@@ -8422,16 +8649,21 @@ impl GetConvolutionFilterRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_CONVOLUTION_FILTER_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize format
-        // TODO: deserialize type_
-        // TODO: deserialize swap_bytes
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_CONVOLUTION_FILTER_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (format, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = u32::try_parse(remaining)?;
+        let (swap_bytes, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetConvolutionFilterRequest {
+            context_tag,
+            target,
+            format,
+            type_,
+            swap_bytes,
+        })
     }
 }
 pub fn get_convolution_filter<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Conn, GetConvolutionFilterReply>, ConnectionError>
@@ -8542,14 +8774,17 @@ impl GetConvolutionParameterfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_CONVOLUTION_PARAMETERFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_CONVOLUTION_PARAMETERFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetConvolutionParameterfvRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_convolution_parameterfv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetConvolutionParameterfvReply>, ConnectionError>
@@ -8656,14 +8891,17 @@ impl GetConvolutionParameterivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_CONVOLUTION_PARAMETERIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_CONVOLUTION_PARAMETERIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetConvolutionParameterivRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_convolution_parameteriv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetConvolutionParameterivReply>, ConnectionError>
@@ -8782,16 +9020,21 @@ impl GetSeparableFilterRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_SEPARABLE_FILTER_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize format
-        // TODO: deserialize type_
-        // TODO: deserialize swap_bytes
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_SEPARABLE_FILTER_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (format, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = u32::try_parse(remaining)?;
+        let (swap_bytes, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetSeparableFilterRequest {
+            context_tag,
+            target,
+            format,
+            type_,
+            swap_bytes,
+        })
     }
 }
 pub fn get_separable_filter<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Conn, GetSeparableFilterReply>, ConnectionError>
@@ -8916,17 +9159,23 @@ impl GetHistogramRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_HISTOGRAM_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize format
-        // TODO: deserialize type_
-        // TODO: deserialize swap_bytes
-        // TODO: deserialize reset
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_HISTOGRAM_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (format, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = u32::try_parse(remaining)?;
+        let (swap_bytes, remaining) = bool::try_parse(remaining)?;
+        let (reset, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetHistogramRequest {
+            context_tag,
+            target,
+            format,
+            type_,
+            swap_bytes,
+            reset,
+        })
     }
 }
 pub fn get_histogram<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool, reset: bool) -> Result<Cookie<'_, Conn, GetHistogramReply>, ConnectionError>
@@ -9036,14 +9285,17 @@ impl GetHistogramParameterfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_HISTOGRAM_PARAMETERFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_HISTOGRAM_PARAMETERFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetHistogramParameterfvRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_histogram_parameterfv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetHistogramParameterfvReply>, ConnectionError>
@@ -9150,14 +9402,17 @@ impl GetHistogramParameterivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_HISTOGRAM_PARAMETERIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_HISTOGRAM_PARAMETERIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetHistogramParameterivRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_histogram_parameteriv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetHistogramParameterivReply>, ConnectionError>
@@ -9278,17 +9533,23 @@ impl GetMinmaxRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MINMAX_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize format
-        // TODO: deserialize type_
-        // TODO: deserialize swap_bytes
-        // TODO: deserialize reset
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MINMAX_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (format, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = u32::try_parse(remaining)?;
+        let (swap_bytes, remaining) = bool::try_parse(remaining)?;
+        let (reset, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMinmaxRequest {
+            context_tag,
+            target,
+            format,
+            type_,
+            swap_bytes,
+            reset,
+        })
     }
 }
 pub fn get_minmax<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool, reset: bool) -> Result<Cookie<'_, Conn, GetMinmaxReply>, ConnectionError>
@@ -9395,14 +9656,17 @@ impl GetMinmaxParameterfvRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MINMAX_PARAMETERFV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MINMAX_PARAMETERFV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMinmaxParameterfvRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_minmax_parameterfv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetMinmaxParameterfvReply>, ConnectionError>
@@ -9509,14 +9773,17 @@ impl GetMinmaxParameterivRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MINMAX_PARAMETERIV_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MINMAX_PARAMETERIV_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMinmaxParameterivRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_minmax_parameteriv<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetMinmaxParameterivReply>, ConnectionError>
@@ -9623,14 +9890,17 @@ impl GetCompressedTexImageARBRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize level
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (level, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetCompressedTexImageARBRequest {
+            context_tag,
+            target,
+            level,
+        })
     }
 }
 pub fn get_compressed_tex_image_arb<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, level: i32) -> Result<Cookie<'_, Conn, GetCompressedTexImageARBReply>, ConnectionError>
@@ -9736,14 +10006,16 @@ impl<'input> DeleteQueriesARBRequest<'input> {
         Ok((vec![request0.into(), ids_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DELETE_QUERIES_ARB_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize n
-        // TODO: deserialize ids
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DELETE_QUERIES_ARB_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (n, remaining) = i32::try_parse(remaining)?;
+        let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(DeleteQueriesARBRequest {
+            context_tag,
+            ids: Cow::Owned(ids),
+        })
     }
 }
 pub fn delete_queries_arb<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, ids: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -9798,13 +10070,15 @@ impl GenQueriesARBRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GEN_QUERIES_ARB_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize n
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GEN_QUERIES_ARB_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (n, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GenQueriesARBRequest {
+            context_tag,
+            n,
+        })
     }
 }
 pub fn gen_queries_arb<Conn>(conn: &Conn, context_tag: ContextTag, n: i32) -> Result<Cookie<'_, Conn, GenQueriesARBReply>, ConnectionError>
@@ -9899,13 +10173,15 @@ impl IsQueryARBRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(IS_QUERY_ARB_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize id
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(IS_QUERY_ARB_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (id, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(IsQueryARBRequest {
+            context_tag,
+            id,
+        })
     }
 }
 pub fn is_query_arb<Conn>(conn: &Conn, context_tag: ContextTag, id: u32) -> Result<Cookie<'_, Conn, IsQueryARBReply>, ConnectionError>
@@ -9991,14 +10267,17 @@ impl GetQueryivARBRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_QUERYIV_ARB_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize target
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_QUERYIV_ARB_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (target, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetQueryivARBRequest {
+            context_tag,
+            target,
+            pname,
+        })
     }
 }
 pub fn get_queryiv_arb<Conn>(conn: &Conn, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Conn, GetQueryivARBReply>, ConnectionError>
@@ -10105,14 +10384,17 @@ impl GetQueryObjectivARBRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_QUERY_OBJECTIV_ARB_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize id
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_QUERY_OBJECTIV_ARB_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (id, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetQueryObjectivARBRequest {
+            context_tag,
+            id,
+            pname,
+        })
     }
 }
 pub fn get_query_objectiv_arb<Conn>(conn: &Conn, context_tag: ContextTag, id: u32, pname: u32) -> Result<Cookie<'_, Conn, GetQueryObjectivARBReply>, ConnectionError>
@@ -10219,14 +10501,17 @@ impl GetQueryObjectuivARBRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_QUERY_OBJECTUIV_ARB_REQUEST))?;
-        // TODO: deserialize context_tag
-        // TODO: deserialize id
-        // TODO: deserialize pname
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_QUERY_OBJECTUIV_ARB_REQUEST))?;
+        let (context_tag, remaining) = ContextTag::try_parse(value)?;
+        let (id, remaining) = u32::try_parse(remaining)?;
+        let (pname, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetQueryObjectuivARBRequest {
+            context_tag,
+            id,
+            pname,
+        })
     }
 }
 pub fn get_query_objectuiv_arb<Conn>(conn: &Conn, context_tag: ContextTag, id: u32, pname: u32) -> Result<Cookie<'_, Conn, GetQueryObjectuivARBReply>, ConnectionError>

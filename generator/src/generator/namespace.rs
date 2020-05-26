@@ -875,10 +875,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             // Parsing implementation.
             outln!(out, "/// Parse this request given its header, its body, and any fds that go along with it");
             if !(gathered.single_fds.is_empty() && gathered.fd_lists.is_empty()) {
-                outln!(out, "pub fn try_parse_request_fd(header: RequestHeader, body: &{lifetime}[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {{",
+                outln!(out, "pub fn try_parse_request_fd(header: RequestHeader, value: &{lifetime}[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {{",
                        lifetime = parse_lifetime_block);
             } else {
-                outln!(out, "pub fn try_parse_request(header: RequestHeader, body: &{lifetime}[u8]) -> Result<Self, ParseError> {{",
+                outln!(out, "pub fn try_parse_request(header: RequestHeader, value: &{lifetime}[u8]) -> Result<Self, ParseError> {{",
                        lifetime = parse_lifetime_block);
             }
             out.indented(|out| {
@@ -888,12 +888,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 } else {
                     (opcode, "None".into())
                 };
-                outln!(out, "validate_request_pieces(header, body, {major_opcode}, {minor_opcode})?;",
+                outln!(out, "validate_request_pieces(header, value, {major_opcode}, {minor_opcode})?;",
                        major_opcode=major_opcode,
                        minor_opcode=minor_opcode);
 
                 let fields = request_def.fields.borrow();
                 let mut seen_complete_header = false;
+                let mut is_first_body_field = true;
                 for (_, field) in fields.iter().enumerate() {
                     match field.name() {
                         // These are all in the header. Ignore them.
@@ -904,18 +905,45 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         },
                         _ => (),
                     }
-                    match field {
-                        _ => {
-                            let rust_field_name = to_rust_variable_name(field.name().unwrap_or("<unnamed field>"));
-                            outln!(out, "// TODO: deserialize {}", rust_field_name);
-                        }
-                    }
+
+                    let from = if !seen_complete_header {
+                        assert_eq!(field.size(), Some(1));
+                        "&[header.minor_opcode]"
+                    } else if is_first_body_field {
+                        is_first_body_field = false;
+                        "value"
+                    } else {
+                        "remaining"
+                    };
+                    self.emit_field_parse(field, "", from, FieldContainer::Request(name.to_string()), out);
+                    self.emit_field_post_parse(field, out);
                 }
 
                 // Suppress a warning about this being unused.
-                outln!(out, "let _ = body;");
-                outln!(out, "// TODO: produce final struct");
-                outln!(out, "unimplemented!()");
+                if is_first_body_field {
+                    outln!(out, "let _ = value;");
+                } else {
+                    outln!(out, "let _ = remaining;");
+                }
+
+                let has_members = !gathered.request_args.is_empty();
+                let members_start = if has_members { " {" } else { "" };
+                outln!(out, "Ok({}Request{}", name, members_start);
+                out.indented(|out| {
+                    for (arg_name, arg_type) in gathered.request_args.iter() {
+                        if arg_type.needs_cow() {
+                            outln!(out, "{name}: Cow::Owned({name}),", name = arg_name);
+                        } else {
+                            outln!(out, "{name},", name = arg_name);
+                        }
+                    }
+                });
+                let members_end = if has_members {
+                    "}"
+                } else {
+                    ""
+                };
+                outln!(out, "{})", members_end);
             });
             outln!(out, "}}");
         });
@@ -1399,7 +1427,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         rust_field_type,
                     );
                     out.indented(|out| {
-                        self.emit_field_parse(field, &rust_name, out);
+                        self.emit_field_parse(
+                            field,
+                            &rust_name,
+                            "remaining",
+                            FieldContainer::Other,
+                            out,
+                        );
                         self.emit_field_post_parse(field, out);
                         outln!(out, "let _ = remaining;");
                         outln!(out, "Ok({})", rust_field_name);
@@ -2086,7 +2120,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 out.indented(|out| {
                     Self::emit_let_value_for_dynamic_align(fields, out);
                     for field in fields.iter() {
-                        self.emit_field_parse(field, switch_prefix, out);
+                        self.emit_field_parse(
+                            field,
+                            switch_prefix,
+                            "remaining",
+                            FieldContainer::Other,
+                            out,
+                        );
                     }
                     for field in fields.iter() {
                         if !field
@@ -2846,7 +2886,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     let case_fields = case.fields.borrow();
                                     Self::emit_let_value_for_dynamic_align(&*case_fields, out);
                                     for field in case_fields.iter() {
-                                        self.emit_field_parse(field, name, out);
+                                        self.emit_field_parse(
+                                            field,
+                                            name,
+                                            "remaining",
+                                            FieldContainer::Other,
+                                            out,
+                                        );
                                     }
                                     for field in case_fields.iter() {
                                         self.emit_field_post_parse(field, out);
@@ -2932,7 +2978,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     let case_fields = case.fields.borrow();
                                     Self::emit_let_value_for_dynamic_align(&*case_fields, out);
                                     for field in case_fields.iter() {
-                                        self.emit_field_parse(field, name, out);
+                                        self.emit_field_parse(
+                                            field,
+                                            name,
+                                            "remaining",
+                                            FieldContainer::Other,
+                                            out,
+                                        );
                                     }
                                     for field in case_fields.iter() {
                                         self.emit_field_post_parse(field, out);
@@ -3334,7 +3386,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 
-    fn emit_field_parse(&self, field: &xcbdefs::FieldDef, switch_prefix: &str, out: &mut Output) {
+    fn emit_field_parse(
+        &self,
+        field: &xcbdefs::FieldDef,
+        switch_prefix: &str,
+        from: &str,
+        container: FieldContainer,
+        out: &mut Output,
+    ) {
         match field {
             xcbdefs::FieldDef::Pad(pad_field) => {
                 let pad_size = match pad_field.kind {
@@ -3357,8 +3416,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 };
                 outln!(
                     out,
-                    "let remaining = remaining.get({}..).ok_or(ParseError::ParseError)?;",
-                    pad_size
+                    "let remaining = {from}.get({pad}..).ok_or(ParseError::ParseError)?;",
+                    from = from,
+                    pad = pad_size,
                 );
             }
             xcbdefs::FieldDef::Normal(normal_field) => {
@@ -3367,7 +3427,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     out,
                     "let ({}, remaining) = {};",
                     rust_field_name,
-                    self.emit_value_parse(&normal_field.type_),
+                    self.emit_value_parse(&normal_field.type_, from),
                 );
             }
             xcbdefs::FieldDef::List(list_field) => {
@@ -3378,24 +3438,42 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if let Some(list_length) = list_field.length() {
                         outln!(
                             out,
-                            "let ({}, remaining) = crate::x11_utils::parse_u8_list(remaining, \
+                            "let ({}, remaining) = crate::x11_utils::parse_u8_list({}, \
                              {})?;",
                             rust_field_name,
+                            from,
                             list_length,
                         );
-                        outln!(
-                            out,
-                            "let {} = <[u8; {}]>::try_from({}).unwrap();",
-                            rust_field_name,
-                            list_length,
-                            rust_field_name,
-                        );
+                        if container == FieldContainer::Other {
+                            // Only force taking ownership for non-request types.
+                            outln!(
+                                out,
+                                "let {} = <[u8; {}]>::try_from({}).unwrap();",
+                                rust_field_name,
+                                list_length,
+                                rust_field_name,
+                            );
+                        } else {
+                            // Otherwise convert this into a reference to a fixed length array.
+                            // It's basically dumb luck that the largest list in the X11 protocol
+                            // and the largest fixed length array that Rust has a builtin conversion
+                            // for going from &[T] to &[T; N] both happen to be 32.
+                            assert!(list_length <= 32);
+                            outln!(
+                                out,
+                                "let {} = <&[u8; {}]>::try_from({}).unwrap();",
+                                rust_field_name,
+                                list_length,
+                                rust_field_name,
+                            );
+                        }
                     } else if let Some(ref length_expr) = list_field.length_expr {
                         outln!(
                             out,
-                            "let ({}, remaining) = crate::x11_utils::parse_u8_list(remaining, \
+                            "let ({}, remaining) = crate::x11_utils::parse_u8_list({}, \
                              {}.try_into().or(Err(ParseError::ParseError))?)?;",
                             rust_field_name,
+                            from,
                             self.expr_to_str(
                                 length_expr,
                                 to_rust_variable_name,
@@ -3404,15 +3482,27 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 true,
                             ),
                         );
-                        outln!(
-                            out,
-                            "let {} = {}.to_vec();",
-                            rust_field_name,
-                            rust_field_name
-                        );
+                        // Only force taking ownership for non-request types.
+                        if container == FieldContainer::Other {
+                            outln!(
+                                out,
+                                "let {} = {}.to_vec();",
+                                rust_field_name,
+                                rust_field_name
+                            );
+                        }
                     } else {
-                        outln!(out, "let {} = remaining.to_vec();", rust_field_name);
-                        outln!(out, "let remaining = &remaining[remaining.len()..];");
+                        // Only force taking ownership for non-request types.
+                        if container == FieldContainer::Other {
+                            outln!(out, "let {} = remaining.to_vec();", rust_field_name);
+                            outln!(out, "let remaining = &remaining[remaining.len()..];");
+                        } else {
+                            outln!(
+                                out,
+                                "let ({}, remaining) = remaining.split_at(remaining.len());",
+                                rust_field_name
+                            );
+                        }
                     }
                 } else if self.can_use_simple_list_parsing(&list_field.element_type)
                     && list_field.length_expr.is_some()
@@ -3442,7 +3532,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             "let ({}_{}, remaining) = {};",
                             rust_field_name,
                             i,
-                            self.emit_value_parse(&list_field.element_type),
+                            self.emit_value_parse(&list_field.element_type, from),
                         );
                         self.emit_value_post_parse(&list_field.element_type, &tmp_name, out);
                     }
@@ -3452,7 +3542,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     }
                     outln!(out, "];");
                 } else {
-                    outln!(out, "let mut remaining = remaining;");
+                    outln!(out, "let mut remaining = {};", from);
                     if let Some(ref length_expr) = list_field.length_expr {
                         outln!(
                             out,
@@ -3481,7 +3571,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(
                             out,
                             "let (v, new_remaining) = {};",
-                            self.emit_value_parse(&list_field.element_type),
+                            self.emit_value_parse(&list_field.element_type, from),
                         );
                         self.emit_value_post_parse(&list_field.element_type, "v", out);
                         outln!(out, "remaining = new_remaining;");
@@ -3492,8 +3582,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             }
             xcbdefs::FieldDef::Switch(switch_field) => {
                 let rust_field_name = to_rust_variable_name(&switch_field.name);
-                let switch_struct_name =
-                    format!("{}{}", switch_prefix, to_rust_type_name(&switch_field.name));
+                let switch_struct_name = if let FieldContainer::Request(request_name) = container {
+                    format!("{}Aux", request_name)
+                } else {
+                    format!("{}{}", switch_prefix, to_rust_type_name(&switch_field.name))
+                };
                 let mut parse_params = Vec::new();
                 parse_params.push(String::from("remaining"));
                 for ext_param in switch_field.external_params.borrow().iter() {
@@ -3538,7 +3631,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             }
             xcbdefs::FieldDef::Expr(_) => {
                 // Only supported in requests
-                unreachable!();
+                outln!(
+                    out,
+                    "// TODO: Parse {}",
+                    field.name().unwrap_or("<unnamed field>")
+                );
             }
             xcbdefs::FieldDef::VirtualLen(_) => {}
         }
@@ -3551,11 +3648,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 
-    fn emit_value_parse(&self, type_: &xcbdefs::FieldValueType) -> String {
-        // Don't handle enum values yet
+    fn emit_value_parse(&self, type_: &xcbdefs::FieldValueType, from: &str) -> String {
         let type_type = type_.type_.def.get().unwrap();
         let rust_type = self.type_to_rust_type(type_type);
-        let params = self.get_type_parse_params(type_type, "remaining");
+        let params = self.get_type_parse_params(type_type, from);
         format!("{}::try_parse({})?", rust_type, params.join(", "))
     }
 
@@ -3572,7 +3668,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 _ => unreachable!(),
             };
             if !self.enum_has_repeated_values(&enum_def) {
-                outln!(out, "let {} = {}.try_into()?;", var_name, var_name);
+                let type_type = type_.type_.def.get().unwrap();
+                match type_type {
+                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Bool) => {
+                        // Cast this to a u8 before calling try_into, because there's
+                        // no TryFrom<bool> implementation.
+                        outln!(out, "let {var} = {var} as u8;", var = var_name);
+                    }
+                    _ => (),
+                }
+                outln!(out, "let {var} = {var}.try_into()?;", var = var_name);
             }
             if is_xproto_gravity(&enum_def) {
                 let enum_ns = enum_def.namespace.upgrade().unwrap();
@@ -5360,6 +5465,15 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, De
     }
 
     deducible_fields
+}
+
+/// A helper to note what owns a field.
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum FieldContainer {
+    /// This field is part of a request.
+    Request(String),
+    /// The field belongs to something else.
+    Other,
 }
 
 /// A helper to represent either simple or borrowed types.

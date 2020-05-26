@@ -153,11 +153,11 @@ impl QueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        let _ = value;
+        Ok(QueryVersionRequest
+        )
     }
 }
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -230,12 +230,13 @@ impl ListSurfaceTypesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(LIST_SURFACE_TYPES_REQUEST))?;
-        // TODO: deserialize port_id
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(LIST_SURFACE_TYPES_REQUEST))?;
+        let (port_id, remaining) = xv::Port::try_parse(value)?;
+        let _ = remaining;
+        Ok(ListSurfaceTypesRequest {
+            port_id,
+        })
     }
 }
 pub fn list_surface_types<Conn>(conn: &Conn, port_id: xv::Port) -> Result<Cookie<'_, Conn, ListSurfaceTypesReply>, ConnectionError>
@@ -351,17 +352,23 @@ impl CreateContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_CONTEXT_REQUEST))?;
-        // TODO: deserialize context_id
-        // TODO: deserialize port_id
-        // TODO: deserialize surface_id
-        // TODO: deserialize width
-        // TODO: deserialize height
-        // TODO: deserialize flags
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_CONTEXT_REQUEST))?;
+        let (context_id, remaining) = Context::try_parse(value)?;
+        let (port_id, remaining) = xv::Port::try_parse(remaining)?;
+        let (surface_id, remaining) = Surface::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateContextRequest {
+            context_id,
+            port_id,
+            surface_id,
+            width,
+            height,
+            flags,
+        })
     }
 }
 pub fn create_context<Conn>(conn: &Conn, context_id: Context, port_id: xv::Port, surface_id: Surface, width: u16, height: u16, flags: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
@@ -460,12 +467,13 @@ impl DestroyContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_CONTEXT_REQUEST))?;
-        // TODO: deserialize context_id
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_CONTEXT_REQUEST))?;
+        let (context_id, remaining) = Context::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyContextRequest {
+            context_id,
+        })
     }
 }
 pub fn destroy_context<Conn>(conn: &Conn, context_id: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -519,13 +527,15 @@ impl CreateSurfaceRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_SURFACE_REQUEST))?;
-        // TODO: deserialize surface_id
-        // TODO: deserialize context_id
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_SURFACE_REQUEST))?;
+        let (surface_id, remaining) = Surface::try_parse(value)?;
+        let (context_id, remaining) = Context::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateSurfaceRequest {
+            surface_id,
+            context_id,
+        })
     }
 }
 pub fn create_surface<Conn>(conn: &Conn, surface_id: Surface, context_id: Context) -> Result<Cookie<'_, Conn, CreateSurfaceReply>, ConnectionError>
@@ -614,12 +624,13 @@ impl DestroySurfaceRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_SURFACE_REQUEST))?;
-        // TODO: deserialize surface_id
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_SURFACE_REQUEST))?;
+        let (surface_id, remaining) = Surface::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroySurfaceRequest {
+            surface_id,
+        })
     }
 }
 pub fn destroy_surface<Conn>(conn: &Conn, surface_id: Surface) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -687,16 +698,21 @@ impl CreateSubpictureRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_SUBPICTURE_REQUEST))?;
-        // TODO: deserialize subpicture_id
-        // TODO: deserialize context
-        // TODO: deserialize xvimage_id
-        // TODO: deserialize width
-        // TODO: deserialize height
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_SUBPICTURE_REQUEST))?;
+        let (subpicture_id, remaining) = Subpicture::try_parse(value)?;
+        let (context, remaining) = Context::try_parse(remaining)?;
+        let (xvimage_id, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateSubpictureRequest {
+            subpicture_id,
+            context,
+            xvimage_id,
+            width,
+            height,
+        })
     }
 }
 pub fn create_subpicture<Conn>(conn: &Conn, subpicture_id: Subpicture, context: Context, xvimage_id: u32, width: u16, height: u16) -> Result<Cookie<'_, Conn, CreateSubpictureReply>, ConnectionError>
@@ -799,12 +815,13 @@ impl DestroySubpictureRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_SUBPICTURE_REQUEST))?;
-        // TODO: deserialize subpicture_id
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_SUBPICTURE_REQUEST))?;
+        let (subpicture_id, remaining) = Subpicture::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroySubpictureRequest {
+            subpicture_id,
+        })
     }
 }
 pub fn destroy_subpicture<Conn>(conn: &Conn, subpicture_id: Subpicture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -858,13 +875,15 @@ impl ListSubpictureTypesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(LIST_SUBPICTURE_TYPES_REQUEST))?;
-        // TODO: deserialize port_id
-        // TODO: deserialize surface_id
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(LIST_SUBPICTURE_TYPES_REQUEST))?;
+        let (port_id, remaining) = xv::Port::try_parse(value)?;
+        let (surface_id, remaining) = Surface::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ListSubpictureTypesRequest {
+            port_id,
+            surface_id,
+        })
     }
 }
 pub fn list_subpicture_types<Conn>(conn: &Conn, port_id: xv::Port, surface_id: Surface) -> Result<Cookie<'_, Conn, ListSubpictureTypesReply>, ConnectionError>

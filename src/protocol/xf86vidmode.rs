@@ -393,11 +393,11 @@ impl QueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        let _ = value;
+        Ok(QueryVersionRequest
+        )
     }
 }
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -470,13 +470,14 @@ impl GetModeLineRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MODE_LINE_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MODE_LINE_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetModeLineRequest {
+            screen,
+        })
     }
 }
 pub fn get_mode_line<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetModeLineReply>, ConnectionError>
@@ -656,26 +657,38 @@ impl<'input> ModModeLineRequest<'input> {
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(MOD_MODE_LINE_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize hdisplay
-        // TODO: deserialize hsyncstart
-        // TODO: deserialize hsyncend
-        // TODO: deserialize htotal
-        // TODO: deserialize hskew
-        // TODO: deserialize vdisplay
-        // TODO: deserialize vsyncstart
-        // TODO: deserialize vsyncend
-        // TODO: deserialize vtotal
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize flags
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize privsize
-        // TODO: deserialize private
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(MOD_MODE_LINE_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ModModeLineRequest {
+            screen,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            private,
+        })
     }
 }
 pub fn mod_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -738,13 +751,15 @@ impl SwitchModeRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SWITCH_MODE_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize zoom
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SWITCH_MODE_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let (zoom, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SwitchModeRequest {
+            screen,
+            zoom,
+        })
     }
 }
 pub fn switch_mode<Conn>(conn: &Conn, screen: u16, zoom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -793,13 +808,14 @@ impl GetMonitorRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_MONITOR_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_MONITOR_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetMonitorRequest {
+            screen,
+        })
     }
 }
 pub fn get_monitor<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetMonitorReply>, ConnectionError>
@@ -944,13 +960,15 @@ impl LockModeSwitchRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(LOCK_MODE_SWITCH_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize lock
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(LOCK_MODE_SWITCH_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let (lock, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(LockModeSwitchRequest {
+            screen,
+            lock,
+        })
     }
 }
 pub fn lock_mode_switch<Conn>(conn: &Conn, screen: u16, lock: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -999,13 +1017,14 @@ impl GetAllModeLinesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_ALL_MODE_LINES_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_ALL_MODE_LINES_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetAllModeLinesRequest {
+            screen,
+        })
     }
 }
 pub fn get_all_mode_lines<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetAllModeLinesReply>, ConnectionError>
@@ -1229,40 +1248,64 @@ impl<'input> AddModeLineRequest<'input> {
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(ADD_MODE_LINE_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize dotclock
-        // TODO: deserialize hdisplay
-        // TODO: deserialize hsyncstart
-        // TODO: deserialize hsyncend
-        // TODO: deserialize htotal
-        // TODO: deserialize hskew
-        // TODO: deserialize vdisplay
-        // TODO: deserialize vsyncstart
-        // TODO: deserialize vsyncend
-        // TODO: deserialize vtotal
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize flags
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize privsize
-        // TODO: deserialize after_dotclock
-        // TODO: deserialize after_hdisplay
-        // TODO: deserialize after_hsyncstart
-        // TODO: deserialize after_hsyncend
-        // TODO: deserialize after_htotal
-        // TODO: deserialize after_hskew
-        // TODO: deserialize after_vdisplay
-        // TODO: deserialize after_vsyncstart
-        // TODO: deserialize after_vsyncend
-        // TODO: deserialize after_vtotal
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize after_flags
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize private
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(ADD_MODE_LINE_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (after_dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (after_hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (after_hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (after_hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (after_htotal, remaining) = u16::try_parse(remaining)?;
+        let (after_hskew, remaining) = u16::try_parse(remaining)?;
+        let (after_vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (after_vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (after_vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (after_vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (after_flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(AddModeLineRequest {
+            screen,
+            dotclock,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            after_dotclock,
+            after_hdisplay,
+            after_hsyncstart,
+            after_hsyncend,
+            after_htotal,
+            after_hskew,
+            after_vdisplay,
+            after_vsyncstart,
+            after_vsyncend,
+            after_vtotal,
+            after_flags,
+            private,
+        })
     }
 }
 pub fn add_mode_line<'c, 'input, Conn, A, B>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1409,27 +1452,40 @@ impl<'input> DeleteModeLineRequest<'input> {
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DELETE_MODE_LINE_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize dotclock
-        // TODO: deserialize hdisplay
-        // TODO: deserialize hsyncstart
-        // TODO: deserialize hsyncend
-        // TODO: deserialize htotal
-        // TODO: deserialize hskew
-        // TODO: deserialize vdisplay
-        // TODO: deserialize vsyncstart
-        // TODO: deserialize vsyncend
-        // TODO: deserialize vtotal
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize flags
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize privsize
-        // TODO: deserialize private
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DELETE_MODE_LINE_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(DeleteModeLineRequest {
+            screen,
+            dotclock,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            private,
+        })
     }
 }
 pub fn delete_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1563,27 +1619,40 @@ impl<'input> ValidateModeLineRequest<'input> {
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(VALIDATE_MODE_LINE_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize dotclock
-        // TODO: deserialize hdisplay
-        // TODO: deserialize hsyncstart
-        // TODO: deserialize hsyncend
-        // TODO: deserialize htotal
-        // TODO: deserialize hskew
-        // TODO: deserialize vdisplay
-        // TODO: deserialize vsyncstart
-        // TODO: deserialize vsyncend
-        // TODO: deserialize vtotal
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize flags
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize privsize
-        // TODO: deserialize private
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(VALIDATE_MODE_LINE_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ValidateModeLineRequest {
+            screen,
+            dotclock,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            private,
+        })
     }
 }
 pub fn validate_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
@@ -1743,27 +1812,40 @@ impl<'input> SwitchToModeRequest<'input> {
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SWITCH_TO_MODE_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize dotclock
-        // TODO: deserialize hdisplay
-        // TODO: deserialize hsyncstart
-        // TODO: deserialize hsyncend
-        // TODO: deserialize htotal
-        // TODO: deserialize hskew
-        // TODO: deserialize vdisplay
-        // TODO: deserialize vsyncstart
-        // TODO: deserialize vsyncend
-        // TODO: deserialize vtotal
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize flags
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize privsize
-        // TODO: deserialize private
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SWITCH_TO_MODE_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SwitchToModeRequest {
+            screen,
+            dotclock,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            private,
+        })
     }
 }
 pub fn switch_to_mode<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1825,13 +1907,14 @@ impl GetViewPortRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_VIEW_PORT_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_VIEW_PORT_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetViewPortRequest {
+            screen,
+        })
     }
 }
 pub fn get_view_port<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetViewPortReply>, ConnectionError>
@@ -1919,15 +2002,18 @@ impl SetViewPortRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_VIEW_PORT_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize x
-        // TODO: deserialize y
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_VIEW_PORT_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (x, remaining) = u32::try_parse(remaining)?;
+        let (y, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetViewPortRequest {
+            screen,
+            x,
+            y,
+        })
     }
 }
 pub fn set_view_port<Conn>(conn: &Conn, screen: u16, x: u32, y: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1977,13 +2063,14 @@ impl GetDotClocksRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_DOT_CLOCKS_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_DOT_CLOCKS_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetDotClocksRequest {
+            screen,
+        })
     }
 }
 pub fn get_dot_clocks<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetDotClocksReply>, ConnectionError>
@@ -2065,13 +2152,15 @@ impl SetClientVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_CLIENT_VERSION_REQUEST))?;
-        // TODO: deserialize major
-        // TODO: deserialize minor
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_CLIENT_VERSION_REQUEST))?;
+        let (major, remaining) = u16::try_parse(value)?;
+        let (minor, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetClientVersionRequest {
+            major,
+            minor,
+        })
     }
 }
 pub fn set_client_version<Conn>(conn: &Conn, major: u16, minor: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2150,17 +2239,21 @@ impl SetGammaRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_GAMMA_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize red
-        // TODO: deserialize green
-        // TODO: deserialize blue
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_GAMMA_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (red, remaining) = u32::try_parse(remaining)?;
+        let (green, remaining) = u32::try_parse(remaining)?;
+        let (blue, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SetGammaRequest {
+            screen,
+            red,
+            green,
+            blue,
+        })
     }
 }
 pub fn set_gamma<Conn>(conn: &Conn, screen: u16, red: u32, green: u32, blue: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2235,13 +2328,14 @@ impl GetGammaRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_GAMMA_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_GAMMA_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(26..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetGammaRequest {
+            screen,
+        })
     }
 }
 pub fn get_gamma<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaReply>, ConnectionError>
@@ -2321,13 +2415,15 @@ impl GetGammaRampRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_GAMMA_RAMP_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize size
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_GAMMA_RAMP_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let (size, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetGammaRampRequest {
+            screen,
+            size,
+        })
     }
 }
 pub fn get_gamma_ramp<Conn>(conn: &Conn, screen: u16, size: u16) -> Result<Cookie<'_, Conn, GetGammaRampReply>, ConnectionError>
@@ -2424,16 +2520,21 @@ impl<'input> SetGammaRampRequest<'input> {
         Ok((vec![request0.into(), red_bytes.into(), green_bytes.into(), blue_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_GAMMA_RAMP_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize size
-        // TODO: deserialize red
-        // TODO: deserialize green
-        // TODO: deserialize blue
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_GAMMA_RAMP_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let (size, remaining) = u16::try_parse(remaining)?;
+        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetGammaRampRequest {
+            screen,
+            size,
+            red: Cow::Owned(red),
+            green: Cow::Owned(green),
+            blue: Cow::Owned(blue),
+        })
     }
 }
 pub fn set_gamma_ramp<'c, 'input, Conn>(conn: &'c Conn, screen: u16, size: u16, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2485,13 +2586,14 @@ impl GetGammaRampSizeRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_GAMMA_RAMP_SIZE_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_GAMMA_RAMP_SIZE_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetGammaRampSizeRequest {
+            screen,
+        })
     }
 }
 pub fn get_gamma_ramp_size<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaRampSizeReply>, ConnectionError>
@@ -2565,13 +2667,14 @@ impl GetPermissionsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_PERMISSIONS_REQUEST))?;
-        // TODO: deserialize screen
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_PERMISSIONS_REQUEST))?;
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetPermissionsRequest {
+            screen,
+        })
     }
 }
 pub fn get_permissions<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetPermissionsReply>, ConnectionError>

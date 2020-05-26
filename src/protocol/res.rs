@@ -466,13 +466,15 @@ impl QueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        // TODO: deserialize client_major
-        // TODO: deserialize client_minor
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        let (client_major, remaining) = u8::try_parse(value)?;
+        let (client_minor, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            client_major,
+            client_minor,
+        })
     }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major: u8, client_minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -541,11 +543,11 @@ impl QueryClientsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_CLIENTS_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_CLIENTS_REQUEST))?;
+        let _ = value;
+        Ok(QueryClientsRequest
+        )
     }
 }
 pub fn query_clients<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryClientsReply>, ConnectionError>
@@ -633,12 +635,13 @@ impl QueryClientResourcesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_CLIENT_RESOURCES_REQUEST))?;
-        // TODO: deserialize xid
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_CLIENT_RESOURCES_REQUEST))?;
+        let (xid, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryClientResourcesRequest {
+            xid,
+        })
     }
 }
 pub fn query_client_resources<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientResourcesReply>, ConnectionError>
@@ -728,12 +731,13 @@ impl QueryClientPixmapBytesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_CLIENT_PIXMAP_BYTES_REQUEST))?;
-        // TODO: deserialize xid
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_CLIENT_PIXMAP_BYTES_REQUEST))?;
+        let (xid, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryClientPixmapBytesRequest {
+            xid,
+        })
     }
 }
 pub fn query_client_pixmap_bytes<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientPixmapBytesReply>, ConnectionError>
@@ -813,13 +817,14 @@ impl<'input> QueryClientIdsRequest<'input> {
         Ok((vec![request0.into(), specs_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_CLIENT_IDS_REQUEST))?;
-        // TODO: deserialize num_specs
-        // TODO: deserialize specs
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_CLIENT_IDS_REQUEST))?;
+        let (num_specs, remaining) = u32::try_parse(value)?;
+        let (specs, remaining) = crate::x11_utils::parse_list::<ClientIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(QueryClientIdsRequest {
+            specs: Cow::Owned(specs),
+        })
     }
 }
 pub fn query_client_ids<'c, 'input, Conn>(conn: &'c Conn, specs: &'input [ClientIdSpec]) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
@@ -920,14 +925,16 @@ impl<'input> QueryResourceBytesRequest<'input> {
         Ok((vec![request0.into(), specs_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_RESOURCE_BYTES_REQUEST))?;
-        // TODO: deserialize client
-        // TODO: deserialize num_specs
-        // TODO: deserialize specs
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_RESOURCE_BYTES_REQUEST))?;
+        let (client, remaining) = u32::try_parse(value)?;
+        let (num_specs, remaining) = u32::try_parse(remaining)?;
+        let (specs, remaining) = crate::x11_utils::parse_list::<ResourceIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(QueryResourceBytesRequest {
+            client,
+            specs: Cow::Owned(specs),
+        })
     }
 }
 pub fn query_resource_bytes<'c, 'input, Conn>(conn: &'c Conn, client: u32, specs: &'input [ResourceIdSpec]) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>

@@ -431,11 +431,11 @@ impl PrintQueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_QUERY_VERSION_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_QUERY_VERSION_REQUEST))?;
+        let _ = value;
+        Ok(PrintQueryVersionRequest
+        )
     }
 }
 pub fn print_query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintQueryVersionReply>, ConnectionError>
@@ -520,15 +520,17 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         Ok((vec![request0.into(), self.printer_name.into(), self.locale.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_GET_PRINTER_LIST_REQUEST))?;
-        // TODO: deserialize printer_name_len
-        // TODO: deserialize locale_len
-        // TODO: deserialize printer_name
-        // TODO: deserialize locale
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_GET_PRINTER_LIST_REQUEST))?;
+        let (printer_name_len, remaining) = u32::try_parse(value)?;
+        let (locale_len, remaining) = u32::try_parse(remaining)?;
+        let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(PrintGetPrinterListRequest {
+            printer_name,
+            locale,
+        })
     }
 }
 pub fn print_get_printer_list<'c, 'input, Conn>(conn: &'c Conn, printer_name: &'input [String8], locale: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
@@ -612,11 +614,11 @@ impl PrintRehashPrinterListRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_REHASH_PRINTER_LIST_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_REHASH_PRINTER_LIST_REQUEST))?;
+        let _ = value;
+        Ok(PrintRehashPrinterListRequest
+        )
     }
 }
 pub fn print_rehash_printer_list<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -680,16 +682,19 @@ impl<'input> CreateContextRequest<'input> {
         Ok((vec![request0.into(), self.printer_name.into(), self.locale.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_CONTEXT_REQUEST))?;
-        // TODO: deserialize context_id
-        // TODO: deserialize printer_name_len
-        // TODO: deserialize locale_len
-        // TODO: deserialize printer_name
-        // TODO: deserialize locale
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_CONTEXT_REQUEST))?;
+        let (context_id, remaining) = u32::try_parse(value)?;
+        let (printer_name_len, remaining) = u32::try_parse(remaining)?;
+        let (locale_len, remaining) = u32::try_parse(remaining)?;
+        let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(CreateContextRequest {
+            context_id,
+            printer_name,
+            locale,
+        })
     }
 }
 pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context_id: u32, printer_name: &'input [String8], locale: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -739,12 +744,13 @@ impl PrintSetContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_SET_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_SET_CONTEXT_REQUEST))?;
+        let (context, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintSetContextRequest {
+            context,
+        })
     }
 }
 pub fn print_set_context<Conn>(conn: &Conn, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -785,11 +791,11 @@ impl PrintGetContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_GET_CONTEXT_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_GET_CONTEXT_REQUEST))?;
+        let _ = value;
+        Ok(PrintGetContextRequest
+        )
     }
 }
 pub fn print_get_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintGetContextReply>, ConnectionError>
@@ -860,12 +866,13 @@ impl PrintDestroyContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_DESTROY_CONTEXT_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_DESTROY_CONTEXT_REQUEST))?;
+        let (context, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintDestroyContextRequest {
+            context,
+        })
     }
 }
 pub fn print_destroy_context<Conn>(conn: &Conn, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -906,11 +913,11 @@ impl PrintGetScreenOfContextRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_GET_SCREEN_OF_CONTEXT_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_GET_SCREEN_OF_CONTEXT_REQUEST))?;
+        let _ = value;
+        Ok(PrintGetScreenOfContextRequest
+        )
     }
 }
 pub fn print_get_screen_of_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintGetScreenOfContextReply>, ConnectionError>
@@ -981,12 +988,13 @@ impl PrintStartJobRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_START_JOB_REQUEST))?;
-        // TODO: deserialize output_mode
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_START_JOB_REQUEST))?;
+        let (output_mode, remaining) = u8::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintStartJobRequest {
+            output_mode,
+        })
     }
 }
 pub fn print_start_job<Conn>(conn: &Conn, output_mode: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1034,12 +1042,13 @@ impl PrintEndJobRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_END_JOB_REQUEST))?;
-        // TODO: deserialize cancel
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_END_JOB_REQUEST))?;
+        let (cancel, remaining) = bool::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintEndJobRequest {
+            cancel,
+        })
     }
 }
 pub fn print_end_job<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1087,12 +1096,13 @@ impl PrintStartDocRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_START_DOC_REQUEST))?;
-        // TODO: deserialize driver_mode
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_START_DOC_REQUEST))?;
+        let (driver_mode, remaining) = u8::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintStartDocRequest {
+            driver_mode,
+        })
     }
 }
 pub fn print_start_doc<Conn>(conn: &Conn, driver_mode: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1140,12 +1150,13 @@ impl PrintEndDocRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_END_DOC_REQUEST))?;
-        // TODO: deserialize cancel
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_END_DOC_REQUEST))?;
+        let (cancel, remaining) = bool::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintEndDocRequest {
+            cancel,
+        })
     }
 }
 pub fn print_end_doc<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1215,18 +1226,22 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         Ok((vec![request0.into(), self.data.into(), self.doc_format.into(), self.options.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_PUT_DOCUMENT_DATA_REQUEST))?;
-        // TODO: deserialize drawable
-        // TODO: deserialize len_data
-        // TODO: deserialize len_fmt
-        // TODO: deserialize len_options
-        // TODO: deserialize data
-        // TODO: deserialize doc_format
-        // TODO: deserialize options
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_PUT_DOCUMENT_DATA_REQUEST))?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (len_data, remaining) = u32::try_parse(remaining)?;
+        let (len_fmt, remaining) = u16::try_parse(remaining)?;
+        let (len_options, remaining) = u16::try_parse(remaining)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, len_data.try_into().or(Err(ParseError::ParseError))?)?;
+        let (doc_format, remaining) = crate::x11_utils::parse_u8_list(remaining, len_fmt.try_into().or(Err(ParseError::ParseError))?)?;
+        let (options, remaining) = crate::x11_utils::parse_u8_list(remaining, len_options.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(PrintPutDocumentDataRequest {
+            drawable,
+            data,
+            doc_format,
+            options,
+        })
     }
 }
 pub fn print_put_document_data<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &'input [u8], doc_format: &'input [String8], options: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1283,13 +1298,15 @@ impl PrintGetDocumentDataRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_GET_DOCUMENT_DATA_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize max_bytes
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_GET_DOCUMENT_DATA_REQUEST))?;
+        let (context, remaining) = Pcontext::try_parse(value)?;
+        let (max_bytes, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PrintGetDocumentDataRequest {
+            context,
+            max_bytes,
+        })
     }
 }
 pub fn print_get_document_data<Conn>(conn: &Conn, context: Pcontext, max_bytes: u32) -> Result<Cookie<'_, Conn, PrintGetDocumentDataReply>, ConnectionError>
@@ -1385,12 +1402,13 @@ impl PrintStartPageRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_START_PAGE_REQUEST))?;
-        // TODO: deserialize window
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_START_PAGE_REQUEST))?;
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintStartPageRequest {
+            window,
+        })
     }
 }
 pub fn print_start_page<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1438,13 +1456,14 @@ impl PrintEndPageRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_END_PAGE_REQUEST))?;
-        // TODO: deserialize cancel
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_END_PAGE_REQUEST))?;
+        let (cancel, remaining) = bool::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(PrintEndPageRequest {
+            cancel,
+        })
     }
 }
 pub fn print_end_page<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1498,13 +1517,15 @@ impl PrintSelectInputRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_SELECT_INPUT_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize event_mask
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_SELECT_INPUT_REQUEST))?;
+        let (context, remaining) = Pcontext::try_parse(value)?;
+        let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PrintSelectInputRequest {
+            context,
+            event_mask,
+        })
     }
 }
 pub fn print_select_input<Conn>(conn: &Conn, context: Pcontext, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1553,12 +1574,13 @@ impl PrintInputSelectedRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_INPUT_SELECTED_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_INPUT_SELECTED_REQUEST))?;
+        let (context, remaining) = Pcontext::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintInputSelectedRequest {
+            context,
+        })
     }
 }
 pub fn print_input_selected<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintInputSelectedReply>, ConnectionError>
@@ -1639,14 +1661,16 @@ impl PrintGetAttributesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_GET_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize pool
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_GET_ATTRIBUTES_REQUEST))?;
+        let (context, remaining) = Pcontext::try_parse(value)?;
+        let (pool, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(PrintGetAttributesRequest {
+            context,
+            pool,
+        })
     }
 }
 pub fn print_get_attributes<Conn>(conn: &Conn, context: Pcontext, pool: u8) -> Result<Cookie<'_, Conn, PrintGetAttributesReply>, ConnectionError>
@@ -1754,16 +1778,19 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_GET_ONE_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize name_len
-        // TODO: deserialize pool
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize name
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_GET_ONE_ATTRIBUTES_REQUEST))?;
+        let (context, remaining) = Pcontext::try_parse(value)?;
+        let (name_len, remaining) = u32::try_parse(remaining)?;
+        let (pool, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(PrintGetOneAttributesRequest {
+            context,
+            pool,
+            name,
+        })
     }
 }
 pub fn print_get_one_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
@@ -1874,18 +1901,22 @@ impl<'input> PrintSetAttributesRequest<'input> {
         Ok((vec![request0.into(), self.attributes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_SET_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize string_len
-        // TODO: deserialize pool
-        // TODO: deserialize rule
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize attributes
-        // TODO: deserialize attributes_len
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_SET_ATTRIBUTES_REQUEST))?;
+        let (context, remaining) = Pcontext::try_parse(value)?;
+        let (string_len, remaining) = u32::try_parse(remaining)?;
+        let (pool, remaining) = u8::try_parse(remaining)?;
+        let (rule, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (attributes, remaining) = remaining.split_at(remaining.len());
+        let _ = remaining;
+        Ok(PrintSetAttributesRequest {
+            context,
+            string_len,
+            pool,
+            rule,
+            attributes,
+        })
     }
 }
 pub fn print_set_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1937,12 +1968,13 @@ impl PrintGetPageDimensionsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_GET_PAGE_DIMENSIONS_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_GET_PAGE_DIMENSIONS_REQUEST))?;
+        let (context, remaining) = Pcontext::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintGetPageDimensionsRequest {
+            context,
+        })
     }
 }
 pub fn print_get_page_dimensions<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetPageDimensionsReply>, ConnectionError>
@@ -2018,11 +2050,11 @@ impl PrintQueryScreensRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_QUERY_SCREENS_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_QUERY_SCREENS_REQUEST))?;
+        let _ = value;
+        Ok(PrintQueryScreensRequest
+        )
     }
 }
 pub fn print_query_screens<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintQueryScreensReply>, ConnectionError>
@@ -2116,13 +2148,15 @@ impl PrintSetImageResolutionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_SET_IMAGE_RESOLUTION_REQUEST))?;
-        // TODO: deserialize context
-        // TODO: deserialize image_resolution
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_SET_IMAGE_RESOLUTION_REQUEST))?;
+        let (context, remaining) = Pcontext::try_parse(value)?;
+        let (image_resolution, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PrintSetImageResolutionRequest {
+            context,
+            image_resolution,
+        })
     }
 }
 pub fn print_set_image_resolution<Conn>(conn: &Conn, context: Pcontext, image_resolution: u16) -> Result<Cookie<'_, Conn, PrintSetImageResolutionReply>, ConnectionError>
@@ -2197,12 +2231,13 @@ impl PrintGetImageResolutionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PRINT_GET_IMAGE_RESOLUTION_REQUEST))?;
-        // TODO: deserialize context
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PRINT_GET_IMAGE_RESOLUTION_REQUEST))?;
+        let (context, remaining) = Pcontext::try_parse(value)?;
+        let _ = remaining;
+        Ok(PrintGetImageResolutionRequest {
+            context,
+        })
     }
 }
 pub fn print_get_image_resolution<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetImageResolutionReply>, ConnectionError>

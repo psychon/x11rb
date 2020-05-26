@@ -294,11 +294,11 @@ impl QueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        let _ = value;
+        Ok(QueryVersionRequest
+        )
     }
 }
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -394,20 +394,36 @@ impl<'input> RectanglesRequest<'input> {
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(RECTANGLES_REQUEST))?;
-        // TODO: deserialize operation
-        // TODO: deserialize destination_kind
-        // TODO: deserialize ordering
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize destination_window
-        // TODO: deserialize x_offset
-        // TODO: deserialize y_offset
-        // TODO: deserialize rectangles
-        // TODO: deserialize rectangles_len
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(RECTANGLES_REQUEST))?;
+        let (operation, remaining) = Op::try_parse(value)?;
+        let operation = operation.try_into()?;
+        let (destination_kind, remaining) = Kind::try_parse(remaining)?;
+        let destination_kind = destination_kind.try_into()?;
+        let (ordering, remaining) = u8::try_parse(remaining)?;
+        let ordering = ordering.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x_offset, remaining) = i16::try_parse(remaining)?;
+        let (y_offset, remaining) = i16::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut rectangles = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = xproto::Rectangle::try_parse(remaining)?;
+            remaining = new_remaining;
+            rectangles.push(v);
+        }
+        let _ = remaining;
+        Ok(RectanglesRequest {
+            operation,
+            destination_kind,
+            ordering,
+            destination_window,
+            x_offset,
+            y_offset,
+            rectangles: Cow::Owned(rectangles),
+        })
     }
 }
 pub fn rectangles<'c, 'input, Conn>(conn: &'c Conn, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -483,18 +499,26 @@ impl MaskRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(MASK_REQUEST))?;
-        // TODO: deserialize operation
-        // TODO: deserialize destination_kind
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize destination_window
-        // TODO: deserialize x_offset
-        // TODO: deserialize y_offset
-        // TODO: deserialize source_bitmap
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(MASK_REQUEST))?;
+        let (operation, remaining) = Op::try_parse(value)?;
+        let operation = operation.try_into()?;
+        let (destination_kind, remaining) = Kind::try_parse(remaining)?;
+        let destination_kind = destination_kind.try_into()?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x_offset, remaining) = i16::try_parse(remaining)?;
+        let (y_offset, remaining) = i16::try_parse(remaining)?;
+        let (source_bitmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(MaskRequest {
+            operation,
+            destination_kind,
+            destination_window,
+            x_offset,
+            y_offset,
+            source_bitmap,
+        })
     }
 }
 pub fn mask<Conn, A>(conn: &Conn, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -573,19 +597,29 @@ impl CombineRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(COMBINE_REQUEST))?;
-        // TODO: deserialize operation
-        // TODO: deserialize destination_kind
-        // TODO: deserialize source_kind
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize destination_window
-        // TODO: deserialize x_offset
-        // TODO: deserialize y_offset
-        // TODO: deserialize source_window
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(COMBINE_REQUEST))?;
+        let (operation, remaining) = Op::try_parse(value)?;
+        let operation = operation.try_into()?;
+        let (destination_kind, remaining) = Kind::try_parse(remaining)?;
+        let destination_kind = destination_kind.try_into()?;
+        let (source_kind, remaining) = Kind::try_parse(remaining)?;
+        let source_kind = source_kind.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x_offset, remaining) = i16::try_parse(remaining)?;
+        let (y_offset, remaining) = i16::try_parse(remaining)?;
+        let (source_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CombineRequest {
+            operation,
+            destination_kind,
+            source_kind,
+            destination_window,
+            x_offset,
+            y_offset,
+            source_window,
+        })
     }
 }
 pub fn combine<Conn>(conn: &Conn, operation: SO, destination_kind: SK, source_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -653,16 +687,21 @@ impl OffsetRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(OFFSET_REQUEST))?;
-        // TODO: deserialize destination_kind
-        // TODO: deserialize <unnamed field>
-        // TODO: deserialize destination_window
-        // TODO: deserialize x_offset
-        // TODO: deserialize y_offset
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(OFFSET_REQUEST))?;
+        let (destination_kind, remaining) = Kind::try_parse(value)?;
+        let destination_kind = destination_kind.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x_offset, remaining) = i16::try_parse(remaining)?;
+        let (y_offset, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(OffsetRequest {
+            destination_kind,
+            destination_window,
+            x_offset,
+            y_offset,
+        })
     }
 }
 pub fn offset<Conn>(conn: &Conn, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -713,12 +752,13 @@ impl QueryExtentsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_EXTENTS_REQUEST))?;
-        // TODO: deserialize destination_window
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_EXTENTS_REQUEST))?;
+        let (destination_window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryExtentsRequest {
+            destination_window,
+        })
     }
 }
 pub fn query_extents<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, QueryExtentsReply>, ConnectionError>
@@ -816,14 +856,16 @@ impl SelectInputRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SELECT_INPUT_REQUEST))?;
-        // TODO: deserialize destination_window
-        // TODO: deserialize enable
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SELECT_INPUT_REQUEST))?;
+        let (destination_window, remaining) = xproto::Window::try_parse(value)?;
+        let (enable, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SelectInputRequest {
+            destination_window,
+            enable,
+        })
     }
 }
 pub fn select_input<Conn>(conn: &Conn, destination_window: xproto::Window, enable: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -872,12 +914,13 @@ impl InputSelectedRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(INPUT_SELECTED_REQUEST))?;
-        // TODO: deserialize destination_window
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(INPUT_SELECTED_REQUEST))?;
+        let (destination_window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(InputSelectedRequest {
+            destination_window,
+        })
     }
 }
 pub fn input_selected<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, InputSelectedReply>, ConnectionError>
@@ -955,14 +998,17 @@ impl GetRectanglesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_RECTANGLES_REQUEST))?;
-        // TODO: deserialize window
-        // TODO: deserialize source_kind
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_RECTANGLES_REQUEST))?;
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (source_kind, remaining) = Kind::try_parse(remaining)?;
+        let source_kind = source_kind.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetRectanglesRequest {
+            window,
+            source_kind,
+        })
     }
 }
 pub fn get_rectangles<Conn>(conn: &Conn, window: xproto::Window, source_kind: SK) -> Result<Cookie<'_, Conn, GetRectanglesReply>, ConnectionError>

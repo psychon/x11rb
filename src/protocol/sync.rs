@@ -743,13 +743,15 @@ impl InitializeRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(INITIALIZE_REQUEST))?;
-        // TODO: deserialize desired_major_version
-        // TODO: deserialize desired_minor_version
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(INITIALIZE_REQUEST))?;
+        let (desired_major_version, remaining) = u8::try_parse(value)?;
+        let (desired_minor_version, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(InitializeRequest {
+            desired_major_version,
+            desired_minor_version,
+        })
     }
 }
 pub fn initialize<Conn>(conn: &Conn, desired_major_version: u8, desired_minor_version: u8) -> Result<Cookie<'_, Conn, InitializeReply>, ConnectionError>
@@ -819,11 +821,11 @@ impl ListSystemCountersRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(LIST_SYSTEM_COUNTERS_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(LIST_SYSTEM_COUNTERS_REQUEST))?;
+        let _ = value;
+        Ok(ListSystemCountersRequest
+        )
     }
 }
 pub fn list_system_counters<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListSystemCountersReply>, ConnectionError>
@@ -921,13 +923,15 @@ impl CreateCounterRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_COUNTER_REQUEST))?;
-        // TODO: deserialize id
-        // TODO: deserialize initial_value
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_COUNTER_REQUEST))?;
+        let (id, remaining) = Counter::try_parse(value)?;
+        let (initial_value, remaining) = Int64::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateCounterRequest {
+            id,
+            initial_value,
+        })
     }
 }
 pub fn create_counter<Conn>(conn: &Conn, id: Counter, initial_value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -976,12 +980,13 @@ impl DestroyCounterRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_COUNTER_REQUEST))?;
-        // TODO: deserialize counter
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_COUNTER_REQUEST))?;
+        let (counter, remaining) = Counter::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyCounterRequest {
+            counter,
+        })
     }
 }
 pub fn destroy_counter<Conn>(conn: &Conn, counter: Counter) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1029,12 +1034,13 @@ impl QueryCounterRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_COUNTER_REQUEST))?;
-        // TODO: deserialize counter
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_COUNTER_REQUEST))?;
+        let (counter, remaining) = Counter::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryCounterRequest {
+            counter,
+        })
     }
 }
 pub fn query_counter<Conn>(conn: &Conn, counter: Counter) -> Result<Cookie<'_, Conn, QueryCounterReply>, ConnectionError>
@@ -1106,13 +1112,20 @@ impl<'input> AwaitRequest<'input> {
         Ok((vec![request0.into(), wait_list_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(AWAIT_REQUEST))?;
-        // TODO: deserialize wait_list
-        // TODO: deserialize wait_list_len
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(AWAIT_REQUEST))?;
+        let mut remaining = value;
+        // Length is 'everything left in the input'
+        let mut wait_list = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Waitcondition::try_parse(value)?;
+            remaining = new_remaining;
+            wait_list.push(v);
+        }
+        let _ = remaining;
+        Ok(AwaitRequest {
+            wait_list: Cow::Owned(wait_list),
+        })
     }
 }
 pub fn await_<'c, 'input, Conn>(conn: &'c Conn, wait_list: &'input [Waitcondition]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1170,13 +1183,15 @@ impl ChangeCounterRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CHANGE_COUNTER_REQUEST))?;
-        // TODO: deserialize counter
-        // TODO: deserialize amount
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CHANGE_COUNTER_REQUEST))?;
+        let (counter, remaining) = Counter::try_parse(value)?;
+        let (amount, remaining) = Int64::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ChangeCounterRequest {
+            counter,
+            amount,
+        })
     }
 }
 pub fn change_counter<Conn>(conn: &Conn, counter: Counter, amount: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1235,13 +1250,15 @@ impl SetCounterRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_COUNTER_REQUEST))?;
-        // TODO: deserialize counter
-        // TODO: deserialize value
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_COUNTER_REQUEST))?;
+        let (counter, remaining) = Counter::try_parse(value)?;
+        let (value, remaining) = Int64::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetCounterRequest {
+            counter,
+            value,
+        })
     }
 }
 pub fn set_counter<Conn>(conn: &Conn, counter: Counter, value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1458,14 +1475,16 @@ impl<'input> CreateAlarmRequest<'input> {
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_ALARM_REQUEST))?;
-        // TODO: deserialize id
-        // TODO: deserialize value_mask
-        // TODO: deserialize value_list
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_ALARM_REQUEST))?;
+        let (id, remaining) = Alarm::try_parse(value)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = CreateAlarmAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(CreateAlarmRequest {
+            id,
+            value_list: Cow::Owned(value_list),
+        })
     }
 }
 pub fn create_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1682,14 +1701,16 @@ impl<'input> ChangeAlarmRequest<'input> {
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CHANGE_ALARM_REQUEST))?;
-        // TODO: deserialize id
-        // TODO: deserialize value_mask
-        // TODO: deserialize value_list
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CHANGE_ALARM_REQUEST))?;
+        let (id, remaining) = Alarm::try_parse(value)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = ChangeAlarmAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(ChangeAlarmRequest {
+            id,
+            value_list: Cow::Owned(value_list),
+        })
     }
 }
 pub fn change_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1738,12 +1759,13 @@ impl DestroyAlarmRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_ALARM_REQUEST))?;
-        // TODO: deserialize alarm
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_ALARM_REQUEST))?;
+        let (alarm, remaining) = Alarm::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyAlarmRequest {
+            alarm,
+        })
     }
 }
 pub fn destroy_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1791,12 +1813,13 @@ impl QueryAlarmRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_ALARM_REQUEST))?;
-        // TODO: deserialize alarm
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_ALARM_REQUEST))?;
+        let (alarm, remaining) = Alarm::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryAlarmRequest {
+            alarm,
+        })
     }
 }
 pub fn query_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<Cookie<'_, Conn, QueryAlarmReply>, ConnectionError>
@@ -1883,13 +1906,15 @@ impl SetPriorityRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_PRIORITY_REQUEST))?;
-        // TODO: deserialize id
-        // TODO: deserialize priority
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_PRIORITY_REQUEST))?;
+        let (id, remaining) = u32::try_parse(value)?;
+        let (priority, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetPriorityRequest {
+            id,
+            priority,
+        })
     }
 }
 pub fn set_priority<Conn>(conn: &Conn, id: u32, priority: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1938,12 +1963,13 @@ impl GetPriorityRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_PRIORITY_REQUEST))?;
-        // TODO: deserialize id
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_PRIORITY_REQUEST))?;
+        let (id, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetPriorityRequest {
+            id,
+        })
     }
 }
 pub fn get_priority<Conn>(conn: &Conn, id: u32) -> Result<Cookie<'_, Conn, GetPriorityReply>, ConnectionError>
@@ -2028,14 +2054,17 @@ impl CreateFenceRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_FENCE_REQUEST))?;
-        // TODO: deserialize drawable
-        // TODO: deserialize fence
-        // TODO: deserialize initially_triggered
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_FENCE_REQUEST))?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (fence, remaining) = Fence::try_parse(remaining)?;
+        let (initially_triggered, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateFenceRequest {
+            drawable,
+            fence,
+            initially_triggered,
+        })
     }
 }
 pub fn create_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2085,12 +2114,13 @@ impl TriggerFenceRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(TRIGGER_FENCE_REQUEST))?;
-        // TODO: deserialize fence
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(TRIGGER_FENCE_REQUEST))?;
+        let (fence, remaining) = Fence::try_parse(value)?;
+        let _ = remaining;
+        Ok(TriggerFenceRequest {
+            fence,
+        })
     }
 }
 pub fn trigger_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2138,12 +2168,13 @@ impl ResetFenceRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(RESET_FENCE_REQUEST))?;
-        // TODO: deserialize fence
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(RESET_FENCE_REQUEST))?;
+        let (fence, remaining) = Fence::try_parse(value)?;
+        let _ = remaining;
+        Ok(ResetFenceRequest {
+            fence,
+        })
     }
 }
 pub fn reset_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2191,12 +2222,13 @@ impl DestroyFenceRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_FENCE_REQUEST))?;
-        // TODO: deserialize fence
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_FENCE_REQUEST))?;
+        let (fence, remaining) = Fence::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyFenceRequest {
+            fence,
+        })
     }
 }
 pub fn destroy_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2244,12 +2276,13 @@ impl QueryFenceRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_FENCE_REQUEST))?;
-        // TODO: deserialize fence
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_FENCE_REQUEST))?;
+        let (fence, remaining) = Fence::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryFenceRequest {
+            fence,
+        })
     }
 }
 pub fn query_fence<Conn>(conn: &Conn, fence: Fence) -> Result<Cookie<'_, Conn, QueryFenceReply>, ConnectionError>
@@ -2322,13 +2355,20 @@ impl<'input> AwaitFenceRequest<'input> {
         Ok((vec![request0.into(), fence_list_bytes.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(AWAIT_FENCE_REQUEST))?;
-        // TODO: deserialize fence_list
-        // TODO: deserialize fence_list_len
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(AWAIT_FENCE_REQUEST))?;
+        let mut remaining = value;
+        // Length is 'everything left in the input'
+        let mut fence_list = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Fence::try_parse(value)?;
+            remaining = new_remaining;
+            fence_list.push(v);
+        }
+        let _ = remaining;
+        Ok(AwaitFenceRequest {
+            fence_list: Cow::Owned(fence_list),
+        })
     }
 }
 pub fn await_fence<'c, 'input, Conn>(conn: &'c Conn, fence_list: &'input [Fence]) -> Result<VoidCookie<'c, Conn>, ConnectionError>

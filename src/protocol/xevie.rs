@@ -69,13 +69,15 @@ impl QueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        // TODO: deserialize client_major_version
-        // TODO: deserialize client_minor_version
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        let (client_major_version, remaining) = u16::try_parse(value)?;
+        let (client_minor_version, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            client_major_version,
+            client_minor_version,
+        })
     }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -152,12 +154,13 @@ impl StartRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(START_REQUEST))?;
-        // TODO: deserialize screen
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(START_REQUEST))?;
+        let (screen, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(StartRequest {
+            screen,
+        })
     }
 }
 pub fn start<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, StartReply>, ConnectionError>
@@ -229,12 +232,13 @@ impl EndRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(END_REQUEST))?;
-        // TODO: deserialize cmap
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(END_REQUEST))?;
+        let (cmap, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(EndRequest {
+            cmap,
+        })
     }
 }
 pub fn end<Conn>(conn: &Conn, cmap: u32) -> Result<Cookie<'_, Conn, EndReply>, ConnectionError>
@@ -534,14 +538,16 @@ impl SendRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SEND_REQUEST))?;
-        // TODO: deserialize event
-        // TODO: deserialize data_type
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SEND_REQUEST))?;
+        let (event, remaining) = Event::try_parse(value)?;
+        let (data_type, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(64..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SendRequest {
+            event,
+            data_type,
+        })
     }
 }
 pub fn send<Conn>(conn: &Conn, event: Event, data_type: u32) -> Result<Cookie<'_, Conn, SendReply>, ConnectionError>
@@ -614,12 +620,13 @@ impl SelectInputRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SELECT_INPUT_REQUEST))?;
-        // TODO: deserialize event_mask
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SELECT_INPUT_REQUEST))?;
+        let (event_mask, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(SelectInputRequest {
+            event_mask,
+        })
     }
 }
 pub fn select_input<Conn>(conn: &Conn, event_mask: u32) -> Result<Cookie<'_, Conn, SelectInputReply>, ConnectionError>

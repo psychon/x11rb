@@ -1573,11 +1573,11 @@ impl QueryExtensionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_EXTENSION_REQUEST))?;
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_EXTENSION_REQUEST))?;
+        let _ = value;
+        Ok(QueryExtensionRequest
+        )
     }
 }
 pub fn query_extension<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryExtensionReply>, ConnectionError>
@@ -1650,12 +1650,13 @@ impl QueryAdaptorsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_ADAPTORS_REQUEST))?;
-        // TODO: deserialize window
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_ADAPTORS_REQUEST))?;
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryAdaptorsRequest {
+            window,
+        })
     }
 }
 pub fn query_adaptors<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, QueryAdaptorsReply>, ConnectionError>
@@ -1745,12 +1746,13 @@ impl QueryEncodingsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_ENCODINGS_REQUEST))?;
-        // TODO: deserialize port
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_ENCODINGS_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryEncodingsRequest {
+            port,
+        })
     }
 }
 pub fn query_encodings<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, QueryEncodingsReply>, ConnectionError>
@@ -1846,13 +1848,15 @@ impl GrabPortRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GRAB_PORT_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize time
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GRAB_PORT_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GrabPortRequest {
+            port,
+            time,
+        })
     }
 }
 pub fn grab_port<Conn, A>(conn: &Conn, port: Port, time: A) -> Result<Cookie<'_, Conn, GrabPortReply>, ConnectionError>
@@ -1934,13 +1938,15 @@ impl UngrabPortRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(UNGRAB_PORT_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize time
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(UNGRAB_PORT_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(UngrabPortRequest {
+            port,
+            time,
+        })
     }
 }
 pub fn ungrab_port<Conn, A>(conn: &Conn, port: Port, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2035,22 +2041,33 @@ impl PutVideoRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PUT_VIDEO_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize drawable
-        // TODO: deserialize gc
-        // TODO: deserialize vid_x
-        // TODO: deserialize vid_y
-        // TODO: deserialize vid_w
-        // TODO: deserialize vid_h
-        // TODO: deserialize drw_x
-        // TODO: deserialize drw_y
-        // TODO: deserialize drw_w
-        // TODO: deserialize drw_h
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PUT_VIDEO_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
+        let (vid_x, remaining) = i16::try_parse(remaining)?;
+        let (vid_y, remaining) = i16::try_parse(remaining)?;
+        let (vid_w, remaining) = u16::try_parse(remaining)?;
+        let (vid_h, remaining) = u16::try_parse(remaining)?;
+        let (drw_x, remaining) = i16::try_parse(remaining)?;
+        let (drw_y, remaining) = i16::try_parse(remaining)?;
+        let (drw_w, remaining) = u16::try_parse(remaining)?;
+        let (drw_h, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PutVideoRequest {
+            port,
+            drawable,
+            gc,
+            vid_x,
+            vid_y,
+            vid_w,
+            vid_h,
+            drw_x,
+            drw_y,
+            drw_w,
+            drw_h,
+        })
     }
 }
 pub fn put_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2152,22 +2169,33 @@ impl PutStillRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PUT_STILL_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize drawable
-        // TODO: deserialize gc
-        // TODO: deserialize vid_x
-        // TODO: deserialize vid_y
-        // TODO: deserialize vid_w
-        // TODO: deserialize vid_h
-        // TODO: deserialize drw_x
-        // TODO: deserialize drw_y
-        // TODO: deserialize drw_w
-        // TODO: deserialize drw_h
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PUT_STILL_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
+        let (vid_x, remaining) = i16::try_parse(remaining)?;
+        let (vid_y, remaining) = i16::try_parse(remaining)?;
+        let (vid_w, remaining) = u16::try_parse(remaining)?;
+        let (vid_h, remaining) = u16::try_parse(remaining)?;
+        let (drw_x, remaining) = i16::try_parse(remaining)?;
+        let (drw_y, remaining) = i16::try_parse(remaining)?;
+        let (drw_w, remaining) = u16::try_parse(remaining)?;
+        let (drw_h, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PutStillRequest {
+            port,
+            drawable,
+            gc,
+            vid_x,
+            vid_y,
+            vid_w,
+            vid_h,
+            drw_x,
+            drw_y,
+            drw_w,
+            drw_h,
+        })
     }
 }
 pub fn put_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2269,22 +2297,33 @@ impl GetVideoRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_VIDEO_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize drawable
-        // TODO: deserialize gc
-        // TODO: deserialize vid_x
-        // TODO: deserialize vid_y
-        // TODO: deserialize vid_w
-        // TODO: deserialize vid_h
-        // TODO: deserialize drw_x
-        // TODO: deserialize drw_y
-        // TODO: deserialize drw_w
-        // TODO: deserialize drw_h
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_VIDEO_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
+        let (vid_x, remaining) = i16::try_parse(remaining)?;
+        let (vid_y, remaining) = i16::try_parse(remaining)?;
+        let (vid_w, remaining) = u16::try_parse(remaining)?;
+        let (vid_h, remaining) = u16::try_parse(remaining)?;
+        let (drw_x, remaining) = i16::try_parse(remaining)?;
+        let (drw_y, remaining) = i16::try_parse(remaining)?;
+        let (drw_w, remaining) = u16::try_parse(remaining)?;
+        let (drw_h, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetVideoRequest {
+            port,
+            drawable,
+            gc,
+            vid_x,
+            vid_y,
+            vid_w,
+            vid_h,
+            drw_x,
+            drw_y,
+            drw_w,
+            drw_h,
+        })
     }
 }
 pub fn get_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2386,22 +2425,33 @@ impl GetStillRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_STILL_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize drawable
-        // TODO: deserialize gc
-        // TODO: deserialize vid_x
-        // TODO: deserialize vid_y
-        // TODO: deserialize vid_w
-        // TODO: deserialize vid_h
-        // TODO: deserialize drw_x
-        // TODO: deserialize drw_y
-        // TODO: deserialize drw_w
-        // TODO: deserialize drw_h
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_STILL_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
+        let (vid_x, remaining) = i16::try_parse(remaining)?;
+        let (vid_y, remaining) = i16::try_parse(remaining)?;
+        let (vid_w, remaining) = u16::try_parse(remaining)?;
+        let (vid_h, remaining) = u16::try_parse(remaining)?;
+        let (drw_x, remaining) = i16::try_parse(remaining)?;
+        let (drw_y, remaining) = i16::try_parse(remaining)?;
+        let (drw_w, remaining) = u16::try_parse(remaining)?;
+        let (drw_h, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetStillRequest {
+            port,
+            drawable,
+            gc,
+            vid_x,
+            vid_y,
+            vid_w,
+            vid_h,
+            drw_x,
+            drw_y,
+            drw_w,
+            drw_h,
+        })
     }
 }
 pub fn get_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2465,13 +2515,15 @@ impl StopVideoRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(STOP_VIDEO_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize drawable
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(STOP_VIDEO_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(StopVideoRequest {
+            port,
+            drawable,
+        })
     }
 }
 pub fn stop_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2526,14 +2578,16 @@ impl SelectVideoNotifyRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SELECT_VIDEO_NOTIFY_REQUEST))?;
-        // TODO: deserialize drawable
-        // TODO: deserialize onoff
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SELECT_VIDEO_NOTIFY_REQUEST))?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (onoff, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SelectVideoNotifyRequest {
+            drawable,
+            onoff,
+        })
     }
 }
 pub fn select_video_notify<Conn>(conn: &Conn, drawable: xproto::Drawable, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2588,14 +2642,16 @@ impl SelectPortNotifyRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SELECT_PORT_NOTIFY_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize onoff
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SELECT_PORT_NOTIFY_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (onoff, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SelectPortNotifyRequest {
+            port,
+            onoff,
+        })
     }
 }
 pub fn select_port_notify<Conn>(conn: &Conn, port: Port, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2666,18 +2722,24 @@ impl QueryBestSizeRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_BEST_SIZE_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize vid_w
-        // TODO: deserialize vid_h
-        // TODO: deserialize drw_w
-        // TODO: deserialize drw_h
-        // TODO: deserialize motion
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_BEST_SIZE_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (vid_w, remaining) = u16::try_parse(remaining)?;
+        let (vid_h, remaining) = u16::try_parse(remaining)?;
+        let (drw_w, remaining) = u16::try_parse(remaining)?;
+        let (drw_h, remaining) = u16::try_parse(remaining)?;
+        let (motion, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(QueryBestSizeRequest {
+            port,
+            vid_w,
+            vid_h,
+            drw_w,
+            drw_h,
+            motion,
+        })
     }
 }
 pub fn query_best_size<Conn>(conn: &Conn, port: Port, vid_w: u16, vid_h: u16, drw_w: u16, drw_h: u16, motion: bool) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
@@ -2769,14 +2831,17 @@ impl SetPortAttributeRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SET_PORT_ATTRIBUTE_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize attribute
-        // TODO: deserialize value
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SET_PORT_ATTRIBUTE_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (value, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetPortAttributeRequest {
+            port,
+            attribute,
+            value,
+        })
     }
 }
 pub fn set_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom, value: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2832,13 +2897,15 @@ impl GetPortAttributeRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(GET_PORT_ATTRIBUTE_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize attribute
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(GET_PORT_ATTRIBUTE_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetPortAttributeRequest {
+            port,
+            attribute,
+        })
     }
 }
 pub fn get_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom) -> Result<Cookie<'_, Conn, GetPortAttributeReply>, ConnectionError>
@@ -2912,12 +2979,13 @@ impl QueryPortAttributesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_PORT_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize port
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_PORT_ATTRIBUTES_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryPortAttributesRequest {
+            port,
+        })
     }
 }
 pub fn query_port_attributes<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, QueryPortAttributesReply>, ConnectionError>
@@ -3009,12 +3077,13 @@ impl ListImageFormatsRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(LIST_IMAGE_FORMATS_REQUEST))?;
-        // TODO: deserialize port
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(LIST_IMAGE_FORMATS_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let _ = remaining;
+        Ok(ListImageFormatsRequest {
+            port,
+        })
     }
 }
 pub fn list_image_formats<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, ListImageFormatsReply>, ConnectionError>
@@ -3118,15 +3187,19 @@ impl QueryImageAttributesRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_IMAGE_ATTRIBUTES_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize id
-        // TODO: deserialize width
-        // TODO: deserialize height
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_IMAGE_ATTRIBUTES_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (id, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryImageAttributesRequest {
+            port,
+            id,
+            width,
+            height,
+        })
     }
 }
 pub fn query_image_attributes<Conn>(conn: &Conn, port: Port, id: u32, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryImageAttributesReply>, ConnectionError>
@@ -3289,27 +3362,41 @@ impl<'input> PutImageRequest<'input> {
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(PUT_IMAGE_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize drawable
-        // TODO: deserialize gc
-        // TODO: deserialize id
-        // TODO: deserialize src_x
-        // TODO: deserialize src_y
-        // TODO: deserialize src_w
-        // TODO: deserialize src_h
-        // TODO: deserialize drw_x
-        // TODO: deserialize drw_y
-        // TODO: deserialize drw_w
-        // TODO: deserialize drw_h
-        // TODO: deserialize width
-        // TODO: deserialize height
-        // TODO: deserialize data
-        // TODO: deserialize data_len
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(PUT_IMAGE_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
+        let (id, remaining) = u32::try_parse(remaining)?;
+        let (src_x, remaining) = i16::try_parse(remaining)?;
+        let (src_y, remaining) = i16::try_parse(remaining)?;
+        let (src_w, remaining) = u16::try_parse(remaining)?;
+        let (src_h, remaining) = u16::try_parse(remaining)?;
+        let (drw_x, remaining) = i16::try_parse(remaining)?;
+        let (drw_y, remaining) = i16::try_parse(remaining)?;
+        let (drw_w, remaining) = u16::try_parse(remaining)?;
+        let (drw_h, remaining) = u16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (data, remaining) = remaining.split_at(remaining.len());
+        let _ = remaining;
+        Ok(PutImageRequest {
+            port,
+            drawable,
+            gc,
+            id,
+            src_x,
+            src_y,
+            src_w,
+            src_h,
+            drw_x,
+            drw_y,
+            drw_w,
+            drw_h,
+            width,
+            height,
+            data,
+        })
     }
 }
 pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -3447,29 +3534,46 @@ impl ShmPutImageRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SHM_PUT_IMAGE_REQUEST))?;
-        // TODO: deserialize port
-        // TODO: deserialize drawable
-        // TODO: deserialize gc
-        // TODO: deserialize shmseg
-        // TODO: deserialize id
-        // TODO: deserialize offset
-        // TODO: deserialize src_x
-        // TODO: deserialize src_y
-        // TODO: deserialize src_w
-        // TODO: deserialize src_h
-        // TODO: deserialize drw_x
-        // TODO: deserialize drw_y
-        // TODO: deserialize drw_w
-        // TODO: deserialize drw_h
-        // TODO: deserialize width
-        // TODO: deserialize height
-        // TODO: deserialize send_event
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SHM_PUT_IMAGE_REQUEST))?;
+        let (port, remaining) = Port::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
+        let (shmseg, remaining) = shm::Seg::try_parse(remaining)?;
+        let (id, remaining) = u32::try_parse(remaining)?;
+        let (offset, remaining) = u32::try_parse(remaining)?;
+        let (src_x, remaining) = i16::try_parse(remaining)?;
+        let (src_y, remaining) = i16::try_parse(remaining)?;
+        let (src_w, remaining) = u16::try_parse(remaining)?;
+        let (src_h, remaining) = u16::try_parse(remaining)?;
+        let (drw_x, remaining) = i16::try_parse(remaining)?;
+        let (drw_y, remaining) = i16::try_parse(remaining)?;
+        let (drw_w, remaining) = u16::try_parse(remaining)?;
+        let (drw_h, remaining) = u16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (send_event, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(ShmPutImageRequest {
+            port,
+            drawable,
+            gc,
+            shmseg,
+            id,
+            offset,
+            src_x,
+            src_y,
+            src_w,
+            src_h,
+            drw_x,
+            drw_y,
+            drw_w,
+            drw_h,
+            width,
+            height,
+            send_event,
+        })
     }
 }
 pub fn shm_put_image<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>

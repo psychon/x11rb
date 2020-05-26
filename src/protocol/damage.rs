@@ -216,13 +216,15 @@ impl QueryVersionRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(QUERY_VERSION_REQUEST))?;
-        // TODO: deserialize client_major_version
-        // TODO: deserialize client_minor_version
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        let (client_major_version, remaining) = u32::try_parse(value)?;
+        let (client_minor_version, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            client_major_version,
+            client_minor_version,
+        })
     }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -311,15 +313,19 @@ impl CreateRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(CREATE_REQUEST))?;
-        // TODO: deserialize damage
-        // TODO: deserialize drawable
-        // TODO: deserialize level
-        // TODO: deserialize <unnamed field>
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(CREATE_REQUEST))?;
+        let (damage, remaining) = Damage::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (level, remaining) = u8::try_parse(remaining)?;
+        let level = level.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(CreateRequest {
+            damage,
+            drawable,
+            level,
+        })
     }
 }
 pub fn create<Conn>(conn: &Conn, damage: Damage, drawable: xproto::Drawable, level: ReportLevel) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -369,12 +375,13 @@ impl DestroyRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(DESTROY_REQUEST))?;
-        // TODO: deserialize damage
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(DESTROY_REQUEST))?;
+        let (damage, remaining) = Damage::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyRequest {
+            damage,
+        })
     }
 }
 pub fn destroy<Conn>(conn: &Conn, damage: Damage) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -434,14 +441,17 @@ impl SubtractRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(SUBTRACT_REQUEST))?;
-        // TODO: deserialize damage
-        // TODO: deserialize repair
-        // TODO: deserialize parts
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(SUBTRACT_REQUEST))?;
+        let (damage, remaining) = Damage::try_parse(value)?;
+        let (repair, remaining) = xfixes::Region::try_parse(remaining)?;
+        let (parts, remaining) = xfixes::Region::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SubtractRequest {
+            damage,
+            repair,
+            parts,
+        })
     }
 }
 pub fn subtract<Conn, A, B>(conn: &Conn, damage: Damage, repair: A, parts: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -501,13 +511,15 @@ impl AddRequest {
         Ok((vec![request0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    pub fn try_parse_request(header: RequestHeader, body: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, body, None, Some(ADD_REQUEST))?;
-        // TODO: deserialize drawable
-        // TODO: deserialize region
-        let _ = body;
-        // TODO: produce final struct
-        unimplemented!()
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        validate_request_pieces(header, value, None, Some(ADD_REQUEST))?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (region, remaining) = xfixes::Region::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(AddRequest {
+            drawable,
+            region,
+        })
     }
 }
 pub fn add<Conn>(conn: &Conn, drawable: xproto::Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
