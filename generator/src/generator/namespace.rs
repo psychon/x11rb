@@ -505,7 +505,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     self.emit_assert_for_field_serialize(
                         field,
                         deducible_fields,
-                        "self.",
+                        |field_name| {
+                            let rust_field_name = to_rust_variable_name(field_name);
+                            if !deducible_fields.contains_key(field_name) {
+                                format!("self.{}", rust_field_name)
+                            } else {
+                                rust_field_name
+                            }
+                        },
                         &mut tmp_out,
                     );
                     match field {
@@ -559,7 +566,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     self.emit_calc_deducible_field(
                                         field,
                                         deducible_field,
-                                        "self.",
+                                        |field_name| {
+                                            let rust_field_name = to_rust_variable_name(field_name);
+                                            if !deducible_fields.contains_key(field_name) {
+                                                format!("self.{}", rust_field_name)
+                                            } else {
+                                                rust_field_name
+                                            }
+                                        },
                                         &rust_field_name,
                                         out,
                                     );
@@ -1241,7 +1255,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     self.emit_field_serialize(
                         field,
                         deducible_fields,
-                        "input.",
+                        |field_name| {
+                            let rust_field_name = to_rust_variable_name(field_name);
+                            if !deducible_fields.contains_key(field_name) {
+                                format!("input.{}", rust_field_name)
+                            } else {
+                                rust_field_name
+                            }
+                        },
                         &mut result_bytes,
                         out,
                     );
@@ -1442,7 +1463,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let bytes_name = self.emit_field_serialize(
                         field,
                         &FxHashMap::default(),
-                        "",
+                        |field| to_rust_variable_name(field),
                         &mut result_bytes,
                         out,
                     );
@@ -2230,7 +2251,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     self.emit_field_serialize(
                         field,
                         deducible_fields,
-                        "self.",
+                        |field_name| {
+                            let rust_field_name = to_rust_variable_name(field_name);
+                            if !deducible_fields.contains_key(field_name) {
+                                format!("self.{}", rust_field_name)
+                            } else {
+                                rust_field_name
+                            }
+                        },
                         &mut result_bytes,
                         out,
                     );
@@ -2253,7 +2281,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if skip_length_field && field.name() == Some("length") {
                         continue;
                     }
-                    self.emit_field_serialize_into(field, deducible_fields, "self.", "bytes", out);
+                    self.emit_field_serialize_into(
+                        field,
+                        deducible_fields,
+                        |field_name| {
+                            let rust_field_name = to_rust_variable_name(field_name);
+                            if !deducible_fields.contains_key(field_name)
+                                && !external_params.iter().any(|param| param.name == field_name)
+                            {
+                                format!("self.{}", rust_field_name)
+                            } else {
+                                rust_field_name
+                            }
+                        },
+                        "bytes",
+                        out,
+                    );
                 }
             });
             outln!(out, "}}");
@@ -2328,7 +2371,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if skip_length_field && field.name() == Some("length") {
                         continue;
                     }
-                    self.emit_field_serialize_into(field, deducible_fields, "self.", "bytes", out);
+                    self.emit_field_serialize_into(
+                        field,
+                        deducible_fields,
+                        |field_name| {
+                            let rust_field_name = to_rust_variable_name(field_name);
+                            if !deducible_fields.contains_key(field_name)
+                                && !external_params.iter().any(|param| param.name == field_name)
+                            {
+                                format!("self.{}", rust_field_name)
+                            } else {
+                                rust_field_name
+                            }
+                        },
+                        "bytes",
+                        out,
+                    );
                 }
             });
             outln!(out, "}}");
@@ -2930,7 +2988,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         self.emit_field_serialize(
                                             field,
                                             &deducible_fields,
-                                            "",
+                                            |field| to_rust_variable_name(field),
                                             &mut result_bytes,
                                             out,
                                         );
@@ -2992,7 +3050,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     self.emit_field_serialize_into(
                                         field,
                                         &deducible_fields,
-                                        "",
+                                        |field| to_rust_variable_name(field),
                                         "bytes",
                                         out,
                                     );
@@ -3109,7 +3167,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         self.emit_field_serialize_into(
                                             field,
                                             &deducible_fields,
-                                            "",
+                                            |field| to_rust_variable_name(field),
                                             "bytes",
                                             out,
                                         );
@@ -3181,7 +3239,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                             self.emit_field_serialize_into(
                                                 field,
                                                 &deducible_fields,
-                                                "",
+                                                |field| to_rust_variable_name(field),
                                                 "bytes",
                                                 out,
                                             );
@@ -3508,14 +3566,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         field: &xcbdefs::FieldDef,
         deducible_fields: &FxHashMap<String, DeducibleField>,
-        obj_prefix: &str,
+        mut wrap_field_ref: impl FnMut(&str) -> String,
         result_bytes: &mut Vec<String>,
         out: &mut Output,
     ) -> Option<String> {
         // Should only be used in fixed size fields
         assert!(field.size().is_some());
         // Just in case, but for fixed size fields it should not emit anything.
-        self.emit_assert_for_field_serialize(field, deducible_fields, obj_prefix, out);
+        self.emit_assert_for_field_serialize(field, deducible_fields, &mut wrap_field_ref, out);
         match field {
             xcbdefs::FieldDef::Pad(pad_field) => {
                 match pad_field.kind {
@@ -3538,7 +3596,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     self.emit_calc_deducible_field(
                         field,
                         deducible_field,
-                        obj_prefix,
+                        wrap_field_ref,
                         &rust_field_name,
                         out,
                     );
@@ -3549,7 +3607,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         self.emit_value_serialize(&normal_field.type_, &rust_field_name, true),
                     );
                 } else {
-                    let src_value = format!("{}{}", obj_prefix, rust_field_name);
+                    let src_value = wrap_field_ref(&normal_field.name);
                     outln!(
                         out,
                         "let {} = {};",
@@ -3564,17 +3622,17 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             }
             xcbdefs::FieldDef::List(list_field) => {
                 let list_length = list_field.length().unwrap();
-                let rust_field_name = to_rust_variable_name(&list_field.name);
                 if self.rust_value_type_is_u8(&list_field.element_type) {
                     // Fixed-sized list with `u8` members
                     for i in 0..list_length {
-                        result_bytes.push(format!("{}{}[{}]", obj_prefix, rust_field_name, i));
+                        result_bytes.push(format!("{}[{}]", wrap_field_ref(&list_field.name), i));
                     }
-                    Some(format!("{}{}", obj_prefix, rust_field_name))
+                    Some(wrap_field_ref(&list_field.name))
                 } else {
                     let element_size = list_field.element_type.size().unwrap();
                     for i in 0..list_length {
-                        let src_value = format!("{}{}[{}]", obj_prefix, rust_field_name, i);
+                        let src_value = format!("{}[{}]", wrap_field_ref(&list_field.name), i);
+                        let rust_field_name = to_rust_variable_name(&list_field.name);
                         let bytes_name =
                             postfix_var_name(&rust_field_name, &format!("{}_bytes", i));
                         outln!(
@@ -3596,10 +3654,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                 outln!(
                     out,
-                    "let {} = {}{}.serialize();",
+                    "let {} = {}.serialize();",
                     bytes_name,
-                    obj_prefix,
-                    rust_field_name,
+                    wrap_field_ref(&switch_field.name),
                 );
                 for i in 0..field_size {
                     result_bytes.push(format!("{}[{}]", bytes_name, i));
@@ -3616,11 +3673,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         field: &xcbdefs::FieldDef,
         deducible_fields: &FxHashMap<String, DeducibleField>,
-        obj_name: &str,
+        mut wrap_field_ref: impl FnMut(&str) -> String,
         bytes_name: &str,
         out: &mut Output,
     ) {
-        self.emit_assert_for_field_serialize(field, deducible_fields, obj_name, out);
+        self.emit_assert_for_field_serialize(field, deducible_fields, &mut wrap_field_ref, out);
         match field {
             xcbdefs::FieldDef::Pad(pad_field) => match pad_field.kind {
                 xcbdefs::PadKind::Bytes(pad_size) => {
@@ -3643,22 +3700,21 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     self.emit_calc_deducible_field(
                         field,
                         deducible_field,
-                        obj_name,
+                        &mut wrap_field_ref,
                         &rust_field_name,
                         out,
                     );
                     self.emit_value_serialize_into(
                         &normal_field.type_,
-                        &rust_field_name,
+                        &wrap_field_ref(&normal_field.name),
                         true,
                         bytes_name,
                         out,
                     );
                 } else {
-                    let src_value = format!("{}{}", obj_name, rust_field_name);
                     self.emit_value_serialize_into(
                         &normal_field.type_,
-                        &src_value,
+                        &wrap_field_ref(&normal_field.name),
                         false,
                         bytes_name,
                         out,
@@ -3666,30 +3722,26 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
             }
             xcbdefs::FieldDef::List(list_field) => {
-                let rust_field_name = to_rust_variable_name(&list_field.name);
                 if self.rust_value_type_is_u8(&list_field.element_type) {
                     // Fixed-sized list with `u8` members
                     outln!(
                         out,
-                        "{}.extend_from_slice(&{}{});",
+                        "{}.extend_from_slice(&{});",
                         bytes_name,
-                        obj_name,
-                        rust_field_name,
+                        wrap_field_ref(&list_field.name),
                     );
                 } else if self.can_use_simple_list_parsing(&list_field.element_type) {
                     outln!(
                         out,
-                        "{}{}.serialize_into({});",
-                        obj_name,
-                        rust_field_name,
+                        "{}.serialize_into({});",
+                        wrap_field_ref(&list_field.name),
                         bytes_name
                     );
                 } else {
                     outln!(
                         out,
-                        "for element in {}{}.iter() {{",
-                        obj_name,
-                        rust_field_name
+                        "for element in {}.iter() {{",
+                        wrap_field_ref(&list_field.name)
                     );
                     out.indented(|out| {
                         self.emit_value_serialize_into(
@@ -3704,7 +3756,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
             }
             xcbdefs::FieldDef::Switch(switch_field) => {
-                let rust_field_name = to_rust_variable_name(&switch_field.name);
                 let ext_params_args = self.ext_params_to_call_args(
                     true,
                     to_rust_variable_name,
@@ -3712,14 +3763,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 );
                 outln!(
                     out,
-                    "{}{}.serialize_into({}{});",
-                    obj_name,
-                    rust_field_name,
+                    "{}.serialize_into({}{});",
+                    wrap_field_ref(&switch_field.name),
                     bytes_name,
                     ext_params_args,
                 );
             }
-            // the reamining field types are only used in request and replies,
+            // the remaining field types are only used in request and replies,
             // which do not implement serialize
             _ => unreachable!(),
         }
@@ -3730,18 +3780,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         field: &xcbdefs::FieldDef,
         deducible_fields: &FxHashMap<String, DeducibleField>,
-        obj_prefix: &str,
+        mut wrap_field_ref: impl FnMut(&str) -> String,
         out: &mut Output,
     ) {
-        let wrap_field_ref = |field_name: &str| -> String {
-            let rust_field_name = to_rust_variable_name(field_name);
-            if !deducible_fields.contains_key(field_name) {
-                format!("{}{}", obj_prefix, rust_field_name)
-            } else {
-                rust_field_name
-            }
-        };
-
         match field {
             xcbdefs::FieldDef::Pad(_) => {}
             xcbdefs::FieldDef::Normal(_) => {}
@@ -3751,8 +3792,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         .values()
                         .any(|deducible_field| match deducible_field {
                             DeducibleField::LengthOf(list_name, _) => *list_name == list_field.name,
-                            DeducibleField::CaseSwitchExpr(_) => false,
-                            DeducibleField::BitCaseSwitchExpr(_) => false,
+                            DeducibleField::CaseSwitchExpr(_, _) => false,
+                            DeducibleField::BitCaseSwitchExpr(_, _) => false,
                         })
                         && list_field.length_expr.is_some()
                         && list_field.length().is_none();
@@ -3761,17 +3802,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let rust_field_name = to_rust_variable_name(&list_field.name);
                     let length_expr_str = self.expr_to_str(
                         list_field.length_expr.as_ref().unwrap(),
-                        wrap_field_ref,
+                        &mut wrap_field_ref,
                         true,
                         false,
                         false,
                     );
                     outln!(
                         out,
-                        "assert_eq!({}{}.len(), usize::try_from({}).unwrap(), \"`{}` has an \
+                        "assert_eq!({}.len(), usize::try_from({}).unwrap(), \"`{}` has an \
                          incorrect length\");",
-                        obj_prefix,
-                        rust_field_name,
+                        wrap_field_ref(&list_field.name),
                         length_expr_str,
                         rust_field_name,
                     );
@@ -3787,8 +3827,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             DeducibleField::LengthOf(list_name, _) => {
                                 *list_name == fd_list_field.name
                             }
-                            DeducibleField::CaseSwitchExpr(_) => false,
-                            DeducibleField::BitCaseSwitchExpr(_) => false,
+                            DeducibleField::CaseSwitchExpr(_, _) => false,
+                            DeducibleField::BitCaseSwitchExpr(_, _) => false,
                         })
                         && fd_list_field.length().is_none();
 
@@ -3796,17 +3836,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let rust_field_name = to_rust_variable_name(&fd_list_field.name);
                     let length_expr_str = self.expr_to_str(
                         &fd_list_field.length_expr,
-                        wrap_field_ref,
+                        &mut wrap_field_ref,
                         true,
                         false,
                         false,
                     );
                     outln!(
                         out,
-                        "assert_eq!({}{}.len(), usize::try_from({}).unwrap(), \"`{}` has an \
+                        "assert_eq!({}.len(), usize::try_from({}).unwrap(), \"`{}` has an \
                          incorrect length\");",
-                        obj_prefix,
-                        rust_field_name,
+                        wrap_field_ref(&fd_list_field.name),
                         length_expr_str,
                         rust_field_name,
                     );
@@ -3828,9 +3867,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             !parent_deducible_fields
                 .values()
                 .any(|deducible_field| match deducible_field {
-                    DeducibleField::LengthOf(_, _) => false,
-                    DeducibleField::CaseSwitchExpr(switch_name) => *switch_name == switch.name,
-                    DeducibleField::BitCaseSwitchExpr(switch_name) => *switch_name == switch.name,
+                    DeducibleField::CaseSwitchExpr(switch_name, _) => *switch_name == switch.name,
+                    DeducibleField::BitCaseSwitchExpr(switch_name, DeducibleFieldOp::None) => {
+                        *switch_name == switch.name
+                    }
+                    DeducibleField::BitCaseSwitchExpr(_, _) | DeducibleField::LengthOf(_, _) => {
+                        false
+                    }
                 });
 
         if needs_expr_assert {
@@ -3870,7 +3913,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         bytes_var: &str,
         out: &mut Output,
     ) {
-        // Deduced fields are not converter to their enum value
+        // Deduced fields are not converted to their enum value
         if !was_deduced && self.use_enum_type_in_field(type_).is_some() {
             let rust_wire_type = self.type_to_rust_type(type_.type_.def.get().unwrap());
             outln!(
@@ -3889,7 +3932,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         field: &xcbdefs::FieldDef,
         deducible_field: &DeducibleField,
-        obj_name: &str,
+        mut wrap_field_ref: impl FnMut(&str) -> String,
         dst_var_name: &str,
         out: &mut Output,
     ) {
@@ -3899,7 +3942,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let rust_type = self.field_value_type_to_rust_type(&normal_field.type_);
                     let rust_list_field_name = to_rust_variable_name(list_field_name);
                     let msg = format!("`{}` has too many elements", rust_list_field_name);
-                    let list_len = format!("{}{}.len()", obj_name, rust_list_field_name);
+                    let list_len = format!("{}.len()", wrap_field_ref(&rust_list_field_name));
                     let value = match op {
                         DeducibleLengthFieldOp::None => {
                             format!("{}::try_from({}).expect(\"{}\")", rust_type, list_len, msg)
@@ -3930,35 +3973,50 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     unreachable!();
                 }
             }
-            DeducibleField::CaseSwitchExpr(switch_field_name) => {
+            DeducibleField::CaseSwitchExpr(switch_field_name, op) => {
+                match op {
+                    DeducibleFieldOp::None => (),
+                    _ => unreachable!(),
+                }
                 if let xcbdefs::FieldDef::Normal(normal_field) = field {
                     let rust_field_type =
                         self.type_to_rust_type(normal_field.type_.type_.def.get().unwrap());
                     outln!(
                         out,
-                        "let {} = {}::try_from({}{}.switch_expr()).unwrap();",
+                        "let {} = {}::try_from({}.switch_expr()).unwrap();",
                         dst_var_name,
                         rust_field_type,
-                        obj_name,
-                        to_rust_variable_name(switch_field_name),
+                        wrap_field_ref(&switch_field_name),
                     );
                 } else {
                     unreachable!();
                 }
             }
-            DeducibleField::BitCaseSwitchExpr(switch_field_name) => {
+            DeducibleField::BitCaseSwitchExpr(switch_field_name, op) => {
                 if let xcbdefs::FieldDef::Normal(normal_field) = field {
-                    // TODO: Try to handle xkb::SelectEvents
                     let rust_field_type =
                         self.type_to_rust_type(normal_field.type_.type_.def.get().unwrap());
+                    let op_str = match op {
+                        DeducibleFieldOp::None => String::new(),
+                        DeducibleFieldOp::Or(or_expr) => format!(
+                            " | {expr}",
+                            expr = self.expr_to_str(
+                                &*or_expr,
+                                &mut wrap_field_ref,
+                                true,
+                                false,
+                                true,
+                            )
+                        ),
+                    };
                     outln!(
                         out,
-                        "let {} = {}::try_from({}{}.switch_expr()).unwrap();",
+                        "let {} = {}::try_from({}.switch_expr(){}).unwrap();",
                         dst_var_name,
                         rust_field_type,
-                        obj_name,
-                        to_rust_variable_name(switch_field_name),
-                    )
+                        wrap_field_ref(&switch_field_name),
+                        op_str,
+                    );
                 } else {
                     unreachable!();
                 }
@@ -4227,6 +4285,27 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             format!("{} & {}", lhs_str, rhs_str)
                         }
                     }
+                    xcbdefs::BinaryOperator::Or => {
+                        let lhs_str = self.expr_to_str_impl(
+                            &bin_op_expr.lhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        );
+                        let rhs_str = self.expr_to_str_impl(
+                            &bin_op_expr.rhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        );
+                        if needs_parens {
+                            format!("({} | {})", lhs_str, rhs_str)
+                        } else {
+                            format!("{} | {}", lhs_str, rhs_str)
+                        }
+                    }
                     // I'm not sure know how to handle overflow here,
                     // but this operator never appears in the XMLs
                     xcbdefs::BinaryOperator::Shl => unimplemented!(),
@@ -4252,9 +4331,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let resolved_field_ref = field_ref_expr.resolved.get().unwrap();
                 let value = match resolved_field_ref.ref_kind {
                     xcbdefs::FieldRefKind::LocalField => wrap_field_ref(&field_ref_expr.field_name),
-                    xcbdefs::FieldRefKind::ExtParam => {
-                        to_rust_variable_name(&field_ref_expr.field_name)
-                    }
+                    xcbdefs::FieldRefKind::ExtParam => wrap_field_ref(&field_ref_expr.field_name),
                     xcbdefs::FieldRefKind::SumOfRef => {
                         format!("x.{}", to_rust_variable_name(&field_ref_expr.field_name))
                     }
@@ -5048,11 +5125,11 @@ enum DeducibleField {
     /// The value is the discriminant of a case switch
     ///
     /// `(switch name)`
-    CaseSwitchExpr(String),
+    CaseSwitchExpr(String, DeducibleFieldOp),
     /// The value is the discriminant of a bitcase switch
     ///
     /// `(switch name)`
-    BitCaseSwitchExpr(String),
+    BitCaseSwitchExpr(String, DeducibleFieldOp),
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -5063,6 +5140,14 @@ enum DeducibleLengthFieldOp {
     Mul(u32),
     /// `deduced field = list length / n`
     Div(u32),
+}
+
+#[derive(Debug, Clone)]
+enum DeducibleFieldOp {
+    /// `deduced field = value`.
+    None,
+    /// `deduced field = value | expr`.
+    Or(Box<xcbdefs::Expression>),
 }
 
 /// Gathers deducible fields (fields whose value can be calculated
@@ -5139,19 +5224,57 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, De
                     if let xcbdefs::Expression::FieldRef(ref field_ref_expr) = switch_field.expr {
                         Some((
                             field_ref_expr.field_name.clone(),
-                            DeducibleField::CaseSwitchExpr(switch_field.name.clone()),
+                            DeducibleField::CaseSwitchExpr(
+                                switch_field.name.clone(),
+                                DeducibleFieldOp::None,
+                            ),
                         ))
                     } else {
-                        None
+                        unreachable!("Can't figure out deducible field of {:#?}", switch_field);
                     }
                 } else if switch_field.kind == xcbdefs::SwitchKind::BitCase {
                     if let xcbdefs::Expression::FieldRef(ref field_ref_expr) = switch_field.expr {
                         Some((
                             field_ref_expr.field_name.clone(),
-                            DeducibleField::BitCaseSwitchExpr(switch_field.name.clone()),
+                            DeducibleField::BitCaseSwitchExpr(
+                                switch_field.name.clone(),
+                                DeducibleFieldOp::None,
+                            ),
                         ))
+                    } else if let xcbdefs::Expression::BinaryOp(ref binary_op_expr) =
+                        switch_field.expr
+                    {
+                        if let xcbdefs::Expression::FieldRef(ref field_ref_expr) =
+                            *binary_op_expr.lhs
+                        {
+                            match binary_op_expr.operator {
+                                xcbdefs::BinaryOperator::And => {
+                                    // This appears in XKB:SelectEvents.
+                                    // There we're provided the additional constraint that
+                                    // the right hand side of this operation is a strict superset of
+                                    // the left hand side. Therefore, we can negate the right
+                                    // hand side and OR it with the switch field to undo the
+                                    // AND and deduce affectWhich.
+                                    // Because this is not true in general, we assert this is
+                                    // the field we expect.
+                                    assert_eq!(field_ref_expr.field_name, "affectWhich");
+                                    let rhs = binary_op_expr.rhs.clone();
+                                    Some((
+                                        field_ref_expr.field_name.clone(),
+                                        DeducibleField::BitCaseSwitchExpr(
+                                            switch_field.name.clone(),
+                                            DeducibleFieldOp::Or(rhs.negate()),
+                                        ),
+                                    ))
+                                }
+                                // No other operators are actually used.
+                                _ => unreachable!(),
+                            }
+                        } else {
+                            unreachable!("Can't figure out deducible field of {:#?}", switch_field);
+                        }
                     } else {
-                        None
+                        unreachable!("Can't figure out deducible field of {:#?}", switch_field);
                     }
                 } else {
                     None

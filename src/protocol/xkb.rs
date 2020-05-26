@@ -6810,7 +6810,6 @@ pub const SELECT_EVENTS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SelectEventsRequest<'input> {
     pub device_spec: DeviceSpec,
-    pub affect_which: u16,
     pub clear: u16,
     pub select_all: u16,
     pub affect_map: u16,
@@ -6827,7 +6826,8 @@ impl<'input> SelectEventsRequest<'input> {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let affect_which_bytes = self.affect_which.serialize();
+        let affect_which = u16::try_from(self.details.switch_expr() | (u32::from(self.clear) | u32::from(self.select_all))).unwrap();
+        let affect_which_bytes = affect_which.serialize();
         let clear_bytes = self.clear.serialize();
         let select_all_bytes = self.select_all.serialize();
         let affect_map_bytes = self.affect_map.serialize();
@@ -6851,7 +6851,7 @@ impl<'input> SelectEventsRequest<'input> {
             map_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let details_bytes = self.details.serialize(self.affect_which, self.clear, self.select_all);
+        let details_bytes = self.details.serialize(affect_which, self.clear, self.select_all);
         let length_so_far = length_so_far + details_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -6861,23 +6861,20 @@ impl<'input> SelectEventsRequest<'input> {
         Ok((vec![request0.into(), details_bytes.into(), padding0.into()], vec![]))
     }
 }
-pub fn select_events<'c, 'input, Conn, A, B, C, D, E>(conn: &'c Conn, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn select_events<'c, 'input, Conn, A, B, C, D>(conn: &'c Conn, device_spec: DeviceSpec, clear: A, select_all: B, affect_map: C, map: D, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
     B: Into<u16>,
     C: Into<u16>,
     D: Into<u16>,
-    E: Into<u16>,
 {
-    let affect_which: u16 = affect_which.into();
     let clear: u16 = clear.into();
     let select_all: u16 = select_all.into();
     let affect_map: u16 = affect_map.into();
     let map: u16 = map.into();
     let request0 = SelectEventsRequest {
         device_spec,
-        affect_which,
         clear,
         select_all,
         affect_map,
@@ -11985,15 +11982,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         use_extension(self, wanted_major, wanted_minor)
     }
-    fn xkb_select_events<'c, 'input, A, B, C, D, E>(&'c self, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_select_events<'c, 'input, A, B, C, D>(&'c self, device_spec: DeviceSpec, clear: A, select_all: B, affect_map: C, map: D, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
         B: Into<u16>,
         C: Into<u16>,
         D: Into<u16>,
-        E: Into<u16>,
     {
-        select_events(self, device_spec, affect_which, clear, select_all, affect_map, map, details)
+        select_events(self, device_spec, clear, select_all, affect_map, map, details)
     }
     fn xkb_bell(&self, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: xproto::Atom, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {

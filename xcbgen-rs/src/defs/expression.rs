@@ -5,7 +5,7 @@ use super::{NamedTypeRef, TypeRef};
 /// An expression for computing some value.
 ///
 /// This is a recursive type describing a tree of the expression.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expression {
     /// An operation with two sub-expressions.
     BinaryOp(BinaryOpExpr),
@@ -48,8 +48,37 @@ pub enum Expression {
     Bit(u8),
 }
 
+impl Expression {
+    /// Negate an expression, attempting to be efficient where possible.
+    pub fn negate(self: Box<Expression>) -> Box<Expression> {
+        match *self {
+            Expression::UnaryOp(UnaryOpExpr {
+                operator: UnaryOperator::Not,
+                rhs,
+            }) => rhs,
+            Expression::BinaryOp(BinaryOpExpr {
+                operator: BinaryOperator::And,
+                lhs,
+                rhs,
+            }) => {
+                // Apply De Morgan's law, because in the one case it appears
+                // in xcb it is advantageous to do so.
+                Box::new(Expression::BinaryOp(BinaryOpExpr {
+                    operator: BinaryOperator::Or,
+                    lhs: lhs.negate(),
+                    rhs: rhs.negate(),
+                }))
+            }
+            _ => Box::new(Expression::UnaryOp(UnaryOpExpr {
+                operator: UnaryOperator::Not,
+                rhs: self,
+            })),
+        }
+    }
+}
+
 /// An expression with two sub-expressions.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BinaryOpExpr {
     /// The operator that is applied to the two sub-expressions.
     pub operator: BinaryOperator,
@@ -79,12 +108,15 @@ pub enum BinaryOperator {
     /// Logical and
     And,
 
+    /// Logical or,
+    Or,
+
     /// A logical left shift
     Shl,
 }
 
 /// An expression with one sub-expression
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnaryOpExpr {
     /// The operator that is applied to the sub-expression.
     pub operator: UnaryOperator,
@@ -101,7 +133,7 @@ pub enum UnaryOperator {
 }
 
 /// An expression referencing a field from the surrounding context.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FieldRefExpr {
     /// The name of the field that is referenced.
     pub field_name: String,
@@ -111,7 +143,7 @@ pub struct FieldRefExpr {
 }
 
 /// Information about a field reference.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ResolvedFieldRef {
     /// The kind of reference to another field.
     pub ref_kind: FieldRefKind,
@@ -134,7 +166,7 @@ pub enum FieldRefKind {
 }
 
 /// An expression referencing a parameter from a surrounding context.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParamRefExpr {
     /// The name of the referenced field.
     pub field_name: String,
@@ -144,7 +176,7 @@ pub struct ParamRefExpr {
 }
 
 /// An expression referencing a value from an enumeration.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EnumRefExpr {
     /// The enum that is referenced.
     pub enum_: NamedTypeRef,
@@ -154,7 +186,7 @@ pub struct EnumRefExpr {
 }
 
 /// An expression representing the sum over some referenced list.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SumOfExpr {
     /// The name of the list that is used.
     pub field_name: String,

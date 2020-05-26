@@ -655,7 +655,7 @@ impl ErrorRef {
 }
 
 /// A reference to a type by name.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NamedTypeRef {
     /// The name of the type that is referenced
     pub name: String,
