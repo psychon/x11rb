@@ -933,6 +933,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(out, "check_exhausted(remaining)?;");
                 }
 
+                // If this is QueryTextExtents we need special handling for odd_length.
+                if ns.header == "xproto" && name == "QueryTextExtents" {
+                    outln!(out, "if odd_length {{");
+                    out.indented(|out| {
+                        outln!(out, "if string.is_empty() {{");
+                        outln!(out.indent(), "return Err(ParseError::ParseError);");
+                        outln!(out, "}}");
+                        outln!(out, "string.truncate(string.len() - 1);");
+                    });
+                    outln!(out, "}}");
+                }
+
                 let has_members = !gathered.request_args.is_empty();
                 let members_start = if has_members { " {" } else { "" };
                 outln!(out, "Ok({}Request{}", name, members_start);
@@ -3637,12 +3649,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "std::mem::swap(fds, &mut {});", rust_field_name);
             }
             xcbdefs::FieldDef::Expr(expr_ref) => {
-                // The only expr field we ever need to parse is odd_length, which
-                // can just be ignored because it's in the minor_opcode slot,
-                // and because we can calculate how much padding we need from the
-                // string length directly.
+                // The only expr field we ever need to parse is odd_length,
+                // so assert that we have that and then just write some one-off
+                // code for it.
                 assert_eq!(expr_ref.name, "odd_length");
-                outln!(out, "let remaining = &remaining[1..];");
+                outln!(
+                    out,
+                    "let (odd_length, remaining) = bool::try_parse(remaining)?;"
+                );
+                // And there is a matching special case to use this in request parsing.
             }
             xcbdefs::FieldDef::VirtualLen(_) => {}
         }

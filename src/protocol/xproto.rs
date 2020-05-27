@@ -14440,7 +14440,7 @@ impl<'input> QueryTextExtentsRequest<'input> {
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, Some(QUERY_TEXT_EXTENTS_REQUEST), None)?;
         let remaining = &[header.minor_opcode];
-        let remaining = &remaining[1..];
+        let (odd_length, remaining) = bool::try_parse(remaining)?;
         check_exhausted(remaining)?;
         let (font, remaining) = Fontable::try_parse(value)?;
         let mut remaining = remaining;
@@ -14454,6 +14454,12 @@ impl<'input> QueryTextExtentsRequest<'input> {
         let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
             .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
+        if odd_length {
+            if string.is_empty() {
+                return Err(ParseError::ParseError);
+            }
+            string.truncate(string.len() - 1);
+        }
         Ok(QueryTextExtentsRequest {
             font,
             string: Cow::Owned(string),

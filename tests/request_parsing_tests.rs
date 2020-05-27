@@ -187,6 +187,62 @@ fn test_get_input_focus() {
     assert_eq!(r, GetInputFocusRequest,);
 }
 
+#[test]
+fn test_query_text_extents() {
+    use x11rb::protocol::xproto::{Char2b, QueryTextExtentsRequest};
+    let header = RequestHeader {
+        major_opcode: 48,
+        minor_opcode: 0,
+        remaining_length: 2,
+    };
+    let mut body = vec![];
+    add_ne!(body, 0x12345678u32);
+    add_ne!(body, 0x9abcu16);
+    add_ne!(body, 0xdef0u16);
+    let r = QueryTextExtentsRequest::try_parse_request(header, &body).unwrap();
+    assert_eq!(
+        r,
+        QueryTextExtentsRequest {
+            font: 0x12345678,
+            string: Cow::Owned(vec![
+                Char2b {
+                    byte1: 0xbc,
+                    byte2: 0x9a,
+                },
+                Char2b {
+                    byte1: 0xf0,
+                    byte2: 0xde,
+                },
+            ]),
+        }
+    );
+}
+
+#[test]
+fn test_query_text_extents_odd_length() {
+    use x11rb::protocol::xproto::{Char2b, QueryTextExtentsRequest};
+    let header = RequestHeader {
+        major_opcode: 48,
+        minor_opcode: 1,
+        remaining_length: 2,
+    };
+    let mut body = vec![];
+    add_ne!(body, 0x12345678u32);
+    add_ne!(body, 0x9abcu16);
+    add_ne!(body, 0xdef0u16);
+    let r = QueryTextExtentsRequest::try_parse_request(header, &body).unwrap();
+    assert_eq!(
+        r,
+        QueryTextExtentsRequest {
+            font: 0x12345678,
+            string: Cow::Owned(vec![Char2b {
+                byte1: 0xbc,
+                byte2: 0x9a,
+            },]),
+        }
+    );
+}
+
 #[cfg(feature = "randr")]
 #[test]
 fn test_randr_get_output_property() {
