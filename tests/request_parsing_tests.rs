@@ -11,15 +11,15 @@ macro_rules! add_ne {
 
 #[test]
 fn test_bad_request_header_opcode() {
-    use x11rb::protocol::xproto::QueryExtensionRequest;
+    use x11rb::protocol::xproto::GetInputFocusRequest;
     let header = RequestHeader {
         major_opcode: 1,
-        minor_opcode: 2,
+        minor_opcode: 0,
         remaining_length: 0,
     };
     let body = &[];
     assert_eq!(
-        QueryExtensionRequest::try_parse_request(header, body),
+        GetInputFocusRequest::try_parse_request(header, body),
         Err(ParseError::ParseError)
     );
 }
