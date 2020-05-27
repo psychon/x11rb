@@ -3463,29 +3463,24 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             from,
                             list_length,
                         );
-                        if container == FieldContainer::Other {
+                        let ownership = if container == FieldContainer::Other {
                             // Only force taking ownership for non-request types.
-                            outln!(
-                                out,
-                                "let {} = <[u8; {}]>::try_from({}).unwrap();",
-                                rust_field_name,
-                                list_length,
-                                rust_field_name,
-                            );
+                            ""
                         } else {
                             // Otherwise convert this into a reference to a fixed length array.
                             // It's basically dumb luck that the largest list in the X11 protocol
                             // and the largest fixed length array that Rust has a builtin conversion
                             // for going from &[T] to &[T; N] both happen to be 32.
                             assert!(list_length <= 32);
-                            outln!(
-                                out,
-                                "let {} = <&[u8; {}]>::try_from({}).unwrap();",
-                                rust_field_name,
-                                list_length,
-                                rust_field_name,
-                            );
-                        }
+                            "&"
+                        };
+                        outln!(
+                            out,
+                            "let {field} = <{ownership}[u8; {length}]>::try_from({field}).unwrap();",
+                            field = rust_field_name,
+                            ownership = ownership,
+                            length = list_length,
+                        );
                     } else if let Some(ref length_expr) = list_field.length_expr {
                         outln!(
                             out,
