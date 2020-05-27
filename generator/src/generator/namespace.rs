@@ -3676,13 +3676,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             };
             if !self.enum_has_repeated_values(&enum_def) {
                 let type_type = type_.type_.def.get().unwrap();
-                match type_type {
-                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Bool) => {
-                        // Cast this to a u8 before calling try_into, because there's
-                        // no TryFrom<bool> implementation.
-                        outln!(out, "let {var} = {var} as u8;", var = var_name);
-                    }
-                    _ => (),
+                if let xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Bool) = type_type {
+                    // Cast this to a u8 before calling try_into, because there's
+                    // no TryFrom<bool> implementation.
+                    outln!(out, "let {var} = {var} as u8;", var = var_name);
                 }
                 outln!(out, "let {var} = {var}.try_into()?;", var = var_name);
             }
