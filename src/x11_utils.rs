@@ -45,9 +45,10 @@ pub struct RequestHeader {
     /// The minor opcode of the request (which, for some requests, may not be an
     /// opcode at all).
     pub minor_opcode: u8,
-    /// The remaining length of the request, in units of 4 bytes. Unlike the wire format,
-    /// this does *not* include the header itself. If the BigRequests extension is enabled
-    /// this can be greater than u16::max_value - 1.
+    /// The remaining length of the request, measured in 4 bytes units. Unlike the wire format,
+    /// this does *not* include the header itself, which is 1 unit (or 2 if BigRequests is
+    /// enabled and the length in the first unit is zero). If the BigRequests extension is
+    /// enabled this can be greater than u16::max_value - 1.
     pub remaining_length: u32,
 }
 
