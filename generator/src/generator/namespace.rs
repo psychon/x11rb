@@ -3689,9 +3689,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 if let xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Bool) = type_type {
                     // Cast this to a u8 before calling try_into, because there's
                     // no TryFrom<bool> implementation.
-                    outln!(out, "let {var} = {var} as u8;", var = var_name);
+                    outln!(
+                        out,
+                        "let {var} = u8::from({var}).try_into()?;",
+                        var = var_name
+                    );
+                } else {
+                    outln!(out, "let {var} = {var}.try_into()?;", var = var_name);
                 }
-                outln!(out, "let {var} = {var}.try_into()?;", var = var_name);
             }
             if is_xproto_gravity(&enum_def) {
                 let enum_ns = enum_def.namespace.upgrade().unwrap();

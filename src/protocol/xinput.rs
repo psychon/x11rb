@@ -12458,8 +12458,7 @@ impl<'input> XIGrabDeviceRequest<'input> {
         let (paired_device_mode, remaining) = u8::try_parse(remaining)?;
         let paired_device_mode = paired_device_mode.try_into()?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
-        let owner_events = owner_events as u8;
-        let owner_events = owner_events.try_into()?;
+        let owner_events = u8::from(owner_events).try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (mask_len, remaining) = u16::try_parse(remaining)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
@@ -13082,8 +13081,7 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         let (paired_device_mode, remaining) = u8::try_parse(remaining)?;
         let paired_device_mode = paired_device_mode.try_into()?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
-        let owner_events = owner_events as u8;
-        let owner_events = owner_events.try_into()?;
+        let owner_events = u8::from(owner_events).try_into()?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
