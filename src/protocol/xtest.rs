@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -71,13 +71,13 @@ impl GetVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_VERSION_REQUEST))?;
+        if header.minor_opcode != GET_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (major_version, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetVersionRequest {
             major_version,
             minor_version,
@@ -233,12 +233,12 @@ impl CompareCursorRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(COMPARE_CURSOR_REQUEST))?;
+        if header.minor_opcode != COMPARE_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CompareCursorRequest {
             window,
             cursor,
@@ -356,7 +356,9 @@ impl FakeInputRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(FAKE_INPUT_REQUEST))?;
+        if header.minor_opcode != FAKE_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(value)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -367,9 +369,7 @@ impl FakeInputRequest {
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
         let (deviceid, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(FakeInputRequest {
             type_,
             detail,
@@ -433,12 +433,12 @@ impl GrabControlRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GRAB_CONTROL_REQUEST))?;
+        if header.minor_opcode != GRAB_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (impervious, remaining) = bool::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GrabControlRequest {
             impervious,
         })

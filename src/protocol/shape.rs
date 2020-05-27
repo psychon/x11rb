@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -295,7 +295,10 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(QueryVersionRequest
         )
     }
@@ -394,7 +397,9 @@ impl<'input> RectanglesRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(RECTANGLES_REQUEST))?;
+        if header.minor_opcode != RECTANGLES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (operation, remaining) = Op::try_parse(value)?;
         let operation = operation.try_into()?;
         let (destination_kind, remaining) = Kind::try_parse(remaining)?;
@@ -413,9 +418,7 @@ impl<'input> RectanglesRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(RectanglesRequest {
             operation,
             destination_kind,
@@ -501,7 +504,9 @@ impl MaskRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(MASK_REQUEST))?;
+        if header.minor_opcode != MASK_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (operation, remaining) = Op::try_parse(value)?;
         let operation = operation.try_into()?;
         let (destination_kind, remaining) = Kind::try_parse(remaining)?;
@@ -511,9 +516,7 @@ impl MaskRequest {
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
         let (source_bitmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(MaskRequest {
             operation,
             destination_kind,
@@ -601,7 +604,9 @@ impl CombineRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(COMBINE_REQUEST))?;
+        if header.minor_opcode != COMBINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (operation, remaining) = Op::try_parse(value)?;
         let operation = operation.try_into()?;
         let (destination_kind, remaining) = Kind::try_parse(remaining)?;
@@ -613,9 +618,7 @@ impl CombineRequest {
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
         let (source_window, remaining) = xproto::Window::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CombineRequest {
             operation,
             destination_kind,
@@ -693,16 +696,16 @@ impl OffsetRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(OFFSET_REQUEST))?;
+        if header.minor_opcode != OFFSET_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (destination_kind, remaining) = Kind::try_parse(value)?;
         let destination_kind = destination_kind.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(OffsetRequest {
             destination_kind,
             destination_window,
@@ -760,11 +763,11 @@ impl QueryExtentsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_EXTENTS_REQUEST))?;
+        if header.minor_opcode != QUERY_EXTENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryExtentsRequest {
             destination_window,
         })
@@ -866,13 +869,13 @@ impl SelectInputRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SELECT_INPUT_REQUEST))?;
+        if header.minor_opcode != SELECT_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SelectInputRequest {
             destination_window,
             enable,
@@ -926,11 +929,11 @@ impl InputSelectedRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(INPUT_SELECTED_REQUEST))?;
+        if header.minor_opcode != INPUT_SELECTED_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(InputSelectedRequest {
             destination_window,
         })
@@ -1012,14 +1015,14 @@ impl GetRectanglesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_RECTANGLES_REQUEST))?;
+        if header.minor_opcode != GET_RECTANGLES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (source_kind, remaining) = Kind::try_parse(remaining)?;
         let source_kind = source_kind.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetRectanglesRequest {
             window,
             source_kind,

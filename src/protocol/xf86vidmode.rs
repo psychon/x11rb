@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -394,7 +394,10 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(QueryVersionRequest
         )
     }
@@ -470,12 +473,12 @@ impl GetModeLineRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_MODE_LINE_REQUEST))?;
+        if header.minor_opcode != GET_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetModeLineRequest {
             screen,
         })
@@ -659,7 +662,9 @@ impl<'input> ModModeLineRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(MOD_MODE_LINE_REQUEST))?;
+        if header.minor_opcode != MOD_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (hdisplay, remaining) = u16::try_parse(remaining)?;
         let (hsyncstart, remaining) = u16::try_parse(remaining)?;
@@ -675,9 +680,7 @@ impl<'input> ModModeLineRequest<'input> {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ModModeLineRequest {
             screen,
             hdisplay,
@@ -755,12 +758,12 @@ impl SwitchModeRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SWITCH_MODE_REQUEST))?;
+        if header.minor_opcode != SWITCH_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let (zoom, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SwitchModeRequest {
             screen,
             zoom,
@@ -814,12 +817,12 @@ impl GetMonitorRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_MONITOR_REQUEST))?;
+        if header.minor_opcode != GET_MONITOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetMonitorRequest {
             screen,
         })
@@ -968,12 +971,12 @@ impl LockModeSwitchRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(LOCK_MODE_SWITCH_REQUEST))?;
+        if header.minor_opcode != LOCK_MODE_SWITCH_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let (lock, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(LockModeSwitchRequest {
             screen,
             lock,
@@ -1027,12 +1030,12 @@ impl GetAllModeLinesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_ALL_MODE_LINES_REQUEST))?;
+        if header.minor_opcode != GET_ALL_MODE_LINES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetAllModeLinesRequest {
             screen,
         })
@@ -1260,7 +1263,9 @@ impl<'input> AddModeLineRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(ADD_MODE_LINE_REQUEST))?;
+        if header.minor_opcode != ADD_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
         let (hdisplay, remaining) = u16::try_parse(remaining)?;
@@ -1290,9 +1295,7 @@ impl<'input> AddModeLineRequest<'input> {
         let (after_flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(AddModeLineRequest {
             screen,
             dotclock,
@@ -1466,7 +1469,9 @@ impl<'input> DeleteModeLineRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DELETE_MODE_LINE_REQUEST))?;
+        if header.minor_opcode != DELETE_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
         let (hdisplay, remaining) = u16::try_parse(remaining)?;
@@ -1483,9 +1488,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DeleteModeLineRequest {
             screen,
             dotclock,
@@ -1635,7 +1638,9 @@ impl<'input> ValidateModeLineRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(VALIDATE_MODE_LINE_REQUEST))?;
+        if header.minor_opcode != VALIDATE_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
         let (hdisplay, remaining) = u16::try_parse(remaining)?;
@@ -1652,9 +1657,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ValidateModeLineRequest {
             screen,
             dotclock,
@@ -1830,7 +1833,9 @@ impl<'input> SwitchToModeRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SWITCH_TO_MODE_REQUEST))?;
+        if header.minor_opcode != SWITCH_TO_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
         let (hdisplay, remaining) = u16::try_parse(remaining)?;
@@ -1847,9 +1852,7 @@ impl<'input> SwitchToModeRequest<'input> {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SwitchToModeRequest {
             screen,
             dotclock,
@@ -1927,12 +1930,12 @@ impl GetViewPortRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_VIEW_PORT_REQUEST))?;
+        if header.minor_opcode != GET_VIEW_PORT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetViewPortRequest {
             screen,
         })
@@ -2024,14 +2027,14 @@ impl SetViewPortRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_VIEW_PORT_REQUEST))?;
+        if header.minor_opcode != SET_VIEW_PORT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (x, remaining) = u32::try_parse(remaining)?;
         let (y, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetViewPortRequest {
             screen,
             x,
@@ -2087,12 +2090,12 @@ impl GetDotClocksRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DOT_CLOCKS_REQUEST))?;
+        if header.minor_opcode != GET_DOT_CLOCKS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDotClocksRequest {
             screen,
         })
@@ -2178,12 +2181,12 @@ impl SetClientVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_CLIENT_VERSION_REQUEST))?;
+        if header.minor_opcode != SET_CLIENT_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (major, remaining) = u16::try_parse(value)?;
         let (minor, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetClientVersionRequest {
             major,
             minor,
@@ -2267,16 +2270,16 @@ impl SetGammaRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_GAMMA_REQUEST))?;
+        if header.minor_opcode != SET_GAMMA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (red, remaining) = u32::try_parse(remaining)?;
         let (green, remaining) = u32::try_parse(remaining)?;
         let (blue, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetGammaRequest {
             screen,
             red,
@@ -2358,12 +2361,12 @@ impl GetGammaRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_GAMMA_REQUEST))?;
+        if header.minor_opcode != GET_GAMMA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(26..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetGammaRequest {
             screen,
         })
@@ -2447,12 +2450,12 @@ impl GetGammaRampRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_GAMMA_RAMP_REQUEST))?;
+        if header.minor_opcode != GET_GAMMA_RAMP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let (size, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetGammaRampRequest {
             screen,
             size,
@@ -2554,15 +2557,15 @@ impl<'input> SetGammaRampRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_GAMMA_RAMP_REQUEST))?;
+        if header.minor_opcode != SET_GAMMA_RAMP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let (size, remaining) = u16::try_parse(remaining)?;
         let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
         let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
         let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetGammaRampRequest {
             screen,
             size,
@@ -2622,12 +2625,12 @@ impl GetGammaRampSizeRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_GAMMA_RAMP_SIZE_REQUEST))?;
+        if header.minor_opcode != GET_GAMMA_RAMP_SIZE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetGammaRampSizeRequest {
             screen,
         })
@@ -2705,12 +2708,12 @@ impl GetPermissionsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_PERMISSIONS_REQUEST))?;
+        if header.minor_opcode != GET_PERMISSIONS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetPermissionsRequest {
             screen,
         })

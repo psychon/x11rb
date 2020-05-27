@@ -85,7 +85,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
-            "use crate::x11_utils::{{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse}};"
+            "use crate::x11_utils::{{RequestHeader, Serialize, TryParse}};"
         );
         outln!(
             out,
@@ -882,15 +882,19 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                        lifetime = parse_lifetime_block);
             }
             out.indented(|out| {
-                let opcode = format!("Some({}_REQUEST)", super::camel_case_to_upper_snake(&name));
-                let (major_opcode, minor_opcode) = if ns.ext_info.is_some() {
-                    ("None".into(), opcode)
+                if ns.ext_info.is_some() {
+                    // We don't have enough information here to validate the major opcode, that requires
+                    // state from the connection.
+                    outln!(out, "if header.minor_opcode != {}_REQUEST {{", super::camel_case_to_upper_snake(&name));
+                    outln!(out.indent(), "return Err(ParseError::ParseError);");
+                    outln!(out, "}}");
                 } else {
-                    (opcode, "None".into())
+                    // The minor opcode could be repurposed to store data for this request, so there's
+                    // no validation of it to be done.
+                    outln!(out, "if header.major_opcode != {}_REQUEST {{", super::camel_case_to_upper_snake(&name));
+                    outln!(out.indent(), "return Err(ParseError::ParseError);");
+                    outln!(out, "}}");
                 };
-                outln!(out, "validate_request_pieces(header, value, {major_opcode}, {minor_opcode})?;",
-                       major_opcode=major_opcode,
-                       minor_opcode=minor_opcode);
 
                 let fields = request_def.fields.borrow();
                 let mut seen_complete_header = false;
@@ -921,16 +925,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
                     if !seen_complete_header {
                         // Dispose of the "remaining" variable just generated.
-                        outln!(out, "check_exhausted(remaining)?;");
+                        outln!(out, "let _ = remaining;");
                     }
                 }
 
-                // If there's a `remaining` variable from parsing the body we should check it.
+                // Silence unused variable warnings for the last component.
                 if !is_first_body_field {
-                    // Trailing padding is not described in the XML. Round this slice off to 4 bytes.
-                    outln!(out, "let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)");
-                    outln!(out.indent(), ".ok_or(ParseError::ParseError)?;");
-                    outln!(out, "check_exhausted(remaining)?;");
+                    outln!(out, "let _ = remaining;");
+                } else {
+                    outln!(out, "let _ = value;");
                 }
 
                 // If this is QueryTextExtents we need special handling for odd_length.

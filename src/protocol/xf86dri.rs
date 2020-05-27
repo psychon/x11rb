@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -111,7 +111,10 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(QueryVersionRequest
         )
     }
@@ -189,11 +192,11 @@ impl QueryDirectRenderingCapableRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_DIRECT_RENDERING_CAPABLE_REQUEST))?;
+        if header.minor_opcode != QUERY_DIRECT_RENDERING_CAPABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryDirectRenderingCapableRequest {
             screen,
         })
@@ -270,11 +273,11 @@ impl OpenConnectionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(OPEN_CONNECTION_REQUEST))?;
+        if header.minor_opcode != OPEN_CONNECTION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(OpenConnectionRequest {
             screen,
         })
@@ -373,11 +376,11 @@ impl CloseConnectionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CLOSE_CONNECTION_REQUEST))?;
+        if header.minor_opcode != CLOSE_CONNECTION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CloseConnectionRequest {
             screen,
         })
@@ -429,11 +432,11 @@ impl GetClientDriverNameRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_CLIENT_DRIVER_NAME_REQUEST))?;
+        if header.minor_opcode != GET_CLIENT_DRIVER_NAME_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetClientDriverNameRequest {
             screen,
         })
@@ -546,13 +549,13 @@ impl CreateContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_CONTEXT_REQUEST))?;
+        if header.minor_opcode != CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (visual, remaining) = u32::try_parse(remaining)?;
         let (context, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateContextRequest {
             screen,
             visual,
@@ -639,12 +642,12 @@ impl DestroyContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DESTROY_CONTEXT_REQUEST))?;
+        if header.minor_opcode != DESTROY_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (context, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DestroyContextRequest {
             screen,
             context,
@@ -704,12 +707,12 @@ impl CreateDrawableRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_DRAWABLE_REQUEST))?;
+        if header.minor_opcode != CREATE_DRAWABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (drawable, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateDrawableRequest {
             screen,
             drawable,
@@ -794,12 +797,12 @@ impl DestroyDrawableRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DESTROY_DRAWABLE_REQUEST))?;
+        if header.minor_opcode != DESTROY_DRAWABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (drawable, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DestroyDrawableRequest {
             screen,
             drawable,
@@ -859,12 +862,12 @@ impl GetDrawableInfoRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DRAWABLE_INFO_REQUEST))?;
+        if header.minor_opcode != GET_DRAWABLE_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (drawable, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDrawableInfoRequest {
             screen,
             drawable,
@@ -991,11 +994,11 @@ impl GetDeviceInfoRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_INFO_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDeviceInfoRequest {
             screen,
         })
@@ -1104,12 +1107,12 @@ impl AuthConnectionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(AUTH_CONNECTION_REQUEST))?;
+        if header.minor_opcode != AUTH_CONNECTION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (screen, remaining) = u32::try_parse(value)?;
         let (magic, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(AuthConnectionRequest {
             screen,
             magic,

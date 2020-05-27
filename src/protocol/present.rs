@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -541,12 +541,12 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryVersionRequest {
             major_version,
             minor_version,
@@ -722,7 +722,9 @@ impl<'input> PixmapRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PIXMAP_REQUEST))?;
+        if header.minor_opcode != PIXMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
         let (serial, remaining) = u32::try_parse(remaining)?;
@@ -746,9 +748,7 @@ impl<'input> PixmapRequest<'input> {
             remaining = new_remaining;
             notifies.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PixmapRequest {
             window,
             pixmap,
@@ -868,16 +868,16 @@ impl NotifyMSCRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(NOTIFY_MSC_REQUEST))?;
+        if header.minor_opcode != NOTIFY_MSC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (serial, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (target_msc, remaining) = u64::try_parse(remaining)?;
         let (divisor, remaining) = u64::try_parse(remaining)?;
         let (remainder, remaining) = u64::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(NotifyMSCRequest {
             window,
             serial,
@@ -951,13 +951,13 @@ impl SelectInputRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SELECT_INPUT_REQUEST))?;
+        if header.minor_opcode != SELECT_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (eid, remaining) = Event::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SelectInputRequest {
             eid,
             window,
@@ -1015,11 +1015,11 @@ impl QueryCapabilitiesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_CAPABILITIES_REQUEST))?;
+        if header.minor_opcode != QUERY_CAPABILITIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (target, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryCapabilitiesRequest {
             target,
         })

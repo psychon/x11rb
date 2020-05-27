@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -6345,12 +6345,12 @@ impl UseExtensionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(USE_EXTENSION_REQUEST))?;
+        if header.minor_opcode != USE_EXTENSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (wanted_major, remaining) = u16::try_parse(value)?;
         let (wanted_minor, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(UseExtensionRequest {
             wanted_major,
             wanted_minor,
@@ -7114,7 +7114,9 @@ impl<'input> SelectEventsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SELECT_EVENTS_REQUEST))?;
+        if header.minor_opcode != SELECT_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (affect_which, remaining) = u16::try_parse(remaining)?;
         let (clear, remaining) = u16::try_parse(remaining)?;
@@ -7122,9 +7124,7 @@ impl<'input> SelectEventsRequest<'input> {
         let (affect_map, remaining) = u16::try_parse(remaining)?;
         let (map, remaining) = u16::try_parse(remaining)?;
         let (details, remaining) = SelectEventsAux::try_parse(remaining, affect_which, clear, select_all)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SelectEventsRequest {
             device_spec,
             clear,
@@ -7232,7 +7232,9 @@ impl BellRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(BELL_REQUEST))?;
+        if header.minor_opcode != BELL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (bell_class, remaining) = BellClassSpec::try_parse(remaining)?;
         let (bell_id, remaining) = IDSpec::try_parse(remaining)?;
@@ -7245,9 +7247,7 @@ impl BellRequest {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(BellRequest {
             device_spec,
             bell_class,
@@ -7317,12 +7317,12 @@ impl GetStateRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_STATE_REQUEST))?;
+        if header.minor_opcode != GET_STATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetStateRequest {
             device_spec,
         })
@@ -7452,7 +7452,9 @@ impl LatchLockStateRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(LATCH_LOCK_STATE_REQUEST))?;
+        if header.minor_opcode != LATCH_LOCK_STATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (affect_mod_locks, remaining) = u8::try_parse(remaining)?;
         let (mod_locks, remaining) = u8::try_parse(remaining)?;
@@ -7464,9 +7466,7 @@ impl LatchLockStateRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (latch_group, remaining) = bool::try_parse(remaining)?;
         let (group_latch, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(LatchLockStateRequest {
             device_spec,
             affect_mod_locks,
@@ -7538,12 +7538,12 @@ impl GetControlsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_CONTROLS_REQUEST))?;
+        if header.minor_opcode != GET_CONTROLS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetControlsRequest {
             device_spec,
         })
@@ -7792,7 +7792,9 @@ impl<'input> SetControlsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_CONTROLS_REQUEST))?;
+        if header.minor_opcode != SET_CONTROLS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (affect_internal_real_mods, remaining) = u8::try_parse(remaining)?;
         let (internal_real_mods, remaining) = u8::try_parse(remaining)?;
@@ -7825,9 +7827,7 @@ impl<'input> SetControlsRequest<'input> {
         let (access_x_timeout_options_values, remaining) = u16::try_parse(remaining)?;
         let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let per_key_repeat = <&[u8; 32]>::try_from(per_key_repeat).unwrap();
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetControlsRequest {
             device_spec,
             affect_internal_real_mods,
@@ -8023,7 +8023,9 @@ impl GetMapRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_MAP_REQUEST))?;
+        if header.minor_opcode != GET_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (full, remaining) = u16::try_parse(remaining)?;
         let (partial, remaining) = u16::try_parse(remaining)?;
@@ -8043,9 +8045,7 @@ impl GetMapRequest {
         let (first_v_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetMapRequest {
             device_spec,
             full,
@@ -8659,7 +8659,9 @@ impl<'input> SetMapRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_MAP_REQUEST))?;
+        if header.minor_opcode != SET_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (present, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u16::try_parse(remaining)?;
@@ -8687,9 +8689,7 @@ impl<'input> SetMapRequest<'input> {
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let (values, remaining) = SetMapAux::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetMapRequest {
             device_spec,
             flags,
@@ -8807,15 +8807,15 @@ impl GetCompatMapRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_COMPAT_MAP_REQUEST))?;
+        if header.minor_opcode != GET_COMPAT_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (groups, remaining) = u8::try_parse(remaining)?;
         let (get_all_si, remaining) = bool::try_parse(remaining)?;
         let (first_si, remaining) = u16::try_parse(remaining)?;
         let (n_si, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetCompatMapRequest {
             device_spec,
             groups,
@@ -8956,7 +8956,9 @@ impl<'input> SetCompatMapRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_COMPAT_MAP_REQUEST))?;
+        if header.minor_opcode != SET_COMPAT_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (recompute_actions, remaining) = bool::try_parse(remaining)?;
@@ -8967,9 +8969,7 @@ impl<'input> SetCompatMapRequest<'input> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (si, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si.try_into().or(Err(ParseError::ParseError))?)?;
         let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetCompatMapRequest {
             device_spec,
             recompute_actions,
@@ -9035,12 +9035,12 @@ impl GetIndicatorStateRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_INDICATOR_STATE_REQUEST))?;
+        if header.minor_opcode != GET_INDICATOR_STATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetIndicatorStateRequest {
             device_spec,
         })
@@ -9125,13 +9125,13 @@ impl GetIndicatorMapRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_INDICATOR_MAP_REQUEST))?;
+        if header.minor_opcode != GET_INDICATOR_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (which, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetIndicatorMapRequest {
             device_spec,
             which,
@@ -9230,14 +9230,14 @@ impl<'input> SetIndicatorMapRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_INDICATOR_MAP_REQUEST))?;
+        if header.minor_opcode != SET_INDICATOR_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (which, remaining) = u32::try_parse(remaining)?;
         let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetIndicatorMapRequest {
             device_spec,
             which,
@@ -9307,16 +9307,16 @@ impl GetNamedIndicatorRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_NAMED_INDICATOR_REQUEST))?;
+        if header.minor_opcode != GET_NAMED_INDICATOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
         let led_class = led_class.try_into()?;
         let (led_id, remaining) = IDSpec::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (indicator, remaining) = xproto::Atom::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetNamedIndicatorRequest {
             device_spec,
             led_class,
@@ -9481,7 +9481,9 @@ impl SetNamedIndicatorRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_NAMED_INDICATOR_REQUEST))?;
+        if header.minor_opcode != SET_NAMED_INDICATOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
         let led_class = led_class.try_into()?;
@@ -9500,9 +9502,7 @@ impl SetNamedIndicatorRequest {
         let (map_real_mods, remaining) = u8::try_parse(remaining)?;
         let (map_vmods, remaining) = u16::try_parse(remaining)?;
         let (map_ctrls, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetNamedIndicatorRequest {
             device_spec,
             led_class,
@@ -9604,13 +9604,13 @@ impl GetNamesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_NAMES_REQUEST))?;
+        if header.minor_opcode != GET_NAMES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (which, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetNamesRequest {
             device_spec,
             which,
@@ -10280,7 +10280,9 @@ impl<'input> SetNamesRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_NAMES_REQUEST))?;
+        if header.minor_opcode != SET_NAMES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let (which, remaining) = u32::try_parse(remaining)?;
@@ -10297,9 +10299,7 @@ impl<'input> SetNamesRequest<'input> {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (total_kt_level_names, remaining) = u16::try_parse(remaining)?;
         let (values, remaining) = SetNamesAux::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetNamesRequest {
             device_spec,
             virtual_mods,
@@ -10411,7 +10411,9 @@ impl PerClientFlagsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PER_CLIENT_FLAGS_REQUEST))?;
+        if header.minor_opcode != PER_CLIENT_FLAGS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (change, remaining) = u32::try_parse(remaining)?;
@@ -10419,9 +10421,7 @@ impl PerClientFlagsRequest {
         let (ctrls_to_change, remaining) = u32::try_parse(remaining)?;
         let (auto_ctrls, remaining) = u32::try_parse(remaining)?;
         let (auto_ctrls_values, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PerClientFlagsRequest {
             device_spec,
             change,
@@ -10528,12 +10528,12 @@ impl ListComponentsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(LIST_COMPONENTS_REQUEST))?;
+        if header.minor_opcode != LIST_COMPONENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (max_names, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ListComponentsRequest {
             device_spec,
             max_names,
@@ -10722,15 +10722,15 @@ impl GetKbdByNameRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_KBD_BY_NAME_REQUEST))?;
+        if header.minor_opcode != GET_KBD_BY_NAME_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (need, remaining) = u16::try_parse(remaining)?;
         let (want, remaining) = u16::try_parse(remaining)?;
         let (load, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetKbdByNameRequest {
             device_spec,
             need,
@@ -11451,7 +11451,9 @@ impl GetDeviceInfoRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_INFO_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (wanted, remaining) = u16::try_parse(remaining)?;
         let (all_buttons, remaining) = bool::try_parse(remaining)?;
@@ -11461,9 +11463,7 @@ impl GetDeviceInfoRequest {
         let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
         let led_class = led_class.try_into()?;
         let (led_id, remaining) = IDSpec::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDeviceInfoRequest {
             device_spec,
             wanted,
@@ -11654,7 +11654,9 @@ impl<'input> SetDeviceInfoRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_DEVICE_INFO_REQUEST))?;
+        if header.minor_opcode != SET_DEVICE_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (first_btn, remaining) = u8::try_parse(remaining)?;
         let (n_btns, remaining) = u8::try_parse(remaining)?;
@@ -11662,9 +11664,7 @@ impl<'input> SetDeviceInfoRequest<'input> {
         let (n_device_led_f_bs, remaining) = u16::try_parse(remaining)?;
         let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns.try_into().or(Err(ParseError::ParseError))?)?;
         let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetDeviceInfoRequest {
             device_spec,
             first_btn,
@@ -11754,7 +11754,9 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_DEBUGGING_FLAGS_REQUEST))?;
+        if header.minor_opcode != SET_DEBUGGING_FLAGS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (msg_length, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (affect_flags, remaining) = u32::try_parse(remaining)?;
@@ -11762,9 +11764,7 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
         let (ctrls, remaining) = u32::try_parse(remaining)?;
         let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, msg_length.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetDebuggingFlagsRequest {
             affect_flags,
             flags,

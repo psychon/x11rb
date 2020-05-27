@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -153,7 +153,10 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(QueryVersionRequest
         )
     }
@@ -249,14 +252,14 @@ impl AttachRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(ATTACH_REQUEST))?;
+        if header.minor_opcode != ATTACH_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (shmseg, remaining) = Seg::try_parse(value)?;
         let (shmid, remaining) = u32::try_parse(remaining)?;
         let (read_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(AttachRequest {
             shmseg,
             shmid,
@@ -312,11 +315,11 @@ impl DetachRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DETACH_REQUEST))?;
+        if header.minor_opcode != DETACH_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (shmseg, remaining) = Seg::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DetachRequest {
             shmseg,
         })
@@ -428,7 +431,9 @@ impl PutImageRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PUT_IMAGE_REQUEST))?;
+        if header.minor_opcode != PUT_IMAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
         let (total_width, remaining) = u16::try_parse(remaining)?;
@@ -445,9 +450,7 @@ impl PutImageRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PutImageRequest {
             drawable,
             gc,
@@ -567,7 +570,9 @@ impl GetImageRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_IMAGE_REQUEST))?;
+        if header.minor_opcode != GET_IMAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
@@ -578,9 +583,7 @@ impl GetImageRequest {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetImageRequest {
             drawable,
             x,
@@ -708,7 +711,9 @@ impl CreatePixmapRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_PIXMAP_REQUEST))?;
+        if header.minor_opcode != CREATE_PIXMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (pid, remaining) = xproto::Pixmap::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -717,9 +722,7 @@ impl CreatePixmapRequest {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreatePixmapRequest {
             pid,
             drawable,
@@ -790,15 +793,15 @@ impl AttachFdRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(ATTACH_FD_REQUEST))?;
+        if header.minor_opcode != ATTACH_FD_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (shmseg, remaining) = Seg::try_parse(value)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let shm_fd = fds.remove(0);
         let (read_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(AttachFdRequest {
             shmseg,
             shm_fd,
@@ -868,14 +871,14 @@ impl CreateSegmentRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_SEGMENT_REQUEST))?;
+        if header.minor_opcode != CREATE_SEGMENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (shmseg, remaining) = Seg::try_parse(value)?;
         let (size, remaining) = u32::try_parse(remaining)?;
         let (read_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateSegmentRequest {
             shmseg,
             size,

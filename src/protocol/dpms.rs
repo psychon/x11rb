@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -70,12 +70,12 @@ impl GetVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_VERSION_REQUEST))?;
+        if header.minor_opcode != GET_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (client_major_version, remaining) = u16::try_parse(value)?;
         let (client_minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetVersionRequest {
             client_major_version,
             client_minor_version,
@@ -149,7 +149,10 @@ impl CapableRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CAPABLE_REQUEST))?;
+        if header.minor_opcode != CAPABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(CapableRequest
         )
     }
@@ -217,7 +220,10 @@ impl GetTimeoutsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_TIMEOUTS_REQUEST))?;
+        if header.minor_opcode != GET_TIMEOUTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(GetTimeoutsRequest
         )
     }
@@ -304,13 +310,13 @@ impl SetTimeoutsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_TIMEOUTS_REQUEST))?;
+        if header.minor_opcode != SET_TIMEOUTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (standby_timeout, remaining) = u16::try_parse(value)?;
         let (suspend_timeout, remaining) = u16::try_parse(remaining)?;
         let (off_timeout, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetTimeoutsRequest {
             standby_timeout,
             suspend_timeout,
@@ -359,7 +365,10 @@ impl EnableRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(ENABLE_REQUEST))?;
+        if header.minor_opcode != ENABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(EnableRequest
         )
     }
@@ -401,7 +410,10 @@ impl DisableRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DISABLE_REQUEST))?;
+        if header.minor_opcode != DISABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(DisableRequest
         )
     }
@@ -518,12 +530,12 @@ impl ForceLevelRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(FORCE_LEVEL_REQUEST))?;
+        if header.minor_opcode != FORCE_LEVEL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (power_level, remaining) = u16::try_parse(value)?;
         let power_level = power_level.try_into()?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ForceLevelRequest {
             power_level,
         })
@@ -568,7 +580,10 @@ impl InfoRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(INFO_REQUEST))?;
+        if header.minor_opcode != INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(InfoRequest
         )
     }

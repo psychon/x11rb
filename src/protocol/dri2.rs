@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -410,12 +410,12 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryVersionRequest {
             major_version,
             minor_version,
@@ -502,13 +502,13 @@ impl ConnectRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CONNECT_REQUEST))?;
+        if header.minor_opcode != CONNECT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (driver_type, remaining) = u32::try_parse(remaining)?;
         let driver_type = driver_type.try_into()?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ConnectRequest {
             window,
             driver_type,
@@ -631,12 +631,12 @@ impl AuthenticateRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(AUTHENTICATE_REQUEST))?;
+        if header.minor_opcode != AUTHENTICATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (magic, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(AuthenticateRequest {
             window,
             magic,
@@ -715,11 +715,11 @@ impl CreateDrawableRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_DRAWABLE_REQUEST))?;
+        if header.minor_opcode != CREATE_DRAWABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateDrawableRequest {
             drawable,
         })
@@ -771,11 +771,11 @@ impl DestroyDrawableRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DESTROY_DRAWABLE_REQUEST))?;
+        if header.minor_opcode != DESTROY_DRAWABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DestroyDrawableRequest {
             drawable,
         })
@@ -838,7 +838,9 @@ impl<'input> GetBuffersRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_BUFFERS_REQUEST))?;
+        if header.minor_opcode != GET_BUFFERS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (count, remaining) = u32::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -849,9 +851,7 @@ impl<'input> GetBuffersRequest<'input> {
             remaining = new_remaining;
             attachments.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetBuffersRequest {
             drawable,
             count,
@@ -971,14 +971,14 @@ impl CopyRegionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(COPY_REGION_REQUEST))?;
+        if header.minor_opcode != COPY_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (region, remaining) = u32::try_parse(remaining)?;
         let (dest, remaining) = u32::try_parse(remaining)?;
         let (src, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CopyRegionRequest {
             drawable,
             region,
@@ -1070,7 +1070,9 @@ impl<'input> GetBuffersWithFormatRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_BUFFERS_WITH_FORMAT_REQUEST))?;
+        if header.minor_opcode != GET_BUFFERS_WITH_FORMAT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (count, remaining) = u32::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -1081,9 +1083,7 @@ impl<'input> GetBuffersWithFormatRequest<'input> {
             remaining = new_remaining;
             attachments.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetBuffersWithFormatRequest {
             drawable,
             count,
@@ -1221,7 +1221,9 @@ impl SwapBuffersRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SWAP_BUFFERS_REQUEST))?;
+        if header.minor_opcode != SWAP_BUFFERS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (target_msc_hi, remaining) = u32::try_parse(remaining)?;
         let (target_msc_lo, remaining) = u32::try_parse(remaining)?;
@@ -1229,9 +1231,7 @@ impl SwapBuffersRequest {
         let (divisor_lo, remaining) = u32::try_parse(remaining)?;
         let (remainder_hi, remaining) = u32::try_parse(remaining)?;
         let (remainder_lo, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SwapBuffersRequest {
             drawable,
             target_msc_hi,
@@ -1322,11 +1322,11 @@ impl GetMSCRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_MSC_REQUEST))?;
+        if header.minor_opcode != GET_MSC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetMSCRequest {
             drawable,
         })
@@ -1449,7 +1449,9 @@ impl WaitMSCRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(WAIT_MSC_REQUEST))?;
+        if header.minor_opcode != WAIT_MSC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (target_msc_hi, remaining) = u32::try_parse(remaining)?;
         let (target_msc_lo, remaining) = u32::try_parse(remaining)?;
@@ -1457,9 +1459,7 @@ impl WaitMSCRequest {
         let (divisor_lo, remaining) = u32::try_parse(remaining)?;
         let (remainder_hi, remaining) = u32::try_parse(remaining)?;
         let (remainder_lo, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(WaitMSCRequest {
             drawable,
             target_msc_hi,
@@ -1570,13 +1570,13 @@ impl WaitSBCRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(WAIT_SBC_REQUEST))?;
+        if header.minor_opcode != WAIT_SBC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (target_sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (target_sbc_lo, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(WaitSBCRequest {
             drawable,
             target_sbc_hi,
@@ -1673,12 +1673,12 @@ impl SwapIntervalRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SWAP_INTERVAL_REQUEST))?;
+        if header.minor_opcode != SWAP_INTERVAL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (interval, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SwapIntervalRequest {
             drawable,
             interval,
@@ -1738,12 +1738,12 @@ impl GetParamRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_PARAM_REQUEST))?;
+        if header.minor_opcode != GET_PARAM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (param, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetParamRequest {
             drawable,
             param,

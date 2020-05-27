@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -1574,7 +1574,10 @@ impl QueryExtensionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_EXTENSION_REQUEST))?;
+        if header.minor_opcode != QUERY_EXTENSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(QueryExtensionRequest
         )
     }
@@ -1650,11 +1653,11 @@ impl QueryAdaptorsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_ADAPTORS_REQUEST))?;
+        if header.minor_opcode != QUERY_ADAPTORS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryAdaptorsRequest {
             window,
         })
@@ -1748,11 +1751,11 @@ impl QueryEncodingsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_ENCODINGS_REQUEST))?;
+        if header.minor_opcode != QUERY_ENCODINGS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryEncodingsRequest {
             port,
         })
@@ -1852,12 +1855,12 @@ impl GrabPortRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GRAB_PORT_REQUEST))?;
+        if header.minor_opcode != GRAB_PORT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GrabPortRequest {
             port,
             time,
@@ -1944,12 +1947,12 @@ impl UngrabPortRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(UNGRAB_PORT_REQUEST))?;
+        if header.minor_opcode != UNGRAB_PORT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(UngrabPortRequest {
             port,
             time,
@@ -2049,7 +2052,9 @@ impl PutVideoRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PUT_VIDEO_REQUEST))?;
+        if header.minor_opcode != PUT_VIDEO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
@@ -2061,9 +2066,7 @@ impl PutVideoRequest {
         let (drw_y, remaining) = i16::try_parse(remaining)?;
         let (drw_w, remaining) = u16::try_parse(remaining)?;
         let (drw_h, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PutVideoRequest {
             port,
             drawable,
@@ -2179,7 +2182,9 @@ impl PutStillRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PUT_STILL_REQUEST))?;
+        if header.minor_opcode != PUT_STILL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
@@ -2191,9 +2196,7 @@ impl PutStillRequest {
         let (drw_y, remaining) = i16::try_parse(remaining)?;
         let (drw_w, remaining) = u16::try_parse(remaining)?;
         let (drw_h, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PutStillRequest {
             port,
             drawable,
@@ -2309,7 +2312,9 @@ impl GetVideoRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_VIDEO_REQUEST))?;
+        if header.minor_opcode != GET_VIDEO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
@@ -2321,9 +2326,7 @@ impl GetVideoRequest {
         let (drw_y, remaining) = i16::try_parse(remaining)?;
         let (drw_w, remaining) = u16::try_parse(remaining)?;
         let (drw_h, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetVideoRequest {
             port,
             drawable,
@@ -2439,7 +2442,9 @@ impl GetStillRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_STILL_REQUEST))?;
+        if header.minor_opcode != GET_STILL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
@@ -2451,9 +2456,7 @@ impl GetStillRequest {
         let (drw_y, remaining) = i16::try_parse(remaining)?;
         let (drw_w, remaining) = u16::try_parse(remaining)?;
         let (drw_h, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetStillRequest {
             port,
             drawable,
@@ -2531,12 +2534,12 @@ impl StopVideoRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(STOP_VIDEO_REQUEST))?;
+        if header.minor_opcode != STOP_VIDEO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(StopVideoRequest {
             port,
             drawable,
@@ -2596,13 +2599,13 @@ impl SelectVideoNotifyRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SELECT_VIDEO_NOTIFY_REQUEST))?;
+        if header.minor_opcode != SELECT_VIDEO_NOTIFY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (onoff, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SelectVideoNotifyRequest {
             drawable,
             onoff,
@@ -2662,13 +2665,13 @@ impl SelectPortNotifyRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SELECT_PORT_NOTIFY_REQUEST))?;
+        if header.minor_opcode != SELECT_PORT_NOTIFY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (onoff, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SelectPortNotifyRequest {
             port,
             onoff,
@@ -2744,7 +2747,9 @@ impl QueryBestSizeRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_BEST_SIZE_REQUEST))?;
+        if header.minor_opcode != QUERY_BEST_SIZE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (vid_w, remaining) = u16::try_parse(remaining)?;
         let (vid_h, remaining) = u16::try_parse(remaining)?;
@@ -2752,9 +2757,7 @@ impl QueryBestSizeRequest {
         let (drw_h, remaining) = u16::try_parse(remaining)?;
         let (motion, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryBestSizeRequest {
             port,
             vid_w,
@@ -2855,13 +2858,13 @@ impl SetPortAttributeRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_PORT_ATTRIBUTE_REQUEST))?;
+        if header.minor_opcode != SET_PORT_ATTRIBUTE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
         let (value, remaining) = i32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetPortAttributeRequest {
             port,
             attribute,
@@ -2923,12 +2926,12 @@ impl GetPortAttributeRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_PORT_ATTRIBUTE_REQUEST))?;
+        if header.minor_opcode != GET_PORT_ATTRIBUTE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetPortAttributeRequest {
             port,
             attribute,
@@ -3007,11 +3010,11 @@ impl QueryPortAttributesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_PORT_ATTRIBUTES_REQUEST))?;
+        if header.minor_opcode != QUERY_PORT_ATTRIBUTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryPortAttributesRequest {
             port,
         })
@@ -3107,11 +3110,11 @@ impl ListImageFormatsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(LIST_IMAGE_FORMATS_REQUEST))?;
+        if header.minor_opcode != LIST_IMAGE_FORMATS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ListImageFormatsRequest {
             port,
         })
@@ -3219,14 +3222,14 @@ impl QueryImageAttributesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_IMAGE_ATTRIBUTES_REQUEST))?;
+        if header.minor_opcode != QUERY_IMAGE_ATTRIBUTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (id, remaining) = u32::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryImageAttributesRequest {
             port,
             id,
@@ -3396,7 +3399,9 @@ impl<'input> PutImageRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PUT_IMAGE_REQUEST))?;
+        if header.minor_opcode != PUT_IMAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
@@ -3412,9 +3417,7 @@ impl<'input> PutImageRequest<'input> {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (data, remaining) = remaining.split_at(remaining.len());
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PutImageRequest {
             port,
             drawable,
@@ -3570,7 +3573,9 @@ impl ShmPutImageRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SHM_PUT_IMAGE_REQUEST))?;
+        if header.minor_opcode != SHM_PUT_IMAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
@@ -3589,9 +3594,7 @@ impl ShmPutImageRequest {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (send_event, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ShmPutImageRequest {
             port,
             drawable,

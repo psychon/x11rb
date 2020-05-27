@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -467,12 +467,12 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (client_major, remaining) = u8::try_parse(value)?;
         let (client_minor, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryVersionRequest {
             client_major,
             client_minor,
@@ -546,7 +546,10 @@ impl QueryClientsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_CLIENTS_REQUEST))?;
+        if header.minor_opcode != QUERY_CLIENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(QueryClientsRequest
         )
     }
@@ -637,11 +640,11 @@ impl QueryClientResourcesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_CLIENT_RESOURCES_REQUEST))?;
+        if header.minor_opcode != QUERY_CLIENT_RESOURCES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (xid, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryClientResourcesRequest {
             xid,
         })
@@ -735,11 +738,11 @@ impl QueryClientPixmapBytesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_CLIENT_PIXMAP_BYTES_REQUEST))?;
+        if header.minor_opcode != QUERY_CLIENT_PIXMAP_BYTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (xid, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryClientPixmapBytesRequest {
             xid,
         })
@@ -823,12 +826,12 @@ impl<'input> QueryClientIdsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_CLIENT_IDS_REQUEST))?;
+        if header.minor_opcode != QUERY_CLIENT_IDS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (num_specs, remaining) = u32::try_parse(value)?;
         let (specs, remaining) = crate::x11_utils::parse_list::<ClientIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryClientIdsRequest {
             specs: Cow::Owned(specs),
         })
@@ -933,13 +936,13 @@ impl<'input> QueryResourceBytesRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_RESOURCE_BYTES_REQUEST))?;
+        if header.minor_opcode != QUERY_RESOURCE_BYTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (client, remaining) = u32::try_parse(value)?;
         let (num_specs, remaining) = u32::try_parse(remaining)?;
         let (specs, remaining) = crate::x11_utils::parse_list::<ResourceIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryResourceBytesRequest {
             client,
             specs: Cow::Owned(specs),

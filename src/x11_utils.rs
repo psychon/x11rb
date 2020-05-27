@@ -51,33 +51,6 @@ pub struct RequestHeader {
     pub remaining_length: u32,
 }
 
-/// Validates that the header and value lengths match and that the major (for xproto requests)
-/// or minor (for extension requests) match what is expected. For extension requests it is the
-/// responsibility of the try_parse_request caller to validate the major opcode.
-pub(crate) fn validate_request_pieces(
-    header: RequestHeader,
-    value: &[u8],
-    expected_major_opcode: Option<u8>,
-    expected_minor_opcode: Option<u8>,
-) -> Result<(), ParseError> {
-    if header.remaining_length as usize * 4 != value.len() {
-        return Err(ParseError::ParseError);
-    }
-    if expected_major_opcode
-        .map(|major| major != header.major_opcode)
-        .unwrap_or(false)
-    {
-        return Err(ParseError::ParseError);
-    }
-    if expected_minor_opcode
-        .map(|minor| minor != header.minor_opcode)
-        .unwrap_or(false)
-    {
-        return Err(ParseError::ParseError);
-    }
-    Ok(())
-}
-
 /// A type implementing this trait can be serialized into X11 raw bytes.
 pub trait Serialize {
     /// The value returned by `serialize`.
@@ -290,15 +263,6 @@ pub fn parse_u8_list(data: &[u8], list_length: usize) -> Result<(&[u8], &[u8]), 
     } else {
         Ok(data.split_at(list_length))
     }
-}
-
-/// Returns a ParseError if the input slice is not finished.
-pub fn check_exhausted(data: &[u8]) -> Result<(), ParseError> {
-    if data.is_empty() {
-        return Ok(());
-    }
-
-    Err(ParseError::ParseError)
 }
 
 impl<T: Serialize> Serialize for [T] {

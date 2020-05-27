@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -1851,12 +1851,12 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (client_major_version, remaining) = u32::try_parse(value)?;
         let (client_minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryVersionRequest {
             client_major_version,
             client_minor_version,
@@ -1931,7 +1931,10 @@ impl QueryPictFormatsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_PICT_FORMATS_REQUEST))?;
+        if header.minor_opcode != QUERY_PICT_FORMATS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(QueryPictFormatsRequest
         )
     }
@@ -2066,11 +2069,11 @@ impl QueryPictIndexValuesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_PICT_INDEX_VALUES_REQUEST))?;
+        if header.minor_opcode != QUERY_PICT_INDEX_VALUES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (format, remaining) = Pictformat::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryPictIndexValuesRequest {
             format,
         })
@@ -2486,15 +2489,15 @@ impl<'input> CreatePictureRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_PICTURE_REQUEST))?;
+        if header.minor_opcode != CREATE_PICTURE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (pid, remaining) = Picture::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (format, remaining) = Pictformat::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = CreatePictureAux::try_parse(remaining, value_mask)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreatePictureRequest {
             pid,
             drawable,
@@ -2862,13 +2865,13 @@ impl<'input> ChangePictureRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CHANGE_PICTURE_REQUEST))?;
+        if header.minor_opcode != CHANGE_PICTURE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = ChangePictureAux::try_parse(remaining, value_mask)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ChangePictureRequest {
             picture,
             value_list: Cow::Owned(value_list),
@@ -2935,7 +2938,9 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_PICTURE_CLIP_RECTANGLES_REQUEST))?;
+        if header.minor_opcode != SET_PICTURE_CLIP_RECTANGLES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (clip_x_origin, remaining) = i16::try_parse(remaining)?;
         let (clip_y_origin, remaining) = i16::try_parse(remaining)?;
@@ -2947,9 +2952,7 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetPictureClipRectanglesRequest {
             picture,
             clip_x_origin,
@@ -3007,11 +3010,11 @@ impl FreePictureRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(FREE_PICTURE_REQUEST))?;
+        if header.minor_opcode != FREE_PICTURE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(FreePictureRequest {
             picture,
         })
@@ -3113,7 +3116,9 @@ impl CompositeRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(COMPOSITE_REQUEST))?;
+        if header.minor_opcode != COMPOSITE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -3128,9 +3133,7 @@ impl CompositeRequest {
         let (dst_y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CompositeRequest {
             op,
             src,
@@ -3237,7 +3240,9 @@ impl<'input> TrapezoidsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(TRAPEZOIDS_REQUEST))?;
+        if header.minor_opcode != TRAPEZOIDS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -3254,9 +3259,7 @@ impl<'input> TrapezoidsRequest<'input> {
             remaining = new_remaining;
             traps.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(TrapezoidsRequest {
             op,
             src,
@@ -3351,7 +3354,9 @@ impl<'input> TrianglesRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(TRIANGLES_REQUEST))?;
+        if header.minor_opcode != TRIANGLES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -3368,9 +3373,7 @@ impl<'input> TrianglesRequest<'input> {
             remaining = new_remaining;
             triangles.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(TrianglesRequest {
             op,
             src,
@@ -3465,7 +3468,9 @@ impl<'input> TriStripRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(TRI_STRIP_REQUEST))?;
+        if header.minor_opcode != TRI_STRIP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -3482,9 +3487,7 @@ impl<'input> TriStripRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(TriStripRequest {
             op,
             src,
@@ -3579,7 +3582,9 @@ impl<'input> TriFanRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(TRI_FAN_REQUEST))?;
+        if header.minor_opcode != TRI_FAN_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -3596,9 +3601,7 @@ impl<'input> TriFanRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(TriFanRequest {
             op,
             src,
@@ -3668,12 +3671,12 @@ impl CreateGlyphSetRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_GLYPH_SET_REQUEST))?;
+        if header.minor_opcode != CREATE_GLYPH_SET_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (gsid, remaining) = Glyphset::try_parse(value)?;
         let (format, remaining) = Pictformat::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateGlyphSetRequest {
             gsid,
             format,
@@ -3733,12 +3736,12 @@ impl ReferenceGlyphSetRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(REFERENCE_GLYPH_SET_REQUEST))?;
+        if header.minor_opcode != REFERENCE_GLYPH_SET_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (gsid, remaining) = Glyphset::try_parse(value)?;
         let (existing, remaining) = Glyphset::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ReferenceGlyphSetRequest {
             gsid,
             existing,
@@ -3792,11 +3795,11 @@ impl FreeGlyphSetRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(FREE_GLYPH_SET_REQUEST))?;
+        if header.minor_opcode != FREE_GLYPH_SET_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (glyphset, remaining) = Glyphset::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(FreeGlyphSetRequest {
             glyphset,
         })
@@ -3865,15 +3868,15 @@ impl<'input> AddGlyphsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(ADD_GLYPHS_REQUEST))?;
+        if header.minor_opcode != ADD_GLYPHS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (glyphset, remaining) = Glyphset::try_parse(value)?;
         let (glyphs_len, remaining) = u32::try_parse(remaining)?;
         let (glyphids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, glyphs_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (glyphs, remaining) = crate::x11_utils::parse_list::<Glyphinfo>(remaining, glyphs_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (data, remaining) = remaining.split_at(remaining.len());
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(AddGlyphsRequest {
             glyphset,
             glyphids: Cow::Owned(glyphids),
@@ -3936,7 +3939,9 @@ impl<'input> FreeGlyphsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(FREE_GLYPHS_REQUEST))?;
+        if header.minor_opcode != FREE_GLYPHS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (glyphset, remaining) = Glyphset::try_parse(value)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
@@ -3946,9 +3951,7 @@ impl<'input> FreeGlyphsRequest<'input> {
             remaining = new_remaining;
             glyphs.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(FreeGlyphsRequest {
             glyphset,
             glyphs: Cow::Owned(glyphs),
@@ -4038,7 +4041,9 @@ impl<'input> CompositeGlyphs8Request<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(COMPOSITE_GLYPHS8_REQUEST))?;
+        if header.minor_opcode != COMPOSITE_GLYPHS8_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -4049,9 +4054,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
         let (src_x, remaining) = i16::try_parse(remaining)?;
         let (src_y, remaining) = i16::try_parse(remaining)?;
         let (glyphcmds, remaining) = remaining.split_at(remaining.len());
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CompositeGlyphs8Request {
             op,
             src,
@@ -4153,7 +4156,9 @@ impl<'input> CompositeGlyphs16Request<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(COMPOSITE_GLYPHS16_REQUEST))?;
+        if header.minor_opcode != COMPOSITE_GLYPHS16_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -4164,9 +4169,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
         let (src_x, remaining) = i16::try_parse(remaining)?;
         let (src_y, remaining) = i16::try_parse(remaining)?;
         let (glyphcmds, remaining) = remaining.split_at(remaining.len());
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CompositeGlyphs16Request {
             op,
             src,
@@ -4268,7 +4271,9 @@ impl<'input> CompositeGlyphs32Request<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(COMPOSITE_GLYPHS32_REQUEST))?;
+        if header.minor_opcode != COMPOSITE_GLYPHS32_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -4279,9 +4284,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
         let (src_x, remaining) = i16::try_parse(remaining)?;
         let (src_y, remaining) = i16::try_parse(remaining)?;
         let (glyphcmds, remaining) = remaining.split_at(remaining.len());
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CompositeGlyphs32Request {
             op,
             src,
@@ -4368,7 +4371,9 @@ impl<'input> FillRectanglesRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(FILL_RECTANGLES_REQUEST))?;
+        if header.minor_opcode != FILL_RECTANGLES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -4382,9 +4387,7 @@ impl<'input> FillRectanglesRequest<'input> {
             remaining = new_remaining;
             rects.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(FillRectanglesRequest {
             op,
             dst,
@@ -4456,14 +4459,14 @@ impl CreateCursorRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_CURSOR_REQUEST))?;
+        if header.minor_opcode != CREATE_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (cid, remaining) = xproto::Cursor::try_parse(value)?;
         let (source, remaining) = Picture::try_parse(remaining)?;
         let (x, remaining) = u16::try_parse(remaining)?;
         let (y, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateCursorRequest {
             cid,
             source,
@@ -4657,12 +4660,12 @@ impl SetPictureTransformRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_PICTURE_TRANSFORM_REQUEST))?;
+        if header.minor_opcode != SET_PICTURE_TRANSFORM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (transform, remaining) = Transform::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetPictureTransformRequest {
             picture,
             transform,
@@ -4716,11 +4719,11 @@ impl QueryFiltersRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_FILTERS_REQUEST))?;
+        if header.minor_opcode != QUERY_FILTERS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryFiltersRequest {
             drawable,
         })
@@ -4845,7 +4848,9 @@ impl<'input> SetPictureFilterRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_PICTURE_FILTER_REQUEST))?;
+        if header.minor_opcode != SET_PICTURE_FILTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (filter_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -4862,9 +4867,7 @@ impl<'input> SetPictureFilterRequest<'input> {
             remaining = new_remaining;
             values.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetPictureFilterRequest {
             picture,
             filter,
@@ -4967,7 +4970,9 @@ impl<'input> CreateAnimCursorRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_ANIM_CURSOR_REQUEST))?;
+        if header.minor_opcode != CREATE_ANIM_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (cid, remaining) = xproto::Cursor::try_parse(value)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
@@ -4977,9 +4982,7 @@ impl<'input> CreateAnimCursorRequest<'input> {
             remaining = new_remaining;
             cursors.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateAnimCursorRequest {
             cid,
             cursors: Cow::Owned(cursors),
@@ -5154,7 +5157,9 @@ impl<'input> AddTrapsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(ADD_TRAPS_REQUEST))?;
+        if header.minor_opcode != ADD_TRAPS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (x_off, remaining) = i16::try_parse(remaining)?;
         let (y_off, remaining) = i16::try_parse(remaining)?;
@@ -5166,9 +5171,7 @@ impl<'input> AddTrapsRequest<'input> {
             remaining = new_remaining;
             traps.push(v);
         }
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(AddTrapsRequest {
             picture,
             x_off,
@@ -5236,12 +5239,12 @@ impl CreateSolidFillRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_SOLID_FILL_REQUEST))?;
+        if header.minor_opcode != CREATE_SOLID_FILL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (color, remaining) = Color::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateSolidFillRequest {
             picture,
             color,
@@ -5330,16 +5333,16 @@ impl<'input> CreateLinearGradientRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_LINEAR_GRADIENT_REQUEST))?;
+        if header.minor_opcode != CREATE_LINEAR_GRADIENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (p1, remaining) = Pointfix::try_parse(remaining)?;
         let (p2, remaining) = Pointfix::try_parse(remaining)?;
         let (num_stops, remaining) = u32::try_parse(remaining)?;
         let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
         let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateLinearGradientRequest {
             picture,
             p1,
@@ -5446,7 +5449,9 @@ impl<'input> CreateRadialGradientRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_RADIAL_GRADIENT_REQUEST))?;
+        if header.minor_opcode != CREATE_RADIAL_GRADIENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (inner, remaining) = Pointfix::try_parse(remaining)?;
         let (outer, remaining) = Pointfix::try_parse(remaining)?;
@@ -5455,9 +5460,7 @@ impl<'input> CreateRadialGradientRequest<'input> {
         let (num_stops, remaining) = u32::try_parse(remaining)?;
         let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
         let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateRadialGradientRequest {
             picture,
             inner,
@@ -5552,16 +5555,16 @@ impl<'input> CreateConicalGradientRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_CONICAL_GRADIENT_REQUEST))?;
+        if header.minor_opcode != CREATE_CONICAL_GRADIENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (center, remaining) = Pointfix::try_parse(remaining)?;
         let (angle, remaining) = Fixed::try_parse(remaining)?;
         let (num_stops, remaining) = u32::try_parse(remaining)?;
         let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
         let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateConicalGradientRequest {
             picture,
             center,

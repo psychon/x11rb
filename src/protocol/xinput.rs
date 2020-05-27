@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -124,13 +124,13 @@ impl<'input> GetExtensionVersionRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_EXTENSION_VERSION_REQUEST))?;
+        if header.minor_opcode != GET_EXTENSION_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetExtensionVersionRequest {
             name,
         })
@@ -984,7 +984,10 @@ impl ListInputDevicesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(LIST_INPUT_DEVICES_REQUEST))?;
+        if header.minor_opcode != LIST_INPUT_DEVICES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(ListInputDevicesRequest
         )
     }
@@ -1124,12 +1127,12 @@ impl OpenDeviceRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(OPEN_DEVICE_REQUEST))?;
+        if header.minor_opcode != OPEN_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(OpenDeviceRequest {
             device_id,
         })
@@ -1229,12 +1232,12 @@ impl CloseDeviceRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CLOSE_DEVICE_REQUEST))?;
+        if header.minor_opcode != CLOSE_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CloseDeviceRequest {
             device_id,
         })
@@ -1288,14 +1291,14 @@ impl SetDeviceModeRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_DEVICE_MODE_REQUEST))?;
+        if header.minor_opcode != SET_DEVICE_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetDeviceModeRequest {
             device_id,
             mode,
@@ -1388,14 +1391,14 @@ impl<'input> SelectExtensionEventRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SELECT_EXTENSION_EVENT_REQUEST))?;
+        if header.minor_opcode != SELECT_EXTENSION_EVENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SelectExtensionEventRequest {
             window,
             classes: Cow::Owned(classes),
@@ -1449,11 +1452,11 @@ impl GetSelectedExtensionEventsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_SELECTED_EXTENSION_EVENTS_REQUEST))?;
+        if header.minor_opcode != GET_SELECTED_EXTENSION_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetSelectedExtensionEventsRequest {
             window,
         })
@@ -1647,16 +1650,16 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST))?;
+        if header.minor_opcode != CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ChangeDeviceDontPropagateListRequest {
             window,
             mode,
@@ -1712,11 +1715,11 @@ impl GetDeviceDontPropagateListRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDeviceDontPropagateListRequest {
             window,
         })
@@ -1851,14 +1854,14 @@ impl GetDeviceMotionEventsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_MOTION_EVENTS_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_MOTION_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (start, remaining) = xproto::Timestamp::try_parse(value)?;
         let (stop, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDeviceMotionEventsRequest {
             start,
             stop,
@@ -1971,12 +1974,12 @@ impl ChangeKeyboardDeviceRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CHANGE_KEYBOARD_DEVICE_REQUEST))?;
+        if header.minor_opcode != CHANGE_KEYBOARD_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ChangeKeyboardDeviceRequest {
             device_id,
         })
@@ -2060,14 +2063,14 @@ impl ChangePointerDeviceRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CHANGE_POINTER_DEVICE_REQUEST))?;
+        if header.minor_opcode != CHANGE_POINTER_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (x_axis, remaining) = u8::try_parse(value)?;
         let (y_axis, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ChangePointerDeviceRequest {
             x_axis,
             y_axis,
@@ -2180,7 +2183,9 @@ impl<'input> GrabDeviceRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GRAB_DEVICE_REQUEST))?;
+        if header.minor_opcode != GRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
@@ -2192,9 +2197,7 @@ impl<'input> GrabDeviceRequest<'input> {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GrabDeviceRequest {
             grab_window,
             time,
@@ -2294,13 +2297,13 @@ impl UngrabDeviceRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(UNGRAB_DEVICE_REQUEST))?;
+        if header.minor_opcode != UNGRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(UngrabDeviceRequest {
             time,
             device_id,
@@ -2448,7 +2451,9 @@ impl<'input> GrabDeviceKeyRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GRAB_DEVICE_KEY_REQUEST))?;
+        if header.minor_opcode != GRAB_DEVICE_KEY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
@@ -2462,9 +2467,7 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GrabDeviceKeyRequest {
             grab_window,
             modifiers,
@@ -2554,15 +2557,15 @@ impl UngrabDeviceKeyRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(UNGRAB_DEVICE_KEY_REQUEST))?;
+        if header.minor_opcode != UNGRAB_DEVICE_KEY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let (modifier_device, remaining) = u8::try_parse(remaining)?;
         let (key, remaining) = u8::try_parse(remaining)?;
         let (grabbed_device, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(UngrabDeviceKeyRequest {
             grab_window,
             modifiers,
@@ -2661,7 +2664,9 @@ impl<'input> GrabDeviceButtonRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GRAB_DEVICE_BUTTON_REQUEST))?;
+        if header.minor_opcode != GRAB_DEVICE_BUTTON_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (grabbed_device, remaining) = u8::try_parse(remaining)?;
         let (modifier_device, remaining) = u8::try_parse(remaining)?;
@@ -2675,9 +2680,7 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GrabDeviceButtonRequest {
             grab_window,
             grabbed_device,
@@ -2767,16 +2770,16 @@ impl UngrabDeviceButtonRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(UNGRAB_DEVICE_BUTTON_REQUEST))?;
+        if header.minor_opcode != UNGRAB_DEVICE_BUTTON_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let (modifier_device, remaining) = u8::try_parse(remaining)?;
         let (button, remaining) = u8::try_parse(remaining)?;
         let (grabbed_device, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(UngrabDeviceButtonRequest {
             grab_window,
             modifiers,
@@ -2924,15 +2927,15 @@ impl AllowDeviceEventsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(ALLOW_DEVICE_EVENTS_REQUEST))?;
+        if header.minor_opcode != ALLOW_DEVICE_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(AllowDeviceEventsRequest {
             time,
             mode,
@@ -2990,12 +2993,12 @@ impl GetDeviceFocusRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_FOCUS_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDeviceFocusRequest {
             device_id,
         })
@@ -3093,16 +3096,16 @@ impl SetDeviceFocusRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_DEVICE_FOCUS_REQUEST))?;
+        if header.minor_opcode != SET_DEVICE_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (focus, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let revert_to = revert_to.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetDeviceFocusRequest {
             focus,
             time,
@@ -4185,12 +4188,12 @@ impl GetFeedbackControlRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_FEEDBACK_CONTROL_REQUEST))?;
+        if header.minor_opcode != GET_FEEDBACK_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetFeedbackControlRequest {
             device_id,
         })
@@ -5205,15 +5208,15 @@ impl ChangeFeedbackControlRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CHANGE_FEEDBACK_CONTROL_REQUEST))?;
+        if header.minor_opcode != CHANGE_FEEDBACK_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (mask, remaining) = u32::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (feedback, remaining) = FeedbackCtl::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ChangeFeedbackControlRequest {
             mask,
             device_id,
@@ -5277,14 +5280,14 @@ impl GetDeviceKeyMappingRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_KEY_MAPPING_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_KEY_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDeviceKeyMappingRequest {
             device_id,
             first_keycode,
@@ -5395,15 +5398,15 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CHANGE_DEVICE_KEY_MAPPING_REQUEST))?;
+        if header.minor_opcode != CHANGE_DEVICE_KEY_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let (keycode_count, remaining) = u8::try_parse(remaining)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ChangeDeviceKeyMappingRequest {
             device_id,
             first_keycode,
@@ -5463,12 +5466,12 @@ impl GetDeviceModifierMappingRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_MODIFIER_MAPPING_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_MODIFIER_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDeviceModifierMappingRequest {
             device_id,
         })
@@ -5572,14 +5575,14 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_DEVICE_MODIFIER_MAPPING_REQUEST))?;
+        if header.minor_opcode != SET_DEVICE_MODIFIER_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetDeviceModifierMappingRequest {
             device_id,
             keymaps,
@@ -5661,12 +5664,12 @@ impl GetDeviceButtonMappingRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_BUTTON_MAPPING_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_BUTTON_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDeviceButtonMappingRequest {
             device_id,
         })
@@ -5773,14 +5776,14 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_DEVICE_BUTTON_MAPPING_REQUEST))?;
+        if header.minor_opcode != SET_DEVICE_BUTTON_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (map_size, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetDeviceButtonMappingRequest {
             device_id,
             map,
@@ -6449,12 +6452,12 @@ impl QueryDeviceStateRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_DEVICE_STATE_REQUEST))?;
+        if header.minor_opcode != QUERY_DEVICE_STATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryDeviceStateRequest {
             device_id,
         })
@@ -6555,14 +6558,14 @@ impl DeviceBellRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DEVICE_BELL_REQUEST))?;
+        if header.minor_opcode != DEVICE_BELL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (feedback_class, remaining) = u8::try_parse(remaining)?;
         let (percent, remaining) = i8::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DeviceBellRequest {
             device_id,
             feedback_id,
@@ -6629,15 +6632,15 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SET_DEVICE_VALUATORS_REQUEST))?;
+        if header.minor_opcode != SET_DEVICE_VALUATORS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SetDeviceValuatorsRequest {
             device_id,
             first_valuator,
@@ -7556,14 +7559,14 @@ impl GetDeviceControlRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_CONTROL_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (control_id, remaining) = u16::try_parse(value)?;
         let control_id = control_id.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDeviceControlRequest {
             control_id,
             device_id,
@@ -8402,15 +8405,15 @@ impl ChangeDeviceControlRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CHANGE_DEVICE_CONTROL_REQUEST))?;
+        if header.minor_opcode != CHANGE_DEVICE_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (control_id, remaining) = u16::try_parse(value)?;
         let control_id = control_id.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (control, remaining) = DeviceCtl::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ChangeDeviceControlRequest {
             control_id,
             device_id,
@@ -8493,12 +8496,12 @@ impl ListDevicePropertiesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(LIST_DEVICE_PROPERTIES_REQUEST))?;
+        if header.minor_opcode != LIST_DEVICE_PROPERTIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ListDevicePropertiesRequest {
             device_id,
         })
@@ -8790,7 +8793,9 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CHANGE_DEVICE_PROPERTY_REQUEST))?;
+        if header.minor_opcode != CHANGE_DEVICE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -8801,9 +8806,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (items, remaining) = ChangeDevicePropertyAux::try_parse(remaining, format, num_items)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ChangeDevicePropertyRequest {
             property,
             type_,
@@ -8871,13 +8874,13 @@ impl DeleteDevicePropertyRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DELETE_DEVICE_PROPERTY_REQUEST))?;
+        if header.minor_opcode != DELETE_DEVICE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DeleteDevicePropertyRequest {
             property,
             device_id,
@@ -8957,7 +8960,9 @@ impl GetDevicePropertyRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_DEVICE_PROPERTY_REQUEST))?;
+        if header.minor_opcode != GET_DEVICE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
@@ -8965,9 +8970,7 @@ impl GetDevicePropertyRequest {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (delete, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetDevicePropertyRequest {
             property,
             type_,
@@ -9315,13 +9318,13 @@ impl XIQueryPointerRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_QUERY_POINTER_REQUEST))?;
+        if header.minor_opcode != XI_QUERY_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIQueryPointerRequest {
             window,
             deviceid,
@@ -9481,7 +9484,9 @@ impl XIWarpPointerRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_WARP_POINTER_REQUEST))?;
+        if header.minor_opcode != XI_WARP_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (src_win, remaining) = xproto::Window::try_parse(value)?;
         let (dst_win, remaining) = xproto::Window::try_parse(remaining)?;
         let (src_x, remaining) = Fp1616::try_parse(remaining)?;
@@ -9492,9 +9497,7 @@ impl XIWarpPointerRequest {
         let (dst_y, remaining) = Fp1616::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIWarpPointerRequest {
             src_win,
             dst_win,
@@ -9576,14 +9579,14 @@ impl XIChangeCursorRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_CHANGE_CURSOR_REQUEST))?;
+        if header.minor_opcode != XI_CHANGE_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIChangeCursorRequest {
             window,
             cursor,
@@ -10325,13 +10328,13 @@ impl<'input> XIChangeHierarchyRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_CHANGE_HIERARCHY_REQUEST))?;
+        if header.minor_opcode != XI_CHANGE_HIERARCHY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (num_changes, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (changes, remaining) = crate::x11_utils::parse_list::<HierarchyChange>(remaining, num_changes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIChangeHierarchyRequest {
             changes: Cow::Owned(changes),
         })
@@ -10389,13 +10392,13 @@ impl XISetClientPointerRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_SET_CLIENT_POINTER_REQUEST))?;
+        if header.minor_opcode != XI_SET_CLIENT_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XISetClientPointerRequest {
             window,
             deviceid,
@@ -10451,11 +10454,11 @@ impl XIGetClientPointerRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_GET_CLIENT_POINTER_REQUEST))?;
+        if header.minor_opcode != XI_GET_CLIENT_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIGetClientPointerRequest {
             window,
         })
@@ -10701,14 +10704,14 @@ impl<'input> XISelectEventsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_SELECT_EVENTS_REQUEST))?;
+        if header.minor_opcode != XI_SELECT_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_mask.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XISelectEventsRequest {
             window,
             masks: Cow::Owned(masks),
@@ -10764,12 +10767,12 @@ impl XIQueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != XI_QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (major_version, remaining) = u16::try_parse(value)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIQueryVersionRequest {
             major_version,
             minor_version,
@@ -12078,12 +12081,12 @@ impl XIQueryDeviceRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_QUERY_DEVICE_REQUEST))?;
+        if header.minor_opcode != XI_QUERY_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIQueryDeviceRequest {
             deviceid,
         })
@@ -12191,14 +12194,14 @@ impl XISetFocusRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_SET_FOCUS_REQUEST))?;
+        if header.minor_opcode != XI_SET_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XISetFocusRequest {
             window,
             time,
@@ -12258,12 +12261,12 @@ impl XIGetFocusRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_GET_FOCUS_REQUEST))?;
+        if header.minor_opcode != XI_GET_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIGetFocusRequest {
             deviceid,
         })
@@ -12448,7 +12451,9 @@ impl<'input> XIGrabDeviceRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_GRAB_DEVICE_REQUEST))?;
+        if header.minor_opcode != XI_GRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
@@ -12462,9 +12467,7 @@ impl<'input> XIGrabDeviceRequest<'input> {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (mask_len, remaining) = u16::try_parse(remaining)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIGrabDeviceRequest {
             window,
             time,
@@ -12567,13 +12570,13 @@ impl XIUngrabDeviceRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_UNGRAB_DEVICE_REQUEST))?;
+        if header.minor_opcode != XI_UNGRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIUngrabDeviceRequest {
             time,
             deviceid,
@@ -12731,7 +12734,9 @@ impl XIAllowEventsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_ALLOW_EVENTS_REQUEST))?;
+        if header.minor_opcode != XI_ALLOW_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (event_mode, remaining) = u8::try_parse(remaining)?;
@@ -12739,9 +12744,7 @@ impl XIAllowEventsRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (touchid, remaining) = u32::try_parse(remaining)?;
         let (grab_window, remaining) = xproto::Window::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIAllowEventsRequest {
             time,
             deviceid,
@@ -13066,7 +13069,9 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_PASSIVE_GRAB_DEVICE_REQUEST))?;
+        if header.minor_opcode != XI_PASSIVE_GRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (grab_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
@@ -13085,9 +13090,7 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIPassiveGrabDeviceRequest {
             time,
             grab_window,
@@ -13230,7 +13233,9 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_PASSIVE_UNGRAB_DEVICE_REQUEST))?;
+        if header.minor_opcode != XI_PASSIVE_UNGRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -13239,9 +13244,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         let grab_type = grab_type.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIPassiveUngrabDeviceRequest {
             grab_window,
             detail,
@@ -13303,12 +13306,12 @@ impl XIListPropertiesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_LIST_PROPERTIES_REQUEST))?;
+        if header.minor_opcode != XI_LIST_PROPERTIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIListPropertiesRequest {
             deviceid,
         })
@@ -13536,7 +13539,9 @@ impl<'input> XIChangePropertyRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_CHANGE_PROPERTY_REQUEST))?;
+        if header.minor_opcode != XI_CHANGE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
@@ -13546,9 +13551,7 @@ impl<'input> XIChangePropertyRequest<'input> {
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (items, remaining) = XIChangePropertyAux::try_parse(remaining, format, num_items)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIChangePropertyRequest {
             deviceid,
             mode,
@@ -13618,13 +13621,13 @@ impl XIDeletePropertyRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_DELETE_PROPERTY_REQUEST))?;
+        if header.minor_opcode != XI_DELETE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIDeletePropertyRequest {
             deviceid,
             property,
@@ -13706,7 +13709,9 @@ impl XIGetPropertyRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_GET_PROPERTY_REQUEST))?;
+        if header.minor_opcode != XI_GET_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let (delete, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -13714,9 +13719,7 @@ impl XIGetPropertyRequest {
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
         let (len, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIGetPropertyRequest {
             deviceid,
             delete,
@@ -13883,11 +13886,11 @@ impl XIGetSelectedEventsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_GET_SELECTED_EVENTS_REQUEST))?;
+        if header.minor_opcode != XI_GET_SELECTED_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIGetSelectedEventsRequest {
             window,
         })
@@ -14038,12 +14041,12 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(XI_BARRIER_RELEASE_POINTER_REQUEST))?;
+        if header.minor_opcode != XI_BARRIER_RELEASE_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (num_barriers, remaining) = u32::try_parse(value)?;
         let (barriers, remaining) = crate::x11_utils::parse_list::<BarrierReleasePointerInfo>(remaining, num_barriers.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(XIBarrierReleasePointerRequest {
             barriers: Cow::Owned(barriers),
         })
@@ -16974,7 +16977,9 @@ impl<'input> SendExtensionEventRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(SEND_EXTENSION_EVENT_REQUEST))?;
+        if header.minor_opcode != SEND_EXTENSION_EVENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (destination, remaining) = xproto::Window::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (propagate, remaining) = bool::try_parse(remaining)?;
@@ -16983,9 +16988,7 @@ impl<'input> SendExtensionEventRequest<'input> {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (events, remaining) = crate::x11_utils::parse_list::<EventForSend>(remaining, num_events.try_into().or(Err(ParseError::ParseError))?)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(SendExtensionEventRequest {
             destination,
             device_id,

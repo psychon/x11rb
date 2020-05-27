@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -154,7 +154,10 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(QueryVersionRequest
         )
     }
@@ -230,11 +233,11 @@ impl ListSurfaceTypesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(LIST_SURFACE_TYPES_REQUEST))?;
+        if header.minor_opcode != LIST_SURFACE_TYPES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port_id, remaining) = xv::Port::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ListSurfaceTypesRequest {
             port_id,
         })
@@ -354,16 +357,16 @@ impl CreateContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_CONTEXT_REQUEST))?;
+        if header.minor_opcode != CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context_id, remaining) = Context::try_parse(value)?;
         let (port_id, remaining) = xv::Port::try_parse(remaining)?;
         let (surface_id, remaining) = Surface::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateContextRequest {
             context_id,
             port_id,
@@ -471,11 +474,11 @@ impl DestroyContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DESTROY_CONTEXT_REQUEST))?;
+        if header.minor_opcode != DESTROY_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context_id, remaining) = Context::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DestroyContextRequest {
             context_id,
         })
@@ -533,12 +536,12 @@ impl CreateSurfaceRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_SURFACE_REQUEST))?;
+        if header.minor_opcode != CREATE_SURFACE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (surface_id, remaining) = Surface::try_parse(value)?;
         let (context_id, remaining) = Context::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateSurfaceRequest {
             surface_id,
             context_id,
@@ -632,11 +635,11 @@ impl DestroySurfaceRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DESTROY_SURFACE_REQUEST))?;
+        if header.minor_opcode != DESTROY_SURFACE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (surface_id, remaining) = Surface::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DestroySurfaceRequest {
             surface_id,
         })
@@ -708,15 +711,15 @@ impl CreateSubpictureRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_SUBPICTURE_REQUEST))?;
+        if header.minor_opcode != CREATE_SUBPICTURE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (subpicture_id, remaining) = Subpicture::try_parse(value)?;
         let (context, remaining) = Context::try_parse(remaining)?;
         let (xvimage_id, remaining) = u32::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateSubpictureRequest {
             subpicture_id,
             context,
@@ -827,11 +830,11 @@ impl DestroySubpictureRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DESTROY_SUBPICTURE_REQUEST))?;
+        if header.minor_opcode != DESTROY_SUBPICTURE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (subpicture_id, remaining) = Subpicture::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DestroySubpictureRequest {
             subpicture_id,
         })
@@ -889,12 +892,12 @@ impl ListSubpictureTypesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(LIST_SUBPICTURE_TYPES_REQUEST))?;
+        if header.minor_opcode != LIST_SUBPICTURE_TYPES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (port_id, remaining) = xv::Port::try_parse(value)?;
         let (surface_id, remaining) = Surface::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(ListSubpictureTypesRequest {
             port_id,
             surface_id,

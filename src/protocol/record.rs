@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -532,12 +532,12 @@ impl QueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (major_version, remaining) = u16::try_parse(value)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(QueryVersionRequest {
             major_version,
             minor_version,
@@ -644,7 +644,9 @@ impl<'input> CreateContextRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_CONTEXT_REQUEST))?;
+        if header.minor_opcode != CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Context::try_parse(value)?;
         let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -652,9 +654,7 @@ impl<'input> CreateContextRequest<'input> {
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
         let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
         let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateContextRequest {
             context,
             element_header,
@@ -738,7 +738,9 @@ impl<'input> RegisterClientsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(REGISTER_CLIENTS_REQUEST))?;
+        if header.minor_opcode != REGISTER_CLIENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Context::try_parse(value)?;
         let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -746,9 +748,7 @@ impl<'input> RegisterClientsRequest<'input> {
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
         let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
         let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(RegisterClientsRequest {
             context,
             element_header,
@@ -817,13 +817,13 @@ impl<'input> UnregisterClientsRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(UNREGISTER_CLIENTS_REQUEST))?;
+        if header.minor_opcode != UNREGISTER_CLIENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Context::try_parse(value)?;
         let (num_client_specs, remaining) = u32::try_parse(remaining)?;
         let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(UnregisterClientsRequest {
             context,
             client_specs: Cow::Owned(client_specs),
@@ -877,11 +877,11 @@ impl GetContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(GET_CONTEXT_REQUEST))?;
+        if header.minor_opcode != GET_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Context::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(GetContextRequest {
             context,
         })
@@ -979,11 +979,11 @@ impl EnableContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(ENABLE_CONTEXT_REQUEST))?;
+        if header.minor_opcode != ENABLE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Context::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(EnableContextRequest {
             context,
         })
@@ -1089,11 +1089,11 @@ impl DisableContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(DISABLE_CONTEXT_REQUEST))?;
+        if header.minor_opcode != DISABLE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Context::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(DisableContextRequest {
             context,
         })
@@ -1145,11 +1145,11 @@ impl FreeContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(FREE_CONTEXT_REQUEST))?;
+        if header.minor_opcode != FREE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Context::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(FreeContextRequest {
             context,
         })

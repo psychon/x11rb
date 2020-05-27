@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{check_exhausted, validate_request_pieces, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -432,7 +432,10 @@ impl PrintQueryVersionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_QUERY_VERSION_REQUEST))?;
+        if header.minor_opcode != PRINT_QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(PrintQueryVersionRequest
         )
     }
@@ -520,14 +523,14 @@ impl<'input> PrintGetPrinterListRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_GET_PRINTER_LIST_REQUEST))?;
+        if header.minor_opcode != PRINT_GET_PRINTER_LIST_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (printer_name_len, remaining) = u32::try_parse(value)?;
         let (locale_len, remaining) = u32::try_parse(remaining)?;
         let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintGetPrinterListRequest {
             printer_name,
             locale,
@@ -616,7 +619,10 @@ impl PrintRehashPrinterListRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_REHASH_PRINTER_LIST_REQUEST))?;
+        if header.minor_opcode != PRINT_REHASH_PRINTER_LIST_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(PrintRehashPrinterListRequest
         )
     }
@@ -683,15 +689,15 @@ impl<'input> CreateContextRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(CREATE_CONTEXT_REQUEST))?;
+        if header.minor_opcode != CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context_id, remaining) = u32::try_parse(value)?;
         let (printer_name_len, remaining) = u32::try_parse(remaining)?;
         let (locale_len, remaining) = u32::try_parse(remaining)?;
         let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(CreateContextRequest {
             context_id,
             printer_name,
@@ -747,11 +753,11 @@ impl PrintSetContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_SET_CONTEXT_REQUEST))?;
+        if header.minor_opcode != PRINT_SET_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintSetContextRequest {
             context,
         })
@@ -796,7 +802,10 @@ impl PrintGetContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_GET_CONTEXT_REQUEST))?;
+        if header.minor_opcode != PRINT_GET_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(PrintGetContextRequest
         )
     }
@@ -870,11 +879,11 @@ impl PrintDestroyContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_DESTROY_CONTEXT_REQUEST))?;
+        if header.minor_opcode != PRINT_DESTROY_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = u32::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintDestroyContextRequest {
             context,
         })
@@ -919,7 +928,10 @@ impl PrintGetScreenOfContextRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_GET_SCREEN_OF_CONTEXT_REQUEST))?;
+        if header.minor_opcode != PRINT_GET_SCREEN_OF_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(PrintGetScreenOfContextRequest
         )
     }
@@ -993,11 +1005,11 @@ impl PrintStartJobRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_START_JOB_REQUEST))?;
+        if header.minor_opcode != PRINT_START_JOB_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (output_mode, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintStartJobRequest {
             output_mode,
         })
@@ -1049,11 +1061,11 @@ impl PrintEndJobRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_END_JOB_REQUEST))?;
+        if header.minor_opcode != PRINT_END_JOB_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (cancel, remaining) = bool::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintEndJobRequest {
             cancel,
         })
@@ -1105,11 +1117,11 @@ impl PrintStartDocRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_START_DOC_REQUEST))?;
+        if header.minor_opcode != PRINT_START_DOC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (driver_mode, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintStartDocRequest {
             driver_mode,
         })
@@ -1161,11 +1173,11 @@ impl PrintEndDocRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_END_DOC_REQUEST))?;
+        if header.minor_opcode != PRINT_END_DOC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (cancel, remaining) = bool::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintEndDocRequest {
             cancel,
         })
@@ -1239,7 +1251,9 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_PUT_DOCUMENT_DATA_REQUEST))?;
+        if header.minor_opcode != PRINT_PUT_DOCUMENT_DATA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (len_data, remaining) = u32::try_parse(remaining)?;
         let (len_fmt, remaining) = u16::try_parse(remaining)?;
@@ -1247,9 +1261,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, len_data.try_into().or(Err(ParseError::ParseError))?)?;
         let (doc_format, remaining) = crate::x11_utils::parse_u8_list(remaining, len_fmt.try_into().or(Err(ParseError::ParseError))?)?;
         let (options, remaining) = crate::x11_utils::parse_u8_list(remaining, len_options.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintPutDocumentDataRequest {
             drawable,
             data,
@@ -1313,12 +1325,12 @@ impl PrintGetDocumentDataRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_GET_DOCUMENT_DATA_REQUEST))?;
+        if header.minor_opcode != PRINT_GET_DOCUMENT_DATA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (max_bytes, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintGetDocumentDataRequest {
             context,
             max_bytes,
@@ -1419,11 +1431,11 @@ impl PrintStartPageRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_START_PAGE_REQUEST))?;
+        if header.minor_opcode != PRINT_START_PAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintStartPageRequest {
             window,
         })
@@ -1475,12 +1487,12 @@ impl PrintEndPageRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_END_PAGE_REQUEST))?;
+        if header.minor_opcode != PRINT_END_PAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (cancel, remaining) = bool::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintEndPageRequest {
             cancel,
         })
@@ -1538,12 +1550,12 @@ impl PrintSelectInputRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_SELECT_INPUT_REQUEST))?;
+        if header.minor_opcode != PRINT_SELECT_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintSelectInputRequest {
             context,
             event_mask,
@@ -1597,11 +1609,11 @@ impl PrintInputSelectedRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_INPUT_SELECTED_REQUEST))?;
+        if header.minor_opcode != PRINT_INPUT_SELECTED_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Pcontext::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintInputSelectedRequest {
             context,
         })
@@ -1686,13 +1698,13 @@ impl PrintGetAttributesRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_GET_ATTRIBUTES_REQUEST))?;
+        if header.minor_opcode != PRINT_GET_ATTRIBUTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (pool, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintGetAttributesRequest {
             context,
             pool,
@@ -1805,15 +1817,15 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_GET_ONE_ATTRIBUTES_REQUEST))?;
+        if header.minor_opcode != PRINT_GET_ONE_ATTRIBUTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (name_len, remaining) = u32::try_parse(remaining)?;
         let (pool, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintGetOneAttributesRequest {
             context,
             pool,
@@ -1930,16 +1942,16 @@ impl<'input> PrintSetAttributesRequest<'input> {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_SET_ATTRIBUTES_REQUEST))?;
+        if header.minor_opcode != PRINT_SET_ATTRIBUTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (string_len, remaining) = u32::try_parse(remaining)?;
         let (pool, remaining) = u8::try_parse(remaining)?;
         let (rule, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (attributes, remaining) = remaining.split_at(remaining.len());
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintSetAttributesRequest {
             context,
             string_len,
@@ -1999,11 +2011,11 @@ impl PrintGetPageDimensionsRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_GET_PAGE_DIMENSIONS_REQUEST))?;
+        if header.minor_opcode != PRINT_GET_PAGE_DIMENSIONS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Pcontext::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintGetPageDimensionsRequest {
             context,
         })
@@ -2083,7 +2095,10 @@ impl PrintQueryScreensRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_QUERY_SCREENS_REQUEST))?;
+        if header.minor_opcode != PRINT_QUERY_SCREENS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
         Ok(PrintQueryScreensRequest
         )
     }
@@ -2180,12 +2195,12 @@ impl PrintSetImageResolutionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_SET_IMAGE_RESOLUTION_REQUEST))?;
+        if header.minor_opcode != PRINT_SET_IMAGE_RESOLUTION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (image_resolution, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintSetImageResolutionRequest {
             context,
             image_resolution,
@@ -2265,11 +2280,11 @@ impl PrintGetImageResolutionRequest {
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
-        validate_request_pieces(header, value, None, Some(PRINT_GET_IMAGE_RESOLUTION_REQUEST))?;
+        if header.minor_opcode != PRINT_GET_IMAGE_RESOLUTION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
         let (context, remaining) = Pcontext::try_parse(value)?;
-        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
-            .ok_or(ParseError::ParseError)?;
-        check_exhausted(remaining)?;
+        let _ = remaining;
         Ok(PrintGetImageResolutionRequest {
             context,
         })
