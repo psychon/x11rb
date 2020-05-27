@@ -67,8 +67,8 @@ fn test_create_window1() {
         r,
         CreateWindowRequest {
             depth: 0x18,
-            wid: 0x05c00001,
-            parent: 0x00000513,
+            wid: 0x05c0_0001,
+            parent: 0x0000_0513,
             x: 0x047b,
             y: 0x0134,
             width: 0x03f5,
@@ -77,7 +77,7 @@ fn test_create_window1() {
             class: WindowClass::InputOutput,
             visual: 0x47,
             value_list: Cow::Owned(CreateWindowAux {
-                background_pixel: Some(0xfff2f1f0),
+                background_pixel: Some(0xfff2_f1f0),
                 border_pixel: Some(0),
                 bit_gravity: Some(Gravity::NorthWest),
                 ..Default::default()
@@ -113,8 +113,8 @@ fn test_create_window2() {
         r,
         CreateWindowRequest {
             depth: 0x18,
-            wid: 0x05400003,
-            parent: 0x00000513,
+            wid: 0x0540_0003,
+            parent: 0x0000_0513,
             x: 0,
             y: 0,
             width: 1,
@@ -126,7 +126,7 @@ fn test_create_window2() {
                 background_pixel: Some(0),
                 border_pixel: Some(0),
                 bit_gravity: Some(Gravity::NorthWest),
-                colormap: Some(0x05400002),
+                colormap: Some(0x0540_0002),
                 ..Default::default()
             }),
         }
@@ -171,7 +171,12 @@ fn test_get_window_attributes() {
     let mut body = vec![];
     add_ne!(body, 0x00e0_0002u32);
     let r = GetWindowAttributesRequest::try_parse_request(header, &body).unwrap();
-    assert_eq!(r, GetWindowAttributesRequest { window: 0x00e00002 });
+    assert_eq!(
+        r,
+        GetWindowAttributesRequest {
+            window: 0x00e0_0002
+        }
+    );
 }
 
 #[test]
@@ -196,14 +201,14 @@ fn test_query_text_extents() {
         remaining_length: 2,
     };
     let mut body = vec![];
-    add_ne!(body, 0x12345_678u32);
+    add_ne!(body, 0x1234_5678u32);
     add_ne!(body, 0x9abcu16);
     add_ne!(body, 0xdef0u16);
     let r = QueryTextExtentsRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(
         r,
         QueryTextExtentsRequest {
-            font: 0x12345678,
+            font: 0x1234_5678,
             string: Cow::Owned(vec![
                 Char2b {
                     byte1: 0xbc,
@@ -234,7 +239,7 @@ fn test_query_text_extents_odd_length() {
     assert_eq!(
         r,
         QueryTextExtentsRequest {
-            font: 0x12345678,
+            font: 0x1234_5678,
             string: Cow::Owned(vec![Char2b {
                 byte1: 0xbc,
                 byte2: 0x9a,
