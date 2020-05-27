@@ -48,18 +48,18 @@ fn test_create_window1() {
         remaining_length: 10,
     };
     let mut body = vec![];
-    add_ne!(body, 0x05c00001u32);
-    add_ne!(body, 0x00000513u32);
+    add_ne!(body, 0x05c0_0001u32);
+    add_ne!(body, 0x0000_0513u32);
     add_ne!(body, 0x047bu16);
     add_ne!(body, 0x0134u16);
     add_ne!(body, 0x03f5u16);
     add_ne!(body, 0x033bu16);
     add_ne!(body, 0x0000u16);
     add_ne!(body, 0x0001u16);
-    add_ne!(body, 0x00000047u32);
-    add_ne!(body, 0x0000001au32);
-    add_ne!(body, 0xfff2f1f0u32);
-    add_ne!(body, 0x00000000u32);
+    add_ne!(body, 0x0000_0047u32);
+    add_ne!(body, 0x0000_001au32);
+    add_ne!(body, 0xfff2_f1f0u32);
+    add_ne!(body, 0x0000_0000u32);
     body.push(0x01);
     body.extend(&[0x00, 0x00, 0x00]); // Final padding.
     let r = CreateWindowRequest::try_parse_request(header, &body).unwrap();
@@ -95,19 +95,19 @@ fn test_create_window2() {
         remaining_length: 11,
     };
     let mut body = vec![];
-    add_ne!(body, 0x05400003u32);
-    add_ne!(body, 0x00000513u32);
-    add_ne!(body, 0x00000000u32);
+    add_ne!(body, 0x0540_0003u32);
+    add_ne!(body, 0x0000_0513u32);
+    add_ne!(body, 0x0000_0000u32);
     add_ne!(body, 0x0001u16);
     add_ne!(body, 0x0001u16);
     add_ne!(body, 0x0000u16);
     add_ne!(body, 0x0001u16);
-    add_ne!(body, 0x0000035au32);
-    add_ne!(body, 0x0000201au32);
-    add_ne!(body, 0x00000000u32);
-    add_ne!(body, 0x00000000u32);
-    add_ne!(body, 0x00000001u32);
-    add_ne!(body, 0x05400002u32);
+    add_ne!(body, 0x0000_035au32);
+    add_ne!(body, 0x0000_201au32);
+    add_ne!(body, 0x0000_0000u32);
+    add_ne!(body, 0x0000_0000u32);
+    add_ne!(body, 0x0000_0001u32);
+    add_ne!(body, 0x0540_0002u32);
     let r = CreateWindowRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(
         r,
@@ -144,9 +144,9 @@ fn test_change_window_attributes() {
         remaining_length: 3,
     };
     let mut body = vec![];
-    add_ne!(body, 0x00000513u32);
-    add_ne!(body, 0x00000800u32);
-    add_ne!(body, 0x00400000u32);
+    add_ne!(body, 0x0000_0513u32);
+    add_ne!(body, 0x0000_0800u32);
+    add_ne!(body, 0x0040_0000u32);
     let r = ChangeWindowAttributesRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(
         r,
@@ -169,7 +169,7 @@ fn test_get_window_attributes() {
         remaining_length: 1,
     };
     let mut body = vec![];
-    add_ne!(body, 0x00e00002u32);
+    add_ne!(body, 0x00e0_0002u32);
     let r = GetWindowAttributesRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(r, GetWindowAttributesRequest { window: 0x00e00002 });
 }
@@ -196,7 +196,7 @@ fn test_query_text_extents() {
         remaining_length: 2,
     };
     let mut body = vec![];
-    add_ne!(body, 0x12345678u32);
+    add_ne!(body, 0x12345_678u32);
     add_ne!(body, 0x9abcu16);
     add_ne!(body, 0xdef0u16);
     let r = QueryTextExtentsRequest::try_parse_request(header, &body).unwrap();
@@ -227,7 +227,7 @@ fn test_query_text_extents_odd_length() {
         remaining_length: 2,
     };
     let mut body = vec![];
-    add_ne!(body, 0x12345678u32);
+    add_ne!(body, 0x1234_5678u32);
     add_ne!(body, 0x9abcu16);
     add_ne!(body, 0xdef0u16);
     let r = QueryTextExtentsRequest::try_parse_request(header, &body).unwrap();
@@ -253,12 +253,12 @@ fn test_randr_get_output_property() {
         remaining_length: 6,
     };
     let mut body = vec![];
-    add_ne!(body, 0x0000008au32);
-    add_ne!(body, 0x00000045u32);
-    add_ne!(body, 0x00000000u32);
-    add_ne!(body, 0x00000000u32);
-    add_ne!(body, 0x00000080u32);
-    add_ne!(body, 0x00000000u32);
+    add_ne!(body, 0x0000_008au32);
+    add_ne!(body, 0x0000_0045u32);
+    add_ne!(body, 0x0000_0000u32);
+    add_ne!(body, 0x0000_0000u32);
+    add_ne!(body, 0x0000_0080u32);
+    add_ne!(body, 0x0000_0000u32);
     let r = GetOutputPropertyRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(
         r,
