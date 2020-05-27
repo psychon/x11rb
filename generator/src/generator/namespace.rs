@@ -928,7 +928,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 // If there's a `remaining` variable from parsing the body we should check it.
                 if !is_first_body_field {
                     // Trailing padding is not described in the XML. Round this slice off to 4 bytes.
-                    outln!(out, "let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];");
+                    outln!(out, "let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)");
+                    outln!(out.indent(), ".ok_or(ParseError::ParseError)?;");
                     outln!(out, "check_exhausted(remaining)?;");
                 }
 

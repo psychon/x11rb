@@ -6242,7 +6242,8 @@ impl<'input> CreateWindowRequest<'input> {
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = CreateWindowAux::try_parse(remaining, value_mask)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateWindowRequest {
             depth,
@@ -6745,7 +6746,8 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
         let (window, remaining) = Window::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = ChangeWindowAttributesAux::try_parse(remaining, value_mask)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeWindowAttributesRequest {
             window,
@@ -6902,7 +6904,8 @@ impl GetWindowAttributesRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetWindowAttributesRequest {
             window,
@@ -7067,7 +7070,8 @@ impl DestroyWindowRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DestroyWindowRequest {
             window,
@@ -7146,7 +7150,8 @@ impl DestroySubwindowsRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DestroySubwindowsRequest {
             window,
@@ -7298,7 +7303,8 @@ impl ChangeSaveSetRequest {
         let mode = mode.try_into()?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeSaveSetRequest {
             mode,
@@ -7428,7 +7434,8 @@ impl ReparentWindowRequest {
         let (parent, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ReparentWindowRequest {
             window,
@@ -7558,7 +7565,8 @@ impl MapWindowRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(MapWindowRequest {
             window,
@@ -7650,7 +7658,8 @@ impl MapSubwindowsRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(MapSubwindowsRequest {
             window,
@@ -7728,7 +7737,8 @@ impl UnmapWindowRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UnmapWindowRequest {
             window,
@@ -7806,7 +7816,8 @@ impl UnmapSubwindowsRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UnmapSubwindowsRequest {
             window,
@@ -8253,7 +8264,8 @@ impl<'input> ConfigureWindowRequest<'input> {
         let (value_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (value_list, remaining) = ConfigureWindowAux::try_parse(remaining, value_mask)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ConfigureWindowRequest {
             window,
@@ -8452,7 +8464,8 @@ impl CirculateWindowRequest {
         let direction = direction.try_into()?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CirculateWindowRequest {
             direction,
@@ -8564,7 +8577,8 @@ impl GetGeometryRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (drawable, remaining) = Drawable::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetGeometryRequest {
             drawable,
@@ -8744,7 +8758,8 @@ impl QueryTreeRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryTreeRequest {
             window,
@@ -8942,7 +8957,8 @@ impl<'input> InternAtomRequest<'input> {
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(InternAtomRequest {
             only_if_exists,
@@ -9071,7 +9087,8 @@ impl GetAtomNameRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (atom, remaining) = Atom::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetAtomNameRequest {
             atom,
@@ -9334,7 +9351,8 @@ impl<'input> ChangePropertyRequest<'input> {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::ParseError)?.checked_div(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangePropertyRequest {
             mode,
@@ -9465,7 +9483,8 @@ impl DeletePropertyRequest {
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
         let (property, remaining) = Atom::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DeletePropertyRequest {
             window,
@@ -9681,7 +9700,8 @@ impl GetPropertyRequest {
         let (type_, remaining) = Atom::try_parse(remaining)?;
         let (long_offset, remaining) = u32::try_parse(remaining)?;
         let (long_length, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetPropertyRequest {
             delete,
@@ -10027,7 +10047,8 @@ impl ListPropertiesRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ListPropertiesRequest {
             window,
@@ -10169,7 +10190,8 @@ impl SetSelectionOwnerRequest {
         let (owner, remaining) = Window::try_parse(value)?;
         let (selection, remaining) = Atom::try_parse(remaining)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetSelectionOwnerRequest {
             owner,
@@ -10280,7 +10302,8 @@ impl GetSelectionOwnerRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (selection, remaining) = Atom::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetSelectionOwnerRequest {
             selection,
@@ -10410,7 +10433,8 @@ impl ConvertSelectionRequest {
         let (target, remaining) = Atom::try_parse(remaining)?;
         let (property, remaining) = Atom::try_parse(remaining)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ConvertSelectionRequest {
             requestor,
@@ -10635,7 +10659,8 @@ impl<'input> SendEventRequest<'input> {
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let (event, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let event = <&[u8; 32]>::try_from(event).unwrap();
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SendEventRequest {
             propagate,
@@ -11093,7 +11118,8 @@ impl GrabPointerRequest {
         let (confine_to, remaining) = Window::try_parse(remaining)?;
         let (cursor, remaining) = Cursor::try_parse(remaining)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GrabPointerRequest {
             owner_events,
@@ -11291,7 +11317,8 @@ impl UngrabPointerRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (time, remaining) = Timestamp::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UngrabPointerRequest {
             time,
@@ -11565,7 +11592,8 @@ impl GrabButtonRequest {
         let button = button.try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GrabButtonRequest {
             owner_events,
@@ -11724,7 +11752,8 @@ impl UngrabButtonRequest {
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UngrabButtonRequest {
             button,
@@ -11802,7 +11831,8 @@ impl ChangeActivePointerGrabRequest {
         let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeActivePointerGrabRequest {
             cursor,
@@ -11953,7 +11983,8 @@ impl GrabKeyboardRequest {
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
         let keyboard_mode = keyboard_mode.try_into()?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GrabKeyboardRequest {
             owner_events,
@@ -12107,7 +12138,8 @@ impl UngrabKeyboardRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (time, remaining) = Timestamp::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UngrabKeyboardRequest {
             time,
@@ -12310,7 +12342,8 @@ impl GrabKeyRequest {
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
         let keyboard_mode = keyboard_mode.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GrabKeyRequest {
             owner_events,
@@ -12476,7 +12509,8 @@ impl UngrabKeyRequest {
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UngrabKeyRequest {
             key,
@@ -12726,7 +12760,8 @@ impl AllowEventsRequest {
         let mode = mode.try_into()?;
         check_exhausted(remaining)?;
         let (time, remaining) = Timestamp::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AllowEventsRequest {
             mode,
@@ -12906,7 +12941,8 @@ impl QueryPointerRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryPointerRequest {
             window,
@@ -13094,7 +13130,8 @@ impl GetMotionEventsRequest {
         let (window, remaining) = Window::try_parse(value)?;
         let (start, remaining) = Timestamp::try_parse(remaining)?;
         let (stop, remaining) = Timestamp::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetMotionEventsRequest {
             window,
@@ -13218,7 +13255,8 @@ impl TranslateCoordinatesRequest {
         let (dst_window, remaining) = Window::try_parse(remaining)?;
         let (src_x, remaining) = i16::try_parse(remaining)?;
         let (src_y, remaining) = i16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(TranslateCoordinatesRequest {
             src_window,
@@ -13380,7 +13418,8 @@ impl WarpPointerRequest {
         let (src_height, remaining) = u16::try_parse(remaining)?;
         let (dst_x, remaining) = i16::try_parse(remaining)?;
         let (dst_y, remaining) = i16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(WarpPointerRequest {
             src_window,
@@ -13609,7 +13648,8 @@ impl SetInputFocusRequest {
         check_exhausted(remaining)?;
         let (focus, remaining) = Window::try_parse(value)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetInputFocusRequest {
             revert_to,
@@ -13883,7 +13923,8 @@ impl<'input> OpenFontRequest<'input> {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(OpenFontRequest {
             fid,
@@ -13962,7 +14003,8 @@ impl CloseFontRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (font, remaining) = Font::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CloseFontRequest {
             font,
@@ -14200,7 +14242,8 @@ impl QueryFontRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (font, remaining) = Fontable::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryFontRequest {
             font,
@@ -14408,7 +14451,8 @@ impl<'input> QueryTextExtentsRequest<'input> {
             remaining = new_remaining;
             string.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryTextExtentsRequest {
             font,
@@ -14609,7 +14653,8 @@ impl<'input> ListFontsRequest<'input> {
         let (max_names, remaining) = u16::try_parse(value)?;
         let (pattern_len, remaining) = u16::try_parse(remaining)?;
         let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ListFontsRequest {
             max_names,
@@ -14747,7 +14792,8 @@ impl<'input> ListFontsWithInfoRequest<'input> {
         let (max_names, remaining) = u16::try_parse(value)?;
         let (pattern_len, remaining) = u16::try_parse(remaining)?;
         let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ListFontsWithInfoRequest {
             max_names,
@@ -14926,7 +14972,8 @@ impl<'input> SetFontPathRequest<'input> {
         let (font_qty, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (font, remaining) = crate::x11_utils::parse_list::<Str>(remaining, font_qty.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetFontPathRequest {
             font: Cow::Owned(font),
@@ -15111,7 +15158,8 @@ impl CreatePixmapRequest {
         let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreatePixmapRequest {
             depth,
@@ -15211,7 +15259,8 @@ impl FreePixmapRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (pixmap, remaining) = Pixmap::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FreePixmapRequest {
             pixmap,
@@ -16602,7 +16651,8 @@ impl<'input> CreateGCRequest<'input> {
         let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = CreateGCAux::try_parse(remaining, value_mask)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateGCRequest {
             cid,
@@ -17247,7 +17297,8 @@ impl<'input> ChangeGCRequest<'input> {
         let (gc, remaining) = Gcontext::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = ChangeGCAux::try_parse(remaining, value_mask)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeGCRequest {
             gc,
@@ -17365,7 +17416,8 @@ impl CopyGCRequest {
         let (src_gc, remaining) = Gcontext::try_parse(value)?;
         let (dst_gc, remaining) = Gcontext::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CopyGCRequest {
             src_gc,
@@ -17443,7 +17495,8 @@ impl<'input> SetDashesRequest<'input> {
         let (dash_offset, remaining) = u16::try_parse(remaining)?;
         let (dashes_len, remaining) = u16::try_parse(remaining)?;
         let (dashes, remaining) = crate::x11_utils::parse_u8_list(remaining, dashes_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetDashesRequest {
             gc,
@@ -17598,7 +17651,8 @@ impl<'input> SetClipRectanglesRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetClipRectanglesRequest {
             ordering,
@@ -17674,7 +17728,8 @@ impl FreeGCRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (gc, remaining) = Gcontext::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FreeGCRequest {
             gc,
@@ -17764,7 +17819,8 @@ impl ClearAreaRequest {
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ClearAreaRequest {
             exposures,
@@ -17896,7 +17952,8 @@ impl CopyAreaRequest {
         let (dst_y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CopyAreaRequest {
             src_drawable,
@@ -18041,7 +18098,8 @@ impl CopyPlaneRequest {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (bit_plane, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CopyPlaneRequest {
             src_drawable,
@@ -18213,7 +18271,8 @@ impl<'input> PolyPointRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PolyPointRequest {
             coordinate_mode,
@@ -18338,7 +18397,8 @@ impl<'input> PolyLineRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PolyLineRequest {
             coordinate_mode,
@@ -18536,7 +18596,8 @@ impl<'input> PolySegmentRequest<'input> {
             remaining = new_remaining;
             segments.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PolySegmentRequest {
             drawable,
@@ -18643,7 +18704,8 @@ impl<'input> PolyRectangleRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PolyRectangleRequest {
             drawable,
@@ -18724,7 +18786,8 @@ impl<'input> PolyArcRequest<'input> {
             remaining = new_remaining;
             arcs.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PolyArcRequest {
             drawable,
@@ -18883,7 +18946,8 @@ impl<'input> FillPolyRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FillPolyRequest {
             drawable,
@@ -18993,7 +19057,8 @@ impl<'input> PolyFillRectangleRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PolyFillRectangleRequest {
             drawable,
@@ -19099,7 +19164,8 @@ impl<'input> PolyFillArcRequest<'input> {
             remaining = new_remaining;
             arcs.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PolyFillArcRequest {
             drawable,
@@ -19271,7 +19337,8 @@ impl<'input> PutImageRequest<'input> {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = remaining.split_at(remaining.len());
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PutImageRequest {
             format,
@@ -19376,7 +19443,8 @@ impl GetImageRequest {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (plane_mask, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetImageRequest {
             format,
@@ -19512,7 +19580,8 @@ impl<'input> PolyText8Request<'input> {
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (items, remaining) = remaining.split_at(remaining.len());
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PolyText8Request {
             drawable,
@@ -19599,7 +19668,8 @@ impl<'input> PolyText16Request<'input> {
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (items, remaining) = remaining.split_at(remaining.len());
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PolyText16Request {
             drawable,
@@ -19722,7 +19792,8 @@ impl<'input> ImageText8Request<'input> {
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ImageText8Request {
             drawable,
@@ -19881,7 +19952,8 @@ impl<'input> ImageText16Request<'input> {
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (string, remaining) = crate::x11_utils::parse_list::<Char2b>(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ImageText16Request {
             drawable,
@@ -20068,7 +20140,8 @@ impl CreateColormapRequest {
         let (mid, remaining) = Colormap::try_parse(value)?;
         let (window, remaining) = Window::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateColormapRequest {
             alloc,
@@ -20131,7 +20204,8 @@ impl FreeColormapRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FreeColormapRequest {
             cmap,
@@ -20195,7 +20269,8 @@ impl CopyColormapAndFreeRequest {
         check_exhausted(remaining)?;
         let (mid, remaining) = Colormap::try_parse(value)?;
         let (src_cmap, remaining) = Colormap::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CopyColormapAndFreeRequest {
             mid,
@@ -20254,7 +20329,8 @@ impl InstallColormapRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(InstallColormapRequest {
             cmap,
@@ -20311,7 +20387,8 @@ impl UninstallColormapRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (cmap, remaining) = Colormap::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UninstallColormapRequest {
             cmap,
@@ -20368,7 +20445,8 @@ impl ListInstalledColormapsRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (window, remaining) = Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ListInstalledColormapsRequest {
             window,
@@ -20503,7 +20581,8 @@ impl AllocColorRequest {
         let (green, remaining) = u16::try_parse(remaining)?;
         let (blue, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AllocColorRequest {
             cmap,
@@ -20629,7 +20708,8 @@ impl<'input> AllocNamedColorRequest<'input> {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AllocNamedColorRequest {
             cmap,
@@ -20737,7 +20817,8 @@ impl AllocColorCellsRequest {
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (colors, remaining) = u16::try_parse(remaining)?;
         let (planes, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AllocColorCellsRequest {
             contiguous,
@@ -20880,7 +20961,8 @@ impl AllocColorPlanesRequest {
         let (reds, remaining) = u16::try_parse(remaining)?;
         let (greens, remaining) = u16::try_parse(remaining)?;
         let (blues, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AllocColorPlanesRequest {
             contiguous,
@@ -21016,7 +21098,8 @@ impl<'input> FreeColorsRequest<'input> {
             remaining = new_remaining;
             pixels.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FreeColorsRequest {
             cmap,
@@ -21216,7 +21299,8 @@ impl<'input> StoreColorsRequest<'input> {
             remaining = new_remaining;
             items.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(StoreColorsRequest {
             cmap,
@@ -21297,7 +21381,8 @@ impl<'input> StoreNamedColorRequest<'input> {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(StoreNamedColorRequest {
             flags,
@@ -21423,7 +21508,8 @@ impl<'input> QueryColorsRequest<'input> {
             remaining = new_remaining;
             pixels.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryColorsRequest {
             cmap,
@@ -21537,7 +21623,8 @@ impl<'input> LookupColorRequest<'input> {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(LookupColorRequest {
             cmap,
@@ -21744,7 +21831,8 @@ impl CreateCursorRequest {
         let (back_blue, remaining) = u16::try_parse(remaining)?;
         let (x, remaining) = u16::try_parse(remaining)?;
         let (y, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateCursorRequest {
             cid,
@@ -21969,7 +22057,8 @@ impl CreateGlyphCursorRequest {
         let (back_red, remaining) = u16::try_parse(remaining)?;
         let (back_green, remaining) = u16::try_parse(remaining)?;
         let (back_blue, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateGlyphCursorRequest {
             cid,
@@ -22093,7 +22182,8 @@ impl FreeCursorRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (cursor, remaining) = Cursor::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FreeCursorRequest {
             cursor,
@@ -22192,7 +22282,8 @@ impl RecolorCursorRequest {
         let (back_red, remaining) = u16::try_parse(remaining)?;
         let (back_green, remaining) = u16::try_parse(remaining)?;
         let (back_blue, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(RecolorCursorRequest {
             cursor,
@@ -22339,7 +22430,8 @@ impl QueryBestSizeRequest {
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryBestSizeRequest {
             class,
@@ -22457,7 +22549,8 @@ impl<'input> QueryExtensionRequest<'input> {
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryExtensionRequest {
             name,
@@ -22671,7 +22764,8 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeKeyboardMappingRequest {
             keycode_count,
@@ -22737,7 +22831,8 @@ impl GetKeyboardMappingRequest {
         check_exhausted(remaining)?;
         let (first_keycode, remaining) = Keycode::try_parse(value)?;
         let (count, remaining) = u8::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetKeyboardMappingRequest {
             first_keycode,
@@ -23256,7 +23351,8 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         check_exhausted(remaining)?;
         let (value_mask, remaining) = u32::try_parse(value)?;
         let (value_list, remaining) = ChangeKeyboardControlAux::try_parse(remaining, value_mask)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeKeyboardControlRequest {
             value_list: Cow::Owned(value_list),
@@ -23462,7 +23558,8 @@ impl ChangePointerControlRequest {
         let (threshold, remaining) = i16::try_parse(remaining)?;
         let (do_acceleration, remaining) = bool::try_parse(remaining)?;
         let (do_threshold, remaining) = bool::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangePointerControlRequest {
             acceleration_numerator,
@@ -23746,7 +23843,8 @@ impl SetScreenSaverRequest {
         let prefer_blanking = prefer_blanking.try_into()?;
         let (allow_exposures, remaining) = u8::try_parse(remaining)?;
         let allow_exposures = allow_exposures.try_into()?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetScreenSaverRequest {
             timeout,
@@ -24041,7 +24139,8 @@ impl<'input> ChangeHostsRequest<'input> {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (address_len, remaining) = u16::try_parse(remaining)?;
         let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeHostsRequest {
             mode,
@@ -24566,7 +24665,8 @@ impl KillClientRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         let (resource, remaining) = u32::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(KillClientRequest {
             resource,
@@ -24660,7 +24760,8 @@ impl<'input> RotatePropertiesRequest<'input> {
         let (atoms_len, remaining) = u16::try_parse(remaining)?;
         let (delta, remaining) = i16::try_parse(remaining)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(RotatePropertiesRequest {
             window,
@@ -24907,7 +25008,8 @@ impl<'input> SetPointerMappingRequest<'input> {
         let (map_len, remaining) = u8::try_parse(remaining)?;
         check_exhausted(remaining)?;
         let (map, remaining) = crate::x11_utils::parse_u8_list(value, map_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetPointerMappingRequest {
             map,
@@ -25156,7 +25258,8 @@ impl<'input> SetModifierMappingRequest<'input> {
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         check_exhausted(remaining)?;
         let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetModifierMappingRequest {
             keycodes,

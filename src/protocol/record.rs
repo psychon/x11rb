@@ -535,7 +535,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (major_version, remaining) = u16::try_parse(value)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             major_version,
@@ -651,7 +652,8 @@ impl<'input> CreateContextRequest<'input> {
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
         let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
         let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateContextRequest {
             context,
@@ -744,7 +746,8 @@ impl<'input> RegisterClientsRequest<'input> {
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
         let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
         let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(RegisterClientsRequest {
             context,
@@ -818,7 +821,8 @@ impl<'input> UnregisterClientsRequest<'input> {
         let (context, remaining) = Context::try_parse(value)?;
         let (num_client_specs, remaining) = u32::try_parse(remaining)?;
         let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UnregisterClientsRequest {
             context,
@@ -875,7 +879,8 @@ impl GetContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_CONTEXT_REQUEST))?;
         let (context, remaining) = Context::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetContextRequest {
             context,
@@ -976,7 +981,8 @@ impl EnableContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(ENABLE_CONTEXT_REQUEST))?;
         let (context, remaining) = Context::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(EnableContextRequest {
             context,
@@ -1085,7 +1091,8 @@ impl DisableContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DISABLE_CONTEXT_REQUEST))?;
         let (context, remaining) = Context::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DisableContextRequest {
             context,
@@ -1140,7 +1147,8 @@ impl FreeContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(FREE_CONTEXT_REQUEST))?;
         let (context, remaining) = Context::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FreeContextRequest {
             context,

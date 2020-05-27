@@ -254,7 +254,8 @@ impl AttachRequest {
         let (shmid, remaining) = u32::try_parse(remaining)?;
         let (read_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AttachRequest {
             shmseg,
@@ -313,7 +314,8 @@ impl DetachRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DETACH_REQUEST))?;
         let (shmseg, remaining) = Seg::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DetachRequest {
             shmseg,
@@ -443,7 +445,8 @@ impl PutImageRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PutImageRequest {
             drawable,
@@ -575,7 +578,8 @@ impl GetImageRequest {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetImageRequest {
             drawable,
@@ -713,7 +717,8 @@ impl CreatePixmapRequest {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreatePixmapRequest {
             pid,
@@ -791,7 +796,8 @@ impl AttachFdRequest {
         let shm_fd = fds.remove(0);
         let (read_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AttachFdRequest {
             shmseg,
@@ -867,7 +873,8 @@ impl CreateSegmentRequest {
         let (size, remaining) = u32::try_parse(remaining)?;
         let (read_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateSegmentRequest {
             shmseg,

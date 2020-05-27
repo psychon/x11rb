@@ -73,7 +73,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (client_major_version, remaining) = u16::try_parse(value)?;
         let (client_minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             client_major_version,

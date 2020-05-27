@@ -74,7 +74,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (client_major, remaining) = u8::try_parse(value)?;
         let (client_minor, remaining) = u8::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             client_major,
@@ -163,7 +164,8 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
         validate_request_pieces(header, value, None, Some(SET_DEVICE_CREATE_CONTEXT_REQUEST))?;
         let (context_len, remaining) = u32::try_parse(value)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetDeviceCreateContextRequest {
             context,
@@ -315,7 +317,8 @@ impl<'input> SetDeviceContextRequest<'input> {
         let (device, remaining) = u32::try_parse(value)?;
         let (context_len, remaining) = u32::try_parse(remaining)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetDeviceContextRequest {
             device,
@@ -372,7 +375,8 @@ impl GetDeviceContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_DEVICE_CONTEXT_REQUEST))?;
         let (device, remaining) = u32::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetDeviceContextRequest {
             device,
@@ -475,7 +479,8 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         validate_request_pieces(header, value, None, Some(SET_WINDOW_CREATE_CONTEXT_REQUEST))?;
         let (context_len, remaining) = u32::try_parse(value)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetWindowCreateContextRequest {
             context,
@@ -615,7 +620,8 @@ impl GetWindowContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_WINDOW_CONTEXT_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetWindowContextRequest {
             window,
@@ -801,7 +807,8 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
         validate_request_pieces(header, value, None, Some(SET_PROPERTY_CREATE_CONTEXT_REQUEST))?;
         let (context_len, remaining) = u32::try_parse(value)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetPropertyCreateContextRequest {
             context,
@@ -946,7 +953,8 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         validate_request_pieces(header, value, None, Some(SET_PROPERTY_USE_CONTEXT_REQUEST))?;
         let (context_len, remaining) = u32::try_parse(value)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetPropertyUseContextRequest {
             context,
@@ -1093,7 +1101,8 @@ impl GetPropertyContextRequest {
         validate_request_pieces(header, value, None, Some(GET_PROPERTY_CONTEXT_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetPropertyContextRequest {
             window,
@@ -1200,7 +1209,8 @@ impl GetPropertyDataContextRequest {
         validate_request_pieces(header, value, None, Some(GET_PROPERTY_DATA_CONTEXT_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetPropertyDataContextRequest {
             window,
@@ -1300,7 +1310,8 @@ impl ListPropertiesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(LIST_PROPERTIES_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ListPropertiesRequest {
             window,
@@ -1402,7 +1413,8 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
         validate_request_pieces(header, value, None, Some(SET_SELECTION_CREATE_CONTEXT_REQUEST))?;
         let (context_len, remaining) = u32::try_parse(value)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetSelectionCreateContextRequest {
             context,
@@ -1547,7 +1559,8 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         validate_request_pieces(header, value, None, Some(SET_SELECTION_USE_CONTEXT_REQUEST))?;
         let (context_len, remaining) = u32::try_parse(value)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetSelectionUseContextRequest {
             context,
@@ -1687,7 +1700,8 @@ impl GetSelectionContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_SELECTION_CONTEXT_REQUEST))?;
         let (selection, remaining) = xproto::Atom::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetSelectionContextRequest {
             selection,
@@ -1785,7 +1799,8 @@ impl GetSelectionDataContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_SELECTION_DATA_CONTEXT_REQUEST))?;
         let (selection, remaining) = xproto::Atom::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetSelectionDataContextRequest {
             selection,
@@ -1967,7 +1982,8 @@ impl GetClientContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_CLIENT_CONTEXT_REQUEST))?;
         let (resource, remaining) = u32::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetClientContextRequest {
             resource,

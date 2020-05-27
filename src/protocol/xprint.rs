@@ -525,7 +525,8 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         let (locale_len, remaining) = u32::try_parse(remaining)?;
         let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintGetPrinterListRequest {
             printer_name,
@@ -688,7 +689,8 @@ impl<'input> CreateContextRequest<'input> {
         let (locale_len, remaining) = u32::try_parse(remaining)?;
         let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateContextRequest {
             context_id,
@@ -747,7 +749,8 @@ impl PrintSetContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_SET_CONTEXT_REQUEST))?;
         let (context, remaining) = u32::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintSetContextRequest {
             context,
@@ -869,7 +872,8 @@ impl PrintDestroyContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_DESTROY_CONTEXT_REQUEST))?;
         let (context, remaining) = u32::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintDestroyContextRequest {
             context,
@@ -991,7 +995,8 @@ impl PrintStartJobRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_START_JOB_REQUEST))?;
         let (output_mode, remaining) = u8::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintStartJobRequest {
             output_mode,
@@ -1046,7 +1051,8 @@ impl PrintEndJobRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_END_JOB_REQUEST))?;
         let (cancel, remaining) = bool::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintEndJobRequest {
             cancel,
@@ -1101,7 +1107,8 @@ impl PrintStartDocRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_START_DOC_REQUEST))?;
         let (driver_mode, remaining) = u8::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintStartDocRequest {
             driver_mode,
@@ -1156,7 +1163,8 @@ impl PrintEndDocRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_END_DOC_REQUEST))?;
         let (cancel, remaining) = bool::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintEndDocRequest {
             cancel,
@@ -1239,7 +1247,8 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, len_data.try_into().or(Err(ParseError::ParseError))?)?;
         let (doc_format, remaining) = crate::x11_utils::parse_u8_list(remaining, len_fmt.try_into().or(Err(ParseError::ParseError))?)?;
         let (options, remaining) = crate::x11_utils::parse_u8_list(remaining, len_options.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintPutDocumentDataRequest {
             drawable,
@@ -1307,7 +1316,8 @@ impl PrintGetDocumentDataRequest {
         validate_request_pieces(header, value, None, Some(PRINT_GET_DOCUMENT_DATA_REQUEST))?;
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (max_bytes, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintGetDocumentDataRequest {
             context,
@@ -1411,7 +1421,8 @@ impl PrintStartPageRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_START_PAGE_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintStartPageRequest {
             window,
@@ -1467,7 +1478,8 @@ impl PrintEndPageRequest {
         validate_request_pieces(header, value, None, Some(PRINT_END_PAGE_REQUEST))?;
         let (cancel, remaining) = bool::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintEndPageRequest {
             cancel,
@@ -1529,7 +1541,8 @@ impl PrintSelectInputRequest {
         validate_request_pieces(header, value, None, Some(PRINT_SELECT_INPUT_REQUEST))?;
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintSelectInputRequest {
             context,
@@ -1586,7 +1599,8 @@ impl PrintInputSelectedRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_INPUT_SELECTED_REQUEST))?;
         let (context, remaining) = Pcontext::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintInputSelectedRequest {
             context,
@@ -1676,7 +1690,8 @@ impl PrintGetAttributesRequest {
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (pool, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintGetAttributesRequest {
             context,
@@ -1796,7 +1811,8 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         let (pool, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintGetOneAttributesRequest {
             context,
@@ -1921,7 +1937,8 @@ impl<'input> PrintSetAttributesRequest<'input> {
         let (rule, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (attributes, remaining) = remaining.split_at(remaining.len());
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintSetAttributesRequest {
             context,
@@ -1984,7 +2001,8 @@ impl PrintGetPageDimensionsRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_GET_PAGE_DIMENSIONS_REQUEST))?;
         let (context, remaining) = Pcontext::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintGetPageDimensionsRequest {
             context,
@@ -2165,7 +2183,8 @@ impl PrintSetImageResolutionRequest {
         validate_request_pieces(header, value, None, Some(PRINT_SET_IMAGE_RESOLUTION_REQUEST))?;
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (image_resolution, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintSetImageResolutionRequest {
             context,
@@ -2248,7 +2267,8 @@ impl PrintGetImageResolutionRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(PRINT_GET_IMAGE_RESOLUTION_REQUEST))?;
         let (context, remaining) = Pcontext::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PrintGetImageResolutionRequest {
             context,

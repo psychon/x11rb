@@ -232,7 +232,8 @@ impl ListSurfaceTypesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(LIST_SURFACE_TYPES_REQUEST))?;
         let (port_id, remaining) = xv::Port::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ListSurfaceTypesRequest {
             port_id,
@@ -360,7 +361,8 @@ impl CreateContextRequest {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateContextRequest {
             context_id,
@@ -471,7 +473,8 @@ impl DestroyContextRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_CONTEXT_REQUEST))?;
         let (context_id, remaining) = Context::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DestroyContextRequest {
             context_id,
@@ -533,7 +536,8 @@ impl CreateSurfaceRequest {
         validate_request_pieces(header, value, None, Some(CREATE_SURFACE_REQUEST))?;
         let (surface_id, remaining) = Surface::try_parse(value)?;
         let (context_id, remaining) = Context::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateSurfaceRequest {
             surface_id,
@@ -630,7 +634,8 @@ impl DestroySurfaceRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_SURFACE_REQUEST))?;
         let (surface_id, remaining) = Surface::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DestroySurfaceRequest {
             surface_id,
@@ -709,7 +714,8 @@ impl CreateSubpictureRequest {
         let (xvimage_id, remaining) = u32::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateSubpictureRequest {
             subpicture_id,
@@ -823,7 +829,8 @@ impl DestroySubpictureRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_SUBPICTURE_REQUEST))?;
         let (subpicture_id, remaining) = Subpicture::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DestroySubpictureRequest {
             subpicture_id,
@@ -885,7 +892,8 @@ impl ListSubpictureTypesRequest {
         validate_request_pieces(header, value, None, Some(LIST_SUBPICTURE_TYPES_REQUEST))?;
         let (port_id, remaining) = xv::Port::try_parse(value)?;
         let (surface_id, remaining) = Surface::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ListSubpictureTypesRequest {
             port_id,

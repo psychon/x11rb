@@ -220,7 +220,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (client_major_version, remaining) = u32::try_parse(value)?;
         let (client_minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             client_major_version,
@@ -321,7 +322,8 @@ impl CreateRequest {
         let (level, remaining) = u8::try_parse(remaining)?;
         let level = level.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateRequest {
             damage,
@@ -380,7 +382,8 @@ impl DestroyRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_REQUEST))?;
         let (damage, remaining) = Damage::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DestroyRequest {
             damage,
@@ -449,7 +452,8 @@ impl SubtractRequest {
         let (damage, remaining) = Damage::try_parse(value)?;
         let (repair, remaining) = xfixes::Region::try_parse(remaining)?;
         let (parts, remaining) = xfixes::Region::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SubtractRequest {
             damage,
@@ -519,7 +523,8 @@ impl AddRequest {
         validate_request_pieces(header, value, None, Some(ADD_REQUEST))?;
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (region, remaining) = xfixes::Region::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AddRequest {
             drawable,

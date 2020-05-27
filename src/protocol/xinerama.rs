@@ -124,7 +124,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (major, remaining) = u8::try_parse(value)?;
         let (minor, remaining) = u8::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             major,
@@ -208,7 +209,8 @@ impl GetStateRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_STATE_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetStateRequest {
             window,
@@ -289,7 +291,8 @@ impl GetScreenCountRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_SCREEN_COUNT_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetScreenCountRequest {
             window,
@@ -377,7 +380,8 @@ impl GetScreenSizeRequest {
         validate_request_pieces(header, value, None, Some(GET_SCREEN_SIZE_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (screen, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetScreenSizeRequest {
             window,

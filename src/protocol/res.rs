@@ -470,7 +470,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (client_major, remaining) = u8::try_parse(value)?;
         let (client_minor, remaining) = u8::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             client_major,
@@ -638,7 +639,8 @@ impl QueryClientResourcesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_CLIENT_RESOURCES_REQUEST))?;
         let (xid, remaining) = u32::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryClientResourcesRequest {
             xid,
@@ -735,7 +737,8 @@ impl QueryClientPixmapBytesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_CLIENT_PIXMAP_BYTES_REQUEST))?;
         let (xid, remaining) = u32::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryClientPixmapBytesRequest {
             xid,
@@ -823,7 +826,8 @@ impl<'input> QueryClientIdsRequest<'input> {
         validate_request_pieces(header, value, None, Some(QUERY_CLIENT_IDS_REQUEST))?;
         let (num_specs, remaining) = u32::try_parse(value)?;
         let (specs, remaining) = crate::x11_utils::parse_list::<ClientIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryClientIdsRequest {
             specs: Cow::Owned(specs),
@@ -933,7 +937,8 @@ impl<'input> QueryResourceBytesRequest<'input> {
         let (client, remaining) = u32::try_parse(value)?;
         let (num_specs, remaining) = u32::try_parse(remaining)?;
         let (specs, remaining) = crate::x11_utils::parse_list::<ResourceIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryResourceBytesRequest {
             client,

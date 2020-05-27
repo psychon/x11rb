@@ -80,7 +80,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (client_major_version, remaining) = u32::try_parse(value)?;
         let (client_minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             client_major_version,
@@ -392,7 +393,8 @@ impl ChangeSaveSetRequest {
         let map = map.try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeSaveSetRequest {
             mode,
@@ -685,7 +687,8 @@ impl SelectSelectionInputRequest {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (selection, remaining) = xproto::Atom::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SelectSelectionInputRequest {
             window,
@@ -956,7 +959,8 @@ impl SelectCursorInputRequest {
         validate_request_pieces(header, value, None, Some(SELECT_CURSOR_INPUT_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SelectCursorInputRequest {
             window,
@@ -1242,7 +1246,8 @@ impl<'input> CreateRegionRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateRegionRequest {
             region,
@@ -1306,7 +1311,8 @@ impl CreateRegionFromBitmapRequest {
         validate_request_pieces(header, value, None, Some(CREATE_REGION_FROM_BITMAP_REQUEST))?;
         let (region, remaining) = Region::try_parse(value)?;
         let (bitmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateRegionFromBitmapRequest {
             region,
@@ -1379,7 +1385,8 @@ impl CreateRegionFromWindowRequest {
         let (kind, remaining) = shape::Kind::try_parse(remaining)?;
         let kind = kind.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateRegionFromWindowRequest {
             region,
@@ -1445,7 +1452,8 @@ impl CreateRegionFromGCRequest {
         validate_request_pieces(header, value, None, Some(CREATE_REGION_FROM_GC_REQUEST))?;
         let (region, remaining) = Region::try_parse(value)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateRegionFromGCRequest {
             region,
@@ -1509,7 +1517,8 @@ impl CreateRegionFromPictureRequest {
         validate_request_pieces(header, value, None, Some(CREATE_REGION_FROM_PICTURE_REQUEST))?;
         let (region, remaining) = Region::try_parse(value)?;
         let (picture, remaining) = render::Picture::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateRegionFromPictureRequest {
             region,
@@ -1566,7 +1575,8 @@ impl DestroyRegionRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DESTROY_REGION_REQUEST))?;
         let (region, remaining) = Region::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DestroyRegionRequest {
             region,
@@ -1634,7 +1644,8 @@ impl<'input> SetRegionRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetRegionRequest {
             region,
@@ -1698,7 +1709,8 @@ impl CopyRegionRequest {
         validate_request_pieces(header, value, None, Some(COPY_REGION_REQUEST))?;
         let (source, remaining) = Region::try_parse(value)?;
         let (destination, remaining) = Region::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CopyRegionRequest {
             source,
@@ -1769,7 +1781,8 @@ impl UnionRegionRequest {
         let (source1, remaining) = Region::try_parse(value)?;
         let (source2, remaining) = Region::try_parse(remaining)?;
         let (destination, remaining) = Region::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UnionRegionRequest {
             source1,
@@ -1842,7 +1855,8 @@ impl IntersectRegionRequest {
         let (source1, remaining) = Region::try_parse(value)?;
         let (source2, remaining) = Region::try_parse(remaining)?;
         let (destination, remaining) = Region::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(IntersectRegionRequest {
             source1,
@@ -1915,7 +1929,8 @@ impl SubtractRegionRequest {
         let (source1, remaining) = Region::try_parse(value)?;
         let (source2, remaining) = Region::try_parse(remaining)?;
         let (destination, remaining) = Region::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SubtractRegionRequest {
             source1,
@@ -1992,7 +2007,8 @@ impl InvertRegionRequest {
         let (source, remaining) = Region::try_parse(value)?;
         let (bounds, remaining) = xproto::Rectangle::try_parse(remaining)?;
         let (destination, remaining) = Region::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(InvertRegionRequest {
             source,
@@ -2061,7 +2077,8 @@ impl TranslateRegionRequest {
         let (region, remaining) = Region::try_parse(value)?;
         let (dx, remaining) = i16::try_parse(remaining)?;
         let (dy, remaining) = i16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(TranslateRegionRequest {
             region,
@@ -2127,7 +2144,8 @@ impl RegionExtentsRequest {
         validate_request_pieces(header, value, None, Some(REGION_EXTENTS_REQUEST))?;
         let (source, remaining) = Region::try_parse(value)?;
         let (destination, remaining) = Region::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(RegionExtentsRequest {
             source,
@@ -2184,7 +2202,8 @@ impl FetchRegionRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(FETCH_REGION_REQUEST))?;
         let (region, remaining) = Region::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FetchRegionRequest {
             region,
@@ -2299,7 +2318,8 @@ impl SetGCClipRegionRequest {
         let (region, remaining) = Region::try_parse(remaining)?;
         let (x_origin, remaining) = i16::try_parse(remaining)?;
         let (y_origin, remaining) = i16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetGCClipRegionRequest {
             gc,
@@ -2388,7 +2408,8 @@ impl SetWindowShapeRegionRequest {
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
         let (region, remaining) = Region::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetWindowShapeRegionRequest {
             dest,
@@ -2470,7 +2491,8 @@ impl SetPictureClipRegionRequest {
         let (region, remaining) = Region::try_parse(remaining)?;
         let (x_origin, remaining) = i16::try_parse(remaining)?;
         let (y_origin, remaining) = i16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetPictureClipRegionRequest {
             picture,
@@ -2546,7 +2568,8 @@ impl<'input> SetCursorNameRequest<'input> {
         let (nbytes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetCursorNameRequest {
             cursor,
@@ -2603,7 +2626,8 @@ impl GetCursorNameRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_CURSOR_NAME_REQUEST))?;
         let (cursor, remaining) = xproto::Cursor::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetCursorNameRequest {
             cursor,
@@ -2813,7 +2837,8 @@ impl ChangeCursorRequest {
         validate_request_pieces(header, value, None, Some(CHANGE_CURSOR_REQUEST))?;
         let (source, remaining) = xproto::Cursor::try_parse(value)?;
         let (destination, remaining) = xproto::Cursor::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeCursorRequest {
             source,
@@ -2883,7 +2908,8 @@ impl<'input> ChangeCursorByNameRequest<'input> {
         let (nbytes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeCursorByNameRequest {
             src,
@@ -2967,7 +2993,8 @@ impl ExpandRegionRequest {
         let (right, remaining) = u16::try_parse(remaining)?;
         let (top, remaining) = u16::try_parse(remaining)?;
         let (bottom, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ExpandRegionRequest {
             source,
@@ -3032,7 +3059,8 @@ impl HideCursorRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(HIDE_CURSOR_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(HideCursorRequest {
             window,
@@ -3087,7 +3115,8 @@ impl ShowCursorRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(SHOW_CURSOR_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ShowCursorRequest {
             window,
@@ -3261,7 +3290,8 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (num_devices, remaining) = u16::try_parse(remaining)?;
         let (devices, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_devices.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreatePointerBarrierRequest {
             barrier,
@@ -3332,7 +3362,8 @@ impl DeletePointerBarrierRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(DELETE_POINTER_BARRIER_REQUEST))?;
         let (barrier, remaining) = Barrier::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DeletePointerBarrierRequest {
             barrier,

@@ -128,7 +128,8 @@ impl<'input> GetExtensionVersionRequest<'input> {
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetExtensionVersionRequest {
             name,
@@ -1126,7 +1127,8 @@ impl OpenDeviceRequest {
         validate_request_pieces(header, value, None, Some(OPEN_DEVICE_REQUEST))?;
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(OpenDeviceRequest {
             device_id,
@@ -1230,7 +1232,8 @@ impl CloseDeviceRequest {
         validate_request_pieces(header, value, None, Some(CLOSE_DEVICE_REQUEST))?;
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CloseDeviceRequest {
             device_id,
@@ -1290,7 +1293,8 @@ impl SetDeviceModeRequest {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetDeviceModeRequest {
             device_id,
@@ -1389,7 +1393,8 @@ impl<'input> SelectExtensionEventRequest<'input> {
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SelectExtensionEventRequest {
             window,
@@ -1446,7 +1451,8 @@ impl GetSelectedExtensionEventsRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_SELECTED_EXTENSION_EVENTS_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetSelectedExtensionEventsRequest {
             window,
@@ -1648,7 +1654,8 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
         let mode = mode.try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeDeviceDontPropagateListRequest {
             window,
@@ -1707,7 +1714,8 @@ impl GetDeviceDontPropagateListRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetDeviceDontPropagateListRequest {
             window,
@@ -1848,7 +1856,8 @@ impl GetDeviceMotionEventsRequest {
         let (stop, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetDeviceMotionEventsRequest {
             start,
@@ -1965,7 +1974,8 @@ impl ChangeKeyboardDeviceRequest {
         validate_request_pieces(header, value, None, Some(CHANGE_KEYBOARD_DEVICE_REQUEST))?;
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeKeyboardDeviceRequest {
             device_id,
@@ -2055,7 +2065,8 @@ impl ChangePointerDeviceRequest {
         let (y_axis, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangePointerDeviceRequest {
             x_axis,
@@ -2181,7 +2192,8 @@ impl<'input> GrabDeviceRequest<'input> {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GrabDeviceRequest {
             grab_window,
@@ -2286,7 +2298,8 @@ impl UngrabDeviceRequest {
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UngrabDeviceRequest {
             time,
@@ -2449,7 +2462,8 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GrabDeviceKeyRequest {
             grab_window,
@@ -2546,7 +2560,8 @@ impl UngrabDeviceKeyRequest {
         let (modifier_device, remaining) = u8::try_parse(remaining)?;
         let (key, remaining) = u8::try_parse(remaining)?;
         let (grabbed_device, remaining) = u8::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UngrabDeviceKeyRequest {
             grab_window,
@@ -2660,7 +2675,8 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GrabDeviceButtonRequest {
             grab_window,
@@ -2758,7 +2774,8 @@ impl UngrabDeviceButtonRequest {
         let (button, remaining) = u8::try_parse(remaining)?;
         let (grabbed_device, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(UngrabDeviceButtonRequest {
             grab_window,
@@ -2913,7 +2930,8 @@ impl AllowDeviceEventsRequest {
         let mode = mode.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AllowDeviceEventsRequest {
             time,
@@ -2975,7 +2993,8 @@ impl GetDeviceFocusRequest {
         validate_request_pieces(header, value, None, Some(GET_DEVICE_FOCUS_REQUEST))?;
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetDeviceFocusRequest {
             device_id,
@@ -3081,7 +3100,8 @@ impl SetDeviceFocusRequest {
         let revert_to = revert_to.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetDeviceFocusRequest {
             focus,
@@ -4168,7 +4188,8 @@ impl GetFeedbackControlRequest {
         validate_request_pieces(header, value, None, Some(GET_FEEDBACK_CONTROL_REQUEST))?;
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetFeedbackControlRequest {
             device_id,
@@ -5190,7 +5211,8 @@ impl ChangeFeedbackControlRequest {
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (feedback, remaining) = FeedbackCtl::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeFeedbackControlRequest {
             mask,
@@ -5260,7 +5282,8 @@ impl GetDeviceKeyMappingRequest {
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetDeviceKeyMappingRequest {
             device_id,
@@ -5378,7 +5401,8 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let (keycode_count, remaining) = u8::try_parse(remaining)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeDeviceKeyMappingRequest {
             device_id,
@@ -5442,7 +5466,8 @@ impl GetDeviceModifierMappingRequest {
         validate_request_pieces(header, value, None, Some(GET_DEVICE_MODIFIER_MAPPING_REQUEST))?;
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetDeviceModifierMappingRequest {
             device_id,
@@ -5552,7 +5577,8 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetDeviceModifierMappingRequest {
             device_id,
@@ -5638,7 +5664,8 @@ impl GetDeviceButtonMappingRequest {
         validate_request_pieces(header, value, None, Some(GET_DEVICE_BUTTON_MAPPING_REQUEST))?;
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetDeviceButtonMappingRequest {
             device_id,
@@ -5751,7 +5778,8 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         let (map_size, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetDeviceButtonMappingRequest {
             device_id,
@@ -6424,7 +6452,8 @@ impl QueryDeviceStateRequest {
         validate_request_pieces(header, value, None, Some(QUERY_DEVICE_STATE_REQUEST))?;
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryDeviceStateRequest {
             device_id,
@@ -6531,7 +6560,8 @@ impl DeviceBellRequest {
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (feedback_class, remaining) = u8::try_parse(remaining)?;
         let (percent, remaining) = i8::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DeviceBellRequest {
             device_id,
@@ -6605,7 +6635,8 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetDeviceValuatorsRequest {
             device_id,
@@ -7530,7 +7561,8 @@ impl GetDeviceControlRequest {
         let control_id = control_id.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetDeviceControlRequest {
             control_id,
@@ -8376,7 +8408,8 @@ impl ChangeDeviceControlRequest {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (control, remaining) = DeviceCtl::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeDeviceControlRequest {
             control_id,
@@ -8463,7 +8496,8 @@ impl ListDevicePropertiesRequest {
         validate_request_pieces(header, value, None, Some(LIST_DEVICE_PROPERTIES_REQUEST))?;
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ListDevicePropertiesRequest {
             device_id,
@@ -8767,7 +8801,8 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (items, remaining) = ChangeDevicePropertyAux::try_parse(remaining, format, num_items)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangeDevicePropertyRequest {
             property,
@@ -8840,7 +8875,8 @@ impl DeleteDevicePropertyRequest {
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(DeleteDevicePropertyRequest {
             property,
@@ -8929,7 +8965,8 @@ impl GetDevicePropertyRequest {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (delete, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetDevicePropertyRequest {
             property,
@@ -9282,7 +9319,8 @@ impl XIQueryPointerRequest {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIQueryPointerRequest {
             window,
@@ -9454,7 +9492,8 @@ impl XIWarpPointerRequest {
         let (dst_y, remaining) = Fp1616::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIWarpPointerRequest {
             src_win,
@@ -9542,7 +9581,8 @@ impl XIChangeCursorRequest {
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIChangeCursorRequest {
             window,
@@ -10289,7 +10329,8 @@ impl<'input> XIChangeHierarchyRequest<'input> {
         let (num_changes, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (changes, remaining) = crate::x11_utils::parse_list::<HierarchyChange>(remaining, num_changes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIChangeHierarchyRequest {
             changes: Cow::Owned(changes),
@@ -10352,7 +10393,8 @@ impl XISetClientPointerRequest {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XISetClientPointerRequest {
             window,
@@ -10411,7 +10453,8 @@ impl XIGetClientPointerRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(XI_GET_CLIENT_POINTER_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIGetClientPointerRequest {
             window,
@@ -10663,7 +10706,8 @@ impl<'input> XISelectEventsRequest<'input> {
         let (num_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_mask.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XISelectEventsRequest {
             window,
@@ -10723,7 +10767,8 @@ impl XIQueryVersionRequest {
         validate_request_pieces(header, value, None, Some(XI_QUERY_VERSION_REQUEST))?;
         let (major_version, remaining) = u16::try_parse(value)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIQueryVersionRequest {
             major_version,
@@ -12036,7 +12081,8 @@ impl XIQueryDeviceRequest {
         validate_request_pieces(header, value, None, Some(XI_QUERY_DEVICE_REQUEST))?;
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIQueryDeviceRequest {
             deviceid,
@@ -12150,7 +12196,8 @@ impl XISetFocusRequest {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XISetFocusRequest {
             window,
@@ -12214,7 +12261,8 @@ impl XIGetFocusRequest {
         validate_request_pieces(header, value, None, Some(XI_GET_FOCUS_REQUEST))?;
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIGetFocusRequest {
             deviceid,
@@ -12415,7 +12463,8 @@ impl<'input> XIGrabDeviceRequest<'input> {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (mask_len, remaining) = u16::try_parse(remaining)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIGrabDeviceRequest {
             window,
@@ -12523,7 +12572,8 @@ impl XIUngrabDeviceRequest {
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIUngrabDeviceRequest {
             time,
@@ -12690,7 +12740,8 @@ impl XIAllowEventsRequest {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (touchid, remaining) = u32::try_parse(remaining)?;
         let (grab_window, remaining) = xproto::Window::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIAllowEventsRequest {
             time,
@@ -13036,7 +13087,8 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIPassiveGrabDeviceRequest {
             time,
@@ -13189,7 +13241,8 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         let grab_type = grab_type.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIPassiveUngrabDeviceRequest {
             grab_window,
@@ -13255,7 +13308,8 @@ impl XIListPropertiesRequest {
         validate_request_pieces(header, value, None, Some(XI_LIST_PROPERTIES_REQUEST))?;
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIListPropertiesRequest {
             deviceid,
@@ -13494,7 +13548,8 @@ impl<'input> XIChangePropertyRequest<'input> {
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (items, remaining) = XIChangePropertyAux::try_parse(remaining, format, num_items)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIChangePropertyRequest {
             deviceid,
@@ -13569,7 +13624,8 @@ impl XIDeletePropertyRequest {
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIDeletePropertyRequest {
             deviceid,
@@ -13660,7 +13716,8 @@ impl XIGetPropertyRequest {
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
         let (len, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIGetPropertyRequest {
             deviceid,
@@ -13830,7 +13887,8 @@ impl XIGetSelectedEventsRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(XI_GET_SELECTED_EVENTS_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIGetSelectedEventsRequest {
             window,
@@ -13985,7 +14043,8 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
         validate_request_pieces(header, value, None, Some(XI_BARRIER_RELEASE_POINTER_REQUEST))?;
         let (num_barriers, remaining) = u32::try_parse(value)?;
         let (barriers, remaining) = crate::x11_utils::parse_list::<BarrierReleasePointerInfo>(remaining, num_barriers.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(XIBarrierReleasePointerRequest {
             barriers: Cow::Owned(barriers),
@@ -16926,7 +16985,8 @@ impl<'input> SendExtensionEventRequest<'input> {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (events, remaining) = crate::x11_utils::parse_list::<EventForSend>(remaining, num_events.try_into().or(Err(ParseError::ParseError))?)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SendExtensionEventRequest {
             destination,

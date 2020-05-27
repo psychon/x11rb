@@ -78,7 +78,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             major_version,
@@ -169,7 +170,8 @@ impl OpenRequest {
         validate_request_pieces(header, value, None, Some(OPEN_REQUEST))?;
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (provider, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(OpenRequest {
             drawable,
@@ -295,7 +297,8 @@ impl PixmapFromBufferRequest {
         let (bpp, remaining) = u8::try_parse(remaining)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let pixmap_fd = fds.remove(0);
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PixmapFromBufferRequest {
             pixmap,
@@ -368,7 +371,8 @@ impl BufferFromPixmapRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(BUFFER_FROM_PIXMAP_REQUEST))?;
         let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(BufferFromPixmapRequest {
             pixmap,
@@ -482,7 +486,8 @@ impl FenceFromFDRequest {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let fence_fd = fds.remove(0);
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FenceFromFDRequest {
             drawable,
@@ -552,7 +557,8 @@ impl FDFromFenceRequest {
         validate_request_pieces(header, value, None, Some(FD_FROM_FENCE_REQUEST))?;
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (fence, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FDFromFenceRequest {
             drawable,
@@ -649,7 +655,8 @@ impl GetSupportedModifiersRequest {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (bpp, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetSupportedModifiersRequest {
             window,
@@ -874,7 +881,8 @@ impl PixmapFromBuffersRequest {
         if fds.len() < fds_len { return Err(ParseError::ParseError) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(PixmapFromBuffersRequest {
             pixmap,
@@ -959,7 +967,8 @@ impl BuffersFromPixmapRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(BUFFERS_FROM_PIXMAP_REQUEST))?;
         let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(BuffersFromPixmapRequest {
             pixmap,

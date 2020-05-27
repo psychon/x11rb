@@ -1854,7 +1854,8 @@ impl QueryVersionRequest {
         validate_request_pieces(header, value, None, Some(QUERY_VERSION_REQUEST))?;
         let (client_major_version, remaining) = u32::try_parse(value)?;
         let (client_minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryVersionRequest {
             client_major_version,
@@ -2067,7 +2068,8 @@ impl QueryPictIndexValuesRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_PICT_INDEX_VALUES_REQUEST))?;
         let (format, remaining) = Pictformat::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryPictIndexValuesRequest {
             format,
@@ -2490,7 +2492,8 @@ impl<'input> CreatePictureRequest<'input> {
         let (format, remaining) = Pictformat::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = CreatePictureAux::try_parse(remaining, value_mask)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreatePictureRequest {
             pid,
@@ -2863,7 +2866,8 @@ impl<'input> ChangePictureRequest<'input> {
         let (picture, remaining) = Picture::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = ChangePictureAux::try_parse(remaining, value_mask)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ChangePictureRequest {
             picture,
@@ -2943,7 +2947,8 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
             remaining = new_remaining;
             rectangles.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetPictureClipRectanglesRequest {
             picture,
@@ -3004,7 +3009,8 @@ impl FreePictureRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(FREE_PICTURE_REQUEST))?;
         let (picture, remaining) = Picture::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FreePictureRequest {
             picture,
@@ -3122,7 +3128,8 @@ impl CompositeRequest {
         let (dst_y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CompositeRequest {
             op,
@@ -3247,7 +3254,8 @@ impl<'input> TrapezoidsRequest<'input> {
             remaining = new_remaining;
             traps.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(TrapezoidsRequest {
             op,
@@ -3360,7 +3368,8 @@ impl<'input> TrianglesRequest<'input> {
             remaining = new_remaining;
             triangles.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(TrianglesRequest {
             op,
@@ -3473,7 +3482,8 @@ impl<'input> TriStripRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(TriStripRequest {
             op,
@@ -3586,7 +3596,8 @@ impl<'input> TriFanRequest<'input> {
             remaining = new_remaining;
             points.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(TriFanRequest {
             op,
@@ -3660,7 +3671,8 @@ impl CreateGlyphSetRequest {
         validate_request_pieces(header, value, None, Some(CREATE_GLYPH_SET_REQUEST))?;
         let (gsid, remaining) = Glyphset::try_parse(value)?;
         let (format, remaining) = Pictformat::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateGlyphSetRequest {
             gsid,
@@ -3724,7 +3736,8 @@ impl ReferenceGlyphSetRequest {
         validate_request_pieces(header, value, None, Some(REFERENCE_GLYPH_SET_REQUEST))?;
         let (gsid, remaining) = Glyphset::try_parse(value)?;
         let (existing, remaining) = Glyphset::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(ReferenceGlyphSetRequest {
             gsid,
@@ -3781,7 +3794,8 @@ impl FreeGlyphSetRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(FREE_GLYPH_SET_REQUEST))?;
         let (glyphset, remaining) = Glyphset::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FreeGlyphSetRequest {
             glyphset,
@@ -3857,7 +3871,8 @@ impl<'input> AddGlyphsRequest<'input> {
         let (glyphids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, glyphs_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (glyphs, remaining) = crate::x11_utils::parse_list::<Glyphinfo>(remaining, glyphs_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (data, remaining) = remaining.split_at(remaining.len());
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AddGlyphsRequest {
             glyphset,
@@ -3931,7 +3946,8 @@ impl<'input> FreeGlyphsRequest<'input> {
             remaining = new_remaining;
             glyphs.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FreeGlyphsRequest {
             glyphset,
@@ -4033,7 +4049,8 @@ impl<'input> CompositeGlyphs8Request<'input> {
         let (src_x, remaining) = i16::try_parse(remaining)?;
         let (src_y, remaining) = i16::try_parse(remaining)?;
         let (glyphcmds, remaining) = remaining.split_at(remaining.len());
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CompositeGlyphs8Request {
             op,
@@ -4147,7 +4164,8 @@ impl<'input> CompositeGlyphs16Request<'input> {
         let (src_x, remaining) = i16::try_parse(remaining)?;
         let (src_y, remaining) = i16::try_parse(remaining)?;
         let (glyphcmds, remaining) = remaining.split_at(remaining.len());
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CompositeGlyphs16Request {
             op,
@@ -4261,7 +4279,8 @@ impl<'input> CompositeGlyphs32Request<'input> {
         let (src_x, remaining) = i16::try_parse(remaining)?;
         let (src_y, remaining) = i16::try_parse(remaining)?;
         let (glyphcmds, remaining) = remaining.split_at(remaining.len());
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CompositeGlyphs32Request {
             op,
@@ -4363,7 +4382,8 @@ impl<'input> FillRectanglesRequest<'input> {
             remaining = new_remaining;
             rects.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FillRectanglesRequest {
             op,
@@ -4441,7 +4461,8 @@ impl CreateCursorRequest {
         let (source, remaining) = Picture::try_parse(remaining)?;
         let (x, remaining) = u16::try_parse(remaining)?;
         let (y, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateCursorRequest {
             cid,
@@ -4639,7 +4660,8 @@ impl SetPictureTransformRequest {
         validate_request_pieces(header, value, None, Some(SET_PICTURE_TRANSFORM_REQUEST))?;
         let (picture, remaining) = Picture::try_parse(value)?;
         let (transform, remaining) = Transform::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetPictureTransformRequest {
             picture,
@@ -4696,7 +4718,8 @@ impl QueryFiltersRequest {
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         validate_request_pieces(header, value, None, Some(QUERY_FILTERS_REQUEST))?;
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(QueryFiltersRequest {
             drawable,
@@ -4839,7 +4862,8 @@ impl<'input> SetPictureFilterRequest<'input> {
             remaining = new_remaining;
             values.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(SetPictureFilterRequest {
             picture,
@@ -4953,7 +4977,8 @@ impl<'input> CreateAnimCursorRequest<'input> {
             remaining = new_remaining;
             cursors.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateAnimCursorRequest {
             cid,
@@ -5141,7 +5166,8 @@ impl<'input> AddTrapsRequest<'input> {
             remaining = new_remaining;
             traps.push(v);
         }
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(AddTrapsRequest {
             picture,
@@ -5213,7 +5239,8 @@ impl CreateSolidFillRequest {
         validate_request_pieces(header, value, None, Some(CREATE_SOLID_FILL_REQUEST))?;
         let (picture, remaining) = Picture::try_parse(value)?;
         let (color, remaining) = Color::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateSolidFillRequest {
             picture,
@@ -5310,7 +5337,8 @@ impl<'input> CreateLinearGradientRequest<'input> {
         let (num_stops, remaining) = u32::try_parse(remaining)?;
         let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
         let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateLinearGradientRequest {
             picture,
@@ -5427,7 +5455,8 @@ impl<'input> CreateRadialGradientRequest<'input> {
         let (num_stops, remaining) = u32::try_parse(remaining)?;
         let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
         let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateRadialGradientRequest {
             picture,
@@ -5530,7 +5559,8 @@ impl<'input> CreateConicalGradientRequest<'input> {
         let (num_stops, remaining) = u32::try_parse(remaining)?;
         let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
         let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_into().or(Err(ParseError::ParseError))?)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CreateConicalGradientRequest {
             picture,

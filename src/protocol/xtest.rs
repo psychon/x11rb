@@ -75,7 +75,8 @@ impl GetVersionRequest {
         let (major_version, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GetVersionRequest {
             major_version,
@@ -235,7 +236,8 @@ impl CompareCursorRequest {
         validate_request_pieces(header, value, None, Some(COMPARE_CURSOR_REQUEST))?;
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(CompareCursorRequest {
             window,
@@ -365,7 +367,8 @@ impl FakeInputRequest {
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
         let (deviceid, remaining) = u8::try_parse(remaining)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(FakeInputRequest {
             type_,
@@ -433,7 +436,8 @@ impl GrabControlRequest {
         validate_request_pieces(header, value, None, Some(GRAB_CONTROL_REQUEST))?;
         let (impervious, remaining) = bool::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let remaining = &remaining[..(4 - (remaining.len() % 4)) % 4];
+        let remaining = remaining.get(..(4 - (remaining.len() % 4)) % 4)
+            .ok_or(ParseError::ParseError)?;
         check_exhausted(remaining)?;
         Ok(GrabControlRequest {
             impervious,
