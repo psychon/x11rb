@@ -37,6 +37,63 @@ pub trait TryParse: Sized {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>;
 }
 
+/// A representation of the header of a request.
+#[derive(Debug, Clone, Copy)]
+pub struct RequestHeader {
+    /// The major opcode of the request.
+    pub major_opcode: u8,
+    /// The minor opcode of the request (which, for some requests, may not be an
+    /// opcode at all).
+    pub minor_opcode: u8,
+    /// The remaining length of the request, measured in 4 bytes units. Unlike the wire format,
+    /// this does *not* include the header itself, which is 1 unit (or 2 if BigRequests is
+    /// enabled and the length in the first unit is zero). If the BigRequests extension is
+    /// enabled this can be greater than u16::max_value - 1.
+    pub remaining_length: u32,
+}
+
+/// Has the BigRequests extension been enabled?
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BigRequests {
+    /// The BigRequests extension has been enabled.
+    Enabled,
+    /// The BigRequests extension has not been enabled.
+    NotEnabled,
+}
+
+/// Parse the given input for a RequestHeader and the remaining input.
+pub fn parse_request_header(
+    input: &[u8],
+    big_requests_enabled: BigRequests,
+) -> Result<(RequestHeader, &[u8]), ParseError> {
+    let (major_opcode, remaining) = u8::try_parse(input)?;
+    let (minor_opcode, remaining) = u8::try_parse(remaining)?;
+    let (length, remaining) = u16::try_parse(remaining)?;
+    let (remaining_length, finally_remaining) = if length == 0 {
+        if big_requests_enabled == BigRequests::NotEnabled {
+            return Err(ParseError::ParseError);
+        }
+
+        let (length, remaining) = u32::try_parse(remaining)?;
+        if length < 2 {
+            return Err(ParseError::ParseError);
+        }
+        // Adjust length for the size of this header (two 4 byte units).
+        (length - 2, remaining)
+    } else {
+        // Adjust length for the size of this header (one 4 byte unit).
+        (length as u32 - 1, remaining)
+    };
+    Ok((
+        RequestHeader {
+            major_opcode,
+            minor_opcode,
+            remaining_length,
+        },
+        finally_remaining,
+    ))
+}
+
 /// A type implementing this trait can be serialized into X11 raw bytes.
 pub trait Serialize {
     /// The value returned by `serialize`.

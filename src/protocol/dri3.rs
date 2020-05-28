@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -72,6 +72,19 @@ impl QueryVersionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (major_version, remaining) = u32::try_parse(value)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            major_version,
+            minor_version,
+        })
     }
 }
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -151,6 +164,19 @@ impl OpenRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != OPEN_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (provider, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(OpenRequest {
+            drawable,
+            provider,
+        })
     }
 }
 pub fn open<Conn>(conn: &Conn, drawable: xproto::Drawable, provider: u32) -> Result<CookieWithFds<'_, Conn, OpenReply>, ConnectionError>
@@ -258,6 +284,34 @@ impl PixmapFromBufferRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![self.pixmap_fd]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
+        if header.minor_opcode != PIXMAP_FROM_BUFFER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (size, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (stride, remaining) = u16::try_parse(remaining)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let (bpp, remaining) = u8::try_parse(remaining)?;
+        if fds.is_empty() { return Err(ParseError::ParseError) }
+        let pixmap_fd = fds.remove(0);
+        let _ = remaining;
+        Ok(PixmapFromBufferRequest {
+            pixmap,
+            drawable,
+            size,
+            width,
+            height,
+            stride,
+            depth,
+            bpp,
+            pixmap_fd,
+        })
+    }
 }
 pub fn pixmap_from_buffer<Conn, A>(conn: &Conn, pixmap: xproto::Pixmap, drawable: xproto::Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -312,6 +366,17 @@ impl BufferFromPixmapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != BUFFER_FROM_PIXMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
+        let _ = remaining;
+        Ok(BufferFromPixmapRequest {
+            pixmap,
+        })
     }
 }
 pub fn buffer_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BufferFromPixmapReply>, ConnectionError>
@@ -412,6 +477,25 @@ impl FenceFromFDRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![self.fence_fd]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
+        if header.minor_opcode != FENCE_FROM_FD_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (fence, remaining) = u32::try_parse(remaining)?;
+        let (initially_triggered, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        if fds.is_empty() { return Err(ParseError::ParseError) }
+        let fence_fd = fds.remove(0);
+        let _ = remaining;
+        Ok(FenceFromFDRequest {
+            drawable,
+            fence,
+            initially_triggered,
+            fence_fd,
+        })
+    }
 }
 pub fn fence_from_fd<Conn, A>(conn: &Conn, drawable: xproto::Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -467,6 +551,19 @@ impl FDFromFenceRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != FD_FROM_FENCE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (fence, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(FDFromFenceRequest {
+            drawable,
+            fence,
+        })
     }
 }
 pub fn fd_from_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: u32) -> Result<CookieWithFds<'_, Conn, FDFromFenceReply>, ConnectionError>
@@ -550,6 +647,22 @@ impl GetSupportedModifiersRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SUPPORTED_MODIFIERS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = u32::try_parse(value)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let (bpp, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetSupportedModifiersRequest {
+            window,
+            depth,
+            bpp,
+        })
     }
 }
 pub fn get_supported_modifiers<Conn>(conn: &Conn, window: u32, depth: u8, bpp: u8) -> Result<Cookie<'_, Conn, GetSupportedModifiersReply>, ConnectionError>
@@ -743,6 +856,53 @@ impl PixmapFromBuffersRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], self.buffers))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
+        if header.minor_opcode != PIXMAP_FROM_BUFFERS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (num_buffers, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (stride0, remaining) = u32::try_parse(remaining)?;
+        let (offset0, remaining) = u32::try_parse(remaining)?;
+        let (stride1, remaining) = u32::try_parse(remaining)?;
+        let (offset1, remaining) = u32::try_parse(remaining)?;
+        let (stride2, remaining) = u32::try_parse(remaining)?;
+        let (offset2, remaining) = u32::try_parse(remaining)?;
+        let (stride3, remaining) = u32::try_parse(remaining)?;
+        let (offset3, remaining) = u32::try_parse(remaining)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let (bpp, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (modifier, remaining) = u64::try_parse(remaining)?;
+        let fds_len = usize::try_from(num_buffers).or(Err(ParseError::ParseError))?;
+        if fds.len() < fds_len { return Err(ParseError::ParseError) }
+        let mut buffers = fds.split_off(fds_len);
+        std::mem::swap(fds, &mut buffers);
+        let _ = remaining;
+        Ok(PixmapFromBuffersRequest {
+            pixmap,
+            window,
+            width,
+            height,
+            stride0,
+            offset0,
+            stride1,
+            offset1,
+            stride2,
+            offset2,
+            stride3,
+            offset3,
+            depth,
+            bpp,
+            modifier,
+            buffers,
+        })
+    }
 }
 pub fn pixmap_from_buffers<Conn>(conn: &Conn, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -802,6 +962,17 @@ impl BuffersFromPixmapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != BUFFERS_FROM_PIXMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
+        let _ = remaining;
+        Ok(BuffersFromPixmapRequest {
+            pixmap,
+        })
     }
 }
 pub fn buffers_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BuffersFromPixmapReply>, ConnectionError>

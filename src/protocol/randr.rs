@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -540,6 +540,19 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (major_version, remaining) = u32::try_parse(value)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            major_version,
+            minor_version,
+        })
+    }
 }
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -707,6 +720,28 @@ impl SetScreenConfigRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_SCREEN_CONFIG_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (size_id, remaining) = u16::try_parse(remaining)?;
+        let (rotation, remaining) = u16::try_parse(remaining)?;
+        let (rate, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SetScreenConfigRequest {
+            window,
+            timestamp,
+            config_timestamp,
+            size_id,
+            rotation,
+            rate,
+        })
     }
 }
 pub fn set_screen_config<Conn, A>(conn: &Conn, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: A, rate: u16) -> Result<Cookie<'_, Conn, SetScreenConfigReply>, ConnectionError>
@@ -882,6 +917,20 @@ impl SelectInputRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SELECT_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (enable, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SelectInputRequest {
+            window,
+            enable,
+        })
+    }
 }
 pub fn select_input<Conn, A>(conn: &Conn, window: xproto::Window, enable: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -929,6 +978,17 @@ impl GetScreenInfoRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SCREEN_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetScreenInfoRequest {
+            window,
+        })
     }
 }
 pub fn get_screen_info<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenInfoReply>, ConnectionError>
@@ -1034,6 +1094,17 @@ impl GetScreenSizeRangeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SCREEN_SIZE_RANGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetScreenSizeRangeRequest {
+            window,
+        })
+    }
 }
 pub fn get_screen_size_range<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenSizeRangeReply>, ConnectionError>
 where
@@ -1130,6 +1201,25 @@ impl SetScreenSizeRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_SCREEN_SIZE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (mm_width, remaining) = u32::try_parse(remaining)?;
+        let (mm_height, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetScreenSizeRequest {
+            window,
+            width,
+            height,
+            mm_width,
+            mm_height,
+        })
     }
 }
 pub fn set_screen_size<Conn>(conn: &Conn, window: xproto::Window, width: u16, height: u16, mm_width: u32, mm_height: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1373,6 +1463,17 @@ impl GetScreenResourcesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SCREEN_RESOURCES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetScreenResourcesRequest {
+            window,
+        })
+    }
 }
 pub fn get_screen_resources<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenResourcesReply>, ConnectionError>
 where
@@ -1584,6 +1685,19 @@ impl GetOutputInfoRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_OUTPUT_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (output, remaining) = Output::try_parse(value)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetOutputInfoRequest {
+            output,
+            config_timestamp,
+        })
+    }
 }
 pub fn get_output_info<Conn>(conn: &Conn, output: Output, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetOutputInfoReply>, ConnectionError>
 where
@@ -1738,6 +1852,17 @@ impl ListOutputPropertiesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LIST_OUTPUT_PROPERTIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (output, remaining) = Output::try_parse(value)?;
+        let _ = remaining;
+        Ok(ListOutputPropertiesRequest {
+            output,
+        })
+    }
 }
 pub fn list_output_properties<Conn>(conn: &Conn, output: Output) -> Result<Cookie<'_, Conn, ListOutputPropertiesReply>, ConnectionError>
 where
@@ -1830,6 +1955,19 @@ impl QueryOutputPropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_OUTPUT_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (output, remaining) = Output::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryOutputPropertyRequest {
+            output,
+            property,
+        })
     }
 }
 pub fn query_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom) -> Result<Cookie<'_, Conn, QueryOutputPropertyReply>, ConnectionError>
@@ -1942,6 +2080,33 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CONFIGURE_OUTPUT_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (output, remaining) = Output::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (pending, remaining) = bool::try_parse(remaining)?;
+        let (range, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut values = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = i32::try_parse(remaining)?;
+            remaining = new_remaining;
+            values.push(v);
+        }
+        let _ = remaining;
+        Ok(ConfigureOutputPropertyRequest {
+            output,
+            property,
+            pending,
+            range,
+            values: Cow::Owned(values),
+        })
+    }
 }
 pub fn configure_output_property<'c, 'input, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &'input [i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2022,6 +2187,31 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_OUTPUT_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (output, remaining) = Output::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (num_units, remaining) = u32::try_parse(remaining)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_units.checked_mul(u32::from(format)).ok_or(ParseError::ParseError)?.checked_div(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ChangeOutputPropertyRequest {
+            output,
+            property,
+            type_,
+            format,
+            mode,
+            num_units,
+            data,
+        })
+    }
 }
 pub fn change_output_property<'c, 'input, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2078,6 +2268,19 @@ impl DeleteOutputPropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DELETE_OUTPUT_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (output, remaining) = Output::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(DeleteOutputPropertyRequest {
+            output,
+            property,
+        })
     }
 }
 pub fn delete_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2156,6 +2359,30 @@ impl GetOutputPropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_OUTPUT_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (output, remaining) = Output::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (long_offset, remaining) = u32::try_parse(remaining)?;
+        let (long_length, remaining) = u32::try_parse(remaining)?;
+        let (delete, remaining) = bool::try_parse(remaining)?;
+        let (pending, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetOutputPropertyRequest {
+            output,
+            property,
+            type_,
+            long_offset,
+            long_length,
+            delete,
+            pending,
+        })
     }
 }
 pub fn get_output_property<Conn, A>(conn: &Conn, output: Output, property: xproto::Atom, type_: A, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetOutputPropertyReply>, ConnectionError>
@@ -2282,6 +2509,21 @@ impl<'input> CreateModeRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (mode_info, remaining) = ModeInfo::try_parse(remaining)?;
+        let (name, remaining) = remaining.split_at(remaining.len());
+        let _ = remaining;
+        Ok(CreateModeRequest {
+            window,
+            mode_info,
+            name,
+        })
+    }
 }
 pub fn create_mode<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, mode_info: ModeInfo, name: &'input [u8]) -> Result<Cookie<'c, Conn, CreateModeReply>, ConnectionError>
 where
@@ -2355,6 +2597,17 @@ impl DestroyModeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DESTROY_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (mode, remaining) = Mode::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyModeRequest {
+            mode,
+        })
+    }
 }
 pub fn destroy_mode<Conn>(conn: &Conn, mode: Mode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2405,6 +2658,19 @@ impl AddOutputModeRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != ADD_OUTPUT_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (output, remaining) = Output::try_parse(value)?;
+        let (mode, remaining) = Mode::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(AddOutputModeRequest {
+            output,
+            mode,
+        })
     }
 }
 pub fn add_output_mode<Conn>(conn: &Conn, output: Output, mode: Mode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2458,6 +2724,19 @@ impl DeleteOutputModeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DELETE_OUTPUT_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (output, remaining) = Output::try_parse(value)?;
+        let (mode, remaining) = Mode::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(DeleteOutputModeRequest {
+            output,
+            mode,
+        })
+    }
 }
 pub fn delete_output_mode<Conn>(conn: &Conn, output: Output, mode: Mode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2509,6 +2788,19 @@ impl GetCrtcInfoRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CRTC_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (crtc, remaining) = Crtc::try_parse(value)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetCrtcInfoRequest {
+            crtc,
+            config_timestamp,
+        })
     }
 }
 pub fn get_crtc_info<Conn>(conn: &Conn, crtc: Crtc, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetCrtcInfoReply>, ConnectionError>
@@ -2668,6 +2960,39 @@ impl<'input> SetCrtcConfigRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), outputs_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_CRTC_CONFIG_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (crtc, remaining) = Crtc::try_parse(value)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (mode, remaining) = Mode::try_parse(remaining)?;
+        let (rotation, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut outputs = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Output::try_parse(remaining)?;
+            remaining = new_remaining;
+            outputs.push(v);
+        }
+        let _ = remaining;
+        Ok(SetCrtcConfigRequest {
+            crtc,
+            timestamp,
+            config_timestamp,
+            x,
+            y,
+            mode,
+            rotation,
+            outputs: Cow::Owned(outputs),
+        })
+    }
 }
 pub fn set_crtc_config<'c, 'input, Conn, A>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &'input [Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
 where
@@ -2750,6 +3075,17 @@ impl GetCrtcGammaSizeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CRTC_GAMMA_SIZE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (crtc, remaining) = Crtc::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetCrtcGammaSizeRequest {
+            crtc,
+        })
+    }
 }
 pub fn get_crtc_gamma_size<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetCrtcGammaSizeReply>, ConnectionError>
 where
@@ -2820,6 +3156,17 @@ impl GetCrtcGammaRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CRTC_GAMMA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (crtc, remaining) = Crtc::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetCrtcGammaRequest {
+            crtc,
+        })
     }
 }
 pub fn get_crtc_gamma<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetCrtcGammaReply>, ConnectionError>
@@ -2931,6 +3278,25 @@ impl<'input> SetCrtcGammaRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), red_bytes.into(), green_bytes.into(), blue_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_CRTC_GAMMA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (crtc, remaining) = Crtc::try_parse(value)?;
+        let (size, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetCrtcGammaRequest {
+            crtc,
+            red: Cow::Owned(red),
+            green: Cow::Owned(green),
+            blue: Cow::Owned(blue),
+        })
+    }
 }
 pub fn set_crtc_gamma<'c, 'input, Conn>(conn: &'c Conn, crtc: Crtc, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2978,6 +3344,17 @@ impl GetScreenResourcesCurrentRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SCREEN_RESOURCES_CURRENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetScreenResourcesCurrentRequest {
+            window,
+        })
     }
 }
 pub fn get_screen_resources_current<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenResourcesCurrentReply>, ConnectionError>
@@ -3241,6 +3618,36 @@ impl<'input> SetCrtcTransformRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.filter_name.into(), padding0.into(), filter_params_bytes.into(), padding1.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_CRTC_TRANSFORM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (crtc, remaining) = Crtc::try_parse(value)?;
+        let (transform, remaining) = render::Transform::try_parse(remaining)?;
+        let (filter_len, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (filter_name, remaining) = crate::x11_utils::parse_u8_list(remaining, filter_len.try_into().or(Err(ParseError::ParseError))?)?;
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut filter_params = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = render::Fixed::try_parse(remaining)?;
+            remaining = new_remaining;
+            filter_params.push(v);
+        }
+        let _ = remaining;
+        Ok(SetCrtcTransformRequest {
+            crtc,
+            transform,
+            filter_name,
+            filter_params: Cow::Owned(filter_params),
+        })
+    }
 }
 pub fn set_crtc_transform<'c, 'input, Conn>(conn: &'c Conn, crtc: Crtc, transform: render::Transform, filter_name: &'input [u8], filter_params: &'input [render::Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -3288,6 +3695,17 @@ impl GetCrtcTransformRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CRTC_TRANSFORM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (crtc, remaining) = Crtc::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetCrtcTransformRequest {
+            crtc,
+        })
     }
 }
 pub fn get_crtc_transform<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetCrtcTransformReply>, ConnectionError>
@@ -3442,6 +3860,17 @@ impl GetPanningRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PANNING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (crtc, remaining) = Crtc::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetPanningRequest {
+            crtc,
+        })
+    }
 }
 pub fn get_panning<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetPanningReply>, ConnectionError>
 where
@@ -3592,6 +4021,43 @@ impl SetPanningRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_PANNING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (crtc, remaining) = Crtc::try_parse(value)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (left, remaining) = u16::try_parse(remaining)?;
+        let (top, remaining) = u16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (track_left, remaining) = u16::try_parse(remaining)?;
+        let (track_top, remaining) = u16::try_parse(remaining)?;
+        let (track_width, remaining) = u16::try_parse(remaining)?;
+        let (track_height, remaining) = u16::try_parse(remaining)?;
+        let (border_left, remaining) = i16::try_parse(remaining)?;
+        let (border_top, remaining) = i16::try_parse(remaining)?;
+        let (border_right, remaining) = i16::try_parse(remaining)?;
+        let (border_bottom, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetPanningRequest {
+            crtc,
+            timestamp,
+            left,
+            top,
+            width,
+            height,
+            track_left,
+            track_top,
+            track_width,
+            track_height,
+            border_left,
+            border_top,
+            border_right,
+            border_bottom,
+        })
+    }
 }
 pub fn set_panning<Conn>(conn: &Conn, crtc: Crtc, timestamp: xproto::Timestamp, left: u16, top: u16, width: u16, height: u16, track_left: u16, track_top: u16, track_width: u16, track_height: u16, border_left: i16, border_top: i16, border_right: i16, border_bottom: i16) -> Result<Cookie<'_, Conn, SetPanningReply>, ConnectionError>
 where
@@ -3683,6 +4149,19 @@ impl SetOutputPrimaryRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_OUTPUT_PRIMARY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (output, remaining) = Output::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetOutputPrimaryRequest {
+            window,
+            output,
+        })
+    }
 }
 pub fn set_output_primary<Conn>(conn: &Conn, window: xproto::Window, output: Output) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -3728,6 +4207,17 @@ impl GetOutputPrimaryRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_OUTPUT_PRIMARY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetOutputPrimaryRequest {
+            window,
+        })
     }
 }
 pub fn get_output_primary<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetOutputPrimaryReply>, ConnectionError>
@@ -3798,6 +4288,17 @@ impl GetProvidersRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PROVIDERS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetProvidersRequest {
+            window,
+        })
     }
 }
 pub fn get_providers<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetProvidersReply>, ConnectionError>
@@ -3963,6 +4464,19 @@ impl GetProviderInfoRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PROVIDER_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (provider, remaining) = Provider::try_parse(value)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetProviderInfoRequest {
+            provider,
+            config_timestamp,
+        })
+    }
 }
 pub fn get_provider_info<Conn>(conn: &Conn, provider: Provider, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetProviderInfoReply>, ConnectionError>
 where
@@ -4119,6 +4633,21 @@ impl SetProviderOffloadSinkRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_PROVIDER_OFFLOAD_SINK_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (provider, remaining) = Provider::try_parse(value)?;
+        let (sink_provider, remaining) = Provider::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetProviderOffloadSinkRequest {
+            provider,
+            sink_provider,
+            config_timestamp,
+        })
+    }
 }
 pub fn set_provider_offload_sink<Conn>(conn: &Conn, provider: Provider, sink_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -4178,6 +4707,21 @@ impl SetProviderOutputSourceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_PROVIDER_OUTPUT_SOURCE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (provider, remaining) = Provider::try_parse(value)?;
+        let (source_provider, remaining) = Provider::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetProviderOutputSourceRequest {
+            provider,
+            source_provider,
+            config_timestamp,
+        })
+    }
 }
 pub fn set_provider_output_source<Conn>(conn: &Conn, provider: Provider, source_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -4224,6 +4768,17 @@ impl ListProviderPropertiesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LIST_PROVIDER_PROPERTIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (provider, remaining) = Provider::try_parse(value)?;
+        let _ = remaining;
+        Ok(ListProviderPropertiesRequest {
+            provider,
+        })
     }
 }
 pub fn list_provider_properties<Conn>(conn: &Conn, provider: Provider) -> Result<Cookie<'_, Conn, ListProviderPropertiesReply>, ConnectionError>
@@ -4317,6 +4872,19 @@ impl QueryProviderPropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_PROVIDER_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (provider, remaining) = Provider::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryProviderPropertyRequest {
+            provider,
+            property,
+        })
     }
 }
 pub fn query_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom) -> Result<Cookie<'_, Conn, QueryProviderPropertyReply>, ConnectionError>
@@ -4429,6 +4997,33 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CONFIGURE_PROVIDER_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (provider, remaining) = Provider::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (pending, remaining) = bool::try_parse(remaining)?;
+        let (range, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut values = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = i32::try_parse(remaining)?;
+            remaining = new_remaining;
+            values.push(v);
+        }
+        let _ = remaining;
+        Ok(ConfigureProviderPropertyRequest {
+            provider,
+            property,
+            pending,
+            range,
+            values: Cow::Owned(values),
+        })
+    }
 }
 pub fn configure_provider_property<'c, 'input, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &'input [i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -4509,6 +5104,30 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_PROVIDER_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (provider, remaining) = Provider::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (num_items, remaining) = u32::try_parse(remaining)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ChangeProviderPropertyRequest {
+            provider,
+            property,
+            type_,
+            format,
+            mode,
+            num_items,
+            data,
+        })
+    }
 }
 pub fn change_provider_property<'c, 'input, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -4565,6 +5184,19 @@ impl DeleteProviderPropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DELETE_PROVIDER_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (provider, remaining) = Provider::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(DeleteProviderPropertyRequest {
+            provider,
+            property,
+        })
     }
 }
 pub fn delete_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -4643,6 +5275,30 @@ impl GetProviderPropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PROVIDER_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (provider, remaining) = Provider::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (long_offset, remaining) = u32::try_parse(remaining)?;
+        let (long_length, remaining) = u32::try_parse(remaining)?;
+        let (delete, remaining) = bool::try_parse(remaining)?;
+        let (pending, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetProviderPropertyRequest {
+            provider,
+            property,
+            type_,
+            long_offset,
+            long_length,
+            delete,
+            pending,
+        })
     }
 }
 pub fn get_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetProviderPropertyReply>, ConnectionError>
@@ -5457,6 +6113,19 @@ impl GetMonitorsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_MONITORS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (get_active, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMonitorsRequest {
+            window,
+            get_active,
+        })
+    }
 }
 pub fn get_monitors<Conn>(conn: &Conn, window: xproto::Window, get_active: bool) -> Result<Cookie<'_, Conn, GetMonitorsReply>, ConnectionError>
 where
@@ -5554,6 +6223,19 @@ impl SetMonitorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), monitorinfo_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_MONITOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (monitorinfo, remaining) = MonitorInfo::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetMonitorRequest {
+            window,
+            monitorinfo,
+        })
+    }
 }
 pub fn set_monitor<Conn>(conn: &Conn, window: xproto::Window, monitorinfo: MonitorInfo) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -5605,6 +6287,19 @@ impl DeleteMonitorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DELETE_MONITOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (name, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(DeleteMonitorRequest {
+            window,
+            name,
+        })
     }
 }
 pub fn delete_monitor<Conn>(conn: &Conn, window: xproto::Window, name: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -5673,6 +6368,25 @@ impl<'input> CreateLeaseRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), crtcs_bytes.into(), outputs_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_LEASE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (lid, remaining) = Lease::try_parse(remaining)?;
+        let (num_crtcs, remaining) = u16::try_parse(remaining)?;
+        let (num_outputs, remaining) = u16::try_parse(remaining)?;
+        let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(CreateLeaseRequest {
+            window,
+            lid,
+            crtcs: Cow::Owned(crtcs),
+            outputs: Cow::Owned(outputs),
+        })
     }
 }
 pub fn create_lease<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, lid: Lease, crtcs: &'input [Crtc], outputs: &'input [Output]) -> Result<CookieWithFds<'c, Conn, CreateLeaseReply>, ConnectionError>
@@ -5756,6 +6470,19 @@ impl FreeLeaseRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != FREE_LEASE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (lid, remaining) = Lease::try_parse(value)?;
+        let (terminate, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(FreeLeaseRequest {
+            lid,
+            terminate,
+        })
     }
 }
 pub fn free_lease<Conn>(conn: &Conn, lid: Lease, terminate: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>

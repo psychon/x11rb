@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -109,6 +109,15 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(QueryVersionRequest
+        )
+    }
 }
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -181,6 +190,17 @@ impl QueryDirectRenderingCapableRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_DIRECT_RENDERING_CAPABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryDirectRenderingCapableRequest {
+            screen,
+        })
+    }
 }
 pub fn query_direct_rendering_capable<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, QueryDirectRenderingCapableReply>, ConnectionError>
 where
@@ -250,6 +270,17 @@ impl OpenConnectionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != OPEN_CONNECTION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(OpenConnectionRequest {
+            screen,
+        })
     }
 }
 pub fn open_connection<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, OpenConnectionReply>, ConnectionError>
@@ -343,6 +374,17 @@ impl CloseConnectionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CLOSE_CONNECTION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(CloseConnectionRequest {
+            screen,
+        })
+    }
 }
 pub fn close_connection<Conn>(conn: &Conn, screen: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -387,6 +429,17 @@ impl GetClientDriverNameRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CLIENT_DRIVER_NAME_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetClientDriverNameRequest {
+            screen,
+        })
     }
 }
 pub fn get_client_driver_name<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetClientDriverNameReply>, ConnectionError>
@@ -494,6 +547,21 @@ impl CreateContextRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (visual, remaining) = u32::try_parse(remaining)?;
+        let (context, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateContextRequest {
+            screen,
+            visual,
+            context,
+        })
+    }
 }
 pub fn create_context<Conn>(conn: &Conn, screen: u32, visual: u32, context: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
 where
@@ -572,6 +640,19 @@ impl DestroyContextRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DESTROY_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (context, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(DestroyContextRequest {
+            screen,
+            context,
+        })
+    }
 }
 pub fn destroy_context<Conn>(conn: &Conn, screen: u32, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -623,6 +704,19 @@ impl CreateDrawableRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_DRAWABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (drawable, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateDrawableRequest {
+            screen,
+            drawable,
+        })
     }
 }
 pub fn create_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, CreateDrawableReply>, ConnectionError>
@@ -701,6 +795,19 @@ impl DestroyDrawableRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DESTROY_DRAWABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (drawable, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(DestroyDrawableRequest {
+            screen,
+            drawable,
+        })
+    }
 }
 pub fn destroy_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -752,6 +859,19 @@ impl GetDrawableInfoRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DRAWABLE_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (drawable, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetDrawableInfoRequest {
+            screen,
+            drawable,
+        })
     }
 }
 pub fn get_drawable_info<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, GetDrawableInfoReply>, ConnectionError>
@@ -872,6 +992,17 @@ impl GetDeviceInfoRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetDeviceInfoRequest {
+            screen,
+        })
+    }
 }
 pub fn get_device_info<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
 where
@@ -973,6 +1104,19 @@ impl AuthConnectionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != AUTH_CONNECTION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (magic, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(AuthConnectionRequest {
+            screen,
+            magic,
+        })
     }
 }
 pub fn auth_connection<Conn>(conn: &Conn, screen: u32, magic: u32) -> Result<Cookie<'_, Conn, AuthConnectionReply>, ConnectionError>

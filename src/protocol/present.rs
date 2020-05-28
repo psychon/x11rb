@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -539,6 +539,19 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (major_version, remaining) = u32::try_parse(value)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            major_version,
+            minor_version,
+        })
+    }
 }
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -707,6 +720,53 @@ impl<'input> PixmapRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), notifies_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != PIXMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
+        let (valid, remaining) = xfixes::Region::try_parse(remaining)?;
+        let (update, remaining) = xfixes::Region::try_parse(remaining)?;
+        let (x_off, remaining) = i16::try_parse(remaining)?;
+        let (y_off, remaining) = i16::try_parse(remaining)?;
+        let (target_crtc, remaining) = randr::Crtc::try_parse(remaining)?;
+        let (wait_fence, remaining) = sync::Fence::try_parse(remaining)?;
+        let (idle_fence, remaining) = sync::Fence::try_parse(remaining)?;
+        let (options, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (target_msc, remaining) = u64::try_parse(remaining)?;
+        let (divisor, remaining) = u64::try_parse(remaining)?;
+        let (remainder, remaining) = u64::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut notifies = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Notify::try_parse(remaining)?;
+            remaining = new_remaining;
+            notifies.push(v);
+        }
+        let _ = remaining;
+        Ok(PixmapRequest {
+            window,
+            pixmap,
+            serial,
+            valid,
+            update,
+            x_off,
+            y_off,
+            target_crtc,
+            wait_fence,
+            idle_fence,
+            options,
+            target_msc,
+            divisor,
+            remainder,
+            notifies: Cow::Owned(notifies),
+        })
+    }
 }
 pub fn pixmap<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &'input [Notify]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -806,6 +866,26 @@ impl NotifyMSCRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != NOTIFY_MSC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (target_msc, remaining) = u64::try_parse(remaining)?;
+        let (divisor, remaining) = u64::try_parse(remaining)?;
+        let (remainder, remaining) = u64::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(NotifyMSCRequest {
+            window,
+            serial,
+            target_msc,
+            divisor,
+            remainder,
+        })
+    }
 }
 pub fn notify_msc<Conn>(conn: &Conn, window: xproto::Window, serial: u32, target_msc: u64, divisor: u64, remainder: u64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -869,6 +949,21 @@ impl SelectInputRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SELECT_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (eid, remaining) = Event::try_parse(value)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SelectInputRequest {
+            eid,
+            window,
+            event_mask,
+        })
+    }
 }
 pub fn select_input<Conn, A>(conn: &Conn, eid: Event, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -917,6 +1012,17 @@ impl QueryCapabilitiesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_CAPABILITIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (target, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryCapabilitiesRequest {
+            target,
+        })
     }
 }
 pub fn query_capabilities<Conn>(conn: &Conn, target: u32) -> Result<Cookie<'_, Conn, QueryCapabilitiesReply>, ConnectionError>

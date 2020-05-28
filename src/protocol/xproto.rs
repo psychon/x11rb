@@ -22,7 +22,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -5733,7 +5733,7 @@ impl From<Gravity> for Option<u32> {
     }
 }
 impl Gravity {
-    fn try_from(value: impl Into<u32>, value_for_zero: Self) -> Result<Self, ParseError> {
+    pub fn try_from(value: impl Into<u32>, value_for_zero: Self) -> Result<Self, ParseError> {
         let value = value.into();
         match value {
             0 => Ok(value_for_zero),
@@ -5770,6 +5770,137 @@ pub struct CreateWindowAux {
     pub do_not_propogate_mask: Option<u32>,
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
+}
+impl CreateWindowAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let background_pixmap = if switch_expr & u32::from(CW::BackPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixmap)
+        } else {
+            None
+        };
+        let background_pixel = if switch_expr & u32::from(CW::BackPixel) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixel)
+        } else {
+            None
+        };
+        let border_pixmap = if switch_expr & u32::from(CW::BorderPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixmap)
+        } else {
+            None
+        };
+        let border_pixel = if switch_expr & u32::from(CW::BorderPixel) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixel)
+        } else {
+            None
+        };
+        let bit_gravity = if switch_expr & u32::from(CW::BitGravity) != 0 {
+            let remaining = outer_remaining;
+            let (bit_gravity, remaining) = u32::try_parse(remaining)?;
+            let bit_gravity = Gravity::try_from(bit_gravity, Gravity::BitForget)?;
+            outer_remaining = remaining;
+            Some(bit_gravity)
+        } else {
+            None
+        };
+        let win_gravity = if switch_expr & u32::from(CW::WinGravity) != 0 {
+            let remaining = outer_remaining;
+            let (win_gravity, remaining) = u32::try_parse(remaining)?;
+            let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
+            outer_remaining = remaining;
+            Some(win_gravity)
+        } else {
+            None
+        };
+        let backing_store = if switch_expr & u32::from(CW::BackingStore) != 0 {
+            let remaining = outer_remaining;
+            let (backing_store, remaining) = u32::try_parse(remaining)?;
+            let backing_store = backing_store.try_into()?;
+            outer_remaining = remaining;
+            Some(backing_store)
+        } else {
+            None
+        };
+        let backing_planes = if switch_expr & u32::from(CW::BackingPlanes) != 0 {
+            let remaining = outer_remaining;
+            let (backing_planes, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_planes)
+        } else {
+            None
+        };
+        let backing_pixel = if switch_expr & u32::from(CW::BackingPixel) != 0 {
+            let remaining = outer_remaining;
+            let (backing_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_pixel)
+        } else {
+            None
+        };
+        let override_redirect = if switch_expr & u32::from(CW::OverrideRedirect) != 0 {
+            let remaining = outer_remaining;
+            let (override_redirect, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(override_redirect)
+        } else {
+            None
+        };
+        let save_under = if switch_expr & u32::from(CW::SaveUnder) != 0 {
+            let remaining = outer_remaining;
+            let (save_under, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(save_under)
+        } else {
+            None
+        };
+        let event_mask = if switch_expr & u32::from(CW::EventMask) != 0 {
+            let remaining = outer_remaining;
+            let (event_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(event_mask)
+        } else {
+            None
+        };
+        let do_not_propogate_mask = if switch_expr & u32::from(CW::DontPropagate) != 0 {
+            let remaining = outer_remaining;
+            let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(do_not_propogate_mask)
+        } else {
+            None
+        };
+        let colormap = if switch_expr & u32::from(CW::Colormap) != 0 {
+            let remaining = outer_remaining;
+            let (colormap, remaining) = Colormap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(colormap)
+        } else {
+            None
+        };
+        let cursor = if switch_expr & u32::from(CW::Cursor) != 0 {
+            let remaining = outer_remaining;
+            let (cursor, remaining) = Cursor::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(cursor)
+        } else {
+            None
+        };
+        let result = CreateWindowAux { background_pixmap, background_pixel, border_pixmap, border_pixel, bit_gravity, win_gravity, backing_store, backing_planes, backing_pixel, override_redirect, save_under, event_mask, do_not_propogate_mask, colormap, cursor };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl CreateWindowAux {
@@ -6093,6 +6224,41 @@ impl<'input> CreateWindowRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CREATE_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        let (wid, remaining) = Window::try_parse(value)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (border_width, remaining) = u16::try_parse(remaining)?;
+        let (class, remaining) = u16::try_parse(remaining)?;
+        let class = class.try_into()?;
+        let (visual, remaining) = Visualid::try_parse(remaining)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = CreateWindowAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(CreateWindowRequest {
+            depth,
+            wid,
+            parent,
+            x,
+            y,
+            width,
+            height,
+            border_width,
+            class,
+            visual,
+            value_list: Cow::Owned(value_list),
+        })
+    }
 }
 /// Creates a window.
 ///
@@ -6188,6 +6354,137 @@ pub struct ChangeWindowAttributesAux {
     pub do_not_propogate_mask: Option<u32>,
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
+}
+impl ChangeWindowAttributesAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let background_pixmap = if switch_expr & u32::from(CW::BackPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixmap)
+        } else {
+            None
+        };
+        let background_pixel = if switch_expr & u32::from(CW::BackPixel) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixel)
+        } else {
+            None
+        };
+        let border_pixmap = if switch_expr & u32::from(CW::BorderPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixmap, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixmap)
+        } else {
+            None
+        };
+        let border_pixel = if switch_expr & u32::from(CW::BorderPixel) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixel)
+        } else {
+            None
+        };
+        let bit_gravity = if switch_expr & u32::from(CW::BitGravity) != 0 {
+            let remaining = outer_remaining;
+            let (bit_gravity, remaining) = u32::try_parse(remaining)?;
+            let bit_gravity = Gravity::try_from(bit_gravity, Gravity::BitForget)?;
+            outer_remaining = remaining;
+            Some(bit_gravity)
+        } else {
+            None
+        };
+        let win_gravity = if switch_expr & u32::from(CW::WinGravity) != 0 {
+            let remaining = outer_remaining;
+            let (win_gravity, remaining) = u32::try_parse(remaining)?;
+            let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
+            outer_remaining = remaining;
+            Some(win_gravity)
+        } else {
+            None
+        };
+        let backing_store = if switch_expr & u32::from(CW::BackingStore) != 0 {
+            let remaining = outer_remaining;
+            let (backing_store, remaining) = u32::try_parse(remaining)?;
+            let backing_store = backing_store.try_into()?;
+            outer_remaining = remaining;
+            Some(backing_store)
+        } else {
+            None
+        };
+        let backing_planes = if switch_expr & u32::from(CW::BackingPlanes) != 0 {
+            let remaining = outer_remaining;
+            let (backing_planes, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_planes)
+        } else {
+            None
+        };
+        let backing_pixel = if switch_expr & u32::from(CW::BackingPixel) != 0 {
+            let remaining = outer_remaining;
+            let (backing_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_pixel)
+        } else {
+            None
+        };
+        let override_redirect = if switch_expr & u32::from(CW::OverrideRedirect) != 0 {
+            let remaining = outer_remaining;
+            let (override_redirect, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(override_redirect)
+        } else {
+            None
+        };
+        let save_under = if switch_expr & u32::from(CW::SaveUnder) != 0 {
+            let remaining = outer_remaining;
+            let (save_under, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(save_under)
+        } else {
+            None
+        };
+        let event_mask = if switch_expr & u32::from(CW::EventMask) != 0 {
+            let remaining = outer_remaining;
+            let (event_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(event_mask)
+        } else {
+            None
+        };
+        let do_not_propogate_mask = if switch_expr & u32::from(CW::DontPropagate) != 0 {
+            let remaining = outer_remaining;
+            let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(do_not_propogate_mask)
+        } else {
+            None
+        };
+        let colormap = if switch_expr & u32::from(CW::Colormap) != 0 {
+            let remaining = outer_remaining;
+            let (colormap, remaining) = Colormap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(colormap)
+        } else {
+            None
+        };
+        let cursor = if switch_expr & u32::from(CW::Cursor) != 0 {
+            let remaining = outer_remaining;
+            let (cursor, remaining) = Cursor::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(cursor)
+        } else {
+            None
+        };
+        let result = ChangeWindowAttributesAux { background_pixmap, background_pixel, border_pixmap, border_pixel, bit_gravity, win_gravity, backing_store, backing_planes, backing_pixel, override_redirect, save_under, event_mask, do_not_propogate_mask, colormap, cursor };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ChangeWindowAttributesAux {
@@ -6440,6 +6737,23 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CHANGE_WINDOW_ATTRIBUTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = ChangeWindowAttributesAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(ChangeWindowAttributesRequest {
+            window,
+            value_list: Cow::Owned(value_list),
+        })
+    }
 }
 /// change window attributes.
 ///
@@ -6582,6 +6896,20 @@ impl GetWindowAttributesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_WINDOW_ATTRIBUTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetWindowAttributesRequest {
+            window,
+        })
     }
 }
 /// Gets window attributes.
@@ -6735,6 +7063,20 @@ impl DestroyWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != DESTROY_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyWindowRequest {
+            window,
+        })
+    }
 }
 /// Destroys a window.
 ///
@@ -6800,6 +7142,20 @@ impl DestroySubwindowsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != DESTROY_SUBWINDOWS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroySubwindowsRequest {
+            window,
+        })
     }
 }
 pub fn destroy_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -6939,6 +7295,22 @@ impl ChangeSaveSetRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CHANGE_SAVE_SET_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(ChangeSaveSetRequest {
+            mode,
+            window,
+        })
+    }
 }
 /// Changes a client's save set.
 ///
@@ -7051,6 +7423,26 @@ impl ReparentWindowRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != REPARENT_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ReparentWindowRequest {
+            window,
+            parent,
+            x,
+            y,
+        })
     }
 }
 /// Reparents a window.
@@ -7166,6 +7558,20 @@ impl MapWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != MAP_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(MapWindowRequest {
+            window,
+        })
+    }
 }
 /// Makes a window visible.
 ///
@@ -7245,6 +7651,20 @@ impl MapSubwindowsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != MAP_SUBWINDOWS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(MapSubwindowsRequest {
+            window,
+        })
+    }
 }
 pub fn map_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -7310,6 +7730,20 @@ impl UnmapWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != UNMAP_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(UnmapWindowRequest {
+            window,
+        })
+    }
 }
 /// Makes a window invisible.
 ///
@@ -7374,6 +7808,20 @@ impl UnmapSubwindowsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != UNMAP_SUBWINDOWS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(UnmapSubwindowsRequest {
+            window,
+        })
     }
 }
 pub fn unmap_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -7548,6 +7996,71 @@ pub struct ConfigureWindowAux {
     pub border_width: Option<u32>,
     pub sibling: Option<Window>,
     pub stack_mode: Option<StackMode>,
+}
+impl ConfigureWindowAux {
+    fn try_parse(value: &[u8], value_mask: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(value_mask);
+        let mut outer_remaining = value;
+        let x = if switch_expr & u32::from(ConfigWindow::X) != 0 {
+            let remaining = outer_remaining;
+            let (x, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(x)
+        } else {
+            None
+        };
+        let y = if switch_expr & u32::from(ConfigWindow::Y) != 0 {
+            let remaining = outer_remaining;
+            let (y, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(y)
+        } else {
+            None
+        };
+        let width = if switch_expr & u32::from(ConfigWindow::Width) != 0 {
+            let remaining = outer_remaining;
+            let (width, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(width)
+        } else {
+            None
+        };
+        let height = if switch_expr & u32::from(ConfigWindow::Height) != 0 {
+            let remaining = outer_remaining;
+            let (height, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(height)
+        } else {
+            None
+        };
+        let border_width = if switch_expr & u32::from(ConfigWindow::BorderWidth) != 0 {
+            let remaining = outer_remaining;
+            let (border_width, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_width)
+        } else {
+            None
+        };
+        let sibling = if switch_expr & u32::from(ConfigWindow::Sibling) != 0 {
+            let remaining = outer_remaining;
+            let (sibling, remaining) = Window::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(sibling)
+        } else {
+            None
+        };
+        let stack_mode = if switch_expr & u32::from(ConfigWindow::StackMode) != 0 {
+            let remaining = outer_remaining;
+            let (stack_mode, remaining) = u32::try_parse(remaining)?;
+            let stack_mode = stack_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(stack_mode)
+        } else {
+            None
+        };
+        let result = ConfigureWindowAux { x, y, width, height, border_width, sibling, stack_mode };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ConfigureWindowAux {
@@ -7741,6 +8254,24 @@ impl<'input> ConfigureWindowRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CONFIGURE_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let (value_mask, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (value_list, remaining) = ConfigureWindowAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(ConfigureWindowRequest {
+            window,
+            value_list: Cow::Owned(value_list),
+        })
+    }
 }
 /// Configures window attributes.
 ///
@@ -7925,6 +8456,22 @@ impl CirculateWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CIRCULATE_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (direction, remaining) = u8::try_parse(remaining)?;
+        let direction = direction.try_into()?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(CirculateWindowRequest {
+            direction,
+            window,
+        })
+    }
 }
 /// Change window stacking order.
 ///
@@ -8022,6 +8569,20 @@ impl GetGeometryRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_GEOMETRY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetGeometryRequest {
+            drawable,
+        })
     }
 }
 /// Get current window geometry.
@@ -8189,6 +8750,20 @@ impl QueryTreeRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != QUERY_TREE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryTreeRequest {
+            window,
+        })
     }
 }
 /// query the window tree.
@@ -8373,6 +8948,23 @@ impl<'input> InternAtomRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != INTERN_ATOM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (only_if_exists, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (name_len, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(InternAtomRequest {
+            only_if_exists,
+            name,
+        })
+    }
 }
 /// Get atom identifier by name.
 ///
@@ -8487,6 +9079,20 @@ impl GetAtomNameRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_ATOM_NAME_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (atom, remaining) = Atom::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetAtomNameRequest {
+            atom,
+        })
     }
 }
 pub fn get_atom_name<Conn>(conn: &Conn, atom: Atom) -> Result<Cookie<'_, Conn, GetAtomNameReply>, ConnectionError>
@@ -8731,6 +9337,33 @@ impl<'input> ChangePropertyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CHANGE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
+        let (type_, remaining) = Atom::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (data_len, remaining) = u32::try_parse(remaining)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::ParseError)?.checked_div(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ChangePropertyRequest {
+            mode,
+            window,
+            property,
+            type_,
+            format,
+            data_len,
+            data,
+        })
+    }
 }
 /// Changes a window property.
 ///
@@ -8841,6 +9474,22 @@ impl DeletePropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != DELETE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(DeletePropertyRequest {
+            window,
+            property,
+        })
     }
 }
 pub fn delete_property<Conn>(conn: &Conn, window: Window, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -9039,6 +9688,29 @@ impl GetPropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (delete, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
+        let (type_, remaining) = Atom::try_parse(remaining)?;
+        let (long_offset, remaining) = u32::try_parse(remaining)?;
+        let (long_length, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetPropertyRequest {
+            delete,
+            window,
+            property,
+            type_,
+            long_offset,
+            long_length,
+        })
     }
 }
 /// Gets a window property.
@@ -9368,6 +10040,20 @@ impl ListPropertiesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != LIST_PROPERTIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(ListPropertiesRequest {
+            window,
+        })
+    }
 }
 pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
 where
@@ -9495,6 +10181,24 @@ impl SetSelectionOwnerRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_SELECTION_OWNER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (owner, remaining) = Window::try_parse(value)?;
+        let (selection, remaining) = Atom::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetSelectionOwnerRequest {
+            owner,
+            selection,
+            time,
+        })
+    }
 }
 /// Sets the owner of a selection.
 ///
@@ -9590,6 +10294,20 @@ impl GetSelectionOwnerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_SELECTION_OWNER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (selection, remaining) = Atom::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetSelectionOwnerRequest {
+            selection,
+        })
     }
 }
 /// Gets the owner of a selection.
@@ -9703,6 +10421,28 @@ impl ConvertSelectionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CONVERT_SELECTION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (requestor, remaining) = Window::try_parse(value)?;
+        let (selection, remaining) = Atom::try_parse(remaining)?;
+        let (target, remaining) = Atom::try_parse(remaining)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ConvertSelectionRequest {
+            requestor,
+            selection,
+            target,
+            property,
+            time,
+        })
     }
 }
 pub fn convert_selection<Conn, A, B>(conn: &Conn, requestor: Window, selection: Atom, target: Atom, property: A, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -9908,6 +10648,26 @@ impl<'input> SendEventRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), (&self.event[..]).into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SEND_EVENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (propagate, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (destination, remaining) = Window::try_parse(value)?;
+        let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let (event, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let event = <&[u8; 32]>::try_from(event).unwrap();
+        let _ = remaining;
+        Ok(SendEventRequest {
+            propagate,
+            destination,
+            event_mask,
+            event,
+        })
     }
 }
 /// send an event.
@@ -10343,6 +11103,35 @@ impl GrabPointerRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GRAB_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (grab_window, remaining) = Window::try_parse(value)?;
+        let (event_mask, remaining) = u16::try_parse(remaining)?;
+        let (pointer_mode, remaining) = u8::try_parse(remaining)?;
+        let pointer_mode = pointer_mode.try_into()?;
+        let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
+        let keyboard_mode = keyboard_mode.try_into()?;
+        let (confine_to, remaining) = Window::try_parse(remaining)?;
+        let (cursor, remaining) = Cursor::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GrabPointerRequest {
+            owner_events,
+            grab_window,
+            event_mask,
+            pointer_mode,
+            keyboard_mode,
+            confine_to,
+            cursor,
+            time,
+        })
+    }
 }
 /// Grab the pointer.
 ///
@@ -10520,6 +11309,20 @@ impl UngrabPointerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != UNGRAB_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (time, remaining) = Timestamp::try_parse(value)?;
+        let _ = remaining;
+        Ok(UngrabPointerRequest {
+            time,
+        })
     }
 }
 /// release the pointer.
@@ -10771,6 +11574,39 @@ impl GrabButtonRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GRAB_BUTTON_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (grab_window, remaining) = Window::try_parse(value)?;
+        let (event_mask, remaining) = u16::try_parse(remaining)?;
+        let (pointer_mode, remaining) = u8::try_parse(remaining)?;
+        let pointer_mode = pointer_mode.try_into()?;
+        let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
+        let keyboard_mode = keyboard_mode.try_into()?;
+        let (confine_to, remaining) = Window::try_parse(remaining)?;
+        let (cursor, remaining) = Cursor::try_parse(remaining)?;
+        let (button, remaining) = u8::try_parse(remaining)?;
+        let button = button.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GrabButtonRequest {
+            owner_events,
+            grab_window,
+            event_mask,
+            pointer_mode,
+            keyboard_mode,
+            confine_to,
+            cursor,
+            button,
+            modifiers,
+        })
+    }
 }
 /// Grab pointer button(s).
 ///
@@ -10906,6 +11742,25 @@ impl UngrabButtonRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != UNGRAB_BUTTON_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (button, remaining) = u8::try_parse(remaining)?;
+        let button = button.try_into()?;
+        let _ = remaining;
+        let (grab_window, remaining) = Window::try_parse(value)?;
+        let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(UngrabButtonRequest {
+            button,
+            grab_window,
+            modifiers,
+        })
+    }
 }
 pub fn ungrab_button<Conn, A>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -10965,6 +11820,25 @@ impl ChangeActivePointerGrabRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CHANGE_ACTIVE_POINTER_GRAB_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cursor, remaining) = Cursor::try_parse(value)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (event_mask, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(ChangeActivePointerGrabRequest {
+            cursor,
+            time,
+            event_mask,
+        })
     }
 }
 pub fn change_active_pointer_grab<Conn, A, B, C>(conn: &Conn, cursor: A, time: B, event_mask: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -11095,6 +11969,30 @@ impl GrabKeyboardRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GRAB_KEYBOARD_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (grab_window, remaining) = Window::try_parse(value)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (pointer_mode, remaining) = u8::try_parse(remaining)?;
+        let pointer_mode = pointer_mode.try_into()?;
+        let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
+        let keyboard_mode = keyboard_mode.try_into()?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GrabKeyboardRequest {
+            owner_events,
+            grab_window,
+            time,
+            pointer_mode,
+            keyboard_mode,
+        })
     }
 }
 /// Grab the keyboard.
@@ -11232,6 +12130,20 @@ impl UngrabKeyboardRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != UNGRAB_KEYBOARD_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (time, remaining) = Timestamp::try_parse(value)?;
+        let _ = remaining;
+        Ok(UngrabKeyboardRequest {
+            time,
+        })
     }
 }
 pub fn ungrab_keyboard<Conn, A>(conn: &Conn, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -11416,6 +12328,32 @@ impl GrabKeyRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GRAB_KEY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (grab_window, remaining) = Window::try_parse(value)?;
+        let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let (key, remaining) = Keycode::try_parse(remaining)?;
+        let (pointer_mode, remaining) = u8::try_parse(remaining)?;
+        let pointer_mode = pointer_mode.try_into()?;
+        let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
+        let keyboard_mode = keyboard_mode.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GrabKeyRequest {
+            owner_events,
+            grab_window,
+            modifiers,
+            key,
+            pointer_mode,
+            keyboard_mode,
+        })
+    }
 }
 /// Grab keyboard key(s).
 ///
@@ -11561,6 +12499,24 @@ impl UngrabKeyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != UNGRAB_KEY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (key, remaining) = Keycode::try_parse(remaining)?;
+        let _ = remaining;
+        let (grab_window, remaining) = Window::try_parse(value)?;
+        let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(UngrabKeyRequest {
+            key,
+            grab_window,
+            modifiers,
+        })
     }
 }
 /// release a key combination.
@@ -11796,6 +12752,22 @@ impl AllowEventsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != ALLOW_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let (time, remaining) = Timestamp::try_parse(value)?;
+        let _ = remaining;
+        Ok(AllowEventsRequest {
+            mode,
+            time,
+        })
+    }
 }
 /// release queued events.
 ///
@@ -11854,6 +12826,18 @@ impl GrabServerRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GRAB_SERVER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(GrabServerRequest
+        )
+    }
 }
 pub fn grab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -11888,6 +12872,18 @@ impl UngrabServerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != UNGRAB_SERVER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(UngrabServerRequest
+        )
     }
 }
 pub fn ungrab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -11943,6 +12939,20 @@ impl QueryPointerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != QUERY_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryPointerRequest {
+            window,
+        })
     }
 }
 /// get pointer coordinates.
@@ -12117,6 +13127,24 @@ impl GetMotionEventsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_MOTION_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let (start, remaining) = Timestamp::try_parse(remaining)?;
+        let (stop, remaining) = Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetMotionEventsRequest {
+            window,
+            start,
+            stop,
+        })
+    }
 }
 pub fn get_motion_events<Conn, A, B>(conn: &Conn, window: Window, start: A, stop: B) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
 where
@@ -12222,6 +13250,26 @@ impl TranslateCoordinatesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != TRANSLATE_COORDINATES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (src_window, remaining) = Window::try_parse(value)?;
+        let (dst_window, remaining) = Window::try_parse(remaining)?;
+        let (src_x, remaining) = i16::try_parse(remaining)?;
+        let (src_y, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(TranslateCoordinatesRequest {
+            src_window,
+            dst_window,
+            src_x,
+            src_y,
+        })
     }
 }
 pub fn translate_coordinates<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Conn, TranslateCoordinatesReply>, ConnectionError>
@@ -12361,6 +13409,34 @@ impl WarpPointerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != WARP_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (src_window, remaining) = Window::try_parse(value)?;
+        let (dst_window, remaining) = Window::try_parse(remaining)?;
+        let (src_x, remaining) = i16::try_parse(remaining)?;
+        let (src_y, remaining) = i16::try_parse(remaining)?;
+        let (src_width, remaining) = u16::try_parse(remaining)?;
+        let (src_height, remaining) = u16::try_parse(remaining)?;
+        let (dst_x, remaining) = i16::try_parse(remaining)?;
+        let (dst_y, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(WarpPointerRequest {
+            src_window,
+            dst_window,
+            src_x,
+            src_y,
+            src_width,
+            src_height,
+            dst_x,
+            dst_y,
+        })
     }
 }
 /// move mouse pointer.
@@ -12569,6 +13645,24 @@ impl SetInputFocusRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_INPUT_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (revert_to, remaining) = u8::try_parse(remaining)?;
+        let revert_to = revert_to.try_into()?;
+        let _ = remaining;
+        let (focus, remaining) = Window::try_parse(value)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetInputFocusRequest {
+            revert_to,
+            focus,
+            time,
+        })
+    }
 }
 /// Sets input focus.
 ///
@@ -12647,6 +13741,18 @@ impl GetInputFocusRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_INPUT_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(GetInputFocusRequest
+        )
+    }
 }
 pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
 where
@@ -12708,6 +13814,18 @@ impl QueryKeymapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != QUERY_KEYMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(QueryKeymapRequest
+        )
     }
 }
 pub fn query_keymap<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryKeymapReply>, ConnectionError>
@@ -12807,6 +13925,24 @@ impl<'input> OpenFontRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != OPEN_FONT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (fid, remaining) = Font::try_parse(value)?;
+        let (name_len, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(OpenFontRequest {
+            fid,
+            name,
+        })
+    }
 }
 /// opens a font.
 ///
@@ -12871,6 +14007,20 @@ impl CloseFontRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CLOSE_FONT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (font, remaining) = Font::try_parse(value)?;
+        let _ = remaining;
+        Ok(CloseFontRequest {
+            font,
+        })
     }
 }
 pub fn close_font<Conn>(conn: &Conn, font: Font) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -13097,6 +14247,20 @@ impl QueryFontRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != QUERY_FONT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (font, remaining) = Fontable::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryFontRequest {
+            font,
+        })
+    }
 }
 /// query font metrics.
 ///
@@ -13284,6 +14448,35 @@ impl<'input> QueryTextExtentsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), string_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != QUERY_TEXT_EXTENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (odd_length, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (font, remaining) = Fontable::try_parse(value)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut string = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Char2b::try_parse(remaining)?;
+            remaining = new_remaining;
+            string.push(v);
+        }
+        let _ = remaining;
+        if odd_length {
+            if string.is_empty() {
+                return Err(ParseError::ParseError);
+            }
+            string.truncate(string.len() - 1);
+        }
+        Ok(QueryTextExtentsRequest {
+            font,
+            string: Cow::Owned(string),
+        })
+    }
 }
 /// get text extents.
 ///
@@ -13469,6 +14662,23 @@ impl<'input> ListFontsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.pattern.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != LIST_FONTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (max_names, remaining) = u16::try_parse(value)?;
+        let (pattern_len, remaining) = u16::try_parse(remaining)?;
+        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ListFontsRequest {
+            max_names,
+            pattern,
+        })
+    }
 }
 /// get matching font names.
 ///
@@ -13590,6 +14800,23 @@ impl<'input> ListFontsWithInfoRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.pattern.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != LIST_FONTS_WITH_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (max_names, remaining) = u16::try_parse(value)?;
+        let (pattern_len, remaining) = u16::try_parse(remaining)?;
+        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ListFontsWithInfoRequest {
+            max_names,
+            pattern,
+        })
     }
 }
 /// get matching font names and information.
@@ -13754,6 +14981,22 @@ impl<'input> SetFontPathRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), font_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_FONT_PATH_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (font_qty, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (font, remaining) = crate::x11_utils::parse_list::<Str>(remaining, font_qty.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetFontPathRequest {
+            font: Cow::Owned(font),
+        })
+    }
 }
 pub fn set_font_path<'c, 'input, Conn>(conn: &'c Conn, font: &'input [Str]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -13790,6 +15033,18 @@ impl GetFontPathRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_FONT_PATH_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(GetFontPathRequest
+        )
     }
 }
 pub fn get_font_path<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetFontPathReply>, ConnectionError>
@@ -13914,6 +15169,27 @@ impl CreatePixmapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CREATE_PIXMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        let (pid, remaining) = Pixmap::try_parse(value)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreatePixmapRequest {
+            depth,
+            pid,
+            drawable,
+            width,
+            height,
+        })
+    }
 }
 /// Creates a pixmap.
 ///
@@ -13996,6 +15272,20 @@ impl FreePixmapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != FREE_PIXMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (pixmap, remaining) = Pixmap::try_parse(value)?;
+        let _ = remaining;
+        Ok(FreePixmapRequest {
+            pixmap,
+        })
     }
 }
 /// Destroys a pixmap.
@@ -14825,6 +16115,206 @@ pub struct CreateGCAux {
     pub dashes: Option<u32>,
     pub arc_mode: Option<ArcMode>,
 }
+impl CreateGCAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let function = if switch_expr & u32::from(GC::Function) != 0 {
+            let remaining = outer_remaining;
+            let (function, remaining) = u32::try_parse(remaining)?;
+            let function = function.try_into()?;
+            outer_remaining = remaining;
+            Some(function)
+        } else {
+            None
+        };
+        let plane_mask = if switch_expr & u32::from(GC::PlaneMask) != 0 {
+            let remaining = outer_remaining;
+            let (plane_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(plane_mask)
+        } else {
+            None
+        };
+        let foreground = if switch_expr & u32::from(GC::Foreground) != 0 {
+            let remaining = outer_remaining;
+            let (foreground, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(foreground)
+        } else {
+            None
+        };
+        let background = if switch_expr & u32::from(GC::Background) != 0 {
+            let remaining = outer_remaining;
+            let (background, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background)
+        } else {
+            None
+        };
+        let line_width = if switch_expr & u32::from(GC::LineWidth) != 0 {
+            let remaining = outer_remaining;
+            let (line_width, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(line_width)
+        } else {
+            None
+        };
+        let line_style = if switch_expr & u32::from(GC::LineStyle) != 0 {
+            let remaining = outer_remaining;
+            let (line_style, remaining) = u32::try_parse(remaining)?;
+            let line_style = line_style.try_into()?;
+            outer_remaining = remaining;
+            Some(line_style)
+        } else {
+            None
+        };
+        let cap_style = if switch_expr & u32::from(GC::CapStyle) != 0 {
+            let remaining = outer_remaining;
+            let (cap_style, remaining) = u32::try_parse(remaining)?;
+            let cap_style = cap_style.try_into()?;
+            outer_remaining = remaining;
+            Some(cap_style)
+        } else {
+            None
+        };
+        let join_style = if switch_expr & u32::from(GC::JoinStyle) != 0 {
+            let remaining = outer_remaining;
+            let (join_style, remaining) = u32::try_parse(remaining)?;
+            let join_style = join_style.try_into()?;
+            outer_remaining = remaining;
+            Some(join_style)
+        } else {
+            None
+        };
+        let fill_style = if switch_expr & u32::from(GC::FillStyle) != 0 {
+            let remaining = outer_remaining;
+            let (fill_style, remaining) = u32::try_parse(remaining)?;
+            let fill_style = fill_style.try_into()?;
+            outer_remaining = remaining;
+            Some(fill_style)
+        } else {
+            None
+        };
+        let fill_rule = if switch_expr & u32::from(GC::FillRule) != 0 {
+            let remaining = outer_remaining;
+            let (fill_rule, remaining) = u32::try_parse(remaining)?;
+            let fill_rule = fill_rule.try_into()?;
+            outer_remaining = remaining;
+            Some(fill_rule)
+        } else {
+            None
+        };
+        let tile = if switch_expr & u32::from(GC::Tile) != 0 {
+            let remaining = outer_remaining;
+            let (tile, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile)
+        } else {
+            None
+        };
+        let stipple = if switch_expr & u32::from(GC::Stipple) != 0 {
+            let remaining = outer_remaining;
+            let (stipple, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(stipple)
+        } else {
+            None
+        };
+        let tile_stipple_x_origin = if switch_expr & u32::from(GC::TileStippleOriginX) != 0 {
+            let remaining = outer_remaining;
+            let (tile_stipple_x_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile_stipple_x_origin)
+        } else {
+            None
+        };
+        let tile_stipple_y_origin = if switch_expr & u32::from(GC::TileStippleOriginY) != 0 {
+            let remaining = outer_remaining;
+            let (tile_stipple_y_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile_stipple_y_origin)
+        } else {
+            None
+        };
+        let font = if switch_expr & u32::from(GC::Font) != 0 {
+            let remaining = outer_remaining;
+            let (font, remaining) = Font::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(font)
+        } else {
+            None
+        };
+        let subwindow_mode = if switch_expr & u32::from(GC::SubwindowMode) != 0 {
+            let remaining = outer_remaining;
+            let (subwindow_mode, remaining) = u32::try_parse(remaining)?;
+            let subwindow_mode = subwindow_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(subwindow_mode)
+        } else {
+            None
+        };
+        let graphics_exposures = if switch_expr & u32::from(GC::GraphicsExposures) != 0 {
+            let remaining = outer_remaining;
+            let (graphics_exposures, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(graphics_exposures)
+        } else {
+            None
+        };
+        let clip_x_origin = if switch_expr & u32::from(GC::ClipOriginX) != 0 {
+            let remaining = outer_remaining;
+            let (clip_x_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_x_origin)
+        } else {
+            None
+        };
+        let clip_y_origin = if switch_expr & u32::from(GC::ClipOriginY) != 0 {
+            let remaining = outer_remaining;
+            let (clip_y_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_y_origin)
+        } else {
+            None
+        };
+        let clip_mask = if switch_expr & u32::from(GC::ClipMask) != 0 {
+            let remaining = outer_remaining;
+            let (clip_mask, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_mask)
+        } else {
+            None
+        };
+        let dash_offset = if switch_expr & u32::from(GC::DashOffset) != 0 {
+            let remaining = outer_remaining;
+            let (dash_offset, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dash_offset)
+        } else {
+            None
+        };
+        let dashes = if switch_expr & u32::from(GC::DashList) != 0 {
+            let remaining = outer_remaining;
+            let (dashes, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dashes)
+        } else {
+            None
+        };
+        let arc_mode = if switch_expr & u32::from(GC::ArcMode) != 0 {
+            let remaining = outer_remaining;
+            let (arc_mode, remaining) = u32::try_parse(remaining)?;
+            let arc_mode = arc_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(arc_mode)
+        } else {
+            None
+        };
+        let result = CreateGCAux { function, plane_mask, foreground, background, line_width, line_style, cap_style, join_style, fill_style, fill_rule, tile, stipple, tile_stipple_x_origin, tile_stipple_y_origin, font, subwindow_mode, graphics_exposures, clip_x_origin, clip_y_origin, clip_mask, dash_offset, dashes, arc_mode };
+        Ok((result, outer_remaining))
+    }
+}
 #[allow(dead_code, unused_variables)]
 impl CreateGCAux {
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
@@ -15172,6 +16662,25 @@ impl<'input> CreateGCRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CREATE_GC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cid, remaining) = Gcontext::try_parse(value)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = CreateGCAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(CreateGCRequest {
+            cid,
+            drawable,
+            value_list: Cow::Owned(value_list),
+        })
+    }
 }
 /// Creates a graphics context.
 ///
@@ -15236,6 +16745,206 @@ pub struct ChangeGCAux {
     pub dash_offset: Option<u32>,
     pub dashes: Option<u32>,
     pub arc_mode: Option<ArcMode>,
+}
+impl ChangeGCAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let function = if switch_expr & u32::from(GC::Function) != 0 {
+            let remaining = outer_remaining;
+            let (function, remaining) = u32::try_parse(remaining)?;
+            let function = function.try_into()?;
+            outer_remaining = remaining;
+            Some(function)
+        } else {
+            None
+        };
+        let plane_mask = if switch_expr & u32::from(GC::PlaneMask) != 0 {
+            let remaining = outer_remaining;
+            let (plane_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(plane_mask)
+        } else {
+            None
+        };
+        let foreground = if switch_expr & u32::from(GC::Foreground) != 0 {
+            let remaining = outer_remaining;
+            let (foreground, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(foreground)
+        } else {
+            None
+        };
+        let background = if switch_expr & u32::from(GC::Background) != 0 {
+            let remaining = outer_remaining;
+            let (background, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background)
+        } else {
+            None
+        };
+        let line_width = if switch_expr & u32::from(GC::LineWidth) != 0 {
+            let remaining = outer_remaining;
+            let (line_width, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(line_width)
+        } else {
+            None
+        };
+        let line_style = if switch_expr & u32::from(GC::LineStyle) != 0 {
+            let remaining = outer_remaining;
+            let (line_style, remaining) = u32::try_parse(remaining)?;
+            let line_style = line_style.try_into()?;
+            outer_remaining = remaining;
+            Some(line_style)
+        } else {
+            None
+        };
+        let cap_style = if switch_expr & u32::from(GC::CapStyle) != 0 {
+            let remaining = outer_remaining;
+            let (cap_style, remaining) = u32::try_parse(remaining)?;
+            let cap_style = cap_style.try_into()?;
+            outer_remaining = remaining;
+            Some(cap_style)
+        } else {
+            None
+        };
+        let join_style = if switch_expr & u32::from(GC::JoinStyle) != 0 {
+            let remaining = outer_remaining;
+            let (join_style, remaining) = u32::try_parse(remaining)?;
+            let join_style = join_style.try_into()?;
+            outer_remaining = remaining;
+            Some(join_style)
+        } else {
+            None
+        };
+        let fill_style = if switch_expr & u32::from(GC::FillStyle) != 0 {
+            let remaining = outer_remaining;
+            let (fill_style, remaining) = u32::try_parse(remaining)?;
+            let fill_style = fill_style.try_into()?;
+            outer_remaining = remaining;
+            Some(fill_style)
+        } else {
+            None
+        };
+        let fill_rule = if switch_expr & u32::from(GC::FillRule) != 0 {
+            let remaining = outer_remaining;
+            let (fill_rule, remaining) = u32::try_parse(remaining)?;
+            let fill_rule = fill_rule.try_into()?;
+            outer_remaining = remaining;
+            Some(fill_rule)
+        } else {
+            None
+        };
+        let tile = if switch_expr & u32::from(GC::Tile) != 0 {
+            let remaining = outer_remaining;
+            let (tile, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile)
+        } else {
+            None
+        };
+        let stipple = if switch_expr & u32::from(GC::Stipple) != 0 {
+            let remaining = outer_remaining;
+            let (stipple, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(stipple)
+        } else {
+            None
+        };
+        let tile_stipple_x_origin = if switch_expr & u32::from(GC::TileStippleOriginX) != 0 {
+            let remaining = outer_remaining;
+            let (tile_stipple_x_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile_stipple_x_origin)
+        } else {
+            None
+        };
+        let tile_stipple_y_origin = if switch_expr & u32::from(GC::TileStippleOriginY) != 0 {
+            let remaining = outer_remaining;
+            let (tile_stipple_y_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(tile_stipple_y_origin)
+        } else {
+            None
+        };
+        let font = if switch_expr & u32::from(GC::Font) != 0 {
+            let remaining = outer_remaining;
+            let (font, remaining) = Font::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(font)
+        } else {
+            None
+        };
+        let subwindow_mode = if switch_expr & u32::from(GC::SubwindowMode) != 0 {
+            let remaining = outer_remaining;
+            let (subwindow_mode, remaining) = u32::try_parse(remaining)?;
+            let subwindow_mode = subwindow_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(subwindow_mode)
+        } else {
+            None
+        };
+        let graphics_exposures = if switch_expr & u32::from(GC::GraphicsExposures) != 0 {
+            let remaining = outer_remaining;
+            let (graphics_exposures, remaining) = Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(graphics_exposures)
+        } else {
+            None
+        };
+        let clip_x_origin = if switch_expr & u32::from(GC::ClipOriginX) != 0 {
+            let remaining = outer_remaining;
+            let (clip_x_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_x_origin)
+        } else {
+            None
+        };
+        let clip_y_origin = if switch_expr & u32::from(GC::ClipOriginY) != 0 {
+            let remaining = outer_remaining;
+            let (clip_y_origin, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_y_origin)
+        } else {
+            None
+        };
+        let clip_mask = if switch_expr & u32::from(GC::ClipMask) != 0 {
+            let remaining = outer_remaining;
+            let (clip_mask, remaining) = Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(clip_mask)
+        } else {
+            None
+        };
+        let dash_offset = if switch_expr & u32::from(GC::DashOffset) != 0 {
+            let remaining = outer_remaining;
+            let (dash_offset, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dash_offset)
+        } else {
+            None
+        };
+        let dashes = if switch_expr & u32::from(GC::DashList) != 0 {
+            let remaining = outer_remaining;
+            let (dashes, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(dashes)
+        } else {
+            None
+        };
+        let arc_mode = if switch_expr & u32::from(GC::ArcMode) != 0 {
+            let remaining = outer_remaining;
+            let (arc_mode, remaining) = u32::try_parse(remaining)?;
+            let arc_mode = arc_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(arc_mode)
+        } else {
+            None
+        };
+        let result = ChangeGCAux { function, plane_mask, foreground, background, line_width, line_style, cap_style, join_style, fill_style, fill_rule, tile, stipple, tile_stipple_x_origin, tile_stipple_y_origin, font, subwindow_mode, graphics_exposures, clip_x_origin, clip_y_origin, clip_mask, dash_offset, dashes, arc_mode };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ChangeGCAux {
@@ -15600,6 +17309,23 @@ impl<'input> ChangeGCRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CHANGE_GC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (gc, remaining) = Gcontext::try_parse(value)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = ChangeGCAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(ChangeGCRequest {
+            gc,
+            value_list: Cow::Owned(value_list),
+        })
+    }
 }
 /// change graphics context components.
 ///
@@ -15702,6 +17428,24 @@ impl CopyGCRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != COPY_GC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (src_gc, remaining) = Gcontext::try_parse(value)?;
+        let (dst_gc, remaining) = Gcontext::try_parse(remaining)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CopyGCRequest {
+            src_gc,
+            dst_gc,
+            value_mask,
+        })
+    }
 }
 pub fn copy_gc<Conn, A>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -15761,6 +17505,25 @@ impl<'input> SetDashesRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.dashes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_DASHES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (gc, remaining) = Gcontext::try_parse(value)?;
+        let (dash_offset, remaining) = u16::try_parse(remaining)?;
+        let (dashes_len, remaining) = u16::try_parse(remaining)?;
+        let (dashes, remaining) = crate::x11_utils::parse_u8_list(remaining, dashes_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDashesRequest {
+            gc,
+            dash_offset,
+            dashes,
+        })
     }
 }
 pub fn set_dashes<'c, 'input, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -15891,6 +17654,35 @@ impl<'input> SetClipRectanglesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_CLIP_RECTANGLES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (ordering, remaining) = u8::try_parse(remaining)?;
+        let ordering = ordering.try_into()?;
+        let _ = remaining;
+        let (gc, remaining) = Gcontext::try_parse(value)?;
+        let (clip_x_origin, remaining) = i16::try_parse(remaining)?;
+        let (clip_y_origin, remaining) = i16::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut rectangles = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Rectangle::try_parse(remaining)?;
+            remaining = new_remaining;
+            rectangles.push(v);
+        }
+        let _ = remaining;
+        Ok(SetClipRectanglesRequest {
+            ordering,
+            gc,
+            clip_x_origin,
+            clip_y_origin,
+            rectangles: Cow::Owned(rectangles),
+        })
+    }
 }
 pub fn set_clip_rectangles<'c, 'input, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -15949,6 +17741,20 @@ impl FreeGCRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != FREE_GC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (gc, remaining) = Gcontext::try_parse(value)?;
+        let _ = remaining;
+        Ok(FreeGCRequest {
+            gc,
+        })
     }
 }
 /// Destroys a graphics context.
@@ -16022,6 +17828,29 @@ impl ClearAreaRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CLEAR_AREA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (exposures, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ClearAreaRequest {
+            exposures,
+            window,
+            x,
+            y,
+            width,
+            height,
+        })
     }
 }
 pub fn clear_area<Conn>(conn: &Conn, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -16128,6 +17957,36 @@ impl CopyAreaRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != COPY_AREA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (src_drawable, remaining) = Drawable::try_parse(value)?;
+        let (dst_drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let (src_x, remaining) = i16::try_parse(remaining)?;
+        let (src_y, remaining) = i16::try_parse(remaining)?;
+        let (dst_x, remaining) = i16::try_parse(remaining)?;
+        let (dst_y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CopyAreaRequest {
+            src_drawable,
+            dst_drawable,
+            gc,
+            src_x,
+            src_y,
+            dst_x,
+            dst_y,
+            width,
+            height,
+        })
     }
 }
 /// copy areas.
@@ -16243,6 +18102,38 @@ impl CopyPlaneRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != COPY_PLANE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (src_drawable, remaining) = Drawable::try_parse(value)?;
+        let (dst_drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let (src_x, remaining) = i16::try_parse(remaining)?;
+        let (src_y, remaining) = i16::try_parse(remaining)?;
+        let (dst_x, remaining) = i16::try_parse(remaining)?;
+        let (dst_y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (bit_plane, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CopyPlaneRequest {
+            src_drawable,
+            dst_drawable,
+            gc,
+            src_x,
+            src_y,
+            dst_x,
+            dst_y,
+            width,
+            height,
+            bit_plane,
+        })
     }
 }
 pub fn copy_plane<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -16384,6 +18275,33 @@ impl<'input> PolyPointRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != POLY_POINT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
+        let coordinate_mode = coordinate_mode.try_into()?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut points = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Point::try_parse(remaining)?;
+            remaining = new_remaining;
+            points.push(v);
+        }
+        let _ = remaining;
+        Ok(PolyPointRequest {
+            coordinate_mode,
+            drawable,
+            gc,
+            points: Cow::Owned(points),
+        })
+    }
 }
 pub fn poly_point<'c, 'input, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -16482,6 +18400,33 @@ impl<'input> PolyLineRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != POLY_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
+        let coordinate_mode = coordinate_mode.try_into()?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut points = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Point::try_parse(remaining)?;
+            remaining = new_remaining;
+            points.push(v);
+        }
+        let _ = remaining;
+        Ok(PolyLineRequest {
+            coordinate_mode,
+            drawable,
+            gc,
+            points: Cow::Owned(points),
+        })
     }
 }
 /// draw lines.
@@ -16656,6 +18601,31 @@ impl<'input> PolySegmentRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), segments_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != POLY_SEGMENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut segments = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Segment::try_parse(remaining)?;
+            remaining = new_remaining;
+            segments.push(v);
+        }
+        let _ = remaining;
+        Ok(PolySegmentRequest {
+            drawable,
+            gc,
+            segments: Cow::Owned(segments),
+        })
+    }
 }
 /// draw lines.
 ///
@@ -16739,6 +18709,31 @@ impl<'input> PolyRectangleRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != POLY_RECTANGLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut rectangles = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Rectangle::try_parse(remaining)?;
+            remaining = new_remaining;
+            rectangles.push(v);
+        }
+        let _ = remaining;
+        Ok(PolyRectangleRequest {
+            drawable,
+            gc,
+            rectangles: Cow::Owned(rectangles),
+        })
+    }
 }
 pub fn poly_rectangle<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -16795,6 +18790,31 @@ impl<'input> PolyArcRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != POLY_ARC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut arcs = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Arc::try_parse(remaining)?;
+            remaining = new_remaining;
+            arcs.push(v);
+        }
+        let _ = remaining;
+        Ok(PolyArcRequest {
+            drawable,
+            gc,
+            arcs: Cow::Owned(arcs),
+        })
     }
 }
 pub fn poly_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -16926,6 +18946,38 @@ impl<'input> FillPolyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != FILL_POLY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let (shape, remaining) = u8::try_parse(remaining)?;
+        let shape = shape.try_into()?;
+        let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
+        let coordinate_mode = coordinate_mode.try_into()?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut points = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Point::try_parse(remaining)?;
+            remaining = new_remaining;
+            points.push(v);
+        }
+        let _ = remaining;
+        Ok(FillPolyRequest {
+            drawable,
+            gc,
+            shape,
+            coordinate_mode,
+            points: Cow::Owned(points),
+        })
+    }
 }
 pub fn fill_poly<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -17010,6 +19062,31 @@ impl<'input> PolyFillRectangleRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != POLY_FILL_RECTANGLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut rectangles = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Rectangle::try_parse(remaining)?;
+            remaining = new_remaining;
+            rectangles.push(v);
+        }
+        let _ = remaining;
+        Ok(PolyFillRectangleRequest {
+            drawable,
+            gc,
+            rectangles: Cow::Owned(rectangles),
+        })
+    }
 }
 /// Fills rectangles.
 ///
@@ -17091,6 +19168,31 @@ impl<'input> PolyFillArcRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != POLY_FILL_ARC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut arcs = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Arc::try_parse(remaining)?;
+            remaining = new_remaining;
+            arcs.push(v);
+        }
+        let _ = remaining;
+        Ok(PolyFillArcRequest {
+            drawable,
+            gc,
+            arcs: Cow::Owned(arcs),
+        })
     }
 }
 pub fn poly_fill_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -17239,6 +19341,39 @@ impl<'input> PutImageRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != PUT_IMAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let format = format.try_into()?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (dst_x, remaining) = i16::try_parse(remaining)?;
+        let (dst_y, remaining) = i16::try_parse(remaining)?;
+        let (left_pad, remaining) = u8::try_parse(remaining)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (data, remaining) = remaining.split_at(remaining.len());
+        let _ = remaining;
+        Ok(PutImageRequest {
+            format,
+            drawable,
+            gc,
+            width,
+            height,
+            dst_x,
+            dst_y,
+            left_pad,
+            depth,
+            data,
+        })
+    }
 }
 pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -17315,6 +19450,32 @@ impl GetImageRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_IMAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let format = format.try_into()?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (plane_mask, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetImageRequest {
+            format,
+            drawable,
+            x,
+            y,
+            width,
+            height,
+            plane_mask,
+        })
     }
 }
 pub fn get_image<Conn>(conn: &Conn, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
@@ -17429,6 +19590,28 @@ impl<'input> PolyText8Request<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.items.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != POLY_TEXT8_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (items, remaining) = remaining.split_at(remaining.len());
+        let _ = remaining;
+        Ok(PolyText8Request {
+            drawable,
+            gc,
+            x,
+            y,
+            items,
+        })
+    }
 }
 pub fn poly_text8<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -17494,6 +19677,28 @@ impl<'input> PolyText16Request<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.items.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != POLY_TEXT16_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (items, remaining) = remaining.split_at(remaining.len());
+        let _ = remaining;
+        Ok(PolyText16Request {
+            drawable,
+            gc,
+            x,
+            y,
+            items,
+        })
     }
 }
 pub fn poly_text16<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -17596,6 +19801,28 @@ impl<'input> ImageText8Request<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.string.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != IMAGE_TEXT8_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (string_len, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ImageText8Request {
+            drawable,
+            gc,
+            x,
+            y,
+            string,
+        })
     }
 }
 /// Draws text.
@@ -17734,6 +19961,28 @@ impl<'input> ImageText16Request<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), string_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != IMAGE_TEXT16_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (string_len, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (gc, remaining) = Gcontext::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (string, remaining) = crate::x11_utils::parse_list::<Char2b>(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ImageText16Request {
+            drawable,
+            gc,
+            x,
+            y,
+            string: Cow::Owned(string),
+        })
     }
 }
 /// Draws text.
@@ -17902,6 +20151,26 @@ impl CreateColormapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CREATE_COLORMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (alloc, remaining) = u8::try_parse(remaining)?;
+        let alloc = alloc.try_into()?;
+        let _ = remaining;
+        let (mid, remaining) = Colormap::try_parse(value)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (visual, remaining) = Visualid::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateColormapRequest {
+            alloc,
+            mid,
+            window,
+            visual,
+        })
+    }
 }
 pub fn create_colormap<Conn>(conn: &Conn, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -17948,6 +20217,20 @@ impl FreeColormapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != FREE_COLORMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let _ = remaining;
+        Ok(FreeColormapRequest {
+            cmap,
+        })
     }
 }
 pub fn free_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -17999,6 +20282,22 @@ impl CopyColormapAndFreeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != COPY_COLORMAP_AND_FREE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (mid, remaining) = Colormap::try_parse(value)?;
+        let (src_cmap, remaining) = Colormap::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CopyColormapAndFreeRequest {
+            mid,
+            src_cmap,
+        })
+    }
 }
 pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -18044,6 +20343,20 @@ impl InstallColormapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != INSTALL_COLORMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let _ = remaining;
+        Ok(InstallColormapRequest {
+            cmap,
+        })
+    }
 }
 pub fn install_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -18088,6 +20401,20 @@ impl UninstallColormapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != UNINSTALL_COLORMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let _ = remaining;
+        Ok(UninstallColormapRequest {
+            cmap,
+        })
+    }
 }
 pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -18131,6 +20458,20 @@ impl ListInstalledColormapsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != LIST_INSTALLED_COLORMAPS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(ListInstalledColormapsRequest {
+            window,
+        })
     }
 }
 pub fn list_installed_colormaps<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListInstalledColormapsReply>, ConnectionError>
@@ -18250,6 +20591,27 @@ impl AllocColorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != ALLOC_COLOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let (red, remaining) = u16::try_parse(remaining)?;
+        let (green, remaining) = u16::try_parse(remaining)?;
+        let (blue, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(AllocColorRequest {
+            cmap,
+            red,
+            green,
+            blue,
+        })
+    }
 }
 /// Allocate a color.
 ///
@@ -18357,6 +20719,24 @@ impl<'input> AllocNamedColorRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != ALLOC_NAMED_COLOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let (name_len, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(AllocNamedColorRequest {
+            cmap,
+            name,
+        })
+    }
 }
 pub fn alloc_named_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
 where
@@ -18448,6 +20828,25 @@ impl AllocColorCellsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != ALLOC_COLOR_CELLS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (contiguous, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let (colors, remaining) = u16::try_parse(remaining)?;
+        let (planes, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(AllocColorCellsRequest {
+            contiguous,
+            cmap,
+            colors,
+            planes,
+        })
     }
 }
 pub fn alloc_color_cells<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Conn, AllocColorCellsReply>, ConnectionError>
@@ -18572,6 +20971,29 @@ impl AllocColorPlanesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != ALLOC_COLOR_PLANES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (contiguous, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let (colors, remaining) = u16::try_parse(remaining)?;
+        let (reds, remaining) = u16::try_parse(remaining)?;
+        let (greens, remaining) = u16::try_parse(remaining)?;
+        let (blues, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(AllocColorPlanesRequest {
+            contiguous,
+            cmap,
+            colors,
+            reds,
+            greens,
+            blues,
+        })
+    }
 }
 pub fn alloc_color_planes<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Conn, AllocColorPlanesReply>, ConnectionError>
 where
@@ -18680,6 +21102,31 @@ impl<'input> FreeColorsRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != FREE_COLORS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let (plane_mask, remaining) = u32::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut pixels = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = u32::try_parse(remaining)?;
+            remaining = new_remaining;
+            pixels.push(v);
+        }
+        let _ = remaining;
+        Ok(FreeColorsRequest {
+            cmap,
+            plane_mask,
+            pixels: Cow::Owned(pixels),
+        })
     }
 }
 pub fn free_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -18858,6 +21305,29 @@ impl<'input> StoreColorsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), items_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != STORE_COLORS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut items = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Coloritem::try_parse(remaining)?;
+            remaining = new_remaining;
+            items.push(v);
+        }
+        let _ = remaining;
+        Ok(StoreColorsRequest {
+            cmap,
+            items: Cow::Owned(items),
+        })
+    }
 }
 pub fn store_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, items: &'input [Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -18920,6 +21390,27 @@ impl<'input> StoreNamedColorRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != STORE_NAMED_COLOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let (pixel, remaining) = u32::try_parse(remaining)?;
+        let (name_len, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(StoreNamedColorRequest {
+            flags,
+            cmap,
+            pixel,
+            name,
+        })
     }
 }
 pub fn store_named_color<'c, 'input, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -19023,6 +21514,29 @@ impl<'input> QueryColorsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != QUERY_COLORS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut pixels = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = u32::try_parse(remaining)?;
+            remaining = new_remaining;
+            pixels.push(v);
+        }
+        let _ = remaining;
+        Ok(QueryColorsRequest {
+            cmap,
+            pixels: Cow::Owned(pixels),
+        })
+    }
 }
 pub fn query_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &'input [u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
 where
@@ -19119,6 +21633,24 @@ impl<'input> LookupColorRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != LOOKUP_COLOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cmap, remaining) = Colormap::try_parse(value)?;
+        let (name_len, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(LookupColorRequest {
+            cmap,
+            name,
+        })
     }
 }
 pub fn lookup_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
@@ -19302,6 +21834,40 @@ impl CreateCursorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CREATE_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cid, remaining) = Cursor::try_parse(value)?;
+        let (source, remaining) = Pixmap::try_parse(remaining)?;
+        let (mask, remaining) = Pixmap::try_parse(remaining)?;
+        let (fore_red, remaining) = u16::try_parse(remaining)?;
+        let (fore_green, remaining) = u16::try_parse(remaining)?;
+        let (fore_blue, remaining) = u16::try_parse(remaining)?;
+        let (back_red, remaining) = u16::try_parse(remaining)?;
+        let (back_green, remaining) = u16::try_parse(remaining)?;
+        let (back_blue, remaining) = u16::try_parse(remaining)?;
+        let (x, remaining) = u16::try_parse(remaining)?;
+        let (y, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateCursorRequest {
+            cid,
+            source,
+            mask,
+            fore_red,
+            fore_green,
+            fore_blue,
+            back_red,
+            back_green,
+            back_blue,
+            x,
+            y,
+        })
     }
 }
 pub fn create_cursor<Conn, A>(conn: &Conn, cid: Cursor, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -19495,6 +22061,40 @@ impl CreateGlyphCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CREATE_GLYPH_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cid, remaining) = Cursor::try_parse(value)?;
+        let (source_font, remaining) = Font::try_parse(remaining)?;
+        let (mask_font, remaining) = Font::try_parse(remaining)?;
+        let (source_char, remaining) = u16::try_parse(remaining)?;
+        let (mask_char, remaining) = u16::try_parse(remaining)?;
+        let (fore_red, remaining) = u16::try_parse(remaining)?;
+        let (fore_green, remaining) = u16::try_parse(remaining)?;
+        let (fore_blue, remaining) = u16::try_parse(remaining)?;
+        let (back_red, remaining) = u16::try_parse(remaining)?;
+        let (back_green, remaining) = u16::try_parse(remaining)?;
+        let (back_blue, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateGlyphCursorRequest {
+            cid,
+            source_font,
+            mask_font,
+            source_char,
+            mask_char,
+            fore_red,
+            fore_green,
+            fore_blue,
+            back_red,
+            back_green,
+            back_blue,
+        })
+    }
 }
 /// create cursor.
 ///
@@ -19596,6 +22196,20 @@ impl FreeCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != FREE_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cursor, remaining) = Cursor::try_parse(value)?;
+        let _ = remaining;
+        Ok(FreeCursorRequest {
+            cursor,
+        })
+    }
 }
 /// Deletes a cursor.
 ///
@@ -19675,6 +22289,32 @@ impl RecolorCursorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != RECOLOR_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (cursor, remaining) = Cursor::try_parse(value)?;
+        let (fore_red, remaining) = u16::try_parse(remaining)?;
+        let (fore_green, remaining) = u16::try_parse(remaining)?;
+        let (fore_blue, remaining) = u16::try_parse(remaining)?;
+        let (back_red, remaining) = u16::try_parse(remaining)?;
+        let (back_green, remaining) = u16::try_parse(remaining)?;
+        let (back_blue, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(RecolorCursorRequest {
+            cursor,
+            fore_red,
+            fore_green,
+            fore_blue,
+            back_red,
+            back_green,
+            back_blue,
+        })
     }
 }
 pub fn recolor_cursor<Conn>(conn: &Conn, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -19801,6 +22441,26 @@ impl QueryBestSizeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != QUERY_BEST_SIZE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (class, remaining) = u8::try_parse(remaining)?;
+        let class = class.try_into()?;
+        let _ = remaining;
+        let (drawable, remaining) = Drawable::try_parse(value)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryBestSizeRequest {
+            class,
+            drawable,
+            width,
+            height,
+        })
+    }
 }
 pub fn query_best_size<Conn>(conn: &Conn, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
 where
@@ -19901,6 +22561,22 @@ impl<'input> QueryExtensionRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != QUERY_EXTENSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (name_len, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(QueryExtensionRequest {
+            name,
+        })
+    }
 }
 /// check if extension is present.
 ///
@@ -19997,6 +22673,18 @@ impl ListExtensionsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != LIST_EXTENSIONS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(ListExtensionsRequest
+        )
+    }
 }
 pub fn list_extensions<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListExtensionsReply>, ConnectionError>
 where
@@ -20090,6 +22778,26 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), keysyms_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CHANGE_KEYBOARD_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (keycode_count, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        let (first_keycode, remaining) = Keycode::try_parse(value)?;
+        let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ChangeKeyboardMappingRequest {
+            keycode_count,
+            first_keycode,
+            keysyms_per_keycode,
+            keysyms: Cow::Owned(keysyms),
+        })
+    }
 }
 pub fn change_keyboard_mapping<'c, 'input, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &'input [Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -20138,6 +22846,22 @@ impl GetKeyboardMappingRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_KEYBOARD_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (first_keycode, remaining) = Keycode::try_parse(value)?;
+        let (count, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetKeyboardMappingRequest {
+            first_keycode,
+            count,
+        })
     }
 }
 pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Conn, GetKeyboardMappingReply>, ConnectionError>
@@ -20422,6 +23146,80 @@ pub struct ChangeKeyboardControlAux {
     pub key: Option<Keycode32>,
     pub auto_repeat_mode: Option<AutoRepeatMode>,
 }
+impl ChangeKeyboardControlAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let key_click_percent = if switch_expr & u32::from(KB::KeyClickPercent) != 0 {
+            let remaining = outer_remaining;
+            let (key_click_percent, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(key_click_percent)
+        } else {
+            None
+        };
+        let bell_percent = if switch_expr & u32::from(KB::BellPercent) != 0 {
+            let remaining = outer_remaining;
+            let (bell_percent, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(bell_percent)
+        } else {
+            None
+        };
+        let bell_pitch = if switch_expr & u32::from(KB::BellPitch) != 0 {
+            let remaining = outer_remaining;
+            let (bell_pitch, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(bell_pitch)
+        } else {
+            None
+        };
+        let bell_duration = if switch_expr & u32::from(KB::BellDuration) != 0 {
+            let remaining = outer_remaining;
+            let (bell_duration, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(bell_duration)
+        } else {
+            None
+        };
+        let led = if switch_expr & u32::from(KB::Led) != 0 {
+            let remaining = outer_remaining;
+            let (led, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(led)
+        } else {
+            None
+        };
+        let led_mode = if switch_expr & u32::from(KB::LedMode) != 0 {
+            let remaining = outer_remaining;
+            let (led_mode, remaining) = u32::try_parse(remaining)?;
+            let led_mode = led_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(led_mode)
+        } else {
+            None
+        };
+        let key = if switch_expr & u32::from(KB::Key) != 0 {
+            let remaining = outer_remaining;
+            let (key, remaining) = Keycode32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(key)
+        } else {
+            None
+        };
+        let auto_repeat_mode = if switch_expr & u32::from(KB::AutoRepeatMode) != 0 {
+            let remaining = outer_remaining;
+            let (auto_repeat_mode, remaining) = u32::try_parse(remaining)?;
+            let auto_repeat_mode = auto_repeat_mode.try_into()?;
+            outer_remaining = remaining;
+            Some(auto_repeat_mode)
+        } else {
+            None
+        };
+        let result = ChangeKeyboardControlAux { key_click_percent, bell_percent, bell_pitch, bell_duration, led, led_mode, key, auto_repeat_mode };
+        Ok((result, outer_remaining))
+    }
+}
 #[allow(dead_code, unused_variables)]
 impl ChangeKeyboardControlAux {
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
@@ -20569,6 +23367,21 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CHANGE_KEYBOARD_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (value_mask, remaining) = u32::try_parse(value)?;
+        let (value_list, remaining) = ChangeKeyboardControlAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(ChangeKeyboardControlRequest {
+            value_list: Cow::Owned(value_list),
+        })
+    }
 }
 pub fn change_keyboard_control<'c, 'input, Conn>(conn: &'c Conn, value_list: &'input ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -20605,6 +23418,18 @@ impl GetKeyboardControlRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_KEYBOARD_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(GetKeyboardControlRequest
+        )
     }
 }
 pub fn get_keyboard_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetKeyboardControlReply>, ConnectionError>
@@ -20683,6 +23508,19 @@ impl BellRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != BELL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (percent, remaining) = i8::try_parse(remaining)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(BellRequest {
+            percent,
+        })
+    }
 }
 pub fn bell<Conn>(conn: &Conn, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -20739,6 +23577,28 @@ impl ChangePointerControlRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CHANGE_POINTER_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (acceleration_numerator, remaining) = i16::try_parse(value)?;
+        let (acceleration_denominator, remaining) = i16::try_parse(remaining)?;
+        let (threshold, remaining) = i16::try_parse(remaining)?;
+        let (do_acceleration, remaining) = bool::try_parse(remaining)?;
+        let (do_threshold, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ChangePointerControlRequest {
+            acceleration_numerator,
+            acceleration_denominator,
+            threshold,
+            do_acceleration,
+            do_threshold,
+        })
+    }
 }
 pub fn change_pointer_control<Conn>(conn: &Conn, acceleration_numerator: i16, acceleration_denominator: i16, threshold: i16, do_acceleration: bool, do_threshold: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -20779,6 +23639,18 @@ impl GetPointerControlRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_POINTER_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(GetPointerControlRequest
+        )
     }
 }
 pub fn get_pointer_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerControlReply>, ConnectionError>
@@ -20992,6 +23864,28 @@ impl SetScreenSaverRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_SCREEN_SAVER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (timeout, remaining) = i16::try_parse(value)?;
+        let (interval, remaining) = i16::try_parse(remaining)?;
+        let (prefer_blanking, remaining) = u8::try_parse(remaining)?;
+        let prefer_blanking = prefer_blanking.try_into()?;
+        let (allow_exposures, remaining) = u8::try_parse(remaining)?;
+        let allow_exposures = allow_exposures.try_into()?;
+        let _ = remaining;
+        Ok(SetScreenSaverRequest {
+            timeout,
+            interval,
+            prefer_blanking,
+            allow_exposures,
+        })
+    }
 }
 pub fn set_screen_saver<Conn>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -21031,6 +23925,18 @@ impl GetScreenSaverRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_SCREEN_SAVER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(GetScreenSaverRequest
+        )
     }
 }
 pub fn get_screen_saver<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetScreenSaverReply>, ConnectionError>
@@ -21257,6 +24163,27 @@ impl<'input> ChangeHostsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.address.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != CHANGE_HOSTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let (family, remaining) = u8::try_parse(value)?;
+        let family = family.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (address_len, remaining) = u16::try_parse(remaining)?;
+        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ChangeHostsRequest {
+            mode,
+            family,
+            address,
+        })
+    }
 }
 pub fn change_hosts<'c, 'input, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -21356,6 +24283,18 @@ impl ListHostsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != LIST_HOSTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(ListHostsRequest
+        )
     }
 }
 pub fn list_hosts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListHostsReply>, ConnectionError>
@@ -21509,6 +24448,20 @@ impl SetAccessControlRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_ACCESS_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let _ = value;
+        Ok(SetAccessControlRequest {
+            mode,
+        })
+    }
 }
 pub fn set_access_control<Conn>(conn: &Conn, mode: AccessControl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -21613,6 +24566,20 @@ impl SetCloseDownModeRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_CLOSE_DOWN_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let _ = value;
+        Ok(SetCloseDownModeRequest {
+            mode,
+        })
     }
 }
 pub fn set_close_down_mode<Conn>(conn: &Conn, mode: CloseDown) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -21736,6 +24703,20 @@ impl KillClientRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != KILL_CLIENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (resource, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(KillClientRequest {
+            resource,
+        })
+    }
 }
 /// kills a client.
 ///
@@ -21813,6 +24794,25 @@ impl<'input> RotatePropertiesRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), atoms_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != ROTATE_PROPERTIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let (window, remaining) = Window::try_parse(value)?;
+        let (atoms_len, remaining) = u16::try_parse(remaining)?;
+        let (delta, remaining) = i16::try_parse(remaining)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(RotatePropertiesRequest {
+            window,
+            delta,
+            atoms: Cow::Owned(atoms),
+        })
     }
 }
 pub fn rotate_properties<'c, 'input, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &'input [Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -21926,6 +24926,20 @@ impl ForceScreenSaverRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != FORCE_SCREEN_SAVER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let _ = value;
+        Ok(ForceScreenSaverRequest {
+            mode,
+        })
+    }
 }
 pub fn force_screen_saver<Conn>(conn: &Conn, mode: ScreenSaver) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -22035,6 +25049,20 @@ impl<'input> SetPointerMappingRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.map.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_POINTER_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (map_len, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(value, map_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetPointerMappingRequest {
+            map,
+        })
+    }
 }
 pub fn set_pointer_mapping<'c, 'input, Conn>(conn: &'c Conn, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
 where
@@ -22096,6 +25124,18 @@ impl GetPointerMappingRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_POINTER_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(GetPointerMappingRequest
+        )
     }
 }
 pub fn get_pointer_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerMappingReply>, ConnectionError>
@@ -22262,6 +25302,20 @@ impl<'input> SetModifierMappingRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.keycodes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != SET_MODIFIER_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetModifierMappingRequest {
+            keycodes,
+        })
+    }
 }
 pub fn set_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, keycodes: &'input [Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
 where
@@ -22323,6 +25377,18 @@ impl GetModifierMappingRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != GET_MODIFIER_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(GetModifierMappingRequest
+        )
     }
 }
 pub fn get_modifier_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetModifierMappingReply>, ConnectionError>
@@ -22401,6 +25467,18 @@ impl NoOperationRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.major_opcode != NO_OPERATION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let remaining = &[header.minor_opcode];
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let _ = value;
+        Ok(NoOperationRequest
+        )
     }
 }
 pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>

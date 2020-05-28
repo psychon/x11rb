@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -265,6 +265,20 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (client_major_version, remaining) = u8::try_parse(value)?;
+        let (client_minor_version, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            client_major_version,
+            client_minor_version,
+        })
+    }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u8, client_minor_version: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -338,6 +352,17 @@ impl QueryInfoRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryInfoRequest {
+            drawable,
+        })
     }
 }
 pub fn query_info<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryInfoReply>, ConnectionError>
@@ -426,6 +451,19 @@ impl SelectInputRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SELECT_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SelectInputRequest {
+            drawable,
+            event_mask,
+        })
+    }
 }
 pub fn select_input<Conn, A>(conn: &Conn, drawable: xproto::Drawable, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -460,6 +498,137 @@ pub struct SetAttributesAux {
     pub do_not_propogate_mask: Option<u32>,
     pub colormap: Option<xproto::Colormap>,
     pub cursor: Option<xproto::Cursor>,
+}
+impl SetAttributesAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let background_pixmap = if switch_expr & u32::from(xproto::CW::BackPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixmap)
+        } else {
+            None
+        };
+        let background_pixel = if switch_expr & u32::from(xproto::CW::BackPixel) != 0 {
+            let remaining = outer_remaining;
+            let (background_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(background_pixel)
+        } else {
+            None
+        };
+        let border_pixmap = if switch_expr & u32::from(xproto::CW::BorderPixmap) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixmap)
+        } else {
+            None
+        };
+        let border_pixel = if switch_expr & u32::from(xproto::CW::BorderPixel) != 0 {
+            let remaining = outer_remaining;
+            let (border_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(border_pixel)
+        } else {
+            None
+        };
+        let bit_gravity = if switch_expr & u32::from(xproto::CW::BitGravity) != 0 {
+            let remaining = outer_remaining;
+            let (bit_gravity, remaining) = u32::try_parse(remaining)?;
+            let bit_gravity = xproto::Gravity::try_from(bit_gravity, xproto::Gravity::BitForget)?;
+            outer_remaining = remaining;
+            Some(bit_gravity)
+        } else {
+            None
+        };
+        let win_gravity = if switch_expr & u32::from(xproto::CW::WinGravity) != 0 {
+            let remaining = outer_remaining;
+            let (win_gravity, remaining) = u32::try_parse(remaining)?;
+            let win_gravity = xproto::Gravity::try_from(win_gravity, xproto::Gravity::WinUnmap)?;
+            outer_remaining = remaining;
+            Some(win_gravity)
+        } else {
+            None
+        };
+        let backing_store = if switch_expr & u32::from(xproto::CW::BackingStore) != 0 {
+            let remaining = outer_remaining;
+            let (backing_store, remaining) = u32::try_parse(remaining)?;
+            let backing_store = backing_store.try_into()?;
+            outer_remaining = remaining;
+            Some(backing_store)
+        } else {
+            None
+        };
+        let backing_planes = if switch_expr & u32::from(xproto::CW::BackingPlanes) != 0 {
+            let remaining = outer_remaining;
+            let (backing_planes, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_planes)
+        } else {
+            None
+        };
+        let backing_pixel = if switch_expr & u32::from(xproto::CW::BackingPixel) != 0 {
+            let remaining = outer_remaining;
+            let (backing_pixel, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(backing_pixel)
+        } else {
+            None
+        };
+        let override_redirect = if switch_expr & u32::from(xproto::CW::OverrideRedirect) != 0 {
+            let remaining = outer_remaining;
+            let (override_redirect, remaining) = xproto::Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(override_redirect)
+        } else {
+            None
+        };
+        let save_under = if switch_expr & u32::from(xproto::CW::SaveUnder) != 0 {
+            let remaining = outer_remaining;
+            let (save_under, remaining) = xproto::Bool32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(save_under)
+        } else {
+            None
+        };
+        let event_mask = if switch_expr & u32::from(xproto::CW::EventMask) != 0 {
+            let remaining = outer_remaining;
+            let (event_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(event_mask)
+        } else {
+            None
+        };
+        let do_not_propogate_mask = if switch_expr & u32::from(xproto::CW::DontPropagate) != 0 {
+            let remaining = outer_remaining;
+            let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(do_not_propogate_mask)
+        } else {
+            None
+        };
+        let colormap = if switch_expr & u32::from(xproto::CW::Colormap) != 0 {
+            let remaining = outer_remaining;
+            let (colormap, remaining) = xproto::Colormap::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(colormap)
+        } else {
+            None
+        };
+        let cursor = if switch_expr & u32::from(xproto::CW::Cursor) != 0 {
+            let remaining = outer_remaining;
+            let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(cursor)
+        } else {
+            None
+        };
+        let result = SetAttributesAux { background_pixmap, background_pixel, border_pixmap, border_pixel, bit_gravity, win_gravity, backing_store, backing_planes, backing_pixel, override_redirect, save_under, event_mask, do_not_propogate_mask, colormap, cursor };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl SetAttributesAux {
@@ -724,6 +893,37 @@ impl<'input> SetAttributesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_ATTRIBUTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (border_width, remaining) = u16::try_parse(remaining)?;
+        let (class, remaining) = u8::try_parse(remaining)?;
+        let class = class.try_into()?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = SetAttributesAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(SetAttributesRequest {
+            drawable,
+            x,
+            y,
+            width,
+            height,
+            border_width,
+            class,
+            depth,
+            visual,
+            value_list: Cow::Owned(value_list),
+        })
+    }
 }
 pub fn set_attributes<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &'input SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -778,6 +978,17 @@ impl UnsetAttributesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != UNSET_ATTRIBUTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let _ = remaining;
+        Ok(UnsetAttributesRequest {
+            drawable,
+        })
+    }
 }
 pub fn unset_attributes<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -822,6 +1033,17 @@ impl SuspendRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SUSPEND_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (suspend, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(SuspendRequest {
+            suspend,
+        })
     }
 }
 pub fn suspend<Conn>(conn: &Conn, suspend: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>

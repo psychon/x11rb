@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -67,6 +67,19 @@ impl GetVersionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (client_major_version, remaining) = u16::try_parse(value)?;
+        let (client_minor_version, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetVersionRequest {
+            client_major_version,
+            client_minor_version,
+        })
     }
 }
 pub fn get_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
@@ -134,6 +147,15 @@ impl CapableRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CAPABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(CapableRequest
+        )
+    }
 }
 pub fn capable<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, CapableReply>, ConnectionError>
 where
@@ -195,6 +217,15 @@ impl GetTimeoutsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_TIMEOUTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(GetTimeoutsRequest
+        )
     }
 }
 pub fn get_timeouts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetTimeoutsReply>, ConnectionError>
@@ -277,6 +308,21 @@ impl SetTimeoutsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_TIMEOUTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (standby_timeout, remaining) = u16::try_parse(value)?;
+        let (suspend_timeout, remaining) = u16::try_parse(remaining)?;
+        let (off_timeout, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetTimeoutsRequest {
+            standby_timeout,
+            suspend_timeout,
+            off_timeout,
+        })
+    }
 }
 pub fn set_timeouts<Conn>(conn: &Conn, standby_timeout: u16, suspend_timeout: u16, off_timeout: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -317,6 +363,15 @@ impl EnableRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != ENABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(EnableRequest
+        )
+    }
 }
 pub fn enable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -352,6 +407,15 @@ impl DisableRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DISABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(DisableRequest
+        )
     }
 }
 pub fn disable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -464,6 +528,18 @@ impl ForceLevelRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != FORCE_LEVEL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (power_level, remaining) = u16::try_parse(value)?;
+        let power_level = power_level.try_into()?;
+        let _ = remaining;
+        Ok(ForceLevelRequest {
+            power_level,
+        })
+    }
 }
 pub fn force_level<Conn>(conn: &Conn, power_level: DPMSMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -501,6 +577,15 @@ impl InfoRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(InfoRequest
+        )
     }
 }
 pub fn info<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, InfoReply>, ConnectionError>

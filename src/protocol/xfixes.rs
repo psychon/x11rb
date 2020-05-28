@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -74,6 +74,19 @@ impl QueryVersionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (client_major_version, remaining) = u32::try_parse(value)?;
+        let (client_minor_version, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            client_major_version,
+            client_minor_version,
+        })
     }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -369,6 +382,27 @@ impl ChangeSaveSetRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_SAVE_SET_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (mode, remaining) = u8::try_parse(value)?;
+        let mode = mode.try_into()?;
+        let (target, remaining) = u8::try_parse(remaining)?;
+        let target = target.try_into()?;
+        let (map, remaining) = u8::try_parse(remaining)?;
+        let map = map.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ChangeSaveSetRequest {
+            mode,
+            target,
+            map,
+            window,
+        })
+    }
 }
 pub fn change_save_set<Conn>(conn: &Conn, mode: SaveSetMode, target: SaveSetTarget, map: SaveSetMapping, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -647,6 +681,21 @@ impl SelectSelectionInputRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SELECT_SELECTION_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (selection, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SelectSelectionInputRequest {
+            window,
+            selection,
+            event_mask,
+        })
+    }
 }
 pub fn select_selection_input<Conn, A>(conn: &Conn, window: xproto::Window, selection: xproto::Atom, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -905,6 +954,19 @@ impl SelectCursorInputRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SELECT_CURSOR_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SelectCursorInputRequest {
+            window,
+            event_mask,
+        })
+    }
 }
 pub fn select_cursor_input<Conn, A>(conn: &Conn, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -945,6 +1007,15 @@ impl GetCursorImageRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CURSOR_IMAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(GetCursorImageRequest
+        )
     }
 }
 pub fn get_cursor_image<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetCursorImageReply>, ConnectionError>
@@ -1166,6 +1237,26 @@ impl<'input> CreateRegionRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = Region::try_parse(value)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut rectangles = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = xproto::Rectangle::try_parse(remaining)?;
+            remaining = new_remaining;
+            rectangles.push(v);
+        }
+        let _ = remaining;
+        Ok(CreateRegionRequest {
+            region,
+            rectangles: Cow::Owned(rectangles),
+        })
+    }
 }
 pub fn create_region<'c, 'input, Conn>(conn: &'c Conn, region: Region, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1217,6 +1308,19 @@ impl CreateRegionFromBitmapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_REGION_FROM_BITMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = Region::try_parse(value)?;
+        let (bitmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateRegionFromBitmapRequest {
+            region,
+            bitmap,
+        })
     }
 }
 pub fn create_region_from_bitmap<Conn>(conn: &Conn, region: Region, bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1276,6 +1380,23 @@ impl CreateRegionFromWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_REGION_FROM_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = Region::try_parse(value)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (kind, remaining) = shape::Kind::try_parse(remaining)?;
+        let kind = kind.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(CreateRegionFromWindowRequest {
+            region,
+            window,
+            kind,
+        })
+    }
 }
 pub fn create_region_from_window<Conn>(conn: &Conn, region: Region, window: xproto::Window, kind: shape::SK) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1329,6 +1450,19 @@ impl CreateRegionFromGCRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_REGION_FROM_GC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = Region::try_parse(value)?;
+        let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateRegionFromGCRequest {
+            region,
+            gc,
+        })
+    }
 }
 pub fn create_region_from_gc<Conn>(conn: &Conn, region: Region, gc: xproto::Gcontext) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1381,6 +1515,19 @@ impl CreateRegionFromPictureRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_REGION_FROM_PICTURE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = Region::try_parse(value)?;
+        let (picture, remaining) = render::Picture::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateRegionFromPictureRequest {
+            region,
+            picture,
+        })
+    }
 }
 pub fn create_region_from_picture<Conn>(conn: &Conn, region: Region, picture: render::Picture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1426,6 +1573,17 @@ impl DestroyRegionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DESTROY_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = Region::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyRegionRequest {
+            region,
+        })
     }
 }
 pub fn destroy_region<Conn>(conn: &Conn, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1476,6 +1634,26 @@ impl<'input> SetRegionRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = Region::try_parse(value)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut rectangles = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = xproto::Rectangle::try_parse(remaining)?;
+            remaining = new_remaining;
+            rectangles.push(v);
+        }
+        let _ = remaining;
+        Ok(SetRegionRequest {
+            region,
+            rectangles: Cow::Owned(rectangles),
+        })
     }
 }
 pub fn set_region<'c, 'input, Conn>(conn: &'c Conn, region: Region, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1528,6 +1706,19 @@ impl CopyRegionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != COPY_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (source, remaining) = Region::try_parse(value)?;
+        let (destination, remaining) = Region::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CopyRegionRequest {
+            source,
+            destination,
+        })
     }
 }
 pub fn copy_region<Conn>(conn: &Conn, source: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1586,6 +1777,21 @@ impl UnionRegionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != UNION_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (source1, remaining) = Region::try_parse(value)?;
+        let (source2, remaining) = Region::try_parse(remaining)?;
+        let (destination, remaining) = Region::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(UnionRegionRequest {
+            source1,
+            source2,
+            destination,
+        })
     }
 }
 pub fn union_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1646,6 +1852,21 @@ impl IntersectRegionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != INTERSECT_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (source1, remaining) = Region::try_parse(value)?;
+        let (source2, remaining) = Region::try_parse(remaining)?;
+        let (destination, remaining) = Region::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(IntersectRegionRequest {
+            source1,
+            source2,
+            destination,
+        })
+    }
 }
 pub fn intersect_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1704,6 +1925,21 @@ impl SubtractRegionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SUBTRACT_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (source1, remaining) = Region::try_parse(value)?;
+        let (source2, remaining) = Region::try_parse(remaining)?;
+        let (destination, remaining) = Region::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SubtractRegionRequest {
+            source1,
+            source2,
+            destination,
+        })
     }
 }
 pub fn subtract_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1768,6 +2004,21 @@ impl InvertRegionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != INVERT_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (source, remaining) = Region::try_parse(value)?;
+        let (bounds, remaining) = xproto::Rectangle::try_parse(remaining)?;
+        let (destination, remaining) = Region::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(InvertRegionRequest {
+            source,
+            bounds,
+            destination,
+        })
+    }
 }
 pub fn invert_region<Conn>(conn: &Conn, source: Region, bounds: xproto::Rectangle, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1823,6 +2074,21 @@ impl TranslateRegionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != TRANSLATE_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = Region::try_parse(value)?;
+        let (dx, remaining) = i16::try_parse(remaining)?;
+        let (dy, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(TranslateRegionRequest {
+            region,
+            dx,
+            dy,
+        })
+    }
 }
 pub fn translate_region<Conn>(conn: &Conn, region: Region, dx: i16, dy: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1876,6 +2142,19 @@ impl RegionExtentsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != REGION_EXTENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (source, remaining) = Region::try_parse(value)?;
+        let (destination, remaining) = Region::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(RegionExtentsRequest {
+            source,
+            destination,
+        })
+    }
 }
 pub fn region_extents<Conn>(conn: &Conn, source: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1921,6 +2200,17 @@ impl FetchRegionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != FETCH_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = Region::try_parse(value)?;
+        let _ = remaining;
+        Ok(FetchRegionRequest {
+            region,
+        })
     }
 }
 pub fn fetch_region<Conn>(conn: &Conn, region: Region) -> Result<Cookie<'_, Conn, FetchRegionReply>, ConnectionError>
@@ -2024,6 +2314,23 @@ impl SetGCClipRegionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_GC_CLIP_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (gc, remaining) = xproto::Gcontext::try_parse(value)?;
+        let (region, remaining) = Region::try_parse(remaining)?;
+        let (x_origin, remaining) = i16::try_parse(remaining)?;
+        let (y_origin, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetGCClipRegionRequest {
+            gc,
+            region,
+            x_origin,
+            y_origin,
+        })
+    }
 }
 pub fn set_gc_clip_region<Conn, A>(conn: &Conn, gc: xproto::Gcontext, region: A, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2094,6 +2401,27 @@ impl SetWindowShapeRegionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_WINDOW_SHAPE_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (dest, remaining) = xproto::Window::try_parse(value)?;
+        let (dest_kind, remaining) = shape::Kind::try_parse(remaining)?;
+        let dest_kind = dest_kind.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (x_offset, remaining) = i16::try_parse(remaining)?;
+        let (y_offset, remaining) = i16::try_parse(remaining)?;
+        let (region, remaining) = Region::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetWindowShapeRegionRequest {
+            dest,
+            dest_kind,
+            x_offset,
+            y_offset,
+            region,
+        })
+    }
 }
 pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2159,6 +2487,23 @@ impl SetPictureClipRegionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_PICTURE_CLIP_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (picture, remaining) = render::Picture::try_parse(value)?;
+        let (region, remaining) = Region::try_parse(remaining)?;
+        let (x_origin, remaining) = i16::try_parse(remaining)?;
+        let (y_origin, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetPictureClipRegionRequest {
+            picture,
+            region,
+            x_origin,
+            y_origin,
+        })
+    }
 }
 pub fn set_picture_clip_region<Conn, A>(conn: &Conn, picture: render::Picture, region: A, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2219,6 +2564,21 @@ impl<'input> SetCursorNameRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_CURSOR_NAME_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (cursor, remaining) = xproto::Cursor::try_parse(value)?;
+        let (nbytes, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetCursorNameRequest {
+            cursor,
+            name,
+        })
+    }
 }
 pub fn set_cursor_name<'c, 'input, Conn>(conn: &'c Conn, cursor: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2264,6 +2624,17 @@ impl GetCursorNameRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CURSOR_NAME_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (cursor, remaining) = xproto::Cursor::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetCursorNameRequest {
+            cursor,
+        })
     }
 }
 pub fn get_cursor_name<Conn>(conn: &Conn, cursor: xproto::Cursor) -> Result<Cookie<'_, Conn, GetCursorNameReply>, ConnectionError>
@@ -2347,6 +2718,15 @@ impl GetCursorImageAndNameRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CURSOR_IMAGE_AND_NAME_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(GetCursorImageAndNameRequest
+        )
     }
 }
 pub fn get_cursor_image_and_name<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetCursorImageAndNameReply>, ConnectionError>
@@ -2458,6 +2838,19 @@ impl ChangeCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (source, remaining) = xproto::Cursor::try_parse(value)?;
+        let (destination, remaining) = xproto::Cursor::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ChangeCursorRequest {
+            source,
+            destination,
+        })
+    }
 }
 pub fn change_cursor<Conn>(conn: &Conn, source: xproto::Cursor, destination: xproto::Cursor) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2513,6 +2906,21 @@ impl<'input> ChangeCursorByNameRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_CURSOR_BY_NAME_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (src, remaining) = xproto::Cursor::try_parse(value)?;
+        let (nbytes, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ChangeCursorByNameRequest {
+            src,
+            name,
+        })
     }
 }
 pub fn change_cursor_by_name<'c, 'input, Conn>(conn: &'c Conn, src: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2582,6 +2990,27 @@ impl ExpandRegionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != EXPAND_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (source, remaining) = Region::try_parse(value)?;
+        let (destination, remaining) = Region::try_parse(remaining)?;
+        let (left, remaining) = u16::try_parse(remaining)?;
+        let (right, remaining) = u16::try_parse(remaining)?;
+        let (top, remaining) = u16::try_parse(remaining)?;
+        let (bottom, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ExpandRegionRequest {
+            source,
+            destination,
+            left,
+            right,
+            top,
+            bottom,
+        })
+    }
 }
 pub fn expand_region<Conn>(conn: &Conn, source: Region, destination: Region, left: u16, right: u16, top: u16, bottom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2632,6 +3061,17 @@ impl HideCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != HIDE_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(HideCursorRequest {
+            window,
+        })
+    }
 }
 pub fn hide_cursor<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2676,6 +3116,17 @@ impl ShowCursorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SHOW_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(ShowCursorRequest {
+            window,
+        })
     }
 }
 pub fn show_cursor<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2832,6 +3283,33 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), devices_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_POINTER_BARRIER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (barrier, remaining) = Barrier::try_parse(value)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x1, remaining) = u16::try_parse(remaining)?;
+        let (y1, remaining) = u16::try_parse(remaining)?;
+        let (x2, remaining) = u16::try_parse(remaining)?;
+        let (y2, remaining) = u16::try_parse(remaining)?;
+        let (directions, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (num_devices, remaining) = u16::try_parse(remaining)?;
+        let (devices, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_devices.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(CreatePointerBarrierRequest {
+            barrier,
+            window,
+            x1,
+            y1,
+            x2,
+            y2,
+            directions,
+            devices: Cow::Owned(devices),
+        })
+    }
 }
 pub fn create_pointer_barrier<'c, 'input, Conn, A>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2885,6 +3363,17 @@ impl DeletePointerBarrierRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DELETE_POINTER_BARRIER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (barrier, remaining) = Barrier::try_parse(value)?;
+        let _ = remaining;
+        Ok(DeletePointerBarrierRequest {
+            barrier,
+        })
     }
 }
 pub fn delete_pointer_barrier<Conn>(conn: &Conn, barrier: Barrier) -> Result<VoidCookie<'_, Conn>, ConnectionError>

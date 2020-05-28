@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -144,6 +144,19 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (client_major_version, remaining) = u32::try_parse(value)?;
+        let (client_minor_version, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            client_major_version,
+            client_minor_version,
+        })
+    }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -224,6 +237,21 @@ impl RedirectWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != REDIRECT_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (update, remaining) = u8::try_parse(remaining)?;
+        let update = update.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(RedirectWindowRequest {
+            window,
+            update,
+        })
+    }
 }
 pub fn redirect_window<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -275,6 +303,21 @@ impl RedirectSubwindowsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != REDIRECT_SUBWINDOWS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (update, remaining) = u8::try_parse(remaining)?;
+        let update = update.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(RedirectSubwindowsRequest {
+            window,
+            update,
+        })
     }
 }
 pub fn redirect_subwindows<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -328,6 +371,21 @@ impl UnredirectWindowRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != UNREDIRECT_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (update, remaining) = u8::try_parse(remaining)?;
+        let update = update.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(UnredirectWindowRequest {
+            window,
+            update,
+        })
+    }
 }
 pub fn unredirect_window<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -379,6 +437,21 @@ impl UnredirectSubwindowsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != UNREDIRECT_SUBWINDOWS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (update, remaining) = u8::try_parse(remaining)?;
+        let update = update.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(UnredirectSubwindowsRequest {
+            window,
+            update,
+        })
     }
 }
 pub fn unredirect_subwindows<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -432,6 +505,19 @@ impl CreateRegionFromBorderClipRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_REGION_FROM_BORDER_CLIP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (region, remaining) = xfixes::Region::try_parse(value)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateRegionFromBorderClipRequest {
+            region,
+            window,
+        })
+    }
 }
 pub fn create_region_from_border_clip<Conn>(conn: &Conn, region: xfixes::Region, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -484,6 +570,19 @@ impl NameWindowPixmapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != NAME_WINDOW_PIXMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(NameWindowPixmapRequest {
+            window,
+            pixmap,
+        })
+    }
 }
 pub fn name_window_pixmap<Conn>(conn: &Conn, window: xproto::Window, pixmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -529,6 +628,17 @@ impl GetOverlayWindowRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_OVERLAY_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetOverlayWindowRequest {
+            window,
+        })
     }
 }
 pub fn get_overlay_window<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetOverlayWindowReply>, ConnectionError>
@@ -600,6 +710,17 @@ impl ReleaseOverlayWindowRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != RELEASE_OVERLAY_WINDOW_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(ReleaseOverlayWindowRequest {
+            window,
+        })
     }
 }
 pub fn release_overlay_window<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>

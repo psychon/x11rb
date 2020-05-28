@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -742,6 +742,19 @@ impl InitializeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != INITIALIZE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (desired_major_version, remaining) = u8::try_parse(value)?;
+        let (desired_minor_version, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(InitializeRequest {
+            desired_major_version,
+            desired_minor_version,
+        })
+    }
 }
 pub fn initialize<Conn>(conn: &Conn, desired_major_version: u8, desired_minor_version: u8) -> Result<Cookie<'_, Conn, InitializeReply>, ConnectionError>
 where
@@ -808,6 +821,15 @@ impl ListSystemCountersRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LIST_SYSTEM_COUNTERS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(ListSystemCountersRequest
+        )
     }
 }
 pub fn list_system_counters<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListSystemCountersReply>, ConnectionError>
@@ -904,6 +926,19 @@ impl CreateCounterRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_COUNTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (id, remaining) = Counter::try_parse(value)?;
+        let (initial_value, remaining) = Int64::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateCounterRequest {
+            id,
+            initial_value,
+        })
+    }
 }
 pub fn create_counter<Conn>(conn: &Conn, id: Counter, initial_value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -950,6 +985,17 @@ impl DestroyCounterRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DESTROY_COUNTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (counter, remaining) = Counter::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyCounterRequest {
+            counter,
+        })
+    }
 }
 pub fn destroy_counter<Conn>(conn: &Conn, counter: Counter) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -994,6 +1040,17 @@ impl QueryCounterRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_COUNTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (counter, remaining) = Counter::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryCounterRequest {
+            counter,
+        })
     }
 }
 pub fn query_counter<Conn>(conn: &Conn, counter: Counter) -> Result<Cookie<'_, Conn, QueryCounterReply>, ConnectionError>
@@ -1064,6 +1121,24 @@ impl<'input> AwaitRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), wait_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != AWAIT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let mut remaining = value;
+        // Length is 'everything left in the input'
+        let mut wait_list = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Waitcondition::try_parse(value)?;
+            remaining = new_remaining;
+            wait_list.push(v);
+        }
+        let _ = remaining;
+        Ok(AwaitRequest {
+            wait_list: Cow::Owned(wait_list),
+        })
+    }
 }
 pub fn await_<'c, 'input, Conn>(conn: &'c Conn, wait_list: &'input [Waitcondition]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1118,6 +1193,19 @@ impl ChangeCounterRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_COUNTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (counter, remaining) = Counter::try_parse(value)?;
+        let (amount, remaining) = Int64::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ChangeCounterRequest {
+            counter,
+            amount,
+        })
     }
 }
 pub fn change_counter<Conn>(conn: &Conn, counter: Counter, amount: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1175,6 +1263,19 @@ impl SetCounterRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_COUNTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (counter, remaining) = Counter::try_parse(value)?;
+        let (value, remaining) = Int64::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetCounterRequest {
+            counter,
+            value,
+        })
+    }
 }
 pub fn set_counter<Conn>(conn: &Conn, counter: Counter, value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1198,6 +1299,64 @@ pub struct CreateAlarmAux {
     pub test_type: Option<TESTTYPE>,
     pub delta: Option<Int64>,
     pub events: Option<u32>,
+}
+impl CreateAlarmAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let counter = if switch_expr & u32::from(CA::Counter) != 0 {
+            let remaining = outer_remaining;
+            let (counter, remaining) = Counter::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(counter)
+        } else {
+            None
+        };
+        let value_type = if switch_expr & u32::from(CA::ValueType) != 0 {
+            let remaining = outer_remaining;
+            let (value_type, remaining) = u32::try_parse(remaining)?;
+            let value_type = value_type.try_into()?;
+            outer_remaining = remaining;
+            Some(value_type)
+        } else {
+            None
+        };
+        let value = if switch_expr & u32::from(CA::Value) != 0 {
+            let remaining = outer_remaining;
+            let (value, remaining) = Int64::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(value)
+        } else {
+            None
+        };
+        let test_type = if switch_expr & u32::from(CA::TestType) != 0 {
+            let remaining = outer_remaining;
+            let (test_type, remaining) = u32::try_parse(remaining)?;
+            let test_type = test_type.try_into()?;
+            outer_remaining = remaining;
+            Some(test_type)
+        } else {
+            None
+        };
+        let delta = if switch_expr & u32::from(CA::Delta) != 0 {
+            let remaining = outer_remaining;
+            let (delta, remaining) = Int64::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(delta)
+        } else {
+            None
+        };
+        let events = if switch_expr & u32::from(CA::Events) != 0 {
+            let remaining = outer_remaining;
+            let (events, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(events)
+        } else {
+            None
+        };
+        let result = CreateAlarmAux { counter, value_type, value, test_type, delta, events };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl CreateAlarmAux {
@@ -1331,6 +1490,20 @@ impl<'input> CreateAlarmRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_ALARM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (id, remaining) = Alarm::try_parse(value)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = CreateAlarmAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(CreateAlarmRequest {
+            id,
+            value_list: Cow::Owned(value_list),
+        })
+    }
 }
 pub fn create_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1354,6 +1527,64 @@ pub struct ChangeAlarmAux {
     pub test_type: Option<TESTTYPE>,
     pub delta: Option<Int64>,
     pub events: Option<u32>,
+}
+impl ChangeAlarmAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
+        let mut outer_remaining = value;
+        let counter = if switch_expr & u32::from(CA::Counter) != 0 {
+            let remaining = outer_remaining;
+            let (counter, remaining) = Counter::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(counter)
+        } else {
+            None
+        };
+        let value_type = if switch_expr & u32::from(CA::ValueType) != 0 {
+            let remaining = outer_remaining;
+            let (value_type, remaining) = u32::try_parse(remaining)?;
+            let value_type = value_type.try_into()?;
+            outer_remaining = remaining;
+            Some(value_type)
+        } else {
+            None
+        };
+        let value = if switch_expr & u32::from(CA::Value) != 0 {
+            let remaining = outer_remaining;
+            let (value, remaining) = Int64::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(value)
+        } else {
+            None
+        };
+        let test_type = if switch_expr & u32::from(CA::TestType) != 0 {
+            let remaining = outer_remaining;
+            let (test_type, remaining) = u32::try_parse(remaining)?;
+            let test_type = test_type.try_into()?;
+            outer_remaining = remaining;
+            Some(test_type)
+        } else {
+            None
+        };
+        let delta = if switch_expr & u32::from(CA::Delta) != 0 {
+            let remaining = outer_remaining;
+            let (delta, remaining) = Int64::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(delta)
+        } else {
+            None
+        };
+        let events = if switch_expr & u32::from(CA::Events) != 0 {
+            let remaining = outer_remaining;
+            let (events, remaining) = u32::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(events)
+        } else {
+            None
+        };
+        let result = ChangeAlarmAux { counter, value_type, value, test_type, delta, events };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl ChangeAlarmAux {
@@ -1487,6 +1718,20 @@ impl<'input> ChangeAlarmRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_ALARM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (id, remaining) = Alarm::try_parse(value)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = ChangeAlarmAux::try_parse(remaining, value_mask)?;
+        let _ = remaining;
+        Ok(ChangeAlarmRequest {
+            id,
+            value_list: Cow::Owned(value_list),
+        })
+    }
 }
 pub fn change_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1533,6 +1778,17 @@ impl DestroyAlarmRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DESTROY_ALARM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (alarm, remaining) = Alarm::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyAlarmRequest {
+            alarm,
+        })
+    }
 }
 pub fn destroy_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1577,6 +1833,17 @@ impl QueryAlarmRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_ALARM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (alarm, remaining) = Alarm::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryAlarmRequest {
+            alarm,
+        })
     }
 }
 pub fn query_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<Cookie<'_, Conn, QueryAlarmReply>, ConnectionError>
@@ -1662,6 +1929,19 @@ impl SetPriorityRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_PRIORITY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (id, remaining) = u32::try_parse(value)?;
+        let (priority, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetPriorityRequest {
+            id,
+            priority,
+        })
+    }
 }
 pub fn set_priority<Conn>(conn: &Conn, id: u32, priority: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1707,6 +1987,17 @@ impl GetPriorityRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PRIORITY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (id, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetPriorityRequest {
+            id,
+        })
     }
 }
 pub fn get_priority<Conn>(conn: &Conn, id: u32) -> Result<Cookie<'_, Conn, GetPriorityReply>, ConnectionError>
@@ -1790,6 +2081,21 @@ impl CreateFenceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_FENCE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (fence, remaining) = Fence::try_parse(remaining)?;
+        let (initially_triggered, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreateFenceRequest {
+            drawable,
+            fence,
+            initially_triggered,
+        })
+    }
 }
 pub fn create_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1837,6 +2143,17 @@ impl TriggerFenceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != TRIGGER_FENCE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (fence, remaining) = Fence::try_parse(value)?;
+        let _ = remaining;
+        Ok(TriggerFenceRequest {
+            fence,
+        })
+    }
 }
 pub fn trigger_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1881,6 +2198,17 @@ impl ResetFenceRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != RESET_FENCE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (fence, remaining) = Fence::try_parse(value)?;
+        let _ = remaining;
+        Ok(ResetFenceRequest {
+            fence,
+        })
     }
 }
 pub fn reset_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -1927,6 +2255,17 @@ impl DestroyFenceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DESTROY_FENCE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (fence, remaining) = Fence::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyFenceRequest {
+            fence,
+        })
+    }
 }
 pub fn destroy_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1971,6 +2310,17 @@ impl QueryFenceRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_FENCE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (fence, remaining) = Fence::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryFenceRequest {
+            fence,
+        })
     }
 }
 pub fn query_fence<Conn>(conn: &Conn, fence: Fence) -> Result<Cookie<'_, Conn, QueryFenceReply>, ConnectionError>
@@ -2041,6 +2391,24 @@ impl<'input> AwaitFenceRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), fence_list_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != AWAIT_FENCE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let mut remaining = value;
+        // Length is 'everything left in the input'
+        let mut fence_list = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Fence::try_parse(value)?;
+            remaining = new_remaining;
+            fence_list.push(v);
+        }
+        let _ = remaining;
+        Ok(AwaitFenceRequest {
+            fence_list: Cow::Owned(fence_list),
+        })
     }
 }
 pub fn await_fence<'c, 'input, Conn>(conn: &'c Conn, fence_list: &'input [Fence]) -> Result<VoidCookie<'c, Conn>, ConnectionError>

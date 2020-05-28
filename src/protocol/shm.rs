@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -151,6 +151,15 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(QueryVersionRequest
+        )
+    }
 }
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -241,6 +250,22 @@ impl AttachRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != ATTACH_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (shmseg, remaining) = Seg::try_parse(value)?;
+        let (shmid, remaining) = u32::try_parse(remaining)?;
+        let (read_only, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(AttachRequest {
+            shmseg,
+            shmid,
+            read_only,
+        })
+    }
 }
 pub fn attach<Conn>(conn: &Conn, shmseg: Seg, shmid: u32, read_only: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -287,6 +312,17 @@ impl DetachRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DETACH_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (shmseg, remaining) = Seg::try_parse(value)?;
+        let _ = remaining;
+        Ok(DetachRequest {
+            shmseg,
+        })
     }
 }
 pub fn detach<Conn>(conn: &Conn, shmseg: Seg) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -393,6 +429,46 @@ impl PutImageRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != PUT_IMAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
+        let (total_width, remaining) = u16::try_parse(remaining)?;
+        let (total_height, remaining) = u16::try_parse(remaining)?;
+        let (src_x, remaining) = u16::try_parse(remaining)?;
+        let (src_y, remaining) = u16::try_parse(remaining)?;
+        let (src_width, remaining) = u16::try_parse(remaining)?;
+        let (src_height, remaining) = u16::try_parse(remaining)?;
+        let (dst_x, remaining) = i16::try_parse(remaining)?;
+        let (dst_y, remaining) = i16::try_parse(remaining)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let (send_event, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (shmseg, remaining) = Seg::try_parse(remaining)?;
+        let (offset, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PutImageRequest {
+            drawable,
+            gc,
+            total_width,
+            total_height,
+            src_x,
+            src_y,
+            src_width,
+            src_height,
+            dst_x,
+            dst_y,
+            depth,
+            format,
+            send_event,
+            shmseg,
+            offset,
+        })
+    }
 }
 pub fn put_image<Conn>(conn: &Conn, drawable: xproto::Drawable, gc: xproto::Gcontext, total_width: u16, total_height: u16, src_x: u16, src_y: u16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16, depth: u8, format: u8, send_event: bool, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -491,6 +567,34 @@ impl GetImageRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_IMAGE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (plane_mask, remaining) = u32::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (shmseg, remaining) = Seg::try_parse(remaining)?;
+        let (offset, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetImageRequest {
+            drawable,
+            x,
+            y,
+            width,
+            height,
+            plane_mask,
+            format,
+            shmseg,
+            offset,
+        })
     }
 }
 pub fn get_image<Conn>(conn: &Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32, format: u8, shmseg: Seg, offset: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
@@ -605,6 +709,30 @@ impl CreatePixmapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_PIXMAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (pid, remaining) = xproto::Pixmap::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (shmseg, remaining) = Seg::try_parse(remaining)?;
+        let (offset, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CreatePixmapRequest {
+            pid,
+            drawable,
+            width,
+            height,
+            depth,
+            shmseg,
+            offset,
+        })
+    }
 }
 pub fn create_pixmap<Conn>(conn: &Conn, pid: xproto::Pixmap, drawable: xproto::Drawable, width: u16, height: u16, depth: u8, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -662,6 +790,23 @@ impl AttachFdRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![self.shm_fd]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
+        if header.minor_opcode != ATTACH_FD_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (shmseg, remaining) = Seg::try_parse(value)?;
+        if fds.is_empty() { return Err(ParseError::ParseError) }
+        let shm_fd = fds.remove(0);
+        let (read_only, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(AttachFdRequest {
+            shmseg,
+            shm_fd,
+            read_only,
+        })
     }
 }
 pub fn attach_fd<Conn, A>(conn: &Conn, shmseg: Seg, shm_fd: A, read_only: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -723,6 +868,22 @@ impl CreateSegmentRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_SEGMENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (shmseg, remaining) = Seg::try_parse(value)?;
+        let (size, remaining) = u32::try_parse(remaining)?;
+        let (read_only, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(CreateSegmentRequest {
+            shmseg,
+            size,
+            read_only,
+        })
     }
 }
 pub fn create_segment<Conn>(conn: &Conn, shmseg: Seg, size: u32, read_only: bool) -> Result<CookieWithFds<'_, Conn, CreateSegmentReply>, ConnectionError>

@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -68,6 +68,20 @@ impl GetVersionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (major_version, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (minor_version, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetVersionRequest {
+            major_version,
+            minor_version,
+        })
     }
 }
 pub fn get_version<Conn>(conn: &Conn, major_version: u8, minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
@@ -217,6 +231,19 @@ impl CompareCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != COMPARE_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CompareCursorRequest {
+            window,
+            cursor,
+        })
+    }
 }
 pub fn compare_cursor<Conn>(conn: &Conn, window: xproto::Window, cursor: xproto::Cursor) -> Result<Cookie<'_, Conn, CompareCursorReply>, ConnectionError>
 where
@@ -327,6 +354,32 @@ impl FakeInputRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != FAKE_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (type_, remaining) = u8::try_parse(value)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (time, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
+        let (deviceid, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(FakeInputRequest {
+            type_,
+            detail,
+            time,
+            root,
+            root_x,
+            root_y,
+            deviceid,
+        })
+    }
 }
 pub fn fake_input<Conn>(conn: &Conn, type_: u8, detail: u8, time: u32, root: xproto::Window, root_x: i16, root_y: i16, deviceid: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -377,6 +430,18 @@ impl GrabControlRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GRAB_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (impervious, remaining) = bool::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GrabControlRequest {
+            impervious,
+        })
     }
 }
 pub fn grab_control<Conn>(conn: &Conn, impervious: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>

@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -408,6 +408,19 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (major_version, remaining) = u32::try_parse(value)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            major_version,
+            minor_version,
+        })
+    }
 }
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -486,6 +499,20 @@ impl ConnectRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CONNECT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (driver_type, remaining) = u32::try_parse(remaining)?;
+        let driver_type = driver_type.try_into()?;
+        let _ = remaining;
+        Ok(ConnectRequest {
+            window,
+            driver_type,
+        })
     }
 }
 pub fn connect<Conn>(conn: &Conn, window: xproto::Window, driver_type: DriverType) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
@@ -602,6 +629,19 @@ impl AuthenticateRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != AUTHENTICATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (magic, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(AuthenticateRequest {
+            window,
+            magic,
+        })
+    }
 }
 pub fn authenticate<Conn>(conn: &Conn, window: xproto::Window, magic: u32) -> Result<Cookie<'_, Conn, AuthenticateReply>, ConnectionError>
 where
@@ -673,6 +713,17 @@ impl CreateDrawableRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CREATE_DRAWABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let _ = remaining;
+        Ok(CreateDrawableRequest {
+            drawable,
+        })
+    }
 }
 pub fn create_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -717,6 +768,17 @@ impl DestroyDrawableRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DESTROY_DRAWABLE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let _ = remaining;
+        Ok(DestroyDrawableRequest {
+            drawable,
+        })
     }
 }
 pub fn destroy_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -773,6 +835,28 @@ impl<'input> GetBuffersRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), attachments_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_BUFFERS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (count, remaining) = u32::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut attachments = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = u32::try_parse(remaining)?;
+            remaining = new_remaining;
+            attachments.push(v);
+        }
+        let _ = remaining;
+        Ok(GetBuffersRequest {
+            drawable,
+            count,
+            attachments: Cow::Owned(attachments),
+        })
     }
 }
 pub fn get_buffers<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &'input [u32]) -> Result<Cookie<'c, Conn, GetBuffersReply>, ConnectionError>
@@ -885,6 +969,23 @@ impl CopyRegionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != COPY_REGION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (region, remaining) = u32::try_parse(remaining)?;
+        let (dest, remaining) = u32::try_parse(remaining)?;
+        let (src, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CopyRegionRequest {
+            drawable,
+            region,
+            dest,
+            src,
+        })
+    }
 }
 pub fn copy_region<Conn>(conn: &Conn, drawable: xproto::Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Conn, CopyRegionReply>, ConnectionError>
 where
@@ -966,6 +1067,28 @@ impl<'input> GetBuffersWithFormatRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), attachments_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_BUFFERS_WITH_FORMAT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (count, remaining) = u32::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut attachments = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = AttachFormat::try_parse(remaining)?;
+            remaining = new_remaining;
+            attachments.push(v);
+        }
+        let _ = remaining;
+        Ok(GetBuffersWithFormatRequest {
+            drawable,
+            count,
+            attachments: Cow::Owned(attachments),
+        })
     }
 }
 pub fn get_buffers_with_format<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &'input [AttachFormat]) -> Result<Cookie<'c, Conn, GetBuffersWithFormatReply>, ConnectionError>
@@ -1096,6 +1219,29 @@ impl SwapBuffersRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SWAP_BUFFERS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (target_msc_hi, remaining) = u32::try_parse(remaining)?;
+        let (target_msc_lo, remaining) = u32::try_parse(remaining)?;
+        let (divisor_hi, remaining) = u32::try_parse(remaining)?;
+        let (divisor_lo, remaining) = u32::try_parse(remaining)?;
+        let (remainder_hi, remaining) = u32::try_parse(remaining)?;
+        let (remainder_lo, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SwapBuffersRequest {
+            drawable,
+            target_msc_hi,
+            target_msc_lo,
+            divisor_hi,
+            divisor_lo,
+            remainder_hi,
+            remainder_lo,
+        })
+    }
 }
 pub fn swap_buffers<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, SwapBuffersReply>, ConnectionError>
 where
@@ -1173,6 +1319,17 @@ impl GetMSCRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_MSC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetMSCRequest {
+            drawable,
+        })
     }
 }
 pub fn get_msc<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, GetMSCReply>, ConnectionError>
@@ -1290,6 +1447,29 @@ impl WaitMSCRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != WAIT_MSC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (target_msc_hi, remaining) = u32::try_parse(remaining)?;
+        let (target_msc_lo, remaining) = u32::try_parse(remaining)?;
+        let (divisor_hi, remaining) = u32::try_parse(remaining)?;
+        let (divisor_lo, remaining) = u32::try_parse(remaining)?;
+        let (remainder_hi, remaining) = u32::try_parse(remaining)?;
+        let (remainder_lo, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(WaitMSCRequest {
+            drawable,
+            target_msc_hi,
+            target_msc_lo,
+            divisor_hi,
+            divisor_lo,
+            remainder_hi,
+            remainder_lo,
+        })
+    }
 }
 pub fn wait_msc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, WaitMSCReply>, ConnectionError>
 where
@@ -1388,6 +1568,21 @@ impl WaitSBCRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != WAIT_SBC_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (target_sbc_hi, remaining) = u32::try_parse(remaining)?;
+        let (target_sbc_lo, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(WaitSBCRequest {
+            drawable,
+            target_sbc_hi,
+            target_sbc_lo,
+        })
+    }
 }
 pub fn wait_sbc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Conn, WaitSBCReply>, ConnectionError>
 where
@@ -1476,6 +1671,19 @@ impl SwapIntervalRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SWAP_INTERVAL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (interval, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SwapIntervalRequest {
+            drawable,
+            interval,
+        })
+    }
 }
 pub fn swap_interval<Conn>(conn: &Conn, drawable: xproto::Drawable, interval: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1527,6 +1735,19 @@ impl GetParamRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PARAM_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
+        let (param, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetParamRequest {
+            drawable,
+            param,
+        })
     }
 }
 pub fn get_param<Conn>(conn: &Conn, drawable: xproto::Drawable, param: u32) -> Result<Cookie<'_, Conn, GetParamReply>, ConnectionError>

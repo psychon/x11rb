@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -6343,6 +6343,19 @@ impl UseExtensionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != USE_EXTENSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (wanted_major, remaining) = u16::try_parse(value)?;
+        let (wanted_minor, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(UseExtensionRequest {
+            wanted_major,
+            wanted_minor,
+        })
+    }
 }
 pub fn use_extension<Conn>(conn: &Conn, wanted_major: u16, wanted_minor: u16) -> Result<Cookie<'_, Conn, UseExtensionReply>, ConnectionError>
 where
@@ -6391,6 +6404,20 @@ pub struct SelectEventsAuxBitcase1 {
     pub affect_new_keyboard: u16,
     pub new_keyboard_details: u16,
 }
+impl TryParse for SelectEventsAuxBitcase1 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_new_keyboard, remaining) = u16::try_parse(remaining)?;
+        let (new_keyboard_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase1 { affect_new_keyboard, new_keyboard_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase1 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase1 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -6414,6 +6441,20 @@ pub struct SelectEventsAuxBitcase2 {
     pub affect_state: u16,
     pub state_details: u16,
 }
+impl TryParse for SelectEventsAuxBitcase2 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_state, remaining) = u16::try_parse(remaining)?;
+        let (state_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase2 { affect_state, state_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase2 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase2 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -6436,6 +6477,20 @@ impl Serialize for SelectEventsAuxBitcase2 {
 pub struct SelectEventsAuxBitcase3 {
     pub affect_ctrls: u32,
     pub ctrl_details: u32,
+}
+impl TryParse for SelectEventsAuxBitcase3 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
+        let (ctrl_details, remaining) = u32::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase3 { affect_ctrls, ctrl_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase3 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase3 {
     type Bytes = [u8; 8];
@@ -6464,6 +6519,20 @@ pub struct SelectEventsAuxBitcase4 {
     pub affect_indicator_state: u32,
     pub indicator_state_details: u32,
 }
+impl TryParse for SelectEventsAuxBitcase4 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_indicator_state, remaining) = u32::try_parse(remaining)?;
+        let (indicator_state_details, remaining) = u32::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase4 { affect_indicator_state, indicator_state_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase4 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase4 {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -6490,6 +6559,20 @@ impl Serialize for SelectEventsAuxBitcase4 {
 pub struct SelectEventsAuxBitcase5 {
     pub affect_indicator_map: u32,
     pub indicator_map_details: u32,
+}
+impl TryParse for SelectEventsAuxBitcase5 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_indicator_map, remaining) = u32::try_parse(remaining)?;
+        let (indicator_map_details, remaining) = u32::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase5 { affect_indicator_map, indicator_map_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase5 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase5 {
     type Bytes = [u8; 8];
@@ -6518,6 +6601,20 @@ pub struct SelectEventsAuxBitcase6 {
     pub affect_names: u16,
     pub names_details: u16,
 }
+impl TryParse for SelectEventsAuxBitcase6 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_names, remaining) = u16::try_parse(remaining)?;
+        let (names_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase6 { affect_names, names_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase6 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase6 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -6541,6 +6638,20 @@ pub struct SelectEventsAuxBitcase7 {
     pub affect_compat: u8,
     pub compat_details: u8,
 }
+impl TryParse for SelectEventsAuxBitcase7 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_compat, remaining) = u8::try_parse(remaining)?;
+        let (compat_details, remaining) = u8::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase7 { affect_compat, compat_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase7 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase7 {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -6561,6 +6672,20 @@ impl Serialize for SelectEventsAuxBitcase7 {
 pub struct SelectEventsAuxBitcase8 {
     pub affect_bell: u8,
     pub bell_details: u8,
+}
+impl TryParse for SelectEventsAuxBitcase8 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_bell, remaining) = u8::try_parse(remaining)?;
+        let (bell_details, remaining) = u8::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase8 { affect_bell, bell_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase8 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase8 {
     type Bytes = [u8; 2];
@@ -6583,6 +6708,20 @@ pub struct SelectEventsAuxBitcase9 {
     pub affect_msg_details: u8,
     pub msg_details: u8,
 }
+impl TryParse for SelectEventsAuxBitcase9 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_msg_details, remaining) = u8::try_parse(remaining)?;
+        let (msg_details, remaining) = u8::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase9 { affect_msg_details, msg_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase9 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
 impl Serialize for SelectEventsAuxBitcase9 {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -6603,6 +6742,20 @@ impl Serialize for SelectEventsAuxBitcase9 {
 pub struct SelectEventsAuxBitcase10 {
     pub affect_access_x: u16,
     pub access_x_details: u16,
+}
+impl TryParse for SelectEventsAuxBitcase10 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_access_x, remaining) = u16::try_parse(remaining)?;
+        let (access_x_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase10 { affect_access_x, access_x_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase10 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase10 {
     type Bytes = [u8; 4];
@@ -6626,6 +6779,20 @@ impl Serialize for SelectEventsAuxBitcase10 {
 pub struct SelectEventsAuxBitcase11 {
     pub affect_ext_dev: u16,
     pub extdev_details: u16,
+}
+impl TryParse for SelectEventsAuxBitcase11 {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (affect_ext_dev, remaining) = u16::try_parse(remaining)?;
+        let (extdev_details, remaining) = u16::try_parse(remaining)?;
+        let result = SelectEventsAuxBitcase11 { affect_ext_dev, extdev_details };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for SelectEventsAuxBitcase11 {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
 }
 impl Serialize for SelectEventsAuxBitcase11 {
     type Bytes = [u8; 4];
@@ -6659,6 +6826,91 @@ pub struct SelectEventsAux {
     pub bitcase9: Option<SelectEventsAuxBitcase9>,
     pub bitcase10: Option<SelectEventsAuxBitcase10>,
     pub bitcase11: Option<SelectEventsAuxBitcase11>,
+}
+impl SelectEventsAux {
+    fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all)));
+        let mut outer_remaining = value;
+        let bitcase1 = if switch_expr & u32::from(EventType::NewKeyboardNotify) != 0 {
+            let (bitcase1, new_remaining) = SelectEventsAuxBitcase1::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase1)
+        } else {
+            None
+        };
+        let bitcase2 = if switch_expr & u32::from(EventType::StateNotify) != 0 {
+            let (bitcase2, new_remaining) = SelectEventsAuxBitcase2::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase2)
+        } else {
+            None
+        };
+        let bitcase3 = if switch_expr & u32::from(EventType::ControlsNotify) != 0 {
+            let (bitcase3, new_remaining) = SelectEventsAuxBitcase3::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase3)
+        } else {
+            None
+        };
+        let bitcase4 = if switch_expr & u32::from(EventType::IndicatorStateNotify) != 0 {
+            let (bitcase4, new_remaining) = SelectEventsAuxBitcase4::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase4)
+        } else {
+            None
+        };
+        let bitcase5 = if switch_expr & u32::from(EventType::IndicatorMapNotify) != 0 {
+            let (bitcase5, new_remaining) = SelectEventsAuxBitcase5::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase5)
+        } else {
+            None
+        };
+        let bitcase6 = if switch_expr & u32::from(EventType::NamesNotify) != 0 {
+            let (bitcase6, new_remaining) = SelectEventsAuxBitcase6::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase6)
+        } else {
+            None
+        };
+        let bitcase7 = if switch_expr & u32::from(EventType::CompatMapNotify) != 0 {
+            let (bitcase7, new_remaining) = SelectEventsAuxBitcase7::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase7)
+        } else {
+            None
+        };
+        let bitcase8 = if switch_expr & u32::from(EventType::BellNotify) != 0 {
+            let (bitcase8, new_remaining) = SelectEventsAuxBitcase8::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase8)
+        } else {
+            None
+        };
+        let bitcase9 = if switch_expr & u32::from(EventType::ActionMessage) != 0 {
+            let (bitcase9, new_remaining) = SelectEventsAuxBitcase9::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase9)
+        } else {
+            None
+        };
+        let bitcase10 = if switch_expr & u32::from(EventType::AccessXNotify) != 0 {
+            let (bitcase10, new_remaining) = SelectEventsAuxBitcase10::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase10)
+        } else {
+            None
+        };
+        let bitcase11 = if switch_expr & u32::from(EventType::ExtensionDeviceNotify) != 0 {
+            let (bitcase11, new_remaining) = SelectEventsAuxBitcase11::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            Some(bitcase11)
+        } else {
+            None
+        };
+        let result = SelectEventsAux { bitcase1, bitcase2, bitcase3, bitcase4, bitcase5, bitcase6, bitcase7, bitcase8, bitcase9, bitcase10, bitcase11 };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl SelectEventsAux {
@@ -6860,6 +7112,28 @@ impl<'input> SelectEventsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), details_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SELECT_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (affect_which, remaining) = u16::try_parse(remaining)?;
+        let (clear, remaining) = u16::try_parse(remaining)?;
+        let (select_all, remaining) = u16::try_parse(remaining)?;
+        let (affect_map, remaining) = u16::try_parse(remaining)?;
+        let (map, remaining) = u16::try_parse(remaining)?;
+        let (details, remaining) = SelectEventsAux::try_parse(remaining, affect_which, clear, select_all)?;
+        let _ = remaining;
+        Ok(SelectEventsRequest {
+            device_spec,
+            clear,
+            select_all,
+            affect_map,
+            map,
+            details: Cow::Owned(details),
+        })
+    }
 }
 pub fn select_events<'c, 'input, Conn, A, B, C, D>(conn: &'c Conn, device_spec: DeviceSpec, clear: A, select_all: B, affect_map: C, map: D, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -6956,6 +7230,37 @@ impl BellRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != BELL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (bell_class, remaining) = BellClassSpec::try_parse(remaining)?;
+        let (bell_id, remaining) = IDSpec::try_parse(remaining)?;
+        let (percent, remaining) = i8::try_parse(remaining)?;
+        let (force_sound, remaining) = bool::try_parse(remaining)?;
+        let (event_only, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (pitch, remaining) = i16::try_parse(remaining)?;
+        let (duration, remaining) = i16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(BellRequest {
+            device_spec,
+            bell_class,
+            bell_id,
+            percent,
+            force_sound,
+            event_only,
+            pitch,
+            duration,
+            name,
+            window,
+        })
+    }
 }
 pub fn bell<Conn>(conn: &Conn, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: xproto::Atom, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -7009,6 +7314,18 @@ impl GetStateRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_STATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetStateRequest {
+            device_spec,
+        })
     }
 }
 pub fn get_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
@@ -7133,6 +7450,34 @@ impl LatchLockStateRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LATCH_LOCK_STATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (affect_mod_locks, remaining) = u8::try_parse(remaining)?;
+        let (mod_locks, remaining) = u8::try_parse(remaining)?;
+        let (lock_group, remaining) = bool::try_parse(remaining)?;
+        let (group_lock, remaining) = u8::try_parse(remaining)?;
+        let group_lock = group_lock.try_into()?;
+        let (affect_mod_latches, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (latch_group, remaining) = bool::try_parse(remaining)?;
+        let (group_latch, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(LatchLockStateRequest {
+            device_spec,
+            affect_mod_locks,
+            mod_locks,
+            lock_group,
+            group_lock,
+            affect_mod_latches,
+            latch_group,
+            group_latch,
+        })
+    }
 }
 pub fn latch_lock_state<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, affect_mod_locks: A, mod_locks: B, lock_group: bool, group_lock: Group, affect_mod_latches: C, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -7190,6 +7535,18 @@ impl GetControlsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CONTROLS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetControlsRequest {
+            device_spec,
+        })
     }
 }
 pub fn get_controls<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetControlsReply>, ConnectionError>
@@ -7433,6 +7790,77 @@ impl<'input> SetControlsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), (&self.per_key_repeat[..]).into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_CONTROLS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (affect_internal_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (internal_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (affect_ignore_lock_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (ignore_lock_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (affect_internal_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (internal_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (affect_ignore_lock_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (ignore_lock_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_dflt_btn, remaining) = u8::try_parse(remaining)?;
+        let (groups_wrap, remaining) = u8::try_parse(remaining)?;
+        let (access_x_options, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (affect_enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let (enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let (change_controls, remaining) = u32::try_parse(remaining)?;
+        let (repeat_delay, remaining) = u16::try_parse(remaining)?;
+        let (repeat_interval, remaining) = u16::try_parse(remaining)?;
+        let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
+        let (debounce_delay, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_delay, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_interval, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_time_to_max, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_max_speed, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_curve, remaining) = i16::try_parse(remaining)?;
+        let (access_x_timeout, remaining) = u16::try_parse(remaining)?;
+        let (access_x_timeout_mask, remaining) = u32::try_parse(remaining)?;
+        let (access_x_timeout_values, remaining) = u32::try_parse(remaining)?;
+        let (access_x_timeout_options_mask, remaining) = u16::try_parse(remaining)?;
+        let (access_x_timeout_options_values, remaining) = u16::try_parse(remaining)?;
+        let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let per_key_repeat = <&[u8; 32]>::try_from(per_key_repeat).unwrap();
+        let _ = remaining;
+        Ok(SetControlsRequest {
+            device_spec,
+            affect_internal_real_mods,
+            internal_real_mods,
+            affect_ignore_lock_real_mods,
+            ignore_lock_real_mods,
+            affect_internal_virtual_mods,
+            internal_virtual_mods,
+            affect_ignore_lock_virtual_mods,
+            ignore_lock_virtual_mods,
+            mouse_keys_dflt_btn,
+            groups_wrap,
+            access_x_options,
+            affect_enabled_controls,
+            enabled_controls,
+            change_controls,
+            repeat_delay,
+            repeat_interval,
+            slow_keys_delay,
+            debounce_delay,
+            mouse_keys_delay,
+            mouse_keys_interval,
+            mouse_keys_time_to_max,
+            mouse_keys_max_speed,
+            mouse_keys_curve,
+            access_x_timeout,
+            access_x_timeout_mask,
+            access_x_timeout_values,
+            access_x_timeout_options_mask,
+            access_x_timeout_options_values,
+            per_key_repeat,
+        })
+    }
 }
 pub fn set_controls<'c, 'input, Conn, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(conn: &'c Conn, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &'input [u8; 32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -7592,6 +8020,52 @@ impl GetMapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (full, remaining) = u16::try_parse(remaining)?;
+        let (partial, remaining) = u16::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_key_sym, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_syms, remaining) = u8::try_parse(remaining)?;
+        let (first_key_action, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_actions, remaining) = u8::try_parse(remaining)?;
+        let (first_key_behavior, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_behaviors, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (first_key_explicit, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (first_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (first_v_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetMapRequest {
+            device_spec,
+            full,
+            partial,
+            first_type,
+            n_types,
+            first_key_sym,
+            n_key_syms,
+            first_key_action,
+            n_key_actions,
+            first_key_behavior,
+            n_key_behaviors,
+            virtual_mods,
+            first_key_explicit,
+            n_key_explicit,
+            first_mod_map_key,
+            n_mod_map_keys,
+            first_v_mod_map_key,
+            n_v_mod_map_keys,
+        })
     }
 }
 pub fn get_map<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, full: A, partial: B, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, first_key_action: xproto::Keycode, n_key_actions: u8, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, virtual_mods: C, first_key_explicit: xproto::Keycode, n_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Conn, GetMapReply>, ConnectionError>
@@ -7830,6 +8304,21 @@ pub struct SetMapAuxBitcase3 {
     pub actions_count: Vec<u8>,
     pub actions: Vec<Action>,
 }
+impl SetMapAuxBitcase3 {
+    pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (actions_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ParseError))?)?;
+        let actions_count = actions_count.to_vec();
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_into().or(Err(ParseError::ParseError))?)?;
+        let result = SetMapAuxBitcase3 { actions_count, actions };
+        Ok((result, remaining))
+    }
+}
+// Skipping TryFrom implementations because of unresolved members
 #[allow(dead_code, unused_variables)]
 impl SetMapAuxBitcase3 {
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
@@ -7856,6 +8345,83 @@ pub struct SetMapAux {
     pub explicit: Option<Vec<SetExplicit>>,
     pub modmap: Option<Vec<KeyModMap>>,
     pub vmodmap: Option<Vec<KeyVModMap>>,
+}
+impl SetMapAux {
+    fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(present);
+        let mut outer_remaining = value;
+        let types = if switch_expr & u32::from(MapPart::KeyTypes) != 0 {
+            let remaining = outer_remaining;
+            let (types, remaining) = crate::x11_utils::parse_list::<SetKeyType>(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(types)
+        } else {
+            None
+        };
+        let syms = if switch_expr & u32::from(MapPart::KeySyms) != 0 {
+            let remaining = outer_remaining;
+            let (syms, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(syms)
+        } else {
+            None
+        };
+        let bitcase3 = if switch_expr & u32::from(MapPart::KeyActions) != 0 {
+            let (bitcase3, new_remaining) = SetMapAuxBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
+            outer_remaining = new_remaining;
+            Some(bitcase3)
+        } else {
+            None
+        };
+        let behaviors = if switch_expr & u32::from(MapPart::KeyBehaviors) != 0 {
+            let remaining = outer_remaining;
+            let (behaviors, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(behaviors)
+        } else {
+            None
+        };
+        let vmods = if switch_expr & u32::from(MapPart::VirtualMods) != 0 {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+            let vmods = vmods.to_vec();
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            Some(vmods)
+        } else {
+            None
+        };
+        let explicit = if switch_expr & u32::from(MapPart::ExplicitComponents) != 0 {
+            let remaining = outer_remaining;
+            let (explicit, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(explicit)
+        } else {
+            None
+        };
+        let modmap = if switch_expr & u32::from(MapPart::ModifierMap) != 0 {
+            let remaining = outer_remaining;
+            let (modmap, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(modmap)
+        } else {
+            None
+        };
+        let vmodmap = if switch_expr & u32::from(MapPart::VirtualModMap) != 0 {
+            let remaining = outer_remaining;
+            let (vmodmap, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(vmodmap)
+        } else {
+            None
+        };
+        let result = SetMapAux { types, syms, bitcase3, behaviors, vmods, explicit, modmap, vmodmap };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl SetMapAux {
@@ -8091,6 +8657,68 @@ impl<'input> SetMapRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (present, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u16::try_parse(remaining)?;
+        let (min_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (max_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_key_sym, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_syms, remaining) = u8::try_parse(remaining)?;
+        let (total_syms, remaining) = u16::try_parse(remaining)?;
+        let (first_key_action, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_actions, remaining) = u8::try_parse(remaining)?;
+        let (total_actions, remaining) = u16::try_parse(remaining)?;
+        let (first_key_behavior, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_behaviors, remaining) = u8::try_parse(remaining)?;
+        let (total_key_behaviors, remaining) = u8::try_parse(remaining)?;
+        let (first_key_explicit, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (total_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (first_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (total_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (first_v_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (values, remaining) = SetMapAux::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
+        let _ = remaining;
+        Ok(SetMapRequest {
+            device_spec,
+            flags,
+            min_key_code,
+            max_key_code,
+            first_type,
+            n_types,
+            first_key_sym,
+            n_key_syms,
+            total_syms,
+            first_key_action,
+            n_key_actions,
+            total_actions,
+            first_key_behavior,
+            n_key_behaviors,
+            total_key_behaviors,
+            first_key_explicit,
+            n_key_explicit,
+            total_key_explicit,
+            first_mod_map_key,
+            n_mod_map_keys,
+            total_mod_map_keys,
+            first_v_mod_map_key,
+            n_v_mod_map_keys,
+            total_v_mod_map_keys,
+            virtual_mods,
+            values: Cow::Owned(values),
+        })
+    }
 }
 pub fn set_map<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &'input SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -8176,6 +8804,25 @@ impl GetCompatMapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_COMPAT_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (groups, remaining) = u8::try_parse(remaining)?;
+        let (get_all_si, remaining) = bool::try_parse(remaining)?;
+        let (first_si, remaining) = u16::try_parse(remaining)?;
+        let (n_si, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetCompatMapRequest {
+            device_spec,
+            groups,
+            get_all_si,
+            first_si,
+            n_si,
+        })
     }
 }
 pub fn get_compat_map<Conn, A>(conn: &Conn, device_spec: DeviceSpec, groups: A, get_all_si: bool, first_si: u16, n_si: u16) -> Result<Cookie<'_, Conn, GetCompatMapReply>, ConnectionError>
@@ -8307,6 +8954,32 @@ impl<'input> SetCompatMapRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), si_bytes.into(), group_maps_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_COMPAT_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (recompute_actions, remaining) = bool::try_parse(remaining)?;
+        let (truncate_si, remaining) = bool::try_parse(remaining)?;
+        let (groups, remaining) = u8::try_parse(remaining)?;
+        let (first_si, remaining) = u16::try_parse(remaining)?;
+        let (n_si, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (si, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si.try_into().or(Err(ParseError::ParseError))?)?;
+        let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetCompatMapRequest {
+            device_spec,
+            recompute_actions,
+            truncate_si,
+            groups,
+            first_si,
+            si: Cow::Owned(si),
+            group_maps: Cow::Owned(group_maps),
+        })
+    }
 }
 pub fn set_compat_map<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &'input [SymInterpret], group_maps: &'input [ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -8359,6 +9032,18 @@ impl GetIndicatorStateRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_INDICATOR_STATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetIndicatorStateRequest {
+            device_spec,
+        })
     }
 }
 pub fn get_indicator_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetIndicatorStateReply>, ConnectionError>
@@ -8437,6 +9122,20 @@ impl GetIndicatorMapRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_INDICATOR_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetIndicatorMapRequest {
+            device_spec,
+            which,
+        })
     }
 }
 pub fn get_indicator_map<Conn>(conn: &Conn, device_spec: DeviceSpec, which: u32) -> Result<Cookie<'_, Conn, GetIndicatorMapReply>, ConnectionError>
@@ -8529,6 +9228,22 @@ impl<'input> SetIndicatorMapRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), maps_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_INDICATOR_MAP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetIndicatorMapRequest {
+            device_spec,
+            which,
+            maps: Cow::Owned(maps),
+        })
+    }
 }
 pub fn set_indicator_map<'c, 'input, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &'input [IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -8589,6 +9304,25 @@ impl GetNamedIndicatorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_NAMED_INDICATOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
+        let led_class = led_class.try_into()?;
+        let (led_id, remaining) = IDSpec::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (indicator, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetNamedIndicatorRequest {
+            device_spec,
+            led_class,
+            led_id,
+            indicator,
+        })
     }
 }
 pub fn get_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
@@ -8745,6 +9479,48 @@ impl SetNamedIndicatorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_NAMED_INDICATOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
+        let led_class = led_class.try_into()?;
+        let (led_id, remaining) = IDSpec::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (indicator, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (set_state, remaining) = bool::try_parse(remaining)?;
+        let (on, remaining) = bool::try_parse(remaining)?;
+        let (set_map, remaining) = bool::try_parse(remaining)?;
+        let (create_map, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (map_flags, remaining) = u8::try_parse(remaining)?;
+        let (map_which_groups, remaining) = u8::try_parse(remaining)?;
+        let (map_groups, remaining) = u8::try_parse(remaining)?;
+        let (map_which_mods, remaining) = u8::try_parse(remaining)?;
+        let (map_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (map_vmods, remaining) = u16::try_parse(remaining)?;
+        let (map_ctrls, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetNamedIndicatorRequest {
+            device_spec,
+            led_class,
+            led_id,
+            indicator,
+            set_state,
+            on,
+            set_map,
+            create_map,
+            map_flags,
+            map_which_groups,
+            map_groups,
+            map_which_mods,
+            map_real_mods,
+            map_vmods,
+            map_ctrls,
+        })
+    }
 }
 pub fn set_named_indicator<Conn, A, B, C, D, E, F, G, H>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: B, map_which_groups: C, map_groups: D, map_which_mods: E, map_real_mods: F, map_vmods: G, map_ctrls: H) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -8825,6 +9601,20 @@ impl GetNamesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_NAMES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetNamesRequest {
+            device_spec,
+            which,
+        })
     }
 }
 pub fn get_names<Conn, A>(conn: &Conn, device_spec: DeviceSpec, which: A) -> Result<Cookie<'_, Conn, GetNamesReply>, ConnectionError>
@@ -9054,6 +9844,21 @@ pub struct SetNamesAuxBitcase8 {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
 }
+impl SetNamesAuxBitcase8 {
+    pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
+        let n_levels_per_type = n_levels_per_type.to_vec();
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let result = SetNamesAuxBitcase8 { n_levels_per_type, kt_level_names };
+        Ok((result, remaining))
+    }
+}
+// Skipping TryFrom implementations because of unresolved members
 #[allow(dead_code, unused_variables)]
 impl SetNamesAuxBitcase8 {
     fn serialize(&self, n_types: u8) -> Vec<u8> {
@@ -9086,6 +9891,125 @@ pub struct SetNamesAux {
     pub key_names: Option<Vec<KeyName>>,
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
+}
+impl SetNamesAux {
+    fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = which;
+        let mut outer_remaining = value;
+        let keycodes_name = if switch_expr & u32::from(NameDetail::Keycodes) != 0 {
+            let remaining = outer_remaining;
+            let (keycodes_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(keycodes_name)
+        } else {
+            None
+        };
+        let geometry_name = if switch_expr & u32::from(NameDetail::Geometry) != 0 {
+            let remaining = outer_remaining;
+            let (geometry_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(geometry_name)
+        } else {
+            None
+        };
+        let symbols_name = if switch_expr & u32::from(NameDetail::Symbols) != 0 {
+            let remaining = outer_remaining;
+            let (symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(symbols_name)
+        } else {
+            None
+        };
+        let phys_symbols_name = if switch_expr & u32::from(NameDetail::PhysSymbols) != 0 {
+            let remaining = outer_remaining;
+            let (phys_symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(phys_symbols_name)
+        } else {
+            None
+        };
+        let types_name = if switch_expr & u32::from(NameDetail::Types) != 0 {
+            let remaining = outer_remaining;
+            let (types_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(types_name)
+        } else {
+            None
+        };
+        let compat_name = if switch_expr & u32::from(NameDetail::Compat) != 0 {
+            let remaining = outer_remaining;
+            let (compat_name, remaining) = xproto::Atom::try_parse(remaining)?;
+            outer_remaining = remaining;
+            Some(compat_name)
+        } else {
+            None
+        };
+        let type_names = if switch_expr & u32::from(NameDetail::KeyTypeNames) != 0 {
+            let remaining = outer_remaining;
+            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(type_names)
+        } else {
+            None
+        };
+        let bitcase8 = if switch_expr & u32::from(NameDetail::KTLevelNames) != 0 {
+            let (bitcase8, new_remaining) = SetNamesAuxBitcase8::try_parse(outer_remaining, n_types)?;
+            outer_remaining = new_remaining;
+            Some(bitcase8)
+        } else {
+            None
+        };
+        let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
+            let remaining = outer_remaining;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(indicator_names)
+        } else {
+            None
+        };
+        let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
+            let remaining = outer_remaining;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(virtual_mod_names)
+        } else {
+            None
+        };
+        let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
+            let remaining = outer_remaining;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(groups)
+        } else {
+            None
+        };
+        let key_names = if switch_expr & u32::from(NameDetail::KeyNames) != 0 {
+            let remaining = outer_remaining;
+            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(key_names)
+        } else {
+            None
+        };
+        let key_aliases = if switch_expr & u32::from(NameDetail::KeyAliases) != 0 {
+            let remaining = outer_remaining;
+            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(key_aliases)
+        } else {
+            None
+        };
+        let radio_group_names = if switch_expr & u32::from(NameDetail::RGNames) != 0 {
+            let remaining = outer_remaining;
+            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            Some(radio_group_names)
+        } else {
+            None
+        };
+        let result = SetNamesAux { keycodes_name, geometry_name, symbols_name, phys_symbols_name, types_name, compat_name, type_names, bitcase8, indicator_names, virtual_mod_names, groups, key_names, key_aliases, radio_group_names };
+        Ok((result, outer_remaining))
+    }
 }
 #[allow(dead_code, unused_variables)]
 impl SetNamesAux {
@@ -9354,6 +10278,45 @@ impl<'input> SetNamesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_NAMES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_kt_levelt, remaining) = u8::try_parse(remaining)?;
+        let (n_kt_levels, remaining) = u8::try_parse(remaining)?;
+        let (indicators, remaining) = u32::try_parse(remaining)?;
+        let (group_names, remaining) = u8::try_parse(remaining)?;
+        let (n_radio_groups, remaining) = u8::try_parse(remaining)?;
+        let (first_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_keys, remaining) = u8::try_parse(remaining)?;
+        let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (total_kt_level_names, remaining) = u16::try_parse(remaining)?;
+        let (values, remaining) = SetNamesAux::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
+        let _ = remaining;
+        Ok(SetNamesRequest {
+            device_spec,
+            virtual_mods,
+            first_type,
+            n_types,
+            first_kt_levelt,
+            n_kt_levels,
+            indicators,
+            group_names,
+            n_radio_groups,
+            first_key,
+            n_keys,
+            n_key_aliases,
+            total_kt_level_names,
+            values: Cow::Owned(values),
+        })
+    }
 }
 pub fn set_names<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &'input SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -9445,6 +10408,28 @@ impl PerClientFlagsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != PER_CLIENT_FLAGS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (change, remaining) = u32::try_parse(remaining)?;
+        let (value, remaining) = u32::try_parse(remaining)?;
+        let (ctrls_to_change, remaining) = u32::try_parse(remaining)?;
+        let (auto_ctrls, remaining) = u32::try_parse(remaining)?;
+        let (auto_ctrls_values, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(PerClientFlagsRequest {
+            device_spec,
+            change,
+            value,
+            ctrls_to_change,
+            auto_ctrls,
+            auto_ctrls_values,
+        })
     }
 }
 pub fn per_client_flags<Conn, A, B, C, D, E>(conn: &Conn, device_spec: DeviceSpec, change: A, value: B, ctrls_to_change: C, auto_ctrls: D, auto_ctrls_values: E) -> Result<Cookie<'_, Conn, PerClientFlagsReply>, ConnectionError>
@@ -9540,6 +10525,19 @@ impl ListComponentsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LIST_COMPONENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (max_names, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ListComponentsRequest {
+            device_spec,
+            max_names,
+        })
     }
 }
 pub fn list_components<Conn>(conn: &Conn, device_spec: DeviceSpec, max_names: u16) -> Result<Cookie<'_, Conn, ListComponentsReply>, ConnectionError>
@@ -9721,6 +10719,24 @@ impl GetKbdByNameRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_KBD_BY_NAME_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (need, remaining) = u16::try_parse(remaining)?;
+        let (want, remaining) = u16::try_parse(remaining)?;
+        let (load, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetKbdByNameRequest {
+            device_spec,
+            need,
+            want,
+            load,
+        })
     }
 }
 pub fn get_kbd_by_name<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, need: A, want: B, load: bool) -> Result<Cookie<'_, Conn, GetKbdByNameReply>, ConnectionError>
@@ -10433,6 +11449,31 @@ impl GetDeviceInfoRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (wanted, remaining) = u16::try_parse(remaining)?;
+        let (all_buttons, remaining) = bool::try_parse(remaining)?;
+        let (first_button, remaining) = u8::try_parse(remaining)?;
+        let (n_buttons, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
+        let led_class = led_class.try_into()?;
+        let (led_id, remaining) = IDSpec::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetDeviceInfoRequest {
+            device_spec,
+            wanted,
+            all_buttons,
+            first_button,
+            n_buttons,
+            led_class,
+            led_id,
+        })
+    }
 }
 pub fn get_device_info<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, wanted: A, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: LedClass, led_id: B) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
 where
@@ -10611,6 +11652,27 @@ impl<'input> SetDeviceInfoRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), btn_actions_bytes.into(), leds_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DEVICE_INFO_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
+        let (first_btn, remaining) = u8::try_parse(remaining)?;
+        let (n_btns, remaining) = u8::try_parse(remaining)?;
+        let (change, remaining) = u16::try_parse(remaining)?;
+        let (n_device_led_f_bs, remaining) = u16::try_parse(remaining)?;
+        let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns.try_into().or(Err(ParseError::ParseError))?)?;
+        let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDeviceInfoRequest {
+            device_spec,
+            first_btn,
+            change,
+            btn_actions: Cow::Owned(btn_actions),
+            leds: Cow::Owned(leds),
+        })
+    }
 }
 pub fn set_device_info<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &'input [Action], leds: &'input [DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -10689,6 +11751,27 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.message.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DEBUGGING_FLAGS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (msg_length, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (affect_flags, remaining) = u32::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
+        let (ctrls, remaining) = u32::try_parse(remaining)?;
+        let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, msg_length.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDebuggingFlagsRequest {
+            affect_flags,
+            flags,
+            affect_ctrls,
+            ctrls,
+            message,
+        })
     }
 }
 pub fn set_debugging_flags<'c, 'input, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>

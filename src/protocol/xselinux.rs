@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -68,6 +68,19 @@ impl QueryVersionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (client_major, remaining) = u8::try_parse(value)?;
+        let (client_minor, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            client_major,
+            client_minor,
+        })
     }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major: u8, client_minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
@@ -146,6 +159,18 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DEVICE_CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (context_len, remaining) = u32::try_parse(value)?;
+        let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDeviceCreateContextRequest {
+            context,
+        })
+    }
 }
 pub fn set_device_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -183,6 +208,15 @@ impl GetDeviceCreateContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(GetDeviceCreateContextRequest
+        )
     }
 }
 pub fn get_device_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetDeviceCreateContextReply>, ConnectionError>
@@ -280,6 +314,20 @@ impl<'input> SetDeviceContextRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DEVICE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device, remaining) = u32::try_parse(value)?;
+        let (context_len, remaining) = u32::try_parse(remaining)?;
+        let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDeviceContextRequest {
+            device,
+            context,
+        })
+    }
 }
 pub fn set_device_context<'c, 'input, Conn>(conn: &'c Conn, device: u32, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -325,6 +373,17 @@ impl GetDeviceContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetDeviceContextRequest {
+            device,
+        })
     }
 }
 pub fn get_device_context<Conn>(conn: &Conn, device: u32) -> Result<Cookie<'_, Conn, GetDeviceContextReply>, ConnectionError>
@@ -418,6 +477,18 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_WINDOW_CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (context_len, remaining) = u32::try_parse(value)?;
+        let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetWindowCreateContextRequest {
+            context,
+        })
+    }
 }
 pub fn set_window_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -455,6 +526,15 @@ impl GetWindowCreateContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_WINDOW_CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(GetWindowCreateContextRequest
+        )
     }
 }
 pub fn get_window_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetWindowCreateContextReply>, ConnectionError>
@@ -541,6 +621,17 @@ impl GetWindowContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_WINDOW_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetWindowContextRequest {
+            window,
+        })
     }
 }
 pub fn get_window_context<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetWindowContextReply>, ConnectionError>
@@ -717,6 +808,18 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_PROPERTY_CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (context_len, remaining) = u32::try_parse(value)?;
+        let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetPropertyCreateContextRequest {
+            context,
+        })
+    }
 }
 pub fn set_property_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -754,6 +857,15 @@ impl GetPropertyCreateContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PROPERTY_CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(GetPropertyCreateContextRequest
+        )
     }
 }
 pub fn get_property_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPropertyCreateContextReply>, ConnectionError>
@@ -845,6 +957,18 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_PROPERTY_USE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (context_len, remaining) = u32::try_parse(value)?;
+        let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetPropertyUseContextRequest {
+            context,
+        })
+    }
 }
 pub fn set_property_use_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -882,6 +1006,15 @@ impl GetPropertyUseContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PROPERTY_USE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(GetPropertyUseContextRequest
+        )
     }
 }
 pub fn get_property_use_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPropertyUseContextReply>, ConnectionError>
@@ -974,6 +1107,19 @@ impl GetPropertyContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PROPERTY_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetPropertyContextRequest {
+            window,
+            property,
+        })
     }
 }
 pub fn get_property_context<Conn>(conn: &Conn, window: xproto::Window, property: xproto::Atom) -> Result<Cookie<'_, Conn, GetPropertyContextReply>, ConnectionError>
@@ -1070,6 +1216,19 @@ impl GetPropertyDataContextRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PROPERTY_DATA_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetPropertyDataContextRequest {
+            window,
+            property,
+        })
+    }
 }
 pub fn get_property_data_context<Conn>(conn: &Conn, window: xproto::Window, property: xproto::Atom) -> Result<Cookie<'_, Conn, GetPropertyDataContextReply>, ConnectionError>
 where
@@ -1158,6 +1317,17 @@ impl ListPropertiesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LIST_PROPERTIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(ListPropertiesRequest {
+            window,
+        })
     }
 }
 pub fn list_properties<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
@@ -1250,6 +1420,18 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_SELECTION_CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (context_len, remaining) = u32::try_parse(value)?;
+        let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetSelectionCreateContextRequest {
+            context,
+        })
+    }
 }
 pub fn set_selection_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1287,6 +1469,15 @@ impl GetSelectionCreateContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SELECTION_CREATE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(GetSelectionCreateContextRequest
+        )
     }
 }
 pub fn get_selection_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetSelectionCreateContextReply>, ConnectionError>
@@ -1378,6 +1569,18 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_SELECTION_USE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (context_len, remaining) = u32::try_parse(value)?;
+        let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetSelectionUseContextRequest {
+            context,
+        })
+    }
 }
 pub fn set_selection_use_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1415,6 +1618,15 @@ impl GetSelectionUseContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SELECTION_USE_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(GetSelectionUseContextRequest
+        )
     }
 }
 pub fn get_selection_use_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetSelectionUseContextReply>, ConnectionError>
@@ -1501,6 +1713,17 @@ impl GetSelectionContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SELECTION_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (selection, remaining) = xproto::Atom::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetSelectionContextRequest {
+            selection,
+        })
     }
 }
 pub fn get_selection_context<Conn>(conn: &Conn, selection: xproto::Atom) -> Result<Cookie<'_, Conn, GetSelectionContextReply>, ConnectionError>
@@ -1590,6 +1813,17 @@ impl GetSelectionDataContextRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SELECTION_DATA_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (selection, remaining) = xproto::Atom::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetSelectionDataContextRequest {
+            selection,
+        })
+    }
 }
 pub fn get_selection_data_context<Conn>(conn: &Conn, selection: xproto::Atom) -> Result<Cookie<'_, Conn, GetSelectionDataContextReply>, ConnectionError>
 where
@@ -1670,6 +1904,15 @@ impl ListSelectionsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LIST_SELECTIONS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(ListSelectionsRequest
+        )
     }
 }
 pub fn list_selections<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListSelectionsReply>, ConnectionError>
@@ -1755,6 +1998,17 @@ impl GetClientContextRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CLIENT_CONTEXT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (resource, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetClientContextRequest {
+            resource,
+        })
     }
 }
 pub fn get_client_context<Conn>(conn: &Conn, resource: u32) -> Result<Cookie<'_, Conn, GetClientContextReply>, ConnectionError>

@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -121,6 +121,19 @@ impl<'input> GetExtensionVersionRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_EXTENSION_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (name_len, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(GetExtensionVersionRequest {
+            name,
+        })
     }
 }
 pub fn get_extension_version<'c, 'input, Conn>(conn: &'c Conn, name: &'input [u8]) -> Result<Cookie<'c, Conn, GetExtensionVersionReply>, ConnectionError>
@@ -969,6 +982,15 @@ impl ListInputDevicesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LIST_INPUT_DEVICES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(ListInputDevicesRequest
+        )
+    }
 }
 pub fn list_input_devices<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListInputDevicesReply>, ConnectionError>
 where
@@ -1103,6 +1125,18 @@ impl OpenDeviceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != OPEN_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(OpenDeviceRequest {
+            device_id,
+        })
+    }
 }
 pub fn open_device<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, OpenDeviceReply>, ConnectionError>
 where
@@ -1196,6 +1230,18 @@ impl CloseDeviceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CLOSE_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(CloseDeviceRequest {
+            device_id,
+        })
+    }
 }
 pub fn close_device<Conn>(conn: &Conn, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1242,6 +1288,21 @@ impl SetDeviceModeRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DEVICE_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SetDeviceModeRequest {
+            device_id,
+            mode,
+        })
     }
 }
 pub fn set_device_mode<Conn>(conn: &Conn, device_id: u8, mode: ValuatorMode) -> Result<Cookie<'_, Conn, SetDeviceModeReply>, ConnectionError>
@@ -1328,6 +1389,21 @@ impl<'input> SelectExtensionEventRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), classes_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SELECT_EXTENSION_EVENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SelectExtensionEventRequest {
+            window,
+            classes: Cow::Owned(classes),
+        })
+    }
 }
 pub fn select_extension_event<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1373,6 +1449,17 @@ impl GetSelectedExtensionEventsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_SELECTED_EXTENSION_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetSelectedExtensionEventsRequest {
+            window,
+        })
     }
 }
 pub fn get_selected_extension_events<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetSelectedExtensionEventsReply>, ConnectionError>
@@ -1561,6 +1648,24 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), classes_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ChangeDeviceDontPropagateListRequest {
+            window,
+            mode,
+            classes: Cow::Owned(classes),
+        })
+    }
 }
 pub fn change_device_dont_propagate_list<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, mode: PropagateMode, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1607,6 +1712,17 @@ impl GetDeviceDontPropagateListRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(GetDeviceDontPropagateListRequest {
+            window,
+        })
     }
 }
 pub fn get_device_dont_propagate_list<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetDeviceDontPropagateListReply>, ConnectionError>
@@ -1736,6 +1852,22 @@ impl GetDeviceMotionEventsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_MOTION_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (start, remaining) = xproto::Timestamp::try_parse(value)?;
+        let (stop, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetDeviceMotionEventsRequest {
+            start,
+            stop,
+            device_id,
+        })
+    }
 }
 pub fn get_device_motion_events<Conn, A>(conn: &Conn, start: xproto::Timestamp, stop: A, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceMotionEventsReply>, ConnectionError>
 where
@@ -1840,6 +1972,18 @@ impl ChangeKeyboardDeviceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_KEYBOARD_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(ChangeKeyboardDeviceRequest {
+            device_id,
+        })
+    }
 }
 pub fn change_keyboard_device<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, ChangeKeyboardDeviceReply>, ConnectionError>
 where
@@ -1916,6 +2060,22 @@ impl ChangePointerDeviceRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_POINTER_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (x_axis, remaining) = u8::try_parse(value)?;
+        let (y_axis, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(ChangePointerDeviceRequest {
+            x_axis,
+            y_axis,
+            device_id,
+        })
     }
 }
 pub fn change_pointer_device<Conn>(conn: &Conn, x_axis: u8, y_axis: u8, device_id: u8) -> Result<Cookie<'_, Conn, ChangePointerDeviceReply>, ConnectionError>
@@ -2021,6 +2181,33 @@ impl<'input> GrabDeviceRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), classes_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (grab_window, remaining) = xproto::Window::try_parse(value)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let (this_device_mode, remaining) = u8::try_parse(remaining)?;
+        let this_device_mode = this_device_mode.try_into()?;
+        let (other_device_mode, remaining) = u8::try_parse(remaining)?;
+        let other_device_mode = other_device_mode.try_into()?;
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(GrabDeviceRequest {
+            grab_window,
+            time,
+            this_device_mode,
+            other_device_mode,
+            owner_events,
+            device_id,
+            classes: Cow::Owned(classes),
+        })
+    }
 }
 pub fn grab_device<'c, 'input, Conn, A>(conn: &'c Conn, grab_window: xproto::Window, time: A, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, device_id: u8, classes: &'input [EventClass]) -> Result<Cookie<'c, Conn, GrabDeviceReply>, ConnectionError>
 where
@@ -2107,6 +2294,20 @@ impl UngrabDeviceRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != UNGRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (time, remaining) = xproto::Timestamp::try_parse(value)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(UngrabDeviceRequest {
+            time,
+            device_id,
+        })
     }
 }
 pub fn ungrab_device<Conn, A>(conn: &Conn, time: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2248,6 +2449,37 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), classes_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GRAB_DEVICE_KEY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (grab_window, remaining) = xproto::Window::try_parse(value)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let (modifier_device, remaining) = u8::try_parse(remaining)?;
+        let (grabbed_device, remaining) = u8::try_parse(remaining)?;
+        let (key, remaining) = u8::try_parse(remaining)?;
+        let (this_device_mode, remaining) = u8::try_parse(remaining)?;
+        let this_device_mode = this_device_mode.try_into()?;
+        let (other_device_mode, remaining) = u8::try_parse(remaining)?;
+        let other_device_mode = other_device_mode.try_into()?;
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(GrabDeviceKeyRequest {
+            grab_window,
+            modifiers,
+            modifier_device,
+            grabbed_device,
+            key,
+            this_device_mode,
+            other_device_mode,
+            owner_events,
+            classes: Cow::Owned(classes),
+        })
+    }
 }
 pub fn grab_device_key<'c, 'input, Conn, A, B, C>(conn: &'c Conn, grab_window: xproto::Window, modifiers: A, modifier_device: B, grabbed_device: u8, key: C, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2322,6 +2554,25 @@ impl UngrabDeviceKeyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != UNGRAB_DEVICE_KEY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (grab_window, remaining) = xproto::Window::try_parse(value)?;
+        let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let (modifier_device, remaining) = u8::try_parse(remaining)?;
+        let (key, remaining) = u8::try_parse(remaining)?;
+        let (grabbed_device, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(UngrabDeviceKeyRequest {
+            grab_window,
+            modifiers,
+            modifier_device,
+            key,
+            grabbed_device,
+        })
     }
 }
 pub fn ungrab_device_key<Conn, A, B, C>(conn: &Conn, grab_window: xproto::Window, modifiers: A, modifier_device: B, key: C, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2411,6 +2662,37 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), classes_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GRAB_DEVICE_BUTTON_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (grab_window, remaining) = xproto::Window::try_parse(value)?;
+        let (grabbed_device, remaining) = u8::try_parse(remaining)?;
+        let (modifier_device, remaining) = u8::try_parse(remaining)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let (this_device_mode, remaining) = u8::try_parse(remaining)?;
+        let this_device_mode = this_device_mode.try_into()?;
+        let (other_device_mode, remaining) = u8::try_parse(remaining)?;
+        let other_device_mode = other_device_mode.try_into()?;
+        let (button, remaining) = u8::try_parse(remaining)?;
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(GrabDeviceButtonRequest {
+            grab_window,
+            grabbed_device,
+            modifier_device,
+            modifiers,
+            this_device_mode,
+            other_device_mode,
+            button,
+            owner_events,
+            classes: Cow::Owned(classes),
+        })
+    }
 }
 pub fn grab_device_button<'c, 'input, Conn, A, B, C>(conn: &'c Conn, grab_window: xproto::Window, grabbed_device: u8, modifier_device: A, modifiers: B, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, button: C, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2485,6 +2767,26 @@ impl UngrabDeviceButtonRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != UNGRAB_DEVICE_BUTTON_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (grab_window, remaining) = xproto::Window::try_parse(value)?;
+        let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let (modifier_device, remaining) = u8::try_parse(remaining)?;
+        let (button, remaining) = u8::try_parse(remaining)?;
+        let (grabbed_device, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(UngrabDeviceButtonRequest {
+            grab_window,
+            modifiers,
+            modifier_device,
+            button,
+            grabbed_device,
+        })
     }
 }
 pub fn ungrab_device_button<Conn, A, B, C>(conn: &Conn, grab_window: xproto::Window, modifiers: A, modifier_device: B, button: C, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -2623,6 +2925,23 @@ impl AllowDeviceEventsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != ALLOW_DEVICE_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (time, remaining) = xproto::Timestamp::try_parse(value)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(AllowDeviceEventsRequest {
+            time,
+            mode,
+            device_id,
+        })
+    }
 }
 pub fn allow_device_events<Conn, A>(conn: &Conn, time: A, mode: DeviceInputMode, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2671,6 +2990,18 @@ impl GetDeviceFocusRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetDeviceFocusRequest {
+            device_id,
+        })
     }
 }
 pub fn get_device_focus<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceFocusReply>, ConnectionError>
@@ -2762,6 +3093,25 @@ impl SetDeviceFocusRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DEVICE_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (focus, remaining) = xproto::Window::try_parse(value)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (revert_to, remaining) = u8::try_parse(remaining)?;
+        let revert_to = revert_to.try_into()?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SetDeviceFocusRequest {
+            focus,
+            time,
+            revert_to,
+            device_id,
+        })
     }
 }
 pub fn set_device_focus<Conn, A, B>(conn: &Conn, focus: A, time: B, revert_to: xproto::InputFocus, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -3836,6 +4186,18 @@ impl GetFeedbackControlRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_FEEDBACK_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetFeedbackControlRequest {
+            device_id,
+        })
+    }
 }
 pub fn get_feedback_control<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetFeedbackControlReply>, ConnectionError>
 where
@@ -4844,6 +5206,24 @@ impl ChangeFeedbackControlRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), feedback_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_FEEDBACK_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (mask, remaining) = u32::try_parse(value)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (feedback, remaining) = FeedbackCtl::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ChangeFeedbackControlRequest {
+            mask,
+            device_id,
+            feedback_id,
+            feedback,
+        })
+    }
 }
 pub fn change_feedback_control<Conn, A>(conn: &Conn, mask: A, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -4897,6 +5277,22 @@ impl GetDeviceKeyMappingRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_KEY_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
+        let (count, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetDeviceKeyMappingRequest {
+            device_id,
+            first_keycode,
+            count,
+        })
     }
 }
 pub fn get_device_key_mapping<Conn>(conn: &Conn, device_id: u8, first_keycode: KeyCode, count: u8) -> Result<Cookie<'_, Conn, GetDeviceKeyMappingReply>, ConnectionError>
@@ -5000,6 +5396,25 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), keysyms_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_DEVICE_KEY_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
+        let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
+        let (keycode_count, remaining) = u8::try_parse(remaining)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ChangeDeviceKeyMappingRequest {
+            device_id,
+            first_keycode,
+            keysyms_per_keycode,
+            keycode_count,
+            keysyms: Cow::Owned(keysyms),
+        })
+    }
 }
 pub fn change_device_key_mapping<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &'input [xproto::Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -5048,6 +5463,18 @@ impl GetDeviceModifierMappingRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_MODIFIER_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetDeviceModifierMappingRequest {
+            device_id,
+        })
     }
 }
 pub fn get_device_modifier_mapping<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceModifierMappingReply>, ConnectionError>
@@ -5146,6 +5573,21 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.keymaps.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DEVICE_MODIFIER_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDeviceModifierMappingRequest {
+            device_id,
+            keymaps,
+        })
+    }
 }
 pub fn set_device_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, keymaps: &'input [u8]) -> Result<Cookie<'c, Conn, SetDeviceModifierMappingReply>, ConnectionError>
 where
@@ -5219,6 +5661,18 @@ impl GetDeviceButtonMappingRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_BUTTON_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetDeviceButtonMappingRequest {
+            device_id,
+        })
     }
 }
 pub fn get_device_button_mapping<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceButtonMappingReply>, ConnectionError>
@@ -5319,6 +5773,21 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.map.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DEVICE_BUTTON_MAPPING_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let (map_size, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDeviceButtonMappingRequest {
+            device_id,
+            map,
+        })
     }
 }
 pub fn set_device_button_mapping<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetDeviceButtonMappingReply>, ConnectionError>
@@ -5981,6 +6450,18 @@ impl QueryDeviceStateRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_DEVICE_STATE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(QueryDeviceStateRequest {
+            device_id,
+        })
+    }
 }
 pub fn query_device_state<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, QueryDeviceStateReply>, ConnectionError>
 where
@@ -6075,6 +6556,23 @@ impl DeviceBellRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DEVICE_BELL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_class, remaining) = u8::try_parse(remaining)?;
+        let (percent, remaining) = i8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(DeviceBellRequest {
+            device_id,
+            feedback_id,
+            feedback_class,
+            percent,
+        })
+    }
 }
 pub fn device_bell<Conn>(conn: &Conn, device_id: u8, feedback_id: u8, feedback_class: u8, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -6131,6 +6629,23 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), valuators_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DEVICE_VALUATORS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let (first_valuator, remaining) = u8::try_parse(remaining)?;
+        let (num_valuators, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetDeviceValuatorsRequest {
+            device_id,
+            first_valuator,
+            valuators: Cow::Owned(valuators),
+        })
     }
 }
 pub fn set_device_valuators<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, first_valuator: u8, valuators: &'input [i32]) -> Result<Cookie<'c, Conn, SetDeviceValuatorsReply>, ConnectionError>
@@ -7042,6 +7557,21 @@ impl GetDeviceControlRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (control_id, remaining) = u16::try_parse(value)?;
+        let control_id = control_id.try_into()?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetDeviceControlRequest {
+            control_id,
+            device_id,
+        })
+    }
 }
 pub fn get_device_control<Conn>(conn: &Conn, control_id: DeviceControl, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceControlReply>, ConnectionError>
 where
@@ -7873,6 +8403,23 @@ impl ChangeDeviceControlRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), control_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_DEVICE_CONTROL_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (control_id, remaining) = u16::try_parse(value)?;
+        let control_id = control_id.try_into()?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (control, remaining) = DeviceCtl::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(ChangeDeviceControlRequest {
+            control_id,
+            device_id,
+            control,
+        })
+    }
 }
 pub fn change_device_control<Conn>(conn: &Conn, control_id: DeviceControl, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Conn, ChangeDeviceControlReply>, ConnectionError>
 where
@@ -7946,6 +8493,18 @@ impl ListDevicePropertiesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LIST_DEVICE_PROPERTIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (device_id, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(ListDevicePropertiesRequest {
+            device_id,
+        })
     }
 }
 pub fn list_device_properties<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, ListDevicePropertiesReply>, ConnectionError>
@@ -8075,6 +8634,49 @@ pub enum ChangeDevicePropertyAux {
     Data32(Vec<u32>),
 }
 impl ChangeDevicePropertyAux {
+    fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(format);
+        let mut outer_remaining = value;
+        let mut parse_result = None;
+        if switch_expr == u32::from(PropertyFormat::M8Bits) {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let data8 = data8.to_vec();
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(ChangeDevicePropertyAux::Data8(data8));
+        }
+        if switch_expr == u32::from(PropertyFormat::M16Bits) {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(ChangeDevicePropertyAux::Data16(data16));
+        }
+        if switch_expr == u32::from(PropertyFormat::M32Bits) {
+            let remaining = outer_remaining;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(ChangeDevicePropertyAux::Data32(data32));
+        }
+        match parse_result {
+            None => Err(ParseError::ParseError),
+            Some(result) => Ok((result, outer_remaining)),
+        }
+    }
+}
+impl ChangeDevicePropertyAux {
     pub fn as_data8(&self) -> Option<&Vec<u8>> {
         match self {
             ChangeDevicePropertyAux::Data8(value) => Some(value),
@@ -8189,6 +8791,31 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), items_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != CHANGE_DEVICE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (property, remaining) = xproto::Atom::try_parse(value)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let format = format.try_into()?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (num_items, remaining) = u32::try_parse(remaining)?;
+        let (items, remaining) = ChangeDevicePropertyAux::try_parse(remaining, format, num_items)?;
+        let _ = remaining;
+        Ok(ChangeDevicePropertyRequest {
+            property,
+            type_,
+            device_id,
+            mode,
+            num_items,
+            items: Cow::Owned(items),
+        })
+    }
 }
 pub fn change_device_property<'c, 'input, Conn>(conn: &'c Conn, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: xproto::PropMode, num_items: u32, items: &'input ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -8244,6 +8871,20 @@ impl DeleteDevicePropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DELETE_DEVICE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (property, remaining) = xproto::Atom::try_parse(value)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(DeleteDevicePropertyRequest {
+            property,
+            device_id,
+        })
     }
 }
 pub fn delete_device_property<Conn>(conn: &Conn, property: xproto::Atom, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -8316,6 +8957,28 @@ impl GetDevicePropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DEVICE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (property, remaining) = xproto::Atom::try_parse(value)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (offset, remaining) = u32::try_parse(remaining)?;
+        let (len, remaining) = u32::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (delete, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetDevicePropertyRequest {
+            property,
+            type_,
+            offset,
+            len,
+            device_id,
+            delete,
+        })
     }
 }
 pub fn get_device_property<Conn>(conn: &Conn, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Conn, GetDevicePropertyReply>, ConnectionError>
@@ -8653,6 +9316,20 @@ impl XIQueryPointerRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_QUERY_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(XIQueryPointerRequest {
+            window,
+            deviceid,
+        })
+    }
 }
 pub fn xi_query_pointer<Conn, A>(conn: &Conn, window: xproto::Window, deviceid: A) -> Result<Cookie<'_, Conn, XIQueryPointerReply>, ConnectionError>
 where
@@ -8805,6 +9482,34 @@ impl XIWarpPointerRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_WARP_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (src_win, remaining) = xproto::Window::try_parse(value)?;
+        let (dst_win, remaining) = xproto::Window::try_parse(remaining)?;
+        let (src_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (src_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (src_width, remaining) = u16::try_parse(remaining)?;
+        let (src_height, remaining) = u16::try_parse(remaining)?;
+        let (dst_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (dst_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(XIWarpPointerRequest {
+            src_win,
+            dst_win,
+            src_x,
+            src_y,
+            src_width,
+            src_height,
+            dst_x,
+            dst_y,
+            deviceid,
+        })
+    }
 }
 pub fn xi_warp_pointer<Conn, A>(conn: &Conn, src_win: xproto::Window, dst_win: xproto::Window, src_x: Fp1616, src_y: Fp1616, src_width: u16, src_height: u16, dst_x: Fp1616, dst_y: Fp1616, deviceid: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -8871,6 +9576,22 @@ impl XIChangeCursorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_CHANGE_CURSOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(XIChangeCursorRequest {
+            window,
+            cursor,
+            deviceid,
+        })
     }
 }
 pub fn xi_change_cursor<Conn, A>(conn: &Conn, window: xproto::Window, cursor: xproto::Cursor, deviceid: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -9605,6 +10326,19 @@ impl<'input> XIChangeHierarchyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), changes_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_CHANGE_HIERARCHY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (num_changes, remaining) = u8::try_parse(value)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (changes, remaining) = crate::x11_utils::parse_list::<HierarchyChange>(remaining, num_changes.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(XIChangeHierarchyRequest {
+            changes: Cow::Owned(changes),
+        })
+    }
 }
 pub fn xi_change_hierarchy<'c, 'input, Conn>(conn: &'c Conn, changes: &'input [HierarchyChange]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -9656,6 +10390,20 @@ impl XISetClientPointerRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_SET_CLIENT_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(XISetClientPointerRequest {
+            window,
+            deviceid,
+        })
+    }
 }
 pub fn xi_set_client_pointer<Conn, A>(conn: &Conn, window: xproto::Window, deviceid: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -9703,6 +10451,17 @@ impl XIGetClientPointerRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_GET_CLIENT_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(XIGetClientPointerRequest {
+            window,
+        })
     }
 }
 pub fn xi_get_client_pointer<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, XIGetClientPointerReply>, ConnectionError>
@@ -9943,6 +10702,21 @@ impl<'input> XISelectEventsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), masks_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_SELECT_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (num_mask, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_mask.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(XISelectEventsRequest {
+            window,
+            masks: Cow::Owned(masks),
+        })
+    }
 }
 pub fn xi_select_events<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, masks: &'input [EventMask]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -9990,6 +10764,19 @@ impl XIQueryVersionRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (major_version, remaining) = u16::try_parse(value)?;
+        let (minor_version, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(XIQueryVersionRequest {
+            major_version,
+            minor_version,
+        })
     }
 }
 pub fn xi_query_version<Conn>(conn: &Conn, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Conn, XIQueryVersionReply>, ConnectionError>
@@ -11292,6 +12079,18 @@ impl XIQueryDeviceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_QUERY_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (deviceid, remaining) = DeviceId::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(XIQueryDeviceRequest {
+            deviceid,
+        })
+    }
 }
 pub fn xi_query_device<Conn, A>(conn: &Conn, deviceid: A) -> Result<Cookie<'_, Conn, XIQueryDeviceReply>, ConnectionError>
 where
@@ -11393,6 +12192,22 @@ impl XISetFocusRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_SET_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(XISetFocusRequest {
+            window,
+            time,
+            deviceid,
+        })
+    }
 }
 pub fn xi_set_focus<Conn, A, B>(conn: &Conn, window: xproto::Window, time: A, deviceid: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -11443,6 +12258,18 @@ impl XIGetFocusRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_GET_FOCUS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (deviceid, remaining) = DeviceId::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(XIGetFocusRequest {
+            deviceid,
+        })
     }
 }
 pub fn xi_get_focus<Conn, A>(conn: &Conn, deviceid: A) -> Result<Cookie<'_, Conn, XIGetFocusReply>, ConnectionError>
@@ -11622,6 +12449,36 @@ impl<'input> XIGrabDeviceRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), mask_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_GRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let (paired_device_mode, remaining) = u8::try_parse(remaining)?;
+        let paired_device_mode = paired_device_mode.try_into()?;
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        let owner_events = u8::from(owner_events).try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (mask_len, remaining) = u16::try_parse(remaining)?;
+        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(XIGrabDeviceRequest {
+            window,
+            time,
+            cursor,
+            deviceid,
+            mode,
+            paired_device_mode,
+            owner_events,
+            mask: Cow::Owned(mask),
+        })
+    }
 }
 pub fn xi_grab_device<'c, 'input, Conn, A, B>(conn: &'c Conn, window: xproto::Window, time: A, cursor: xproto::Cursor, deviceid: B, mode: xproto::GrabMode, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &'input [u32]) -> Result<Cookie<'c, Conn, XIGrabDeviceReply>, ConnectionError>
 where
@@ -11710,6 +12567,20 @@ impl XIUngrabDeviceRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_UNGRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (time, remaining) = xproto::Timestamp::try_parse(value)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(XIUngrabDeviceRequest {
+            time,
+            deviceid,
+        })
     }
 }
 pub fn xi_ungrab_device<Conn, A, B>(conn: &Conn, time: A, deviceid: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -11860,6 +12731,27 @@ impl XIAllowEventsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_ALLOW_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (time, remaining) = xproto::Timestamp::try_parse(value)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (event_mode, remaining) = u8::try_parse(remaining)?;
+        let event_mode = event_mode.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (touchid, remaining) = u32::try_parse(remaining)?;
+        let (grab_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(XIAllowEventsRequest {
+            time,
+            deviceid,
+            event_mode,
+            touchid,
+            grab_window,
+        })
     }
 }
 pub fn xi_allow_events<Conn, A, B>(conn: &Conn, time: A, deviceid: B, event_mode: EventMode, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -12175,6 +13067,44 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), mask_bytes.into(), modifiers_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_PASSIVE_GRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (time, remaining) = xproto::Timestamp::try_parse(value)?;
+        let (grab_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (num_modifiers, remaining) = u16::try_parse(remaining)?;
+        let (mask_len, remaining) = u16::try_parse(remaining)?;
+        let (grab_type, remaining) = u8::try_parse(remaining)?;
+        let grab_type = grab_type.try_into()?;
+        let (grab_mode, remaining) = u8::try_parse(remaining)?;
+        let grab_mode = grab_mode.try_into()?;
+        let (paired_device_mode, remaining) = u8::try_parse(remaining)?;
+        let paired_device_mode = paired_device_mode.try_into()?;
+        let (owner_events, remaining) = bool::try_parse(remaining)?;
+        let owner_events = u8::from(owner_events).try_into()?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(XIPassiveGrabDeviceRequest {
+            time,
+            grab_window,
+            cursor,
+            detail,
+            deviceid,
+            grab_type,
+            grab_mode,
+            paired_device_mode,
+            owner_events,
+            mask: Cow::Owned(mask),
+            modifiers: Cow::Owned(modifiers),
+        })
+    }
 }
 pub fn xi_passive_grab_device<'c, 'input, Conn, A, B>(conn: &'c Conn, time: A, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: B, grab_type: GrabType, grab_mode: GrabMode22, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &'input [u32], modifiers: &'input [u32]) -> Result<Cookie<'c, Conn, XIPassiveGrabDeviceReply>, ConnectionError>
 where
@@ -12301,6 +13231,28 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), modifiers_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_PASSIVE_UNGRAB_DEVICE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (grab_window, remaining) = xproto::Window::try_parse(value)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (num_modifiers, remaining) = u16::try_parse(remaining)?;
+        let (grab_type, remaining) = u8::try_parse(remaining)?;
+        let grab_type = grab_type.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(XIPassiveUngrabDeviceRequest {
+            grab_window,
+            detail,
+            deviceid,
+            grab_type,
+            modifiers: Cow::Owned(modifiers),
+        })
+    }
 }
 pub fn xi_passive_ungrab_device<'c, 'input, Conn, A>(conn: &'c Conn, grab_window: xproto::Window, detail: u32, deviceid: A, grab_type: GrabType, modifiers: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -12351,6 +13303,18 @@ impl XIListPropertiesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_LIST_PROPERTIES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (deviceid, remaining) = DeviceId::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(XIListPropertiesRequest {
+            deviceid,
+        })
     }
 }
 pub fn xi_list_properties<Conn, A>(conn: &Conn, deviceid: A) -> Result<Cookie<'_, Conn, XIListPropertiesReply>, ConnectionError>
@@ -12414,6 +13378,49 @@ pub enum XIChangePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+}
+impl XIChangePropertyAux {
+    fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = u32::from(format);
+        let mut outer_remaining = value;
+        let mut parse_result = None;
+        if switch_expr == u32::from(PropertyFormat::M8Bits) {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let data8 = data8.to_vec();
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(XIChangePropertyAux::Data8(data8));
+        }
+        if switch_expr == u32::from(PropertyFormat::M16Bits) {
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            // Align offset to multiple of 4
+            let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+            let misalignment = (4 - (offset % 4)) % 4;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(XIChangePropertyAux::Data16(data16));
+        }
+        if switch_expr == u32::from(PropertyFormat::M32Bits) {
+            let remaining = outer_remaining;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            outer_remaining = remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(XIChangePropertyAux::Data32(data32));
+        }
+        match parse_result {
+            None => Err(ParseError::ParseError),
+            Some(result) => Ok((result, outer_remaining)),
+        }
+    }
 }
 impl XIChangePropertyAux {
     pub fn as_data8(&self) -> Option<&Vec<u8>> {
@@ -12530,6 +13537,30 @@ impl<'input> XIChangePropertyRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), items_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_CHANGE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (deviceid, remaining) = DeviceId::try_parse(value)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let format = format.try_into()?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (num_items, remaining) = u32::try_parse(remaining)?;
+        let (items, remaining) = XIChangePropertyAux::try_parse(remaining, format, num_items)?;
+        let _ = remaining;
+        Ok(XIChangePropertyRequest {
+            deviceid,
+            mode,
+            property,
+            type_,
+            num_items,
+            items: Cow::Owned(items),
+        })
+    }
 }
 pub fn xi_change_property<'c, 'input, Conn, A>(conn: &'c Conn, deviceid: A, mode: xproto::PropMode, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &'input XIChangePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -12587,6 +13618,20 @@ impl XIDeletePropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_DELETE_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (deviceid, remaining) = DeviceId::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(XIDeletePropertyRequest {
+            deviceid,
+            property,
+        })
     }
 }
 pub fn xi_delete_property<Conn, A>(conn: &Conn, deviceid: A, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -12661,6 +13706,28 @@ impl XIGetPropertyRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_GET_PROPERTY_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (deviceid, remaining) = DeviceId::try_parse(value)?;
+        let (delete, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (offset, remaining) = u32::try_parse(remaining)?;
+        let (len, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(XIGetPropertyRequest {
+            deviceid,
+            delete,
+            property,
+            type_,
+            offset,
+            len,
+        })
     }
 }
 pub fn xi_get_property<Conn, A>(conn: &Conn, deviceid: A, delete: bool, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32) -> Result<Cookie<'_, Conn, XIGetPropertyReply>, ConnectionError>
@@ -12817,6 +13884,17 @@ impl XIGetSelectedEventsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_GET_SELECTED_EVENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(XIGetSelectedEventsRequest {
+            window,
+        })
+    }
 }
 pub fn xi_get_selected_events<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, XIGetSelectedEventsReply>, ConnectionError>
 where
@@ -12960,6 +14038,18 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), barriers_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != XI_BARRIER_RELEASE_POINTER_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (num_barriers, remaining) = u32::try_parse(value)?;
+        let (barriers, remaining) = crate::x11_utils::parse_list::<BarrierReleasePointerInfo>(remaining, num_barriers.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(XIBarrierReleasePointerRequest {
+            barriers: Cow::Owned(barriers),
+        })
     }
 }
 pub fn xi_barrier_release_pointer<'c, 'input, Conn>(conn: &'c Conn, barriers: &'input [BarrierReleasePointerInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -15884,6 +16974,28 @@ impl<'input> SendExtensionEventRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), events_bytes.into(), classes_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SEND_EXTENSION_EVENT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (destination, remaining) = xproto::Window::try_parse(value)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (propagate, remaining) = bool::try_parse(remaining)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let (num_events, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (events, remaining) = crate::x11_utils::parse_list::<EventForSend>(remaining, num_events.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SendExtensionEventRequest {
+            destination,
+            device_id,
+            propagate,
+            events: Cow::Owned(events),
+            classes: Cow::Owned(classes),
+        })
     }
 }
 pub fn send_extension_event<'c, 'input, Conn>(conn: &'c Conn, destination: xproto::Window, device_id: u8, propagate: bool, events: &'input [EventForSend], classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>

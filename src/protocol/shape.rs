@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -293,6 +293,15 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(QueryVersionRequest
+        )
+    }
 }
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -386,6 +395,40 @@ impl<'input> RectanglesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != RECTANGLES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (operation, remaining) = Op::try_parse(value)?;
+        let operation = operation.try_into()?;
+        let (destination_kind, remaining) = Kind::try_parse(remaining)?;
+        let destination_kind = destination_kind.try_into()?;
+        let (ordering, remaining) = u8::try_parse(remaining)?;
+        let ordering = ordering.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x_offset, remaining) = i16::try_parse(remaining)?;
+        let (y_offset, remaining) = i16::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut rectangles = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = xproto::Rectangle::try_parse(remaining)?;
+            remaining = new_remaining;
+            rectangles.push(v);
+        }
+        let _ = remaining;
+        Ok(RectanglesRequest {
+            operation,
+            destination_kind,
+            ordering,
+            destination_window,
+            x_offset,
+            y_offset,
+            rectangles: Cow::Owned(rectangles),
+        })
+    }
 }
 pub fn rectangles<'c, 'input, Conn>(conn: &'c Conn, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -458,6 +501,30 @@ impl MaskRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != MASK_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (operation, remaining) = Op::try_parse(value)?;
+        let operation = operation.try_into()?;
+        let (destination_kind, remaining) = Kind::try_parse(remaining)?;
+        let destination_kind = destination_kind.try_into()?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x_offset, remaining) = i16::try_parse(remaining)?;
+        let (y_offset, remaining) = i16::try_parse(remaining)?;
+        let (source_bitmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(MaskRequest {
+            operation,
+            destination_kind,
+            destination_window,
+            x_offset,
+            y_offset,
+            source_bitmap,
+        })
     }
 }
 pub fn mask<Conn, A>(conn: &Conn, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -535,6 +602,33 @@ impl CombineRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != COMBINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (operation, remaining) = Op::try_parse(value)?;
+        let operation = operation.try_into()?;
+        let (destination_kind, remaining) = Kind::try_parse(remaining)?;
+        let destination_kind = destination_kind.try_into()?;
+        let (source_kind, remaining) = Kind::try_parse(remaining)?;
+        let source_kind = source_kind.try_into()?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x_offset, remaining) = i16::try_parse(remaining)?;
+        let (y_offset, remaining) = i16::try_parse(remaining)?;
+        let (source_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(CombineRequest {
+            operation,
+            destination_kind,
+            source_kind,
+            destination_window,
+            x_offset,
+            y_offset,
+            source_window,
+        })
+    }
 }
 pub fn combine<Conn>(conn: &Conn, operation: SO, destination_kind: SK, source_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -600,6 +694,25 @@ impl OffsetRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != OFFSET_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (destination_kind, remaining) = Kind::try_parse(value)?;
+        let destination_kind = destination_kind.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x_offset, remaining) = i16::try_parse(remaining)?;
+        let (y_offset, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(OffsetRequest {
+            destination_kind,
+            destination_window,
+            x_offset,
+            y_offset,
+        })
+    }
 }
 pub fn offset<Conn>(conn: &Conn, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -647,6 +760,17 @@ impl QueryExtentsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_EXTENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (destination_window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryExtentsRequest {
+            destination_window,
+        })
     }
 }
 pub fn query_extents<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, QueryExtentsReply>, ConnectionError>
@@ -743,6 +867,20 @@ impl SelectInputRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SELECT_INPUT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (destination_window, remaining) = xproto::Window::try_parse(value)?;
+        let (enable, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SelectInputRequest {
+            destination_window,
+            enable,
+        })
+    }
 }
 pub fn select_input<Conn>(conn: &Conn, destination_window: xproto::Window, enable: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -788,6 +926,17 @@ impl InputSelectedRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != INPUT_SELECTED_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (destination_window, remaining) = xproto::Window::try_parse(value)?;
+        let _ = remaining;
+        Ok(InputSelectedRequest {
+            destination_window,
+        })
     }
 }
 pub fn input_selected<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, InputSelectedReply>, ConnectionError>
@@ -863,6 +1012,21 @@ impl GetRectanglesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_RECTANGLES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (source_kind, remaining) = Kind::try_parse(remaining)?;
+        let source_kind = source_kind.try_into()?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetRectanglesRequest {
+            window,
+            source_kind,
+        })
     }
 }
 pub fn get_rectangles<Conn>(conn: &Conn, window: xproto::Window, source_kind: SK) -> Result<Cookie<'_, Conn, GetRectanglesReply>, ConnectionError>

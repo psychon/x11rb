@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -465,6 +465,19 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (client_major, remaining) = u8::try_parse(value)?;
+        let (client_minor, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(QueryVersionRequest {
+            client_major,
+            client_minor,
+        })
+    }
 }
 pub fn query_version<Conn>(conn: &Conn, client_major: u8, client_minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -530,6 +543,15 @@ impl QueryClientsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_CLIENTS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(QueryClientsRequest
+        )
     }
 }
 pub fn query_clients<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryClientsReply>, ConnectionError>
@@ -615,6 +637,17 @@ impl QueryClientResourcesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_CLIENT_RESOURCES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (xid, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryClientResourcesRequest {
+            xid,
+        })
     }
 }
 pub fn query_client_resources<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientResourcesReply>, ConnectionError>
@@ -703,6 +736,17 @@ impl QueryClientPixmapBytesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_CLIENT_PIXMAP_BYTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (xid, remaining) = u32::try_parse(value)?;
+        let _ = remaining;
+        Ok(QueryClientPixmapBytesRequest {
+            xid,
+        })
+    }
 }
 pub fn query_client_pixmap_bytes<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientPixmapBytesReply>, ConnectionError>
 where
@@ -779,6 +823,18 @@ impl<'input> QueryClientIdsRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), specs_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_CLIENT_IDS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (num_specs, remaining) = u32::try_parse(value)?;
+        let (specs, remaining) = crate::x11_utils::parse_list::<ClientIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(QueryClientIdsRequest {
+            specs: Cow::Owned(specs),
+        })
     }
 }
 pub fn query_client_ids<'c, 'input, Conn>(conn: &'c Conn, specs: &'input [ClientIdSpec]) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
@@ -877,6 +933,20 @@ impl<'input> QueryResourceBytesRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), specs_bytes.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_RESOURCE_BYTES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (client, remaining) = u32::try_parse(value)?;
+        let (num_specs, remaining) = u32::try_parse(remaining)?;
+        let (specs, remaining) = crate::x11_utils::parse_list::<ResourceIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(QueryResourceBytesRequest {
+            client,
+            specs: Cow::Owned(specs),
+        })
     }
 }
 pub fn query_resource_bytes<'c, 'input, Conn>(conn: &'c Conn, client: u32, specs: &'input [ResourceIdSpec]) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>

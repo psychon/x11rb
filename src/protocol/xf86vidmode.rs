@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Serialize, TryParse};
+use crate::x11_utils::{RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -392,6 +392,15 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != QUERY_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let _ = value;
+        Ok(QueryVersionRequest
+        )
+    }
 }
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -461,6 +470,18 @@ impl GetModeLineRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetModeLineRequest {
+            screen,
+        })
     }
 }
 pub fn get_mode_line<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetModeLineReply>, ConnectionError>
@@ -639,6 +660,42 @@ impl<'input> ModModeLineRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != MOD_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ModModeLineRequest {
+            screen,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            private,
+        })
+    }
 }
 pub fn mod_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -699,6 +756,19 @@ impl SwitchModeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SWITCH_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let (zoom, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SwitchModeRequest {
+            screen,
+            zoom,
+        })
+    }
 }
 pub fn switch_mode<Conn>(conn: &Conn, screen: u16, zoom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -744,6 +814,18 @@ impl GetMonitorRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_MONITOR_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetMonitorRequest {
+            screen,
+        })
     }
 }
 pub fn get_monitor<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetMonitorReply>, ConnectionError>
@@ -887,6 +969,19 @@ impl LockModeSwitchRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != LOCK_MODE_SWITCH_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let (lock, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(LockModeSwitchRequest {
+            screen,
+            lock,
+        })
+    }
 }
 pub fn lock_mode_switch<Conn>(conn: &Conn, screen: u16, lock: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -932,6 +1027,18 @@ impl GetAllModeLinesRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_ALL_MODE_LINES_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetAllModeLinesRequest {
+            screen,
+        })
     }
 }
 pub fn get_all_mode_lines<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetAllModeLinesReply>, ConnectionError>
@@ -1154,6 +1261,68 @@ impl<'input> AddModeLineRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != ADD_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (after_dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (after_hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (after_hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (after_hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (after_htotal, remaining) = u16::try_parse(remaining)?;
+        let (after_hskew, remaining) = u16::try_parse(remaining)?;
+        let (after_vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (after_vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (after_vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (after_vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (after_flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(AddModeLineRequest {
+            screen,
+            dotclock,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            after_dotclock,
+            after_hdisplay,
+            after_hsyncstart,
+            after_hsyncend,
+            after_htotal,
+            after_hskew,
+            after_vdisplay,
+            after_vsyncstart,
+            after_vsyncend,
+            after_vtotal,
+            after_flags,
+            private,
+        })
+    }
 }
 pub fn add_mode_line<'c, 'input, Conn, A, B>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1298,6 +1467,44 @@ impl<'input> DeleteModeLineRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != DELETE_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(DeleteModeLineRequest {
+            screen,
+            dotclock,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            private,
+        })
+    }
 }
 pub fn delete_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1428,6 +1635,44 @@ impl<'input> ValidateModeLineRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != VALIDATE_MODE_LINE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(ValidateModeLineRequest {
+            screen,
+            dotclock,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            private,
+        })
     }
 }
 pub fn validate_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
@@ -1586,6 +1831,44 @@ impl<'input> SwitchToModeRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SWITCH_TO_MODE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u32::try_parse(value)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
+        let (hdisplay, remaining) = u16::try_parse(remaining)?;
+        let (hsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (hsyncend, remaining) = u16::try_parse(remaining)?;
+        let (htotal, remaining) = u16::try_parse(remaining)?;
+        let (hskew, remaining) = u16::try_parse(remaining)?;
+        let (vdisplay, remaining) = u16::try_parse(remaining)?;
+        let (vsyncstart, remaining) = u16::try_parse(remaining)?;
+        let (vsyncend, remaining) = u16::try_parse(remaining)?;
+        let (vtotal, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (privsize, remaining) = u32::try_parse(remaining)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SwitchToModeRequest {
+            screen,
+            dotclock,
+            hdisplay,
+            hsyncstart,
+            hsyncend,
+            htotal,
+            hskew,
+            vdisplay,
+            vsyncstart,
+            vsyncend,
+            vtotal,
+            flags,
+            private,
+        })
+    }
 }
 pub fn switch_to_mode<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1644,6 +1927,18 @@ impl GetViewPortRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_VIEW_PORT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetViewPortRequest {
+            screen,
+        })
     }
 }
 pub fn get_view_port<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetViewPortReply>, ConnectionError>
@@ -1730,6 +2025,22 @@ impl SetViewPortRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_VIEW_PORT_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (x, remaining) = u32::try_parse(remaining)?;
+        let (y, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetViewPortRequest {
+            screen,
+            x,
+            y,
+        })
+    }
 }
 pub fn set_view_port<Conn>(conn: &Conn, screen: u16, x: u32, y: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1776,6 +2087,18 @@ impl GetDotClocksRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_DOT_CLOCKS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetDotClocksRequest {
+            screen,
+        })
     }
 }
 pub fn get_dot_clocks<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetDotClocksReply>, ConnectionError>
@@ -1856,6 +2179,19 @@ impl SetClientVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_CLIENT_VERSION_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (major, remaining) = u16::try_parse(value)?;
+        let (minor, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetClientVersionRequest {
+            major,
+            minor,
+        })
+    }
 }
 pub fn set_client_version<Conn>(conn: &Conn, major: u16, minor: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1932,6 +2268,25 @@ impl SetGammaRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_GAMMA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (red, remaining) = u32::try_parse(remaining)?;
+        let (green, remaining) = u32::try_parse(remaining)?;
+        let (blue, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(SetGammaRequest {
+            screen,
+            red,
+            green,
+            blue,
+        })
+    }
 }
 pub fn set_gamma<Conn>(conn: &Conn, screen: u16, red: u32, green: u32, blue: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2003,6 +2358,18 @@ impl GetGammaRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_GAMMA_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(26..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetGammaRequest {
+            screen,
+        })
     }
 }
 pub fn get_gamma<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaReply>, ConnectionError>
@@ -2080,6 +2447,19 @@ impl GetGammaRampRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_GAMMA_RAMP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let (size, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(GetGammaRampRequest {
+            screen,
+            size,
+        })
     }
 }
 pub fn get_gamma_ramp<Conn>(conn: &Conn, screen: u16, size: u16) -> Result<Cookie<'_, Conn, GetGammaRampReply>, ConnectionError>
@@ -2175,6 +2555,25 @@ impl<'input> SetGammaRampRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), red_bytes.into(), green_bytes.into(), blue_bytes.into(), padding0.into()], vec![]))
     }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_GAMMA_RAMP_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let (size, remaining) = u16::try_parse(remaining)?;
+        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        Ok(SetGammaRampRequest {
+            screen,
+            size,
+            red: Cow::Owned(red),
+            green: Cow::Owned(green),
+            blue: Cow::Owned(blue),
+        })
+    }
 }
 pub fn set_gamma_ramp<'c, 'input, Conn>(conn: &'c Conn, screen: u16, size: u16, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -2223,6 +2622,18 @@ impl GetGammaRampSizeRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_GAMMA_RAMP_SIZE_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetGammaRampSizeRequest {
+            screen,
+        })
     }
 }
 pub fn get_gamma_ramp_size<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaRampSizeReply>, ConnectionError>
@@ -2294,6 +2705,18 @@ impl GetPermissionsRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_PERMISSIONS_REQUEST {
+            return Err(ParseError::ParseError);
+        }
+        let (screen, remaining) = u16::try_parse(value)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        Ok(GetPermissionsRequest {
+            screen,
+        })
     }
 }
 pub fn get_permissions<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetPermissionsReply>, ConnectionError>
