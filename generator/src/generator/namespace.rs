@@ -873,25 +873,45 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "}}");
 
             // Parsing implementation.
-            outln!(out, "/// Parse this request given its header, its body, and any fds that go along with it");
+            outln!(
+                out,
+                "/// Parse this request given its header, its body, and any fds that go along \
+                 with it"
+            );
             if !(gathered.single_fds.is_empty() && gathered.fd_lists.is_empty()) {
-                outln!(out, "pub fn try_parse_request_fd(header: RequestHeader, value: &{lifetime}[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {{",
-                       lifetime = parse_lifetime_block);
+                outln!(
+                    out,
+                    "pub fn try_parse_request_fd(header: RequestHeader, value: &{lifetime}[u8], \
+                     fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {{",
+                    lifetime = parse_lifetime_block,
+                );
             } else {
-                outln!(out, "pub fn try_parse_request(header: RequestHeader, value: &{lifetime}[u8]) -> Result<Self, ParseError> {{",
-                       lifetime = parse_lifetime_block);
+                outln!(
+                    out,
+                    "pub fn try_parse_request(header: RequestHeader, value: &{lifetime}[u8]) -> \
+                     Result<Self, ParseError> {{",
+                    lifetime = parse_lifetime_block,
+                );
             }
             out.indented(|out| {
                 if ns.ext_info.is_some() {
                     // We don't have enough information here to validate the major opcode, that requires
                     // state from the connection.
-                    outln!(out, "if header.minor_opcode != {}_REQUEST {{", super::camel_case_to_upper_snake(&name));
+                    outln!(
+                        out,
+                        "if header.minor_opcode != {}_REQUEST {{",
+                        super::camel_case_to_upper_snake(&name),
+                    );
                     outln!(out.indent(), "return Err(ParseError::ParseError);");
                     outln!(out, "}}");
                 } else {
                     // The minor opcode could be repurposed to store data for this request, so there's
                     // no validation of it to be done.
-                    outln!(out, "if header.major_opcode != {}_REQUEST {{", super::camel_case_to_upper_snake(&name));
+                    outln!(
+                        out,
+                        "if header.major_opcode != {}_REQUEST {{",
+                        super::camel_case_to_upper_snake(&name),
+                    );
                     outln!(out.indent(), "return Err(ParseError::ParseError);");
                     outln!(out, "}}");
                 };
@@ -906,7 +926,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         Some("length") => {
                             seen_complete_header = true;
                             continue;
-                        },
+                        }
                         _ => (),
                     }
 
@@ -920,7 +940,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     } else {
                         "remaining"
                     };
-                    self.emit_field_parse(field, "", from, FieldContainer::Request(name.to_string()), out);
+                    self.emit_field_parse(
+                        field,
+                        "",
+                        from,
+                        FieldContainer::Request(name.to_string()),
+                        out,
+                    );
                     self.emit_field_post_parse(field, out);
 
                     if !seen_complete_header {
@@ -960,11 +986,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         }
                     }
                 });
-                let members_end = if has_members {
-                    "}"
-                } else {
-                    ""
-                };
+                let members_end = if has_members { "}" } else { "" };
                 outln!(out, "{})", members_end);
             });
             outln!(out, "}}");
@@ -1901,8 +1923,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let largest_type = larger_types.last().unwrap();
                     outln!(
                         out,
-                        "pub fn try_from(value: impl Into<{}>, value_for_zero: Self) -> Result<Self, \
-                         ParseError> {{",
+                        "pub fn try_from(value: impl Into<{}>, value_for_zero: Self) -> \
+                         Result<Self, ParseError> {{",
                         largest_type,
                     );
                     outln!(out.indent(), "let value = value.into();");
@@ -3460,8 +3482,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if let Some(list_length) = list_field.length() {
                         outln!(
                             out,
-                            "let ({}, remaining) = crate::x11_utils::parse_u8_list({}, \
-                             {})?;",
+                            "let ({}, remaining) = crate::x11_utils::parse_u8_list({}, {})?;",
                             rust_field_name,
                             from,
                             list_length,
@@ -3479,7 +3500,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         };
                         outln!(
                             out,
-                            "let {field} = <{ownership}[u8; {length}]>::try_from({field}).unwrap();",
+                            "let {field} = <{ownership}[u8; \
+                             {length}]>::try_from({field}).unwrap();",
                             field = rust_field_name,
                             ownership = ownership,
                             length = list_length,
