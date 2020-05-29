@@ -1,5 +1,3 @@
-use once_cell::unsync::OnceCell;
-
 use crate::defs;
 
 /// Create synthesised fields in the module.
@@ -230,10 +228,7 @@ fn make_builtin_field_value_type(builtin_type: defs::BuiltInType) -> defs::Field
         defs::BuiltInType::Void => "void",
     };
     defs::FieldValueType {
-        type_: defs::NamedTypeRef {
-            name: type_name.into(),
-            def: OnceCell::from(defs::TypeRef::BuiltIn(builtin_type)),
-        },
+        type_: defs::NamedTypeRef::resolved(type_name.into(), defs::TypeRef::BuiltIn(builtin_type)),
         value_set: defs::FieldValueSet::None,
     }
 }

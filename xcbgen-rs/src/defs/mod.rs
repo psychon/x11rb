@@ -60,11 +60,10 @@ impl Module {
             .borrow()
             .values()
             .find(|ns| {
-                if let Some(ref ext_info) = ns.ext_info {
-                    ext_info.name == name
-                } else {
-                    false
-                }
+                ns.ext_info
+                    .as_ref()
+                    .map(|ext_info| ext_info.name == name)
+                    .unwrap_or(false)
             })
             .cloned()
     }

@@ -98,7 +98,7 @@ impl StructParamRefGatherer {
             defs::Expression::ParamRef(param_ref_expr) => {
                 self.add_external_param(
                     &param_ref_expr.field_name,
-                    param_ref_expr.type_.def.get().unwrap().clone(),
+                    param_ref_expr.type_.get_resolved().clone(),
                 )?;
                 Ok(())
             }

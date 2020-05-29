@@ -8,5 +8,5 @@ publish = false
 
 [dependencies]
 fxhash = "0.2.1"
-roxmltree = "0.10.1"
+roxmltree = "0.11.0"
 xcbgen = { path = "../xcbgen-rs" }

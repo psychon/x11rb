@@ -352,7 +352,7 @@ impl FieldValueType {
     ///
     /// Panics if this value type was not yet resolved.
     pub fn size(&self) -> Option<u32> {
-        self.type_.def.get().unwrap().size()
+        self.type_.get_resolved().size()
     }
 }
 

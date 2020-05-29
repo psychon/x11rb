@@ -1226,7 +1226,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             out,
             "pub type {}Event = {};",
             name,
-            self.event_to_rust_type(event_copy_def.ref_.def.get().unwrap()),
+            self.event_to_rust_type(event_copy_def.ref_.get_resolved()),
         );
         outln!(out, "");
     }
@@ -1306,7 +1306,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             out,
             "pub type {}Error = {};",
             name,
-            self.error_to_rust_type(error_copy_def.ref_.def.get().unwrap()),
+            self.error_to_rust_type(error_copy_def.ref_.get_resolved()),
         );
         outln!(out, "");
     }
@@ -1536,13 +1536,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         self.type_name_to_rust_type(&self.get_enum_rust_name(&enum_def), &ns)
                     } else {
                         self.type_to_rust_type(
-                            &normal_field
-                                .type_
-                                .type_
-                                .def
-                                .get()
-                                .unwrap()
-                                .get_original_type(),
+                            &normal_field.type_.type_.get_resolved().get_original_type(),
                         )
                     }
                 }
@@ -1557,9 +1551,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             &list_field
                                 .element_type
                                 .type_
-                                .def
-                                .get()
-                                .unwrap()
+                                .get_resolved()
                                 .get_original_type(),
                         )
                     };
@@ -2018,7 +2010,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             out,
             "pub type {} = {};",
             rust_new_name,
-            self.type_to_rust_type(type_alias_def.old_name.def.get().unwrap()),
+            self.type_to_rust_type(type_alias_def.old_name.get_resolved()),
         );
         outln!(out, "");
     }
@@ -3548,7 +3540,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     && list_field.length().is_none()
                 {
                     let rust_element_type =
-                        self.type_to_rust_type(list_field.element_type.type_.def.get().unwrap());
+                        self.type_to_rust_type(list_field.element_type.type_.get_resolved());
                     outln!(
                         out,
                         "let ({}, remaining) = crate::x11_utils::parse_list::<{}>(remaining, \
@@ -3691,7 +3683,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     }
 
     fn emit_value_parse(&self, type_: &xcbdefs::FieldValueType, from: &str) -> String {
-        let type_type = type_.type_.def.get().unwrap();
+        let type_type = type_.type_.get_resolved();
         let rust_type = self.type_to_rust_type(type_type);
         let params = self.get_type_parse_params(type_type, from);
         format!("{}::try_parse({})?", rust_type, params.join(", "))
@@ -3705,12 +3697,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     ) {
         if let xcbdefs::FieldValueSet::Enum(ref enum_) = type_.value_set {
             // Handle turning things into enum instances where necessary.
-            let enum_def = match enum_.def.get().unwrap() {
+            let enum_def = match enum_.get_resolved() {
                 xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
                 _ => unreachable!(),
             };
             if !self.enum_has_repeated_values(&enum_def) {
-                let type_type = type_.type_.def.get().unwrap();
+                let type_type = type_.type_.get_resolved();
                 if let xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Bool) = type_type {
                     // Cast this to a u8 before calling try_into, because there's
                     // no TryFrom<bool> implementation.
@@ -3748,7 +3740,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn needs_post_parse(&self, type_: &xcbdefs::FieldValueType) -> bool {
         if let xcbdefs::FieldValueSet::Enum(ref enum_) = type_.value_set {
-            let enum_def = match enum_.def.get().unwrap() {
+            let enum_def = match enum_.get_resolved() {
                 xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
                 _ => unreachable!(),
             };
@@ -3759,7 +3751,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     }
 
     fn can_use_simple_list_parsing(&self, type_: &xcbdefs::FieldValueType) -> bool {
-        self.get_type_parse_params(&type_.type_.def.get().unwrap(), "")
+        self.get_type_parse_params(&type_.type_.get_resolved(), "")
             .len()
             == 1
             && !self.needs_post_parse(type_)
@@ -3793,7 +3785,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 None
             }
             xcbdefs::FieldDef::Normal(normal_field) => {
-                let field_size = normal_field.type_.type_.def.get().unwrap().size().unwrap();
+                let field_size = normal_field.type_.type_.get_resolved().size().unwrap();
                 let rust_field_name = to_rust_variable_name(&normal_field.name);
                 let bytes_name = postfix_var_name(&rust_field_name, "bytes");
 
@@ -4103,7 +4095,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     ) -> String {
         // Deduced fields are not converter to their enum value
         if !was_deduced && self.use_enum_type_in_field(type_).is_some() {
-            let rust_wire_type = self.type_to_rust_type(type_.type_.def.get().unwrap());
+            let rust_wire_type = self.type_to_rust_type(type_.type_.get_resolved());
             format!("{}::from({}).serialize()", rust_wire_type, value)
         } else {
             format!("{}.serialize()", value)
@@ -4120,7 +4112,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     ) {
         // Deduced fields are not converted to their enum value
         if !was_deduced && self.use_enum_type_in_field(type_).is_some() {
-            let rust_wire_type = self.type_to_rust_type(type_.type_.def.get().unwrap());
+            let rust_wire_type = self.type_to_rust_type(type_.type_.get_resolved());
             outln!(
                 out,
                 "{}::from({}).serialize_into({});",
@@ -4185,7 +4177,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
                 if let xcbdefs::FieldDef::Normal(normal_field) = field {
                     let rust_field_type =
-                        self.type_to_rust_type(normal_field.type_.type_.def.get().unwrap());
+                        self.type_to_rust_type(normal_field.type_.type_.get_resolved());
                     outln!(
                         out,
                         "let {} = {}::try_from({}.switch_expr()).unwrap();",
@@ -4200,7 +4192,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             DeducibleField::BitCaseSwitchExpr(switch_field_name, op) => {
                 if let xcbdefs::FieldDef::Normal(normal_field) = field {
                     let rust_field_type =
-                        self.type_to_rust_type(normal_field.type_.type_.def.get().unwrap());
+                        self.type_to_rust_type(normal_field.type_.type_.get_resolved());
                     let op_str = match op {
                         DeducibleFieldOp::None => String::new(),
                         DeducibleFieldOp::Or(or_expr) => format!(
@@ -4233,7 +4225,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if self.use_enum_type_in_field(type_).is_some() {
             false
         } else {
-            let original_type = match type_.type_.def.get().unwrap() {
+            let original_type = match type_.type_.get_resolved() {
                 xcbdefs::TypeRef::Alias(type_alias_def) => {
                     type_alias_def.upgrade().unwrap().get_original_type()
                 }
@@ -4254,7 +4246,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         type_: &xcbdefs::FieldValueType,
     ) -> Option<Rc<xcbdefs::EnumDef>> {
         if let xcbdefs::FieldValueSet::Enum(ref enum_) = type_.value_set {
-            let enum_def = match enum_.def.get().unwrap() {
+            let enum_def = match enum_.get_resolved() {
                 xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
                 _ => unreachable!(),
             };
@@ -4553,7 +4545,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             }
             xcbdefs::Expression::ParamRef(param_ref_expr) => {
                 let rust_field_name = to_rust_variable_name(&param_ref_expr.field_name);
-                let param_is_card32 = match param_ref_expr.type_.def.get().unwrap() {
+                let param_is_card32 = match param_ref_expr.type_.get_resolved() {
                     xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => true,
                     _ => false,
                 };
@@ -4564,7 +4556,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
             }
             xcbdefs::Expression::EnumRef(enum_ref_expr) => {
-                let rust_enum_type = self.type_to_rust_type(enum_ref_expr.enum_.def.get().unwrap());
+                let rust_enum_type = self.type_to_rust_type(enum_ref_expr.enum_.get_resolved());
                 let rust_variant_name = ename_to_rust(&enum_ref_expr.variant);
                 format!("u32::from({}::{})", rust_enum_type, rust_variant_name)
             }
@@ -5052,7 +5044,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             let ns = enum_def.namespace.upgrade().unwrap();
             self.type_name_to_rust_type(&self.get_enum_rust_name(&enum_def), &ns)
         } else {
-            self.type_to_rust_type(value_type.type_.def.get().unwrap())
+            self.type_to_rust_type(value_type.type_.get_resolved())
         }
     }
 
@@ -5136,15 +5128,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             match field {
                 xcbdefs::FieldDef::Pad(_) => {}
                 xcbdefs::FieldDef::Normal(normal_field) => {
-                    self.filter_derives_for_type(
-                        derives,
-                        normal_field.type_.type_.def.get().unwrap(),
-                    );
+                    self.filter_derives_for_type(derives, normal_field.type_.type_.get_resolved());
                 }
                 xcbdefs::FieldDef::List(list_field) => {
                     self.filter_derives_for_type(
                         derives,
-                        list_field.element_type.type_.def.get().unwrap(),
+                        list_field.element_type.type_.get_resolved(),
                     );
 
                     if !list_field.has_fixed_length() {
@@ -5213,7 +5202,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             xcbdefs::TypeRef::Enum(_) => {}
             xcbdefs::TypeRef::Alias(type_alias_def) => {
                 let type_alias_def = type_alias_def.upgrade().unwrap();
-                self.filter_derives_for_type(derives, type_alias_def.old_name.def.get().unwrap())
+                self.filter_derives_for_type(derives, type_alias_def.old_name.get_resolved())
             }
         }
     }
@@ -5613,14 +5602,7 @@ fn format_literal_integer(value: u32) -> String {
 fn needs_match_by_value(field: &xcbdefs::FieldDef) -> bool {
     match field {
         xcbdefs::FieldDef::Normal(normal_field) => {
-            match normal_field
-                .type_
-                .type_
-                .def
-                .get()
-                .unwrap()
-                .get_original_type()
-            {
+            match normal_field.type_.type_.get_resolved().get_original_type() {
                 xcbdefs::TypeRef::BuiltIn(_) => true,
                 xcbdefs::TypeRef::Xid(_) => true,
                 xcbdefs::TypeRef::XidUnion(_) => true,
