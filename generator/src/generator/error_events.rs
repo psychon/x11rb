@@ -1,3 +1,4 @@
+use super::get_ns_name_prefix;
 use super::output::Output;
 
 pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
@@ -572,18 +573,6 @@ pub fn sent_event(&self) -> bool {{
         );
     });
     outln!(out, "}}");
-}
-
-/// Get the prefix that should be used for enum variants from this module.
-fn get_ns_name_prefix(ns: &xcbgen::defs::Namespace) -> String {
-    if ns.ext_info.is_some() {
-        let (first, remaining) = ns.header.split_at(1);
-        let mut r = first.to_ascii_uppercase();
-        r.push_str(remaining);
-        r
-    } else {
-        String::new()
-    }
 }
 
 fn sorted_errors(ns: &xcbgen::defs::Namespace) -> Vec<xcbgen::defs::ErrorDef> {

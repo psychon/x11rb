@@ -9,11 +9,49 @@ use fxhash::{FxHashMap, FxHashSet};
 use xcbgen::defs as xcbdefs;
 
 use super::output::Output;
-use super::special_cases;
+use super::{get_ns_name_prefix, special_cases};
+
+type EnumCases = FxHashMap<String, Vec<String>>;
 
 /// Generate a Rust module for namespace `ns`.
-pub(super) fn generate(ns: &xcbdefs::Namespace, caches: &RefCell<Caches>, out: &mut Output) {
-    NamespaceGenerator::new(ns, caches).generate(out);
+pub(super) fn generate(
+    ns: &xcbdefs::Namespace,
+    caches: &RefCell<Caches>,
+    out: &mut Output,
+    enum_cases: &mut EnumCases,
+) {
+    NamespaceGenerator::new(ns, caches).generate(out, enum_cases);
+}
+
+/// Generate the Request and enum containing all possible requests.
+pub(super) fn generate_request_enum(
+    out: &mut Output,
+    module: &xcbdefs::Module,
+    mut enum_cases: EnumCases,
+) {
+    let namespaces = module.sorted_namespaces();
+
+    outln!(out, "/// Enumeration of all possible X11 requests.");
+    outln!(out, "#[derive(Debug)]");
+    // For xc_misc.
+    outln!(out, "#[allow(non_camel_case_types)]");
+    outln!(out, "pub enum Request<'input> {{");
+    out.indented(|out| {
+        outln!(out, "Unknown(&'input [u8]),");
+        for ns in namespaces.iter() {
+            let has_feature = super::ext_has_feature(&ns.header);
+
+            let request_cases = enum_cases.get_mut(&ns.header).unwrap().drain(..);
+            for case in request_cases {
+                if has_feature {
+                    outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                }
+                outln!(out, "{}", case);
+            }
+        }
+    });
+    outln!(out, "}}");
+    outln!(out, "");
 }
 
 /// Caches to avoid repeating some operations.
@@ -47,7 +85,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 
-    fn generate(&self, out: &mut Output) {
+    fn generate(&self, out: &mut Output, enum_cases: &mut EnumCases) {
         super::write_code_header(out);
         if let Some(info) = &self.ns.ext_info {
             outln!(out, "//! Bindings to the `{}` X11 extension.", info.name);
@@ -158,7 +196,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         for def in self.ns.src_order_defs.borrow().iter() {
             match def {
                 xcbdefs::Def::Request(request_def) => {
-                    self.generate_request(request_def, out, &mut trait_out)
+                    let cases_entry = enum_cases.entry(self.ns.header.clone()).or_default();
+                    self.generate_request(request_def, out, &mut trait_out, cases_entry)
                 }
                 xcbdefs::Def::Event(event_def) => match event_def {
                     xcbdefs::EventDef::Full(event_full_def) => {
@@ -219,6 +258,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         request_def: &xcbdefs::RequestDef,
         out: &mut Output,
         trait_out: &mut Output,
+        request_enum_cases: &mut Vec<String>,
     ) {
         let name = to_rust_type_name(&request_def.name);
 
@@ -261,6 +301,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let gathered = self.gather_request_fields(request_def, &deducible_fields);
 
         self.emit_request_struct(request_def, &name, &deducible_fields, &gathered, out);
+        let lifetime_block = if gathered.needs_lifetime {
+            "<'input>"
+        } else {
+            ""
+        };
+        request_enum_cases.push(format!(
+            "{ns_prefix}{name}({header}::{name}Request{lifetime}),",
+            ns_prefix = get_ns_name_prefix(self.ns),
+            name = name,
+            header = self.ns.header,
+            lifetime = lifetime_block
+        ));
         self.emit_request_function(request_def, &name, &function_name, &gathered, out);
         self.emit_request_trait_function(request_def, &name, &function_name, &gathered, trait_out);
 
