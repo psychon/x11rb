@@ -124,7 +124,7 @@ pub struct Namespace {
 
     /// Information about the extension that is described.
     ///
-    /// This should only be `None` for the core X11 protocol `xproto.
+    /// This should only be `None` for the core X11 protocol `xproto`.
     pub ext_info: Option<ExtInfo>,
 
     /// Other namespaces that are imported into this namespace.
