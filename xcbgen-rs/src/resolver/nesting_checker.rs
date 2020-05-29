@@ -111,7 +111,7 @@ impl NestingChecker {
     }
 
     fn check_field_value_type(&mut self, type_: &defs::FieldValueType) -> Result<(), ResolveError> {
-        self.check_type_ref(type_.type_.def.get().unwrap())
+        self.check_type_ref(type_.type_.get_resolved())
     }
 
     fn check_type_ref(&mut self, type_: &defs::TypeRef) -> Result<(), ResolveError> {
@@ -120,7 +120,7 @@ impl NestingChecker {
             defs::TypeRef::Union(union_def) => self.check_union(union_def.upgrade().unwrap()),
             defs::TypeRef::Alias(type_alias_def) => {
                 let type_alias_def = type_alias_def.upgrade().unwrap();
-                self.check_type_ref(type_alias_def.old_name.def.get().unwrap())
+                self.check_type_ref(type_alias_def.old_name.get_resolved())
             }
             _ => Ok(()),
         }

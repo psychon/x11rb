@@ -69,7 +69,7 @@ impl FieldRefResolveScope<'_, '_, '_> {
                             .ok_or_else(|| ResolveError::InvalidFieldRef(name.into()))?;
                         return Ok(defs::ResolvedFieldRef {
                             ref_kind: defs::FieldRefKind::LocalField,
-                            field_type: field_type.type_.def.get().unwrap().clone(),
+                            field_type: field_type.type_.get_resolved().clone(),
                         });
                     }
                 }
@@ -83,7 +83,7 @@ impl FieldRefResolveScope<'_, '_, '_> {
                             .ok_or_else(|| ResolveError::InvalidFieldRef(name.into()))?;
                         return Ok(defs::ResolvedFieldRef {
                             ref_kind: defs::FieldRefKind::SumOfRef,
-                            field_type: field_type.type_.def.get().unwrap().clone(),
+                            field_type: field_type.type_.get_resolved().clone(),
                         });
                     }
                 }
@@ -119,12 +119,12 @@ impl NormalFieldRefResolveScope<'_, '_, '_> {
                     if depth == 0 {
                         break 'outer Some(defs::ResolvedFieldRef {
                             ref_kind: defs::FieldRefKind::LocalField,
-                            field_type: field_type.type_.def.get().unwrap().clone(),
+                            field_type: field_type.type_.get_resolved().clone(),
                         });
                     } else {
                         break 'outer Some(defs::ResolvedFieldRef {
                             ref_kind: defs::FieldRefKind::ExtParam,
-                            field_type: field_type.type_.def.get().unwrap().clone(),
+                            field_type: field_type.type_.get_resolved().clone(),
                         });
                     }
                 }
@@ -261,11 +261,11 @@ fn resolve_field_refs_in_field(
     match field {
         defs::FieldDef::Pad(_) => Ok(()),
         defs::FieldDef::Normal(normal_field) => {
-            resolve_field_refs_in_type(normal_field.type_.type_.def.get().unwrap(), scope)?;
+            resolve_field_refs_in_type(normal_field.type_.type_.get_resolved(), scope)?;
             Ok(())
         }
         defs::FieldDef::List(list_field) => {
-            resolve_field_refs_in_type(list_field.element_type.type_.def.get().unwrap(), scope)?;
+            resolve_field_refs_in_type(list_field.element_type.type_.get_resolved(), scope)?;
             if let Some(ref length_expr) = list_field.length_expr {
                 resolve_field_refs_in_expr(length_expr, scope)?;
             }
@@ -344,7 +344,7 @@ fn resolve_field_refs_in_type(
         }
         defs::TypeRef::Alias(type_alias_def) => {
             let type_alias_def = type_alias_def.upgrade().unwrap();
-            resolve_field_refs_in_type(type_alias_def.old_name.def.get().unwrap(), scope)?;
+            resolve_field_refs_in_type(type_alias_def.old_name.get_resolved(), scope)?;
             Ok(())
         }
         _ => Ok(()),
@@ -373,7 +373,7 @@ fn resolve_field_refs_in_expr(
         defs::Expression::ParamRef(param_ref_expr) => {
             scope.add_param_ref(
                 &param_ref_expr.field_name,
-                param_ref_expr.type_.def.get().unwrap(),
+                param_ref_expr.type_.get_resolved(),
             )?;
             Ok(())
         }

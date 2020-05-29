@@ -330,21 +330,21 @@ impl<'a> TypeResolver<'a> {
         named_event: &defs::NamedEventRef,
         ns: &defs::Namespace,
     ) -> Result<(), ResolveError> {
-        let (header, name) = Self::parse_type_name(&named_event.name)?;
+        let (header, name) = Self::parse_type_name(named_event.name())?;
         if let Some(header) = header {
             if header == ns.header {
                 let event = ns
                     .get_event(&name)
-                    .ok_or_else(|| ResolveError::UnknownEventName(named_event.name.clone()))?;
-                named_event.def.set(event).unwrap();
+                    .ok_or_else(|| ResolveError::UnknownEventName(named_event.name().into()))?;
+                named_event.set_resolved(event);
             } else {
                 let imported_ns = ns
                     .get_import(&header)
-                    .ok_or_else(|| ResolveError::UnknownEventName(named_event.name.clone()))?;
+                    .ok_or_else(|| ResolveError::UnknownEventName(named_event.name().into()))?;
                 let event = imported_ns
                     .get_event(&name)
-                    .ok_or_else(|| ResolveError::UnknownEventName(named_event.name.clone()))?;
-                named_event.def.set(event).unwrap();
+                    .ok_or_else(|| ResolveError::UnknownEventName(named_event.name().into()))?;
+                named_event.set_resolved(event);
             }
             Ok(())
         } else {
@@ -355,14 +355,16 @@ impl<'a> TypeResolver<'a> {
                 for imported_ns in ns.imports.borrow().values().map(defs::Import::ns) {
                     if let Some(event_in_import) = imported_ns.get_event(&name) {
                         if event.is_some() {
-                            return Err(ResolveError::AmbiguousEventName(named_event.name.clone()));
+                            return Err(ResolveError::AmbiguousEventName(
+                                named_event.name().into(),
+                            ));
                         }
                         event = Some(event_in_import);
                     }
                 }
-                event.ok_or_else(|| ResolveError::UnknownEventName(named_event.name.clone()))?
+                event.ok_or_else(|| ResolveError::UnknownEventName(named_event.name().into()))?
             };
-            named_event.def.set(event).unwrap();
+            named_event.set_resolved(event);
             Ok(())
         }
     }
@@ -372,21 +374,21 @@ impl<'a> TypeResolver<'a> {
         named_error: &defs::NamedErrorRef,
         ns: &defs::Namespace,
     ) -> Result<(), ResolveError> {
-        let (header, name) = Self::parse_type_name(&named_error.name)?;
+        let (header, name) = Self::parse_type_name(named_error.name())?;
         if let Some(header) = header {
             if header == ns.header {
                 let error = ns
                     .get_error(&name)
-                    .ok_or_else(|| ResolveError::UnknownErrorName(named_error.name.clone()))?;
-                named_error.def.set(error).unwrap();
+                    .ok_or_else(|| ResolveError::UnknownErrorName(named_error.name().into()))?;
+                named_error.set_resolved(error);
             } else {
                 let imported_ns = ns
                     .get_import(&header)
-                    .ok_or_else(|| ResolveError::UnknownErrorName(named_error.name.clone()))?;
+                    .ok_or_else(|| ResolveError::UnknownErrorName(named_error.name().into()))?;
                 let error = imported_ns
                     .get_error(&name)
-                    .ok_or_else(|| ResolveError::UnknownErrorName(named_error.name.clone()))?;
-                named_error.def.set(error).unwrap();
+                    .ok_or_else(|| ResolveError::UnknownErrorName(named_error.name().into()))?;
+                named_error.set_resolved(error);
             }
             Ok(())
         } else {
@@ -397,14 +399,16 @@ impl<'a> TypeResolver<'a> {
                 for imported_ns in ns.imports.borrow().values().map(defs::Import::ns) {
                     if let Some(error_in_import) = imported_ns.get_error(&name) {
                         if error.is_some() {
-                            return Err(ResolveError::AmbiguousErrorName(named_error.name.clone()));
+                            return Err(ResolveError::AmbiguousErrorName(
+                                named_error.name().into(),
+                            ));
                         }
                         error = Some(error_in_import);
                     }
                 }
-                error.ok_or_else(|| ResolveError::UnknownErrorName(named_error.name.clone()))?
+                error.ok_or_else(|| ResolveError::UnknownErrorName(named_error.name().into()))?
             };
-            named_error.def.set(error).unwrap();
+            named_error.set_resolved(error);
             Ok(())
         }
     }
@@ -415,21 +419,21 @@ impl<'a> TypeResolver<'a> {
         ns: &defs::Namespace,
         can_be_enum: bool,
     ) -> Result<(), ResolveError> {
-        let (header, name) = Self::parse_type_name(&named_type.name)?;
+        let (header, name) = Self::parse_type_name(named_type.name())?;
         if let Some(header) = header {
             if header == ns.header {
                 let type_ = ns
                     .get_type(&name)
-                    .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name.clone()))?;
-                named_type.def.set(type_).unwrap();
+                    .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name().into()))?;
+                named_type.set_resolved(type_);
             } else {
                 let imported_ns = ns
                     .get_import(&header)
-                    .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name.clone()))?;
+                    .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name().into()))?;
                 let type_ = imported_ns
                     .get_type(&name)
-                    .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name.clone()))?;
-                named_type.def.set(type_).unwrap();
+                    .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name().into()))?;
+                named_type.set_resolved(type_);
             }
         } else {
             let type_ = match name {
@@ -456,22 +460,23 @@ impl<'a> TypeResolver<'a> {
                             if let Some(type_in_import) = imported_ns.get_type(&name) {
                                 if type_.is_some() {
                                     return Err(ResolveError::AmbiguousTypeName(
-                                        named_type.name.clone(),
+                                        named_type.name().into(),
                                     ));
                                 }
                                 type_ = Some(type_in_import);
                             }
                         }
-                        type_
-                            .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name.clone()))?
+                        type_.ok_or_else(|| {
+                            ResolveError::UnknownTypeName(named_type.name().into())
+                        })?
                     }
                 }
             };
-            named_type.def.set(type_).unwrap();
+            named_type.set_resolved(type_);
         }
 
         if !can_be_enum {
-            if let defs::TypeRef::Enum(enum_def) = named_type.def.get().unwrap() {
+            if let defs::TypeRef::Enum(enum_def) = named_type.get_resolved() {
                 let enum_def = enum_def.upgrade().unwrap();
                 return Err(ResolveError::InvalidUseOfEnum(enum_def.name.clone()));
             }

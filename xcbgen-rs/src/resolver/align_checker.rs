@@ -363,11 +363,11 @@ fn resolve_field_alignment(field: &defs::FieldDef) -> Result<defs::ComplexAlignm
             }),
         },
         defs::FieldDef::Normal(normal_field) => {
-            get_type_alignment(normal_field.type_.type_.def.get().unwrap())
+            get_type_alignment(normal_field.type_.type_.get_resolved())
         }
         defs::FieldDef::List(list_field) => {
             let element_alignment =
-                get_type_alignment(list_field.element_type.type_.def.get().unwrap())?;
+                get_type_alignment(list_field.element_type.type_.get_resolved())?;
             if let Some(list_length) = list_field.length() {
                 Ok(element_alignment
                     .repeat_n(list_length)
@@ -387,7 +387,7 @@ fn resolve_field_alignment(field: &defs::FieldDef) -> Result<defs::ComplexAlignm
         defs::FieldDef::Fd(_) => Ok(defs::ComplexAlignment::zero_sized()),
         defs::FieldDef::FdList(_) => Ok(defs::ComplexAlignment::zero_sized()),
         defs::FieldDef::Expr(expr_field) => {
-            get_type_alignment(expr_field.type_.type_.def.get().unwrap())
+            get_type_alignment(expr_field.type_.type_.get_resolved())
         }
         // This is a virtual field (not serialized), so it
         // does not impose any alignment

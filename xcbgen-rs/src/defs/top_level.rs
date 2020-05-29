@@ -189,7 +189,7 @@ impl EventCopyDef {
     ///
     /// Panics if the reference was not resolved yet.
     pub fn get_original_full_def(&self) -> Rc<EventFullDef> {
-        self.ref_.def.get().unwrap().get_original_full_def()
+        self.ref_.get_resolved().get_original_full_def()
     }
 }
 
@@ -281,7 +281,7 @@ impl ErrorCopyDef {
     ///
     /// Panics if the reference was not resolved yet.
     pub fn get_original_full_def(&self) -> Rc<ErrorFullDef> {
-        self.ref_.def.get().unwrap().get_original_full_def()
+        self.ref_.get_resolved().get_original_full_def()
     }
 }
 
@@ -499,11 +499,11 @@ impl TypeAliasDef {
     ///
     /// Panics if the type definition was not yet resolved.
     pub fn get_original_type(&self) -> TypeRef {
-        let mut type_ref = self.old_name.def.get().unwrap().clone();
+        let mut type_ref = self.old_name.get_resolved().clone();
         loop {
             match type_ref {
                 TypeRef::Alias(alias) => {
-                    type_ref = alias.upgrade().unwrap().old_name.def.get().unwrap().clone();
+                    type_ref = alias.upgrade().unwrap().old_name.get_resolved().clone();
                 }
                 _ => return type_ref,
             }
@@ -515,21 +515,66 @@ impl TypeAliasDef {
 #[derive(Debug)]
 pub struct NamedEventRef {
     /// The name of the event that is referenced.
-    pub name: String,
+    name: String,
 
     /// The definition of the event that is referenced.
     ///
     /// This field is only set up during resolving.
-    pub def: OnceCell<EventRef>,
+    def: OnceCell<EventRef>,
 }
 
 impl NamedEventRef {
     /// Create a new unresolved instance.
+    #[inline]
     pub fn unresolved(name: String) -> Self {
         Self {
             name,
             def: OnceCell::new(),
         }
+    }
+
+    /// Create a new resolved instance.
+    #[inline]
+    pub fn resolved(name: String, def: EventRef) -> Self {
+        Self {
+            name,
+            def: OnceCell::from(def),
+        }
+    }
+
+    /// Returns the event name as it appears in the XML.
+    #[inline]
+    pub fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
+    /// Returns whether the event name has been resolved.
+    #[inline]
+    pub fn is_resolved(&self) -> bool {
+        self.def.get().is_some()
+    }
+
+    /// Sets the resolved event. Panics if it is already set.
+    ///
+    /// This is called during resolving (see the `resolve` function from this crate).
+    #[inline]
+    pub fn set_resolved(&self, def: EventRef) {
+        self.def
+            .set(def)
+            .expect("named event reference already resolved")
+    }
+
+    /// Returns the resolved event, or `None` if not set.
+    #[inline]
+    pub fn try_get_resolved(&self) -> Option<&EventRef> {
+        self.def.get()
+    }
+
+    /// Returns the resolved event, or panics if not set.
+    #[inline]
+    pub fn get_resolved(&self) -> &EventRef {
+        self.try_get_resolved()
+            .expect("named event reference has not been resolved")
     }
 }
 
@@ -558,7 +603,7 @@ impl EventRef {
             Self::Copy(event_copy_def) => {
                 let mut event_copy_def = event_copy_def.upgrade().unwrap();
                 loop {
-                    match event_copy_def.ref_.def.get().unwrap() {
+                    match event_copy_def.ref_.get_resolved() {
                         EventRef::Full(event_full_def) => return event_full_def.upgrade().unwrap(),
                         EventRef::Copy(event_copy_ref) => {
                             event_copy_def = event_copy_ref.upgrade().unwrap()
@@ -589,12 +634,12 @@ impl EventRef {
 #[derive(Debug)]
 pub struct NamedErrorRef {
     /// The name of the error that is referenced.
-    pub name: String,
+    name: String,
 
-    /// The definition of the event that is referenced.
+    /// The definition of the error that is referenced.
     ///
     /// This field is only set up during resolving.
-    pub def: OnceCell<ErrorRef>,
+    def: OnceCell<ErrorRef>,
 }
 
 impl NamedErrorRef {
@@ -604,6 +649,50 @@ impl NamedErrorRef {
             name,
             def: OnceCell::new(),
         }
+    }
+
+    /// Create a new resolved instance.
+    #[inline]
+    pub fn resolved(name: String, def: ErrorRef) -> Self {
+        Self {
+            name,
+            def: OnceCell::from(def),
+        }
+    }
+
+    /// Returns the error name as it appears in the XML.
+    #[inline]
+    pub fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
+    /// Returns whether the event name has been resolved.
+    #[inline]
+    pub fn is_resolved(&self) -> bool {
+        self.def.get().is_some()
+    }
+
+    /// Sets the resolved error. Panics if it is already set.
+    ///
+    /// This is called during resolving (see the `resolve` function from this crate).
+    #[inline]
+    pub fn set_resolved(&self, def: ErrorRef) {
+        self.def
+            .set(def)
+            .expect("named error reference already resolved")
+    }
+
+    /// Returns the resolved error, or `None` if not set.
+    #[inline]
+    pub fn try_get_resolved(&self) -> Option<&ErrorRef> {
+        self.def.get()
+    }
+
+    /// Returns the resolved error, or panics if not set.
+    #[inline]
+    pub fn get_resolved(&self) -> &ErrorRef {
+        self.try_get_resolved()
+            .expect("named error reference has not been resolved")
     }
 }
 
@@ -632,7 +721,7 @@ impl ErrorRef {
             Self::Copy(error_copy_def) => {
                 let mut error_copy_def = error_copy_def.upgrade().unwrap();
                 loop {
-                    match error_copy_def.ref_.def.get().unwrap() {
+                    match error_copy_def.ref_.get_resolved() {
                         ErrorRef::Full(error_full_def) => return error_full_def.upgrade().unwrap(),
                         ErrorRef::Copy(error_copy_ref) => {
                             error_copy_def = error_copy_ref.upgrade().unwrap()
@@ -658,21 +747,66 @@ impl ErrorRef {
 #[derive(Debug, Clone)]
 pub struct NamedTypeRef {
     /// The name of the type that is referenced
-    pub name: String,
+    name: String,
 
     /// The definition of the type that is referenced.
     ///
     /// This field is only set up during resolving.
-    pub def: OnceCell<TypeRef>,
+    def: OnceCell<TypeRef>,
 }
 
 impl NamedTypeRef {
     /// Create a new unresolved instance.
+    #[inline]
     pub fn unresolved(name: String) -> Self {
         Self {
             name,
             def: OnceCell::new(),
         }
+    }
+
+    /// Create a new resolved instance.
+    #[inline]
+    pub fn resolved(name: String, def: TypeRef) -> Self {
+        Self {
+            name,
+            def: OnceCell::from(def),
+        }
+    }
+
+    /// Returns the type name as it appears in the XML.
+    #[inline]
+    pub fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
+    /// Returns whether the type name has been resolved.
+    #[inline]
+    pub fn is_resolved(&self) -> bool {
+        self.def.get().is_some()
+    }
+
+    /// Sets the resolved type. Panics if it is already set.
+    ///
+    /// This is called during resolving (see the `resolve` function from this crate).
+    #[inline]
+    pub fn set_resolved(&self, def: TypeRef) {
+        self.def
+            .set(def)
+            .expect("named type reference already resolved")
+    }
+
+    /// Returns the resolved type, or `None` if not set.
+    #[inline]
+    pub fn try_get_resolved(&self) -> Option<&TypeRef> {
+        self.def.get()
+    }
+
+    /// Returns the resolved type, or panics if not set.
+    #[inline]
+    pub fn get_resolved(&self) -> &TypeRef {
+        self.try_get_resolved()
+            .expect("named type reference has not been resolved")
     }
 }
 
@@ -756,7 +890,7 @@ impl TypeRef {
             Self::Enum(_) => unreachable!(),
             Self::Alias(type_alias_def) => {
                 let type_alias_def = type_alias_def.upgrade().unwrap();
-                type_alias_def.old_name.def.get().unwrap().size()
+                type_alias_def.old_name.get_resolved().size()
             }
         }
     }

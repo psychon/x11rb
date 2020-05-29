@@ -722,7 +722,7 @@ impl Parser {
                     .map(|expr_node| self.parse_expression(expr_node))
                     .transpose()?;
 
-                if element_type.type_.name == "fd" {
+                if element_type.type_.name() == "fd" {
                     Ok(Some(defs::FieldDef::FdList(defs::FdListField {
                         name: name.into(),
                         length_expr: length_expr.ok_or_else(|| ParseError::InvalidXml)?,
