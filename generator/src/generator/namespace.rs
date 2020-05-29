@@ -55,6 +55,7 @@ pub(super) fn generate_request_enum(
     outln!(out, "impl<'input> Request<'input> {{");
     out.indented(|out| {
         outln!(out, "// Parse a X11 request into a concrete type");
+        outln!(out, "#[allow(clippy::cognitive_complexity, clippy::single_match)]");
         outln!(out, "pub fn parse(");
         outln!(out.indent(), "request: &'input [u8],");
         outln!(out.indent(), "fds: &mut Vec<RawFdContainer>,");
@@ -62,13 +63,53 @@ pub(super) fn generate_request_enum(
         outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
         outln!(out, ") -> Result<Self, ParseError> {{");
         out.indented(|out| {
-            outln!(out, "let (header, remaining) = parse_request_header(request, big_requests_enabled)?;");
+            outln!(
+                out,
+                "let (header, remaining) = parse_request_header(request, big_requests_enabled)?;"
+            );
+            outln!(out, "// Check if this is a core protocol request.");
             outln!(out, "match header.major_opcode {{");
             out.indented(|out| {
                 let xproto_ns = module.namespace("xproto").unwrap();
                 let xproto_cases = enum_cases.get_mut(&xproto_ns.header).unwrap().1.drain(..);
                 for case in xproto_cases {
                     outln!(out, "{}", case);
+                }
+                outln!(out, "_ => (),");
+            });
+            outln!(out, "}}");
+            outln!(
+                out,
+                "// Find the extension that this request could belong to"
+            );
+            outln!(
+                out,
+                "let ext_info = ext_info_provider.get_from_major_opcode(header.major_opcode);"
+            );
+            outln!(out, "match ext_info {{");
+            out.indented(|out| {
+                for ns in namespaces.iter() {
+                    let parse_cases = &mut enum_cases.get_mut(&ns.header).unwrap().1;
+                    if parse_cases.is_empty() {
+                        continue;
+                    }
+
+                    let has_feature = super::ext_has_feature(&ns.header);
+                    if has_feature {
+                        outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                    }
+                    outln!(out, "Some(({}::X11_EXTENSION_NAME, _)) => {{", ns.header);
+
+                    out.indented(|out| {
+                        let parse_cases = parse_cases.drain(..);
+                        outln!(out, "match header.minor_opcode {{");
+                        for case in parse_cases {
+                            outln!(out.indent(), "{}", case);
+                        }
+                        outln!(out.indent(), "_ => ()");
+                        outln!(out, "}}");
+                    });
+                    outln!(out, "}}");
                 }
                 outln!(out, "_ => (),");
             });
@@ -352,7 +393,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         ));
         if gathered.has_fds() {
             parse_cases.push(format!(
-                "{header}::{opcode_name}_REQUEST => return Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request_fds(header, remaining, fds)?)),",
+                "{header}::{opcode_name}_REQUEST => return Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request_fd(header, remaining, fds)?)),",
                 header = self.ns.header,
                 opcode_name = super::camel_case_to_upper_snake(&name),
                 ns_prefix = ns_prefix,
