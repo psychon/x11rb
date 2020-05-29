@@ -30,7 +30,8 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> FxHashMap<PathBuf, Stri
     outln!(main_out, "");
     outln!(main_out, "use std::convert::{{TryFrom, TryInto}};");
     outln!(main_out, "use crate::errors::ParseError;");
-    outln!(main_out, "use crate::x11_utils::ExtInfoProvider;");
+    outln!(main_out, "use crate::utils::RawFdContainer;");
+    outln!(main_out, "use crate::x11_utils::{{parse_request_header, BigRequests, ExtInfoProvider}};");
     outln!(main_out, "");
 
     let caches = RefCell::new(namespace::Caches::default());
