@@ -9,7 +9,7 @@
 use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{parse_request_header, BigRequests, ExtInfoProvider};
+use crate::x11_utils::{parse_request_header, BigRequests, ExtInfoProvider, RequestHeader};
 
 pub mod xproto;
 pub mod bigreq;
@@ -74,7 +74,7 @@ pub mod xvmc;
 #[derive(Debug)]
 #[allow(non_camel_case_types)]
 pub enum Request<'input> {
-    Unknown(&'input [u8]),
+    Unknown(RequestHeader, &'input [u8]),
     CreateWindow(xproto::CreateWindowRequest<'input>),
     ChangeWindowAttributes(xproto::ChangeWindowAttributesRequest<'input>),
     GetWindowAttributes(xproto::GetWindowAttributesRequest),
@@ -1396,7 +1396,7 @@ impl<'input> Request<'input> {
             Some((bigreq::X11_EXTENSION_NAME, _)) => {
                 match header.minor_opcode {
                     bigreq::ENABLE_REQUEST => return Ok(Request::BigreqEnable(bigreq::EnableRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "composite")]
@@ -1411,7 +1411,7 @@ impl<'input> Request<'input> {
                     composite::NAME_WINDOW_PIXMAP_REQUEST => return Ok(Request::CompositeNameWindowPixmap(composite::NameWindowPixmapRequest::try_parse_request(header, remaining)?)),
                     composite::GET_OVERLAY_WINDOW_REQUEST => return Ok(Request::CompositeGetOverlayWindow(composite::GetOverlayWindowRequest::try_parse_request(header, remaining)?)),
                     composite::RELEASE_OVERLAY_WINDOW_REQUEST => return Ok(Request::CompositeReleaseOverlayWindow(composite::ReleaseOverlayWindowRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "damage")]
@@ -1422,7 +1422,7 @@ impl<'input> Request<'input> {
                     damage::DESTROY_REQUEST => return Ok(Request::DamageDestroy(damage::DestroyRequest::try_parse_request(header, remaining)?)),
                     damage::SUBTRACT_REQUEST => return Ok(Request::DamageSubtract(damage::SubtractRequest::try_parse_request(header, remaining)?)),
                     damage::ADD_REQUEST => return Ok(Request::DamageAdd(damage::AddRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "dpms")]
@@ -1436,7 +1436,7 @@ impl<'input> Request<'input> {
                     dpms::DISABLE_REQUEST => return Ok(Request::DpmsDisable(dpms::DisableRequest::try_parse_request(header, remaining)?)),
                     dpms::FORCE_LEVEL_REQUEST => return Ok(Request::DpmsForceLevel(dpms::ForceLevelRequest::try_parse_request(header, remaining)?)),
                     dpms::INFO_REQUEST => return Ok(Request::DpmsInfo(dpms::InfoRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "dri2")]
@@ -1456,7 +1456,7 @@ impl<'input> Request<'input> {
                     dri2::WAIT_SBC_REQUEST => return Ok(Request::Dri2WaitSBC(dri2::WaitSBCRequest::try_parse_request(header, remaining)?)),
                     dri2::SWAP_INTERVAL_REQUEST => return Ok(Request::Dri2SwapInterval(dri2::SwapIntervalRequest::try_parse_request(header, remaining)?)),
                     dri2::GET_PARAM_REQUEST => return Ok(Request::Dri2GetParam(dri2::GetParamRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "dri3")]
@@ -1471,13 +1471,13 @@ impl<'input> Request<'input> {
                     dri3::GET_SUPPORTED_MODIFIERS_REQUEST => return Ok(Request::Dri3GetSupportedModifiers(dri3::GetSupportedModifiersRequest::try_parse_request(header, remaining)?)),
                     dri3::PIXMAP_FROM_BUFFERS_REQUEST => return Ok(Request::Dri3PixmapFromBuffers(dri3::PixmapFromBuffersRequest::try_parse_request_fd(header, remaining, fds)?)),
                     dri3::BUFFERS_FROM_PIXMAP_REQUEST => return Ok(Request::Dri3BuffersFromPixmap(dri3::BuffersFromPixmapRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             Some((ge::X11_EXTENSION_NAME, _)) => {
                 match header.minor_opcode {
                     ge::QUERY_VERSION_REQUEST => return Ok(Request::GeQueryVersion(ge::QueryVersionRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "glx")]
@@ -1584,7 +1584,7 @@ impl<'input> Request<'input> {
                     glx::GET_QUERYIV_ARB_REQUEST => return Ok(Request::GlxGetQueryivARB(glx::GetQueryivARBRequest::try_parse_request(header, remaining)?)),
                     glx::GET_QUERY_OBJECTIV_ARB_REQUEST => return Ok(Request::GlxGetQueryObjectivARB(glx::GetQueryObjectivARBRequest::try_parse_request(header, remaining)?)),
                     glx::GET_QUERY_OBJECTUIV_ARB_REQUEST => return Ok(Request::GlxGetQueryObjectuivARB(glx::GetQueryObjectuivARBRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "present")]
@@ -1595,7 +1595,7 @@ impl<'input> Request<'input> {
                     present::NOTIFY_MSC_REQUEST => return Ok(Request::PresentNotifyMSC(present::NotifyMSCRequest::try_parse_request(header, remaining)?)),
                     present::SELECT_INPUT_REQUEST => return Ok(Request::PresentSelectInput(present::SelectInputRequest::try_parse_request(header, remaining)?)),
                     present::QUERY_CAPABILITIES_REQUEST => return Ok(Request::PresentQueryCapabilities(present::QueryCapabilitiesRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "randr")]
@@ -1646,7 +1646,7 @@ impl<'input> Request<'input> {
                     randr::DELETE_MONITOR_REQUEST => return Ok(Request::RandrDeleteMonitor(randr::DeleteMonitorRequest::try_parse_request(header, remaining)?)),
                     randr::CREATE_LEASE_REQUEST => return Ok(Request::RandrCreateLease(randr::CreateLeaseRequest::try_parse_request(header, remaining)?)),
                     randr::FREE_LEASE_REQUEST => return Ok(Request::RandrFreeLease(randr::FreeLeaseRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "record")]
@@ -1660,7 +1660,7 @@ impl<'input> Request<'input> {
                     record::ENABLE_CONTEXT_REQUEST => return Ok(Request::RecordEnableContext(record::EnableContextRequest::try_parse_request(header, remaining)?)),
                     record::DISABLE_CONTEXT_REQUEST => return Ok(Request::RecordDisableContext(record::DisableContextRequest::try_parse_request(header, remaining)?)),
                     record::FREE_CONTEXT_REQUEST => return Ok(Request::RecordFreeContext(record::FreeContextRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "render")]
@@ -1697,7 +1697,7 @@ impl<'input> Request<'input> {
                     render::CREATE_LINEAR_GRADIENT_REQUEST => return Ok(Request::RenderCreateLinearGradient(render::CreateLinearGradientRequest::try_parse_request(header, remaining)?)),
                     render::CREATE_RADIAL_GRADIENT_REQUEST => return Ok(Request::RenderCreateRadialGradient(render::CreateRadialGradientRequest::try_parse_request(header, remaining)?)),
                     render::CREATE_CONICAL_GRADIENT_REQUEST => return Ok(Request::RenderCreateConicalGradient(render::CreateConicalGradientRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "res")]
@@ -1709,7 +1709,7 @@ impl<'input> Request<'input> {
                     res::QUERY_CLIENT_PIXMAP_BYTES_REQUEST => return Ok(Request::ResQueryClientPixmapBytes(res::QueryClientPixmapBytesRequest::try_parse_request(header, remaining)?)),
                     res::QUERY_CLIENT_IDS_REQUEST => return Ok(Request::ResQueryClientIds(res::QueryClientIdsRequest::try_parse_request(header, remaining)?)),
                     res::QUERY_RESOURCE_BYTES_REQUEST => return Ok(Request::ResQueryResourceBytes(res::QueryResourceBytesRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "screensaver")]
@@ -1721,7 +1721,7 @@ impl<'input> Request<'input> {
                     screensaver::SET_ATTRIBUTES_REQUEST => return Ok(Request::ScreensaverSetAttributes(screensaver::SetAttributesRequest::try_parse_request(header, remaining)?)),
                     screensaver::UNSET_ATTRIBUTES_REQUEST => return Ok(Request::ScreensaverUnsetAttributes(screensaver::UnsetAttributesRequest::try_parse_request(header, remaining)?)),
                     screensaver::SUSPEND_REQUEST => return Ok(Request::ScreensaverSuspend(screensaver::SuspendRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "shape")]
@@ -1736,7 +1736,7 @@ impl<'input> Request<'input> {
                     shape::SELECT_INPUT_REQUEST => return Ok(Request::ShapeSelectInput(shape::SelectInputRequest::try_parse_request(header, remaining)?)),
                     shape::INPUT_SELECTED_REQUEST => return Ok(Request::ShapeInputSelected(shape::InputSelectedRequest::try_parse_request(header, remaining)?)),
                     shape::GET_RECTANGLES_REQUEST => return Ok(Request::ShapeGetRectangles(shape::GetRectanglesRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "shm")]
@@ -1750,7 +1750,7 @@ impl<'input> Request<'input> {
                     shm::CREATE_PIXMAP_REQUEST => return Ok(Request::ShmCreatePixmap(shm::CreatePixmapRequest::try_parse_request(header, remaining)?)),
                     shm::ATTACH_FD_REQUEST => return Ok(Request::ShmAttachFd(shm::AttachFdRequest::try_parse_request_fd(header, remaining, fds)?)),
                     shm::CREATE_SEGMENT_REQUEST => return Ok(Request::ShmCreateSegment(shm::CreateSegmentRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "sync")]
@@ -1776,7 +1776,7 @@ impl<'input> Request<'input> {
                     sync::DESTROY_FENCE_REQUEST => return Ok(Request::SyncDestroyFence(sync::DestroyFenceRequest::try_parse_request(header, remaining)?)),
                     sync::QUERY_FENCE_REQUEST => return Ok(Request::SyncQueryFence(sync::QueryFenceRequest::try_parse_request(header, remaining)?)),
                     sync::AWAIT_FENCE_REQUEST => return Ok(Request::SyncAwaitFence(sync::AwaitFenceRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             Some((xc_misc::X11_EXTENSION_NAME, _)) => {
@@ -1784,7 +1784,7 @@ impl<'input> Request<'input> {
                     xc_misc::GET_VERSION_REQUEST => return Ok(Request::Xc_miscGetVersion(xc_misc::GetVersionRequest::try_parse_request(header, remaining)?)),
                     xc_misc::GET_XID_RANGE_REQUEST => return Ok(Request::Xc_miscGetXIDRange(xc_misc::GetXIDRangeRequest::try_parse_request(header, remaining)?)),
                     xc_misc::GET_XID_LIST_REQUEST => return Ok(Request::Xc_miscGetXIDList(xc_misc::GetXIDListRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xevie")]
@@ -1795,7 +1795,7 @@ impl<'input> Request<'input> {
                     xevie::END_REQUEST => return Ok(Request::XevieEnd(xevie::EndRequest::try_parse_request(header, remaining)?)),
                     xevie::SEND_REQUEST => return Ok(Request::XevieSend(xevie::SendRequest::try_parse_request(header, remaining)?)),
                     xevie::SELECT_INPUT_REQUEST => return Ok(Request::XevieSelectInput(xevie::SelectInputRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xf86dri")]
@@ -1813,7 +1813,7 @@ impl<'input> Request<'input> {
                     xf86dri::GET_DRAWABLE_INFO_REQUEST => return Ok(Request::Xf86driGetDrawableInfo(xf86dri::GetDrawableInfoRequest::try_parse_request(header, remaining)?)),
                     xf86dri::GET_DEVICE_INFO_REQUEST => return Ok(Request::Xf86driGetDeviceInfo(xf86dri::GetDeviceInfoRequest::try_parse_request(header, remaining)?)),
                     xf86dri::AUTH_CONNECTION_REQUEST => return Ok(Request::Xf86driAuthConnection(xf86dri::AuthConnectionRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xf86vidmode")]
@@ -1840,7 +1840,7 @@ impl<'input> Request<'input> {
                     xf86vidmode::SET_GAMMA_RAMP_REQUEST => return Ok(Request::Xf86vidmodeSetGammaRamp(xf86vidmode::SetGammaRampRequest::try_parse_request(header, remaining)?)),
                     xf86vidmode::GET_GAMMA_RAMP_SIZE_REQUEST => return Ok(Request::Xf86vidmodeGetGammaRampSize(xf86vidmode::GetGammaRampSizeRequest::try_parse_request(header, remaining)?)),
                     xf86vidmode::GET_PERMISSIONS_REQUEST => return Ok(Request::Xf86vidmodeGetPermissions(xf86vidmode::GetPermissionsRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xfixes")]
@@ -1879,7 +1879,7 @@ impl<'input> Request<'input> {
                     xfixes::SHOW_CURSOR_REQUEST => return Ok(Request::XfixesShowCursor(xfixes::ShowCursorRequest::try_parse_request(header, remaining)?)),
                     xfixes::CREATE_POINTER_BARRIER_REQUEST => return Ok(Request::XfixesCreatePointerBarrier(xfixes::CreatePointerBarrierRequest::try_parse_request(header, remaining)?)),
                     xfixes::DELETE_POINTER_BARRIER_REQUEST => return Ok(Request::XfixesDeletePointerBarrier(xfixes::DeletePointerBarrierRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xinerama")]
@@ -1891,7 +1891,7 @@ impl<'input> Request<'input> {
                     xinerama::GET_SCREEN_SIZE_REQUEST => return Ok(Request::XineramaGetScreenSize(xinerama::GetScreenSizeRequest::try_parse_request(header, remaining)?)),
                     xinerama::IS_ACTIVE_REQUEST => return Ok(Request::XineramaIsActive(xinerama::IsActiveRequest::try_parse_request(header, remaining)?)),
                     xinerama::QUERY_SCREENS_REQUEST => return Ok(Request::XineramaQueryScreens(xinerama::QueryScreensRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xinput")]
@@ -1958,7 +1958,7 @@ impl<'input> Request<'input> {
                     xinput::XI_GET_SELECTED_EVENTS_REQUEST => return Ok(Request::XinputXIGetSelectedEvents(xinput::XIGetSelectedEventsRequest::try_parse_request(header, remaining)?)),
                     xinput::XI_BARRIER_RELEASE_POINTER_REQUEST => return Ok(Request::XinputXIBarrierReleasePointer(xinput::XIBarrierReleasePointerRequest::try_parse_request(header, remaining)?)),
                     xinput::SEND_EXTENSION_EVENT_REQUEST => return Ok(Request::XinputSendExtensionEvent(xinput::SendExtensionEventRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xkb")]
@@ -1988,7 +1988,7 @@ impl<'input> Request<'input> {
                     xkb::GET_DEVICE_INFO_REQUEST => return Ok(Request::XkbGetDeviceInfo(xkb::GetDeviceInfoRequest::try_parse_request(header, remaining)?)),
                     xkb::SET_DEVICE_INFO_REQUEST => return Ok(Request::XkbSetDeviceInfo(xkb::SetDeviceInfoRequest::try_parse_request(header, remaining)?)),
                     xkb::SET_DEBUGGING_FLAGS_REQUEST => return Ok(Request::XkbSetDebuggingFlags(xkb::SetDebuggingFlagsRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xprint")]
@@ -2019,7 +2019,7 @@ impl<'input> Request<'input> {
                     xprint::PRINT_QUERY_SCREENS_REQUEST => return Ok(Request::XprintPrintQueryScreens(xprint::PrintQueryScreensRequest::try_parse_request(header, remaining)?)),
                     xprint::PRINT_SET_IMAGE_RESOLUTION_REQUEST => return Ok(Request::XprintPrintSetImageResolution(xprint::PrintSetImageResolutionRequest::try_parse_request(header, remaining)?)),
                     xprint::PRINT_GET_IMAGE_RESOLUTION_REQUEST => return Ok(Request::XprintPrintGetImageResolution(xprint::PrintGetImageResolutionRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xselinux")]
@@ -2048,7 +2048,7 @@ impl<'input> Request<'input> {
                     xselinux::GET_SELECTION_DATA_CONTEXT_REQUEST => return Ok(Request::XselinuxGetSelectionDataContext(xselinux::GetSelectionDataContextRequest::try_parse_request(header, remaining)?)),
                     xselinux::LIST_SELECTIONS_REQUEST => return Ok(Request::XselinuxListSelections(xselinux::ListSelectionsRequest::try_parse_request(header, remaining)?)),
                     xselinux::GET_CLIENT_CONTEXT_REQUEST => return Ok(Request::XselinuxGetClientContext(xselinux::GetClientContextRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xtest")]
@@ -2058,7 +2058,7 @@ impl<'input> Request<'input> {
                     xtest::COMPARE_CURSOR_REQUEST => return Ok(Request::XtestCompareCursor(xtest::CompareCursorRequest::try_parse_request(header, remaining)?)),
                     xtest::FAKE_INPUT_REQUEST => return Ok(Request::XtestFakeInput(xtest::FakeInputRequest::try_parse_request(header, remaining)?)),
                     xtest::GRAB_CONTROL_REQUEST => return Ok(Request::XtestGrabControl(xtest::GrabControlRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xv")]
@@ -2084,7 +2084,7 @@ impl<'input> Request<'input> {
                     xv::QUERY_IMAGE_ATTRIBUTES_REQUEST => return Ok(Request::XvQueryImageAttributes(xv::QueryImageAttributesRequest::try_parse_request(header, remaining)?)),
                     xv::PUT_IMAGE_REQUEST => return Ok(Request::XvPutImage(xv::PutImageRequest::try_parse_request(header, remaining)?)),
                     xv::SHM_PUT_IMAGE_REQUEST => return Ok(Request::XvShmPutImage(xv::ShmPutImageRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             #[cfg(feature = "xvmc")]
@@ -2099,12 +2099,12 @@ impl<'input> Request<'input> {
                     xvmc::CREATE_SUBPICTURE_REQUEST => return Ok(Request::XvmcCreateSubpicture(xvmc::CreateSubpictureRequest::try_parse_request(header, remaining)?)),
                     xvmc::DESTROY_SUBPICTURE_REQUEST => return Ok(Request::XvmcDestroySubpicture(xvmc::DestroySubpictureRequest::try_parse_request(header, remaining)?)),
                     xvmc::LIST_SUBPICTURE_TYPES_REQUEST => return Ok(Request::XvmcListSubpictureTypes(xvmc::ListSubpictureTypesRequest::try_parse_request(header, remaining)?)),
-                    _ => ()
+                    _ => (),
                 }
             }
             _ => (),
         }
-        Err(ParseError::ParseError)
+        Ok(Request::Unknown(header, remaining))
     }
 }
 

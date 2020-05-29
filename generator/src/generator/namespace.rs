@@ -37,7 +37,7 @@ pub(super) fn generate_request_enum(
     outln!(out, "#[allow(non_camel_case_types)]");
     outln!(out, "pub enum Request<'input> {{");
     out.indented(|out| {
-        outln!(out, "Unknown(&'input [u8]),");
+        outln!(out, "Unknown(RequestHeader, &'input [u8]),");
         for ns in namespaces.iter() {
             let has_feature = super::ext_has_feature(&ns.header);
 
@@ -55,7 +55,10 @@ pub(super) fn generate_request_enum(
     outln!(out, "impl<'input> Request<'input> {{");
     out.indented(|out| {
         outln!(out, "// Parse a X11 request into a concrete type");
-        outln!(out, "#[allow(clippy::cognitive_complexity, clippy::single_match)]");
+        outln!(
+            out,
+            "#[allow(clippy::cognitive_complexity, clippy::single_match)]"
+        );
         outln!(out, "pub fn parse(");
         outln!(out.indent(), "request: &'input [u8],");
         outln!(out.indent(), "fds: &mut Vec<RawFdContainer>,");
@@ -106,7 +109,7 @@ pub(super) fn generate_request_enum(
                         for case in parse_cases {
                             outln!(out.indent(), "{}", case);
                         }
-                        outln!(out.indent(), "_ => ()");
+                        outln!(out.indent(), "_ => (),");
                         outln!(out, "}}");
                     });
                     outln!(out, "}}");
@@ -114,7 +117,7 @@ pub(super) fn generate_request_enum(
                 outln!(out, "_ => (),");
             });
             outln!(out, "}}");
-            outln!(out, "Err(ParseError::ParseError)");
+            outln!(out, "Ok(Request::Unknown(header, remaining))");
         });
         outln!(out, "}}");
     });
