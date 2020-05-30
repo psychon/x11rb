@@ -72,7 +72,7 @@ pub mod xvmc;
 
 /// Enumeration of all possible X11 requests.
 #[derive(Debug)]
-#[allow(non_camel_case_types, clippy::large_enum_variant)]
+#[allow(clippy::large_enum_variant)]
 pub enum Request<'input> {
     Unknown(RequestHeader, &'input [u8]),
     CreateWindow(xproto::CreateWindowRequest<'input>),
@@ -765,9 +765,9 @@ pub enum Request<'input> {
     SyncQueryFence(sync::QueryFenceRequest),
     #[cfg(feature = "sync")]
     SyncAwaitFence(sync::AwaitFenceRequest<'input>),
-    Xc_miscGetVersion(xc_misc::GetVersionRequest),
-    Xc_miscGetXIDRange(xc_misc::GetXIDRangeRequest),
-    Xc_miscGetXIDList(xc_misc::GetXIDListRequest),
+    XcMiscGetVersion(xc_misc::GetVersionRequest),
+    XcMiscGetXIDRange(xc_misc::GetXIDRangeRequest),
+    XcMiscGetXIDList(xc_misc::GetXIDListRequest),
     #[cfg(feature = "xevie")]
     XevieQueryVersion(xevie::QueryVersionRequest),
     #[cfg(feature = "xevie")]
@@ -1781,9 +1781,9 @@ impl<'input> Request<'input> {
             }
             Some((xc_misc::X11_EXTENSION_NAME, _)) => {
                 match header.minor_opcode {
-                    xc_misc::GET_VERSION_REQUEST => return Ok(Request::Xc_miscGetVersion(xc_misc::GetVersionRequest::try_parse_request(header, remaining)?)),
-                    xc_misc::GET_XID_RANGE_REQUEST => return Ok(Request::Xc_miscGetXIDRange(xc_misc::GetXIDRangeRequest::try_parse_request(header, remaining)?)),
-                    xc_misc::GET_XID_LIST_REQUEST => return Ok(Request::Xc_miscGetXIDList(xc_misc::GetXIDListRequest::try_parse_request(header, remaining)?)),
+                    xc_misc::GET_VERSION_REQUEST => return Ok(Request::XcMiscGetVersion(xc_misc::GetVersionRequest::try_parse_request(header, remaining)?)),
+                    xc_misc::GET_XID_RANGE_REQUEST => return Ok(Request::XcMiscGetXIDRange(xc_misc::GetXIDRangeRequest::try_parse_request(header, remaining)?)),
+                    xc_misc::GET_XID_LIST_REQUEST => return Ok(Request::XcMiscGetXIDList(xc_misc::GetXIDListRequest::try_parse_request(header, remaining)?)),
                     _ => (),
                 }
             }

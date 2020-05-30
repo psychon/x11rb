@@ -188,9 +188,14 @@ fn camel_case_to_upper_snake(arg: &str) -> String {
 /// Get the prefix that should be used for enum variants from this module.
 pub(crate) fn get_ns_name_prefix(ns: &xcbgen::defs::Namespace) -> String {
     if ns.ext_info.is_some() {
-        let (first, remaining) = ns.header.split_at(1);
-        let mut r = first.to_ascii_uppercase();
-        r.push_str(remaining);
+        // Convert to camel case
+        let mut r = String::new();
+        for chunk in ns.header.split('_') {
+            r.push_str(&chunk[..1]);
+            let r_len = r.len();
+            r[(r_len - 1)..].make_ascii_uppercase();
+            r.push_str(&chunk[1..]);
+        }
         r
     } else {
         String::new()

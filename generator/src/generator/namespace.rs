@@ -33,11 +33,8 @@ pub(super) fn generate_request_enum(
 
     outln!(out, "/// Enumeration of all possible X11 requests.");
     outln!(out, "#[derive(Debug)]");
-    // non_camel_case_types for xc_misc, clippy::large_enum_variant for XkbSetNamesRequest.
-    outln!(
-        out,
-        "#[allow(non_camel_case_types, clippy::large_enum_variant)]"
-    );
+    // clippy::large_enum_variant for XkbSetNamesRequest.
+    outln!(out, "#[allow(clippy::large_enum_variant)]");
     outln!(out, "pub enum Request<'input> {{");
     out.indented(|out| {
         outln!(out, "Unknown(RequestHeader, &'input [u8]),");
