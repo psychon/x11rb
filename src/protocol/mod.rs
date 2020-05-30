@@ -72,7 +72,7 @@ pub mod xvmc;
 
 /// Enumeration of all possible X11 requests.
 #[derive(Debug)]
-#[allow(non_camel_case_types)]
+#[allow(non_camel_case_types, clippy::large_enum_variant)]
 pub enum Request<'input> {
     Unknown(RequestHeader, &'input [u8]),
     CreateWindow(xproto::CreateWindowRequest<'input>),
