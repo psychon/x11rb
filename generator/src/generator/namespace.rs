@@ -9,11 +9,120 @@ use fxhash::{FxHashMap, FxHashSet};
 use xcbgen::defs as xcbdefs;
 
 use super::output::Output;
-use super::special_cases;
+use super::{get_ns_name_prefix, special_cases};
+
+type EnumCases = FxHashMap<String, (Vec<String>, Vec<String>)>;
 
 /// Generate a Rust module for namespace `ns`.
-pub(super) fn generate(ns: &xcbdefs::Namespace, caches: &RefCell<Caches>, out: &mut Output) {
-    NamespaceGenerator::new(ns, caches).generate(out);
+pub(super) fn generate(
+    ns: &xcbdefs::Namespace,
+    caches: &RefCell<Caches>,
+    out: &mut Output,
+    enum_cases: &mut EnumCases,
+) {
+    NamespaceGenerator::new(ns, caches).generate(out, enum_cases);
+}
+
+/// Generate the Request and enum containing all possible requests.
+pub(super) fn generate_request_enum(
+    out: &mut Output,
+    module: &xcbdefs::Module,
+    mut enum_cases: EnumCases,
+) {
+    let namespaces = module.sorted_namespaces();
+
+    outln!(out, "/// Enumeration of all possible X11 requests.");
+    outln!(out, "#[derive(Debug)]");
+    // clippy::large_enum_variant for XkbSetNamesRequest.
+    outln!(out, "#[allow(clippy::large_enum_variant)]");
+    outln!(out, "pub enum Request<'input> {{");
+    out.indented(|out| {
+        outln!(out, "Unknown(RequestHeader, &'input [u8]),");
+        for ns in namespaces.iter() {
+            let has_feature = super::ext_has_feature(&ns.header);
+
+            let request_cases = enum_cases.get_mut(&ns.header).unwrap().0.drain(..);
+            for case in request_cases {
+                if has_feature {
+                    outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                }
+                outln!(out, "{}", case);
+            }
+        }
+    });
+    outln!(out, "}}");
+    outln!(out, "");
+    outln!(out, "impl<'input> Request<'input> {{");
+    out.indented(|out| {
+        outln!(out, "// Parse a X11 request into a concrete type");
+        outln!(
+            out,
+            "#[allow(clippy::cognitive_complexity, clippy::single_match)]"
+        );
+        outln!(out, "pub fn parse(");
+        outln!(out.indent(), "request: &'input [u8],");
+        outln!(out.indent(), "fds: &mut Vec<RawFdContainer>,");
+        outln!(out.indent(), "big_requests_enabled: BigRequests,");
+        outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
+        outln!(out, ") -> Result<Self, ParseError> {{");
+        out.indented(|out| {
+            outln!(
+                out,
+                "let (header, remaining) = parse_request_header(request, big_requests_enabled)?;"
+            );
+            outln!(out, "// Check if this is a core protocol request.");
+            outln!(out, "match header.major_opcode {{");
+            out.indented(|out| {
+                let xproto_ns = module.namespace("xproto").unwrap();
+                let xproto_cases = enum_cases.get_mut(&xproto_ns.header).unwrap().1.drain(..);
+                for case in xproto_cases {
+                    outln!(out, "{}", case);
+                }
+                outln!(out, "_ => (),");
+            });
+            outln!(out, "}}");
+            outln!(
+                out,
+                "// Find the extension that this request could belong to"
+            );
+            outln!(
+                out,
+                "let ext_info = ext_info_provider.get_from_major_opcode(header.major_opcode);"
+            );
+            outln!(out, "match ext_info {{");
+            out.indented(|out| {
+                for ns in namespaces.iter() {
+                    let parse_cases = &mut enum_cases.get_mut(&ns.header).unwrap().1;
+                    if parse_cases.is_empty() {
+                        continue;
+                    }
+
+                    let has_feature = super::ext_has_feature(&ns.header);
+                    if has_feature {
+                        outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                    }
+                    outln!(out, "Some(({}::X11_EXTENSION_NAME, _)) => {{", ns.header);
+
+                    out.indented(|out| {
+                        let parse_cases = parse_cases.drain(..);
+                        outln!(out, "match header.minor_opcode {{");
+                        for case in parse_cases {
+                            outln!(out.indent(), "{}", case);
+                        }
+                        outln!(out.indent(), "_ => (),");
+                        outln!(out, "}}");
+                    });
+                    outln!(out, "}}");
+                }
+                outln!(out, "_ => (),");
+            });
+            outln!(out, "}}");
+            outln!(out, "Ok(Request::Unknown(header, remaining))");
+        });
+        outln!(out, "}}");
+    });
+    outln!(out, "}}");
+    outln!(out, "");
 }
 
 /// Caches to avoid repeating some operations.
@@ -47,7 +156,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 
-    fn generate(&self, out: &mut Output) {
+    fn generate(&self, out: &mut Output, enum_cases: &mut EnumCases) {
         super::write_code_header(out);
         if let Some(info) = &self.ns.ext_info {
             outln!(out, "//! Bindings to the `{}` X11 extension.", info.name);
@@ -158,7 +267,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         for def in self.ns.src_order_defs.borrow().iter() {
             match def {
                 xcbdefs::Def::Request(request_def) => {
-                    self.generate_request(request_def, out, &mut trait_out)
+                    let cases_entry = enum_cases.entry(self.ns.header.clone()).or_default();
+                    self.generate_request(request_def, out, &mut trait_out, cases_entry)
                 }
                 xcbdefs::Def::Event(event_def) => match event_def {
                     xcbdefs::EventDef::Full(event_full_def) => {
@@ -219,7 +329,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         request_def: &xcbdefs::RequestDef,
         out: &mut Output,
         trait_out: &mut Output,
+        request_enum_cases: &mut (Vec<String>, Vec<String>),
     ) {
+        let (variant_cases, parse_cases) = request_enum_cases;
         let name = to_rust_type_name(&request_def.name);
 
         let mut function_name = super::camel_case_to_lower_snake(&name);
@@ -258,9 +370,47 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             );
         }
 
+        outln!(out, "/// Opcode for the {} request", name);
+        outln!(
+            out,
+            "pub const {}_REQUEST: u8 = {};",
+            super::camel_case_to_upper_snake(&name),
+            request_def.opcode,
+        );
+
         let gathered = self.gather_request_fields(request_def, &deducible_fields);
 
         self.emit_request_struct(request_def, &name, &deducible_fields, &gathered, out);
+        let ns_prefix = get_ns_name_prefix(self.ns);
+        let lifetime_block = if gathered.needs_lifetime {
+            "<'input>"
+        } else {
+            ""
+        };
+        variant_cases.push(format!(
+            "{ns_prefix}{name}({header}::{name}Request{lifetime}),",
+            ns_prefix = ns_prefix,
+            name = name,
+            header = self.ns.header,
+            lifetime = lifetime_block
+        ));
+        if gathered.has_fds() {
+            parse_cases.push(format!(
+                "{header}::{opcode_name}_REQUEST => return Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request_fd(header, remaining, fds)?)),",
+                header = self.ns.header,
+                opcode_name = super::camel_case_to_upper_snake(&name),
+                ns_prefix = ns_prefix,
+                name = name,
+            ));
+        } else {
+            parse_cases.push(format!(
+                "{header}::{opcode_name}_REQUEST => return Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request(header, remaining)?)),",
+                header = self.ns.header,
+                opcode_name = super::camel_case_to_upper_snake(&name),
+                ns_prefix = ns_prefix,
+                name = name,
+            ));
+        }
         self.emit_request_function(request_def, &name, &function_name, &gathered, out);
         self.emit_request_trait_function(request_def, &name, &function_name, &gathered, trait_out);
 
@@ -382,14 +532,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         out: &mut Output,
     ) {
         let ns = request_def.namespace.upgrade().unwrap();
-
-        outln!(out, "/// Opcode for the {} request", name);
-        outln!(
-            out,
-            "pub const {}_REQUEST: u8 = {};",
-            super::camel_case_to_upper_snake(&name),
-            request_def.opcode,
-        );
 
         if let Some(ref doc) = request_def.doc {
             self.emit_doc(doc, out);
@@ -878,7 +1020,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 "/// Parse this request given its header, its body, and any fds that go along \
                  with it"
             );
-            if !(gathered.single_fds.is_empty() && gathered.fd_lists.is_empty()) {
+            if gathered.has_fds() {
                 outln!(
                     out,
                     "pub fn try_parse_request_fd(header: RequestHeader, value: &{lifetime}[u8], \
@@ -5571,6 +5713,13 @@ struct GatheredRequestFields {
     single_fds: Vec<String>,
     /// FD list fields
     fd_lists: Vec<String>,
+}
+
+impl GatheredRequestFields {
+    /// Does the request have fds in it?
+    fn has_fds(&self) -> bool {
+        !self.single_fds.is_empty() || !self.fd_lists.is_empty()
+    }
 }
 
 /// Formats an integer such as clippy does not complain.

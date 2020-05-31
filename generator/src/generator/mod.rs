@@ -30,13 +30,18 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> FxHashMap<PathBuf, Stri
     outln!(main_out, "");
     outln!(main_out, "use std::convert::{{TryFrom, TryInto}};");
     outln!(main_out, "use crate::errors::ParseError;");
-    outln!(main_out, "use crate::x11_utils::ExtInfoProvider;");
+    outln!(main_out, "use crate::utils::RawFdContainer;");
+    outln!(
+        main_out,
+        "use crate::x11_utils::{{parse_request_header, BigRequests, ExtInfoProvider, RequestHeader}};"
+    );
     outln!(main_out, "");
 
     let caches = RefCell::new(namespace::Caches::default());
+    let mut enum_cases = FxHashMap::default();
     for ns in module.sorted_namespaces() {
         let mut ns_out = Output::new();
-        namespace::generate(&ns, &caches, &mut ns_out);
+        namespace::generate(&ns, &caches, &mut ns_out, &mut enum_cases);
         out_map.insert(
             PathBuf::from(format!("{}.rs", ns.header)),
             ns_out.into_data(),
@@ -49,6 +54,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> FxHashMap<PathBuf, Stri
     }
     outln!(main_out, "");
 
+    namespace::generate_request_enum(&mut main_out, module, enum_cases);
     error_events::generate(&mut main_out, module);
 
     out_map.insert(PathBuf::from("mod.rs"), main_out.into_data());
@@ -177,4 +183,21 @@ fn camel_case_to_upper_snake(arg: &str) -> String {
     let mut r = camel_case_to_snake(arg);
     r.make_ascii_uppercase();
     r
+}
+
+/// Get the prefix that should be used for enum variants from this module.
+pub(crate) fn get_ns_name_prefix(ns: &xcbgen::defs::Namespace) -> String {
+    if ns.ext_info.is_some() {
+        // Convert to camel case
+        let mut r = String::new();
+        for chunk in ns.header.split('_') {
+            r.push_str(&chunk[..1]);
+            let r_len = r.len();
+            r[(r_len - 1)..].make_ascii_uppercase();
+            r.push_str(&chunk[1..]);
+        }
+        r
+    } else {
+        String::new()
+    }
 }
