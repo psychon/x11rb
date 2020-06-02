@@ -1,7 +1,6 @@
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::path::PathBuf;
-
-use fxhash::FxHashMap;
 
 #[macro_use]
 mod output;
@@ -11,8 +10,8 @@ mod special_cases;
 
 use output::Output;
 
-pub(crate) fn generate(module: &xcbgen::defs::Module) -> FxHashMap<PathBuf, String> {
-    let mut out_map = FxHashMap::default();
+pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String> {
+    let mut out_map = HashMap::new();
 
     let mut main_out = Output::new();
     write_code_header(&mut main_out);
@@ -38,7 +37,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> FxHashMap<PathBuf, Stri
     outln!(main_out, "");
 
     let caches = RefCell::new(namespace::Caches::default());
-    let mut enum_cases = FxHashMap::default();
+    let mut enum_cases = HashMap::new();
     for ns in module.sorted_namespaces() {
         let mut ns_out = Output::new();
         namespace::generate(&ns, &caches, &mut ns_out, &mut enum_cases);

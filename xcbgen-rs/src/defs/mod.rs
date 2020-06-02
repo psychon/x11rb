@@ -6,9 +6,9 @@
 
 use std::cell::RefCell;
 use std::collections::hash_map::Entry as HashMapEntry;
+use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
-use fxhash::FxHashMap;
 use once_cell::unsync::OnceCell;
 
 mod alignment;
@@ -27,14 +27,14 @@ pub use top_level::*;
 #[derive(Debug)]
 pub struct Module {
     /// All namespaces in this module
-    pub namespaces: RefCell<FxHashMap<String, Rc<Namespace>>>,
+    pub namespaces: RefCell<HashMap<String, Rc<Namespace>>>,
 }
 
 impl Module {
     /// Create a new, empty module
     pub fn new() -> Rc<Self> {
         Rc::new(Module {
-            namespaces: RefCell::new(FxHashMap::default()),
+            namespaces: RefCell::new(HashMap::new()),
         })
     }
 
@@ -127,19 +127,19 @@ pub struct Namespace {
     pub ext_info: Option<ExtInfo>,
 
     /// Other namespaces that are imported into this namespace.
-    pub imports: RefCell<FxHashMap<String, Import>>,
+    pub imports: RefCell<HashMap<String, Import>>,
 
     /// The requests that are defined in this module.
-    pub request_defs: RefCell<FxHashMap<String, Rc<RequestDef>>>,
+    pub request_defs: RefCell<HashMap<String, Rc<RequestDef>>>,
 
     /// The events that are defined in this module.
-    pub event_defs: RefCell<FxHashMap<String, EventDef>>,
+    pub event_defs: RefCell<HashMap<String, EventDef>>,
 
     /// The errors that are defined in this module.
-    pub error_defs: RefCell<FxHashMap<String, ErrorDef>>,
+    pub error_defs: RefCell<HashMap<String, ErrorDef>>,
 
     /// The types that are defined in this module.
-    pub type_defs: RefCell<FxHashMap<String, TypeDef>>,
+    pub type_defs: RefCell<HashMap<String, TypeDef>>,
 
     /// All definitions in this module in the order they appear in the XML description.
     pub src_order_defs: RefCell<Vec<Def>>,
@@ -156,11 +156,11 @@ impl Namespace {
             module: Rc::downgrade(module),
             header,
             ext_info,
-            imports: RefCell::new(FxHashMap::default()),
-            request_defs: RefCell::new(FxHashMap::default()),
-            event_defs: RefCell::new(FxHashMap::default()),
-            error_defs: RefCell::new(FxHashMap::default()),
-            type_defs: RefCell::new(FxHashMap::default()),
+            imports: RefCell::new(HashMap::new()),
+            request_defs: RefCell::new(HashMap::new()),
+            event_defs: RefCell::new(HashMap::new()),
+            error_defs: RefCell::new(HashMap::new()),
+            type_defs: RefCell::new(HashMap::new()),
             src_order_defs: RefCell::new(Vec::new()),
         })
     }

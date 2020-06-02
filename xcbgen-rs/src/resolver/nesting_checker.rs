@@ -1,6 +1,5 @@
+use std::collections::HashSet;
 use std::rc::Rc;
-
-use fxhash::FxHashSet;
 
 use crate::{defs, ResolveError};
 
@@ -14,14 +13,14 @@ pub(super) fn check(module: &defs::Module) -> Result<(), ResolveError> {
 struct NestingChecker {
     stack: Vec<NestingStackItem>,
     /// Pointers converted to `usize`.
-    checked: FxHashSet<usize>,
+    checked: HashSet<usize>,
 }
 
 impl NestingChecker {
     fn new() -> Self {
         Self {
             stack: Vec::new(),
-            checked: FxHashSet::default(),
+            checked: HashSet::default(),
         }
     }
 

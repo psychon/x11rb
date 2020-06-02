@@ -3,15 +3,15 @@
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry as HashMapEntry;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
-use fxhash::{FxHashMap, FxHashSet};
 use xcbgen::defs as xcbdefs;
 
 use super::output::Output;
 use super::{get_ns_name_prefix, special_cases};
 
-type EnumCases = FxHashMap<String, (Vec<String>, Vec<String>)>;
+type EnumCases = HashMap<String, (Vec<String>, Vec<String>)>;
 
 /// Generate a Rust module for namespace `ns`.
 pub(super) fn generate(
@@ -139,9 +139,9 @@ pub(super) fn generate_request_enum(
 /// Caches to avoid repeating some operations.
 #[derive(Default)]
 pub(super) struct Caches {
-    derives: FxHashMap<usize, Derives>,
-    enum_has_repeated_values: FxHashMap<usize, bool>,
-    rust_type_names: FxHashMap<usize, String>,
+    derives: HashMap<usize, Derives>,
+    enum_has_repeated_values: HashMap<usize, bool>,
+    rust_type_names: HashMap<usize, String>,
 }
 
 struct NamespaceGenerator<'ns, 'c> {
@@ -455,7 +455,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn generate_aux(
         &self,
         request_def: &xcbdefs::RequestDef,
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
         switch_field: &xcbdefs::SwitchField,
         function_name: &str,
         out: &mut Output,
@@ -538,7 +538,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         request_def: &xcbdefs::RequestDef,
         name: &str,
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
         gathered: &GatheredRequestFields,
         out: &mut Output,
     ) {
@@ -1517,7 +1517,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name: &str,
         fields: &[xcbdefs::FieldDef],
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
         out: &mut Output,
     ) {
         outln!(out, "impl From<&{}> for [u8; 32] {{", name);
@@ -1677,7 +1677,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         });
         outln!(out, "}}");
 
-        let mut seen_field_types = FxHashSet::default();
+        let mut seen_field_types = HashSet::new();
 
         for field in fields.iter() {
             // Get the original type (without type aliases)
@@ -1735,7 +1735,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 out.indented(|out| {
                     let bytes_name = self.emit_field_serialize(
                         field,
-                        &FxHashMap::default(),
+                        &HashMap::new(),
                         |field| to_rust_variable_name(field),
                         &mut result_bytes,
                         out,
@@ -1841,7 +1841,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         });
         outln!(out, "}}");
 
-        let mut events_with_from = FxHashSet::default();
+        let mut events_with_from = HashSet::new();
 
         for allowed in event_struct_def.alloweds.iter() {
             for event in allowed.resolved.borrow().iter() {
@@ -2172,7 +2172,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name_prefix: &str,
         fields: &[xcbdefs::FieldDef],
-        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
+        parent_deducible_fields: &HashMap<String, DeducibleField>,
         generate_try_parse: bool,
         generate_serialize: bool,
         out: &mut Output,
@@ -2195,7 +2195,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name_prefix: &str,
         switch: &xcbdefs::SwitchField,
-        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
+        parent_deducible_fields: &HashMap<String, DeducibleField>,
         generate_try_parse: bool,
         generate_serialize: bool,
         out: &mut Output,
@@ -2497,7 +2497,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         name: &str,
         fields: &[xcbdefs::FieldDef],
         external_params: &[xcbdefs::ExternalParam],
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
         skip_length_field: bool,
         size: u32,
         out: &mut Output,
@@ -2588,7 +2588,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         name: &str,
         fields: &[xcbdefs::FieldDef],
         external_params: &[xcbdefs::ExternalParam],
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
         skip_length_field: bool,
         out: &mut Output,
     ) {
@@ -2677,7 +2677,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         switch: &xcbdefs::SwitchField,
         name: &str,
-        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
+        parent_deducible_fields: &HashMap<String, DeducibleField>,
         generate_try_parse: bool,
         generate_serialize: bool,
         doc: Option<&str>,
@@ -3227,7 +3227,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         switch: &xcbdefs::SwitchField,
         name: &str,
-        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
+        parent_deducible_fields: &HashMap<String, DeducibleField>,
         case_infos: &[CaseInfo],
         size: u32,
         out: &mut Output,
@@ -3373,7 +3373,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         switch: &xcbdefs::SwitchField,
         name: &str,
-        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
+        parent_deducible_fields: &HashMap<String, DeducibleField>,
         case_infos: &[CaseInfo],
         out: &mut Output,
     ) {
@@ -3915,7 +3915,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn emit_field_serialize(
         &self,
         field: &xcbdefs::FieldDef,
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
         mut wrap_field_ref: impl FnMut(&str) -> String,
         result_bytes: &mut Vec<String>,
         out: &mut Output,
@@ -4022,7 +4022,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn emit_field_serialize_into(
         &self,
         field: &xcbdefs::FieldDef,
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
         mut wrap_field_ref: impl FnMut(&str) -> String,
         bytes_name: &str,
         out: &mut Output,
@@ -4129,7 +4129,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn emit_assert_for_field_serialize(
         &self,
         field: &xcbdefs::FieldDef,
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
         mut wrap_field_ref: impl FnMut(&str) -> String,
         out: &mut Output,
     ) {
@@ -4210,7 +4210,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn emit_assert_for_switch_serialize(
         &self,
         switch: &xcbdefs::SwitchField,
-        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
+        parent_deducible_fields: &HashMap<String, DeducibleField>,
         out: &mut Output,
     ) {
         let needs_expr_assert =
@@ -4880,7 +4880,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         match self.caches.borrow_mut().enum_has_repeated_values.entry(id) {
             HashMapEntry::Occupied(entry) => *entry.get(),
             HashMapEntry::Vacant(entry) => {
-                let mut value_set = FxHashSet::default();
+                let mut value_set = HashSet::new();
                 let mut has_repeated = false;
                 for enum_item in enum_def.items.iter() {
                     let value = match enum_item.value {
@@ -4904,7 +4904,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn gather_request_fields(
         &self,
         request_def: &xcbdefs::RequestDef,
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
     ) -> GatheredRequestFields {
         let mut letter_iter = b'A'..=b'Z';
 
@@ -5364,7 +5364,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn field_is_visible(
         &self,
         field: &xcbdefs::FieldDef,
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
     ) -> bool {
         match field {
             xcbdefs::FieldDef::Pad(_) => false,
@@ -5384,7 +5384,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn case_has_single_visible_field(
         &self,
         case: &xcbdefs::SwitchCase,
-        deducible_fields: &FxHashMap<String, DeducibleField>,
+        deducible_fields: &HashMap<String, DeducibleField>,
     ) -> bool {
         let num_visible_fields = case
             .fields
@@ -5499,7 +5499,7 @@ enum DeducibleFieldOp {
 
 /// Gathers deducible fields (fields whose value can be calculated
 /// from other fields) from a list of fields.
-fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, DeducibleField> {
+fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> HashMap<String, DeducibleField> {
     fn extract_length(expr: &xcbdefs::Expression) -> Option<(String, DeducibleLengthFieldOp)> {
         match expr {
             xcbdefs::Expression::FieldRef(field_ref_expr) => Some((
@@ -5544,7 +5544,7 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, De
         }
     }
 
-    let mut deducible_fields = FxHashMap::default();
+    let mut deducible_fields = HashMap::new();
     for field in fields.iter() {
         let deducible_field = match field {
             xcbdefs::FieldDef::List(list_field) => list_field
