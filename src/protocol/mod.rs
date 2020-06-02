@@ -1265,6 +1265,10 @@ impl<'input> Request<'input> {
         big_requests_enabled: BigRequests,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
+        // Might not be used if none of the extensions that use FD passing is enabled
+        // The `allow` is not in the function argument because it is not stable in Rust 1.37
+        #[allow(unused_variables)]
+        let fds = fds;
         let (header, remaining) = parse_request_header(request, big_requests_enabled)?;
         // Check if this is a core protocol request.
         match header.major_opcode {
