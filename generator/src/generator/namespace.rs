@@ -68,6 +68,17 @@ pub(super) fn generate_request_enum(
         out.indented(|out| {
             outln!(
                 out,
+                "// Might not be used if none of the extensions that use FD passing is enabled",
+            );
+            outln!(
+                out,
+                "// The `allow` is not in the function argument because it is not stable in Rust \
+                 1.37",
+            );
+            outln!(out, "#[allow(unused_variables)]");
+            outln!(out, "let fds = fds;");
+            outln!(
+                out,
                 "let (header, remaining) = parse_request_header(request, big_requests_enabled)?;"
             );
             outln!(out, "// Check if this is a core protocol request.");
