@@ -179,9 +179,9 @@ impl XCBConnection {
             iov_base: null_mut(),
             iov_len: 0,
         });
+        #[allow(clippy::useless_conversion)]
         new_bufs_ffi.extend(new_bufs.iter().map(|ioslice| raw_ffi::iovec {
             iov_base: ioslice.as_ptr() as _,
-            #[allow(clippy::useless_conversion)]
             iov_len: ioslice.len().try_into().unwrap(),
         }));
 
