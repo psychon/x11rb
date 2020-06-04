@@ -2453,7 +2453,7 @@ impl<'input> CreatePictureRequest<'input> {
         let pid_bytes = self.pid.serialize();
         let drawable_bytes = self.drawable.serialize();
         let format_bytes = self.format.serialize();
-        let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -2837,7 +2837,7 @@ impl<'input> ChangePictureRequest<'input> {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let picture_bytes = self.picture.serialize();
-        let value_mask = u32::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,

@@ -40,7 +40,7 @@ mod util {
                 response_type: CLIENT_MESSAGE_EVENT,
                 format: 32,
                 sequence: 0,
-                window: window,
+                window,
                 type_: wm_protocols.reply().unwrap().atom,
                 data,
             };

@@ -10,7 +10,7 @@ jobs:
     - rust: stable
       env: CLIPPY_RUSTFMT=yes
     - rust: beta
-      env: CLIPPY_RUSTFMT=yes
+      env: CLIPPY_RUSTFMT=no
     - rust: nightly
       env: CLIPPY_RUSTFMT=if_available
   allow_failures:

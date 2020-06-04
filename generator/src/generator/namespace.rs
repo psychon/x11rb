@@ -407,7 +407,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         ));
         if gathered.has_fds() {
             parse_cases.push(format!(
-                "{header}::{opcode_name}_REQUEST => return Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request_fd(header, remaining, fds)?)),",
+                "{header}::{opcode_name}_REQUEST => return \
+                 Ok(Request::{ns_prefix}{name}({header}::{name}Request::\
+                 try_parse_request_fd(header, remaining, fds)?)),",
                 header = self.ns.header,
                 opcode_name = super::camel_case_to_upper_snake(&name),
                 ns_prefix = ns_prefix,
@@ -415,7 +417,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             ));
         } else {
             parse_cases.push(format!(
-                "{header}::{opcode_name}_REQUEST => return Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request(header, remaining)?)),",
+                "{header}::{opcode_name}_REQUEST => return \
+                 Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request(header, \
+                 remaining)?)),",
                 header = self.ns.header,
                 opcode_name = super::camel_case_to_upper_snake(&name),
                 ns_prefix = ns_prefix,
@@ -1100,7 +1104,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         FieldContainer::Request(name.to_string()),
                         out,
                     );
-                    self.emit_field_post_parse(field, out);
+                    if !field
+                        .name()
+                        .map(|field_name| deducible_fields.contains_key(field_name))
+                        .unwrap_or(false)
+                    {
+                        self.emit_field_post_parse(field, out);
+                    }
 
                     if !seen_complete_header {
                         // Dispose of the "remaining" variable just generated.
@@ -4329,23 +4339,32 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     _ => unreachable!(),
                 }
                 if let xcbdefs::FieldDef::Normal(normal_field) = field {
-                    let rust_field_type =
-                        self.type_to_rust_type(normal_field.type_.type_.get_resolved());
-                    outln!(
-                        out,
-                        "let {} = {}::try_from({}.switch_expr()).unwrap();",
-                        dst_var_name,
-                        rust_field_type,
-                        wrap_field_ref(&switch_field_name),
-                    );
+                    let field_type = normal_field.type_.type_.get_resolved();
+                    let rust_field_type = self.type_to_rust_type(field_type);
+                    if let xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) = field_type {
+                        outln!(
+                            out,
+                            "let {} = {}.switch_expr();",
+                            dst_var_name,
+                            wrap_field_ref(&switch_field_name),
+                        );
+                    } else {
+                        outln!(
+                            out,
+                            "let {} = {}::try_from({}.switch_expr()).unwrap();",
+                            dst_var_name,
+                            rust_field_type,
+                            wrap_field_ref(&switch_field_name),
+                        );
+                    }
                 } else {
                     unreachable!();
                 }
             }
             DeducibleField::BitCaseSwitchExpr(switch_field_name, op) => {
                 if let xcbdefs::FieldDef::Normal(normal_field) = field {
-                    let rust_field_type =
-                        self.type_to_rust_type(normal_field.type_.type_.get_resolved());
+                    let field_type = normal_field.type_.type_.get_resolved();
+                    let rust_field_type = self.type_to_rust_type(field_type);
                     let op_str = match op {
                         DeducibleFieldOp::None => String::new(),
                         DeducibleFieldOp::Or(or_expr) => format!(
@@ -4359,14 +4378,24 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             )
                         ),
                     };
-                    outln!(
-                        out,
-                        "let {} = {}::try_from({}.switch_expr(){}).unwrap();",
-                        dst_var_name,
-                        rust_field_type,
-                        wrap_field_ref(&switch_field_name),
-                        op_str,
-                    );
+                    if let xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) = field_type {
+                        assert!(op_str.is_empty());
+                        outln!(
+                            out,
+                            "let {} = {}.switch_expr();",
+                            dst_var_name,
+                            wrap_field_ref(&switch_field_name),
+                        );
+                    } else {
+                        outln!(
+                            out,
+                            "let {} = {}::try_from({}.switch_expr(){}).unwrap();",
+                            dst_var_name,
+                            rust_field_type,
+                            wrap_field_ref(&switch_field_name),
+                            op_str,
+                        );
+                    }
                 } else {
                     unreachable!();
                 }

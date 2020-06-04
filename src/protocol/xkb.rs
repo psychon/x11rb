@@ -10225,7 +10225,7 @@ impl<'input> SetNamesRequest<'input> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
         let virtual_mods_bytes = self.virtual_mods.serialize();
-        let which = u32::try_from(self.values.switch_expr()).unwrap();
+        let which = self.values.switch_expr();
         let which_bytes = which.serialize();
         let first_type_bytes = self.first_type.serialize();
         let n_types_bytes = self.n_types.serialize();

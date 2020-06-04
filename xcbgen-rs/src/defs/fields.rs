@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::convert::TryFrom;
 
 use once_cell::unsync::OnceCell;
 
@@ -143,7 +142,7 @@ impl ListField {
     pub fn length(&self) -> Option<u32> {
         if let Some(ref length_expr) = self.length_expr {
             match length_expr {
-                Expression::Value(v) => Some(u32::try_from(*v).unwrap()),
+                Expression::Value(v) => Some(*v),
                 Expression::Bit(bit) => Some(1 << *bit),
                 _ => None,
             }
@@ -281,7 +280,7 @@ impl FdListField {
     /// Get the length of the list if it is statically known.
     pub fn length(&self) -> Option<u32> {
         match self.length_expr {
-            Expression::Value(v) => Some(u32::try_from(v).unwrap()),
+            Expression::Value(v) => Some(v),
             Expression::Bit(bit) => Some(1 << bit),
             _ => None,
         }

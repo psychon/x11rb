@@ -108,13 +108,15 @@ pub(crate) struct xcb_setup_t {
 }
 
 pub(crate) mod connection_errors {
-    pub(crate) const ERROR: i32 = 1;
-    pub(crate) const EXT_NOTSUPPORTED: i32 = 2;
-    pub(crate) const MEM_INSUFFICIENT: i32 = 3;
-    pub(crate) const REQ_LEN_EXCEED: i32 = 4;
-    pub(crate) const PARSE_ERR: i32 = 5;
-    pub(crate) const INVALID_SCREEN: i32 = 6;
-    pub(crate) const FDPASSING_FAILED: i32 = 7;
+    use std::os::raw::c_int;
+
+    pub(crate) const ERROR: c_int = 1;
+    pub(crate) const EXT_NOTSUPPORTED: c_int = 2;
+    pub(crate) const MEM_INSUFFICIENT: c_int = 3;
+    pub(crate) const REQ_LEN_EXCEED: c_int = 4;
+    pub(crate) const PARSE_ERR: c_int = 5;
+    pub(crate) const INVALID_SCREEN: c_int = 6;
+    pub(crate) const FDPASSING_FAILED: c_int = 7;
 }
 
 pub(crate) mod send_request_flags {
