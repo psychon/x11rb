@@ -407,7 +407,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         ));
         if gathered.has_fds() {
             parse_cases.push(format!(
-                "{header}::{opcode_name}_REQUEST => return Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request_fd(header, remaining, fds)?)),",
+                "{header}::{opcode_name}_REQUEST => return \
+                 Ok(Request::{ns_prefix}{name}({header}::{name}Request::\
+                 try_parse_request_fd(header, remaining, fds)?)),",
                 header = self.ns.header,
                 opcode_name = super::camel_case_to_upper_snake(&name),
                 ns_prefix = ns_prefix,
@@ -415,7 +417,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             ));
         } else {
             parse_cases.push(format!(
-                "{header}::{opcode_name}_REQUEST => return Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request(header, remaining)?)),",
+                "{header}::{opcode_name}_REQUEST => return \
+                 Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request(header, \
+                 remaining)?)),",
                 header = self.ns.header,
                 opcode_name = super::camel_case_to_upper_snake(&name),
                 ns_prefix = ns_prefix,
