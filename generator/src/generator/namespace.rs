@@ -19,6 +19,8 @@ pub(super) struct PerModuleEnumCases {
     request_parse_cases: Vec<String>,
     /// Lines that belong in the Reply enum definition.
     reply_variants: Vec<String>,
+    /// Impls for From<ReplyType> for Reply enum.
+    reply_from_cases: Vec<String>,
 }
 
 type EnumCases = HashMap<String, PerModuleEnumCases>;
@@ -177,6 +179,21 @@ pub(super) fn generate_request_reply_enum(
         }
     });
     outln!(out, "}}");
+    for ns in namespaces.iter() {
+        let has_feature = super::ext_has_feature(&ns.header);
+
+        let reply_from_cases = enum_cases
+            .get_mut(&ns.header)
+            .unwrap()
+            .reply_from_cases
+            .drain(..);
+        for case in reply_from_cases {
+            if has_feature {
+                outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+            }
+            outln!(out, "{}", case);
+        }
+    }
     outln!(out, "");
 }
 
@@ -480,6 +497,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             let reply_struct_name = format!("{}Reply", name);
             enum_cases.reply_variants.push(format!(
                 "{ns_prefix}{name}({header}::{name}Reply),",
+                ns_prefix = ns_prefix,
+                name = name,
+                header = self.ns.header,
+            ));
+            enum_cases.reply_from_cases.push(format!(
+                r#"impl From<{header}::{name}Reply> for Reply {{
+  fn from(reply: {header}::{name}Reply) -> Reply {{
+    Reply::{ns_prefix}{name}(reply)
+  }}
+}}"#,
                 ns_prefix = ns_prefix,
                 name = name,
                 header = self.ns.header,
