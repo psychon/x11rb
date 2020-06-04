@@ -13,6 +13,10 @@ jobs:
       env: CLIPPY_RUSTFMT=no
     - rust: nightly
       env: CLIPPY_RUSTFMT=if_available
+    - env: CROSS_TARGET=mips64-unknown-linux-gnuabi64 CLIPPY_RUSTFMT=no
+      rust: stable
+      services: docker
+      sudo: required
   allow_failures:
     - rust: nightly
       env: CLIPPY_RUSTFMT=if_available
@@ -22,7 +26,7 @@ addons:
     packages:
       - xvfb
 
-install:
+before_script:
   # Run the examples as 'integration tests'. For this, there is a special
   # timeout mode where the examples close automatically after some time.
   - |
@@ -65,6 +69,27 @@ install:
             cargo fmt --all -- --check || return 1
         fi
     }
+  - |
+    # Preparations for testing on a big endian platform
+    if [ ! -z "$CROSS_TARGET" ]; then
+        rustup target add "$CROSS_TARGET" || return 1
+        cargo install cross --force || return 1
+
+        # Replace cargo with a shell function
+        cargo() {
+            command="$1"
+            shift
+            echo "Running the following:" cross "$command" --target "$CROSS_TARGET" "$@"
+            cross "$command" --target "$CROSS_TARGET" "$@"
+        }
+        skip_on_cross() {
+            echo "Skipping $@"
+        }
+    else
+        skip_on_cross() {
+            "$@"
+        }
+    fi
 
 script:
   # Check the code generator. Output should be identical to the
@@ -79,14 +104,21 @@ script:
   # to check that this works fine.
   - cargo check --verbose --all-targets
 
-  - cargo build --verbose --all-targets --all-features
-  - cargo test --verbose --all-features
-  - cargo doc --verbose --all-features
+  # Skip XCBConnection on cross (libxcb not available)
+  - |
+    if [ -z "$CROSS_TARGET" ]; then
+        export FEATURES="--all-features"
+      else
+        export FEATURES="--features all-extensions"
+      fi
+  - cargo build --verbose --all-targets $FEATURES
+  - cargo test --verbose $FEATURES
+  - cargo doc --verbose $FEATURES
 
   # Run the examples as 'integration tests'.
   # Enable the 'all-extensions' feature or Cargo will complain.
   # Enable the 'allow-unsafe-code' feature so XCBConnection is used.
-  - run_examples --all-features
+  - skip_on_cross run_examples --all-features
 
   - cargo build --verbose --all-targets --features all-extensions
 
