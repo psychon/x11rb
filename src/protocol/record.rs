@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -544,6 +544,9 @@ impl QueryVersionRequest {
         })
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -663,6 +666,9 @@ impl<'input> CreateContextRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreateContextRequest<'input> {
+    type Reply = ();
+}
 pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -757,6 +763,9 @@ impl<'input> RegisterClientsRequest<'input> {
         })
     }
 }
+impl<'input> Request for RegisterClientsRequest<'input> {
+    type Reply = ();
+}
 pub fn register_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -830,6 +839,9 @@ impl<'input> UnregisterClientsRequest<'input> {
         })
     }
 }
+impl<'input> Request for UnregisterClientsRequest<'input> {
+    type Reply = ();
+}
 pub fn unregister_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, client_specs: &'input [ClientSpec]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -886,6 +898,9 @@ impl GetContextRequest {
             context,
         })
     }
+}
+impl Request for GetContextRequest {
+    type Reply = GetContextReply;
 }
 pub fn get_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, GetContextReply>, ConnectionError>
 where
@@ -988,6 +1003,9 @@ impl EnableContextRequest {
             context,
         })
     }
+}
+impl Request for EnableContextRequest {
+    type Reply = EnableContextReply;
 }
 pub fn enable_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, EnableContextReply>, ConnectionError>
 where
@@ -1099,6 +1117,9 @@ impl DisableContextRequest {
         })
     }
 }
+impl Request for DisableContextRequest {
+    type Reply = ();
+}
 pub fn disable_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1154,6 +1175,9 @@ impl FreeContextRequest {
             context,
         })
     }
+}
+impl Request for FreeContextRequest {
+    type Reply = ();
 }
 pub fn free_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where

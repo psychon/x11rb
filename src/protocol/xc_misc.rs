@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -81,6 +81,9 @@ impl GetVersionRequest {
             client_minor_version,
         })
     }
+}
+impl Request for GetVersionRequest {
+    type Reply = GetVersionReply;
 }
 pub fn get_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
 where
@@ -156,6 +159,9 @@ impl GetXIDRangeRequest {
         Ok(GetXIDRangeRequest
         )
     }
+}
+impl Request for GetXIDRangeRequest {
+    type Reply = GetXIDRangeReply;
 }
 pub fn get_xid_range<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetXIDRangeReply>, ConnectionError>
 where
@@ -237,6 +243,9 @@ impl GetXIDListRequest {
             count,
         })
     }
+}
+impl Request for GetXIDListRequest {
+    type Reply = GetXIDListReply;
 }
 pub fn get_xid_list<Conn>(conn: &Conn, count: u32) -> Result<Cookie<'_, Conn, GetXIDListReply>, ConnectionError>
 where

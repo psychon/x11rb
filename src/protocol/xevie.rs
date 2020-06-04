@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -81,6 +81,9 @@ impl QueryVersionRequest {
             client_minor_version,
         })
     }
+}
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -167,6 +170,9 @@ impl StartRequest {
         })
     }
 }
+impl Request for StartRequest {
+    type Reply = StartReply;
+}
 pub fn start<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, StartReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -246,6 +252,9 @@ impl EndRequest {
             cmap,
         })
     }
+}
+impl Request for EndRequest {
+    type Reply = EndReply;
 }
 pub fn end<Conn>(conn: &Conn, cmap: u32) -> Result<Cookie<'_, Conn, EndReply>, ConnectionError>
 where
@@ -558,6 +567,9 @@ impl SendRequest {
         })
     }
 }
+impl Request for SendRequest {
+    type Reply = SendReply;
+}
 pub fn send<Conn>(conn: &Conn, event: Event, data_type: u32) -> Result<Cookie<'_, Conn, SendReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -638,6 +650,9 @@ impl SelectInputRequest {
             event_mask,
         })
     }
+}
+impl Request for SelectInputRequest {
+    type Reply = SelectInputReply;
 }
 pub fn select_input<Conn>(conn: &Conn, event_mask: u32) -> Result<Cookie<'_, Conn, SelectInputReply>, ConnectionError>
 where

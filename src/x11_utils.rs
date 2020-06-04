@@ -94,6 +94,11 @@ pub fn parse_request_header(
     ))
 }
 
+/// A type implementing this trait is an X11 request.
+pub trait Request {
+    type Reply: Into<crate::protocol::Reply>;
+}
+
 /// A type implementing this trait can be serialized into X11 raw bytes.
 pub trait Serialize {
     /// The value returned by `serialize`.

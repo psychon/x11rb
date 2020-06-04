@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -135,6 +135,9 @@ impl<'input> GetExtensionVersionRequest<'input> {
             name,
         })
     }
+}
+impl<'input> Request for GetExtensionVersionRequest<'input> {
+    type Reply = GetExtensionVersionReply;
 }
 pub fn get_extension_version<'c, 'input, Conn>(conn: &'c Conn, name: &'input [u8]) -> Result<Cookie<'c, Conn, GetExtensionVersionReply>, ConnectionError>
 where
@@ -992,6 +995,9 @@ impl ListInputDevicesRequest {
         )
     }
 }
+impl Request for ListInputDevicesRequest {
+    type Reply = ListInputDevicesReply;
+}
 pub fn list_input_devices<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListInputDevicesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1138,6 +1144,9 @@ impl OpenDeviceRequest {
         })
     }
 }
+impl Request for OpenDeviceRequest {
+    type Reply = OpenDeviceReply;
+}
 pub fn open_device<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, OpenDeviceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1243,6 +1252,9 @@ impl CloseDeviceRequest {
         })
     }
 }
+impl Request for CloseDeviceRequest {
+    type Reply = ();
+}
 pub fn close_device<Conn>(conn: &Conn, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1304,6 +1316,9 @@ impl SetDeviceModeRequest {
             mode,
         })
     }
+}
+impl Request for SetDeviceModeRequest {
+    type Reply = SetDeviceModeReply;
 }
 pub fn set_device_mode<Conn>(conn: &Conn, device_id: u8, mode: ValuatorMode) -> Result<Cookie<'_, Conn, SetDeviceModeReply>, ConnectionError>
 where
@@ -1405,6 +1420,9 @@ impl<'input> SelectExtensionEventRequest<'input> {
         })
     }
 }
+impl<'input> Request for SelectExtensionEventRequest<'input> {
+    type Reply = ();
+}
 pub fn select_extension_event<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1461,6 +1479,9 @@ impl GetSelectedExtensionEventsRequest {
             window,
         })
     }
+}
+impl Request for GetSelectedExtensionEventsRequest {
+    type Reply = GetSelectedExtensionEventsReply;
 }
 pub fn get_selected_extension_events<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetSelectedExtensionEventsReply>, ConnectionError>
 where
@@ -1667,6 +1688,9 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeDeviceDontPropagateListRequest<'input> {
+    type Reply = ();
+}
 pub fn change_device_dont_propagate_list<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, mode: PropagateMode, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1724,6 +1748,9 @@ impl GetDeviceDontPropagateListRequest {
             window,
         })
     }
+}
+impl Request for GetDeviceDontPropagateListRequest {
+    type Reply = GetDeviceDontPropagateListReply;
 }
 pub fn get_device_dont_propagate_list<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetDeviceDontPropagateListReply>, ConnectionError>
 where
@@ -1869,6 +1896,9 @@ impl GetDeviceMotionEventsRequest {
         })
     }
 }
+impl Request for GetDeviceMotionEventsRequest {
+    type Reply = GetDeviceMotionEventsReply;
+}
 pub fn get_device_motion_events<Conn, A>(conn: &Conn, start: xproto::Timestamp, stop: A, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceMotionEventsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1985,6 +2015,9 @@ impl ChangeKeyboardDeviceRequest {
         })
     }
 }
+impl Request for ChangeKeyboardDeviceRequest {
+    type Reply = ChangeKeyboardDeviceReply;
+}
 pub fn change_keyboard_device<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, ChangeKeyboardDeviceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2077,6 +2110,9 @@ impl ChangePointerDeviceRequest {
             device_id,
         })
     }
+}
+impl Request for ChangePointerDeviceRequest {
+    type Reply = ChangePointerDeviceReply;
 }
 pub fn change_pointer_device<Conn>(conn: &Conn, x_axis: u8, y_axis: u8, device_id: u8) -> Result<Cookie<'_, Conn, ChangePointerDeviceReply>, ConnectionError>
 where
@@ -2209,6 +2245,9 @@ impl<'input> GrabDeviceRequest<'input> {
         })
     }
 }
+impl<'input> Request for GrabDeviceRequest<'input> {
+    type Reply = GrabDeviceReply;
+}
 pub fn grab_device<'c, 'input, Conn, A>(conn: &'c Conn, grab_window: xproto::Window, time: A, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, device_id: u8, classes: &'input [EventClass]) -> Result<Cookie<'c, Conn, GrabDeviceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2309,6 +2348,9 @@ impl UngrabDeviceRequest {
             device_id,
         })
     }
+}
+impl Request for UngrabDeviceRequest {
+    type Reply = ();
 }
 pub fn ungrab_device<Conn, A>(conn: &Conn, time: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2481,6 +2523,9 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         })
     }
 }
+impl<'input> Request for GrabDeviceKeyRequest<'input> {
+    type Reply = ();
+}
 pub fn grab_device_key<'c, 'input, Conn, A, B, C>(conn: &'c Conn, grab_window: xproto::Window, modifiers: A, modifier_device: B, grabbed_device: u8, key: C, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2574,6 +2619,9 @@ impl UngrabDeviceKeyRequest {
             grabbed_device,
         })
     }
+}
+impl Request for UngrabDeviceKeyRequest {
+    type Reply = ();
 }
 pub fn ungrab_device_key<Conn, A, B, C>(conn: &Conn, grab_window: xproto::Window, modifiers: A, modifier_device: B, key: C, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2694,6 +2742,9 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         })
     }
 }
+impl<'input> Request for GrabDeviceButtonRequest<'input> {
+    type Reply = ();
+}
 pub fn grab_device_button<'c, 'input, Conn, A, B, C>(conn: &'c Conn, grab_window: xproto::Window, grabbed_device: u8, modifier_device: A, modifiers: B, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, button: C, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2788,6 +2839,9 @@ impl UngrabDeviceButtonRequest {
             grabbed_device,
         })
     }
+}
+impl Request for UngrabDeviceButtonRequest {
+    type Reply = ();
 }
 pub fn ungrab_device_button<Conn, A, B, C>(conn: &Conn, grab_window: xproto::Window, modifiers: A, modifier_device: B, button: C, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2943,6 +2997,9 @@ impl AllowDeviceEventsRequest {
         })
     }
 }
+impl Request for AllowDeviceEventsRequest {
+    type Reply = ();
+}
 pub fn allow_device_events<Conn, A>(conn: &Conn, time: A, mode: DeviceInputMode, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3003,6 +3060,9 @@ impl GetDeviceFocusRequest {
             device_id,
         })
     }
+}
+impl Request for GetDeviceFocusRequest {
+    type Reply = GetDeviceFocusReply;
 }
 pub fn get_device_focus<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceFocusReply>, ConnectionError>
 where
@@ -3113,6 +3173,9 @@ impl SetDeviceFocusRequest {
             device_id,
         })
     }
+}
+impl Request for SetDeviceFocusRequest {
+    type Reply = ();
 }
 pub fn set_device_focus<Conn, A, B>(conn: &Conn, focus: A, time: B, revert_to: xproto::InputFocus, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -4199,6 +4262,9 @@ impl GetFeedbackControlRequest {
         })
     }
 }
+impl Request for GetFeedbackControlRequest {
+    type Reply = GetFeedbackControlReply;
+}
 pub fn get_feedback_control<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetFeedbackControlReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -5225,6 +5291,9 @@ impl ChangeFeedbackControlRequest {
         })
     }
 }
+impl Request for ChangeFeedbackControlRequest {
+    type Reply = ();
+}
 pub fn change_feedback_control<Conn, A>(conn: &Conn, mask: A, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -5294,6 +5363,9 @@ impl GetDeviceKeyMappingRequest {
             count,
         })
     }
+}
+impl Request for GetDeviceKeyMappingRequest {
+    type Reply = GetDeviceKeyMappingReply;
 }
 pub fn get_device_key_mapping<Conn>(conn: &Conn, device_id: u8, first_keycode: KeyCode, count: u8) -> Result<Cookie<'_, Conn, GetDeviceKeyMappingReply>, ConnectionError>
 where
@@ -5416,6 +5488,9 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeDeviceKeyMappingRequest<'input> {
+    type Reply = ();
+}
 pub fn change_device_key_mapping<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &'input [xproto::Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -5476,6 +5551,9 @@ impl GetDeviceModifierMappingRequest {
             device_id,
         })
     }
+}
+impl Request for GetDeviceModifierMappingRequest {
+    type Reply = GetDeviceModifierMappingReply;
 }
 pub fn get_device_modifier_mapping<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceModifierMappingReply>, ConnectionError>
 where
@@ -5589,6 +5667,9 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetDeviceModifierMappingRequest<'input> {
+    type Reply = SetDeviceModifierMappingReply;
+}
 pub fn set_device_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, keymaps: &'input [u8]) -> Result<Cookie<'c, Conn, SetDeviceModifierMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -5674,6 +5755,9 @@ impl GetDeviceButtonMappingRequest {
             device_id,
         })
     }
+}
+impl Request for GetDeviceButtonMappingRequest {
+    type Reply = GetDeviceButtonMappingReply;
 }
 pub fn get_device_button_mapping<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceButtonMappingReply>, ConnectionError>
 where
@@ -5789,6 +5873,9 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
             map,
         })
     }
+}
+impl<'input> Request for SetDeviceButtonMappingRequest<'input> {
+    type Reply = SetDeviceButtonMappingReply;
 }
 pub fn set_device_button_mapping<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetDeviceButtonMappingReply>, ConnectionError>
 where
@@ -6463,6 +6550,9 @@ impl QueryDeviceStateRequest {
         })
     }
 }
+impl Request for QueryDeviceStateRequest {
+    type Reply = QueryDeviceStateReply;
+}
 pub fn query_device_state<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, QueryDeviceStateReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -6574,6 +6664,9 @@ impl DeviceBellRequest {
         })
     }
 }
+impl Request for DeviceBellRequest {
+    type Reply = ();
+}
 pub fn device_bell<Conn>(conn: &Conn, device_id: u8, feedback_id: u8, feedback_class: u8, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -6647,6 +6740,9 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
             valuators: Cow::Owned(valuators),
         })
     }
+}
+impl<'input> Request for SetDeviceValuatorsRequest<'input> {
+    type Reply = SetDeviceValuatorsReply;
 }
 pub fn set_device_valuators<'c, 'input, Conn>(conn: &'c Conn, device_id: u8, first_valuator: u8, valuators: &'input [i32]) -> Result<Cookie<'c, Conn, SetDeviceValuatorsReply>, ConnectionError>
 where
@@ -7573,6 +7669,9 @@ impl GetDeviceControlRequest {
         })
     }
 }
+impl Request for GetDeviceControlRequest {
+    type Reply = GetDeviceControlReply;
+}
 pub fn get_device_control<Conn>(conn: &Conn, control_id: DeviceControl, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceControlReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8421,6 +8520,9 @@ impl ChangeDeviceControlRequest {
         })
     }
 }
+impl Request for ChangeDeviceControlRequest {
+    type Reply = ChangeDeviceControlReply;
+}
 pub fn change_device_control<Conn>(conn: &Conn, control_id: DeviceControl, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Conn, ChangeDeviceControlReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8506,6 +8608,9 @@ impl ListDevicePropertiesRequest {
             device_id,
         })
     }
+}
+impl Request for ListDevicePropertiesRequest {
+    type Reply = ListDevicePropertiesReply;
 }
 pub fn list_device_properties<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, ListDevicePropertiesReply>, ConnectionError>
 where
@@ -8816,6 +8921,9 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeDevicePropertyRequest<'input> {
+    type Reply = ();
+}
 pub fn change_device_property<'c, 'input, Conn>(conn: &'c Conn, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: xproto::PropMode, num_items: u32, items: &'input ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8885,6 +8993,9 @@ impl DeleteDevicePropertyRequest {
             device_id,
         })
     }
+}
+impl Request for DeleteDevicePropertyRequest {
+    type Reply = ();
 }
 pub fn delete_device_property<Conn>(conn: &Conn, property: xproto::Atom, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -8979,6 +9090,9 @@ impl GetDevicePropertyRequest {
             delete,
         })
     }
+}
+impl Request for GetDevicePropertyRequest {
+    type Reply = GetDevicePropertyReply;
 }
 pub fn get_device_property<Conn>(conn: &Conn, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Conn, GetDevicePropertyReply>, ConnectionError>
 where
@@ -9330,6 +9444,9 @@ impl XIQueryPointerRequest {
         })
     }
 }
+impl Request for XIQueryPointerRequest {
+    type Reply = XIQueryPointerReply;
+}
 pub fn xi_query_pointer<Conn, A>(conn: &Conn, window: xproto::Window, deviceid: A) -> Result<Cookie<'_, Conn, XIQueryPointerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9510,6 +9627,9 @@ impl XIWarpPointerRequest {
         })
     }
 }
+impl Request for XIWarpPointerRequest {
+    type Reply = ();
+}
 pub fn xi_warp_pointer<Conn, A>(conn: &Conn, src_win: xproto::Window, dst_win: xproto::Window, src_x: Fp1616, src_y: Fp1616, src_width: u16, src_height: u16, dst_x: Fp1616, dst_y: Fp1616, deviceid: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9592,6 +9712,9 @@ impl XIChangeCursorRequest {
             deviceid,
         })
     }
+}
+impl Request for XIChangeCursorRequest {
+    type Reply = ();
 }
 pub fn xi_change_cursor<Conn, A>(conn: &Conn, window: xproto::Window, cursor: xproto::Cursor, deviceid: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -10339,6 +10462,9 @@ impl<'input> XIChangeHierarchyRequest<'input> {
         })
     }
 }
+impl<'input> Request for XIChangeHierarchyRequest<'input> {
+    type Reply = ();
+}
 pub fn xi_change_hierarchy<'c, 'input, Conn>(conn: &'c Conn, changes: &'input [HierarchyChange]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10404,6 +10530,9 @@ impl XISetClientPointerRequest {
         })
     }
 }
+impl Request for XISetClientPointerRequest {
+    type Reply = ();
+}
 pub fn xi_set_client_pointer<Conn, A>(conn: &Conn, window: xproto::Window, deviceid: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10462,6 +10591,9 @@ impl XIGetClientPointerRequest {
             window,
         })
     }
+}
+impl Request for XIGetClientPointerRequest {
+    type Reply = XIGetClientPointerReply;
 }
 pub fn xi_get_client_pointer<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, XIGetClientPointerReply>, ConnectionError>
 where
@@ -10717,6 +10849,9 @@ impl<'input> XISelectEventsRequest<'input> {
         })
     }
 }
+impl<'input> Request for XISelectEventsRequest<'input> {
+    type Reply = ();
+}
 pub fn xi_select_events<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, masks: &'input [EventMask]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10777,6 +10912,9 @@ impl XIQueryVersionRequest {
             minor_version,
         })
     }
+}
+impl Request for XIQueryVersionRequest {
+    type Reply = XIQueryVersionReply;
 }
 pub fn xi_query_version<Conn>(conn: &Conn, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Conn, XIQueryVersionReply>, ConnectionError>
 where
@@ -12091,6 +12229,9 @@ impl XIQueryDeviceRequest {
         })
     }
 }
+impl Request for XIQueryDeviceRequest {
+    type Reply = XIQueryDeviceReply;
+}
 pub fn xi_query_device<Conn, A>(conn: &Conn, deviceid: A) -> Result<Cookie<'_, Conn, XIQueryDeviceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -12208,6 +12349,9 @@ impl XISetFocusRequest {
         })
     }
 }
+impl Request for XISetFocusRequest {
+    type Reply = ();
+}
 pub fn xi_set_focus<Conn, A, B>(conn: &Conn, window: xproto::Window, time: A, deviceid: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -12270,6 +12414,9 @@ impl XIGetFocusRequest {
             deviceid,
         })
     }
+}
+impl Request for XIGetFocusRequest {
+    type Reply = XIGetFocusReply;
 }
 pub fn xi_get_focus<Conn, A>(conn: &Conn, deviceid: A) -> Result<Cookie<'_, Conn, XIGetFocusReply>, ConnectionError>
 where
@@ -12479,6 +12626,9 @@ impl<'input> XIGrabDeviceRequest<'input> {
         })
     }
 }
+impl<'input> Request for XIGrabDeviceRequest<'input> {
+    type Reply = XIGrabDeviceReply;
+}
 pub fn xi_grab_device<'c, 'input, Conn, A, B>(conn: &'c Conn, window: xproto::Window, time: A, cursor: xproto::Cursor, deviceid: B, mode: xproto::GrabMode, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &'input [u32]) -> Result<Cookie<'c, Conn, XIGrabDeviceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -12581,6 +12731,9 @@ impl XIUngrabDeviceRequest {
             deviceid,
         })
     }
+}
+impl Request for XIUngrabDeviceRequest {
+    type Reply = ();
 }
 pub fn xi_ungrab_device<Conn, A, B>(conn: &Conn, time: A, deviceid: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -12752,6 +12905,9 @@ impl XIAllowEventsRequest {
             grab_window,
         })
     }
+}
+impl Request for XIAllowEventsRequest {
+    type Reply = ();
 }
 pub fn xi_allow_events<Conn, A, B>(conn: &Conn, time: A, deviceid: B, event_mode: EventMode, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -13105,6 +13261,9 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         })
     }
 }
+impl<'input> Request for XIPassiveGrabDeviceRequest<'input> {
+    type Reply = XIPassiveGrabDeviceReply;
+}
 pub fn xi_passive_grab_device<'c, 'input, Conn, A, B>(conn: &'c Conn, time: A, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: B, grab_type: GrabType, grab_mode: GrabMode22, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &'input [u32], modifiers: &'input [u32]) -> Result<Cookie<'c, Conn, XIPassiveGrabDeviceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -13253,6 +13412,9 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         })
     }
 }
+impl<'input> Request for XIPassiveUngrabDeviceRequest<'input> {
+    type Reply = ();
+}
 pub fn xi_passive_ungrab_device<'c, 'input, Conn, A>(conn: &'c Conn, grab_window: xproto::Window, detail: u32, deviceid: A, grab_type: GrabType, modifiers: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -13315,6 +13477,9 @@ impl XIListPropertiesRequest {
             deviceid,
         })
     }
+}
+impl Request for XIListPropertiesRequest {
+    type Reply = XIListPropertiesReply;
 }
 pub fn xi_list_properties<Conn, A>(conn: &Conn, deviceid: A) -> Result<Cookie<'_, Conn, XIListPropertiesReply>, ConnectionError>
 where
@@ -13560,6 +13725,9 @@ impl<'input> XIChangePropertyRequest<'input> {
         })
     }
 }
+impl<'input> Request for XIChangePropertyRequest<'input> {
+    type Reply = ();
+}
 pub fn xi_change_property<'c, 'input, Conn, A>(conn: &'c Conn, deviceid: A, mode: xproto::PropMode, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &'input XIChangePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -13631,6 +13799,9 @@ impl XIDeletePropertyRequest {
             property,
         })
     }
+}
+impl Request for XIDeletePropertyRequest {
+    type Reply = ();
 }
 pub fn xi_delete_property<Conn, A>(conn: &Conn, deviceid: A, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -13727,6 +13898,9 @@ impl XIGetPropertyRequest {
             len,
         })
     }
+}
+impl Request for XIGetPropertyRequest {
+    type Reply = XIGetPropertyReply;
 }
 pub fn xi_get_property<Conn, A>(conn: &Conn, deviceid: A, delete: bool, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32) -> Result<Cookie<'_, Conn, XIGetPropertyReply>, ConnectionError>
 where
@@ -13894,6 +14068,9 @@ impl XIGetSelectedEventsRequest {
         })
     }
 }
+impl Request for XIGetSelectedEventsRequest {
+    type Reply = XIGetSelectedEventsReply;
+}
 pub fn xi_get_selected_events<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, XIGetSelectedEventsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -14049,6 +14226,9 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
             barriers: Cow::Owned(barriers),
         })
     }
+}
+impl<'input> Request for XIBarrierReleasePointerRequest<'input> {
+    type Reply = ();
 }
 pub fn xi_barrier_release_pointer<'c, 'input, Conn>(conn: &'c Conn, barriers: &'input [BarrierReleasePointerInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -16995,6 +17175,9 @@ impl<'input> SendExtensionEventRequest<'input> {
             classes: Cow::Owned(classes),
         })
     }
+}
+impl<'input> Request for SendExtensionEventRequest<'input> {
+    type Reply = ();
 }
 pub fn send_extension_event<'c, 'input, Conn>(conn: &'c Conn, destination: xproto::Window, device_id: u8, propagate: bool, events: &'input [EventForSend], classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where

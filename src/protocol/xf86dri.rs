@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -119,6 +119,9 @@ impl QueryVersionRequest {
         )
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -202,6 +205,9 @@ impl QueryDirectRenderingCapableRequest {
         })
     }
 }
+impl Request for QueryDirectRenderingCapableRequest {
+    type Reply = QueryDirectRenderingCapableReply;
+}
 pub fn query_direct_rendering_capable<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, QueryDirectRenderingCapableReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -282,6 +288,9 @@ impl OpenConnectionRequest {
             screen,
         })
     }
+}
+impl Request for OpenConnectionRequest {
+    type Reply = OpenConnectionReply;
 }
 pub fn open_connection<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, OpenConnectionReply>, ConnectionError>
 where
@@ -386,6 +395,9 @@ impl CloseConnectionRequest {
         })
     }
 }
+impl Request for CloseConnectionRequest {
+    type Reply = ();
+}
 pub fn close_connection<Conn>(conn: &Conn, screen: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -441,6 +453,9 @@ impl GetClientDriverNameRequest {
             screen,
         })
     }
+}
+impl Request for GetClientDriverNameRequest {
+    type Reply = GetClientDriverNameReply;
 }
 pub fn get_client_driver_name<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetClientDriverNameReply>, ConnectionError>
 where
@@ -563,6 +578,9 @@ impl CreateContextRequest {
         })
     }
 }
+impl Request for CreateContextRequest {
+    type Reply = CreateContextReply;
+}
 pub fn create_context<Conn>(conn: &Conn, screen: u32, visual: u32, context: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -654,6 +672,9 @@ impl DestroyContextRequest {
         })
     }
 }
+impl Request for DestroyContextRequest {
+    type Reply = ();
+}
 pub fn destroy_context<Conn>(conn: &Conn, screen: u32, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -718,6 +739,9 @@ impl CreateDrawableRequest {
             drawable,
         })
     }
+}
+impl Request for CreateDrawableRequest {
+    type Reply = CreateDrawableReply;
 }
 pub fn create_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, CreateDrawableReply>, ConnectionError>
 where
@@ -809,6 +833,9 @@ impl DestroyDrawableRequest {
         })
     }
 }
+impl Request for DestroyDrawableRequest {
+    type Reply = ();
+}
 pub fn destroy_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -873,6 +900,9 @@ impl GetDrawableInfoRequest {
             drawable,
         })
     }
+}
+impl Request for GetDrawableInfoRequest {
+    type Reply = GetDrawableInfoReply;
 }
 pub fn get_drawable_info<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, GetDrawableInfoReply>, ConnectionError>
 where
@@ -1004,6 +1034,9 @@ impl GetDeviceInfoRequest {
         })
     }
 }
+impl Request for GetDeviceInfoRequest {
+    type Reply = GetDeviceInfoReply;
+}
 pub fn get_device_info<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1118,6 +1151,9 @@ impl AuthConnectionRequest {
             magic,
         })
     }
+}
+impl Request for AuthConnectionRequest {
+    type Reply = AuthConnectionReply;
 }
 pub fn auth_connection<Conn>(conn: &Conn, screen: u32, magic: u32) -> Result<Cookie<'_, Conn, AuthConnectionReply>, ConnectionError>
 where

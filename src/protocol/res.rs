@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -479,6 +479,9 @@ impl QueryVersionRequest {
         })
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn, client_major: u8, client_minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -553,6 +556,9 @@ impl QueryClientsRequest {
         Ok(QueryClientsRequest
         )
     }
+}
+impl Request for QueryClientsRequest {
+    type Reply = QueryClientsReply;
 }
 pub fn query_clients<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryClientsReply>, ConnectionError>
 where
@@ -649,6 +655,9 @@ impl QueryClientResourcesRequest {
             xid,
         })
     }
+}
+impl Request for QueryClientResourcesRequest {
+    type Reply = QueryClientResourcesReply;
 }
 pub fn query_client_resources<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientResourcesReply>, ConnectionError>
 where
@@ -748,6 +757,9 @@ impl QueryClientPixmapBytesRequest {
         })
     }
 }
+impl Request for QueryClientPixmapBytesRequest {
+    type Reply = QueryClientPixmapBytesReply;
+}
 pub fn query_client_pixmap_bytes<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientPixmapBytesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -836,6 +848,9 @@ impl<'input> QueryClientIdsRequest<'input> {
             specs: Cow::Owned(specs),
         })
     }
+}
+impl<'input> Request for QueryClientIdsRequest<'input> {
+    type Reply = QueryClientIdsReply;
 }
 pub fn query_client_ids<'c, 'input, Conn>(conn: &'c Conn, specs: &'input [ClientIdSpec]) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
 where
@@ -948,6 +963,9 @@ impl<'input> QueryResourceBytesRequest<'input> {
             specs: Cow::Owned(specs),
         })
     }
+}
+impl<'input> Request for QueryResourceBytesRequest<'input> {
+    type Reply = QueryResourceBytesReply;
 }
 pub fn query_resource_bytes<'c, 'input, Conn>(conn: &'c Conn, client: u32, specs: &'input [ResourceIdSpec]) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>
 where

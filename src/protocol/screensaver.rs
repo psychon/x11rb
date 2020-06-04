@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -280,6 +280,9 @@ impl QueryVersionRequest {
         })
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u8, client_minor_version: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -364,6 +367,9 @@ impl QueryInfoRequest {
             drawable,
         })
     }
+}
+impl Request for QueryInfoRequest {
+    type Reply = QueryInfoReply;
 }
 pub fn query_info<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryInfoReply>, ConnectionError>
 where
@@ -464,6 +470,9 @@ impl SelectInputRequest {
             event_mask,
         })
     }
+}
+impl Request for SelectInputRequest {
+    type Reply = ();
 }
 pub fn select_input<Conn, A>(conn: &Conn, drawable: xproto::Drawable, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -925,6 +934,9 @@ impl<'input> SetAttributesRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetAttributesRequest<'input> {
+    type Reply = ();
+}
 pub fn set_attributes<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &'input SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -990,6 +1002,9 @@ impl UnsetAttributesRequest {
         })
     }
 }
+impl Request for UnsetAttributesRequest {
+    type Reply = ();
+}
 pub fn unset_attributes<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1045,6 +1060,9 @@ impl SuspendRequest {
             suspend,
         })
     }
+}
+impl Request for SuspendRequest {
+    type Reply = ();
 }
 pub fn suspend<Conn>(conn: &Conn, suspend: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where

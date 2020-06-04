@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -756,6 +756,9 @@ impl InitializeRequest {
         })
     }
 }
+impl Request for InitializeRequest {
+    type Reply = InitializeReply;
+}
 pub fn initialize<Conn>(conn: &Conn, desired_major_version: u8, desired_minor_version: u8) -> Result<Cookie<'_, Conn, InitializeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -831,6 +834,9 @@ impl ListSystemCountersRequest {
         Ok(ListSystemCountersRequest
         )
     }
+}
+impl Request for ListSystemCountersRequest {
+    type Reply = ListSystemCountersReply;
 }
 pub fn list_system_counters<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListSystemCountersReply>, ConnectionError>
 where
@@ -940,6 +946,9 @@ impl CreateCounterRequest {
         })
     }
 }
+impl Request for CreateCounterRequest {
+    type Reply = ();
+}
 pub fn create_counter<Conn>(conn: &Conn, id: Counter, initial_value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -997,6 +1006,9 @@ impl DestroyCounterRequest {
         })
     }
 }
+impl Request for DestroyCounterRequest {
+    type Reply = ();
+}
 pub fn destroy_counter<Conn>(conn: &Conn, counter: Counter) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1052,6 +1064,9 @@ impl QueryCounterRequest {
             counter,
         })
     }
+}
+impl Request for QueryCounterRequest {
+    type Reply = QueryCounterReply;
 }
 pub fn query_counter<Conn>(conn: &Conn, counter: Counter) -> Result<Cookie<'_, Conn, QueryCounterReply>, ConnectionError>
 where
@@ -1140,6 +1155,9 @@ impl<'input> AwaitRequest<'input> {
         })
     }
 }
+impl<'input> Request for AwaitRequest<'input> {
+    type Reply = ();
+}
 pub fn await_<'c, 'input, Conn>(conn: &'c Conn, wait_list: &'input [Waitcondition]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1207,6 +1225,9 @@ impl ChangeCounterRequest {
             amount,
         })
     }
+}
+impl Request for ChangeCounterRequest {
+    type Reply = ();
 }
 pub fn change_counter<Conn>(conn: &Conn, counter: Counter, amount: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1276,6 +1297,9 @@ impl SetCounterRequest {
             value,
         })
     }
+}
+impl Request for SetCounterRequest {
+    type Reply = ();
 }
 pub fn set_counter<Conn>(conn: &Conn, counter: Counter, value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1505,6 +1529,9 @@ impl<'input> CreateAlarmRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreateAlarmRequest<'input> {
+    type Reply = ();
+}
 pub fn create_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1733,6 +1760,9 @@ impl<'input> ChangeAlarmRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeAlarmRequest<'input> {
+    type Reply = ();
+}
 pub fn change_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1790,6 +1820,9 @@ impl DestroyAlarmRequest {
         })
     }
 }
+impl Request for DestroyAlarmRequest {
+    type Reply = ();
+}
 pub fn destroy_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1845,6 +1878,9 @@ impl QueryAlarmRequest {
             alarm,
         })
     }
+}
+impl Request for QueryAlarmRequest {
+    type Reply = QueryAlarmReply;
 }
 pub fn query_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<Cookie<'_, Conn, QueryAlarmReply>, ConnectionError>
 where
@@ -1943,6 +1979,9 @@ impl SetPriorityRequest {
         })
     }
 }
+impl Request for SetPriorityRequest {
+    type Reply = ();
+}
 pub fn set_priority<Conn>(conn: &Conn, id: u32, priority: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1999,6 +2038,9 @@ impl GetPriorityRequest {
             id,
         })
     }
+}
+impl Request for GetPriorityRequest {
+    type Reply = GetPriorityReply;
 }
 pub fn get_priority<Conn>(conn: &Conn, id: u32) -> Result<Cookie<'_, Conn, GetPriorityReply>, ConnectionError>
 where
@@ -2097,6 +2139,9 @@ impl CreateFenceRequest {
         })
     }
 }
+impl Request for CreateFenceRequest {
+    type Reply = ();
+}
 pub fn create_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2155,6 +2200,9 @@ impl TriggerFenceRequest {
         })
     }
 }
+impl Request for TriggerFenceRequest {
+    type Reply = ();
+}
 pub fn trigger_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2210,6 +2258,9 @@ impl ResetFenceRequest {
             fence,
         })
     }
+}
+impl Request for ResetFenceRequest {
+    type Reply = ();
 }
 pub fn reset_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2267,6 +2318,9 @@ impl DestroyFenceRequest {
         })
     }
 }
+impl Request for DestroyFenceRequest {
+    type Reply = ();
+}
 pub fn destroy_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2322,6 +2376,9 @@ impl QueryFenceRequest {
             fence,
         })
     }
+}
+impl Request for QueryFenceRequest {
+    type Reply = QueryFenceReply;
 }
 pub fn query_fence<Conn>(conn: &Conn, fence: Fence) -> Result<Cookie<'_, Conn, QueryFenceReply>, ConnectionError>
 where
@@ -2410,6 +2467,9 @@ impl<'input> AwaitFenceRequest<'input> {
             fence_list: Cow::Owned(fence_list),
         })
     }
+}
+impl<'input> Request for AwaitFenceRequest<'input> {
+    type Reply = ();
 }
 pub fn await_fence<'c, 'input, Conn>(conn: &'c Conn, fence_list: &'input [Fence]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where

@@ -2713,6 +2713,11 @@ pub enum Reply {
     #[cfg(feature = "xvmc")]
     XvmcListSubpictureTypes(xvmc::ListSubpictureTypesReply),
 }
+impl From<()> for Reply {
+    fn from(_: ()) -> Reply {
+        Reply::Void
+    }
+}
 impl From<xproto::GetWindowAttributesReply> for Reply {
   fn from(reply: xproto::GetWindowAttributesReply) -> Reply {
     Reply::GetWindowAttributes(reply)

@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -162,6 +162,9 @@ impl QueryVersionRequest {
         )
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -242,6 +245,9 @@ impl ListSurfaceTypesRequest {
             port_id,
         })
     }
+}
+impl Request for ListSurfaceTypesRequest {
+    type Reply = ListSurfaceTypesReply;
 }
 pub fn list_surface_types<Conn>(conn: &Conn, port_id: xv::Port) -> Result<Cookie<'_, Conn, ListSurfaceTypesReply>, ConnectionError>
 where
@@ -377,6 +383,9 @@ impl CreateContextRequest {
         })
     }
 }
+impl Request for CreateContextRequest {
+    type Reply = CreateContextReply;
+}
 pub fn create_context<Conn>(conn: &Conn, context_id: Context, port_id: xv::Port, surface_id: Surface, width: u16, height: u16, flags: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -484,6 +493,9 @@ impl DestroyContextRequest {
         })
     }
 }
+impl Request for DestroyContextRequest {
+    type Reply = ();
+}
 pub fn destroy_context<Conn>(conn: &Conn, context_id: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -547,6 +559,9 @@ impl CreateSurfaceRequest {
             context_id,
         })
     }
+}
+impl Request for CreateSurfaceRequest {
+    type Reply = CreateSurfaceReply;
 }
 pub fn create_surface<Conn>(conn: &Conn, surface_id: Surface, context_id: Context) -> Result<Cookie<'_, Conn, CreateSurfaceReply>, ConnectionError>
 where
@@ -645,6 +660,9 @@ impl DestroySurfaceRequest {
         })
     }
 }
+impl Request for DestroySurfaceRequest {
+    type Reply = ();
+}
 pub fn destroy_surface<Conn>(conn: &Conn, surface_id: Surface) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -728,6 +746,9 @@ impl CreateSubpictureRequest {
             height,
         })
     }
+}
+impl Request for CreateSubpictureRequest {
+    type Reply = CreateSubpictureReply;
 }
 pub fn create_subpicture<Conn>(conn: &Conn, subpicture_id: Subpicture, context: Context, xvimage_id: u32, width: u16, height: u16) -> Result<Cookie<'_, Conn, CreateSubpictureReply>, ConnectionError>
 where
@@ -840,6 +861,9 @@ impl DestroySubpictureRequest {
         })
     }
 }
+impl Request for DestroySubpictureRequest {
+    type Reply = ();
+}
 pub fn destroy_subpicture<Conn>(conn: &Conn, subpicture_id: Subpicture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -903,6 +927,9 @@ impl ListSubpictureTypesRequest {
             surface_id,
         })
     }
+}
+impl Request for ListSubpictureTypesRequest {
+    type Reply = ListSubpictureTypesReply;
 }
 pub fn list_subpicture_types<Conn>(conn: &Conn, port_id: xv::Port, surface_id: Surface) -> Result<Cookie<'_, Conn, ListSubpictureTypesReply>, ConnectionError>
 where

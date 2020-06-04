@@ -179,6 +179,13 @@ pub(super) fn generate_request_reply_enum(
         }
     });
     outln!(out, "}}");
+    outln!(out, "impl From<()> for Reply {{");
+    out.indented(|out| {
+        outln!(out, "fn from(_: ()) -> Reply {{");
+        outln!(out.indent(), "Reply::Void");
+        outln!(out, "}}");
+    });
+    outln!(out, "}}");
     for ns in namespaces.iter() {
         let has_feature = super::ext_has_feature(&ns.header);
 
@@ -266,7 +273,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
-            "use crate::x11_utils::{{RequestHeader, Serialize, TryParse}};"
+            "use crate::x11_utils::{{Request, RequestHeader, Serialize, TryParse}};"
         );
         outln!(
             out,
@@ -1230,6 +1237,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             });
             outln!(out, "}}");
         });
+        outln!(out, "}}");
+        outln!(
+            out,
+            "impl{lifetime} Request for {name}Request{lifetime} {{",
+            lifetime = struct_lifetime_block,
+            name = name
+        );
+        if request_def.reply.is_some() {
+            outln!(out.indent(), "type Reply = {}Reply;", name);
+        } else {
+            outln!(out.indent(), "type Reply = ();");
+        }
         outln!(out, "}}");
     }
 

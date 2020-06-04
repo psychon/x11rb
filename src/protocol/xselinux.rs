@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -82,6 +82,9 @@ impl QueryVersionRequest {
             client_minor,
         })
     }
+}
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
 }
 pub fn query_version<Conn>(conn: &Conn, client_major: u8, client_minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -172,6 +175,9 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetDeviceCreateContextRequest<'input> {
+    type Reply = ();
+}
 pub fn set_device_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -218,6 +224,9 @@ impl GetDeviceCreateContextRequest {
         Ok(GetDeviceCreateContextRequest
         )
     }
+}
+impl Request for GetDeviceCreateContextRequest {
+    type Reply = GetDeviceCreateContextReply;
 }
 pub fn get_device_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetDeviceCreateContextReply>, ConnectionError>
 where
@@ -329,6 +338,9 @@ impl<'input> SetDeviceContextRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetDeviceContextRequest<'input> {
+    type Reply = ();
+}
 pub fn set_device_context<'c, 'input, Conn>(conn: &'c Conn, device: u32, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -385,6 +397,9 @@ impl GetDeviceContextRequest {
             device,
         })
     }
+}
+impl Request for GetDeviceContextRequest {
+    type Reply = GetDeviceContextReply;
 }
 pub fn get_device_context<Conn>(conn: &Conn, device: u32) -> Result<Cookie<'_, Conn, GetDeviceContextReply>, ConnectionError>
 where
@@ -490,6 +505,9 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetWindowCreateContextRequest<'input> {
+    type Reply = ();
+}
 pub fn set_window_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -536,6 +554,9 @@ impl GetWindowCreateContextRequest {
         Ok(GetWindowCreateContextRequest
         )
     }
+}
+impl Request for GetWindowCreateContextRequest {
+    type Reply = GetWindowCreateContextReply;
 }
 pub fn get_window_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetWindowCreateContextReply>, ConnectionError>
 where
@@ -633,6 +654,9 @@ impl GetWindowContextRequest {
             window,
         })
     }
+}
+impl Request for GetWindowContextRequest {
+    type Reply = GetWindowContextReply;
 }
 pub fn get_window_context<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetWindowContextReply>, ConnectionError>
 where
@@ -821,6 +845,9 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetPropertyCreateContextRequest<'input> {
+    type Reply = ();
+}
 pub fn set_property_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -867,6 +894,9 @@ impl GetPropertyCreateContextRequest {
         Ok(GetPropertyCreateContextRequest
         )
     }
+}
+impl Request for GetPropertyCreateContextRequest {
+    type Reply = GetPropertyCreateContextReply;
 }
 pub fn get_property_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPropertyCreateContextReply>, ConnectionError>
 where
@@ -970,6 +1000,9 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetPropertyUseContextRequest<'input> {
+    type Reply = ();
+}
 pub fn set_property_use_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1016,6 +1049,9 @@ impl GetPropertyUseContextRequest {
         Ok(GetPropertyUseContextRequest
         )
     }
+}
+impl Request for GetPropertyUseContextRequest {
+    type Reply = GetPropertyUseContextReply;
 }
 pub fn get_property_use_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPropertyUseContextReply>, ConnectionError>
 where
@@ -1121,6 +1157,9 @@ impl GetPropertyContextRequest {
             property,
         })
     }
+}
+impl Request for GetPropertyContextRequest {
+    type Reply = GetPropertyContextReply;
 }
 pub fn get_property_context<Conn>(conn: &Conn, window: xproto::Window, property: xproto::Atom) -> Result<Cookie<'_, Conn, GetPropertyContextReply>, ConnectionError>
 where
@@ -1230,6 +1269,9 @@ impl GetPropertyDataContextRequest {
         })
     }
 }
+impl Request for GetPropertyDataContextRequest {
+    type Reply = GetPropertyDataContextReply;
+}
 pub fn get_property_data_context<Conn>(conn: &Conn, window: xproto::Window, property: xproto::Atom) -> Result<Cookie<'_, Conn, GetPropertyDataContextReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1329,6 +1371,9 @@ impl ListPropertiesRequest {
             window,
         })
     }
+}
+impl Request for ListPropertiesRequest {
+    type Reply = ListPropertiesReply;
 }
 pub fn list_properties<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
 where
@@ -1433,6 +1478,9 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetSelectionCreateContextRequest<'input> {
+    type Reply = ();
+}
 pub fn set_selection_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1479,6 +1527,9 @@ impl GetSelectionCreateContextRequest {
         Ok(GetSelectionCreateContextRequest
         )
     }
+}
+impl Request for GetSelectionCreateContextRequest {
+    type Reply = GetSelectionCreateContextReply;
 }
 pub fn get_selection_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetSelectionCreateContextReply>, ConnectionError>
 where
@@ -1582,6 +1633,9 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetSelectionUseContextRequest<'input> {
+    type Reply = ();
+}
 pub fn set_selection_use_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1628,6 +1682,9 @@ impl GetSelectionUseContextRequest {
         Ok(GetSelectionUseContextRequest
         )
     }
+}
+impl Request for GetSelectionUseContextRequest {
+    type Reply = GetSelectionUseContextReply;
 }
 pub fn get_selection_use_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetSelectionUseContextReply>, ConnectionError>
 where
@@ -1725,6 +1782,9 @@ impl GetSelectionContextRequest {
             selection,
         })
     }
+}
+impl Request for GetSelectionContextRequest {
+    type Reply = GetSelectionContextReply;
 }
 pub fn get_selection_context<Conn>(conn: &Conn, selection: xproto::Atom) -> Result<Cookie<'_, Conn, GetSelectionContextReply>, ConnectionError>
 where
@@ -1825,6 +1885,9 @@ impl GetSelectionDataContextRequest {
         })
     }
 }
+impl Request for GetSelectionDataContextRequest {
+    type Reply = GetSelectionDataContextReply;
+}
 pub fn get_selection_data_context<Conn>(conn: &Conn, selection: xproto::Atom) -> Result<Cookie<'_, Conn, GetSelectionDataContextReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1914,6 +1977,9 @@ impl ListSelectionsRequest {
         Ok(ListSelectionsRequest
         )
     }
+}
+impl Request for ListSelectionsRequest {
+    type Reply = ListSelectionsReply;
 }
 pub fn list_selections<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListSelectionsReply>, ConnectionError>
 where
@@ -2010,6 +2076,9 @@ impl GetClientContextRequest {
             resource,
         })
     }
+}
+impl Request for GetClientContextRequest {
+    type Reply = GetClientContextReply;
 }
 pub fn get_client_context<Conn>(conn: &Conn, resource: u32) -> Result<Cookie<'_, Conn, GetClientContextReply>, ConnectionError>
 where

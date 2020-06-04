@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -83,6 +83,9 @@ impl GetVersionRequest {
             minor_version,
         })
     }
+}
+impl Request for GetVersionRequest {
+    type Reply = GetVersionReply;
 }
 pub fn get_version<Conn>(conn: &Conn, major_version: u8, minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
 where
@@ -245,6 +248,9 @@ impl CompareCursorRequest {
         })
     }
 }
+impl Request for CompareCursorRequest {
+    type Reply = CompareCursorReply;
+}
 pub fn compare_cursor<Conn>(conn: &Conn, window: xproto::Window, cursor: xproto::Cursor) -> Result<Cookie<'_, Conn, CompareCursorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -381,6 +387,9 @@ impl FakeInputRequest {
         })
     }
 }
+impl Request for FakeInputRequest {
+    type Reply = ();
+}
 pub fn fake_input<Conn>(conn: &Conn, type_: u8, detail: u8, time: u32, root: xproto::Window, root_x: i16, root_y: i16, deviceid: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -443,6 +452,9 @@ impl GrabControlRequest {
             impervious,
         })
     }
+}
+impl Request for GrabControlRequest {
+    type Reply = ();
 }
 pub fn grab_control<Conn>(conn: &Conn, impervious: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
