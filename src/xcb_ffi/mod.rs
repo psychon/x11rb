@@ -5,6 +5,7 @@
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::io::{Error as IOError, ErrorKind, IoSlice};
+use std::os::raw::c_int;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::ptr::{null, null_mut};
@@ -53,7 +54,7 @@ impl XCBConnection {
         Self::connection_error_from_c_error(raw_ffi::xcb_connection_has_error(c))
     }
 
-    fn connection_error_from_c_error(error: i32) -> ConnectionError {
+    fn connection_error_from_c_error(error: c_int) -> ConnectionError {
         use crate::xcb_ffi::raw_ffi::connection_errors::*;
 
         assert_ne!(error, 0);
@@ -68,7 +69,7 @@ impl XCBConnection {
         }
     }
 
-    fn connect_error_from_c_error(error: i32) -> ConnectError {
+    fn connect_error_from_c_error(error: c_int) -> ConnectError {
         use crate::xcb_ffi::raw_ffi::connection_errors::*;
 
         assert_ne!(error, 0);
@@ -98,9 +99,7 @@ impl XCBConnection {
             );
             let error = raw_ffi::xcb_connection_has_error(connection.as_ptr());
             if error != 0 {
-                Err(Self::connect_error_from_c_error(
-                    error.try_into().or(Err(ConnectError::UnknownError))?,
-                ))
+                Err(Self::connect_error_from_c_error(error))
             } else {
                 let setup = raw_ffi::xcb_get_setup(connection.as_ptr());
                 let conn = XCBConnection {
@@ -182,6 +181,7 @@ impl XCBConnection {
         });
         new_bufs_ffi.extend(new_bufs.iter().map(|ioslice| raw_ffi::iovec {
             iov_base: ioslice.as_ptr() as _,
+            #[allow(clippy::useless_conversion)]
             iov_len: ioslice.len().try_into().unwrap(),
         }));
 
