@@ -8800,7 +8800,6 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
-        let format = format.try_into()?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -13546,7 +13545,6 @@ impl<'input> XIChangePropertyRequest<'input> {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
         let (format, remaining) = u8::try_parse(remaining)?;
-        let format = format.try_into()?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
