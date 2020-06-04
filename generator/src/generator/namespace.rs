@@ -11,7 +11,17 @@ use xcbgen::defs as xcbdefs;
 use super::output::Output;
 use super::{get_ns_name_prefix, special_cases};
 
-type EnumCases = HashMap<String, (Vec<String>, Vec<String>)>;
+#[derive(Debug, Default)]
+pub(super) struct PerModuleEnumCases {
+    /// Lines that belong in the Request enum definition.
+    request_variants: Vec<String>,
+    /// Lines that belong in definition of Request::parse.
+    request_parse_cases: Vec<String>,
+    /// Lines that belong in the Reply enum definition.
+    reply_variants: Vec<String>,
+}
+
+type EnumCases = HashMap<String, PerModuleEnumCases>;
 
 /// Generate a Rust module for namespace `ns`.
 pub(super) fn generate(
@@ -23,8 +33,8 @@ pub(super) fn generate(
     NamespaceGenerator::new(ns, caches).generate(out, enum_cases);
 }
 
-/// Generate the Request and enum containing all possible requests.
-pub(super) fn generate_request_enum(
+/// Generate the Request and Reply enums containing all possible requests and replies, respectively.
+pub(super) fn generate_request_reply_enum(
     out: &mut Output,
     module: &xcbdefs::Module,
     mut enum_cases: EnumCases,
@@ -41,7 +51,11 @@ pub(super) fn generate_request_enum(
         for ns in namespaces.iter() {
             let has_feature = super::ext_has_feature(&ns.header);
 
-            let request_cases = enum_cases.get_mut(&ns.header).unwrap().0.drain(..);
+            let request_cases = enum_cases
+                .get_mut(&ns.header)
+                .unwrap()
+                .request_variants
+                .drain(..);
             for case in request_cases {
                 if has_feature {
                     outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
@@ -85,7 +99,11 @@ pub(super) fn generate_request_enum(
             outln!(out, "match header.major_opcode {{");
             out.indented(|out| {
                 let xproto_ns = module.namespace("xproto").unwrap();
-                let xproto_cases = enum_cases.get_mut(&xproto_ns.header).unwrap().1.drain(..);
+                let xproto_cases = enum_cases
+                    .get_mut(&xproto_ns.header)
+                    .unwrap()
+                    .request_parse_cases
+                    .drain(..);
                 for case in xproto_cases {
                     outln!(out, "{}", case);
                 }
@@ -103,7 +121,8 @@ pub(super) fn generate_request_enum(
             outln!(out, "match ext_info {{");
             out.indented(|out| {
                 for ns in namespaces.iter() {
-                    let parse_cases = &mut enum_cases.get_mut(&ns.header).unwrap().1;
+                    let parse_cases =
+                        &mut enum_cases.get_mut(&ns.header).unwrap().request_parse_cases;
                     if parse_cases.is_empty() {
                         continue;
                     }
@@ -131,6 +150,31 @@ pub(super) fn generate_request_enum(
             outln!(out, "Ok(Request::Unknown(header, remaining))");
         });
         outln!(out, "}}");
+    });
+    outln!(out, "}}");
+    outln!(out, "");
+    outln!(out, "/// Enumeration of all possible X11 replies.");
+    outln!(out, "#[derive(Debug)]");
+    // clippy::large_enum_variant for XkbGetKbdByNameReply.
+    outln!(out, "#[allow(clippy::large_enum_variant)]");
+    outln!(out, "pub enum Reply {{");
+    out.indented(|out| {
+        outln!(out, "Void,");
+        for ns in namespaces.iter() {
+            let has_feature = super::ext_has_feature(&ns.header);
+
+            let reply_cases = enum_cases
+                .get_mut(&ns.header)
+                .unwrap()
+                .reply_variants
+                .drain(..);
+            for case in reply_cases {
+                if has_feature {
+                    outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                }
+                outln!(out, "{}", case);
+            }
+        }
     });
     outln!(out, "}}");
     outln!(out, "");
@@ -340,9 +384,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         request_def: &xcbdefs::RequestDef,
         out: &mut Output,
         trait_out: &mut Output,
-        request_enum_cases: &mut (Vec<String>, Vec<String>),
+        enum_cases: &mut PerModuleEnumCases,
     ) {
-        let (variant_cases, parse_cases) = request_enum_cases;
         let name = to_rust_type_name(&request_def.name);
 
         let mut function_name = super::camel_case_to_lower_snake(&name);
@@ -398,7 +441,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         } else {
             ""
         };
-        variant_cases.push(format!(
+        enum_cases.request_variants.push(format!(
             "{ns_prefix}{name}({header}::{name}Request{lifetime}),",
             ns_prefix = ns_prefix,
             name = name,
@@ -406,7 +449,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             lifetime = lifetime_block
         ));
         if gathered.has_fds() {
-            parse_cases.push(format!(
+            enum_cases.request_parse_cases.push(format!(
                 "{header}::{opcode_name}_REQUEST => return \
                  Ok(Request::{ns_prefix}{name}({header}::{name}Request::\
                  try_parse_request_fd(header, remaining, fds)?)),",
@@ -416,7 +459,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 name = name,
             ));
         } else {
-            parse_cases.push(format!(
+            enum_cases.request_parse_cases.push(format!(
                 "{header}::{opcode_name}_REQUEST => return \
                  Ok(Request::{ns_prefix}{name}({header}::{name}Request::try_parse_request(header, \
                  remaining)?)),",
@@ -435,6 +478,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         if let Some(ref reply) = request_def.reply {
             let reply_struct_name = format!("{}Reply", name);
+            enum_cases.reply_variants.push(format!(
+                "{ns_prefix}{name}({header}::{name}Reply),",
+                ns_prefix = ns_prefix,
+                name = name,
+                header = self.ns.header,
+            ));
             let reply_fields = reply.fields.borrow();
             let mut reply_derives = Derives::all();
             self.filter_derives_for_fields(&mut reply_derives, &*reply_fields, false);

@@ -54,7 +54,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     }
     outln!(main_out, "");
 
-    namespace::generate_request_enum(&mut main_out, module, enum_cases);
+    namespace::generate_request_reply_enum(&mut main_out, module, enum_cases);
     error_events::generate(&mut main_out, module);
 
     out_map.insert(PathBuf::from("mod.rs"), main_out.into_data());

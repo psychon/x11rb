@@ -2112,6 +2112,608 @@ impl<'input> Request<'input> {
     }
 }
 
+/// Enumeration of all possible X11 replies.
+#[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
+pub enum Reply {
+    Void,
+    GetWindowAttributes(xproto::GetWindowAttributesReply),
+    GetGeometry(xproto::GetGeometryReply),
+    QueryTree(xproto::QueryTreeReply),
+    InternAtom(xproto::InternAtomReply),
+    GetAtomName(xproto::GetAtomNameReply),
+    GetProperty(xproto::GetPropertyReply),
+    ListProperties(xproto::ListPropertiesReply),
+    GetSelectionOwner(xproto::GetSelectionOwnerReply),
+    GrabPointer(xproto::GrabPointerReply),
+    GrabKeyboard(xproto::GrabKeyboardReply),
+    QueryPointer(xproto::QueryPointerReply),
+    GetMotionEvents(xproto::GetMotionEventsReply),
+    TranslateCoordinates(xproto::TranslateCoordinatesReply),
+    GetInputFocus(xproto::GetInputFocusReply),
+    QueryKeymap(xproto::QueryKeymapReply),
+    QueryFont(xproto::QueryFontReply),
+    QueryTextExtents(xproto::QueryTextExtentsReply),
+    ListFonts(xproto::ListFontsReply),
+    ListFontsWithInfo(xproto::ListFontsWithInfoReply),
+    GetFontPath(xproto::GetFontPathReply),
+    GetImage(xproto::GetImageReply),
+    ListInstalledColormaps(xproto::ListInstalledColormapsReply),
+    AllocColor(xproto::AllocColorReply),
+    AllocNamedColor(xproto::AllocNamedColorReply),
+    AllocColorCells(xproto::AllocColorCellsReply),
+    AllocColorPlanes(xproto::AllocColorPlanesReply),
+    QueryColors(xproto::QueryColorsReply),
+    LookupColor(xproto::LookupColorReply),
+    QueryBestSize(xproto::QueryBestSizeReply),
+    QueryExtension(xproto::QueryExtensionReply),
+    ListExtensions(xproto::ListExtensionsReply),
+    GetKeyboardMapping(xproto::GetKeyboardMappingReply),
+    GetKeyboardControl(xproto::GetKeyboardControlReply),
+    GetPointerControl(xproto::GetPointerControlReply),
+    GetScreenSaver(xproto::GetScreenSaverReply),
+    ListHosts(xproto::ListHostsReply),
+    SetPointerMapping(xproto::SetPointerMappingReply),
+    GetPointerMapping(xproto::GetPointerMappingReply),
+    SetModifierMapping(xproto::SetModifierMappingReply),
+    GetModifierMapping(xproto::GetModifierMappingReply),
+    BigreqEnable(bigreq::EnableReply),
+    #[cfg(feature = "composite")]
+    CompositeQueryVersion(composite::QueryVersionReply),
+    #[cfg(feature = "composite")]
+    CompositeGetOverlayWindow(composite::GetOverlayWindowReply),
+    #[cfg(feature = "damage")]
+    DamageQueryVersion(damage::QueryVersionReply),
+    #[cfg(feature = "dpms")]
+    DpmsGetVersion(dpms::GetVersionReply),
+    #[cfg(feature = "dpms")]
+    DpmsCapable(dpms::CapableReply),
+    #[cfg(feature = "dpms")]
+    DpmsGetTimeouts(dpms::GetTimeoutsReply),
+    #[cfg(feature = "dpms")]
+    DpmsInfo(dpms::InfoReply),
+    #[cfg(feature = "dri2")]
+    Dri2QueryVersion(dri2::QueryVersionReply),
+    #[cfg(feature = "dri2")]
+    Dri2Connect(dri2::ConnectReply),
+    #[cfg(feature = "dri2")]
+    Dri2Authenticate(dri2::AuthenticateReply),
+    #[cfg(feature = "dri2")]
+    Dri2GetBuffers(dri2::GetBuffersReply),
+    #[cfg(feature = "dri2")]
+    Dri2CopyRegion(dri2::CopyRegionReply),
+    #[cfg(feature = "dri2")]
+    Dri2GetBuffersWithFormat(dri2::GetBuffersWithFormatReply),
+    #[cfg(feature = "dri2")]
+    Dri2SwapBuffers(dri2::SwapBuffersReply),
+    #[cfg(feature = "dri2")]
+    Dri2GetMSC(dri2::GetMSCReply),
+    #[cfg(feature = "dri2")]
+    Dri2WaitMSC(dri2::WaitMSCReply),
+    #[cfg(feature = "dri2")]
+    Dri2WaitSBC(dri2::WaitSBCReply),
+    #[cfg(feature = "dri2")]
+    Dri2GetParam(dri2::GetParamReply),
+    #[cfg(feature = "dri3")]
+    Dri3QueryVersion(dri3::QueryVersionReply),
+    #[cfg(feature = "dri3")]
+    Dri3Open(dri3::OpenReply),
+    #[cfg(feature = "dri3")]
+    Dri3BufferFromPixmap(dri3::BufferFromPixmapReply),
+    #[cfg(feature = "dri3")]
+    Dri3FDFromFence(dri3::FDFromFenceReply),
+    #[cfg(feature = "dri3")]
+    Dri3GetSupportedModifiers(dri3::GetSupportedModifiersReply),
+    #[cfg(feature = "dri3")]
+    Dri3BuffersFromPixmap(dri3::BuffersFromPixmapReply),
+    GeQueryVersion(ge::QueryVersionReply),
+    #[cfg(feature = "glx")]
+    GlxMakeCurrent(glx::MakeCurrentReply),
+    #[cfg(feature = "glx")]
+    GlxIsDirect(glx::IsDirectReply),
+    #[cfg(feature = "glx")]
+    GlxQueryVersion(glx::QueryVersionReply),
+    #[cfg(feature = "glx")]
+    GlxGetVisualConfigs(glx::GetVisualConfigsReply),
+    #[cfg(feature = "glx")]
+    GlxVendorPrivateWithReply(glx::VendorPrivateWithReplyReply),
+    #[cfg(feature = "glx")]
+    GlxQueryExtensionsString(glx::QueryExtensionsStringReply),
+    #[cfg(feature = "glx")]
+    GlxQueryServerString(glx::QueryServerStringReply),
+    #[cfg(feature = "glx")]
+    GlxGetFBConfigs(glx::GetFBConfigsReply),
+    #[cfg(feature = "glx")]
+    GlxQueryContext(glx::QueryContextReply),
+    #[cfg(feature = "glx")]
+    GlxMakeContextCurrent(glx::MakeContextCurrentReply),
+    #[cfg(feature = "glx")]
+    GlxGetDrawableAttributes(glx::GetDrawableAttributesReply),
+    #[cfg(feature = "glx")]
+    GlxGenLists(glx::GenListsReply),
+    #[cfg(feature = "glx")]
+    GlxRenderMode(glx::RenderModeReply),
+    #[cfg(feature = "glx")]
+    GlxFinish(glx::FinishReply),
+    #[cfg(feature = "glx")]
+    GlxReadPixels(glx::ReadPixelsReply),
+    #[cfg(feature = "glx")]
+    GlxGetBooleanv(glx::GetBooleanvReply),
+    #[cfg(feature = "glx")]
+    GlxGetClipPlane(glx::GetClipPlaneReply),
+    #[cfg(feature = "glx")]
+    GlxGetDoublev(glx::GetDoublevReply),
+    #[cfg(feature = "glx")]
+    GlxGetError(glx::GetErrorReply),
+    #[cfg(feature = "glx")]
+    GlxGetFloatv(glx::GetFloatvReply),
+    #[cfg(feature = "glx")]
+    GlxGetIntegerv(glx::GetIntegervReply),
+    #[cfg(feature = "glx")]
+    GlxGetLightfv(glx::GetLightfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetLightiv(glx::GetLightivReply),
+    #[cfg(feature = "glx")]
+    GlxGetMapdv(glx::GetMapdvReply),
+    #[cfg(feature = "glx")]
+    GlxGetMapfv(glx::GetMapfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetMapiv(glx::GetMapivReply),
+    #[cfg(feature = "glx")]
+    GlxGetMaterialfv(glx::GetMaterialfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetMaterialiv(glx::GetMaterialivReply),
+    #[cfg(feature = "glx")]
+    GlxGetPixelMapfv(glx::GetPixelMapfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetPixelMapuiv(glx::GetPixelMapuivReply),
+    #[cfg(feature = "glx")]
+    GlxGetPixelMapusv(glx::GetPixelMapusvReply),
+    #[cfg(feature = "glx")]
+    GlxGetPolygonStipple(glx::GetPolygonStippleReply),
+    #[cfg(feature = "glx")]
+    GlxGetString(glx::GetStringReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexEnvfv(glx::GetTexEnvfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexEnviv(glx::GetTexEnvivReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexGendv(glx::GetTexGendvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexGenfv(glx::GetTexGenfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexGeniv(glx::GetTexGenivReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexImage(glx::GetTexImageReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexParameterfv(glx::GetTexParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexParameteriv(glx::GetTexParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexLevelParameterfv(glx::GetTexLevelParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexLevelParameteriv(glx::GetTexLevelParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxIsEnabled(glx::IsEnabledReply),
+    #[cfg(feature = "glx")]
+    GlxIsList(glx::IsListReply),
+    #[cfg(feature = "glx")]
+    GlxAreTexturesResident(glx::AreTexturesResidentReply),
+    #[cfg(feature = "glx")]
+    GlxGenTextures(glx::GenTexturesReply),
+    #[cfg(feature = "glx")]
+    GlxIsTexture(glx::IsTextureReply),
+    #[cfg(feature = "glx")]
+    GlxGetColorTable(glx::GetColorTableReply),
+    #[cfg(feature = "glx")]
+    GlxGetColorTableParameterfv(glx::GetColorTableParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetColorTableParameteriv(glx::GetColorTableParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetConvolutionFilter(glx::GetConvolutionFilterReply),
+    #[cfg(feature = "glx")]
+    GlxGetConvolutionParameterfv(glx::GetConvolutionParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetConvolutionParameteriv(glx::GetConvolutionParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetSeparableFilter(glx::GetSeparableFilterReply),
+    #[cfg(feature = "glx")]
+    GlxGetHistogram(glx::GetHistogramReply),
+    #[cfg(feature = "glx")]
+    GlxGetHistogramParameterfv(glx::GetHistogramParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetHistogramParameteriv(glx::GetHistogramParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetMinmax(glx::GetMinmaxReply),
+    #[cfg(feature = "glx")]
+    GlxGetMinmaxParameterfv(glx::GetMinmaxParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetMinmaxParameteriv(glx::GetMinmaxParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetCompressedTexImageARB(glx::GetCompressedTexImageARBReply),
+    #[cfg(feature = "glx")]
+    GlxGenQueriesARB(glx::GenQueriesARBReply),
+    #[cfg(feature = "glx")]
+    GlxIsQueryARB(glx::IsQueryARBReply),
+    #[cfg(feature = "glx")]
+    GlxGetQueryivARB(glx::GetQueryivARBReply),
+    #[cfg(feature = "glx")]
+    GlxGetQueryObjectivARB(glx::GetQueryObjectivARBReply),
+    #[cfg(feature = "glx")]
+    GlxGetQueryObjectuivARB(glx::GetQueryObjectuivARBReply),
+    #[cfg(feature = "present")]
+    PresentQueryVersion(present::QueryVersionReply),
+    #[cfg(feature = "present")]
+    PresentQueryCapabilities(present::QueryCapabilitiesReply),
+    #[cfg(feature = "randr")]
+    RandrQueryVersion(randr::QueryVersionReply),
+    #[cfg(feature = "randr")]
+    RandrSetScreenConfig(randr::SetScreenConfigReply),
+    #[cfg(feature = "randr")]
+    RandrGetScreenInfo(randr::GetScreenInfoReply),
+    #[cfg(feature = "randr")]
+    RandrGetScreenSizeRange(randr::GetScreenSizeRangeReply),
+    #[cfg(feature = "randr")]
+    RandrGetScreenResources(randr::GetScreenResourcesReply),
+    #[cfg(feature = "randr")]
+    RandrGetOutputInfo(randr::GetOutputInfoReply),
+    #[cfg(feature = "randr")]
+    RandrListOutputProperties(randr::ListOutputPropertiesReply),
+    #[cfg(feature = "randr")]
+    RandrQueryOutputProperty(randr::QueryOutputPropertyReply),
+    #[cfg(feature = "randr")]
+    RandrGetOutputProperty(randr::GetOutputPropertyReply),
+    #[cfg(feature = "randr")]
+    RandrCreateMode(randr::CreateModeReply),
+    #[cfg(feature = "randr")]
+    RandrGetCrtcInfo(randr::GetCrtcInfoReply),
+    #[cfg(feature = "randr")]
+    RandrSetCrtcConfig(randr::SetCrtcConfigReply),
+    #[cfg(feature = "randr")]
+    RandrGetCrtcGammaSize(randr::GetCrtcGammaSizeReply),
+    #[cfg(feature = "randr")]
+    RandrGetCrtcGamma(randr::GetCrtcGammaReply),
+    #[cfg(feature = "randr")]
+    RandrGetScreenResourcesCurrent(randr::GetScreenResourcesCurrentReply),
+    #[cfg(feature = "randr")]
+    RandrGetCrtcTransform(randr::GetCrtcTransformReply),
+    #[cfg(feature = "randr")]
+    RandrGetPanning(randr::GetPanningReply),
+    #[cfg(feature = "randr")]
+    RandrSetPanning(randr::SetPanningReply),
+    #[cfg(feature = "randr")]
+    RandrGetOutputPrimary(randr::GetOutputPrimaryReply),
+    #[cfg(feature = "randr")]
+    RandrGetProviders(randr::GetProvidersReply),
+    #[cfg(feature = "randr")]
+    RandrGetProviderInfo(randr::GetProviderInfoReply),
+    #[cfg(feature = "randr")]
+    RandrListProviderProperties(randr::ListProviderPropertiesReply),
+    #[cfg(feature = "randr")]
+    RandrQueryProviderProperty(randr::QueryProviderPropertyReply),
+    #[cfg(feature = "randr")]
+    RandrGetProviderProperty(randr::GetProviderPropertyReply),
+    #[cfg(feature = "randr")]
+    RandrGetMonitors(randr::GetMonitorsReply),
+    #[cfg(feature = "randr")]
+    RandrCreateLease(randr::CreateLeaseReply),
+    #[cfg(feature = "record")]
+    RecordQueryVersion(record::QueryVersionReply),
+    #[cfg(feature = "record")]
+    RecordGetContext(record::GetContextReply),
+    #[cfg(feature = "record")]
+    RecordEnableContext(record::EnableContextReply),
+    #[cfg(feature = "render")]
+    RenderQueryVersion(render::QueryVersionReply),
+    #[cfg(feature = "render")]
+    RenderQueryPictFormats(render::QueryPictFormatsReply),
+    #[cfg(feature = "render")]
+    RenderQueryPictIndexValues(render::QueryPictIndexValuesReply),
+    #[cfg(feature = "render")]
+    RenderQueryFilters(render::QueryFiltersReply),
+    #[cfg(feature = "res")]
+    ResQueryVersion(res::QueryVersionReply),
+    #[cfg(feature = "res")]
+    ResQueryClients(res::QueryClientsReply),
+    #[cfg(feature = "res")]
+    ResQueryClientResources(res::QueryClientResourcesReply),
+    #[cfg(feature = "res")]
+    ResQueryClientPixmapBytes(res::QueryClientPixmapBytesReply),
+    #[cfg(feature = "res")]
+    ResQueryClientIds(res::QueryClientIdsReply),
+    #[cfg(feature = "res")]
+    ResQueryResourceBytes(res::QueryResourceBytesReply),
+    #[cfg(feature = "screensaver")]
+    ScreensaverQueryVersion(screensaver::QueryVersionReply),
+    #[cfg(feature = "screensaver")]
+    ScreensaverQueryInfo(screensaver::QueryInfoReply),
+    #[cfg(feature = "shape")]
+    ShapeQueryVersion(shape::QueryVersionReply),
+    #[cfg(feature = "shape")]
+    ShapeQueryExtents(shape::QueryExtentsReply),
+    #[cfg(feature = "shape")]
+    ShapeInputSelected(shape::InputSelectedReply),
+    #[cfg(feature = "shape")]
+    ShapeGetRectangles(shape::GetRectanglesReply),
+    #[cfg(feature = "shm")]
+    ShmQueryVersion(shm::QueryVersionReply),
+    #[cfg(feature = "shm")]
+    ShmGetImage(shm::GetImageReply),
+    #[cfg(feature = "shm")]
+    ShmCreateSegment(shm::CreateSegmentReply),
+    #[cfg(feature = "sync")]
+    SyncInitialize(sync::InitializeReply),
+    #[cfg(feature = "sync")]
+    SyncListSystemCounters(sync::ListSystemCountersReply),
+    #[cfg(feature = "sync")]
+    SyncQueryCounter(sync::QueryCounterReply),
+    #[cfg(feature = "sync")]
+    SyncQueryAlarm(sync::QueryAlarmReply),
+    #[cfg(feature = "sync")]
+    SyncGetPriority(sync::GetPriorityReply),
+    #[cfg(feature = "sync")]
+    SyncQueryFence(sync::QueryFenceReply),
+    XcMiscGetVersion(xc_misc::GetVersionReply),
+    XcMiscGetXIDRange(xc_misc::GetXIDRangeReply),
+    XcMiscGetXIDList(xc_misc::GetXIDListReply),
+    #[cfg(feature = "xevie")]
+    XevieQueryVersion(xevie::QueryVersionReply),
+    #[cfg(feature = "xevie")]
+    XevieStart(xevie::StartReply),
+    #[cfg(feature = "xevie")]
+    XevieEnd(xevie::EndReply),
+    #[cfg(feature = "xevie")]
+    XevieSend(xevie::SendReply),
+    #[cfg(feature = "xevie")]
+    XevieSelectInput(xevie::SelectInputReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driQueryVersion(xf86dri::QueryVersionReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driQueryDirectRenderingCapable(xf86dri::QueryDirectRenderingCapableReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driOpenConnection(xf86dri::OpenConnectionReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driGetClientDriverName(xf86dri::GetClientDriverNameReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driCreateContext(xf86dri::CreateContextReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driCreateDrawable(xf86dri::CreateDrawableReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driGetDrawableInfo(xf86dri::GetDrawableInfoReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driGetDeviceInfo(xf86dri::GetDeviceInfoReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driAuthConnection(xf86dri::AuthConnectionReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeQueryVersion(xf86vidmode::QueryVersionReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetModeLine(xf86vidmode::GetModeLineReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetMonitor(xf86vidmode::GetMonitorReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetAllModeLines(xf86vidmode::GetAllModeLinesReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeValidateModeLine(xf86vidmode::ValidateModeLineReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetViewPort(xf86vidmode::GetViewPortReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetDotClocks(xf86vidmode::GetDotClocksReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetGamma(xf86vidmode::GetGammaReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetGammaRamp(xf86vidmode::GetGammaRampReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetGammaRampSize(xf86vidmode::GetGammaRampSizeReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetPermissions(xf86vidmode::GetPermissionsReply),
+    #[cfg(feature = "xfixes")]
+    XfixesQueryVersion(xfixes::QueryVersionReply),
+    #[cfg(feature = "xfixes")]
+    XfixesGetCursorImage(xfixes::GetCursorImageReply),
+    #[cfg(feature = "xfixes")]
+    XfixesFetchRegion(xfixes::FetchRegionReply),
+    #[cfg(feature = "xfixes")]
+    XfixesGetCursorName(xfixes::GetCursorNameReply),
+    #[cfg(feature = "xfixes")]
+    XfixesGetCursorImageAndName(xfixes::GetCursorImageAndNameReply),
+    #[cfg(feature = "xinerama")]
+    XineramaQueryVersion(xinerama::QueryVersionReply),
+    #[cfg(feature = "xinerama")]
+    XineramaGetState(xinerama::GetStateReply),
+    #[cfg(feature = "xinerama")]
+    XineramaGetScreenCount(xinerama::GetScreenCountReply),
+    #[cfg(feature = "xinerama")]
+    XineramaGetScreenSize(xinerama::GetScreenSizeReply),
+    #[cfg(feature = "xinerama")]
+    XineramaIsActive(xinerama::IsActiveReply),
+    #[cfg(feature = "xinerama")]
+    XineramaQueryScreens(xinerama::QueryScreensReply),
+    #[cfg(feature = "xinput")]
+    XinputGetExtensionVersion(xinput::GetExtensionVersionReply),
+    #[cfg(feature = "xinput")]
+    XinputListInputDevices(xinput::ListInputDevicesReply),
+    #[cfg(feature = "xinput")]
+    XinputOpenDevice(xinput::OpenDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputSetDeviceMode(xinput::SetDeviceModeReply),
+    #[cfg(feature = "xinput")]
+    XinputGetSelectedExtensionEvents(xinput::GetSelectedExtensionEventsReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceDontPropagateList(xinput::GetDeviceDontPropagateListReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceMotionEvents(xinput::GetDeviceMotionEventsReply),
+    #[cfg(feature = "xinput")]
+    XinputChangeKeyboardDevice(xinput::ChangeKeyboardDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputChangePointerDevice(xinput::ChangePointerDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputGrabDevice(xinput::GrabDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceFocus(xinput::GetDeviceFocusReply),
+    #[cfg(feature = "xinput")]
+    XinputGetFeedbackControl(xinput::GetFeedbackControlReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceKeyMapping(xinput::GetDeviceKeyMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceModifierMapping(xinput::GetDeviceModifierMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputSetDeviceModifierMapping(xinput::SetDeviceModifierMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceButtonMapping(xinput::GetDeviceButtonMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputSetDeviceButtonMapping(xinput::SetDeviceButtonMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputQueryDeviceState(xinput::QueryDeviceStateReply),
+    #[cfg(feature = "xinput")]
+    XinputSetDeviceValuators(xinput::SetDeviceValuatorsReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceControl(xinput::GetDeviceControlReply),
+    #[cfg(feature = "xinput")]
+    XinputChangeDeviceControl(xinput::ChangeDeviceControlReply),
+    #[cfg(feature = "xinput")]
+    XinputListDeviceProperties(xinput::ListDevicePropertiesReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceProperty(xinput::GetDevicePropertyReply),
+    #[cfg(feature = "xinput")]
+    XinputXIQueryPointer(xinput::XIQueryPointerReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGetClientPointer(xinput::XIGetClientPointerReply),
+    #[cfg(feature = "xinput")]
+    XinputXIQueryVersion(xinput::XIQueryVersionReply),
+    #[cfg(feature = "xinput")]
+    XinputXIQueryDevice(xinput::XIQueryDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGetFocus(xinput::XIGetFocusReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGrabDevice(xinput::XIGrabDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputXIPassiveGrabDevice(xinput::XIPassiveGrabDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputXIListProperties(xinput::XIListPropertiesReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGetProperty(xinput::XIGetPropertyReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGetSelectedEvents(xinput::XIGetSelectedEventsReply),
+    #[cfg(feature = "xkb")]
+    XkbUseExtension(xkb::UseExtensionReply),
+    #[cfg(feature = "xkb")]
+    XkbGetState(xkb::GetStateReply),
+    #[cfg(feature = "xkb")]
+    XkbGetControls(xkb::GetControlsReply),
+    #[cfg(feature = "xkb")]
+    XkbGetMap(xkb::GetMapReply),
+    #[cfg(feature = "xkb")]
+    XkbGetCompatMap(xkb::GetCompatMapReply),
+    #[cfg(feature = "xkb")]
+    XkbGetIndicatorState(xkb::GetIndicatorStateReply),
+    #[cfg(feature = "xkb")]
+    XkbGetIndicatorMap(xkb::GetIndicatorMapReply),
+    #[cfg(feature = "xkb")]
+    XkbGetNamedIndicator(xkb::GetNamedIndicatorReply),
+    #[cfg(feature = "xkb")]
+    XkbGetNames(xkb::GetNamesReply),
+    #[cfg(feature = "xkb")]
+    XkbPerClientFlags(xkb::PerClientFlagsReply),
+    #[cfg(feature = "xkb")]
+    XkbListComponents(xkb::ListComponentsReply),
+    #[cfg(feature = "xkb")]
+    XkbGetKbdByName(xkb::GetKbdByNameReply),
+    #[cfg(feature = "xkb")]
+    XkbGetDeviceInfo(xkb::GetDeviceInfoReply),
+    #[cfg(feature = "xkb")]
+    XkbSetDebuggingFlags(xkb::SetDebuggingFlagsReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintQueryVersion(xprint::PrintQueryVersionReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetPrinterList(xprint::PrintGetPrinterListReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetContext(xprint::PrintGetContextReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetScreenOfContext(xprint::PrintGetScreenOfContextReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetDocumentData(xprint::PrintGetDocumentDataReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintInputSelected(xprint::PrintInputSelectedReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetAttributes(xprint::PrintGetAttributesReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetOneAttributes(xprint::PrintGetOneAttributesReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetPageDimensions(xprint::PrintGetPageDimensionsReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintQueryScreens(xprint::PrintQueryScreensReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintSetImageResolution(xprint::PrintSetImageResolutionReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetImageResolution(xprint::PrintGetImageResolutionReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxQueryVersion(xselinux::QueryVersionReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetDeviceCreateContext(xselinux::GetDeviceCreateContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetDeviceContext(xselinux::GetDeviceContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetWindowCreateContext(xselinux::GetWindowCreateContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetWindowContext(xselinux::GetWindowContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetPropertyCreateContext(xselinux::GetPropertyCreateContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetPropertyUseContext(xselinux::GetPropertyUseContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetPropertyContext(xselinux::GetPropertyContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetPropertyDataContext(xselinux::GetPropertyDataContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxListProperties(xselinux::ListPropertiesReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetSelectionCreateContext(xselinux::GetSelectionCreateContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetSelectionUseContext(xselinux::GetSelectionUseContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetSelectionContext(xselinux::GetSelectionContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetSelectionDataContext(xselinux::GetSelectionDataContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxListSelections(xselinux::ListSelectionsReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetClientContext(xselinux::GetClientContextReply),
+    #[cfg(feature = "xtest")]
+    XtestGetVersion(xtest::GetVersionReply),
+    #[cfg(feature = "xtest")]
+    XtestCompareCursor(xtest::CompareCursorReply),
+    #[cfg(feature = "xv")]
+    XvQueryExtension(xv::QueryExtensionReply),
+    #[cfg(feature = "xv")]
+    XvQueryAdaptors(xv::QueryAdaptorsReply),
+    #[cfg(feature = "xv")]
+    XvQueryEncodings(xv::QueryEncodingsReply),
+    #[cfg(feature = "xv")]
+    XvGrabPort(xv::GrabPortReply),
+    #[cfg(feature = "xv")]
+    XvQueryBestSize(xv::QueryBestSizeReply),
+    #[cfg(feature = "xv")]
+    XvGetPortAttribute(xv::GetPortAttributeReply),
+    #[cfg(feature = "xv")]
+    XvQueryPortAttributes(xv::QueryPortAttributesReply),
+    #[cfg(feature = "xv")]
+    XvListImageFormats(xv::ListImageFormatsReply),
+    #[cfg(feature = "xv")]
+    XvQueryImageAttributes(xv::QueryImageAttributesReply),
+    #[cfg(feature = "xvmc")]
+    XvmcQueryVersion(xvmc::QueryVersionReply),
+    #[cfg(feature = "xvmc")]
+    XvmcListSurfaceTypes(xvmc::ListSurfaceTypesReply),
+    #[cfg(feature = "xvmc")]
+    XvmcCreateContext(xvmc::CreateContextReply),
+    #[cfg(feature = "xvmc")]
+    XvmcCreateSurface(xvmc::CreateSurfaceReply),
+    #[cfg(feature = "xvmc")]
+    XvmcCreateSubpicture(xvmc::CreateSubpictureReply),
+    #[cfg(feature = "xvmc")]
+    XvmcListSubpictureTypes(xvmc::ListSubpictureTypesReply),
+}
+
 /// Enumeration of all possible X11 errors.
 #[derive(Debug, Clone)]
 pub enum Error {
