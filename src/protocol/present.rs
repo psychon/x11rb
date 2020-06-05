@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -553,6 +553,9 @@ impl QueryVersionRequest {
         })
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -768,6 +771,9 @@ impl<'input> PixmapRequest<'input> {
         })
     }
 }
+impl<'input> Request for PixmapRequest<'input> {
+    type Reply = ();
+}
 pub fn pixmap<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &'input [Notify]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -887,6 +893,9 @@ impl NotifyMSCRequest {
         })
     }
 }
+impl Request for NotifyMSCRequest {
+    type Reply = ();
+}
 pub fn notify_msc<Conn>(conn: &Conn, window: xproto::Window, serial: u32, target_msc: u64, divisor: u64, remainder: u64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -965,6 +974,9 @@ impl SelectInputRequest {
         })
     }
 }
+impl Request for SelectInputRequest {
+    type Reply = ();
+}
 pub fn select_input<Conn, A>(conn: &Conn, eid: Event, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1024,6 +1036,9 @@ impl QueryCapabilitiesRequest {
             target,
         })
     }
+}
+impl Request for QueryCapabilitiesRequest {
+    type Reply = QueryCapabilitiesReply;
 }
 pub fn query_capabilities<Conn>(conn: &Conn, target: u32) -> Result<Cookie<'_, Conn, QueryCapabilitiesReply>, ConnectionError>
 where

@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -1582,6 +1582,9 @@ impl QueryExtensionRequest {
         )
     }
 }
+impl Request for QueryExtensionRequest {
+    type Reply = QueryExtensionReply;
+}
 pub fn query_extension<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryExtensionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1662,6 +1665,9 @@ impl QueryAdaptorsRequest {
             window,
         })
     }
+}
+impl Request for QueryAdaptorsRequest {
+    type Reply = QueryAdaptorsReply;
 }
 pub fn query_adaptors<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, QueryAdaptorsReply>, ConnectionError>
 where
@@ -1760,6 +1766,9 @@ impl QueryEncodingsRequest {
             port,
         })
     }
+}
+impl Request for QueryEncodingsRequest {
+    type Reply = QueryEncodingsReply;
 }
 pub fn query_encodings<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, QueryEncodingsReply>, ConnectionError>
 where
@@ -1867,6 +1876,9 @@ impl GrabPortRequest {
         })
     }
 }
+impl Request for GrabPortRequest {
+    type Reply = GrabPortReply;
+}
 pub fn grab_port<Conn, A>(conn: &Conn, port: Port, time: A) -> Result<Cookie<'_, Conn, GrabPortReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1958,6 +1970,9 @@ impl UngrabPortRequest {
             time,
         })
     }
+}
+impl Request for UngrabPortRequest {
+    type Reply = ();
 }
 pub fn ungrab_port<Conn, A>(conn: &Conn, port: Port, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2081,6 +2096,9 @@ impl PutVideoRequest {
             drw_h,
         })
     }
+}
+impl Request for PutVideoRequest {
+    type Reply = ();
 }
 pub fn put_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2212,6 +2230,9 @@ impl PutStillRequest {
         })
     }
 }
+impl Request for PutStillRequest {
+    type Reply = ();
+}
 pub fn put_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2341,6 +2362,9 @@ impl GetVideoRequest {
             drw_h,
         })
     }
+}
+impl Request for GetVideoRequest {
+    type Reply = ();
 }
 pub fn get_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2472,6 +2496,9 @@ impl GetStillRequest {
         })
     }
 }
+impl Request for GetStillRequest {
+    type Reply = ();
+}
 pub fn get_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2546,6 +2573,9 @@ impl StopVideoRequest {
         })
     }
 }
+impl Request for StopVideoRequest {
+    type Reply = ();
+}
 pub fn stop_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2612,6 +2642,9 @@ impl SelectVideoNotifyRequest {
         })
     }
 }
+impl Request for SelectVideoNotifyRequest {
+    type Reply = ();
+}
 pub fn select_video_notify<Conn>(conn: &Conn, drawable: xproto::Drawable, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2677,6 +2710,9 @@ impl SelectPortNotifyRequest {
             onoff,
         })
     }
+}
+impl Request for SelectPortNotifyRequest {
+    type Reply = ();
 }
 pub fn select_port_notify<Conn>(conn: &Conn, port: Port, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2767,6 +2803,9 @@ impl QueryBestSizeRequest {
             motion,
         })
     }
+}
+impl Request for QueryBestSizeRequest {
+    type Reply = QueryBestSizeReply;
 }
 pub fn query_best_size<Conn>(conn: &Conn, port: Port, vid_w: u16, vid_h: u16, drw_w: u16, drw_h: u16, motion: bool) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
 where
@@ -2872,6 +2911,9 @@ impl SetPortAttributeRequest {
         })
     }
 }
+impl Request for SetPortAttributeRequest {
+    type Reply = ();
+}
 pub fn set_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom, value: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2937,6 +2979,9 @@ impl GetPortAttributeRequest {
             attribute,
         })
     }
+}
+impl Request for GetPortAttributeRequest {
+    type Reply = GetPortAttributeReply;
 }
 pub fn get_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom) -> Result<Cookie<'_, Conn, GetPortAttributeReply>, ConnectionError>
 where
@@ -3019,6 +3064,9 @@ impl QueryPortAttributesRequest {
             port,
         })
     }
+}
+impl Request for QueryPortAttributesRequest {
+    type Reply = QueryPortAttributesReply;
 }
 pub fn query_port_attributes<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, QueryPortAttributesReply>, ConnectionError>
 where
@@ -3119,6 +3167,9 @@ impl ListImageFormatsRequest {
             port,
         })
     }
+}
+impl Request for ListImageFormatsRequest {
+    type Reply = ListImageFormatsReply;
 }
 pub fn list_image_formats<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, ListImageFormatsReply>, ConnectionError>
 where
@@ -3237,6 +3288,9 @@ impl QueryImageAttributesRequest {
             height,
         })
     }
+}
+impl Request for QueryImageAttributesRequest {
+    type Reply = QueryImageAttributesReply;
 }
 pub fn query_image_attributes<Conn>(conn: &Conn, port: Port, id: u32, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryImageAttributesReply>, ConnectionError>
 where
@@ -3437,6 +3491,9 @@ impl<'input> PutImageRequest<'input> {
         })
     }
 }
+impl<'input> Request for PutImageRequest<'input> {
+    type Reply = ();
+}
 pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3615,6 +3672,9 @@ impl ShmPutImageRequest {
             send_event,
         })
     }
+}
+impl Request for ShmPutImageRequest {
+    type Reply = ();
 }
 pub fn shm_put_image<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where

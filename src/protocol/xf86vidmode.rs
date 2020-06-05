@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -402,6 +402,9 @@ impl QueryVersionRequest {
         )
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -483,6 +486,9 @@ impl GetModeLineRequest {
             screen,
         })
     }
+}
+impl Request for GetModeLineRequest {
+    type Reply = GetModeLineReply;
 }
 pub fn get_mode_line<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetModeLineReply>, ConnectionError>
 where
@@ -697,6 +703,9 @@ impl<'input> ModModeLineRequest<'input> {
         })
     }
 }
+impl<'input> Request for ModModeLineRequest<'input> {
+    type Reply = ();
+}
 pub fn mod_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -770,6 +779,9 @@ impl SwitchModeRequest {
         })
     }
 }
+impl Request for SwitchModeRequest {
+    type Reply = ();
+}
 pub fn switch_mode<Conn>(conn: &Conn, screen: u16, zoom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -827,6 +839,9 @@ impl GetMonitorRequest {
             screen,
         })
     }
+}
+impl Request for GetMonitorRequest {
+    type Reply = GetMonitorReply;
 }
 pub fn get_monitor<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetMonitorReply>, ConnectionError>
 where
@@ -983,6 +998,9 @@ impl LockModeSwitchRequest {
         })
     }
 }
+impl Request for LockModeSwitchRequest {
+    type Reply = ();
+}
 pub fn lock_mode_switch<Conn>(conn: &Conn, screen: u16, lock: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1040,6 +1058,9 @@ impl GetAllModeLinesRequest {
             screen,
         })
     }
+}
+impl Request for GetAllModeLinesRequest {
+    type Reply = GetAllModeLinesReply;
 }
 pub fn get_all_mode_lines<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetAllModeLinesReply>, ConnectionError>
 where
@@ -1324,6 +1345,9 @@ impl<'input> AddModeLineRequest<'input> {
         })
     }
 }
+impl<'input> Request for AddModeLineRequest<'input> {
+    type Reply = ();
+}
 pub fn add_mode_line<'c, 'input, Conn, A, B>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1506,6 +1530,9 @@ impl<'input> DeleteModeLineRequest<'input> {
         })
     }
 }
+impl<'input> Request for DeleteModeLineRequest<'input> {
+    type Reply = ();
+}
 pub fn delete_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1674,6 +1701,9 @@ impl<'input> ValidateModeLineRequest<'input> {
             private,
         })
     }
+}
+impl<'input> Request for ValidateModeLineRequest<'input> {
+    type Reply = ValidateModeLineReply;
 }
 pub fn validate_mode_line<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
 where
@@ -1870,6 +1900,9 @@ impl<'input> SwitchToModeRequest<'input> {
         })
     }
 }
+impl<'input> Request for SwitchToModeRequest<'input> {
+    type Reply = ();
+}
 pub fn switch_to_mode<'c, 'input, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1940,6 +1973,9 @@ impl GetViewPortRequest {
             screen,
         })
     }
+}
+impl Request for GetViewPortRequest {
+    type Reply = GetViewPortReply;
 }
 pub fn get_view_port<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetViewPortReply>, ConnectionError>
 where
@@ -2042,6 +2078,9 @@ impl SetViewPortRequest {
         })
     }
 }
+impl Request for SetViewPortRequest {
+    type Reply = ();
+}
 pub fn set_view_port<Conn>(conn: &Conn, screen: u16, x: u32, y: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2100,6 +2139,9 @@ impl GetDotClocksRequest {
             screen,
         })
     }
+}
+impl Request for GetDotClocksRequest {
+    type Reply = GetDotClocksReply;
 }
 pub fn get_dot_clocks<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetDotClocksReply>, ConnectionError>
 where
@@ -2192,6 +2234,9 @@ impl SetClientVersionRequest {
             minor,
         })
     }
+}
+impl Request for SetClientVersionRequest {
+    type Reply = ();
 }
 pub fn set_client_version<Conn>(conn: &Conn, major: u16, minor: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2288,6 +2333,9 @@ impl SetGammaRequest {
         })
     }
 }
+impl Request for SetGammaRequest {
+    type Reply = ();
+}
 pub fn set_gamma<Conn>(conn: &Conn, screen: u16, red: u32, green: u32, blue: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2371,6 +2419,9 @@ impl GetGammaRequest {
             screen,
         })
     }
+}
+impl Request for GetGammaRequest {
+    type Reply = GetGammaReply;
 }
 pub fn get_gamma<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaReply>, ConnectionError>
 where
@@ -2461,6 +2512,9 @@ impl GetGammaRampRequest {
             size,
         })
     }
+}
+impl Request for GetGammaRampRequest {
+    type Reply = GetGammaRampReply;
 }
 pub fn get_gamma_ramp<Conn>(conn: &Conn, screen: u16, size: u16) -> Result<Cookie<'_, Conn, GetGammaRampReply>, ConnectionError>
 where
@@ -2575,6 +2629,9 @@ impl<'input> SetGammaRampRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetGammaRampRequest<'input> {
+    type Reply = ();
+}
 pub fn set_gamma_ramp<'c, 'input, Conn>(conn: &'c Conn, screen: u16, size: u16, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2635,6 +2692,9 @@ impl GetGammaRampSizeRequest {
             screen,
         })
     }
+}
+impl Request for GetGammaRampSizeRequest {
+    type Reply = GetGammaRampSizeReply;
 }
 pub fn get_gamma_ramp_size<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaRampSizeReply>, ConnectionError>
 where
@@ -2718,6 +2778,9 @@ impl GetPermissionsRequest {
             screen,
         })
     }
+}
+impl Request for GetPermissionsRequest {
+    type Reply = GetPermissionsReply;
 }
 pub fn get_permissions<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetPermissionsReply>, ConnectionError>
 where

@@ -22,7 +22,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -6260,6 +6260,9 @@ impl<'input> CreateWindowRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreateWindowRequest<'input> {
+    type Reply = ();
+}
 /// Creates a window.
 ///
 /// Creates an unmapped window as child of the specified `parent` window. A
@@ -6755,6 +6758,9 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeWindowAttributesRequest<'input> {
+    type Reply = ();
+}
 /// change window attributes.
 ///
 /// Changes the attributes specified by `value_mask` for the specified `window`.
@@ -6911,6 +6917,9 @@ impl GetWindowAttributesRequest {
             window,
         })
     }
+}
+impl Request for GetWindowAttributesRequest {
+    type Reply = GetWindowAttributesReply;
 }
 /// Gets window attributes.
 ///
@@ -7078,6 +7087,9 @@ impl DestroyWindowRequest {
         })
     }
 }
+impl Request for DestroyWindowRequest {
+    type Reply = ();
+}
 /// Destroys a window.
 ///
 /// Destroys the specified window and all of its subwindows. A DestroyNotify event
@@ -7157,6 +7169,9 @@ impl DestroySubwindowsRequest {
             window,
         })
     }
+}
+impl Request for DestroySubwindowsRequest {
+    type Reply = ();
 }
 pub fn destroy_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -7312,6 +7327,9 @@ impl ChangeSaveSetRequest {
         })
     }
 }
+impl Request for ChangeSaveSetRequest {
+    type Reply = ();
+}
 /// Changes a client's save set.
 ///
 /// TODO: explain what the save set is for.
@@ -7445,6 +7463,9 @@ impl ReparentWindowRequest {
         })
     }
 }
+impl Request for ReparentWindowRequest {
+    type Reply = ();
+}
 /// Reparents a window.
 ///
 /// Makes the specified window a child of the specified parent window. If the
@@ -7573,6 +7594,9 @@ impl MapWindowRequest {
         })
     }
 }
+impl Request for MapWindowRequest {
+    type Reply = ();
+}
 /// Makes a window visible.
 ///
 /// Maps the specified window. This means making the window visible (as long as its
@@ -7666,6 +7690,9 @@ impl MapSubwindowsRequest {
         })
     }
 }
+impl Request for MapSubwindowsRequest {
+    type Reply = ();
+}
 pub fn map_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7745,6 +7772,9 @@ impl UnmapWindowRequest {
         })
     }
 }
+impl Request for UnmapWindowRequest {
+    type Reply = ();
+}
 /// Makes a window invisible.
 ///
 /// Unmaps the specified window. This means making the window invisible (and all
@@ -7823,6 +7853,9 @@ impl UnmapSubwindowsRequest {
             window,
         })
     }
+}
+impl Request for UnmapSubwindowsRequest {
+    type Reply = ();
 }
 pub fn unmap_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -8273,6 +8306,9 @@ impl<'input> ConfigureWindowRequest<'input> {
         })
     }
 }
+impl<'input> Request for ConfigureWindowRequest<'input> {
+    type Reply = ();
+}
 /// Configures window attributes.
 ///
 /// Configures a window's size, position, border width and stacking order.
@@ -8473,6 +8509,9 @@ impl CirculateWindowRequest {
         })
     }
 }
+impl Request for CirculateWindowRequest {
+    type Reply = ();
+}
 /// Change window stacking order.
 ///
 /// If `direction` is `XCB_CIRCULATE_RAISE_LOWEST`, the lowest mapped child (if
@@ -8584,6 +8623,9 @@ impl GetGeometryRequest {
             drawable,
         })
     }
+}
+impl Request for GetGeometryRequest {
+    type Reply = GetGeometryReply;
 }
 /// Get current window geometry.
 ///
@@ -8765,6 +8807,9 @@ impl QueryTreeRequest {
             window,
         })
     }
+}
+impl Request for QueryTreeRequest {
+    type Reply = QueryTreeReply;
 }
 /// query the window tree.
 ///
@@ -8966,6 +9011,9 @@ impl<'input> InternAtomRequest<'input> {
         })
     }
 }
+impl<'input> Request for InternAtomRequest<'input> {
+    type Reply = InternAtomReply;
+}
 /// Get atom identifier by name.
 ///
 /// Retrieves the identifier (xcb_atom_t TODO) for the atom with the specified
@@ -9094,6 +9142,9 @@ impl GetAtomNameRequest {
             atom,
         })
     }
+}
+impl Request for GetAtomNameRequest {
+    type Reply = GetAtomNameReply;
 }
 pub fn get_atom_name<Conn>(conn: &Conn, atom: Atom) -> Result<Cookie<'_, Conn, GetAtomNameReply>, ConnectionError>
 where
@@ -9365,6 +9416,9 @@ impl<'input> ChangePropertyRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangePropertyRequest<'input> {
+    type Reply = ();
+}
 /// Changes a window property.
 ///
 /// Sets or updates a property on the specified `window`. Properties are for
@@ -9491,6 +9545,9 @@ impl DeletePropertyRequest {
             property,
         })
     }
+}
+impl Request for DeletePropertyRequest {
+    type Reply = ();
 }
 pub fn delete_property<Conn>(conn: &Conn, window: Window, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -9712,6 +9769,9 @@ impl GetPropertyRequest {
             long_length,
         })
     }
+}
+impl Request for GetPropertyRequest {
+    type Reply = GetPropertyReply;
 }
 /// Gets a window property.
 ///
@@ -10055,6 +10115,9 @@ impl ListPropertiesRequest {
         })
     }
 }
+impl Request for ListPropertiesRequest {
+    type Reply = ListPropertiesReply;
+}
 pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10200,6 +10263,9 @@ impl SetSelectionOwnerRequest {
         })
     }
 }
+impl Request for SetSelectionOwnerRequest {
+    type Reply = ();
+}
 /// Sets the owner of a selection.
 ///
 /// Makes `window` the owner of the selection `selection` and updates the
@@ -10309,6 +10375,9 @@ impl GetSelectionOwnerRequest {
             selection,
         })
     }
+}
+impl Request for GetSelectionOwnerRequest {
+    type Reply = GetSelectionOwnerReply;
 }
 /// Gets the owner of a selection.
 ///
@@ -10444,6 +10513,9 @@ impl ConvertSelectionRequest {
             time,
         })
     }
+}
+impl Request for ConvertSelectionRequest {
+    type Reply = ();
 }
 pub fn convert_selection<Conn, A, B>(conn: &Conn, requestor: Window, selection: Atom, target: Atom, property: A, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -10669,6 +10741,9 @@ impl<'input> SendEventRequest<'input> {
             event,
         })
     }
+}
+impl<'input> Request for SendEventRequest<'input> {
+    type Reply = ();
 }
 /// send an event.
 ///
@@ -11133,6 +11208,9 @@ impl GrabPointerRequest {
         })
     }
 }
+impl Request for GrabPointerRequest {
+    type Reply = GrabPointerReply;
+}
 /// Grab the pointer.
 ///
 /// Actively grabs control of the pointer. Further pointer events are reported only to the grabbing client. Overrides any active pointer grab by this client.
@@ -11324,6 +11402,9 @@ impl UngrabPointerRequest {
             time,
         })
     }
+}
+impl Request for UngrabPointerRequest {
+    type Reply = ();
 }
 /// release the pointer.
 ///
@@ -11608,6 +11689,9 @@ impl GrabButtonRequest {
         })
     }
 }
+impl Request for GrabButtonRequest {
+    type Reply = ();
+}
 /// Grab pointer button(s).
 ///
 /// This request establishes a passive grab. The pointer is actively grabbed as
@@ -11762,6 +11846,9 @@ impl UngrabButtonRequest {
         })
     }
 }
+impl Request for UngrabButtonRequest {
+    type Reply = ();
+}
 pub fn ungrab_button<Conn, A>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -11840,6 +11927,9 @@ impl ChangeActivePointerGrabRequest {
             event_mask,
         })
     }
+}
+impl Request for ChangeActivePointerGrabRequest {
+    type Reply = ();
 }
 pub fn change_active_pointer_grab<Conn, A, B, C>(conn: &Conn, cursor: A, time: B, event_mask: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -11995,6 +12085,9 @@ impl GrabKeyboardRequest {
         })
     }
 }
+impl Request for GrabKeyboardRequest {
+    type Reply = GrabKeyboardReply;
+}
 /// Grab the keyboard.
 ///
 /// Actively grabs control of the keyboard and generates FocusIn and FocusOut
@@ -12145,6 +12238,9 @@ impl UngrabKeyboardRequest {
             time,
         })
     }
+}
+impl Request for UngrabKeyboardRequest {
+    type Reply = ();
 }
 pub fn ungrab_keyboard<Conn, A>(conn: &Conn, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -12355,6 +12451,9 @@ impl GrabKeyRequest {
         })
     }
 }
+impl Request for GrabKeyRequest {
+    type Reply = ();
+}
 /// Grab keyboard key(s).
 ///
 /// Establishes a passive grab on the keyboard. In the future, the keyboard is
@@ -12518,6 +12617,9 @@ impl UngrabKeyRequest {
             modifiers,
         })
     }
+}
+impl Request for UngrabKeyRequest {
+    type Reply = ();
 }
 /// release a key combination.
 ///
@@ -12769,6 +12871,9 @@ impl AllowEventsRequest {
         })
     }
 }
+impl Request for AllowEventsRequest {
+    type Reply = ();
+}
 /// release queued events.
 ///
 /// Releases queued events if the client has caused a device (pointer/keyboard) to
@@ -12839,6 +12944,9 @@ impl GrabServerRequest {
         )
     }
 }
+impl Request for GrabServerRequest {
+    type Reply = ();
+}
 pub fn grab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -12885,6 +12993,9 @@ impl UngrabServerRequest {
         Ok(UngrabServerRequest
         )
     }
+}
+impl Request for UngrabServerRequest {
+    type Reply = ();
 }
 pub fn ungrab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -12954,6 +13065,9 @@ impl QueryPointerRequest {
             window,
         })
     }
+}
+impl Request for QueryPointerRequest {
+    type Reply = QueryPointerReply;
 }
 /// get pointer coordinates.
 ///
@@ -13146,6 +13260,9 @@ impl GetMotionEventsRequest {
         })
     }
 }
+impl Request for GetMotionEventsRequest {
+    type Reply = GetMotionEventsReply;
+}
 pub fn get_motion_events<Conn, A, B>(conn: &Conn, window: Window, start: A, stop: B) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -13271,6 +13388,9 @@ impl TranslateCoordinatesRequest {
             src_y,
         })
     }
+}
+impl Request for TranslateCoordinatesRequest {
+    type Reply = TranslateCoordinatesReply;
 }
 pub fn translate_coordinates<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Conn, TranslateCoordinatesReply>, ConnectionError>
 where
@@ -13438,6 +13558,9 @@ impl WarpPointerRequest {
             dst_y,
         })
     }
+}
+impl Request for WarpPointerRequest {
+    type Reply = ();
 }
 /// move mouse pointer.
 ///
@@ -13664,6 +13787,9 @@ impl SetInputFocusRequest {
         })
     }
 }
+impl Request for SetInputFocusRequest {
+    type Reply = ();
+}
 /// Sets input focus.
 ///
 /// Changes the input focus and the last-focus-change time. If the specified `time`
@@ -13754,6 +13880,9 @@ impl GetInputFocusRequest {
         )
     }
 }
+impl Request for GetInputFocusRequest {
+    type Reply = GetInputFocusReply;
+}
 pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -13827,6 +13956,9 @@ impl QueryKeymapRequest {
         Ok(QueryKeymapRequest
         )
     }
+}
+impl Request for QueryKeymapRequest {
+    type Reply = QueryKeymapReply;
 }
 pub fn query_keymap<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryKeymapReply>, ConnectionError>
 where
@@ -13944,6 +14076,9 @@ impl<'input> OpenFontRequest<'input> {
         })
     }
 }
+impl<'input> Request for OpenFontRequest<'input> {
+    type Reply = ();
+}
 /// opens a font.
 ///
 /// Opens any X core font matching the given `name` (for example "-misc-fixed-*").
@@ -14022,6 +14157,9 @@ impl CloseFontRequest {
             font,
         })
     }
+}
+impl Request for CloseFontRequest {
+    type Reply = ();
 }
 pub fn close_font<Conn>(conn: &Conn, font: Font) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -14262,6 +14400,9 @@ impl QueryFontRequest {
         })
     }
 }
+impl Request for QueryFontRequest {
+    type Reply = QueryFontReply;
+}
 /// query font metrics.
 ///
 /// Queries information associated with the font.
@@ -14478,6 +14619,9 @@ impl<'input> QueryTextExtentsRequest<'input> {
         })
     }
 }
+impl<'input> Request for QueryTextExtentsRequest<'input> {
+    type Reply = QueryTextExtentsReply;
+}
 /// get text extents.
 ///
 /// Query text extents from the X11 server. This request returns the bounding box
@@ -14680,6 +14824,9 @@ impl<'input> ListFontsRequest<'input> {
         })
     }
 }
+impl<'input> Request for ListFontsRequest<'input> {
+    type Reply = ListFontsReply;
+}
 /// get matching font names.
 ///
 /// Gets a list of available font names which match the given `pattern`.
@@ -14818,6 +14965,9 @@ impl<'input> ListFontsWithInfoRequest<'input> {
             pattern,
         })
     }
+}
+impl<'input> Request for ListFontsWithInfoRequest<'input> {
+    type Reply = ListFontsWithInfoReply;
 }
 /// get matching font names and information.
 ///
@@ -14998,6 +15148,9 @@ impl<'input> SetFontPathRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetFontPathRequest<'input> {
+    type Reply = ();
+}
 pub fn set_font_path<'c, 'input, Conn>(conn: &'c Conn, font: &'input [Str]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -15046,6 +15199,9 @@ impl GetFontPathRequest {
         Ok(GetFontPathRequest
         )
     }
+}
+impl Request for GetFontPathRequest {
+    type Reply = GetFontPathReply;
 }
 pub fn get_font_path<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetFontPathReply>, ConnectionError>
 where
@@ -15191,6 +15347,9 @@ impl CreatePixmapRequest {
         })
     }
 }
+impl Request for CreatePixmapRequest {
+    type Reply = ();
+}
 /// Creates a pixmap.
 ///
 /// Creates a pixmap. The pixmap can only be used on the same screen as `drawable`
@@ -15287,6 +15446,9 @@ impl FreePixmapRequest {
             pixmap,
         })
     }
+}
+impl Request for FreePixmapRequest {
+    type Reply = ();
 }
 /// Destroys a pixmap.
 ///
@@ -16682,6 +16844,9 @@ impl<'input> CreateGCRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreateGCRequest<'input> {
+    type Reply = ();
+}
 /// Creates a graphics context.
 ///
 /// Creates a graphics context. The graphics context can be used with any drawable
@@ -17327,6 +17492,9 @@ impl<'input> ChangeGCRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeGCRequest<'input> {
+    type Reply = ();
+}
 /// change graphics context components.
 ///
 /// Changes the components specified by `value_mask` for the specified graphics context.
@@ -17447,6 +17615,9 @@ impl CopyGCRequest {
         })
     }
 }
+impl Request for CopyGCRequest {
+    type Reply = ();
+}
 pub fn copy_gc<Conn, A>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -17525,6 +17696,9 @@ impl<'input> SetDashesRequest<'input> {
             dashes,
         })
     }
+}
+impl<'input> Request for SetDashesRequest<'input> {
+    type Reply = ();
 }
 pub fn set_dashes<'c, 'input, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -17684,6 +17858,9 @@ impl<'input> SetClipRectanglesRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetClipRectanglesRequest<'input> {
+    type Reply = ();
+}
 pub fn set_clip_rectangles<'c, 'input, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -17756,6 +17933,9 @@ impl FreeGCRequest {
             gc,
         })
     }
+}
+impl Request for FreeGCRequest {
+    type Reply = ();
 }
 /// Destroys a graphics context.
 ///
@@ -17852,6 +18032,9 @@ impl ClearAreaRequest {
             height,
         })
     }
+}
+impl Request for ClearAreaRequest {
+    type Reply = ();
 }
 pub fn clear_area<Conn>(conn: &Conn, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -17988,6 +18171,9 @@ impl CopyAreaRequest {
             height,
         })
     }
+}
+impl Request for CopyAreaRequest {
+    type Reply = ();
 }
 /// copy areas.
 ///
@@ -18135,6 +18321,9 @@ impl CopyPlaneRequest {
             bit_plane,
         })
     }
+}
+impl Request for CopyPlaneRequest {
+    type Reply = ();
 }
 pub fn copy_plane<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -18303,6 +18492,9 @@ impl<'input> PolyPointRequest<'input> {
         })
     }
 }
+impl<'input> Request for PolyPointRequest<'input> {
+    type Reply = ();
+}
 pub fn poly_point<'c, 'input, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -18428,6 +18620,9 @@ impl<'input> PolyLineRequest<'input> {
             points: Cow::Owned(points),
         })
     }
+}
+impl<'input> Request for PolyLineRequest<'input> {
+    type Reply = ();
 }
 /// draw lines.
 ///
@@ -18627,6 +18822,9 @@ impl<'input> PolySegmentRequest<'input> {
         })
     }
 }
+impl<'input> Request for PolySegmentRequest<'input> {
+    type Reply = ();
+}
 /// draw lines.
 ///
 /// Draws multiple, unconnected lines. For each segment, a line is drawn between
@@ -18735,6 +18933,9 @@ impl<'input> PolyRectangleRequest<'input> {
         })
     }
 }
+impl<'input> Request for PolyRectangleRequest<'input> {
+    type Reply = ();
+}
 pub fn poly_rectangle<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -18816,6 +19017,9 @@ impl<'input> PolyArcRequest<'input> {
             arcs: Cow::Owned(arcs),
         })
     }
+}
+impl<'input> Request for PolyArcRequest<'input> {
+    type Reply = ();
 }
 pub fn poly_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -18979,6 +19183,9 @@ impl<'input> FillPolyRequest<'input> {
         })
     }
 }
+impl<'input> Request for FillPolyRequest<'input> {
+    type Reply = ();
+}
 pub fn fill_poly<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -19088,6 +19295,9 @@ impl<'input> PolyFillRectangleRequest<'input> {
         })
     }
 }
+impl<'input> Request for PolyFillRectangleRequest<'input> {
+    type Reply = ();
+}
 /// Fills rectangles.
 ///
 /// Fills the specified rectangle(s) in the order listed in the array. For any
@@ -19194,6 +19404,9 @@ impl<'input> PolyFillArcRequest<'input> {
             arcs: Cow::Owned(arcs),
         })
     }
+}
+impl<'input> Request for PolyFillArcRequest<'input> {
+    type Reply = ();
 }
 pub fn poly_fill_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -19375,6 +19588,9 @@ impl<'input> PutImageRequest<'input> {
         })
     }
 }
+impl<'input> Request for PutImageRequest<'input> {
+    type Reply = ();
+}
 pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -19477,6 +19693,9 @@ impl GetImageRequest {
             plane_mask,
         })
     }
+}
+impl Request for GetImageRequest {
+    type Reply = GetImageReply;
 }
 pub fn get_image<Conn>(conn: &Conn, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
 where
@@ -19613,6 +19832,9 @@ impl<'input> PolyText8Request<'input> {
         })
     }
 }
+impl<'input> Request for PolyText8Request<'input> {
+    type Reply = ();
+}
 pub fn poly_text8<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -19700,6 +19922,9 @@ impl<'input> PolyText16Request<'input> {
             items,
         })
     }
+}
+impl<'input> Request for PolyText16Request<'input> {
+    type Reply = ();
 }
 pub fn poly_text16<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -19824,6 +20049,9 @@ impl<'input> ImageText8Request<'input> {
             string,
         })
     }
+}
+impl<'input> Request for ImageText8Request<'input> {
+    type Reply = ();
 }
 /// Draws text.
 ///
@@ -19984,6 +20212,9 @@ impl<'input> ImageText16Request<'input> {
             string: Cow::Owned(string),
         })
     }
+}
+impl<'input> Request for ImageText16Request<'input> {
+    type Reply = ();
 }
 /// Draws text.
 ///
@@ -20172,6 +20403,9 @@ impl CreateColormapRequest {
         })
     }
 }
+impl Request for CreateColormapRequest {
+    type Reply = ();
+}
 pub fn create_colormap<Conn>(conn: &Conn, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -20232,6 +20466,9 @@ impl FreeColormapRequest {
             cmap,
         })
     }
+}
+impl Request for FreeColormapRequest {
+    type Reply = ();
 }
 pub fn free_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -20299,6 +20536,9 @@ impl CopyColormapAndFreeRequest {
         })
     }
 }
+impl Request for CopyColormapAndFreeRequest {
+    type Reply = ();
+}
 pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -20358,6 +20598,9 @@ impl InstallColormapRequest {
         })
     }
 }
+impl Request for InstallColormapRequest {
+    type Reply = ();
+}
 pub fn install_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -20416,6 +20659,9 @@ impl UninstallColormapRequest {
         })
     }
 }
+impl Request for UninstallColormapRequest {
+    type Reply = ();
+}
 pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -20473,6 +20719,9 @@ impl ListInstalledColormapsRequest {
             window,
         })
     }
+}
+impl Request for ListInstalledColormapsRequest {
+    type Reply = ListInstalledColormapsReply;
 }
 pub fn list_installed_colormaps<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListInstalledColormapsReply>, ConnectionError>
 where
@@ -20613,6 +20862,9 @@ impl AllocColorRequest {
         })
     }
 }
+impl Request for AllocColorRequest {
+    type Reply = AllocColorReply;
+}
 /// Allocate a color.
 ///
 /// Allocates a read-only colormap entry corresponding to the closest RGB value
@@ -20738,6 +20990,9 @@ impl<'input> AllocNamedColorRequest<'input> {
         })
     }
 }
+impl<'input> Request for AllocNamedColorRequest<'input> {
+    type Reply = AllocNamedColorReply;
+}
 pub fn alloc_named_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -20848,6 +21103,9 @@ impl AllocColorCellsRequest {
             planes,
         })
     }
+}
+impl Request for AllocColorCellsRequest {
+    type Reply = AllocColorCellsReply;
 }
 pub fn alloc_color_cells<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Conn, AllocColorCellsReply>, ConnectionError>
 where
@@ -20995,6 +21253,9 @@ impl AllocColorPlanesRequest {
         })
     }
 }
+impl Request for AllocColorPlanesRequest {
+    type Reply = AllocColorPlanesReply;
+}
 pub fn alloc_color_planes<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Conn, AllocColorPlanesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -21128,6 +21389,9 @@ impl<'input> FreeColorsRequest<'input> {
             pixels: Cow::Owned(pixels),
         })
     }
+}
+impl<'input> Request for FreeColorsRequest<'input> {
+    type Reply = ();
 }
 pub fn free_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -21329,6 +21593,9 @@ impl<'input> StoreColorsRequest<'input> {
         })
     }
 }
+impl<'input> Request for StoreColorsRequest<'input> {
+    type Reply = ();
+}
 pub fn store_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, items: &'input [Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -21412,6 +21679,9 @@ impl<'input> StoreNamedColorRequest<'input> {
             name,
         })
     }
+}
+impl<'input> Request for StoreNamedColorRequest<'input> {
+    type Reply = ();
 }
 pub fn store_named_color<'c, 'input, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -21538,6 +21808,9 @@ impl<'input> QueryColorsRequest<'input> {
         })
     }
 }
+impl<'input> Request for QueryColorsRequest<'input> {
+    type Reply = QueryColorsReply;
+}
 pub fn query_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &'input [u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -21652,6 +21925,9 @@ impl<'input> LookupColorRequest<'input> {
             name,
         })
     }
+}
+impl<'input> Request for LookupColorRequest<'input> {
+    type Reply = LookupColorReply;
 }
 pub fn lookup_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
 where
@@ -21869,6 +22145,9 @@ impl CreateCursorRequest {
             y,
         })
     }
+}
+impl Request for CreateCursorRequest {
+    type Reply = ();
 }
 pub fn create_cursor<Conn, A>(conn: &Conn, cid: Cursor, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -22096,6 +22375,9 @@ impl CreateGlyphCursorRequest {
         })
     }
 }
+impl Request for CreateGlyphCursorRequest {
+    type Reply = ();
+}
 /// create cursor.
 ///
 /// Creates a cursor from a font glyph. X provides a set of standard cursor shapes
@@ -22211,6 +22493,9 @@ impl FreeCursorRequest {
         })
     }
 }
+impl Request for FreeCursorRequest {
+    type Reply = ();
+}
 /// Deletes a cursor.
 ///
 /// Deletes the association between the cursor resource ID and the specified
@@ -22316,6 +22601,9 @@ impl RecolorCursorRequest {
             back_blue,
         })
     }
+}
+impl Request for RecolorCursorRequest {
+    type Reply = ();
 }
 pub fn recolor_cursor<Conn>(conn: &Conn, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -22462,6 +22750,9 @@ impl QueryBestSizeRequest {
         })
     }
 }
+impl Request for QueryBestSizeRequest {
+    type Reply = QueryBestSizeReply;
+}
 pub fn query_best_size<Conn>(conn: &Conn, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -22578,6 +22869,9 @@ impl<'input> QueryExtensionRequest<'input> {
         })
     }
 }
+impl<'input> Request for QueryExtensionRequest<'input> {
+    type Reply = QueryExtensionReply;
+}
 /// check if extension is present.
 ///
 /// Determines if the specified extension is present on this X11 server.
@@ -22685,6 +22979,9 @@ impl ListExtensionsRequest {
         Ok(ListExtensionsRequest
         )
     }
+}
+impl Request for ListExtensionsRequest {
+    type Reply = ListExtensionsReply;
 }
 pub fn list_extensions<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListExtensionsReply>, ConnectionError>
 where
@@ -22799,6 +23096,9 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeKeyboardMappingRequest<'input> {
+    type Reply = ();
+}
 pub fn change_keyboard_mapping<'c, 'input, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &'input [Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -22863,6 +23163,9 @@ impl GetKeyboardMappingRequest {
             count,
         })
     }
+}
+impl Request for GetKeyboardMappingRequest {
+    type Reply = GetKeyboardMappingReply;
 }
 pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Conn, GetKeyboardMappingReply>, ConnectionError>
 where
@@ -23383,6 +23686,9 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeKeyboardControlRequest<'input> {
+    type Reply = ();
+}
 pub fn change_keyboard_control<'c, 'input, Conn>(conn: &'c Conn, value_list: &'input ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -23431,6 +23737,9 @@ impl GetKeyboardControlRequest {
         Ok(GetKeyboardControlRequest
         )
     }
+}
+impl Request for GetKeyboardControlRequest {
+    type Reply = GetKeyboardControlReply;
 }
 pub fn get_keyboard_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetKeyboardControlReply>, ConnectionError>
 where
@@ -23522,6 +23831,9 @@ impl BellRequest {
         })
     }
 }
+impl Request for BellRequest {
+    type Reply = ();
+}
 pub fn bell<Conn>(conn: &Conn, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -23600,6 +23912,9 @@ impl ChangePointerControlRequest {
         })
     }
 }
+impl Request for ChangePointerControlRequest {
+    type Reply = ();
+}
 pub fn change_pointer_control<Conn>(conn: &Conn, acceleration_numerator: i16, acceleration_denominator: i16, threshold: i16, do_acceleration: bool, do_threshold: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -23652,6 +23967,9 @@ impl GetPointerControlRequest {
         Ok(GetPointerControlRequest
         )
     }
+}
+impl Request for GetPointerControlRequest {
+    type Reply = GetPointerControlReply;
 }
 pub fn get_pointer_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerControlReply>, ConnectionError>
 where
@@ -23887,6 +24205,9 @@ impl SetScreenSaverRequest {
         })
     }
 }
+impl Request for SetScreenSaverRequest {
+    type Reply = ();
+}
 pub fn set_screen_saver<Conn>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -23938,6 +24259,9 @@ impl GetScreenSaverRequest {
         Ok(GetScreenSaverRequest
         )
     }
+}
+impl Request for GetScreenSaverRequest {
+    type Reply = GetScreenSaverReply;
 }
 pub fn get_screen_saver<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetScreenSaverReply>, ConnectionError>
 where
@@ -24185,6 +24509,9 @@ impl<'input> ChangeHostsRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeHostsRequest<'input> {
+    type Reply = ();
+}
 pub fn change_hosts<'c, 'input, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -24296,6 +24623,9 @@ impl ListHostsRequest {
         Ok(ListHostsRequest
         )
     }
+}
+impl Request for ListHostsRequest {
+    type Reply = ListHostsReply;
 }
 pub fn list_hosts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListHostsReply>, ConnectionError>
 where
@@ -24463,6 +24793,9 @@ impl SetAccessControlRequest {
         })
     }
 }
+impl Request for SetAccessControlRequest {
+    type Reply = ();
+}
 pub fn set_access_control<Conn>(conn: &Conn, mode: AccessControl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -24581,6 +24914,9 @@ impl SetCloseDownModeRequest {
             mode,
         })
     }
+}
+impl Request for SetCloseDownModeRequest {
+    type Reply = ();
 }
 pub fn set_close_down_mode<Conn>(conn: &Conn, mode: CloseDown) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -24718,6 +25054,9 @@ impl KillClientRequest {
         })
     }
 }
+impl Request for KillClientRequest {
+    type Reply = ();
+}
 /// kills a client.
 ///
 /// Forces a close down of the client that created the specified `resource`.
@@ -24814,6 +25153,9 @@ impl<'input> RotatePropertiesRequest<'input> {
             atoms: Cow::Owned(atoms),
         })
     }
+}
+impl<'input> Request for RotatePropertiesRequest<'input> {
+    type Reply = ();
 }
 pub fn rotate_properties<'c, 'input, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &'input [Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -24941,6 +25283,9 @@ impl ForceScreenSaverRequest {
         })
     }
 }
+impl Request for ForceScreenSaverRequest {
+    type Reply = ();
+}
 pub fn force_screen_saver<Conn>(conn: &Conn, mode: ScreenSaver) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -25064,6 +25409,9 @@ impl<'input> SetPointerMappingRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetPointerMappingRequest<'input> {
+    type Reply = SetPointerMappingReply;
+}
 pub fn set_pointer_mapping<'c, 'input, Conn>(conn: &'c Conn, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -25137,6 +25485,9 @@ impl GetPointerMappingRequest {
         Ok(GetPointerMappingRequest
         )
     }
+}
+impl Request for GetPointerMappingRequest {
+    type Reply = GetPointerMappingReply;
 }
 pub fn get_pointer_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerMappingReply>, ConnectionError>
 where
@@ -25317,6 +25668,9 @@ impl<'input> SetModifierMappingRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetModifierMappingRequest<'input> {
+    type Reply = SetModifierMappingReply;
+}
 pub fn set_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, keycodes: &'input [Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -25390,6 +25744,9 @@ impl GetModifierMappingRequest {
         Ok(GetModifierMappingRequest
         )
     }
+}
+impl Request for GetModifierMappingRequest {
+    type Reply = GetModifierMappingReply;
 }
 pub fn get_modifier_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetModifierMappingReply>, ConnectionError>
 where
@@ -25480,6 +25837,9 @@ impl NoOperationRequest {
         Ok(NoOperationRequest
         )
     }
+}
+impl Request for NoOperationRequest {
+    type Reply = ();
 }
 pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where

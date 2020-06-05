@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -88,6 +88,9 @@ impl QueryVersionRequest {
             client_minor_version,
         })
     }
+}
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
 }
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -404,6 +407,9 @@ impl ChangeSaveSetRequest {
         })
     }
 }
+impl Request for ChangeSaveSetRequest {
+    type Reply = ();
+}
 pub fn change_save_set<Conn>(conn: &Conn, mode: SaveSetMode, target: SaveSetTarget, map: SaveSetMapping, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -697,6 +703,9 @@ impl SelectSelectionInputRequest {
         })
     }
 }
+impl Request for SelectSelectionInputRequest {
+    type Reply = ();
+}
 pub fn select_selection_input<Conn, A>(conn: &Conn, window: xproto::Window, selection: xproto::Atom, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -968,6 +977,9 @@ impl SelectCursorInputRequest {
         })
     }
 }
+impl Request for SelectCursorInputRequest {
+    type Reply = ();
+}
 pub fn select_cursor_input<Conn, A>(conn: &Conn, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1017,6 +1029,9 @@ impl GetCursorImageRequest {
         Ok(GetCursorImageRequest
         )
     }
+}
+impl Request for GetCursorImageRequest {
+    type Reply = GetCursorImageReply;
 }
 pub fn get_cursor_image<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetCursorImageReply>, ConnectionError>
 where
@@ -1258,6 +1273,9 @@ impl<'input> CreateRegionRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreateRegionRequest<'input> {
+    type Reply = ();
+}
 pub fn create_region<'c, 'input, Conn>(conn: &'c Conn, region: Region, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1322,6 +1340,9 @@ impl CreateRegionFromBitmapRequest {
             bitmap,
         })
     }
+}
+impl Request for CreateRegionFromBitmapRequest {
+    type Reply = ();
 }
 pub fn create_region_from_bitmap<Conn>(conn: &Conn, region: Region, bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1398,6 +1419,9 @@ impl CreateRegionFromWindowRequest {
         })
     }
 }
+impl Request for CreateRegionFromWindowRequest {
+    type Reply = ();
+}
 pub fn create_region_from_window<Conn>(conn: &Conn, region: Region, window: xproto::Window, kind: shape::SK) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1464,6 +1488,9 @@ impl CreateRegionFromGCRequest {
         })
     }
 }
+impl Request for CreateRegionFromGCRequest {
+    type Reply = ();
+}
 pub fn create_region_from_gc<Conn>(conn: &Conn, region: Region, gc: xproto::Gcontext) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1529,6 +1556,9 @@ impl CreateRegionFromPictureRequest {
         })
     }
 }
+impl Request for CreateRegionFromPictureRequest {
+    type Reply = ();
+}
 pub fn create_region_from_picture<Conn>(conn: &Conn, region: Region, picture: render::Picture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1585,6 +1615,9 @@ impl DestroyRegionRequest {
             region,
         })
     }
+}
+impl Request for DestroyRegionRequest {
+    type Reply = ();
 }
 pub fn destroy_region<Conn>(conn: &Conn, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1656,6 +1689,9 @@ impl<'input> SetRegionRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetRegionRequest<'input> {
+    type Reply = ();
+}
 pub fn set_region<'c, 'input, Conn>(conn: &'c Conn, region: Region, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1720,6 +1756,9 @@ impl CopyRegionRequest {
             destination,
         })
     }
+}
+impl Request for CopyRegionRequest {
+    type Reply = ();
 }
 pub fn copy_region<Conn>(conn: &Conn, source: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1793,6 +1832,9 @@ impl UnionRegionRequest {
             destination,
         })
     }
+}
+impl Request for UnionRegionRequest {
+    type Reply = ();
 }
 pub fn union_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1868,6 +1910,9 @@ impl IntersectRegionRequest {
         })
     }
 }
+impl Request for IntersectRegionRequest {
+    type Reply = ();
+}
 pub fn intersect_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1941,6 +1986,9 @@ impl SubtractRegionRequest {
             destination,
         })
     }
+}
+impl Request for SubtractRegionRequest {
+    type Reply = ();
 }
 pub fn subtract_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2020,6 +2068,9 @@ impl InvertRegionRequest {
         })
     }
 }
+impl Request for InvertRegionRequest {
+    type Reply = ();
+}
 pub fn invert_region<Conn>(conn: &Conn, source: Region, bounds: xproto::Rectangle, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2090,6 +2141,9 @@ impl TranslateRegionRequest {
         })
     }
 }
+impl Request for TranslateRegionRequest {
+    type Reply = ();
+}
 pub fn translate_region<Conn>(conn: &Conn, region: Region, dx: i16, dy: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2156,6 +2210,9 @@ impl RegionExtentsRequest {
         })
     }
 }
+impl Request for RegionExtentsRequest {
+    type Reply = ();
+}
 pub fn region_extents<Conn>(conn: &Conn, source: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2212,6 +2269,9 @@ impl FetchRegionRequest {
             region,
         })
     }
+}
+impl Request for FetchRegionRequest {
+    type Reply = FetchRegionReply;
 }
 pub fn fetch_region<Conn>(conn: &Conn, region: Region) -> Result<Cookie<'_, Conn, FetchRegionReply>, ConnectionError>
 where
@@ -2332,6 +2392,9 @@ impl SetGCClipRegionRequest {
         })
     }
 }
+impl Request for SetGCClipRegionRequest {
+    type Reply = ();
+}
 pub fn set_gc_clip_region<Conn, A>(conn: &Conn, gc: xproto::Gcontext, region: A, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2423,6 +2486,9 @@ impl SetWindowShapeRegionRequest {
         })
     }
 }
+impl Request for SetWindowShapeRegionRequest {
+    type Reply = ();
+}
 pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2505,6 +2571,9 @@ impl SetPictureClipRegionRequest {
         })
     }
 }
+impl Request for SetPictureClipRegionRequest {
+    type Reply = ();
+}
 pub fn set_picture_clip_region<Conn, A>(conn: &Conn, picture: render::Picture, region: A, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2580,6 +2649,9 @@ impl<'input> SetCursorNameRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetCursorNameRequest<'input> {
+    type Reply = ();
+}
 pub fn set_cursor_name<'c, 'input, Conn>(conn: &'c Conn, cursor: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2636,6 +2708,9 @@ impl GetCursorNameRequest {
             cursor,
         })
     }
+}
+impl Request for GetCursorNameRequest {
+    type Reply = GetCursorNameReply;
 }
 pub fn get_cursor_name<Conn>(conn: &Conn, cursor: xproto::Cursor) -> Result<Cookie<'_, Conn, GetCursorNameReply>, ConnectionError>
 where
@@ -2728,6 +2803,9 @@ impl GetCursorImageAndNameRequest {
         Ok(GetCursorImageAndNameRequest
         )
     }
+}
+impl Request for GetCursorImageAndNameRequest {
+    type Reply = GetCursorImageAndNameReply;
 }
 pub fn get_cursor_image_and_name<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetCursorImageAndNameReply>, ConnectionError>
 where
@@ -2852,6 +2930,9 @@ impl ChangeCursorRequest {
         })
     }
 }
+impl Request for ChangeCursorRequest {
+    type Reply = ();
+}
 pub fn change_cursor<Conn>(conn: &Conn, source: xproto::Cursor, destination: xproto::Cursor) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2922,6 +3003,9 @@ impl<'input> ChangeCursorByNameRequest<'input> {
             name,
         })
     }
+}
+impl<'input> Request for ChangeCursorByNameRequest<'input> {
+    type Reply = ();
 }
 pub fn change_cursor_by_name<'c, 'input, Conn>(conn: &'c Conn, src: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -3012,6 +3096,9 @@ impl ExpandRegionRequest {
         })
     }
 }
+impl Request for ExpandRegionRequest {
+    type Reply = ();
+}
 pub fn expand_region<Conn>(conn: &Conn, source: Region, destination: Region, left: u16, right: u16, top: u16, bottom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3073,6 +3160,9 @@ impl HideCursorRequest {
         })
     }
 }
+impl Request for HideCursorRequest {
+    type Reply = ();
+}
 pub fn hide_cursor<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3128,6 +3218,9 @@ impl ShowCursorRequest {
             window,
         })
     }
+}
+impl Request for ShowCursorRequest {
+    type Reply = ();
 }
 pub fn show_cursor<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -3311,6 +3404,9 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreatePointerBarrierRequest<'input> {
+    type Reply = ();
+}
 pub fn create_pointer_barrier<'c, 'input, Conn, A>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3375,6 +3471,9 @@ impl DeletePointerBarrierRequest {
             barrier,
         })
     }
+}
+impl Request for DeletePointerBarrierRequest {
+    type Reply = ();
 }
 pub fn delete_pointer_barrier<Conn>(conn: &Conn, barrier: Barrier) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where

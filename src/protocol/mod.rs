@@ -2112,6 +2112,2488 @@ impl<'input> Request<'input> {
     }
 }
 
+/// Enumeration of all possible X11 replies.
+#[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
+pub enum Reply {
+    Void,
+    GetWindowAttributes(xproto::GetWindowAttributesReply),
+    GetGeometry(xproto::GetGeometryReply),
+    QueryTree(xproto::QueryTreeReply),
+    InternAtom(xproto::InternAtomReply),
+    GetAtomName(xproto::GetAtomNameReply),
+    GetProperty(xproto::GetPropertyReply),
+    ListProperties(xproto::ListPropertiesReply),
+    GetSelectionOwner(xproto::GetSelectionOwnerReply),
+    GrabPointer(xproto::GrabPointerReply),
+    GrabKeyboard(xproto::GrabKeyboardReply),
+    QueryPointer(xproto::QueryPointerReply),
+    GetMotionEvents(xproto::GetMotionEventsReply),
+    TranslateCoordinates(xproto::TranslateCoordinatesReply),
+    GetInputFocus(xproto::GetInputFocusReply),
+    QueryKeymap(xproto::QueryKeymapReply),
+    QueryFont(xproto::QueryFontReply),
+    QueryTextExtents(xproto::QueryTextExtentsReply),
+    ListFonts(xproto::ListFontsReply),
+    ListFontsWithInfo(xproto::ListFontsWithInfoReply),
+    GetFontPath(xproto::GetFontPathReply),
+    GetImage(xproto::GetImageReply),
+    ListInstalledColormaps(xproto::ListInstalledColormapsReply),
+    AllocColor(xproto::AllocColorReply),
+    AllocNamedColor(xproto::AllocNamedColorReply),
+    AllocColorCells(xproto::AllocColorCellsReply),
+    AllocColorPlanes(xproto::AllocColorPlanesReply),
+    QueryColors(xproto::QueryColorsReply),
+    LookupColor(xproto::LookupColorReply),
+    QueryBestSize(xproto::QueryBestSizeReply),
+    QueryExtension(xproto::QueryExtensionReply),
+    ListExtensions(xproto::ListExtensionsReply),
+    GetKeyboardMapping(xproto::GetKeyboardMappingReply),
+    GetKeyboardControl(xproto::GetKeyboardControlReply),
+    GetPointerControl(xproto::GetPointerControlReply),
+    GetScreenSaver(xproto::GetScreenSaverReply),
+    ListHosts(xproto::ListHostsReply),
+    SetPointerMapping(xproto::SetPointerMappingReply),
+    GetPointerMapping(xproto::GetPointerMappingReply),
+    SetModifierMapping(xproto::SetModifierMappingReply),
+    GetModifierMapping(xproto::GetModifierMappingReply),
+    BigreqEnable(bigreq::EnableReply),
+    #[cfg(feature = "composite")]
+    CompositeQueryVersion(composite::QueryVersionReply),
+    #[cfg(feature = "composite")]
+    CompositeGetOverlayWindow(composite::GetOverlayWindowReply),
+    #[cfg(feature = "damage")]
+    DamageQueryVersion(damage::QueryVersionReply),
+    #[cfg(feature = "dpms")]
+    DpmsGetVersion(dpms::GetVersionReply),
+    #[cfg(feature = "dpms")]
+    DpmsCapable(dpms::CapableReply),
+    #[cfg(feature = "dpms")]
+    DpmsGetTimeouts(dpms::GetTimeoutsReply),
+    #[cfg(feature = "dpms")]
+    DpmsInfo(dpms::InfoReply),
+    #[cfg(feature = "dri2")]
+    Dri2QueryVersion(dri2::QueryVersionReply),
+    #[cfg(feature = "dri2")]
+    Dri2Connect(dri2::ConnectReply),
+    #[cfg(feature = "dri2")]
+    Dri2Authenticate(dri2::AuthenticateReply),
+    #[cfg(feature = "dri2")]
+    Dri2GetBuffers(dri2::GetBuffersReply),
+    #[cfg(feature = "dri2")]
+    Dri2CopyRegion(dri2::CopyRegionReply),
+    #[cfg(feature = "dri2")]
+    Dri2GetBuffersWithFormat(dri2::GetBuffersWithFormatReply),
+    #[cfg(feature = "dri2")]
+    Dri2SwapBuffers(dri2::SwapBuffersReply),
+    #[cfg(feature = "dri2")]
+    Dri2GetMSC(dri2::GetMSCReply),
+    #[cfg(feature = "dri2")]
+    Dri2WaitMSC(dri2::WaitMSCReply),
+    #[cfg(feature = "dri2")]
+    Dri2WaitSBC(dri2::WaitSBCReply),
+    #[cfg(feature = "dri2")]
+    Dri2GetParam(dri2::GetParamReply),
+    #[cfg(feature = "dri3")]
+    Dri3QueryVersion(dri3::QueryVersionReply),
+    #[cfg(feature = "dri3")]
+    Dri3Open(dri3::OpenReply),
+    #[cfg(feature = "dri3")]
+    Dri3BufferFromPixmap(dri3::BufferFromPixmapReply),
+    #[cfg(feature = "dri3")]
+    Dri3FDFromFence(dri3::FDFromFenceReply),
+    #[cfg(feature = "dri3")]
+    Dri3GetSupportedModifiers(dri3::GetSupportedModifiersReply),
+    #[cfg(feature = "dri3")]
+    Dri3BuffersFromPixmap(dri3::BuffersFromPixmapReply),
+    GeQueryVersion(ge::QueryVersionReply),
+    #[cfg(feature = "glx")]
+    GlxMakeCurrent(glx::MakeCurrentReply),
+    #[cfg(feature = "glx")]
+    GlxIsDirect(glx::IsDirectReply),
+    #[cfg(feature = "glx")]
+    GlxQueryVersion(glx::QueryVersionReply),
+    #[cfg(feature = "glx")]
+    GlxGetVisualConfigs(glx::GetVisualConfigsReply),
+    #[cfg(feature = "glx")]
+    GlxVendorPrivateWithReply(glx::VendorPrivateWithReplyReply),
+    #[cfg(feature = "glx")]
+    GlxQueryExtensionsString(glx::QueryExtensionsStringReply),
+    #[cfg(feature = "glx")]
+    GlxQueryServerString(glx::QueryServerStringReply),
+    #[cfg(feature = "glx")]
+    GlxGetFBConfigs(glx::GetFBConfigsReply),
+    #[cfg(feature = "glx")]
+    GlxQueryContext(glx::QueryContextReply),
+    #[cfg(feature = "glx")]
+    GlxMakeContextCurrent(glx::MakeContextCurrentReply),
+    #[cfg(feature = "glx")]
+    GlxGetDrawableAttributes(glx::GetDrawableAttributesReply),
+    #[cfg(feature = "glx")]
+    GlxGenLists(glx::GenListsReply),
+    #[cfg(feature = "glx")]
+    GlxRenderMode(glx::RenderModeReply),
+    #[cfg(feature = "glx")]
+    GlxFinish(glx::FinishReply),
+    #[cfg(feature = "glx")]
+    GlxReadPixels(glx::ReadPixelsReply),
+    #[cfg(feature = "glx")]
+    GlxGetBooleanv(glx::GetBooleanvReply),
+    #[cfg(feature = "glx")]
+    GlxGetClipPlane(glx::GetClipPlaneReply),
+    #[cfg(feature = "glx")]
+    GlxGetDoublev(glx::GetDoublevReply),
+    #[cfg(feature = "glx")]
+    GlxGetError(glx::GetErrorReply),
+    #[cfg(feature = "glx")]
+    GlxGetFloatv(glx::GetFloatvReply),
+    #[cfg(feature = "glx")]
+    GlxGetIntegerv(glx::GetIntegervReply),
+    #[cfg(feature = "glx")]
+    GlxGetLightfv(glx::GetLightfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetLightiv(glx::GetLightivReply),
+    #[cfg(feature = "glx")]
+    GlxGetMapdv(glx::GetMapdvReply),
+    #[cfg(feature = "glx")]
+    GlxGetMapfv(glx::GetMapfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetMapiv(glx::GetMapivReply),
+    #[cfg(feature = "glx")]
+    GlxGetMaterialfv(glx::GetMaterialfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetMaterialiv(glx::GetMaterialivReply),
+    #[cfg(feature = "glx")]
+    GlxGetPixelMapfv(glx::GetPixelMapfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetPixelMapuiv(glx::GetPixelMapuivReply),
+    #[cfg(feature = "glx")]
+    GlxGetPixelMapusv(glx::GetPixelMapusvReply),
+    #[cfg(feature = "glx")]
+    GlxGetPolygonStipple(glx::GetPolygonStippleReply),
+    #[cfg(feature = "glx")]
+    GlxGetString(glx::GetStringReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexEnvfv(glx::GetTexEnvfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexEnviv(glx::GetTexEnvivReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexGendv(glx::GetTexGendvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexGenfv(glx::GetTexGenfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexGeniv(glx::GetTexGenivReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexImage(glx::GetTexImageReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexParameterfv(glx::GetTexParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexParameteriv(glx::GetTexParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexLevelParameterfv(glx::GetTexLevelParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetTexLevelParameteriv(glx::GetTexLevelParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxIsEnabled(glx::IsEnabledReply),
+    #[cfg(feature = "glx")]
+    GlxIsList(glx::IsListReply),
+    #[cfg(feature = "glx")]
+    GlxAreTexturesResident(glx::AreTexturesResidentReply),
+    #[cfg(feature = "glx")]
+    GlxGenTextures(glx::GenTexturesReply),
+    #[cfg(feature = "glx")]
+    GlxIsTexture(glx::IsTextureReply),
+    #[cfg(feature = "glx")]
+    GlxGetColorTable(glx::GetColorTableReply),
+    #[cfg(feature = "glx")]
+    GlxGetColorTableParameterfv(glx::GetColorTableParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetColorTableParameteriv(glx::GetColorTableParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetConvolutionFilter(glx::GetConvolutionFilterReply),
+    #[cfg(feature = "glx")]
+    GlxGetConvolutionParameterfv(glx::GetConvolutionParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetConvolutionParameteriv(glx::GetConvolutionParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetSeparableFilter(glx::GetSeparableFilterReply),
+    #[cfg(feature = "glx")]
+    GlxGetHistogram(glx::GetHistogramReply),
+    #[cfg(feature = "glx")]
+    GlxGetHistogramParameterfv(glx::GetHistogramParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetHistogramParameteriv(glx::GetHistogramParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetMinmax(glx::GetMinmaxReply),
+    #[cfg(feature = "glx")]
+    GlxGetMinmaxParameterfv(glx::GetMinmaxParameterfvReply),
+    #[cfg(feature = "glx")]
+    GlxGetMinmaxParameteriv(glx::GetMinmaxParameterivReply),
+    #[cfg(feature = "glx")]
+    GlxGetCompressedTexImageARB(glx::GetCompressedTexImageARBReply),
+    #[cfg(feature = "glx")]
+    GlxGenQueriesARB(glx::GenQueriesARBReply),
+    #[cfg(feature = "glx")]
+    GlxIsQueryARB(glx::IsQueryARBReply),
+    #[cfg(feature = "glx")]
+    GlxGetQueryivARB(glx::GetQueryivARBReply),
+    #[cfg(feature = "glx")]
+    GlxGetQueryObjectivARB(glx::GetQueryObjectivARBReply),
+    #[cfg(feature = "glx")]
+    GlxGetQueryObjectuivARB(glx::GetQueryObjectuivARBReply),
+    #[cfg(feature = "present")]
+    PresentQueryVersion(present::QueryVersionReply),
+    #[cfg(feature = "present")]
+    PresentQueryCapabilities(present::QueryCapabilitiesReply),
+    #[cfg(feature = "randr")]
+    RandrQueryVersion(randr::QueryVersionReply),
+    #[cfg(feature = "randr")]
+    RandrSetScreenConfig(randr::SetScreenConfigReply),
+    #[cfg(feature = "randr")]
+    RandrGetScreenInfo(randr::GetScreenInfoReply),
+    #[cfg(feature = "randr")]
+    RandrGetScreenSizeRange(randr::GetScreenSizeRangeReply),
+    #[cfg(feature = "randr")]
+    RandrGetScreenResources(randr::GetScreenResourcesReply),
+    #[cfg(feature = "randr")]
+    RandrGetOutputInfo(randr::GetOutputInfoReply),
+    #[cfg(feature = "randr")]
+    RandrListOutputProperties(randr::ListOutputPropertiesReply),
+    #[cfg(feature = "randr")]
+    RandrQueryOutputProperty(randr::QueryOutputPropertyReply),
+    #[cfg(feature = "randr")]
+    RandrGetOutputProperty(randr::GetOutputPropertyReply),
+    #[cfg(feature = "randr")]
+    RandrCreateMode(randr::CreateModeReply),
+    #[cfg(feature = "randr")]
+    RandrGetCrtcInfo(randr::GetCrtcInfoReply),
+    #[cfg(feature = "randr")]
+    RandrSetCrtcConfig(randr::SetCrtcConfigReply),
+    #[cfg(feature = "randr")]
+    RandrGetCrtcGammaSize(randr::GetCrtcGammaSizeReply),
+    #[cfg(feature = "randr")]
+    RandrGetCrtcGamma(randr::GetCrtcGammaReply),
+    #[cfg(feature = "randr")]
+    RandrGetScreenResourcesCurrent(randr::GetScreenResourcesCurrentReply),
+    #[cfg(feature = "randr")]
+    RandrGetCrtcTransform(randr::GetCrtcTransformReply),
+    #[cfg(feature = "randr")]
+    RandrGetPanning(randr::GetPanningReply),
+    #[cfg(feature = "randr")]
+    RandrSetPanning(randr::SetPanningReply),
+    #[cfg(feature = "randr")]
+    RandrGetOutputPrimary(randr::GetOutputPrimaryReply),
+    #[cfg(feature = "randr")]
+    RandrGetProviders(randr::GetProvidersReply),
+    #[cfg(feature = "randr")]
+    RandrGetProviderInfo(randr::GetProviderInfoReply),
+    #[cfg(feature = "randr")]
+    RandrListProviderProperties(randr::ListProviderPropertiesReply),
+    #[cfg(feature = "randr")]
+    RandrQueryProviderProperty(randr::QueryProviderPropertyReply),
+    #[cfg(feature = "randr")]
+    RandrGetProviderProperty(randr::GetProviderPropertyReply),
+    #[cfg(feature = "randr")]
+    RandrGetMonitors(randr::GetMonitorsReply),
+    #[cfg(feature = "randr")]
+    RandrCreateLease(randr::CreateLeaseReply),
+    #[cfg(feature = "record")]
+    RecordQueryVersion(record::QueryVersionReply),
+    #[cfg(feature = "record")]
+    RecordGetContext(record::GetContextReply),
+    #[cfg(feature = "record")]
+    RecordEnableContext(record::EnableContextReply),
+    #[cfg(feature = "render")]
+    RenderQueryVersion(render::QueryVersionReply),
+    #[cfg(feature = "render")]
+    RenderQueryPictFormats(render::QueryPictFormatsReply),
+    #[cfg(feature = "render")]
+    RenderQueryPictIndexValues(render::QueryPictIndexValuesReply),
+    #[cfg(feature = "render")]
+    RenderQueryFilters(render::QueryFiltersReply),
+    #[cfg(feature = "res")]
+    ResQueryVersion(res::QueryVersionReply),
+    #[cfg(feature = "res")]
+    ResQueryClients(res::QueryClientsReply),
+    #[cfg(feature = "res")]
+    ResQueryClientResources(res::QueryClientResourcesReply),
+    #[cfg(feature = "res")]
+    ResQueryClientPixmapBytes(res::QueryClientPixmapBytesReply),
+    #[cfg(feature = "res")]
+    ResQueryClientIds(res::QueryClientIdsReply),
+    #[cfg(feature = "res")]
+    ResQueryResourceBytes(res::QueryResourceBytesReply),
+    #[cfg(feature = "screensaver")]
+    ScreensaverQueryVersion(screensaver::QueryVersionReply),
+    #[cfg(feature = "screensaver")]
+    ScreensaverQueryInfo(screensaver::QueryInfoReply),
+    #[cfg(feature = "shape")]
+    ShapeQueryVersion(shape::QueryVersionReply),
+    #[cfg(feature = "shape")]
+    ShapeQueryExtents(shape::QueryExtentsReply),
+    #[cfg(feature = "shape")]
+    ShapeInputSelected(shape::InputSelectedReply),
+    #[cfg(feature = "shape")]
+    ShapeGetRectangles(shape::GetRectanglesReply),
+    #[cfg(feature = "shm")]
+    ShmQueryVersion(shm::QueryVersionReply),
+    #[cfg(feature = "shm")]
+    ShmGetImage(shm::GetImageReply),
+    #[cfg(feature = "shm")]
+    ShmCreateSegment(shm::CreateSegmentReply),
+    #[cfg(feature = "sync")]
+    SyncInitialize(sync::InitializeReply),
+    #[cfg(feature = "sync")]
+    SyncListSystemCounters(sync::ListSystemCountersReply),
+    #[cfg(feature = "sync")]
+    SyncQueryCounter(sync::QueryCounterReply),
+    #[cfg(feature = "sync")]
+    SyncQueryAlarm(sync::QueryAlarmReply),
+    #[cfg(feature = "sync")]
+    SyncGetPriority(sync::GetPriorityReply),
+    #[cfg(feature = "sync")]
+    SyncQueryFence(sync::QueryFenceReply),
+    XcMiscGetVersion(xc_misc::GetVersionReply),
+    XcMiscGetXIDRange(xc_misc::GetXIDRangeReply),
+    XcMiscGetXIDList(xc_misc::GetXIDListReply),
+    #[cfg(feature = "xevie")]
+    XevieQueryVersion(xevie::QueryVersionReply),
+    #[cfg(feature = "xevie")]
+    XevieStart(xevie::StartReply),
+    #[cfg(feature = "xevie")]
+    XevieEnd(xevie::EndReply),
+    #[cfg(feature = "xevie")]
+    XevieSend(xevie::SendReply),
+    #[cfg(feature = "xevie")]
+    XevieSelectInput(xevie::SelectInputReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driQueryVersion(xf86dri::QueryVersionReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driQueryDirectRenderingCapable(xf86dri::QueryDirectRenderingCapableReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driOpenConnection(xf86dri::OpenConnectionReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driGetClientDriverName(xf86dri::GetClientDriverNameReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driCreateContext(xf86dri::CreateContextReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driCreateDrawable(xf86dri::CreateDrawableReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driGetDrawableInfo(xf86dri::GetDrawableInfoReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driGetDeviceInfo(xf86dri::GetDeviceInfoReply),
+    #[cfg(feature = "xf86dri")]
+    Xf86driAuthConnection(xf86dri::AuthConnectionReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeQueryVersion(xf86vidmode::QueryVersionReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetModeLine(xf86vidmode::GetModeLineReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetMonitor(xf86vidmode::GetMonitorReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetAllModeLines(xf86vidmode::GetAllModeLinesReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeValidateModeLine(xf86vidmode::ValidateModeLineReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetViewPort(xf86vidmode::GetViewPortReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetDotClocks(xf86vidmode::GetDotClocksReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetGamma(xf86vidmode::GetGammaReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetGammaRamp(xf86vidmode::GetGammaRampReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetGammaRampSize(xf86vidmode::GetGammaRampSizeReply),
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeGetPermissions(xf86vidmode::GetPermissionsReply),
+    #[cfg(feature = "xfixes")]
+    XfixesQueryVersion(xfixes::QueryVersionReply),
+    #[cfg(feature = "xfixes")]
+    XfixesGetCursorImage(xfixes::GetCursorImageReply),
+    #[cfg(feature = "xfixes")]
+    XfixesFetchRegion(xfixes::FetchRegionReply),
+    #[cfg(feature = "xfixes")]
+    XfixesGetCursorName(xfixes::GetCursorNameReply),
+    #[cfg(feature = "xfixes")]
+    XfixesGetCursorImageAndName(xfixes::GetCursorImageAndNameReply),
+    #[cfg(feature = "xinerama")]
+    XineramaQueryVersion(xinerama::QueryVersionReply),
+    #[cfg(feature = "xinerama")]
+    XineramaGetState(xinerama::GetStateReply),
+    #[cfg(feature = "xinerama")]
+    XineramaGetScreenCount(xinerama::GetScreenCountReply),
+    #[cfg(feature = "xinerama")]
+    XineramaGetScreenSize(xinerama::GetScreenSizeReply),
+    #[cfg(feature = "xinerama")]
+    XineramaIsActive(xinerama::IsActiveReply),
+    #[cfg(feature = "xinerama")]
+    XineramaQueryScreens(xinerama::QueryScreensReply),
+    #[cfg(feature = "xinput")]
+    XinputGetExtensionVersion(xinput::GetExtensionVersionReply),
+    #[cfg(feature = "xinput")]
+    XinputListInputDevices(xinput::ListInputDevicesReply),
+    #[cfg(feature = "xinput")]
+    XinputOpenDevice(xinput::OpenDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputSetDeviceMode(xinput::SetDeviceModeReply),
+    #[cfg(feature = "xinput")]
+    XinputGetSelectedExtensionEvents(xinput::GetSelectedExtensionEventsReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceDontPropagateList(xinput::GetDeviceDontPropagateListReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceMotionEvents(xinput::GetDeviceMotionEventsReply),
+    #[cfg(feature = "xinput")]
+    XinputChangeKeyboardDevice(xinput::ChangeKeyboardDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputChangePointerDevice(xinput::ChangePointerDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputGrabDevice(xinput::GrabDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceFocus(xinput::GetDeviceFocusReply),
+    #[cfg(feature = "xinput")]
+    XinputGetFeedbackControl(xinput::GetFeedbackControlReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceKeyMapping(xinput::GetDeviceKeyMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceModifierMapping(xinput::GetDeviceModifierMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputSetDeviceModifierMapping(xinput::SetDeviceModifierMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceButtonMapping(xinput::GetDeviceButtonMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputSetDeviceButtonMapping(xinput::SetDeviceButtonMappingReply),
+    #[cfg(feature = "xinput")]
+    XinputQueryDeviceState(xinput::QueryDeviceStateReply),
+    #[cfg(feature = "xinput")]
+    XinputSetDeviceValuators(xinput::SetDeviceValuatorsReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceControl(xinput::GetDeviceControlReply),
+    #[cfg(feature = "xinput")]
+    XinputChangeDeviceControl(xinput::ChangeDeviceControlReply),
+    #[cfg(feature = "xinput")]
+    XinputListDeviceProperties(xinput::ListDevicePropertiesReply),
+    #[cfg(feature = "xinput")]
+    XinputGetDeviceProperty(xinput::GetDevicePropertyReply),
+    #[cfg(feature = "xinput")]
+    XinputXIQueryPointer(xinput::XIQueryPointerReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGetClientPointer(xinput::XIGetClientPointerReply),
+    #[cfg(feature = "xinput")]
+    XinputXIQueryVersion(xinput::XIQueryVersionReply),
+    #[cfg(feature = "xinput")]
+    XinputXIQueryDevice(xinput::XIQueryDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGetFocus(xinput::XIGetFocusReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGrabDevice(xinput::XIGrabDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputXIPassiveGrabDevice(xinput::XIPassiveGrabDeviceReply),
+    #[cfg(feature = "xinput")]
+    XinputXIListProperties(xinput::XIListPropertiesReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGetProperty(xinput::XIGetPropertyReply),
+    #[cfg(feature = "xinput")]
+    XinputXIGetSelectedEvents(xinput::XIGetSelectedEventsReply),
+    #[cfg(feature = "xkb")]
+    XkbUseExtension(xkb::UseExtensionReply),
+    #[cfg(feature = "xkb")]
+    XkbGetState(xkb::GetStateReply),
+    #[cfg(feature = "xkb")]
+    XkbGetControls(xkb::GetControlsReply),
+    #[cfg(feature = "xkb")]
+    XkbGetMap(xkb::GetMapReply),
+    #[cfg(feature = "xkb")]
+    XkbGetCompatMap(xkb::GetCompatMapReply),
+    #[cfg(feature = "xkb")]
+    XkbGetIndicatorState(xkb::GetIndicatorStateReply),
+    #[cfg(feature = "xkb")]
+    XkbGetIndicatorMap(xkb::GetIndicatorMapReply),
+    #[cfg(feature = "xkb")]
+    XkbGetNamedIndicator(xkb::GetNamedIndicatorReply),
+    #[cfg(feature = "xkb")]
+    XkbGetNames(xkb::GetNamesReply),
+    #[cfg(feature = "xkb")]
+    XkbPerClientFlags(xkb::PerClientFlagsReply),
+    #[cfg(feature = "xkb")]
+    XkbListComponents(xkb::ListComponentsReply),
+    #[cfg(feature = "xkb")]
+    XkbGetKbdByName(xkb::GetKbdByNameReply),
+    #[cfg(feature = "xkb")]
+    XkbGetDeviceInfo(xkb::GetDeviceInfoReply),
+    #[cfg(feature = "xkb")]
+    XkbSetDebuggingFlags(xkb::SetDebuggingFlagsReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintQueryVersion(xprint::PrintQueryVersionReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetPrinterList(xprint::PrintGetPrinterListReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetContext(xprint::PrintGetContextReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetScreenOfContext(xprint::PrintGetScreenOfContextReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetDocumentData(xprint::PrintGetDocumentDataReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintInputSelected(xprint::PrintInputSelectedReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetAttributes(xprint::PrintGetAttributesReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetOneAttributes(xprint::PrintGetOneAttributesReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetPageDimensions(xprint::PrintGetPageDimensionsReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintQueryScreens(xprint::PrintQueryScreensReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintSetImageResolution(xprint::PrintSetImageResolutionReply),
+    #[cfg(feature = "xprint")]
+    XprintPrintGetImageResolution(xprint::PrintGetImageResolutionReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxQueryVersion(xselinux::QueryVersionReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetDeviceCreateContext(xselinux::GetDeviceCreateContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetDeviceContext(xselinux::GetDeviceContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetWindowCreateContext(xselinux::GetWindowCreateContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetWindowContext(xselinux::GetWindowContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetPropertyCreateContext(xselinux::GetPropertyCreateContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetPropertyUseContext(xselinux::GetPropertyUseContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetPropertyContext(xselinux::GetPropertyContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetPropertyDataContext(xselinux::GetPropertyDataContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxListProperties(xselinux::ListPropertiesReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetSelectionCreateContext(xselinux::GetSelectionCreateContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetSelectionUseContext(xselinux::GetSelectionUseContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetSelectionContext(xselinux::GetSelectionContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetSelectionDataContext(xselinux::GetSelectionDataContextReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxListSelections(xselinux::ListSelectionsReply),
+    #[cfg(feature = "xselinux")]
+    XselinuxGetClientContext(xselinux::GetClientContextReply),
+    #[cfg(feature = "xtest")]
+    XtestGetVersion(xtest::GetVersionReply),
+    #[cfg(feature = "xtest")]
+    XtestCompareCursor(xtest::CompareCursorReply),
+    #[cfg(feature = "xv")]
+    XvQueryExtension(xv::QueryExtensionReply),
+    #[cfg(feature = "xv")]
+    XvQueryAdaptors(xv::QueryAdaptorsReply),
+    #[cfg(feature = "xv")]
+    XvQueryEncodings(xv::QueryEncodingsReply),
+    #[cfg(feature = "xv")]
+    XvGrabPort(xv::GrabPortReply),
+    #[cfg(feature = "xv")]
+    XvQueryBestSize(xv::QueryBestSizeReply),
+    #[cfg(feature = "xv")]
+    XvGetPortAttribute(xv::GetPortAttributeReply),
+    #[cfg(feature = "xv")]
+    XvQueryPortAttributes(xv::QueryPortAttributesReply),
+    #[cfg(feature = "xv")]
+    XvListImageFormats(xv::ListImageFormatsReply),
+    #[cfg(feature = "xv")]
+    XvQueryImageAttributes(xv::QueryImageAttributesReply),
+    #[cfg(feature = "xvmc")]
+    XvmcQueryVersion(xvmc::QueryVersionReply),
+    #[cfg(feature = "xvmc")]
+    XvmcListSurfaceTypes(xvmc::ListSurfaceTypesReply),
+    #[cfg(feature = "xvmc")]
+    XvmcCreateContext(xvmc::CreateContextReply),
+    #[cfg(feature = "xvmc")]
+    XvmcCreateSurface(xvmc::CreateSurfaceReply),
+    #[cfg(feature = "xvmc")]
+    XvmcCreateSubpicture(xvmc::CreateSubpictureReply),
+    #[cfg(feature = "xvmc")]
+    XvmcListSubpictureTypes(xvmc::ListSubpictureTypesReply),
+}
+impl From<()> for Reply {
+    fn from(_: ()) -> Reply {
+        Reply::Void
+    }
+}
+impl From<xproto::GetWindowAttributesReply> for Reply {
+  fn from(reply: xproto::GetWindowAttributesReply) -> Reply {
+    Reply::GetWindowAttributes(reply)
+  }
+}
+impl From<xproto::GetGeometryReply> for Reply {
+  fn from(reply: xproto::GetGeometryReply) -> Reply {
+    Reply::GetGeometry(reply)
+  }
+}
+impl From<xproto::QueryTreeReply> for Reply {
+  fn from(reply: xproto::QueryTreeReply) -> Reply {
+    Reply::QueryTree(reply)
+  }
+}
+impl From<xproto::InternAtomReply> for Reply {
+  fn from(reply: xproto::InternAtomReply) -> Reply {
+    Reply::InternAtom(reply)
+  }
+}
+impl From<xproto::GetAtomNameReply> for Reply {
+  fn from(reply: xproto::GetAtomNameReply) -> Reply {
+    Reply::GetAtomName(reply)
+  }
+}
+impl From<xproto::GetPropertyReply> for Reply {
+  fn from(reply: xproto::GetPropertyReply) -> Reply {
+    Reply::GetProperty(reply)
+  }
+}
+impl From<xproto::ListPropertiesReply> for Reply {
+  fn from(reply: xproto::ListPropertiesReply) -> Reply {
+    Reply::ListProperties(reply)
+  }
+}
+impl From<xproto::GetSelectionOwnerReply> for Reply {
+  fn from(reply: xproto::GetSelectionOwnerReply) -> Reply {
+    Reply::GetSelectionOwner(reply)
+  }
+}
+impl From<xproto::GrabPointerReply> for Reply {
+  fn from(reply: xproto::GrabPointerReply) -> Reply {
+    Reply::GrabPointer(reply)
+  }
+}
+impl From<xproto::GrabKeyboardReply> for Reply {
+  fn from(reply: xproto::GrabKeyboardReply) -> Reply {
+    Reply::GrabKeyboard(reply)
+  }
+}
+impl From<xproto::QueryPointerReply> for Reply {
+  fn from(reply: xproto::QueryPointerReply) -> Reply {
+    Reply::QueryPointer(reply)
+  }
+}
+impl From<xproto::GetMotionEventsReply> for Reply {
+  fn from(reply: xproto::GetMotionEventsReply) -> Reply {
+    Reply::GetMotionEvents(reply)
+  }
+}
+impl From<xproto::TranslateCoordinatesReply> for Reply {
+  fn from(reply: xproto::TranslateCoordinatesReply) -> Reply {
+    Reply::TranslateCoordinates(reply)
+  }
+}
+impl From<xproto::GetInputFocusReply> for Reply {
+  fn from(reply: xproto::GetInputFocusReply) -> Reply {
+    Reply::GetInputFocus(reply)
+  }
+}
+impl From<xproto::QueryKeymapReply> for Reply {
+  fn from(reply: xproto::QueryKeymapReply) -> Reply {
+    Reply::QueryKeymap(reply)
+  }
+}
+impl From<xproto::QueryFontReply> for Reply {
+  fn from(reply: xproto::QueryFontReply) -> Reply {
+    Reply::QueryFont(reply)
+  }
+}
+impl From<xproto::QueryTextExtentsReply> for Reply {
+  fn from(reply: xproto::QueryTextExtentsReply) -> Reply {
+    Reply::QueryTextExtents(reply)
+  }
+}
+impl From<xproto::ListFontsReply> for Reply {
+  fn from(reply: xproto::ListFontsReply) -> Reply {
+    Reply::ListFonts(reply)
+  }
+}
+impl From<xproto::ListFontsWithInfoReply> for Reply {
+  fn from(reply: xproto::ListFontsWithInfoReply) -> Reply {
+    Reply::ListFontsWithInfo(reply)
+  }
+}
+impl From<xproto::GetFontPathReply> for Reply {
+  fn from(reply: xproto::GetFontPathReply) -> Reply {
+    Reply::GetFontPath(reply)
+  }
+}
+impl From<xproto::GetImageReply> for Reply {
+  fn from(reply: xproto::GetImageReply) -> Reply {
+    Reply::GetImage(reply)
+  }
+}
+impl From<xproto::ListInstalledColormapsReply> for Reply {
+  fn from(reply: xproto::ListInstalledColormapsReply) -> Reply {
+    Reply::ListInstalledColormaps(reply)
+  }
+}
+impl From<xproto::AllocColorReply> for Reply {
+  fn from(reply: xproto::AllocColorReply) -> Reply {
+    Reply::AllocColor(reply)
+  }
+}
+impl From<xproto::AllocNamedColorReply> for Reply {
+  fn from(reply: xproto::AllocNamedColorReply) -> Reply {
+    Reply::AllocNamedColor(reply)
+  }
+}
+impl From<xproto::AllocColorCellsReply> for Reply {
+  fn from(reply: xproto::AllocColorCellsReply) -> Reply {
+    Reply::AllocColorCells(reply)
+  }
+}
+impl From<xproto::AllocColorPlanesReply> for Reply {
+  fn from(reply: xproto::AllocColorPlanesReply) -> Reply {
+    Reply::AllocColorPlanes(reply)
+  }
+}
+impl From<xproto::QueryColorsReply> for Reply {
+  fn from(reply: xproto::QueryColorsReply) -> Reply {
+    Reply::QueryColors(reply)
+  }
+}
+impl From<xproto::LookupColorReply> for Reply {
+  fn from(reply: xproto::LookupColorReply) -> Reply {
+    Reply::LookupColor(reply)
+  }
+}
+impl From<xproto::QueryBestSizeReply> for Reply {
+  fn from(reply: xproto::QueryBestSizeReply) -> Reply {
+    Reply::QueryBestSize(reply)
+  }
+}
+impl From<xproto::QueryExtensionReply> for Reply {
+  fn from(reply: xproto::QueryExtensionReply) -> Reply {
+    Reply::QueryExtension(reply)
+  }
+}
+impl From<xproto::ListExtensionsReply> for Reply {
+  fn from(reply: xproto::ListExtensionsReply) -> Reply {
+    Reply::ListExtensions(reply)
+  }
+}
+impl From<xproto::GetKeyboardMappingReply> for Reply {
+  fn from(reply: xproto::GetKeyboardMappingReply) -> Reply {
+    Reply::GetKeyboardMapping(reply)
+  }
+}
+impl From<xproto::GetKeyboardControlReply> for Reply {
+  fn from(reply: xproto::GetKeyboardControlReply) -> Reply {
+    Reply::GetKeyboardControl(reply)
+  }
+}
+impl From<xproto::GetPointerControlReply> for Reply {
+  fn from(reply: xproto::GetPointerControlReply) -> Reply {
+    Reply::GetPointerControl(reply)
+  }
+}
+impl From<xproto::GetScreenSaverReply> for Reply {
+  fn from(reply: xproto::GetScreenSaverReply) -> Reply {
+    Reply::GetScreenSaver(reply)
+  }
+}
+impl From<xproto::ListHostsReply> for Reply {
+  fn from(reply: xproto::ListHostsReply) -> Reply {
+    Reply::ListHosts(reply)
+  }
+}
+impl From<xproto::SetPointerMappingReply> for Reply {
+  fn from(reply: xproto::SetPointerMappingReply) -> Reply {
+    Reply::SetPointerMapping(reply)
+  }
+}
+impl From<xproto::GetPointerMappingReply> for Reply {
+  fn from(reply: xproto::GetPointerMappingReply) -> Reply {
+    Reply::GetPointerMapping(reply)
+  }
+}
+impl From<xproto::SetModifierMappingReply> for Reply {
+  fn from(reply: xproto::SetModifierMappingReply) -> Reply {
+    Reply::SetModifierMapping(reply)
+  }
+}
+impl From<xproto::GetModifierMappingReply> for Reply {
+  fn from(reply: xproto::GetModifierMappingReply) -> Reply {
+    Reply::GetModifierMapping(reply)
+  }
+}
+impl From<bigreq::EnableReply> for Reply {
+  fn from(reply: bigreq::EnableReply) -> Reply {
+    Reply::BigreqEnable(reply)
+  }
+}
+#[cfg(feature = "composite")]
+impl From<composite::QueryVersionReply> for Reply {
+  fn from(reply: composite::QueryVersionReply) -> Reply {
+    Reply::CompositeQueryVersion(reply)
+  }
+}
+#[cfg(feature = "composite")]
+impl From<composite::GetOverlayWindowReply> for Reply {
+  fn from(reply: composite::GetOverlayWindowReply) -> Reply {
+    Reply::CompositeGetOverlayWindow(reply)
+  }
+}
+#[cfg(feature = "damage")]
+impl From<damage::QueryVersionReply> for Reply {
+  fn from(reply: damage::QueryVersionReply) -> Reply {
+    Reply::DamageQueryVersion(reply)
+  }
+}
+#[cfg(feature = "dpms")]
+impl From<dpms::GetVersionReply> for Reply {
+  fn from(reply: dpms::GetVersionReply) -> Reply {
+    Reply::DpmsGetVersion(reply)
+  }
+}
+#[cfg(feature = "dpms")]
+impl From<dpms::CapableReply> for Reply {
+  fn from(reply: dpms::CapableReply) -> Reply {
+    Reply::DpmsCapable(reply)
+  }
+}
+#[cfg(feature = "dpms")]
+impl From<dpms::GetTimeoutsReply> for Reply {
+  fn from(reply: dpms::GetTimeoutsReply) -> Reply {
+    Reply::DpmsGetTimeouts(reply)
+  }
+}
+#[cfg(feature = "dpms")]
+impl From<dpms::InfoReply> for Reply {
+  fn from(reply: dpms::InfoReply) -> Reply {
+    Reply::DpmsInfo(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::QueryVersionReply> for Reply {
+  fn from(reply: dri2::QueryVersionReply) -> Reply {
+    Reply::Dri2QueryVersion(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::ConnectReply> for Reply {
+  fn from(reply: dri2::ConnectReply) -> Reply {
+    Reply::Dri2Connect(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::AuthenticateReply> for Reply {
+  fn from(reply: dri2::AuthenticateReply) -> Reply {
+    Reply::Dri2Authenticate(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::GetBuffersReply> for Reply {
+  fn from(reply: dri2::GetBuffersReply) -> Reply {
+    Reply::Dri2GetBuffers(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::CopyRegionReply> for Reply {
+  fn from(reply: dri2::CopyRegionReply) -> Reply {
+    Reply::Dri2CopyRegion(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::GetBuffersWithFormatReply> for Reply {
+  fn from(reply: dri2::GetBuffersWithFormatReply) -> Reply {
+    Reply::Dri2GetBuffersWithFormat(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::SwapBuffersReply> for Reply {
+  fn from(reply: dri2::SwapBuffersReply) -> Reply {
+    Reply::Dri2SwapBuffers(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::GetMSCReply> for Reply {
+  fn from(reply: dri2::GetMSCReply) -> Reply {
+    Reply::Dri2GetMSC(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::WaitMSCReply> for Reply {
+  fn from(reply: dri2::WaitMSCReply) -> Reply {
+    Reply::Dri2WaitMSC(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::WaitSBCReply> for Reply {
+  fn from(reply: dri2::WaitSBCReply) -> Reply {
+    Reply::Dri2WaitSBC(reply)
+  }
+}
+#[cfg(feature = "dri2")]
+impl From<dri2::GetParamReply> for Reply {
+  fn from(reply: dri2::GetParamReply) -> Reply {
+    Reply::Dri2GetParam(reply)
+  }
+}
+#[cfg(feature = "dri3")]
+impl From<dri3::QueryVersionReply> for Reply {
+  fn from(reply: dri3::QueryVersionReply) -> Reply {
+    Reply::Dri3QueryVersion(reply)
+  }
+}
+#[cfg(feature = "dri3")]
+impl From<dri3::OpenReply> for Reply {
+  fn from(reply: dri3::OpenReply) -> Reply {
+    Reply::Dri3Open(reply)
+  }
+}
+#[cfg(feature = "dri3")]
+impl From<dri3::BufferFromPixmapReply> for Reply {
+  fn from(reply: dri3::BufferFromPixmapReply) -> Reply {
+    Reply::Dri3BufferFromPixmap(reply)
+  }
+}
+#[cfg(feature = "dri3")]
+impl From<dri3::FDFromFenceReply> for Reply {
+  fn from(reply: dri3::FDFromFenceReply) -> Reply {
+    Reply::Dri3FDFromFence(reply)
+  }
+}
+#[cfg(feature = "dri3")]
+impl From<dri3::GetSupportedModifiersReply> for Reply {
+  fn from(reply: dri3::GetSupportedModifiersReply) -> Reply {
+    Reply::Dri3GetSupportedModifiers(reply)
+  }
+}
+#[cfg(feature = "dri3")]
+impl From<dri3::BuffersFromPixmapReply> for Reply {
+  fn from(reply: dri3::BuffersFromPixmapReply) -> Reply {
+    Reply::Dri3BuffersFromPixmap(reply)
+  }
+}
+impl From<ge::QueryVersionReply> for Reply {
+  fn from(reply: ge::QueryVersionReply) -> Reply {
+    Reply::GeQueryVersion(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::MakeCurrentReply> for Reply {
+  fn from(reply: glx::MakeCurrentReply) -> Reply {
+    Reply::GlxMakeCurrent(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::IsDirectReply> for Reply {
+  fn from(reply: glx::IsDirectReply) -> Reply {
+    Reply::GlxIsDirect(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::QueryVersionReply> for Reply {
+  fn from(reply: glx::QueryVersionReply) -> Reply {
+    Reply::GlxQueryVersion(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetVisualConfigsReply> for Reply {
+  fn from(reply: glx::GetVisualConfigsReply) -> Reply {
+    Reply::GlxGetVisualConfigs(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::VendorPrivateWithReplyReply> for Reply {
+  fn from(reply: glx::VendorPrivateWithReplyReply) -> Reply {
+    Reply::GlxVendorPrivateWithReply(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::QueryExtensionsStringReply> for Reply {
+  fn from(reply: glx::QueryExtensionsStringReply) -> Reply {
+    Reply::GlxQueryExtensionsString(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::QueryServerStringReply> for Reply {
+  fn from(reply: glx::QueryServerStringReply) -> Reply {
+    Reply::GlxQueryServerString(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetFBConfigsReply> for Reply {
+  fn from(reply: glx::GetFBConfigsReply) -> Reply {
+    Reply::GlxGetFBConfigs(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::QueryContextReply> for Reply {
+  fn from(reply: glx::QueryContextReply) -> Reply {
+    Reply::GlxQueryContext(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::MakeContextCurrentReply> for Reply {
+  fn from(reply: glx::MakeContextCurrentReply) -> Reply {
+    Reply::GlxMakeContextCurrent(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetDrawableAttributesReply> for Reply {
+  fn from(reply: glx::GetDrawableAttributesReply) -> Reply {
+    Reply::GlxGetDrawableAttributes(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GenListsReply> for Reply {
+  fn from(reply: glx::GenListsReply) -> Reply {
+    Reply::GlxGenLists(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::RenderModeReply> for Reply {
+  fn from(reply: glx::RenderModeReply) -> Reply {
+    Reply::GlxRenderMode(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::FinishReply> for Reply {
+  fn from(reply: glx::FinishReply) -> Reply {
+    Reply::GlxFinish(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::ReadPixelsReply> for Reply {
+  fn from(reply: glx::ReadPixelsReply) -> Reply {
+    Reply::GlxReadPixels(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetBooleanvReply> for Reply {
+  fn from(reply: glx::GetBooleanvReply) -> Reply {
+    Reply::GlxGetBooleanv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetClipPlaneReply> for Reply {
+  fn from(reply: glx::GetClipPlaneReply) -> Reply {
+    Reply::GlxGetClipPlane(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetDoublevReply> for Reply {
+  fn from(reply: glx::GetDoublevReply) -> Reply {
+    Reply::GlxGetDoublev(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetErrorReply> for Reply {
+  fn from(reply: glx::GetErrorReply) -> Reply {
+    Reply::GlxGetError(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetFloatvReply> for Reply {
+  fn from(reply: glx::GetFloatvReply) -> Reply {
+    Reply::GlxGetFloatv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetIntegervReply> for Reply {
+  fn from(reply: glx::GetIntegervReply) -> Reply {
+    Reply::GlxGetIntegerv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetLightfvReply> for Reply {
+  fn from(reply: glx::GetLightfvReply) -> Reply {
+    Reply::GlxGetLightfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetLightivReply> for Reply {
+  fn from(reply: glx::GetLightivReply) -> Reply {
+    Reply::GlxGetLightiv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetMapdvReply> for Reply {
+  fn from(reply: glx::GetMapdvReply) -> Reply {
+    Reply::GlxGetMapdv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetMapfvReply> for Reply {
+  fn from(reply: glx::GetMapfvReply) -> Reply {
+    Reply::GlxGetMapfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetMapivReply> for Reply {
+  fn from(reply: glx::GetMapivReply) -> Reply {
+    Reply::GlxGetMapiv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetMaterialfvReply> for Reply {
+  fn from(reply: glx::GetMaterialfvReply) -> Reply {
+    Reply::GlxGetMaterialfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetMaterialivReply> for Reply {
+  fn from(reply: glx::GetMaterialivReply) -> Reply {
+    Reply::GlxGetMaterialiv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetPixelMapfvReply> for Reply {
+  fn from(reply: glx::GetPixelMapfvReply) -> Reply {
+    Reply::GlxGetPixelMapfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetPixelMapuivReply> for Reply {
+  fn from(reply: glx::GetPixelMapuivReply) -> Reply {
+    Reply::GlxGetPixelMapuiv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetPixelMapusvReply> for Reply {
+  fn from(reply: glx::GetPixelMapusvReply) -> Reply {
+    Reply::GlxGetPixelMapusv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetPolygonStippleReply> for Reply {
+  fn from(reply: glx::GetPolygonStippleReply) -> Reply {
+    Reply::GlxGetPolygonStipple(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetStringReply> for Reply {
+  fn from(reply: glx::GetStringReply) -> Reply {
+    Reply::GlxGetString(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexEnvfvReply> for Reply {
+  fn from(reply: glx::GetTexEnvfvReply) -> Reply {
+    Reply::GlxGetTexEnvfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexEnvivReply> for Reply {
+  fn from(reply: glx::GetTexEnvivReply) -> Reply {
+    Reply::GlxGetTexEnviv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexGendvReply> for Reply {
+  fn from(reply: glx::GetTexGendvReply) -> Reply {
+    Reply::GlxGetTexGendv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexGenfvReply> for Reply {
+  fn from(reply: glx::GetTexGenfvReply) -> Reply {
+    Reply::GlxGetTexGenfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexGenivReply> for Reply {
+  fn from(reply: glx::GetTexGenivReply) -> Reply {
+    Reply::GlxGetTexGeniv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexImageReply> for Reply {
+  fn from(reply: glx::GetTexImageReply) -> Reply {
+    Reply::GlxGetTexImage(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexParameterfvReply> for Reply {
+  fn from(reply: glx::GetTexParameterfvReply) -> Reply {
+    Reply::GlxGetTexParameterfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexParameterivReply> for Reply {
+  fn from(reply: glx::GetTexParameterivReply) -> Reply {
+    Reply::GlxGetTexParameteriv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexLevelParameterfvReply> for Reply {
+  fn from(reply: glx::GetTexLevelParameterfvReply) -> Reply {
+    Reply::GlxGetTexLevelParameterfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetTexLevelParameterivReply> for Reply {
+  fn from(reply: glx::GetTexLevelParameterivReply) -> Reply {
+    Reply::GlxGetTexLevelParameteriv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::IsEnabledReply> for Reply {
+  fn from(reply: glx::IsEnabledReply) -> Reply {
+    Reply::GlxIsEnabled(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::IsListReply> for Reply {
+  fn from(reply: glx::IsListReply) -> Reply {
+    Reply::GlxIsList(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::AreTexturesResidentReply> for Reply {
+  fn from(reply: glx::AreTexturesResidentReply) -> Reply {
+    Reply::GlxAreTexturesResident(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GenTexturesReply> for Reply {
+  fn from(reply: glx::GenTexturesReply) -> Reply {
+    Reply::GlxGenTextures(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::IsTextureReply> for Reply {
+  fn from(reply: glx::IsTextureReply) -> Reply {
+    Reply::GlxIsTexture(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetColorTableReply> for Reply {
+  fn from(reply: glx::GetColorTableReply) -> Reply {
+    Reply::GlxGetColorTable(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetColorTableParameterfvReply> for Reply {
+  fn from(reply: glx::GetColorTableParameterfvReply) -> Reply {
+    Reply::GlxGetColorTableParameterfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetColorTableParameterivReply> for Reply {
+  fn from(reply: glx::GetColorTableParameterivReply) -> Reply {
+    Reply::GlxGetColorTableParameteriv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetConvolutionFilterReply> for Reply {
+  fn from(reply: glx::GetConvolutionFilterReply) -> Reply {
+    Reply::GlxGetConvolutionFilter(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetConvolutionParameterfvReply> for Reply {
+  fn from(reply: glx::GetConvolutionParameterfvReply) -> Reply {
+    Reply::GlxGetConvolutionParameterfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetConvolutionParameterivReply> for Reply {
+  fn from(reply: glx::GetConvolutionParameterivReply) -> Reply {
+    Reply::GlxGetConvolutionParameteriv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetSeparableFilterReply> for Reply {
+  fn from(reply: glx::GetSeparableFilterReply) -> Reply {
+    Reply::GlxGetSeparableFilter(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetHistogramReply> for Reply {
+  fn from(reply: glx::GetHistogramReply) -> Reply {
+    Reply::GlxGetHistogram(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetHistogramParameterfvReply> for Reply {
+  fn from(reply: glx::GetHistogramParameterfvReply) -> Reply {
+    Reply::GlxGetHistogramParameterfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetHistogramParameterivReply> for Reply {
+  fn from(reply: glx::GetHistogramParameterivReply) -> Reply {
+    Reply::GlxGetHistogramParameteriv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetMinmaxReply> for Reply {
+  fn from(reply: glx::GetMinmaxReply) -> Reply {
+    Reply::GlxGetMinmax(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetMinmaxParameterfvReply> for Reply {
+  fn from(reply: glx::GetMinmaxParameterfvReply) -> Reply {
+    Reply::GlxGetMinmaxParameterfv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetMinmaxParameterivReply> for Reply {
+  fn from(reply: glx::GetMinmaxParameterivReply) -> Reply {
+    Reply::GlxGetMinmaxParameteriv(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetCompressedTexImageARBReply> for Reply {
+  fn from(reply: glx::GetCompressedTexImageARBReply) -> Reply {
+    Reply::GlxGetCompressedTexImageARB(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GenQueriesARBReply> for Reply {
+  fn from(reply: glx::GenQueriesARBReply) -> Reply {
+    Reply::GlxGenQueriesARB(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::IsQueryARBReply> for Reply {
+  fn from(reply: glx::IsQueryARBReply) -> Reply {
+    Reply::GlxIsQueryARB(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetQueryivARBReply> for Reply {
+  fn from(reply: glx::GetQueryivARBReply) -> Reply {
+    Reply::GlxGetQueryivARB(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetQueryObjectivARBReply> for Reply {
+  fn from(reply: glx::GetQueryObjectivARBReply) -> Reply {
+    Reply::GlxGetQueryObjectivARB(reply)
+  }
+}
+#[cfg(feature = "glx")]
+impl From<glx::GetQueryObjectuivARBReply> for Reply {
+  fn from(reply: glx::GetQueryObjectuivARBReply) -> Reply {
+    Reply::GlxGetQueryObjectuivARB(reply)
+  }
+}
+#[cfg(feature = "present")]
+impl From<present::QueryVersionReply> for Reply {
+  fn from(reply: present::QueryVersionReply) -> Reply {
+    Reply::PresentQueryVersion(reply)
+  }
+}
+#[cfg(feature = "present")]
+impl From<present::QueryCapabilitiesReply> for Reply {
+  fn from(reply: present::QueryCapabilitiesReply) -> Reply {
+    Reply::PresentQueryCapabilities(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::QueryVersionReply> for Reply {
+  fn from(reply: randr::QueryVersionReply) -> Reply {
+    Reply::RandrQueryVersion(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::SetScreenConfigReply> for Reply {
+  fn from(reply: randr::SetScreenConfigReply) -> Reply {
+    Reply::RandrSetScreenConfig(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetScreenInfoReply> for Reply {
+  fn from(reply: randr::GetScreenInfoReply) -> Reply {
+    Reply::RandrGetScreenInfo(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetScreenSizeRangeReply> for Reply {
+  fn from(reply: randr::GetScreenSizeRangeReply) -> Reply {
+    Reply::RandrGetScreenSizeRange(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetScreenResourcesReply> for Reply {
+  fn from(reply: randr::GetScreenResourcesReply) -> Reply {
+    Reply::RandrGetScreenResources(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetOutputInfoReply> for Reply {
+  fn from(reply: randr::GetOutputInfoReply) -> Reply {
+    Reply::RandrGetOutputInfo(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::ListOutputPropertiesReply> for Reply {
+  fn from(reply: randr::ListOutputPropertiesReply) -> Reply {
+    Reply::RandrListOutputProperties(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::QueryOutputPropertyReply> for Reply {
+  fn from(reply: randr::QueryOutputPropertyReply) -> Reply {
+    Reply::RandrQueryOutputProperty(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetOutputPropertyReply> for Reply {
+  fn from(reply: randr::GetOutputPropertyReply) -> Reply {
+    Reply::RandrGetOutputProperty(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::CreateModeReply> for Reply {
+  fn from(reply: randr::CreateModeReply) -> Reply {
+    Reply::RandrCreateMode(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetCrtcInfoReply> for Reply {
+  fn from(reply: randr::GetCrtcInfoReply) -> Reply {
+    Reply::RandrGetCrtcInfo(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::SetCrtcConfigReply> for Reply {
+  fn from(reply: randr::SetCrtcConfigReply) -> Reply {
+    Reply::RandrSetCrtcConfig(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetCrtcGammaSizeReply> for Reply {
+  fn from(reply: randr::GetCrtcGammaSizeReply) -> Reply {
+    Reply::RandrGetCrtcGammaSize(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetCrtcGammaReply> for Reply {
+  fn from(reply: randr::GetCrtcGammaReply) -> Reply {
+    Reply::RandrGetCrtcGamma(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetScreenResourcesCurrentReply> for Reply {
+  fn from(reply: randr::GetScreenResourcesCurrentReply) -> Reply {
+    Reply::RandrGetScreenResourcesCurrent(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetCrtcTransformReply> for Reply {
+  fn from(reply: randr::GetCrtcTransformReply) -> Reply {
+    Reply::RandrGetCrtcTransform(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetPanningReply> for Reply {
+  fn from(reply: randr::GetPanningReply) -> Reply {
+    Reply::RandrGetPanning(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::SetPanningReply> for Reply {
+  fn from(reply: randr::SetPanningReply) -> Reply {
+    Reply::RandrSetPanning(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetOutputPrimaryReply> for Reply {
+  fn from(reply: randr::GetOutputPrimaryReply) -> Reply {
+    Reply::RandrGetOutputPrimary(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetProvidersReply> for Reply {
+  fn from(reply: randr::GetProvidersReply) -> Reply {
+    Reply::RandrGetProviders(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetProviderInfoReply> for Reply {
+  fn from(reply: randr::GetProviderInfoReply) -> Reply {
+    Reply::RandrGetProviderInfo(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::ListProviderPropertiesReply> for Reply {
+  fn from(reply: randr::ListProviderPropertiesReply) -> Reply {
+    Reply::RandrListProviderProperties(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::QueryProviderPropertyReply> for Reply {
+  fn from(reply: randr::QueryProviderPropertyReply) -> Reply {
+    Reply::RandrQueryProviderProperty(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetProviderPropertyReply> for Reply {
+  fn from(reply: randr::GetProviderPropertyReply) -> Reply {
+    Reply::RandrGetProviderProperty(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::GetMonitorsReply> for Reply {
+  fn from(reply: randr::GetMonitorsReply) -> Reply {
+    Reply::RandrGetMonitors(reply)
+  }
+}
+#[cfg(feature = "randr")]
+impl From<randr::CreateLeaseReply> for Reply {
+  fn from(reply: randr::CreateLeaseReply) -> Reply {
+    Reply::RandrCreateLease(reply)
+  }
+}
+#[cfg(feature = "record")]
+impl From<record::QueryVersionReply> for Reply {
+  fn from(reply: record::QueryVersionReply) -> Reply {
+    Reply::RecordQueryVersion(reply)
+  }
+}
+#[cfg(feature = "record")]
+impl From<record::GetContextReply> for Reply {
+  fn from(reply: record::GetContextReply) -> Reply {
+    Reply::RecordGetContext(reply)
+  }
+}
+#[cfg(feature = "record")]
+impl From<record::EnableContextReply> for Reply {
+  fn from(reply: record::EnableContextReply) -> Reply {
+    Reply::RecordEnableContext(reply)
+  }
+}
+#[cfg(feature = "render")]
+impl From<render::QueryVersionReply> for Reply {
+  fn from(reply: render::QueryVersionReply) -> Reply {
+    Reply::RenderQueryVersion(reply)
+  }
+}
+#[cfg(feature = "render")]
+impl From<render::QueryPictFormatsReply> for Reply {
+  fn from(reply: render::QueryPictFormatsReply) -> Reply {
+    Reply::RenderQueryPictFormats(reply)
+  }
+}
+#[cfg(feature = "render")]
+impl From<render::QueryPictIndexValuesReply> for Reply {
+  fn from(reply: render::QueryPictIndexValuesReply) -> Reply {
+    Reply::RenderQueryPictIndexValues(reply)
+  }
+}
+#[cfg(feature = "render")]
+impl From<render::QueryFiltersReply> for Reply {
+  fn from(reply: render::QueryFiltersReply) -> Reply {
+    Reply::RenderQueryFilters(reply)
+  }
+}
+#[cfg(feature = "res")]
+impl From<res::QueryVersionReply> for Reply {
+  fn from(reply: res::QueryVersionReply) -> Reply {
+    Reply::ResQueryVersion(reply)
+  }
+}
+#[cfg(feature = "res")]
+impl From<res::QueryClientsReply> for Reply {
+  fn from(reply: res::QueryClientsReply) -> Reply {
+    Reply::ResQueryClients(reply)
+  }
+}
+#[cfg(feature = "res")]
+impl From<res::QueryClientResourcesReply> for Reply {
+  fn from(reply: res::QueryClientResourcesReply) -> Reply {
+    Reply::ResQueryClientResources(reply)
+  }
+}
+#[cfg(feature = "res")]
+impl From<res::QueryClientPixmapBytesReply> for Reply {
+  fn from(reply: res::QueryClientPixmapBytesReply) -> Reply {
+    Reply::ResQueryClientPixmapBytes(reply)
+  }
+}
+#[cfg(feature = "res")]
+impl From<res::QueryClientIdsReply> for Reply {
+  fn from(reply: res::QueryClientIdsReply) -> Reply {
+    Reply::ResQueryClientIds(reply)
+  }
+}
+#[cfg(feature = "res")]
+impl From<res::QueryResourceBytesReply> for Reply {
+  fn from(reply: res::QueryResourceBytesReply) -> Reply {
+    Reply::ResQueryResourceBytes(reply)
+  }
+}
+#[cfg(feature = "screensaver")]
+impl From<screensaver::QueryVersionReply> for Reply {
+  fn from(reply: screensaver::QueryVersionReply) -> Reply {
+    Reply::ScreensaverQueryVersion(reply)
+  }
+}
+#[cfg(feature = "screensaver")]
+impl From<screensaver::QueryInfoReply> for Reply {
+  fn from(reply: screensaver::QueryInfoReply) -> Reply {
+    Reply::ScreensaverQueryInfo(reply)
+  }
+}
+#[cfg(feature = "shape")]
+impl From<shape::QueryVersionReply> for Reply {
+  fn from(reply: shape::QueryVersionReply) -> Reply {
+    Reply::ShapeQueryVersion(reply)
+  }
+}
+#[cfg(feature = "shape")]
+impl From<shape::QueryExtentsReply> for Reply {
+  fn from(reply: shape::QueryExtentsReply) -> Reply {
+    Reply::ShapeQueryExtents(reply)
+  }
+}
+#[cfg(feature = "shape")]
+impl From<shape::InputSelectedReply> for Reply {
+  fn from(reply: shape::InputSelectedReply) -> Reply {
+    Reply::ShapeInputSelected(reply)
+  }
+}
+#[cfg(feature = "shape")]
+impl From<shape::GetRectanglesReply> for Reply {
+  fn from(reply: shape::GetRectanglesReply) -> Reply {
+    Reply::ShapeGetRectangles(reply)
+  }
+}
+#[cfg(feature = "shm")]
+impl From<shm::QueryVersionReply> for Reply {
+  fn from(reply: shm::QueryVersionReply) -> Reply {
+    Reply::ShmQueryVersion(reply)
+  }
+}
+#[cfg(feature = "shm")]
+impl From<shm::GetImageReply> for Reply {
+  fn from(reply: shm::GetImageReply) -> Reply {
+    Reply::ShmGetImage(reply)
+  }
+}
+#[cfg(feature = "shm")]
+impl From<shm::CreateSegmentReply> for Reply {
+  fn from(reply: shm::CreateSegmentReply) -> Reply {
+    Reply::ShmCreateSegment(reply)
+  }
+}
+#[cfg(feature = "sync")]
+impl From<sync::InitializeReply> for Reply {
+  fn from(reply: sync::InitializeReply) -> Reply {
+    Reply::SyncInitialize(reply)
+  }
+}
+#[cfg(feature = "sync")]
+impl From<sync::ListSystemCountersReply> for Reply {
+  fn from(reply: sync::ListSystemCountersReply) -> Reply {
+    Reply::SyncListSystemCounters(reply)
+  }
+}
+#[cfg(feature = "sync")]
+impl From<sync::QueryCounterReply> for Reply {
+  fn from(reply: sync::QueryCounterReply) -> Reply {
+    Reply::SyncQueryCounter(reply)
+  }
+}
+#[cfg(feature = "sync")]
+impl From<sync::QueryAlarmReply> for Reply {
+  fn from(reply: sync::QueryAlarmReply) -> Reply {
+    Reply::SyncQueryAlarm(reply)
+  }
+}
+#[cfg(feature = "sync")]
+impl From<sync::GetPriorityReply> for Reply {
+  fn from(reply: sync::GetPriorityReply) -> Reply {
+    Reply::SyncGetPriority(reply)
+  }
+}
+#[cfg(feature = "sync")]
+impl From<sync::QueryFenceReply> for Reply {
+  fn from(reply: sync::QueryFenceReply) -> Reply {
+    Reply::SyncQueryFence(reply)
+  }
+}
+impl From<xc_misc::GetVersionReply> for Reply {
+  fn from(reply: xc_misc::GetVersionReply) -> Reply {
+    Reply::XcMiscGetVersion(reply)
+  }
+}
+impl From<xc_misc::GetXIDRangeReply> for Reply {
+  fn from(reply: xc_misc::GetXIDRangeReply) -> Reply {
+    Reply::XcMiscGetXIDRange(reply)
+  }
+}
+impl From<xc_misc::GetXIDListReply> for Reply {
+  fn from(reply: xc_misc::GetXIDListReply) -> Reply {
+    Reply::XcMiscGetXIDList(reply)
+  }
+}
+#[cfg(feature = "xevie")]
+impl From<xevie::QueryVersionReply> for Reply {
+  fn from(reply: xevie::QueryVersionReply) -> Reply {
+    Reply::XevieQueryVersion(reply)
+  }
+}
+#[cfg(feature = "xevie")]
+impl From<xevie::StartReply> for Reply {
+  fn from(reply: xevie::StartReply) -> Reply {
+    Reply::XevieStart(reply)
+  }
+}
+#[cfg(feature = "xevie")]
+impl From<xevie::EndReply> for Reply {
+  fn from(reply: xevie::EndReply) -> Reply {
+    Reply::XevieEnd(reply)
+  }
+}
+#[cfg(feature = "xevie")]
+impl From<xevie::SendReply> for Reply {
+  fn from(reply: xevie::SendReply) -> Reply {
+    Reply::XevieSend(reply)
+  }
+}
+#[cfg(feature = "xevie")]
+impl From<xevie::SelectInputReply> for Reply {
+  fn from(reply: xevie::SelectInputReply) -> Reply {
+    Reply::XevieSelectInput(reply)
+  }
+}
+#[cfg(feature = "xf86dri")]
+impl From<xf86dri::QueryVersionReply> for Reply {
+  fn from(reply: xf86dri::QueryVersionReply) -> Reply {
+    Reply::Xf86driQueryVersion(reply)
+  }
+}
+#[cfg(feature = "xf86dri")]
+impl From<xf86dri::QueryDirectRenderingCapableReply> for Reply {
+  fn from(reply: xf86dri::QueryDirectRenderingCapableReply) -> Reply {
+    Reply::Xf86driQueryDirectRenderingCapable(reply)
+  }
+}
+#[cfg(feature = "xf86dri")]
+impl From<xf86dri::OpenConnectionReply> for Reply {
+  fn from(reply: xf86dri::OpenConnectionReply) -> Reply {
+    Reply::Xf86driOpenConnection(reply)
+  }
+}
+#[cfg(feature = "xf86dri")]
+impl From<xf86dri::GetClientDriverNameReply> for Reply {
+  fn from(reply: xf86dri::GetClientDriverNameReply) -> Reply {
+    Reply::Xf86driGetClientDriverName(reply)
+  }
+}
+#[cfg(feature = "xf86dri")]
+impl From<xf86dri::CreateContextReply> for Reply {
+  fn from(reply: xf86dri::CreateContextReply) -> Reply {
+    Reply::Xf86driCreateContext(reply)
+  }
+}
+#[cfg(feature = "xf86dri")]
+impl From<xf86dri::CreateDrawableReply> for Reply {
+  fn from(reply: xf86dri::CreateDrawableReply) -> Reply {
+    Reply::Xf86driCreateDrawable(reply)
+  }
+}
+#[cfg(feature = "xf86dri")]
+impl From<xf86dri::GetDrawableInfoReply> for Reply {
+  fn from(reply: xf86dri::GetDrawableInfoReply) -> Reply {
+    Reply::Xf86driGetDrawableInfo(reply)
+  }
+}
+#[cfg(feature = "xf86dri")]
+impl From<xf86dri::GetDeviceInfoReply> for Reply {
+  fn from(reply: xf86dri::GetDeviceInfoReply) -> Reply {
+    Reply::Xf86driGetDeviceInfo(reply)
+  }
+}
+#[cfg(feature = "xf86dri")]
+impl From<xf86dri::AuthConnectionReply> for Reply {
+  fn from(reply: xf86dri::AuthConnectionReply) -> Reply {
+    Reply::Xf86driAuthConnection(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::QueryVersionReply> for Reply {
+  fn from(reply: xf86vidmode::QueryVersionReply) -> Reply {
+    Reply::Xf86vidmodeQueryVersion(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::GetModeLineReply> for Reply {
+  fn from(reply: xf86vidmode::GetModeLineReply) -> Reply {
+    Reply::Xf86vidmodeGetModeLine(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::GetMonitorReply> for Reply {
+  fn from(reply: xf86vidmode::GetMonitorReply) -> Reply {
+    Reply::Xf86vidmodeGetMonitor(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::GetAllModeLinesReply> for Reply {
+  fn from(reply: xf86vidmode::GetAllModeLinesReply) -> Reply {
+    Reply::Xf86vidmodeGetAllModeLines(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::ValidateModeLineReply> for Reply {
+  fn from(reply: xf86vidmode::ValidateModeLineReply) -> Reply {
+    Reply::Xf86vidmodeValidateModeLine(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::GetViewPortReply> for Reply {
+  fn from(reply: xf86vidmode::GetViewPortReply) -> Reply {
+    Reply::Xf86vidmodeGetViewPort(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::GetDotClocksReply> for Reply {
+  fn from(reply: xf86vidmode::GetDotClocksReply) -> Reply {
+    Reply::Xf86vidmodeGetDotClocks(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::GetGammaReply> for Reply {
+  fn from(reply: xf86vidmode::GetGammaReply) -> Reply {
+    Reply::Xf86vidmodeGetGamma(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::GetGammaRampReply> for Reply {
+  fn from(reply: xf86vidmode::GetGammaRampReply) -> Reply {
+    Reply::Xf86vidmodeGetGammaRamp(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::GetGammaRampSizeReply> for Reply {
+  fn from(reply: xf86vidmode::GetGammaRampSizeReply) -> Reply {
+    Reply::Xf86vidmodeGetGammaRampSize(reply)
+  }
+}
+#[cfg(feature = "xf86vidmode")]
+impl From<xf86vidmode::GetPermissionsReply> for Reply {
+  fn from(reply: xf86vidmode::GetPermissionsReply) -> Reply {
+    Reply::Xf86vidmodeGetPermissions(reply)
+  }
+}
+#[cfg(feature = "xfixes")]
+impl From<xfixes::QueryVersionReply> for Reply {
+  fn from(reply: xfixes::QueryVersionReply) -> Reply {
+    Reply::XfixesQueryVersion(reply)
+  }
+}
+#[cfg(feature = "xfixes")]
+impl From<xfixes::GetCursorImageReply> for Reply {
+  fn from(reply: xfixes::GetCursorImageReply) -> Reply {
+    Reply::XfixesGetCursorImage(reply)
+  }
+}
+#[cfg(feature = "xfixes")]
+impl From<xfixes::FetchRegionReply> for Reply {
+  fn from(reply: xfixes::FetchRegionReply) -> Reply {
+    Reply::XfixesFetchRegion(reply)
+  }
+}
+#[cfg(feature = "xfixes")]
+impl From<xfixes::GetCursorNameReply> for Reply {
+  fn from(reply: xfixes::GetCursorNameReply) -> Reply {
+    Reply::XfixesGetCursorName(reply)
+  }
+}
+#[cfg(feature = "xfixes")]
+impl From<xfixes::GetCursorImageAndNameReply> for Reply {
+  fn from(reply: xfixes::GetCursorImageAndNameReply) -> Reply {
+    Reply::XfixesGetCursorImageAndName(reply)
+  }
+}
+#[cfg(feature = "xinerama")]
+impl From<xinerama::QueryVersionReply> for Reply {
+  fn from(reply: xinerama::QueryVersionReply) -> Reply {
+    Reply::XineramaQueryVersion(reply)
+  }
+}
+#[cfg(feature = "xinerama")]
+impl From<xinerama::GetStateReply> for Reply {
+  fn from(reply: xinerama::GetStateReply) -> Reply {
+    Reply::XineramaGetState(reply)
+  }
+}
+#[cfg(feature = "xinerama")]
+impl From<xinerama::GetScreenCountReply> for Reply {
+  fn from(reply: xinerama::GetScreenCountReply) -> Reply {
+    Reply::XineramaGetScreenCount(reply)
+  }
+}
+#[cfg(feature = "xinerama")]
+impl From<xinerama::GetScreenSizeReply> for Reply {
+  fn from(reply: xinerama::GetScreenSizeReply) -> Reply {
+    Reply::XineramaGetScreenSize(reply)
+  }
+}
+#[cfg(feature = "xinerama")]
+impl From<xinerama::IsActiveReply> for Reply {
+  fn from(reply: xinerama::IsActiveReply) -> Reply {
+    Reply::XineramaIsActive(reply)
+  }
+}
+#[cfg(feature = "xinerama")]
+impl From<xinerama::QueryScreensReply> for Reply {
+  fn from(reply: xinerama::QueryScreensReply) -> Reply {
+    Reply::XineramaQueryScreens(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetExtensionVersionReply> for Reply {
+  fn from(reply: xinput::GetExtensionVersionReply) -> Reply {
+    Reply::XinputGetExtensionVersion(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::ListInputDevicesReply> for Reply {
+  fn from(reply: xinput::ListInputDevicesReply) -> Reply {
+    Reply::XinputListInputDevices(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::OpenDeviceReply> for Reply {
+  fn from(reply: xinput::OpenDeviceReply) -> Reply {
+    Reply::XinputOpenDevice(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::SetDeviceModeReply> for Reply {
+  fn from(reply: xinput::SetDeviceModeReply) -> Reply {
+    Reply::XinputSetDeviceMode(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetSelectedExtensionEventsReply> for Reply {
+  fn from(reply: xinput::GetSelectedExtensionEventsReply) -> Reply {
+    Reply::XinputGetSelectedExtensionEvents(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetDeviceDontPropagateListReply> for Reply {
+  fn from(reply: xinput::GetDeviceDontPropagateListReply) -> Reply {
+    Reply::XinputGetDeviceDontPropagateList(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetDeviceMotionEventsReply> for Reply {
+  fn from(reply: xinput::GetDeviceMotionEventsReply) -> Reply {
+    Reply::XinputGetDeviceMotionEvents(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::ChangeKeyboardDeviceReply> for Reply {
+  fn from(reply: xinput::ChangeKeyboardDeviceReply) -> Reply {
+    Reply::XinputChangeKeyboardDevice(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::ChangePointerDeviceReply> for Reply {
+  fn from(reply: xinput::ChangePointerDeviceReply) -> Reply {
+    Reply::XinputChangePointerDevice(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GrabDeviceReply> for Reply {
+  fn from(reply: xinput::GrabDeviceReply) -> Reply {
+    Reply::XinputGrabDevice(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetDeviceFocusReply> for Reply {
+  fn from(reply: xinput::GetDeviceFocusReply) -> Reply {
+    Reply::XinputGetDeviceFocus(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetFeedbackControlReply> for Reply {
+  fn from(reply: xinput::GetFeedbackControlReply) -> Reply {
+    Reply::XinputGetFeedbackControl(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetDeviceKeyMappingReply> for Reply {
+  fn from(reply: xinput::GetDeviceKeyMappingReply) -> Reply {
+    Reply::XinputGetDeviceKeyMapping(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetDeviceModifierMappingReply> for Reply {
+  fn from(reply: xinput::GetDeviceModifierMappingReply) -> Reply {
+    Reply::XinputGetDeviceModifierMapping(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::SetDeviceModifierMappingReply> for Reply {
+  fn from(reply: xinput::SetDeviceModifierMappingReply) -> Reply {
+    Reply::XinputSetDeviceModifierMapping(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetDeviceButtonMappingReply> for Reply {
+  fn from(reply: xinput::GetDeviceButtonMappingReply) -> Reply {
+    Reply::XinputGetDeviceButtonMapping(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::SetDeviceButtonMappingReply> for Reply {
+  fn from(reply: xinput::SetDeviceButtonMappingReply) -> Reply {
+    Reply::XinputSetDeviceButtonMapping(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::QueryDeviceStateReply> for Reply {
+  fn from(reply: xinput::QueryDeviceStateReply) -> Reply {
+    Reply::XinputQueryDeviceState(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::SetDeviceValuatorsReply> for Reply {
+  fn from(reply: xinput::SetDeviceValuatorsReply) -> Reply {
+    Reply::XinputSetDeviceValuators(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetDeviceControlReply> for Reply {
+  fn from(reply: xinput::GetDeviceControlReply) -> Reply {
+    Reply::XinputGetDeviceControl(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::ChangeDeviceControlReply> for Reply {
+  fn from(reply: xinput::ChangeDeviceControlReply) -> Reply {
+    Reply::XinputChangeDeviceControl(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::ListDevicePropertiesReply> for Reply {
+  fn from(reply: xinput::ListDevicePropertiesReply) -> Reply {
+    Reply::XinputListDeviceProperties(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::GetDevicePropertyReply> for Reply {
+  fn from(reply: xinput::GetDevicePropertyReply) -> Reply {
+    Reply::XinputGetDeviceProperty(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIQueryPointerReply> for Reply {
+  fn from(reply: xinput::XIQueryPointerReply) -> Reply {
+    Reply::XinputXIQueryPointer(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIGetClientPointerReply> for Reply {
+  fn from(reply: xinput::XIGetClientPointerReply) -> Reply {
+    Reply::XinputXIGetClientPointer(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIQueryVersionReply> for Reply {
+  fn from(reply: xinput::XIQueryVersionReply) -> Reply {
+    Reply::XinputXIQueryVersion(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIQueryDeviceReply> for Reply {
+  fn from(reply: xinput::XIQueryDeviceReply) -> Reply {
+    Reply::XinputXIQueryDevice(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIGetFocusReply> for Reply {
+  fn from(reply: xinput::XIGetFocusReply) -> Reply {
+    Reply::XinputXIGetFocus(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIGrabDeviceReply> for Reply {
+  fn from(reply: xinput::XIGrabDeviceReply) -> Reply {
+    Reply::XinputXIGrabDevice(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIPassiveGrabDeviceReply> for Reply {
+  fn from(reply: xinput::XIPassiveGrabDeviceReply) -> Reply {
+    Reply::XinputXIPassiveGrabDevice(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIListPropertiesReply> for Reply {
+  fn from(reply: xinput::XIListPropertiesReply) -> Reply {
+    Reply::XinputXIListProperties(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIGetPropertyReply> for Reply {
+  fn from(reply: xinput::XIGetPropertyReply) -> Reply {
+    Reply::XinputXIGetProperty(reply)
+  }
+}
+#[cfg(feature = "xinput")]
+impl From<xinput::XIGetSelectedEventsReply> for Reply {
+  fn from(reply: xinput::XIGetSelectedEventsReply) -> Reply {
+    Reply::XinputXIGetSelectedEvents(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::UseExtensionReply> for Reply {
+  fn from(reply: xkb::UseExtensionReply) -> Reply {
+    Reply::XkbUseExtension(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetStateReply> for Reply {
+  fn from(reply: xkb::GetStateReply) -> Reply {
+    Reply::XkbGetState(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetControlsReply> for Reply {
+  fn from(reply: xkb::GetControlsReply) -> Reply {
+    Reply::XkbGetControls(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetMapReply> for Reply {
+  fn from(reply: xkb::GetMapReply) -> Reply {
+    Reply::XkbGetMap(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetCompatMapReply> for Reply {
+  fn from(reply: xkb::GetCompatMapReply) -> Reply {
+    Reply::XkbGetCompatMap(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetIndicatorStateReply> for Reply {
+  fn from(reply: xkb::GetIndicatorStateReply) -> Reply {
+    Reply::XkbGetIndicatorState(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetIndicatorMapReply> for Reply {
+  fn from(reply: xkb::GetIndicatorMapReply) -> Reply {
+    Reply::XkbGetIndicatorMap(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetNamedIndicatorReply> for Reply {
+  fn from(reply: xkb::GetNamedIndicatorReply) -> Reply {
+    Reply::XkbGetNamedIndicator(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetNamesReply> for Reply {
+  fn from(reply: xkb::GetNamesReply) -> Reply {
+    Reply::XkbGetNames(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::PerClientFlagsReply> for Reply {
+  fn from(reply: xkb::PerClientFlagsReply) -> Reply {
+    Reply::XkbPerClientFlags(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::ListComponentsReply> for Reply {
+  fn from(reply: xkb::ListComponentsReply) -> Reply {
+    Reply::XkbListComponents(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetKbdByNameReply> for Reply {
+  fn from(reply: xkb::GetKbdByNameReply) -> Reply {
+    Reply::XkbGetKbdByName(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::GetDeviceInfoReply> for Reply {
+  fn from(reply: xkb::GetDeviceInfoReply) -> Reply {
+    Reply::XkbGetDeviceInfo(reply)
+  }
+}
+#[cfg(feature = "xkb")]
+impl From<xkb::SetDebuggingFlagsReply> for Reply {
+  fn from(reply: xkb::SetDebuggingFlagsReply) -> Reply {
+    Reply::XkbSetDebuggingFlags(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintQueryVersionReply> for Reply {
+  fn from(reply: xprint::PrintQueryVersionReply) -> Reply {
+    Reply::XprintPrintQueryVersion(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintGetPrinterListReply> for Reply {
+  fn from(reply: xprint::PrintGetPrinterListReply) -> Reply {
+    Reply::XprintPrintGetPrinterList(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintGetContextReply> for Reply {
+  fn from(reply: xprint::PrintGetContextReply) -> Reply {
+    Reply::XprintPrintGetContext(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintGetScreenOfContextReply> for Reply {
+  fn from(reply: xprint::PrintGetScreenOfContextReply) -> Reply {
+    Reply::XprintPrintGetScreenOfContext(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintGetDocumentDataReply> for Reply {
+  fn from(reply: xprint::PrintGetDocumentDataReply) -> Reply {
+    Reply::XprintPrintGetDocumentData(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintInputSelectedReply> for Reply {
+  fn from(reply: xprint::PrintInputSelectedReply) -> Reply {
+    Reply::XprintPrintInputSelected(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintGetAttributesReply> for Reply {
+  fn from(reply: xprint::PrintGetAttributesReply) -> Reply {
+    Reply::XprintPrintGetAttributes(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintGetOneAttributesReply> for Reply {
+  fn from(reply: xprint::PrintGetOneAttributesReply) -> Reply {
+    Reply::XprintPrintGetOneAttributes(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintGetPageDimensionsReply> for Reply {
+  fn from(reply: xprint::PrintGetPageDimensionsReply) -> Reply {
+    Reply::XprintPrintGetPageDimensions(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintQueryScreensReply> for Reply {
+  fn from(reply: xprint::PrintQueryScreensReply) -> Reply {
+    Reply::XprintPrintQueryScreens(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintSetImageResolutionReply> for Reply {
+  fn from(reply: xprint::PrintSetImageResolutionReply) -> Reply {
+    Reply::XprintPrintSetImageResolution(reply)
+  }
+}
+#[cfg(feature = "xprint")]
+impl From<xprint::PrintGetImageResolutionReply> for Reply {
+  fn from(reply: xprint::PrintGetImageResolutionReply) -> Reply {
+    Reply::XprintPrintGetImageResolution(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::QueryVersionReply> for Reply {
+  fn from(reply: xselinux::QueryVersionReply) -> Reply {
+    Reply::XselinuxQueryVersion(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetDeviceCreateContextReply> for Reply {
+  fn from(reply: xselinux::GetDeviceCreateContextReply) -> Reply {
+    Reply::XselinuxGetDeviceCreateContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetDeviceContextReply> for Reply {
+  fn from(reply: xselinux::GetDeviceContextReply) -> Reply {
+    Reply::XselinuxGetDeviceContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetWindowCreateContextReply> for Reply {
+  fn from(reply: xselinux::GetWindowCreateContextReply) -> Reply {
+    Reply::XselinuxGetWindowCreateContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetWindowContextReply> for Reply {
+  fn from(reply: xselinux::GetWindowContextReply) -> Reply {
+    Reply::XselinuxGetWindowContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetPropertyCreateContextReply> for Reply {
+  fn from(reply: xselinux::GetPropertyCreateContextReply) -> Reply {
+    Reply::XselinuxGetPropertyCreateContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetPropertyUseContextReply> for Reply {
+  fn from(reply: xselinux::GetPropertyUseContextReply) -> Reply {
+    Reply::XselinuxGetPropertyUseContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetPropertyContextReply> for Reply {
+  fn from(reply: xselinux::GetPropertyContextReply) -> Reply {
+    Reply::XselinuxGetPropertyContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetPropertyDataContextReply> for Reply {
+  fn from(reply: xselinux::GetPropertyDataContextReply) -> Reply {
+    Reply::XselinuxGetPropertyDataContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::ListPropertiesReply> for Reply {
+  fn from(reply: xselinux::ListPropertiesReply) -> Reply {
+    Reply::XselinuxListProperties(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetSelectionCreateContextReply> for Reply {
+  fn from(reply: xselinux::GetSelectionCreateContextReply) -> Reply {
+    Reply::XselinuxGetSelectionCreateContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetSelectionUseContextReply> for Reply {
+  fn from(reply: xselinux::GetSelectionUseContextReply) -> Reply {
+    Reply::XselinuxGetSelectionUseContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetSelectionContextReply> for Reply {
+  fn from(reply: xselinux::GetSelectionContextReply) -> Reply {
+    Reply::XselinuxGetSelectionContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetSelectionDataContextReply> for Reply {
+  fn from(reply: xselinux::GetSelectionDataContextReply) -> Reply {
+    Reply::XselinuxGetSelectionDataContext(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::ListSelectionsReply> for Reply {
+  fn from(reply: xselinux::ListSelectionsReply) -> Reply {
+    Reply::XselinuxListSelections(reply)
+  }
+}
+#[cfg(feature = "xselinux")]
+impl From<xselinux::GetClientContextReply> for Reply {
+  fn from(reply: xselinux::GetClientContextReply) -> Reply {
+    Reply::XselinuxGetClientContext(reply)
+  }
+}
+#[cfg(feature = "xtest")]
+impl From<xtest::GetVersionReply> for Reply {
+  fn from(reply: xtest::GetVersionReply) -> Reply {
+    Reply::XtestGetVersion(reply)
+  }
+}
+#[cfg(feature = "xtest")]
+impl From<xtest::CompareCursorReply> for Reply {
+  fn from(reply: xtest::CompareCursorReply) -> Reply {
+    Reply::XtestCompareCursor(reply)
+  }
+}
+#[cfg(feature = "xv")]
+impl From<xv::QueryExtensionReply> for Reply {
+  fn from(reply: xv::QueryExtensionReply) -> Reply {
+    Reply::XvQueryExtension(reply)
+  }
+}
+#[cfg(feature = "xv")]
+impl From<xv::QueryAdaptorsReply> for Reply {
+  fn from(reply: xv::QueryAdaptorsReply) -> Reply {
+    Reply::XvQueryAdaptors(reply)
+  }
+}
+#[cfg(feature = "xv")]
+impl From<xv::QueryEncodingsReply> for Reply {
+  fn from(reply: xv::QueryEncodingsReply) -> Reply {
+    Reply::XvQueryEncodings(reply)
+  }
+}
+#[cfg(feature = "xv")]
+impl From<xv::GrabPortReply> for Reply {
+  fn from(reply: xv::GrabPortReply) -> Reply {
+    Reply::XvGrabPort(reply)
+  }
+}
+#[cfg(feature = "xv")]
+impl From<xv::QueryBestSizeReply> for Reply {
+  fn from(reply: xv::QueryBestSizeReply) -> Reply {
+    Reply::XvQueryBestSize(reply)
+  }
+}
+#[cfg(feature = "xv")]
+impl From<xv::GetPortAttributeReply> for Reply {
+  fn from(reply: xv::GetPortAttributeReply) -> Reply {
+    Reply::XvGetPortAttribute(reply)
+  }
+}
+#[cfg(feature = "xv")]
+impl From<xv::QueryPortAttributesReply> for Reply {
+  fn from(reply: xv::QueryPortAttributesReply) -> Reply {
+    Reply::XvQueryPortAttributes(reply)
+  }
+}
+#[cfg(feature = "xv")]
+impl From<xv::ListImageFormatsReply> for Reply {
+  fn from(reply: xv::ListImageFormatsReply) -> Reply {
+    Reply::XvListImageFormats(reply)
+  }
+}
+#[cfg(feature = "xv")]
+impl From<xv::QueryImageAttributesReply> for Reply {
+  fn from(reply: xv::QueryImageAttributesReply) -> Reply {
+    Reply::XvQueryImageAttributes(reply)
+  }
+}
+#[cfg(feature = "xvmc")]
+impl From<xvmc::QueryVersionReply> for Reply {
+  fn from(reply: xvmc::QueryVersionReply) -> Reply {
+    Reply::XvmcQueryVersion(reply)
+  }
+}
+#[cfg(feature = "xvmc")]
+impl From<xvmc::ListSurfaceTypesReply> for Reply {
+  fn from(reply: xvmc::ListSurfaceTypesReply) -> Reply {
+    Reply::XvmcListSurfaceTypes(reply)
+  }
+}
+#[cfg(feature = "xvmc")]
+impl From<xvmc::CreateContextReply> for Reply {
+  fn from(reply: xvmc::CreateContextReply) -> Reply {
+    Reply::XvmcCreateContext(reply)
+  }
+}
+#[cfg(feature = "xvmc")]
+impl From<xvmc::CreateSurfaceReply> for Reply {
+  fn from(reply: xvmc::CreateSurfaceReply) -> Reply {
+    Reply::XvmcCreateSurface(reply)
+  }
+}
+#[cfg(feature = "xvmc")]
+impl From<xvmc::CreateSubpictureReply> for Reply {
+  fn from(reply: xvmc::CreateSubpictureReply) -> Reply {
+    Reply::XvmcCreateSubpicture(reply)
+  }
+}
+#[cfg(feature = "xvmc")]
+impl From<xvmc::ListSubpictureTypesReply> for Reply {
+  fn from(reply: xvmc::ListSubpictureTypesReply) -> Reply {
+    Reply::XvmcListSubpictureTypes(reply)
+  }
+}
+
 /// Enumeration of all possible X11 errors.
 #[derive(Debug, Clone)]
 pub enum Error {

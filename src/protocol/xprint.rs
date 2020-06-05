@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -440,6 +440,9 @@ impl PrintQueryVersionRequest {
         )
     }
 }
+impl Request for PrintQueryVersionRequest {
+    type Reply = PrintQueryVersionReply;
+}
 pub fn print_query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintQueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -537,6 +540,9 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         })
     }
 }
+impl<'input> Request for PrintGetPrinterListRequest<'input> {
+    type Reply = PrintGetPrinterListReply;
+}
 pub fn print_get_printer_list<'c, 'input, Conn>(conn: &'c Conn, printer_name: &'input [String8], locale: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -627,6 +633,9 @@ impl PrintRehashPrinterListRequest {
         )
     }
 }
+impl Request for PrintRehashPrinterListRequest {
+    type Reply = ();
+}
 pub fn print_rehash_printer_list<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -705,6 +714,9 @@ impl<'input> CreateContextRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreateContextRequest<'input> {
+    type Reply = ();
+}
 pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context_id: u32, printer_name: &'input [String8], locale: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -763,6 +775,9 @@ impl PrintSetContextRequest {
         })
     }
 }
+impl Request for PrintSetContextRequest {
+    type Reply = ();
+}
 pub fn print_set_context<Conn>(conn: &Conn, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -809,6 +824,9 @@ impl PrintGetContextRequest {
         Ok(PrintGetContextRequest
         )
     }
+}
+impl Request for PrintGetContextRequest {
+    type Reply = PrintGetContextReply;
 }
 pub fn print_get_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintGetContextReply>, ConnectionError>
 where
@@ -889,6 +907,9 @@ impl PrintDestroyContextRequest {
         })
     }
 }
+impl Request for PrintDestroyContextRequest {
+    type Reply = ();
+}
 pub fn print_destroy_context<Conn>(conn: &Conn, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -935,6 +956,9 @@ impl PrintGetScreenOfContextRequest {
         Ok(PrintGetScreenOfContextRequest
         )
     }
+}
+impl Request for PrintGetScreenOfContextRequest {
+    type Reply = PrintGetScreenOfContextReply;
 }
 pub fn print_get_screen_of_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintGetScreenOfContextReply>, ConnectionError>
 where
@@ -1015,6 +1039,9 @@ impl PrintStartJobRequest {
         })
     }
 }
+impl Request for PrintStartJobRequest {
+    type Reply = ();
+}
 pub fn print_start_job<Conn>(conn: &Conn, output_mode: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1070,6 +1097,9 @@ impl PrintEndJobRequest {
             cancel,
         })
     }
+}
+impl Request for PrintEndJobRequest {
+    type Reply = ();
 }
 pub fn print_end_job<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1127,6 +1157,9 @@ impl PrintStartDocRequest {
         })
     }
 }
+impl Request for PrintStartDocRequest {
+    type Reply = ();
+}
 pub fn print_start_doc<Conn>(conn: &Conn, driver_mode: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1182,6 +1215,9 @@ impl PrintEndDocRequest {
             cancel,
         })
     }
+}
+impl Request for PrintEndDocRequest {
+    type Reply = ();
 }
 pub fn print_end_doc<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1270,6 +1306,9 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         })
     }
 }
+impl<'input> Request for PrintPutDocumentDataRequest<'input> {
+    type Reply = ();
+}
 pub fn print_put_document_data<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &'input [u8], doc_format: &'input [String8], options: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1336,6 +1375,9 @@ impl PrintGetDocumentDataRequest {
             max_bytes,
         })
     }
+}
+impl Request for PrintGetDocumentDataRequest {
+    type Reply = PrintGetDocumentDataReply;
 }
 pub fn print_get_document_data<Conn>(conn: &Conn, context: Pcontext, max_bytes: u32) -> Result<Cookie<'_, Conn, PrintGetDocumentDataReply>, ConnectionError>
 where
@@ -1441,6 +1483,9 @@ impl PrintStartPageRequest {
         })
     }
 }
+impl Request for PrintStartPageRequest {
+    type Reply = ();
+}
 pub fn print_start_page<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1497,6 +1542,9 @@ impl PrintEndPageRequest {
             cancel,
         })
     }
+}
+impl Request for PrintEndPageRequest {
+    type Reply = ();
 }
 pub fn print_end_page<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1562,6 +1610,9 @@ impl PrintSelectInputRequest {
         })
     }
 }
+impl Request for PrintSelectInputRequest {
+    type Reply = ();
+}
 pub fn print_select_input<Conn>(conn: &Conn, context: Pcontext, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1618,6 +1669,9 @@ impl PrintInputSelectedRequest {
             context,
         })
     }
+}
+impl Request for PrintInputSelectedRequest {
+    type Reply = PrintInputSelectedReply;
 }
 pub fn print_input_selected<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintInputSelectedReply>, ConnectionError>
 where
@@ -1710,6 +1764,9 @@ impl PrintGetAttributesRequest {
             pool,
         })
     }
+}
+impl Request for PrintGetAttributesRequest {
+    type Reply = PrintGetAttributesReply;
 }
 pub fn print_get_attributes<Conn>(conn: &Conn, context: Pcontext, pool: u8) -> Result<Cookie<'_, Conn, PrintGetAttributesReply>, ConnectionError>
 where
@@ -1832,6 +1889,9 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
             name,
         })
     }
+}
+impl<'input> Request for PrintGetOneAttributesRequest<'input> {
+    type Reply = PrintGetOneAttributesReply;
 }
 pub fn print_get_one_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
 where
@@ -1961,6 +2021,9 @@ impl<'input> PrintSetAttributesRequest<'input> {
         })
     }
 }
+impl<'input> Request for PrintSetAttributesRequest<'input> {
+    type Reply = ();
+}
 pub fn print_set_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2020,6 +2083,9 @@ impl PrintGetPageDimensionsRequest {
             context,
         })
     }
+}
+impl Request for PrintGetPageDimensionsRequest {
+    type Reply = PrintGetPageDimensionsReply;
 }
 pub fn print_get_page_dimensions<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetPageDimensionsReply>, ConnectionError>
 where
@@ -2102,6 +2168,9 @@ impl PrintQueryScreensRequest {
         Ok(PrintQueryScreensRequest
         )
     }
+}
+impl Request for PrintQueryScreensRequest {
+    type Reply = PrintQueryScreensReply;
 }
 pub fn print_query_screens<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintQueryScreensReply>, ConnectionError>
 where
@@ -2207,6 +2276,9 @@ impl PrintSetImageResolutionRequest {
         })
     }
 }
+impl Request for PrintSetImageResolutionRequest {
+    type Reply = PrintSetImageResolutionReply;
+}
 pub fn print_set_image_resolution<Conn>(conn: &Conn, context: Pcontext, image_resolution: u16) -> Result<Cookie<'_, Conn, PrintSetImageResolutionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2289,6 +2361,9 @@ impl PrintGetImageResolutionRequest {
             context,
         })
     }
+}
+impl Request for PrintGetImageResolutionRequest {
+    type Reply = PrintGetImageResolutionReply;
 }
 pub fn print_get_image_resolution<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetImageResolutionReply>, ConnectionError>
 where

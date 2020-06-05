@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -1863,6 +1863,9 @@ impl QueryVersionRequest {
         })
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1938,6 +1941,9 @@ impl QueryPictFormatsRequest {
         Ok(QueryPictFormatsRequest
         )
     }
+}
+impl Request for QueryPictFormatsRequest {
+    type Reply = QueryPictFormatsReply;
 }
 pub fn query_pict_formats<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryPictFormatsReply>, ConnectionError>
 where
@@ -2078,6 +2084,9 @@ impl QueryPictIndexValuesRequest {
             format,
         })
     }
+}
+impl Request for QueryPictIndexValuesRequest {
+    type Reply = QueryPictIndexValuesReply;
 }
 pub fn query_pict_index_values<Conn>(conn: &Conn, format: Pictformat) -> Result<Cookie<'_, Conn, QueryPictIndexValuesReply>, ConnectionError>
 where
@@ -2506,6 +2515,9 @@ impl<'input> CreatePictureRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreatePictureRequest<'input> {
+    type Reply = ();
+}
 pub fn create_picture<'c, 'input, Conn>(conn: &'c Conn, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &'input CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2878,6 +2890,9 @@ impl<'input> ChangePictureRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangePictureRequest<'input> {
+    type Reply = ();
+}
 pub fn change_picture<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, value_list: &'input ChangePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2961,6 +2976,9 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetPictureClipRectanglesRequest<'input> {
+    type Reply = ();
+}
 pub fn set_picture_clip_rectangles<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3019,6 +3037,9 @@ impl FreePictureRequest {
             picture,
         })
     }
+}
+impl Request for FreePictureRequest {
+    type Reply = ();
 }
 pub fn free_picture<Conn>(conn: &Conn, picture: Picture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -3150,6 +3171,9 @@ impl CompositeRequest {
         })
     }
 }
+impl Request for CompositeRequest {
+    type Reply = ();
+}
 pub fn composite<Conn, A>(conn: &Conn, op: PictOp, src: Picture, mask: A, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3271,6 +3295,9 @@ impl<'input> TrapezoidsRequest<'input> {
         })
     }
 }
+impl<'input> Request for TrapezoidsRequest<'input> {
+    type Reply = ();
+}
 pub fn trapezoids<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &'input [Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3384,6 +3411,9 @@ impl<'input> TrianglesRequest<'input> {
             triangles: Cow::Owned(triangles),
         })
     }
+}
+impl<'input> Request for TrianglesRequest<'input> {
+    type Reply = ();
 }
 pub fn triangles<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &'input [Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -3499,6 +3529,9 @@ impl<'input> TriStripRequest<'input> {
         })
     }
 }
+impl<'input> Request for TriStripRequest<'input> {
+    type Reply = ();
+}
 pub fn tri_strip<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &'input [Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3613,6 +3646,9 @@ impl<'input> TriFanRequest<'input> {
         })
     }
 }
+impl<'input> Request for TriFanRequest<'input> {
+    type Reply = ();
+}
 pub fn tri_fan<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &'input [Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3683,6 +3719,9 @@ impl CreateGlyphSetRequest {
         })
     }
 }
+impl Request for CreateGlyphSetRequest {
+    type Reply = ();
+}
 pub fn create_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, format: Pictformat) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3748,6 +3787,9 @@ impl ReferenceGlyphSetRequest {
         })
     }
 }
+impl Request for ReferenceGlyphSetRequest {
+    type Reply = ();
+}
 pub fn reference_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, existing: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3804,6 +3846,9 @@ impl FreeGlyphSetRequest {
             glyphset,
         })
     }
+}
+impl Request for FreeGlyphSetRequest {
+    type Reply = ();
 }
 pub fn free_glyph_set<Conn>(conn: &Conn, glyphset: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -3885,6 +3930,9 @@ impl<'input> AddGlyphsRequest<'input> {
         })
     }
 }
+impl<'input> Request for AddGlyphsRequest<'input> {
+    type Reply = ();
+}
 pub fn add_glyphs<'c, 'input, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphids: &'input [u32], glyphs: &'input [Glyphinfo], data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3957,6 +4005,9 @@ impl<'input> FreeGlyphsRequest<'input> {
             glyphs: Cow::Owned(glyphs),
         })
     }
+}
+impl<'input> Request for FreeGlyphsRequest<'input> {
+    type Reply = ();
 }
 pub fn free_glyphs<'c, 'input, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphs: &'input [Glyph]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -4066,6 +4117,9 @@ impl<'input> CompositeGlyphs8Request<'input> {
             glyphcmds,
         })
     }
+}
+impl<'input> Request for CompositeGlyphs8Request<'input> {
+    type Reply = ();
 }
 pub fn composite_glyphs8<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -4182,6 +4236,9 @@ impl<'input> CompositeGlyphs16Request<'input> {
         })
     }
 }
+impl<'input> Request for CompositeGlyphs16Request<'input> {
+    type Reply = ();
+}
 pub fn composite_glyphs16<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4297,6 +4354,9 @@ impl<'input> CompositeGlyphs32Request<'input> {
         })
     }
 }
+impl<'input> Request for CompositeGlyphs32Request<'input> {
+    type Reply = ();
+}
 pub fn composite_glyphs32<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4396,6 +4456,9 @@ impl<'input> FillRectanglesRequest<'input> {
         })
     }
 }
+impl<'input> Request for FillRectanglesRequest<'input> {
+    type Reply = ();
+}
 pub fn fill_rectangles<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, dst: Picture, color: Color, rects: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4474,6 +4537,9 @@ impl CreateCursorRequest {
             y,
         })
     }
+}
+impl Request for CreateCursorRequest {
+    type Reply = ();
 }
 pub fn create_cursor<Conn>(conn: &Conn, cid: xproto::Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -4672,6 +4738,9 @@ impl SetPictureTransformRequest {
         })
     }
 }
+impl Request for SetPictureTransformRequest {
+    type Reply = ();
+}
 pub fn set_picture_transform<Conn>(conn: &Conn, picture: Picture, transform: Transform) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4728,6 +4797,9 @@ impl QueryFiltersRequest {
             drawable,
         })
     }
+}
+impl Request for QueryFiltersRequest {
+    type Reply = QueryFiltersReply;
 }
 pub fn query_filters<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryFiltersReply>, ConnectionError>
 where
@@ -4875,6 +4947,9 @@ impl<'input> SetPictureFilterRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetPictureFilterRequest<'input> {
+    type Reply = ();
+}
 pub fn set_picture_filter<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, filter: &'input [u8], values: &'input [Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4988,6 +5063,9 @@ impl<'input> CreateAnimCursorRequest<'input> {
             cursors: Cow::Owned(cursors),
         })
     }
+}
+impl<'input> Request for CreateAnimCursorRequest<'input> {
+    type Reply = ();
 }
 pub fn create_anim_cursor<'c, 'input, Conn>(conn: &'c Conn, cid: xproto::Cursor, cursors: &'input [Animcursorelt]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -5180,6 +5258,9 @@ impl<'input> AddTrapsRequest<'input> {
         })
     }
 }
+impl<'input> Request for AddTrapsRequest<'input> {
+    type Reply = ();
+}
 pub fn add_traps<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, x_off: i16, y_off: i16, traps: &'input [Trap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -5250,6 +5331,9 @@ impl CreateSolidFillRequest {
             color,
         })
     }
+}
+impl Request for CreateSolidFillRequest {
+    type Reply = ();
 }
 pub fn create_solid_fill<Conn>(conn: &Conn, picture: Picture, color: Color) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -5351,6 +5435,9 @@ impl<'input> CreateLinearGradientRequest<'input> {
             colors: Cow::Owned(colors),
         })
     }
+}
+impl<'input> Request for CreateLinearGradientRequest<'input> {
+    type Reply = ();
 }
 pub fn create_linear_gradient<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, p1: Pointfix, p2: Pointfix, stops: &'input [Fixed], colors: &'input [Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -5472,6 +5559,9 @@ impl<'input> CreateRadialGradientRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreateRadialGradientRequest<'input> {
+    type Reply = ();
+}
 pub fn create_radial_gradient<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, stops: &'input [Fixed], colors: &'input [Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -5573,6 +5663,9 @@ impl<'input> CreateConicalGradientRequest<'input> {
             colors: Cow::Owned(colors),
         })
     }
+}
+impl<'input> Request for CreateConicalGradientRequest<'input> {
+    type Reply = ();
 }
 pub fn create_conical_gradient<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, center: Pointfix, angle: Fixed, stops: &'input [Fixed], colors: &'input [Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where

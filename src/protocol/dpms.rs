@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -81,6 +81,9 @@ impl GetVersionRequest {
             client_minor_version,
         })
     }
+}
+impl Request for GetVersionRequest {
+    type Reply = GetVersionReply;
 }
 pub fn get_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
 where
@@ -157,6 +160,9 @@ impl CapableRequest {
         )
     }
 }
+impl Request for CapableRequest {
+    type Reply = CapableReply;
+}
 pub fn capable<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, CapableReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -227,6 +233,9 @@ impl GetTimeoutsRequest {
         Ok(GetTimeoutsRequest
         )
     }
+}
+impl Request for GetTimeoutsRequest {
+    type Reply = GetTimeoutsReply;
 }
 pub fn get_timeouts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetTimeoutsReply>, ConnectionError>
 where
@@ -324,6 +333,9 @@ impl SetTimeoutsRequest {
         })
     }
 }
+impl Request for SetTimeoutsRequest {
+    type Reply = ();
+}
 pub fn set_timeouts<Conn>(conn: &Conn, standby_timeout: u16, suspend_timeout: u16, off_timeout: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -373,6 +385,9 @@ impl EnableRequest {
         )
     }
 }
+impl Request for EnableRequest {
+    type Reply = ();
+}
 pub fn enable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -417,6 +432,9 @@ impl DisableRequest {
         Ok(DisableRequest
         )
     }
+}
+impl Request for DisableRequest {
+    type Reply = ();
 }
 pub fn disable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -541,6 +559,9 @@ impl ForceLevelRequest {
         })
     }
 }
+impl Request for ForceLevelRequest {
+    type Reply = ();
+}
 pub fn force_level<Conn>(conn: &Conn, power_level: DPMSMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -587,6 +608,9 @@ impl InfoRequest {
         Ok(InfoRequest
         )
     }
+}
+impl Request for InfoRequest {
+    type Reply = InfoReply;
 }
 pub fn info<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, InfoReply>, ConnectionError>
 where

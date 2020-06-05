@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -6357,6 +6357,9 @@ impl UseExtensionRequest {
         })
     }
 }
+impl Request for UseExtensionRequest {
+    type Reply = UseExtensionReply;
+}
 pub fn use_extension<Conn>(conn: &Conn, wanted_major: u16, wanted_minor: u16) -> Result<Cookie<'_, Conn, UseExtensionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7135,6 +7138,9 @@ impl<'input> SelectEventsRequest<'input> {
         })
     }
 }
+impl<'input> Request for SelectEventsRequest<'input> {
+    type Reply = ();
+}
 pub fn select_events<'c, 'input, Conn, A, B, C, D>(conn: &'c Conn, device_spec: DeviceSpec, clear: A, select_all: B, affect_map: C, map: D, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7262,6 +7268,9 @@ impl BellRequest {
         })
     }
 }
+impl Request for BellRequest {
+    type Reply = ();
+}
 pub fn bell<Conn>(conn: &Conn, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: xproto::Atom, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7327,6 +7336,9 @@ impl GetStateRequest {
             device_spec,
         })
     }
+}
+impl Request for GetStateRequest {
+    type Reply = GetStateReply;
 }
 pub fn get_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
 where
@@ -7479,6 +7491,9 @@ impl LatchLockStateRequest {
         })
     }
 }
+impl Request for LatchLockStateRequest {
+    type Reply = ();
+}
 pub fn latch_lock_state<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, affect_mod_locks: A, mod_locks: B, lock_group: bool, group_lock: Group, affect_mod_latches: C, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7548,6 +7563,9 @@ impl GetControlsRequest {
             device_spec,
         })
     }
+}
+impl Request for GetControlsRequest {
+    type Reply = GetControlsReply;
 }
 pub fn get_controls<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetControlsReply>, ConnectionError>
 where
@@ -7862,6 +7880,9 @@ impl<'input> SetControlsRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetControlsRequest<'input> {
+    type Reply = ();
+}
 pub fn set_controls<'c, 'input, Conn, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(conn: &'c Conn, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &'input [u8; 32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8067,6 +8088,9 @@ impl GetMapRequest {
             n_v_mod_map_keys,
         })
     }
+}
+impl Request for GetMapRequest {
+    type Reply = GetMapReply;
 }
 pub fn get_map<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, full: A, partial: B, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, first_key_action: xproto::Keycode, n_key_actions: u8, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, virtual_mods: C, first_key_explicit: xproto::Keycode, n_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Conn, GetMapReply>, ConnectionError>
 where
@@ -8720,6 +8744,9 @@ impl<'input> SetMapRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetMapRequest<'input> {
+    type Reply = ();
+}
 pub fn set_map<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &'input SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8824,6 +8851,9 @@ impl GetCompatMapRequest {
             n_si,
         })
     }
+}
+impl Request for GetCompatMapRequest {
+    type Reply = GetCompatMapReply;
 }
 pub fn get_compat_map<Conn, A>(conn: &Conn, device_spec: DeviceSpec, groups: A, get_all_si: bool, first_si: u16, n_si: u16) -> Result<Cookie<'_, Conn, GetCompatMapReply>, ConnectionError>
 where
@@ -8981,6 +9011,9 @@ impl<'input> SetCompatMapRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetCompatMapRequest<'input> {
+    type Reply = ();
+}
 pub fn set_compat_map<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &'input [SymInterpret], group_maps: &'input [ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9045,6 +9078,9 @@ impl GetIndicatorStateRequest {
             device_spec,
         })
     }
+}
+impl Request for GetIndicatorStateRequest {
+    type Reply = GetIndicatorStateReply;
 }
 pub fn get_indicator_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetIndicatorStateReply>, ConnectionError>
 where
@@ -9137,6 +9173,9 @@ impl GetIndicatorMapRequest {
             which,
         })
     }
+}
+impl Request for GetIndicatorMapRequest {
+    type Reply = GetIndicatorMapReply;
 }
 pub fn get_indicator_map<Conn>(conn: &Conn, device_spec: DeviceSpec, which: u32) -> Result<Cookie<'_, Conn, GetIndicatorMapReply>, ConnectionError>
 where
@@ -9245,6 +9284,9 @@ impl<'input> SetIndicatorMapRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetIndicatorMapRequest<'input> {
+    type Reply = ();
+}
 pub fn set_indicator_map<'c, 'input, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &'input [IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9324,6 +9366,9 @@ impl GetNamedIndicatorRequest {
             indicator,
         })
     }
+}
+impl Request for GetNamedIndicatorRequest {
+    type Reply = GetNamedIndicatorReply;
 }
 pub fn get_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
 where
@@ -9522,6 +9567,9 @@ impl SetNamedIndicatorRequest {
         })
     }
 }
+impl Request for SetNamedIndicatorRequest {
+    type Reply = ();
+}
 pub fn set_named_indicator<Conn, A, B, C, D, E, F, G, H>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: B, map_which_groups: C, map_groups: D, map_which_mods: E, map_real_mods: F, map_vmods: G, map_ctrls: H) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9616,6 +9664,9 @@ impl GetNamesRequest {
             which,
         })
     }
+}
+impl Request for GetNamesRequest {
+    type Reply = GetNamesReply;
 }
 pub fn get_names<Conn, A>(conn: &Conn, device_spec: DeviceSpec, which: A) -> Result<Cookie<'_, Conn, GetNamesReply>, ConnectionError>
 where
@@ -10318,6 +10369,9 @@ impl<'input> SetNamesRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetNamesRequest<'input> {
+    type Reply = ();
+}
 pub fn set_names<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &'input SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10432,6 +10486,9 @@ impl PerClientFlagsRequest {
         })
     }
 }
+impl Request for PerClientFlagsRequest {
+    type Reply = PerClientFlagsReply;
+}
 pub fn per_client_flags<Conn, A, B, C, D, E>(conn: &Conn, device_spec: DeviceSpec, change: A, value: B, ctrls_to_change: C, auto_ctrls: D, auto_ctrls_values: E) -> Result<Cookie<'_, Conn, PerClientFlagsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10539,6 +10596,9 @@ impl ListComponentsRequest {
             max_names,
         })
     }
+}
+impl Request for ListComponentsRequest {
+    type Reply = ListComponentsReply;
 }
 pub fn list_components<Conn>(conn: &Conn, device_spec: DeviceSpec, max_names: u16) -> Result<Cookie<'_, Conn, ListComponentsReply>, ConnectionError>
 where
@@ -10738,6 +10798,9 @@ impl GetKbdByNameRequest {
             load,
         })
     }
+}
+impl Request for GetKbdByNameRequest {
+    type Reply = GetKbdByNameReply;
 }
 pub fn get_kbd_by_name<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, need: A, want: B, load: bool) -> Result<Cookie<'_, Conn, GetKbdByNameReply>, ConnectionError>
 where
@@ -11475,6 +11538,9 @@ impl GetDeviceInfoRequest {
         })
     }
 }
+impl Request for GetDeviceInfoRequest {
+    type Reply = GetDeviceInfoReply;
+}
 pub fn get_device_info<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, wanted: A, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: LedClass, led_id: B) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -11674,6 +11740,9 @@ impl<'input> SetDeviceInfoRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetDeviceInfoRequest<'input> {
+    type Reply = ();
+}
 pub fn set_device_info<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &'input [Action], leds: &'input [DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -11773,6 +11842,9 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
             message,
         })
     }
+}
+impl<'input> Request for SetDebuggingFlagsRequest<'input> {
+    type Reply = SetDebuggingFlagsReply;
 }
 pub fn set_debugging_flags<'c, 'input, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
 where

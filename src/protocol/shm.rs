@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -161,6 +161,9 @@ impl QueryVersionRequest {
         )
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -267,6 +270,9 @@ impl AttachRequest {
         })
     }
 }
+impl Request for AttachRequest {
+    type Reply = ();
+}
 pub fn attach<Conn>(conn: &Conn, shmseg: Seg, shmid: u32, read_only: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -324,6 +330,9 @@ impl DetachRequest {
             shmseg,
         })
     }
+}
+impl Request for DetachRequest {
+    type Reply = ();
 }
 pub fn detach<Conn>(conn: &Conn, shmseg: Seg) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -470,6 +479,9 @@ impl PutImageRequest {
         })
     }
 }
+impl Request for PutImageRequest {
+    type Reply = ();
+}
 pub fn put_image<Conn>(conn: &Conn, drawable: xproto::Drawable, gc: xproto::Gcontext, total_width: u16, total_height: u16, src_x: u16, src_y: u16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16, depth: u8, format: u8, send_event: bool, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -596,6 +608,9 @@ impl GetImageRequest {
             offset,
         })
     }
+}
+impl Request for GetImageRequest {
+    type Reply = GetImageReply;
 }
 pub fn get_image<Conn>(conn: &Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32, format: u8, shmseg: Seg, offset: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
 where
@@ -734,6 +749,9 @@ impl CreatePixmapRequest {
         })
     }
 }
+impl Request for CreatePixmapRequest {
+    type Reply = ();
+}
 pub fn create_pixmap<Conn>(conn: &Conn, pid: xproto::Pixmap, drawable: xproto::Drawable, width: u16, height: u16, depth: u8, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -808,6 +826,9 @@ impl AttachFdRequest {
             read_only,
         })
     }
+}
+impl Request for AttachFdRequest {
+    type Reply = ();
 }
 pub fn attach_fd<Conn, A>(conn: &Conn, shmseg: Seg, shm_fd: A, read_only: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -885,6 +906,9 @@ impl CreateSegmentRequest {
             read_only,
         })
     }
+}
+impl Request for CreateSegmentRequest {
+    type Reply = CreateSegmentReply;
 }
 pub fn create_segment<Conn>(conn: &Conn, shmseg: Seg, size: u32, read_only: bool) -> Result<CookieWithFds<'_, Conn, CreateSegmentReply>, ConnectionError>
 where

@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -158,6 +158,9 @@ impl QueryVersionRequest {
         })
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -253,6 +256,9 @@ impl RedirectWindowRequest {
         })
     }
 }
+impl Request for RedirectWindowRequest {
+    type Reply = ();
+}
 pub fn redirect_window<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -319,6 +325,9 @@ impl RedirectSubwindowsRequest {
             update,
         })
     }
+}
+impl Request for RedirectSubwindowsRequest {
+    type Reply = ();
 }
 pub fn redirect_subwindows<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -387,6 +396,9 @@ impl UnredirectWindowRequest {
         })
     }
 }
+impl Request for UnredirectWindowRequest {
+    type Reply = ();
+}
 pub fn unredirect_window<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -454,6 +466,9 @@ impl UnredirectSubwindowsRequest {
         })
     }
 }
+impl Request for UnredirectSubwindowsRequest {
+    type Reply = ();
+}
 pub fn unredirect_subwindows<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -518,6 +533,9 @@ impl CreateRegionFromBorderClipRequest {
             window,
         })
     }
+}
+impl Request for CreateRegionFromBorderClipRequest {
+    type Reply = ();
 }
 pub fn create_region_from_border_clip<Conn>(conn: &Conn, region: xfixes::Region, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -584,6 +602,9 @@ impl NameWindowPixmapRequest {
         })
     }
 }
+impl Request for NameWindowPixmapRequest {
+    type Reply = ();
+}
 pub fn name_window_pixmap<Conn>(conn: &Conn, window: xproto::Window, pixmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -640,6 +661,9 @@ impl GetOverlayWindowRequest {
             window,
         })
     }
+}
+impl Request for GetOverlayWindowRequest {
+    type Reply = GetOverlayWindowReply;
 }
 pub fn get_overlay_window<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetOverlayWindowReply>, ConnectionError>
 where
@@ -722,6 +746,9 @@ impl ReleaseOverlayWindowRequest {
             window,
         })
     }
+}
+impl Request for ReleaseOverlayWindowRequest {
+    type Reply = ();
 }
 pub fn release_overlay_window<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where

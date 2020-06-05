@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -554,6 +554,9 @@ impl QueryVersionRequest {
         })
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -744,6 +747,9 @@ impl SetScreenConfigRequest {
         })
     }
 }
+impl Request for SetScreenConfigRequest {
+    type Reply = SetScreenConfigReply;
+}
 pub fn set_screen_config<Conn, A>(conn: &Conn, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: A, rate: u16) -> Result<Cookie<'_, Conn, SetScreenConfigReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -932,6 +938,9 @@ impl SelectInputRequest {
         })
     }
 }
+impl Request for SelectInputRequest {
+    type Reply = ();
+}
 pub fn select_input<Conn, A>(conn: &Conn, window: xproto::Window, enable: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -990,6 +999,9 @@ impl GetScreenInfoRequest {
             window,
         })
     }
+}
+impl Request for GetScreenInfoRequest {
+    type Reply = GetScreenInfoReply;
 }
 pub fn get_screen_info<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenInfoReply>, ConnectionError>
 where
@@ -1106,6 +1118,9 @@ impl GetScreenSizeRangeRequest {
         })
     }
 }
+impl Request for GetScreenSizeRangeRequest {
+    type Reply = GetScreenSizeRangeReply;
+}
 pub fn get_screen_size_range<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenSizeRangeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1221,6 +1236,9 @@ impl SetScreenSizeRequest {
             mm_height,
         })
     }
+}
+impl Request for SetScreenSizeRequest {
+    type Reply = ();
 }
 pub fn set_screen_size<Conn>(conn: &Conn, window: xproto::Window, width: u16, height: u16, mm_width: u32, mm_height: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -1475,6 +1493,9 @@ impl GetScreenResourcesRequest {
         })
     }
 }
+impl Request for GetScreenResourcesRequest {
+    type Reply = GetScreenResourcesReply;
+}
 pub fn get_screen_resources<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenResourcesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1699,6 +1720,9 @@ impl GetOutputInfoRequest {
         })
     }
 }
+impl Request for GetOutputInfoRequest {
+    type Reply = GetOutputInfoReply;
+}
 pub fn get_output_info<Conn>(conn: &Conn, output: Output, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetOutputInfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1864,6 +1888,9 @@ impl ListOutputPropertiesRequest {
         })
     }
 }
+impl Request for ListOutputPropertiesRequest {
+    type Reply = ListOutputPropertiesReply;
+}
 pub fn list_output_properties<Conn>(conn: &Conn, output: Output) -> Result<Cookie<'_, Conn, ListOutputPropertiesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1969,6 +1996,9 @@ impl QueryOutputPropertyRequest {
             property,
         })
     }
+}
+impl Request for QueryOutputPropertyRequest {
+    type Reply = QueryOutputPropertyReply;
 }
 pub fn query_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom) -> Result<Cookie<'_, Conn, QueryOutputPropertyReply>, ConnectionError>
 where
@@ -2108,6 +2138,9 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
         })
     }
 }
+impl<'input> Request for ConfigureOutputPropertyRequest<'input> {
+    type Reply = ();
+}
 pub fn configure_output_property<'c, 'input, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &'input [i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2213,6 +2246,9 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeOutputPropertyRequest<'input> {
+    type Reply = ();
+}
 pub fn change_output_property<'c, 'input, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2282,6 +2318,9 @@ impl DeleteOutputPropertyRequest {
             property,
         })
     }
+}
+impl Request for DeleteOutputPropertyRequest {
+    type Reply = ();
 }
 pub fn delete_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2384,6 +2423,9 @@ impl GetOutputPropertyRequest {
             pending,
         })
     }
+}
+impl Request for GetOutputPropertyRequest {
+    type Reply = GetOutputPropertyReply;
 }
 pub fn get_output_property<Conn, A>(conn: &Conn, output: Output, property: xproto::Atom, type_: A, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetOutputPropertyReply>, ConnectionError>
 where
@@ -2525,6 +2567,9 @@ impl<'input> CreateModeRequest<'input> {
         })
     }
 }
+impl<'input> Request for CreateModeRequest<'input> {
+    type Reply = CreateModeReply;
+}
 pub fn create_mode<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, mode_info: ModeInfo, name: &'input [u8]) -> Result<Cookie<'c, Conn, CreateModeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2609,6 +2654,9 @@ impl DestroyModeRequest {
         })
     }
 }
+impl Request for DestroyModeRequest {
+    type Reply = ();
+}
 pub fn destroy_mode<Conn>(conn: &Conn, mode: Mode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2672,6 +2720,9 @@ impl AddOutputModeRequest {
             mode,
         })
     }
+}
+impl Request for AddOutputModeRequest {
+    type Reply = ();
 }
 pub fn add_output_mode<Conn>(conn: &Conn, output: Output, mode: Mode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -2738,6 +2789,9 @@ impl DeleteOutputModeRequest {
         })
     }
 }
+impl Request for DeleteOutputModeRequest {
+    type Reply = ();
+}
 pub fn delete_output_mode<Conn>(conn: &Conn, output: Output, mode: Mode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2802,6 +2856,9 @@ impl GetCrtcInfoRequest {
             config_timestamp,
         })
     }
+}
+impl Request for GetCrtcInfoRequest {
+    type Reply = GetCrtcInfoReply;
 }
 pub fn get_crtc_info<Conn>(conn: &Conn, crtc: Crtc, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetCrtcInfoReply>, ConnectionError>
 where
@@ -2994,6 +3051,9 @@ impl<'input> SetCrtcConfigRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetCrtcConfigRequest<'input> {
+    type Reply = SetCrtcConfigReply;
+}
 pub fn set_crtc_config<'c, 'input, Conn, A>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &'input [Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3087,6 +3147,9 @@ impl GetCrtcGammaSizeRequest {
         })
     }
 }
+impl Request for GetCrtcGammaSizeRequest {
+    type Reply = GetCrtcGammaSizeReply;
+}
 pub fn get_crtc_gamma_size<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetCrtcGammaSizeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3168,6 +3231,9 @@ impl GetCrtcGammaRequest {
             crtc,
         })
     }
+}
+impl Request for GetCrtcGammaRequest {
+    type Reply = GetCrtcGammaReply;
 }
 pub fn get_crtc_gamma<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetCrtcGammaReply>, ConnectionError>
 where
@@ -3298,6 +3364,9 @@ impl<'input> SetCrtcGammaRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetCrtcGammaRequest<'input> {
+    type Reply = ();
+}
 pub fn set_crtc_gamma<'c, 'input, Conn>(conn: &'c Conn, crtc: Crtc, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3356,6 +3425,9 @@ impl GetScreenResourcesCurrentRequest {
             window,
         })
     }
+}
+impl Request for GetScreenResourcesCurrentRequest {
+    type Reply = GetScreenResourcesCurrentReply;
 }
 pub fn get_screen_resources_current<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenResourcesCurrentReply>, ConnectionError>
 where
@@ -3649,6 +3721,9 @@ impl<'input> SetCrtcTransformRequest<'input> {
         })
     }
 }
+impl<'input> Request for SetCrtcTransformRequest<'input> {
+    type Reply = ();
+}
 pub fn set_crtc_transform<'c, 'input, Conn>(conn: &'c Conn, crtc: Crtc, transform: render::Transform, filter_name: &'input [u8], filter_params: &'input [render::Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3707,6 +3782,9 @@ impl GetCrtcTransformRequest {
             crtc,
         })
     }
+}
+impl Request for GetCrtcTransformRequest {
+    type Reply = GetCrtcTransformReply;
 }
 pub fn get_crtc_transform<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetCrtcTransformReply>, ConnectionError>
 where
@@ -3871,6 +3949,9 @@ impl GetPanningRequest {
             crtc,
         })
     }
+}
+impl Request for GetPanningRequest {
+    type Reply = GetPanningReply;
 }
 pub fn get_panning<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetPanningReply>, ConnectionError>
 where
@@ -4059,6 +4140,9 @@ impl SetPanningRequest {
         })
     }
 }
+impl Request for SetPanningRequest {
+    type Reply = SetPanningReply;
+}
 pub fn set_panning<Conn>(conn: &Conn, crtc: Crtc, timestamp: xproto::Timestamp, left: u16, top: u16, width: u16, height: u16, track_left: u16, track_top: u16, track_width: u16, track_height: u16, border_left: i16, border_top: i16, border_right: i16, border_bottom: i16) -> Result<Cookie<'_, Conn, SetPanningReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4163,6 +4247,9 @@ impl SetOutputPrimaryRequest {
         })
     }
 }
+impl Request for SetOutputPrimaryRequest {
+    type Reply = ();
+}
 pub fn set_output_primary<Conn>(conn: &Conn, window: xproto::Window, output: Output) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4219,6 +4306,9 @@ impl GetOutputPrimaryRequest {
             window,
         })
     }
+}
+impl Request for GetOutputPrimaryRequest {
+    type Reply = GetOutputPrimaryReply;
 }
 pub fn get_output_primary<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetOutputPrimaryReply>, ConnectionError>
 where
@@ -4300,6 +4390,9 @@ impl GetProvidersRequest {
             window,
         })
     }
+}
+impl Request for GetProvidersRequest {
+    type Reply = GetProvidersReply;
 }
 pub fn get_providers<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetProvidersReply>, ConnectionError>
 where
@@ -4478,6 +4571,9 @@ impl GetProviderInfoRequest {
         })
     }
 }
+impl Request for GetProviderInfoRequest {
+    type Reply = GetProviderInfoReply;
+}
 pub fn get_provider_info<Conn>(conn: &Conn, provider: Provider, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetProviderInfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4649,6 +4745,9 @@ impl SetProviderOffloadSinkRequest {
         })
     }
 }
+impl Request for SetProviderOffloadSinkRequest {
+    type Reply = ();
+}
 pub fn set_provider_offload_sink<Conn>(conn: &Conn, provider: Provider, sink_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4723,6 +4822,9 @@ impl SetProviderOutputSourceRequest {
         })
     }
 }
+impl Request for SetProviderOutputSourceRequest {
+    type Reply = ();
+}
 pub fn set_provider_output_source<Conn>(conn: &Conn, provider: Provider, source_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -4780,6 +4882,9 @@ impl ListProviderPropertiesRequest {
             provider,
         })
     }
+}
+impl Request for ListProviderPropertiesRequest {
+    type Reply = ListProviderPropertiesReply;
 }
 pub fn list_provider_properties<Conn>(conn: &Conn, provider: Provider) -> Result<Cookie<'_, Conn, ListProviderPropertiesReply>, ConnectionError>
 where
@@ -4886,6 +4991,9 @@ impl QueryProviderPropertyRequest {
             property,
         })
     }
+}
+impl Request for QueryProviderPropertyRequest {
+    type Reply = QueryProviderPropertyReply;
 }
 pub fn query_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom) -> Result<Cookie<'_, Conn, QueryProviderPropertyReply>, ConnectionError>
 where
@@ -5025,6 +5133,9 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
         })
     }
 }
+impl<'input> Request for ConfigureProviderPropertyRequest<'input> {
+    type Reply = ();
+}
 pub fn configure_provider_property<'c, 'input, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &'input [i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -5129,6 +5240,9 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         })
     }
 }
+impl<'input> Request for ChangeProviderPropertyRequest<'input> {
+    type Reply = ();
+}
 pub fn change_provider_property<'c, 'input, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -5198,6 +5312,9 @@ impl DeleteProviderPropertyRequest {
             property,
         })
     }
+}
+impl Request for DeleteProviderPropertyRequest {
+    type Reply = ();
 }
 pub fn delete_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -5300,6 +5417,9 @@ impl GetProviderPropertyRequest {
             pending,
         })
     }
+}
+impl Request for GetProviderPropertyRequest {
+    type Reply = GetProviderPropertyReply;
 }
 pub fn get_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetProviderPropertyReply>, ConnectionError>
 where
@@ -6127,6 +6247,9 @@ impl GetMonitorsRequest {
         })
     }
 }
+impl Request for GetMonitorsRequest {
+    type Reply = GetMonitorsReply;
+}
 pub fn get_monitors<Conn>(conn: &Conn, window: xproto::Window, get_active: bool) -> Result<Cookie<'_, Conn, GetMonitorsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -6237,6 +6360,9 @@ impl SetMonitorRequest {
         })
     }
 }
+impl Request for SetMonitorRequest {
+    type Reply = ();
+}
 pub fn set_monitor<Conn>(conn: &Conn, window: xproto::Window, monitorinfo: MonitorInfo) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -6301,6 +6427,9 @@ impl DeleteMonitorRequest {
             name,
         })
     }
+}
+impl Request for DeleteMonitorRequest {
+    type Reply = ();
 }
 pub fn delete_monitor<Conn>(conn: &Conn, window: xproto::Window, name: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -6388,6 +6517,9 @@ impl<'input> CreateLeaseRequest<'input> {
             outputs: Cow::Owned(outputs),
         })
     }
+}
+impl<'input> Request for CreateLeaseRequest<'input> {
+    type Reply = CreateLeaseReply;
 }
 pub fn create_lease<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, lid: Lease, crtcs: &'input [Crtc], outputs: &'input [Output]) -> Result<CookieWithFds<'c, Conn, CreateLeaseReply>, ConnectionError>
 where
@@ -6484,6 +6616,9 @@ impl FreeLeaseRequest {
             terminate,
         })
     }
+}
+impl Request for FreeLeaseRequest {
+    type Reply = ();
 }
 pub fn free_lease<Conn>(conn: &Conn, lid: Lease, terminate: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where

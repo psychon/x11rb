@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -422,6 +422,9 @@ impl QueryVersionRequest {
         })
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -514,6 +517,9 @@ impl ConnectRequest {
             driver_type,
         })
     }
+}
+impl Request for ConnectRequest {
+    type Reply = ConnectReply;
 }
 pub fn connect<Conn>(conn: &Conn, window: xproto::Window, driver_type: DriverType) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
 where
@@ -643,6 +649,9 @@ impl AuthenticateRequest {
         })
     }
 }
+impl Request for AuthenticateRequest {
+    type Reply = AuthenticateReply;
+}
 pub fn authenticate<Conn>(conn: &Conn, window: xproto::Window, magic: u32) -> Result<Cookie<'_, Conn, AuthenticateReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -725,6 +734,9 @@ impl CreateDrawableRequest {
         })
     }
 }
+impl Request for CreateDrawableRequest {
+    type Reply = ();
+}
 pub fn create_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -780,6 +792,9 @@ impl DestroyDrawableRequest {
             drawable,
         })
     }
+}
+impl Request for DestroyDrawableRequest {
+    type Reply = ();
 }
 pub fn destroy_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -858,6 +873,9 @@ impl<'input> GetBuffersRequest<'input> {
             attachments: Cow::Owned(attachments),
         })
     }
+}
+impl<'input> Request for GetBuffersRequest<'input> {
+    type Reply = GetBuffersReply;
 }
 pub fn get_buffers<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &'input [u32]) -> Result<Cookie<'c, Conn, GetBuffersReply>, ConnectionError>
 where
@@ -987,6 +1005,9 @@ impl CopyRegionRequest {
         })
     }
 }
+impl Request for CopyRegionRequest {
+    type Reply = CopyRegionReply;
+}
 pub fn copy_region<Conn>(conn: &Conn, drawable: xproto::Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Conn, CopyRegionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1090,6 +1111,9 @@ impl<'input> GetBuffersWithFormatRequest<'input> {
             attachments: Cow::Owned(attachments),
         })
     }
+}
+impl<'input> Request for GetBuffersWithFormatRequest<'input> {
+    type Reply = GetBuffersWithFormatReply;
 }
 pub fn get_buffers_with_format<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &'input [AttachFormat]) -> Result<Cookie<'c, Conn, GetBuffersWithFormatReply>, ConnectionError>
 where
@@ -1243,6 +1267,9 @@ impl SwapBuffersRequest {
         })
     }
 }
+impl Request for SwapBuffersRequest {
+    type Reply = SwapBuffersReply;
+}
 pub fn swap_buffers<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, SwapBuffersReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1331,6 +1358,9 @@ impl GetMSCRequest {
             drawable,
         })
     }
+}
+impl Request for GetMSCRequest {
+    type Reply = GetMSCReply;
 }
 pub fn get_msc<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, GetMSCReply>, ConnectionError>
 where
@@ -1471,6 +1501,9 @@ impl WaitMSCRequest {
         })
     }
 }
+impl Request for WaitMSCRequest {
+    type Reply = WaitMSCReply;
+}
 pub fn wait_msc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, WaitMSCReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1584,6 +1617,9 @@ impl WaitSBCRequest {
         })
     }
 }
+impl Request for WaitSBCRequest {
+    type Reply = WaitSBCReply;
+}
 pub fn wait_sbc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Conn, WaitSBCReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1685,6 +1721,9 @@ impl SwapIntervalRequest {
         })
     }
 }
+impl Request for SwapIntervalRequest {
+    type Reply = ();
+}
 pub fn swap_interval<Conn>(conn: &Conn, drawable: xproto::Drawable, interval: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1749,6 +1788,9 @@ impl GetParamRequest {
             param,
         })
     }
+}
+impl Request for GetParamRequest {
+    type Reply = GetParamReply;
 }
 pub fn get_param<Conn>(conn: &Conn, drawable: xproto::Drawable, param: u32) -> Result<Cookie<'_, Conn, GetParamReply>, ConnectionError>
 where

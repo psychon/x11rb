@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -86,6 +86,9 @@ impl QueryVersionRequest {
             minor_version,
         })
     }
+}
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
 }
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
@@ -178,6 +181,9 @@ impl OpenRequest {
             provider,
         })
     }
+}
+impl Request for OpenRequest {
+    type Reply = OpenReply;
 }
 pub fn open<Conn>(conn: &Conn, drawable: xproto::Drawable, provider: u32) -> Result<CookieWithFds<'_, Conn, OpenReply>, ConnectionError>
 where
@@ -313,6 +319,9 @@ impl PixmapFromBufferRequest {
         })
     }
 }
+impl Request for PixmapFromBufferRequest {
+    type Reply = ();
+}
 pub fn pixmap_from_buffer<Conn, A>(conn: &Conn, pixmap: xproto::Pixmap, drawable: xproto::Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -378,6 +387,9 @@ impl BufferFromPixmapRequest {
             pixmap,
         })
     }
+}
+impl Request for BufferFromPixmapRequest {
+    type Reply = BufferFromPixmapReply;
 }
 pub fn buffer_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BufferFromPixmapReply>, ConnectionError>
 where
@@ -497,6 +509,9 @@ impl FenceFromFDRequest {
         })
     }
 }
+impl Request for FenceFromFDRequest {
+    type Reply = ();
+}
 pub fn fence_from_fd<Conn, A>(conn: &Conn, drawable: xproto::Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -565,6 +580,9 @@ impl FDFromFenceRequest {
             fence,
         })
     }
+}
+impl Request for FDFromFenceRequest {
+    type Reply = FDFromFenceReply;
 }
 pub fn fd_from_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: u32) -> Result<CookieWithFds<'_, Conn, FDFromFenceReply>, ConnectionError>
 where
@@ -664,6 +682,9 @@ impl GetSupportedModifiersRequest {
             bpp,
         })
     }
+}
+impl Request for GetSupportedModifiersRequest {
+    type Reply = GetSupportedModifiersReply;
 }
 pub fn get_supported_modifiers<Conn>(conn: &Conn, window: u32, depth: u8, bpp: u8) -> Result<Cookie<'_, Conn, GetSupportedModifiersReply>, ConnectionError>
 where
@@ -904,6 +925,9 @@ impl PixmapFromBuffersRequest {
         })
     }
 }
+impl Request for PixmapFromBuffersRequest {
+    type Reply = ();
+}
 pub fn pixmap_from_buffers<Conn>(conn: &Conn, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -974,6 +998,9 @@ impl BuffersFromPixmapRequest {
             pixmap,
         })
     }
+}
+impl Request for BuffersFromPixmapRequest {
+    type Reply = BuffersFromPixmapReply;
 }
 pub fn buffers_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BuffersFromPixmapReply>, ConnectionError>
 where

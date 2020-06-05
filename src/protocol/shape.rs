@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -303,6 +303,9 @@ impl QueryVersionRequest {
         )
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -430,6 +433,9 @@ impl<'input> RectanglesRequest<'input> {
         })
     }
 }
+impl<'input> Request for RectanglesRequest<'input> {
+    type Reply = ();
+}
 pub fn rectangles<'c, 'input, Conn>(conn: &'c Conn, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -526,6 +532,9 @@ impl MaskRequest {
             source_bitmap,
         })
     }
+}
+impl Request for MaskRequest {
+    type Reply = ();
 }
 pub fn mask<Conn, A>(conn: &Conn, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -630,6 +639,9 @@ impl CombineRequest {
         })
     }
 }
+impl Request for CombineRequest {
+    type Reply = ();
+}
 pub fn combine<Conn>(conn: &Conn, operation: SO, destination_kind: SK, source_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -714,6 +726,9 @@ impl OffsetRequest {
         })
     }
 }
+impl Request for OffsetRequest {
+    type Reply = ();
+}
 pub fn offset<Conn>(conn: &Conn, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -772,6 +787,9 @@ impl QueryExtentsRequest {
             destination_window,
         })
     }
+}
+impl Request for QueryExtentsRequest {
+    type Reply = QueryExtentsReply;
 }
 pub fn query_extents<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, QueryExtentsReply>, ConnectionError>
 where
@@ -882,6 +900,9 @@ impl SelectInputRequest {
         })
     }
 }
+impl Request for SelectInputRequest {
+    type Reply = ();
+}
 pub fn select_input<Conn>(conn: &Conn, destination_window: xproto::Window, enable: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -938,6 +959,9 @@ impl InputSelectedRequest {
             destination_window,
         })
     }
+}
+impl Request for InputSelectedRequest {
+    type Reply = InputSelectedReply;
 }
 pub fn input_selected<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, InputSelectedReply>, ConnectionError>
 where
@@ -1028,6 +1052,9 @@ impl GetRectanglesRequest {
             source_kind,
         })
     }
+}
+impl Request for GetRectanglesRequest {
+    type Reply = GetRectanglesReply;
 }
 pub fn get_rectangles<Conn>(conn: &Conn, window: xproto::Window, source_kind: SK) -> Result<Cookie<'_, Conn, GetRectanglesReply>, ConnectionError>
 where

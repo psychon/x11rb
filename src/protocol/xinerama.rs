@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -133,6 +133,9 @@ impl QueryVersionRequest {
         })
     }
 }
+impl Request for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 pub fn query_version<Conn>(conn: &Conn, major: u8, minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -217,6 +220,9 @@ impl GetStateRequest {
         })
     }
 }
+impl Request for GetStateRequest {
+    type Reply = GetStateReply;
+}
 pub fn get_state<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -298,6 +304,9 @@ impl GetScreenCountRequest {
             window,
         })
     }
+}
+impl Request for GetScreenCountRequest {
+    type Reply = GetScreenCountReply;
 }
 pub fn get_screen_count<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenCountReply>, ConnectionError>
 where
@@ -389,6 +398,9 @@ impl GetScreenSizeRequest {
         })
     }
 }
+impl Request for GetScreenSizeRequest {
+    type Reply = GetScreenSizeReply;
+}
 pub fn get_screen_size<Conn>(conn: &Conn, window: xproto::Window, screen: u32) -> Result<Cookie<'_, Conn, GetScreenSizeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -468,6 +480,9 @@ impl IsActiveRequest {
         )
     }
 }
+impl Request for IsActiveRequest {
+    type Reply = IsActiveReply;
+}
 pub fn is_active<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, IsActiveReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -537,6 +552,9 @@ impl QueryScreensRequest {
         Ok(QueryScreensRequest
         )
     }
+}
+impl Request for QueryScreensRequest {
+    type Reply = QueryScreensReply;
 }
 pub fn query_screens<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryScreensReply>, ConnectionError>
 where
