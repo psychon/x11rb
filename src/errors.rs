@@ -18,12 +18,6 @@ impl std::fmt::Display for ParseError {
     }
 }
 
-impl From<std::convert::Infallible> for ParseError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!()
-    }
-}
-
 /// An error that occurred while connecting to an X11 server
 #[derive(Debug)]
 pub enum ConnectError {
