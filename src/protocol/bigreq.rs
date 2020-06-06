@@ -84,7 +84,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnableReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub maximum_request_length: u32,
@@ -96,7 +95,10 @@ impl TryParse for EnableReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (maximum_request_length, remaining) = u32::try_parse(remaining)?;
-        let result = EnableReply { response_type, sequence, length, maximum_request_length };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = EnableReply { sequence, length, maximum_request_length };
         Ok((result, remaining))
     }
 }

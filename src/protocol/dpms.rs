@@ -100,7 +100,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub server_major_version: u16,
@@ -114,7 +113,10 @@ impl TryParse for GetVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
-        let result = GetVersionReply { response_type, sequence, length, server_major_version, server_minor_version };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetVersionReply { sequence, length, server_major_version, server_minor_version };
         Ok((result, remaining))
     }
 }
@@ -175,7 +177,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CapableReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub capable: bool,
@@ -188,7 +189,10 @@ impl TryParse for CapableReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (capable, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let result = CapableReply { response_type, sequence, length, capable };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CapableReply { sequence, length, capable };
         Ok((result, remaining))
     }
 }
@@ -249,7 +253,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTimeoutsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub standby_timeout: u16,
@@ -266,7 +269,10 @@ impl TryParse for GetTimeoutsReply {
         let (suspend_timeout, remaining) = u16::try_parse(remaining)?;
         let (off_timeout, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
-        let result = GetTimeoutsReply { response_type, sequence, length, standby_timeout, suspend_timeout, off_timeout };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetTimeoutsReply { sequence, length, standby_timeout, suspend_timeout, off_timeout };
         Ok((result, remaining))
     }
 }
@@ -624,7 +630,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InfoReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub power_level: DPMSMode,
@@ -639,8 +644,11 @@ impl TryParse for InfoReply {
         let (power_level, remaining) = u16::try_parse(remaining)?;
         let (state, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
         let power_level = power_level.try_into()?;
-        let result = InfoReply { response_type, sequence, length, power_level, state };
+        let result = InfoReply { sequence, length, power_level, state };
         Ok((result, remaining))
     }
 }

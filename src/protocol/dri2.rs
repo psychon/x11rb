@@ -440,7 +440,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
@@ -454,7 +453,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -536,7 +538,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConnectReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub driver_name: Vec<u8>,
@@ -558,7 +559,10 @@ impl TryParse for ConnectReply {
         let alignment_pad = alignment_pad.to_vec();
         let (device_name, remaining) = crate::x11_utils::parse_u8_list(remaining, device_name_length.try_into().or(Err(ParseError::ParseError))?)?;
         let device_name = device_name.to_vec();
-        let result = ConnectReply { response_type, sequence, length, driver_name, alignment_pad, device_name };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ConnectReply { sequence, length, driver_name, alignment_pad, device_name };
         Ok((result, remaining))
     }
 }
@@ -667,7 +671,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthenticateReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub authenticated: u32,
@@ -679,7 +682,10 @@ impl TryParse for AuthenticateReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (authenticated, remaining) = u32::try_parse(remaining)?;
-        let result = AuthenticateReply { response_type, sequence, length, authenticated };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = AuthenticateReply { sequence, length, authenticated };
         Ok((result, remaining))
     }
 }
@@ -893,7 +899,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub width: u32,
@@ -911,7 +916,10 @@ impl TryParse for GetBuffersReply {
         let (count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetBuffersReply { response_type, sequence, length, width, height, buffers };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetBuffersReply { sequence, length, width, height, buffers };
         Ok((result, remaining))
     }
 }
@@ -1025,7 +1033,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyRegionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
 }
@@ -1035,7 +1042,10 @@ impl TryParse for CopyRegionReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let result = CopyRegionReply { response_type, sequence, length };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CopyRegionReply { sequence, length };
         Ok((result, remaining))
     }
 }
@@ -1131,7 +1141,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersWithFormatReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub width: u32,
@@ -1149,7 +1158,10 @@ impl TryParse for GetBuffersWithFormatReply {
         let (count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetBuffersWithFormatReply { response_type, sequence, length, width, height, buffers };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetBuffersWithFormatReply { sequence, length, width, height, buffers };
         Ok((result, remaining))
     }
 }
@@ -1290,7 +1302,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SwapBuffersReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub swap_hi: u32,
@@ -1304,7 +1315,10 @@ impl TryParse for SwapBuffersReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (swap_hi, remaining) = u32::try_parse(remaining)?;
         let (swap_lo, remaining) = u32::try_parse(remaining)?;
-        let result = SwapBuffersReply { response_type, sequence, length, swap_hi, swap_lo };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = SwapBuffersReply { sequence, length, swap_hi, swap_lo };
         Ok((result, remaining))
     }
 }
@@ -1376,7 +1390,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMSCReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub ust_hi: u32,
@@ -1398,7 +1411,10 @@ impl TryParse for GetMSCReply {
         let (msc_lo, remaining) = u32::try_parse(remaining)?;
         let (sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (sbc_lo, remaining) = u32::try_parse(remaining)?;
-        let result = GetMSCReply { response_type, sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetMSCReply { sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
         Ok((result, remaining))
     }
 }
@@ -1524,7 +1540,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitMSCReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub ust_hi: u32,
@@ -1546,7 +1561,10 @@ impl TryParse for WaitMSCReply {
         let (msc_lo, remaining) = u32::try_parse(remaining)?;
         let (sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (sbc_lo, remaining) = u32::try_parse(remaining)?;
-        let result = WaitMSCReply { response_type, sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = WaitMSCReply { sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
         Ok((result, remaining))
     }
 }
@@ -1636,7 +1654,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitSBCReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub ust_hi: u32,
@@ -1658,7 +1675,10 @@ impl TryParse for WaitSBCReply {
         let (msc_lo, remaining) = u32::try_parse(remaining)?;
         let (sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (sbc_lo, remaining) = u32::try_parse(remaining)?;
-        let result = WaitSBCReply { response_type, sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = WaitSBCReply { sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
         Ok((result, remaining))
     }
 }
@@ -1807,7 +1827,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetParamReply {
-    pub response_type: u8,
     pub is_param_recognized: bool,
     pub sequence: u16,
     pub length: u32,
@@ -1822,7 +1841,10 @@ impl TryParse for GetParamReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value_hi, remaining) = u32::try_parse(remaining)?;
         let (value_lo, remaining) = u32::try_parse(remaining)?;
-        let result = GetParamReply { response_type, is_param_recognized, sequence, length, value_hi, value_lo };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetParamReply { is_param_recognized, sequence, length, value_hi, value_lo };
         Ok((result, remaining))
     }
 }

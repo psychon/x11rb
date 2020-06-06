@@ -426,7 +426,6 @@ impl ClientInfo {
 pub const BAD_CONTEXT_ERROR: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadContextError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
     pub invalid_record: u32,
@@ -437,7 +436,10 @@ impl TryParse for BadContextError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (invalid_record, remaining) = u32::try_parse(remaining)?;
-        let result = BadContextError { response_type, error_code, sequence, invalid_record };
+        if response_type as u32 != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadContextError { error_code, sequence, invalid_record };
         Ok((result, remaining))
     }
 }
@@ -449,7 +451,7 @@ impl TryFrom<&[u8]> for BadContextError {
 }
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         let invalid_record_bytes = input.invalid_record.serialize();
@@ -562,7 +564,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u16,
@@ -576,7 +577,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -916,7 +920,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetContextReply {
-    pub response_type: u8,
     pub enabled: bool,
     pub sequence: u16,
     pub length: u32,
@@ -934,7 +937,10 @@ impl TryParse for GetContextReply {
         let (num_intercepted_clients, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (intercepted_clients, remaining) = crate::x11_utils::parse_list::<ClientInfo>(remaining, num_intercepted_clients.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetContextReply { response_type, enabled, sequence, length, element_header, intercepted_clients };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetContextReply { enabled, sequence, length, element_header, intercepted_clients };
         Ok((result, remaining))
     }
 }
@@ -1021,7 +1027,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EnableContextReply {
-    pub response_type: u8,
     pub category: u8,
     pub sequence: u16,
     pub element_header: ElementHeader,
@@ -1046,7 +1051,10 @@ impl TryParse for EnableContextReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
-        let result = EnableContextReply { response_type, category, sequence, element_header, client_swapped, xid_base, server_time, rec_sequence_num, data };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = EnableContextReply { category, sequence, element_header, client_swapped, xid_base, server_time, rec_sequence_num, data };
         Ok((result, remaining))
     }
 }

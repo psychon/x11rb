@@ -101,7 +101,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub server_major: u16,
@@ -115,7 +114,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major, remaining) = u16::try_parse(remaining)?;
         let (server_minor, remaining) = u16::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, server_major, server_minor };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, server_major, server_minor };
         Ok((result, remaining))
     }
 }
@@ -240,7 +242,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceCreateContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -255,7 +256,10 @@ impl TryParse for GetDeviceCreateContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetDeviceCreateContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetDeviceCreateContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -415,7 +419,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -430,7 +433,10 @@ impl TryParse for GetDeviceContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetDeviceContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetDeviceContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -570,7 +576,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetWindowCreateContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -585,7 +590,10 @@ impl TryParse for GetWindowCreateContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetWindowCreateContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetWindowCreateContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -672,7 +680,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetWindowContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -687,7 +694,10 @@ impl TryParse for GetWindowContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetWindowContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetWindowContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -910,7 +920,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyCreateContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -925,7 +934,10 @@ impl TryParse for GetPropertyCreateContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetPropertyCreateContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPropertyCreateContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -1065,7 +1077,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyUseContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -1080,7 +1091,10 @@ impl TryParse for GetPropertyUseContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetPropertyUseContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPropertyUseContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -1176,7 +1190,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -1191,7 +1204,10 @@ impl TryParse for GetPropertyContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetPropertyContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPropertyContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -1287,7 +1303,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyDataContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -1302,7 +1317,10 @@ impl TryParse for GetPropertyDataContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetPropertyDataContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPropertyDataContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -1389,7 +1407,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListPropertiesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub properties: Vec<ListItem>,
@@ -1403,7 +1420,10 @@ impl TryParse for ListPropertiesReply {
         let (properties_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<ListItem>(remaining, properties_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListPropertiesReply { response_type, sequence, length, properties };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListPropertiesReply { sequence, length, properties };
         Ok((result, remaining))
     }
 }
@@ -1543,7 +1563,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionCreateContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -1558,7 +1577,10 @@ impl TryParse for GetSelectionCreateContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetSelectionCreateContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetSelectionCreateContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -1698,7 +1720,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionUseContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -1713,7 +1734,10 @@ impl TryParse for GetSelectionUseContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetSelectionUseContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetSelectionUseContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -1800,7 +1824,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -1815,7 +1838,10 @@ impl TryParse for GetSelectionContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetSelectionContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetSelectionContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -1902,7 +1928,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionDataContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -1917,7 +1942,10 @@ impl TryParse for GetSelectionDataContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetSelectionDataContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetSelectionDataContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -1993,7 +2021,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSelectionsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub selections: Vec<ListItem>,
@@ -2007,7 +2034,10 @@ impl TryParse for ListSelectionsReply {
         let (selections_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (selections, remaining) = crate::x11_utils::parse_list::<ListItem>(remaining, selections_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListSelectionsReply { response_type, sequence, length, selections };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListSelectionsReply { sequence, length, selections };
         Ok((result, remaining))
     }
 }
@@ -2094,7 +2124,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetClientContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
@@ -2109,7 +2138,10 @@ impl TryParse for GetClientContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        let result = GetClientContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetClientContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }

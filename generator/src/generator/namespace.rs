@@ -4,6 +4,7 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry as HashMapEntry;
 use std::collections::{HashMap, HashSet};
+use std::convert::TryFrom;
 use std::rc::Rc;
 
 use xcbgen::defs as xcbdefs;
@@ -3918,24 +3919,52 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "std::mem::swap(fds, &mut {});", rust_field_name);
             }
             xcbdefs::FieldDef::Expr(expr_ref) => {
-                // The only expr field we ever need to parse is odd_length,
-                // so assert that we have that and then just write some one-off
-                // code for it.
-                assert_eq!(expr_ref.name, "odd_length");
-                outln!(
-                    out,
-                    "let (odd_length, remaining) = bool::try_parse(remaining)?;"
-                );
-                // And there is a matching special case to use this in request parsing.
+                match expr_ref.expr {
+                    xcbdefs::Expression::Value(_) => {
+                        // Treat this as a normal field, that we'll validate in
+                        // emit_field_post_parse.
+                        let rust_field_name = to_rust_variable_name(&expr_ref.name);
+                        outln!(
+                            out,
+                            "let ({}, remaining) = {};",
+                            rust_field_name,
+                            self.emit_value_parse(&expr_ref.type_, from),
+                        );
+                    }
+                    _ => {
+                        // The only non-constant expr field we ever need to parse is
+                        // odd_length, so assert that we have that and then just write
+                        // some one-off code for it.
+                        assert_eq!(expr_ref.name, "odd_length");
+                        outln!(
+                            out,
+                            "let (odd_length, remaining) = bool::try_parse(remaining)?;"
+                        );
+                        // And there is a matching special case to use this in request parsing.
+                    }
+                }
             }
             xcbdefs::FieldDef::VirtualLen(_) => {}
         }
     }
 
     fn emit_field_post_parse(&self, field: &xcbdefs::FieldDef, out: &mut Output) {
-        if let xcbdefs::FieldDef::Normal(normal_field) = field {
-            let rust_field_name = to_rust_variable_name(&normal_field.name);
-            self.emit_value_post_parse(&normal_field.type_, &rust_field_name, out);
+        match field {
+            xcbdefs::FieldDef::Normal(normal_field) => {
+                let rust_field_name = to_rust_variable_name(&normal_field.name);
+                self.emit_value_post_parse(&normal_field.type_, &rust_field_name, out);
+            }
+            xcbdefs::FieldDef::Expr(xcbdefs::ExprField {
+                name,
+                expr: xcbdefs::Expression::Value(v),
+                ..
+            }) => {
+                let rust_field_name = to_rust_variable_name(name);
+                outln!(out, "if {} as u32 != {} {{", rust_field_name, v);
+                outln!(out.indent(), "return Err(ParseError::ParseError);");
+                outln!(out, "}}");
+            }
+            _ => (),
         }
     }
 
@@ -4117,7 +4146,21 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
                 Some(bytes_name)
             }
-            // the reamining field types are only used in request and replies,
+            xcbdefs::FieldDef::Expr(xcbdefs::ExprField {
+                name,
+                type_,
+                expr: xcbdefs::Expression::Value(v),
+            }) => {
+                let field_size = type_.type_.get_resolved().size().unwrap();
+                assert!(field_size == 1 && u8::try_from(*v).is_ok());
+                let rust_field_name = to_rust_variable_name(name);
+                let bytes_name = postfix_var_name(&rust_field_name, "bytes");
+
+                outln!(out, "let {} = &[{}];", bytes_name, v,);
+                result_bytes.push(format!("{}[{}]", bytes_name, 0));
+                Some(bytes_name)
+            }
+            // the remaining field types are only used in request and replies,
             // which do not implement serialize
             _ => unreachable!(),
         }

@@ -455,7 +455,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintQueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u16,
@@ -469,7 +468,10 @@ impl TryParse for PrintQueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let result = PrintQueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintQueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -558,7 +560,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetPrinterListReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub printers: Vec<Printer>,
@@ -572,7 +573,10 @@ impl TryParse for PrintGetPrinterListReply {
         let (list_count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (printers, remaining) = crate::x11_utils::parse_list::<Printer>(remaining, list_count.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = PrintGetPrinterListReply { response_type, sequence, length, printers };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintGetPrinterListReply { sequence, length, printers };
         Ok((result, remaining))
     }
 }
@@ -840,7 +844,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub context: u32,
@@ -852,7 +855,10 @@ impl TryParse for PrintGetContextReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (context, remaining) = u32::try_parse(remaining)?;
-        let result = PrintGetContextReply { response_type, sequence, length, context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintGetContextReply { sequence, length, context };
         Ok((result, remaining))
     }
 }
@@ -972,7 +978,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetScreenOfContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub root: xproto::Window,
@@ -984,7 +989,10 @@ impl TryParse for PrintGetScreenOfContextReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (root, remaining) = xproto::Window::try_parse(remaining)?;
-        let result = PrintGetScreenOfContextReply { response_type, sequence, length, root };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintGetScreenOfContextReply { sequence, length, root };
         Ok((result, remaining))
     }
 }
@@ -1394,7 +1402,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetDocumentDataReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub status_code: u32,
@@ -1413,7 +1420,10 @@ impl TryParse for PrintGetDocumentDataReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
-        let result = PrintGetDocumentDataReply { response_type, sequence, length, status_code, finished_flag, data };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintGetDocumentDataReply { sequence, length, status_code, finished_flag, data };
         Ok((result, remaining))
     }
 }
@@ -1687,7 +1697,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintInputSelectedReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub event_mask: u32,
@@ -1701,7 +1710,10 @@ impl TryParse for PrintInputSelectedReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let (all_events_mask, remaining) = u32::try_parse(remaining)?;
-        let result = PrintInputSelectedReply { response_type, sequence, length, event_mask, all_events_mask };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintInputSelectedReply { sequence, length, event_mask, all_events_mask };
         Ok((result, remaining))
     }
 }
@@ -1783,7 +1795,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetAttributesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub attributes: Vec<String8>,
@@ -1798,7 +1809,10 @@ impl TryParse for PrintGetAttributesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (attributes, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
         let attributes = attributes.to_vec();
-        let result = PrintGetAttributesReply { response_type, sequence, length, attributes };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintGetAttributesReply { sequence, length, attributes };
         Ok((result, remaining))
     }
 }
@@ -1909,7 +1923,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetOneAttributesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub value: Vec<String8>,
@@ -1924,7 +1937,10 @@ impl TryParse for PrintGetOneAttributesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.try_into().or(Err(ParseError::ParseError))?)?;
         let value = value.to_vec();
-        let result = PrintGetOneAttributesReply { response_type, sequence, length, value };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintGetOneAttributesReply { sequence, length, value };
         Ok((result, remaining))
     }
 }
@@ -2101,7 +2117,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetPageDimensionsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub width: u16,
@@ -2123,7 +2138,10 @@ impl TryParse for PrintGetPageDimensionsReply {
         let (offset_y, remaining) = u16::try_parse(remaining)?;
         let (reproducible_width, remaining) = u16::try_parse(remaining)?;
         let (reproducible_height, remaining) = u16::try_parse(remaining)?;
-        let result = PrintGetPageDimensionsReply { response_type, sequence, length, width, height, offset_x, offset_y, reproducible_width, reproducible_height };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintGetPageDimensionsReply { sequence, length, width, height, offset_x, offset_y, reproducible_width, reproducible_height };
         Ok((result, remaining))
     }
 }
@@ -2184,7 +2202,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintQueryScreensReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub roots: Vec<xproto::Window>,
@@ -2198,7 +2215,10 @@ impl TryParse for PrintQueryScreensReply {
         let (list_count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (roots, remaining) = crate::x11_utils::parse_list::<xproto::Window>(remaining, list_count.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = PrintQueryScreensReply { response_type, sequence, length, roots };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintQueryScreensReply { sequence, length, roots };
         Ok((result, remaining))
     }
 }
@@ -2294,7 +2314,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintSetImageResolutionReply {
-    pub response_type: u8,
     pub status: bool,
     pub sequence: u16,
     pub length: u32,
@@ -2307,7 +2326,10 @@ impl TryParse for PrintSetImageResolutionReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (previous_resolutions, remaining) = u16::try_parse(remaining)?;
-        let result = PrintSetImageResolutionReply { response_type, status, sequence, length, previous_resolutions };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintSetImageResolutionReply { status, sequence, length, previous_resolutions };
         Ok((result, remaining))
     }
 }
@@ -2379,7 +2401,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetImageResolutionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub image_resolution: u16,
@@ -2391,7 +2412,10 @@ impl TryParse for PrintGetImageResolutionReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (image_resolution, remaining) = u16::try_parse(remaining)?;
-        let result = PrintGetImageResolutionReply { response_type, sequence, length, image_resolution };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PrintGetImageResolutionReply { sequence, length, image_resolution };
         Ok((result, remaining))
     }
 }
@@ -2557,7 +2581,6 @@ impl From<AttributNotifyEvent> for [u8; 32] {
 pub const BAD_CONTEXT_ERROR: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadContextError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -2566,7 +2589,10 @@ impl TryParse for BadContextError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadContextError { response_type, error_code, sequence };
+        if response_type as u32 != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadContextError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -2578,7 +2604,7 @@ impl TryFrom<&[u8]> for BadContextError {
 }
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -2628,7 +2654,6 @@ impl From<BadContextError> for [u8; 32] {
 pub const BAD_SEQUENCE_ERROR: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadSequenceError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -2637,7 +2662,10 @@ impl TryParse for BadSequenceError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadSequenceError { response_type, error_code, sequence };
+        if response_type as u32 != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadSequenceError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -2649,7 +2677,7 @@ impl TryFrom<&[u8]> for BadSequenceError {
 }
 impl From<&BadSequenceError> for [u8; 32] {
     fn from(input: &BadSequenceError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [

@@ -144,7 +144,6 @@ mod test {
 
     fn generate_get_xid_range_reply(start_id: u32, count: u32) -> GetXIDRangeReply {
         GetXIDRangeReply {
-            response_type: 0,
             sequence: 0,
             length: 0,
             start_id,

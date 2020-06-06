@@ -176,7 +176,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
@@ -191,7 +190,10 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -679,7 +681,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOverlayWindowReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub overlay_win: xproto::Window,
@@ -692,7 +693,10 @@ impl TryParse for GetOverlayWindowReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (overlay_win, remaining) = xproto::Window::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let result = GetOverlayWindowReply { response_type, sequence, length, overlay_win };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetOverlayWindowReply { sequence, length, overlay_win };
         Ok((result, remaining))
     }
 }

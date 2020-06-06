@@ -755,7 +755,6 @@ pub type Fixed = i32;
 pub const PICT_FORMAT_ERROR: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PictFormatError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -764,7 +763,10 @@ impl TryParse for PictFormatError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = PictFormatError { response_type, error_code, sequence };
+        if response_type as u32 != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PictFormatError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -776,7 +778,7 @@ impl TryFrom<&[u8]> for PictFormatError {
 }
 impl From<&PictFormatError> for [u8; 32] {
     fn from(input: &PictFormatError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -826,7 +828,6 @@ impl From<PictFormatError> for [u8; 32] {
 pub const PICTURE_ERROR: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PictureError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -835,7 +836,10 @@ impl TryParse for PictureError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = PictureError { response_type, error_code, sequence };
+        if response_type as u32 != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PictureError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -847,7 +851,7 @@ impl TryFrom<&[u8]> for PictureError {
 }
 impl From<&PictureError> for [u8; 32] {
     fn from(input: &PictureError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -897,7 +901,6 @@ impl From<PictureError> for [u8; 32] {
 pub const PICT_OP_ERROR: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PictOpError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -906,7 +909,10 @@ impl TryParse for PictOpError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = PictOpError { response_type, error_code, sequence };
+        if response_type as u32 != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = PictOpError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -918,7 +924,7 @@ impl TryFrom<&[u8]> for PictOpError {
 }
 impl From<&PictOpError> for [u8; 32] {
     fn from(input: &PictOpError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -968,7 +974,6 @@ impl From<PictOpError> for [u8; 32] {
 pub const GLYPH_SET_ERROR: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GlyphSetError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -977,7 +982,10 @@ impl TryParse for GlyphSetError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = GlyphSetError { response_type, error_code, sequence };
+        if response_type as u32 != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GlyphSetError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -989,7 +997,7 @@ impl TryFrom<&[u8]> for GlyphSetError {
 }
 impl From<&GlyphSetError> for [u8; 32] {
     fn from(input: &GlyphSetError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -1039,7 +1047,6 @@ impl From<GlyphSetError> for [u8; 32] {
 pub const GLYPH_ERROR: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GlyphError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -1048,7 +1055,10 @@ impl TryParse for GlyphError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = GlyphError { response_type, error_code, sequence };
+        if response_type as u32 != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GlyphError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -1060,7 +1070,7 @@ impl TryFrom<&[u8]> for GlyphError {
 }
 impl From<&GlyphError> for [u8; 32] {
     fn from(input: &GlyphError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -1881,7 +1891,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
@@ -1896,7 +1905,10 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -1957,7 +1969,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictFormatsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub num_depths: u32,
@@ -1989,7 +2000,10 @@ impl TryParse for QueryPictFormatsReply {
             remaining = new_remaining;
             subpixels.push(v);
         }
-        let result = QueryPictFormatsReply { response_type, sequence, length, num_depths, num_visuals, formats, screens, subpixels };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryPictFormatsReply { sequence, length, num_depths, num_visuals, formats, screens, subpixels };
         Ok((result, remaining))
     }
 }
@@ -2102,7 +2116,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictIndexValuesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub values: Vec<Indexvalue>,
@@ -2116,7 +2129,10 @@ impl TryParse for QueryPictIndexValuesReply {
         let (num_values, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (values, remaining) = crate::x11_utils::parse_list::<Indexvalue>(remaining, num_values.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryPictIndexValuesReply { response_type, sequence, length, values };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryPictIndexValuesReply { sequence, length, values };
         Ok((result, remaining))
     }
 }
@@ -4815,7 +4831,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryFiltersReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub aliases: Vec<u16>,
@@ -4832,7 +4847,10 @@ impl TryParse for QueryFiltersReply {
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (aliases, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_aliases.try_into().or(Err(ParseError::ParseError))?)?;
         let (filters, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, num_filters.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryFiltersReply { response_type, sequence, length, aliases, filters };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryFiltersReply { sequence, length, aliases, filters };
         Ok((result, remaining))
     }
 }

@@ -571,7 +571,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
@@ -585,7 +584,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -1054,7 +1056,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCapabilitiesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub capabilities: u32,
@@ -1066,7 +1067,10 @@ impl TryParse for QueryCapabilitiesReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (capabilities, remaining) = u32::try_parse(remaining)?;
-        let result = QueryCapabilitiesReply { response_type, sequence, length, capabilities };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryCapabilitiesReply { sequence, length, capabilities };
         Ok((result, remaining))
     }
 }

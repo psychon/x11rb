@@ -134,7 +134,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub dri_major_version: u16,
@@ -150,7 +149,10 @@ impl TryParse for QueryVersionReply {
         let (dri_major_version, remaining) = u16::try_parse(remaining)?;
         let (dri_minor_version, remaining) = u16::try_parse(remaining)?;
         let (dri_minor_patch, remaining) = u32::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, dri_major_version, dri_minor_version, dri_minor_patch };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, dri_major_version, dri_minor_version, dri_minor_patch };
         Ok((result, remaining))
     }
 }
@@ -222,7 +224,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryDirectRenderingCapableReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub is_capable: bool,
@@ -234,7 +235,10 @@ impl TryParse for QueryDirectRenderingCapableReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (is_capable, remaining) = bool::try_parse(remaining)?;
-        let result = QueryDirectRenderingCapableReply { response_type, sequence, length, is_capable };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryDirectRenderingCapableReply { sequence, length, is_capable };
         Ok((result, remaining))
     }
 }
@@ -306,7 +310,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenConnectionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub sarea_handle_low: u32,
@@ -325,7 +328,10 @@ impl TryParse for OpenConnectionReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (bus_id, remaining) = crate::x11_utils::parse_u8_list(remaining, bus_id_len.try_into().or(Err(ParseError::ParseError))?)?;
         let bus_id = bus_id.to_vec();
-        let result = OpenConnectionReply { response_type, sequence, length, sarea_handle_low, sarea_handle_high, bus_id };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = OpenConnectionReply { sequence, length, sarea_handle_low, sarea_handle_high, bus_id };
         Ok((result, remaining))
     }
 }
@@ -471,7 +477,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetClientDriverNameReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub client_driver_major_version: u32,
@@ -492,7 +497,10 @@ impl TryParse for GetClientDriverNameReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (client_driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, client_driver_name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let client_driver_name = client_driver_name.to_vec();
-        let result = GetClientDriverNameReply { response_type, sequence, length, client_driver_major_version, client_driver_minor_version, client_driver_patch_version, client_driver_name };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetClientDriverNameReply { sequence, length, client_driver_major_version, client_driver_minor_version, client_driver_patch_version, client_driver_name };
         Ok((result, remaining))
     }
 }
@@ -597,7 +605,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub hw_context: u32,
@@ -609,7 +616,10 @@ impl TryParse for CreateContextReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (hw_context, remaining) = u32::try_parse(remaining)?;
-        let result = CreateContextReply { response_type, sequence, length, hw_context };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CreateContextReply { sequence, length, hw_context };
         Ok((result, remaining))
     }
 }
@@ -758,7 +768,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateDrawableReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub hw_drawable_handle: u32,
@@ -770,7 +779,10 @@ impl TryParse for CreateDrawableReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (hw_drawable_handle, remaining) = u32::try_parse(remaining)?;
-        let result = CreateDrawableReply { response_type, sequence, length, hw_drawable_handle };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CreateDrawableReply { sequence, length, hw_drawable_handle };
         Ok((result, remaining))
     }
 }
@@ -919,7 +931,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDrawableInfoReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub drawable_table_index: u32,
@@ -951,7 +962,10 @@ impl TryParse for GetDrawableInfoReply {
         let (num_back_clip_rects, remaining) = u32::try_parse(remaining)?;
         let (clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_clip_rects.try_into().or(Err(ParseError::ParseError))?)?;
         let (back_clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_back_clip_rects.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetDrawableInfoReply { response_type, sequence, length, drawable_table_index, drawable_table_stamp, drawable_origin_x, drawable_origin_y, drawable_size_w, drawable_size_h, back_x, back_y, clip_rects, back_clip_rects };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetDrawableInfoReply { sequence, length, drawable_table_index, drawable_table_stamp, drawable_origin_x, drawable_origin_y, drawable_size_w, drawable_size_h, back_x, back_y, clip_rects, back_clip_rects };
         Ok((result, remaining))
     }
 }
@@ -1051,7 +1065,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceInfoReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub framebuffer_handle_low: u32,
@@ -1074,7 +1087,10 @@ impl TryParse for GetDeviceInfoReply {
         let (framebuffer_stride, remaining) = u32::try_parse(remaining)?;
         let (device_private_size, remaining) = u32::try_parse(remaining)?;
         let (device_private, remaining) = crate::x11_utils::parse_list::<u32>(remaining, device_private_size.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetDeviceInfoReply { response_type, sequence, length, framebuffer_handle_low, framebuffer_handle_high, framebuffer_origin_offset, framebuffer_size, framebuffer_stride, device_private };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetDeviceInfoReply { sequence, length, framebuffer_handle_low, framebuffer_handle_high, framebuffer_origin_offset, framebuffer_size, framebuffer_stride, device_private };
         Ok((result, remaining))
     }
 }
@@ -1170,7 +1186,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthConnectionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub authenticated: u32,
@@ -1182,7 +1197,10 @@ impl TryParse for AuthConnectionReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (authenticated, remaining) = u32::try_parse(remaining)?;
-        let result = AuthConnectionReply { response_type, sequence, length, authenticated };
+        if response_type as u32 != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = AuthConnectionReply { sequence, length, authenticated };
         Ok((result, remaining))
     }
 }
