@@ -60,8 +60,7 @@ fn test_create_window1() {
     add_ne!(body, 0x0000_001au32);
     add_ne!(body, 0xfff2_f1f0u32);
     add_ne!(body, 0x0000_0000u32);
-    body.push(0x01);
-    body.extend(&[0x00, 0x00, 0x00]); // Final padding.
+    add_ne!(body, 0x0000_0001u32);
     let r = CreateWindowRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(
         r,
@@ -202,8 +201,7 @@ fn test_query_text_extents() {
     };
     let mut body = vec![];
     add_ne!(body, 0x1234_5678u32);
-    add_ne!(body, 0x9abcu16);
-    add_ne!(body, 0xdef0u16);
+    body.extend(&[0xbc, 0x9a, 0xf0, 0xde]);
     let r = QueryTextExtentsRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(
         r,
@@ -233,8 +231,7 @@ fn test_query_text_extents_odd_length() {
     };
     let mut body = vec![];
     add_ne!(body, 0x1234_5678u32);
-    add_ne!(body, 0x9abcu16);
-    add_ne!(body, 0xdef0u16);
+    body.extend(&[0xbc, 0x9a, 0xf0, 0xde]);
     let r = QueryTextExtentsRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(
         r,
