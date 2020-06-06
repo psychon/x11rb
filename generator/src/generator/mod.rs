@@ -32,8 +32,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     outln!(main_out, "use crate::utils::RawFdContainer;");
     outln!(
         main_out,
-        "use crate::x11_utils::{{parse_request_header, BigRequests, ExtInfoProvider, \
-         RequestHeader}};"
+        "use crate::x11_utils::{{ExtInfoProvider, RequestHeader}};"
     );
     outln!(main_out, "");
 

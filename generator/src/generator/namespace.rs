@@ -76,10 +76,12 @@ pub(super) fn generate_request_reply_enum(
             "#[allow(clippy::cognitive_complexity, clippy::single_match)]"
         );
         outln!(out, "pub fn parse(");
-        outln!(out.indent(), "request: &'input [u8],");
-        outln!(out.indent(), "fds: &mut Vec<RawFdContainer>,");
-        outln!(out.indent(), "big_requests_enabled: BigRequests,");
-        outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
+        out.indented(|out| {
+            outln!(out, "header: RequestHeader,");
+            outln!(out, "body: &'input [u8],");
+            outln!(out, "fds: &mut Vec<RawFdContainer>,");
+            outln!(out, "ext_info_provider: &dyn ExtInfoProvider,");
+        });
         outln!(out, ") -> Result<Self, ParseError> {{");
         out.indented(|out| {
             outln!(
@@ -93,10 +95,7 @@ pub(super) fn generate_request_reply_enum(
             );
             outln!(out, "#[allow(unused_variables)]");
             outln!(out, "let fds = fds;");
-            outln!(
-                out,
-                "let (header, remaining) = parse_request_header(request, big_requests_enabled)?;"
-            );
+            outln!(out, "let remaining = body;");
             outln!(out, "// Check if this is a core protocol request.");
             outln!(out, "match header.major_opcode {{");
             out.indented(|out| {
