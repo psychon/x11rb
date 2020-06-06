@@ -271,10 +271,11 @@ pub trait RequestConnection {
     /// The given sequence number identifies the request for which the check should be performed.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<Error>, ConnectionError> {
-        let res = self.check_for_raw_error(sequence)?;
-        let res = res.map(|e| self.parse_error(e.as_ref())).transpose()?;
-        Ok(res)
+    fn check_for_error(&self, sequence: SequenceNumber) -> Result<(), ReplyError> {
+        match self.check_for_raw_error(sequence)? {
+            Some(err) => Err(self.parse_error(err.as_ref())?.into()),
+            None => Ok(()),
+        }
     }
 
     /// Check whether a request that does not have a reply caused an X11 error.

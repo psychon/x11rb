@@ -321,19 +321,14 @@ fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError>
     let change = ChangeWindowAttributesAux::default().event_mask(
         EventMask::SubstructureRedirect | EventMask::SubstructureNotify | EventMask::EnterWindow,
     );
-    let error = conn
+    let res = conn
         .change_window_attributes(screen.root, &change)?
-        .check()?;
-    if let Some(error) = error {
-        match error {
-            Error::Access(_) => {
-                eprintln!("Another WM is already running.");
-                exit(1);
-            }
-            error => Err(ReplyError::X11Error(error)),
-        }
+        .check();
+    if let Err(ReplyError::X11Error(Error::Access(_))) = res {
+        eprintln!("Another WM is already running.");
+        exit(1);
     } else {
-        Ok(())
+        res
     }
 }
 
