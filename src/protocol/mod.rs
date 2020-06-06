@@ -9,7 +9,7 @@
 use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{parse_request_header, BigRequests, ExtInfoProvider, RequestHeader};
+use crate::x11_utils::{ExtInfoProvider, RequestHeader};
 
 pub mod xproto;
 pub mod bigreq;
@@ -1260,16 +1260,16 @@ impl<'input> Request<'input> {
     // Parse a X11 request into a concrete type
     #[allow(clippy::cognitive_complexity, clippy::single_match)]
     pub fn parse(
-        request: &'input [u8],
+        header: RequestHeader,
+        body: &'input [u8],
         fds: &mut Vec<RawFdContainer>,
-        big_requests_enabled: BigRequests,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
         // Might not be used if none of the extensions that use FD passing is enabled
         // The `allow` is not in the function argument because it is not stable in Rust 1.37
         #[allow(unused_variables)]
         let fds = fds;
-        let (header, remaining) = parse_request_header(request, big_requests_enabled)?;
+        let remaining = body;
         // Check if this is a core protocol request.
         match header.major_opcode {
             xproto::CREATE_WINDOW_REQUEST => return Ok(Request::CreateWindow(xproto::CreateWindowRequest::try_parse_request(header, remaining)?)),
