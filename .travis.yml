@@ -13,6 +13,15 @@ jobs:
       env: CLIPPY_RUSTFMT=no
     - rust: nightly
       env: CLIPPY_RUSTFMT=if_available
+    - env: CROSS_TARGET=mips64-unknown-linux-gnuabi64 CLIPPY_RUSTFMT=no
+      rust: stable
+      services: docker
+      sudo: required
+      script:
+        - rustup target add "$CROSS_TARGET"
+        - cargo install cross --force
+        # libxcb is not available, so XCBConnection is not enabled
+        - cross test --target "$CROSS_TARGET" --verbose --features all-extensions
   allow_failures:
     - rust: nightly
       env: CLIPPY_RUSTFMT=if_available
@@ -22,7 +31,7 @@ addons:
     packages:
       - xvfb
 
-install:
+before_script:
   # Run the examples as 'integration tests'. For this, there is a special
   # timeout mode where the examples close automatically after some time.
   - |
