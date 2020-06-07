@@ -5906,14 +5906,15 @@ impl CreateWindowAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl CreateWindowAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }
@@ -6493,14 +6494,15 @@ impl ChangeWindowAttributesAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl ChangeWindowAttributesAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }
@@ -8101,14 +8103,15 @@ impl ConfigureWindowAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl ConfigureWindowAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u16) {
+        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
         if let Some(x) = self.x {
             x.serialize_into(bytes);
         }
@@ -16515,14 +16518,15 @@ impl CreateGCAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl CreateGCAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(function) = self.function {
             u32::from(function).serialize_into(bytes);
         }
@@ -17149,14 +17153,15 @@ impl ChangeGCAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl ChangeGCAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(function) = self.function {
             u32::from(function).serialize_into(bytes);
         }
@@ -23585,14 +23590,15 @@ impl ChangeKeyboardControlAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl ChangeKeyboardControlAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(key_click_percent) = self.key_click_percent {
             key_click_percent.serialize_into(bytes);
         }

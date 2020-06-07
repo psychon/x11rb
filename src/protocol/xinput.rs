@@ -852,14 +852,15 @@ impl InputInfoInfo {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl InputInfoInfo {
+    #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, class_id);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
+        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `info` has an inconsistent discriminant");
         match self {
             InputInfoInfo::Key(key) => key.serialize_into(bytes),
             InputInfoInfo::Button(button) => button.serialize_into(bytes),
@@ -1833,8 +1834,8 @@ impl DeviceTimeCoord {
     }
 }
 // Skipping TryFrom implementations because of unresolved members
-#[allow(dead_code, unused_variables)]
 impl DeviceTimeCoord {
+    #[allow(dead_code)]
     fn serialize(&self, num_axes: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, num_axes);
@@ -4169,14 +4170,15 @@ impl FeedbackStateData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl FeedbackStateData {
+    #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, class_id);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
+        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `data` has an inconsistent discriminant");
         match self {
             FeedbackStateData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackStateData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -5119,14 +5121,15 @@ impl FeedbackCtlData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl FeedbackCtlData {
+    #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, class_id);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
+        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `data` has an inconsistent discriminant");
         match self {
             FeedbackCtlData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackCtlData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -6478,14 +6481,15 @@ impl InputStateData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl InputStateData {
+    #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, class_id);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
+        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `data` has an inconsistent discriminant");
         match self {
             InputStateData::Key(key) => key.serialize_into(bytes),
             InputStateData::Button(button) => button.serialize_into(bytes),
@@ -7588,14 +7592,15 @@ impl DeviceStateData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl DeviceStateData {
+    #[allow(dead_code)]
     fn serialize(&self, control_id: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, control_id);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
+        assert_eq!(self.switch_expr(), u32::from(control_id), "switch `data` has an inconsistent discriminant");
         match self {
             DeviceStateData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceStateData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -8434,14 +8439,15 @@ impl DeviceCtlData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl DeviceCtlData {
+    #[allow(dead_code)]
     fn serialize(&self, control_id: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, control_id);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
+        assert_eq!(self.switch_expr(), u32::from(control_id), "switch `data` has an inconsistent discriminant");
         match self {
             DeviceCtlData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceCtlData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -8845,14 +8851,15 @@ impl ChangeDevicePropertyAux {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl ChangeDevicePropertyAux {
+    #[allow(dead_code)]
     fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, format, num_items);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
+        assert_eq!(self.switch_expr(), u32::from(format), "switch `items` has an inconsistent discriminant");
         match self {
             ChangeDevicePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
@@ -10396,14 +10403,15 @@ impl HierarchyChangeData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl HierarchyChangeData {
+    #[allow(dead_code)]
     fn serialize(&self, type_: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, type_);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
+        assert_eq!(self.switch_expr(), u32::from(type_), "switch `data` has an inconsistent discriminant");
         match self {
             HierarchyChangeData::AddMaster(add_master) => add_master.serialize_into(bytes),
             HierarchyChangeData::RemoveMaster(remove_master) => remove_master.serialize_into(bytes),
@@ -12079,14 +12087,15 @@ impl DeviceClassData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl DeviceClassData {
+    #[allow(dead_code)]
     fn serialize(&self, type_: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, type_);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
+        assert_eq!(self.switch_expr(), u32::from(type_), "switch `data` has an inconsistent discriminant");
         match self {
             DeviceClassData::Key(key) => key.serialize_into(bytes),
             DeviceClassData::Button(button) => button.serialize_into(bytes),
@@ -13668,14 +13677,15 @@ impl XIChangePropertyAux {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl XIChangePropertyAux {
+    #[allow(dead_code)]
     fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, format, num_items);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
+        assert_eq!(self.switch_expr(), u32::from(format), "switch `items` has an inconsistent discriminant");
         match self {
             XIChangePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");

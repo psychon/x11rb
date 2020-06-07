@@ -2291,14 +2291,15 @@ impl CreatePictureAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl CreatePictureAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(repeat) = self.repeat {
             u32::from(repeat).serialize_into(bytes);
         }
@@ -2682,14 +2683,15 @@ impl ChangePictureAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl ChangePictureAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(repeat) = self.repeat {
             u32::from(repeat).serialize_into(bytes);
         }

@@ -643,14 +643,15 @@ impl SetAttributesAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl SetAttributesAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }

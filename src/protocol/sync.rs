@@ -1392,14 +1392,15 @@ impl CreateAlarmAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl CreateAlarmAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(counter) = self.counter {
             counter.serialize_into(bytes);
         }
@@ -1623,14 +1624,15 @@ impl ChangeAlarmAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl ChangeAlarmAux {
+    #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(counter) = self.counter {
             counter.serialize_into(bytes);
         }
