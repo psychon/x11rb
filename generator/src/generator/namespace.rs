@@ -440,7 +440,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             }
             self.generate_aux(
                 request_def,
-                &deducible_fields,
                 switch_fields[0],
                 &function_name,
                 out,
@@ -541,7 +540,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn generate_aux(
         &self,
         request_def: &xcbdefs::RequestDef,
-        deducible_fields: &HashMap<String, DeducibleField>,
         switch_field: &xcbdefs::SwitchField,
         function_name: &str,
         out: &mut Output,
@@ -552,7 +550,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             self.emit_switch_type(
                 switch_field,
                 &aux_name,
-                deducible_fields,
                 true,
                 true,
                 None,
@@ -566,7 +563,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             let cases_infos = self.emit_switch_type(
                 switch_field,
                 &aux_name,
-                deducible_fields,
                 true,
                 true,
                 Some(&doc),
@@ -2276,7 +2272,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name_prefix: &str,
         fields: &[xcbdefs::FieldDef],
-        parent_deducible_fields: &HashMap<String, DeducibleField>,
         generate_try_parse: bool,
         generate_serialize: bool,
         out: &mut Output,
@@ -2286,7 +2281,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 self.generate_switch(
                     name_prefix,
                     switch_field,
-                    parent_deducible_fields,
                     generate_try_parse,
                     generate_serialize,
                     out,
@@ -2299,7 +2293,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name_prefix: &str,
         switch: &xcbdefs::SwitchField,
-        parent_deducible_fields: &HashMap<String, DeducibleField>,
         generate_try_parse: bool,
         generate_serialize: bool,
         out: &mut Output,
@@ -2308,7 +2301,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         self.emit_switch_type(
             switch,
             &switch_name,
-            parent_deducible_fields,
             generate_try_parse,
             generate_serialize,
             None,
@@ -2339,7 +2331,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         self.generate_switches_for_fields(
             switch_prefix,
             fields,
-            &deducible_fields,
             generate_try_parse,
             fields_need_serialize,
             out,
@@ -2781,7 +2772,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         switch: &xcbdefs::SwitchField,
         name: &str,
-        parent_deducible_fields: &HashMap<String, DeducibleField>,
         generate_try_parse: bool,
         generate_serialize: bool,
         doc: Option<&str>,
@@ -2834,7 +2824,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     self.generate_switch(
                         name,
                         switch_field,
-                        &case_deducible_fields,
                         generate_try_parse,
                         generate_serialize,
                         out,
@@ -3004,7 +2993,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 self.emit_fixed_size_switch_serialize(
                     switch,
                     name,
-                    parent_deducible_fields,
                     &case_infos,
                     size,
                     out,
@@ -3013,7 +3001,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 self.emit_variable_size_switch_serialize(
                     switch,
                     name,
-                    parent_deducible_fields,
                     &case_infos,
                     out,
                 );
@@ -3331,7 +3318,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         switch: &xcbdefs::SwitchField,
         name: &str,
-        parent_deducible_fields: &HashMap<String, DeducibleField>,
         case_infos: &[CaseInfo],
         size: u32,
         out: &mut Output,
@@ -3360,7 +3346,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 size,
             );
             out.indented(|out| {
-                self.emit_assert_for_switch_serialize(switch, parent_deducible_fields, out);
+                self.emit_assert_for_switch_serialize(switch, out);
                 outln!(out, "match self {{");
                 out.indented(|out| {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
@@ -3477,7 +3463,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         switch: &xcbdefs::SwitchField,
         name: &str,
-        parent_deducible_fields: &HashMap<String, DeducibleField>,
         case_infos: &[CaseInfo],
         out: &mut Output,
     ) {
@@ -3517,7 +3502,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 ext_params_arg_defs
             );
             out.indented(|out| {
-                self.emit_assert_for_switch_serialize(switch, parent_deducible_fields, out);
+                self.emit_assert_for_switch_serialize(switch, out);
                 if switch.kind == xcbdefs::SwitchKind::BitCase {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                         match case_info {
@@ -4314,7 +4299,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn emit_assert_for_switch_serialize(
         &self,
         switch: &xcbdefs::SwitchField,
-        parent_deducible_fields: &HashMap<String, DeducibleField>,
         out: &mut Output,
     ) {
         let rust_field_name = to_rust_variable_name(&switch.name);
