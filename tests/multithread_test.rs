@@ -65,7 +65,7 @@ mod fake_stream {
     use x11rb::protocol::xproto::{
         ImageOrder, Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST,
     };
-    use x11rb::rust_connection::{RustConnection, Stream};
+    use x11rb::rust_connection::{PollMode, RustConnection, Stream};
     use x11rb::utils::RawFdContainer;
 
     /// Create a new `RustConnection` connected to a fake stream
@@ -163,12 +163,8 @@ mod fake_stream {
     }
 
     impl Stream for FakeStream {
-        fn poll(&self, read: bool, write: bool) -> std::io::Result<()> {
-            assert!(
-                read || write,
-                "at least one of `read` and `write` must be true",
-            );
-            if write {
+        fn poll(&self, mode: PollMode) -> std::io::Result<()> {
+            if mode.writable() {
                 Ok(())
             } else {
                 let mut inner = self.inner.lock().unwrap();

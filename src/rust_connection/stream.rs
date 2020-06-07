@@ -12,6 +12,37 @@ use super::xauth::Family;
 use crate::utils::nix_error_to_io;
 use crate::utils::RawFdContainer;
 
+/// The kind of operation that one want to poll for.
+#[derive(Debug, Clone, Copy)]
+pub enum PollMode {
+    /// Check if the stream is readable, i.e. there is pending data to be read.
+    Readable,
+
+    /// Check if the stream is writable, i.e. some data could be successfully written to it.
+    Writable,
+
+    /// Check for both readability and writability.
+    ReadAndWritable,
+}
+
+impl PollMode {
+    /// Does this poll mode include readability?
+    pub fn readable(self) -> bool {
+        match self {
+            PollMode::Readable | PollMode::ReadAndWritable => true,
+            PollMode::Writable => false,
+        }
+    }
+
+    /// Does this poll mode include writability?
+    pub fn writable(self) -> bool {
+        match self {
+            PollMode::Writable | PollMode::ReadAndWritable => true,
+            PollMode::Readable => false,
+        }
+    }
+}
+
 /// A trait used to implement the raw communication with the X11 server.
 ///
 /// None of the functions of this trait shall return [`std::io::ErrorKind::Interrupted`].
@@ -19,7 +50,7 @@ use crate::utils::RawFdContainer;
 pub trait Stream {
     /// Waits for level-triggered read and/or write events on the stream.
     ///
-    /// This function thas not return what cause it complete the poll.
+    /// This function does not return what caused it to complete the poll.
     /// Instead, callers should try to read or write and check for
     /// [`std::io::ErrorKind::WouldBlock`].
     ///
@@ -36,7 +67,7 @@ pub trait Stream {
     /// # Panics
     ///
     /// This function shall panic if `read` and `write` are both false.
-    fn poll(&self, read: bool, write: bool) -> Result<()>;
+    fn poll(&self, mode: PollMode) -> Result<()>;
 
     /// Read some bytes and FDs from this reader without blocking, returning how many bytes
     /// were read.
@@ -80,7 +111,7 @@ pub trait Stream {
     /// should have been read into `buf`.
     fn read_exact(&self, mut buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<()> {
         while !buf.is_empty() {
-            self.poll(true, false)?;
+            self.poll(PollMode::Readable)?;
             match self.read(buf, fd_storage) {
                 Ok(0) => {
                     return Err(std::io::Error::new(
@@ -351,22 +382,17 @@ fn do_write(
 }
 
 impl Stream for DefaultStream {
-    fn poll(&self, read: bool, write: bool) -> Result<()> {
-        assert!(
-            read || write,
-            "at least one of `read` and `write` must be true",
-        );
-
+    fn poll(&self, mode: PollMode) -> Result<()> {
         #[cfg(unix)]
         {
             use nix::errno::Errno;
             use nix::poll::{poll, PollFd, PollFlags};
 
             let mut poll_flags = PollFlags::empty();
-            if read {
+            if mode.readable() {
                 poll_flags |= PollFlags::POLLIN;
             }
-            if write {
+            if mode.writable() {
                 poll_flags |= PollFlags::POLLOUT;
             }
             let fd = self.as_raw_fd();
@@ -388,10 +414,10 @@ impl Stream for DefaultStream {
 
             let raw_socket = self.as_raw_socket();
             let mut events = 0;
-            if read {
+            if mode.readable() {
                 events |= POLLRDNORM;
             }
-            if write {
+            if mode.writable() {
                 events |= POLLWRNORM;
             }
             let mut poll_fds = [WSAPOLLFD {
