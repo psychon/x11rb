@@ -9,7 +9,7 @@
 
 use x11rb::atom_manager;
 use x11rb::connection::Connection;
-use x11rb::errors::ReplyOrIdError;
+use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::protocol::xproto::{ConnectionExt as _, *};
 use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt;
@@ -80,6 +80,14 @@ fn choose_visual(screen: &Screen) -> (u8, Visualid) {
         .and_then(|d| d.visuals.get(0))
         .map(|v| (depth, v.visual_id))
         .unwrap_or((screen.root_depth, screen.root_visual))
+}
+
+/// Check if a composite manager is running
+fn composite_manager_running(conn: &impl Connection, screen_num: usize) -> Result<bool, ReplyError> {
+    let atom = format!("_NET_WM_CM_S{}", screen_num);
+    let atom = conn.intern_atom(false, atom.as_bytes())?.reply()?.atom;
+    let owner = conn.get_selection_owner(atom)?.reply()?;
+    Ok(owner.owner != x11rb::NONE)
 }
 
 /// Create a window for us.
@@ -158,12 +166,20 @@ where
 }
 
 /// Draw the window content
-fn do_draw(cr: &cairo::Context, (width, height): (f64, f64)) {
+fn do_draw(cr: &cairo::Context, (width, height): (f64, f64), transparency: bool) {
     use std::f64::consts::PI;
 
     // Draw a background
-    cr.set_source_rgb(0.9, 1.0, 0.9);
+    if transparency {
+        cr.set_operator(cairo::Operator::Source);
+        cr.set_source_rgba(0.9, 1.0, 0.9, 0.5);
+    } else {
+        cr.set_source_rgb(0.9, 1.0, 0.9);
+    }
     cr.paint();
+    if transparency {
+        cr.set_operator(cairo::Operator::Over);
+    }
 
     // Everybody likes odd geometrical shapes, right?
     let radius = width.min(height) / 3.0;
@@ -197,6 +213,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let atoms = AtomCollection::new(&conn)?.reply()?;
     let (mut width, mut height) = (100, 100);
     let (depth, visualid) = choose_visual(screen);
+
+    // Check if a composite manager is running. In a real application, we should also react to a
+    // composite manager starting/stopping at runtime.
+    let transparency = composite_manager_running(&conn, screen_num)?;
+
     let window = create_window(&conn, &screen, &atoms, (width, height), depth, visualid)?;
 
     // Here comes all the interaction between cairo and x11rb:
@@ -249,7 +270,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         if need_redraw {
             let cr = cairo::Context::new(&surface);
-            do_draw(&cr, (width as _, height as _));
+            do_draw(&cr, (width as _, height as _), transparency);
             surface.flush();
         }
     }
