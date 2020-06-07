@@ -26,7 +26,7 @@ mod xauth;
 
 use inner::PollReply;
 use packet_reader::PacketReader;
-pub use stream::{DefaultStream, Stream};
+pub use stream::{DefaultStream, PollMode, Stream};
 use write_buffer::WriteBuffer;
 
 type Buffer = <RustConnection as RequestConnection>::Buf;
@@ -270,7 +270,7 @@ impl<S: Stream> RustConnection<S> {
     ) -> std::io::Result<MutexGuardInner<'a>> {
         let mut partial_buf: &[u8] = &[];
         while !partial_buf.is_empty() || !bufs.is_empty() || !fds.is_empty() {
-            self.stream.poll(true, true)?;
+            self.stream.poll(PollMode::ReadAndWritable)?;
             let write_result = if !partial_buf.is_empty() {
                 inner
                     .write_buffer
@@ -327,7 +327,7 @@ impl<S: Stream> RustConnection<S> {
         mut inner: MutexGuardInner<'a>,
     ) -> std::io::Result<MutexGuardInner<'a>> {
         while inner.write_buffer.needs_flush() {
-            self.stream.poll(true, true)?;
+            self.stream.poll(PollMode::ReadAndWritable)?;
             match inner.write_buffer.flush(&self.stream) {
                 // Flush completed
                 Ok(()) => break,
@@ -390,7 +390,7 @@ impl<S: Stream> RustConnection<S> {
                     // during the poll.
                     drop(inner);
                     // 2.1.2. Do the actual poll
-                    self.stream.poll(true, false)?;
+                    self.stream.poll(PollMode::Readable)?;
                     // 2.1.3. Relock inner
                     inner = self.inner.lock().unwrap();
                 }
@@ -682,7 +682,7 @@ fn write_setup(
     let data = request.serialize();
     let mut nwritten = 0;
     while nwritten != data.len() {
-        write.poll(false, true)?;
+        write.poll(PollMode::Writable)?;
         // poll returned successfully, so the stream is writable.
         match write.write(&data[nwritten..], &mut Vec::new()) {
             Ok(0) => {
@@ -748,7 +748,7 @@ mod test {
     use std::cell::RefCell;
     use std::io::{Read, Result, Write};
 
-    use super::{read_setup, Stream};
+    use super::{read_setup, PollMode, Stream};
     use crate::errors::ConnectError;
     use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
     use crate::utils::RawFdContainer;
@@ -760,11 +760,7 @@ mod test {
     }
 
     impl<'a, 'b> Stream for SliceStream<'a, 'b> {
-        fn poll(&self, read: bool, write: bool) -> Result<()> {
-            assert!(
-                read || write,
-                "at least one of `read` and `write` must be true",
-            );
+        fn poll(&self, _mode: PollMode) -> Result<()> {
             Ok(())
         }
 

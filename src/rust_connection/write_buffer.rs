@@ -161,14 +161,14 @@ impl WriteBuffer {
 mod test {
     use std::io::{Error, ErrorKind, IoSlice, Result};
 
-    use super::super::Stream;
+    use super::super::{PollMode, Stream};
     use super::WriteBuffer;
     use crate::utils::RawFdContainer;
 
     struct WouldBlockWriter;
 
     impl Stream for WouldBlockWriter {
-        fn poll(&self, _read: bool, _write: bool) -> Result<()> {
+        fn poll(&self, _mode: PollMode) -> Result<()> {
             unimplemented!();
         }
 
