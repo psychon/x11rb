@@ -2602,7 +2602,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if external_params.is_empty() {
             outln!(out, "impl Serialize for {} {{", name);
         } else {
-            outln!(out, "#[allow(dead_code, unused_variables)]");
             outln!(out, "impl {} {{", name);
         }
         out.indented(|out| {
@@ -2694,12 +2693,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if external_params.is_empty() {
             outln!(out, "impl Serialize for {} {{", name);
         } else {
-            outln!(out, "#[allow(dead_code, unused_variables)]");
             outln!(out, "impl {} {{", name);
         }
         out.indented(|out| {
             if external_params.is_empty() {
                 outln!(out, "type Bytes = Vec<u8>;");
+            } else {
+                outln!(out, "#[allow(dead_code)]");
             }
             outln!(
                 out,
@@ -3332,7 +3332,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if external_params.is_empty() {
             outln!(out, "impl Serialize for {} {{", name);
         } else {
-            outln!(out, "#[allow(dead_code, unused_variables)]");
             outln!(out, "impl {} {{", name);
         }
         out.indented(|out| {
@@ -3474,12 +3473,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if external_params.is_empty() {
             outln!(out, "impl Serialize for {} {{", name);
         } else {
-            outln!(out, "#[allow(dead_code, unused_variables)]");
             outln!(out, "impl {} {{", name);
         }
         out.indented(|out| {
             if external_params.is_empty() {
                 outln!(out, "type Bytes = Vec<u8>;");
+            } else {
+                outln!(out, "#[allow(dead_code)]");
             }
             outln!(
                 out,

@@ -6915,8 +6915,8 @@ impl SelectEventsAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl SelectEventsAux {
+    #[allow(dead_code)]
     fn serialize(&self, affect_which: u16, clear: u16, select_all: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, affect_which, clear, select_all);
@@ -8343,8 +8343,8 @@ impl SetMapAuxBitcase3 {
     }
 }
 // Skipping TryFrom implementations because of unresolved members
-#[allow(dead_code, unused_variables)]
 impl SetMapAuxBitcase3 {
+    #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, n_key_actions, total_actions);
@@ -8447,8 +8447,8 @@ impl SetMapAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl SetMapAux {
+    #[allow(dead_code)]
     fn serialize(&self, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
@@ -9911,8 +9911,8 @@ impl SetNamesAuxBitcase8 {
     }
 }
 // Skipping TryFrom implementations because of unresolved members
-#[allow(dead_code, unused_variables)]
 impl SetNamesAuxBitcase8 {
+    #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, n_types);
@@ -10063,8 +10063,8 @@ impl SetNamesAux {
         Ok((result, outer_remaining))
     }
 }
-#[allow(dead_code, unused_variables)]
 impl SetNamesAux {
+    #[allow(dead_code)]
     fn serialize(&self, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);

@@ -850,8 +850,8 @@ impl InputInfoInfo {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl InputInfoInfo {
+    #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, class_id);
@@ -1822,8 +1822,8 @@ impl DeviceTimeCoord {
     }
 }
 // Skipping TryFrom implementations because of unresolved members
-#[allow(dead_code, unused_variables)]
 impl DeviceTimeCoord {
+    #[allow(dead_code)]
     fn serialize(&self, num_axes: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, num_axes);
@@ -4148,8 +4148,8 @@ impl FeedbackStateData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl FeedbackStateData {
+    #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, class_id);
@@ -5097,8 +5097,8 @@ impl FeedbackCtlData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl FeedbackCtlData {
+    #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, class_id);
@@ -6447,8 +6447,8 @@ impl InputStateData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl InputStateData {
+    #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, class_id);
@@ -7554,8 +7554,8 @@ impl DeviceStateData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl DeviceStateData {
+    #[allow(dead_code)]
     fn serialize(&self, control_id: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, control_id);
@@ -8399,8 +8399,8 @@ impl DeviceCtlData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl DeviceCtlData {
+    #[allow(dead_code)]
     fn serialize(&self, control_id: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, control_id);
@@ -8807,8 +8807,8 @@ impl ChangeDevicePropertyAux {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl ChangeDevicePropertyAux {
+    #[allow(dead_code)]
     fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, format, num_items);
@@ -10355,8 +10355,8 @@ impl HierarchyChangeData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl HierarchyChangeData {
+    #[allow(dead_code)]
     fn serialize(&self, type_: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, type_);
@@ -12035,8 +12035,8 @@ impl DeviceClassData {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl DeviceClassData {
+    #[allow(dead_code)]
     fn serialize(&self, type_: u16) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, type_);
@@ -13615,8 +13615,8 @@ impl XIChangePropertyAux {
         }
     }
 }
-#[allow(dead_code, unused_variables)]
 impl XIChangePropertyAux {
+    #[allow(dead_code)]
     fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, format, num_items);
