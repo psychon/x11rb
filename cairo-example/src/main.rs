@@ -11,6 +11,7 @@ use x11rb::atom_manager;
 use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::protocol::xproto::{ConnectionExt as _, *};
+use x11rb::protocol::render::{self, ConnectionExt as _, PictType};
 use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt;
 use x11rb::xcb_ffi::XCBConnection;
@@ -70,16 +71,37 @@ fn find_xcb_visualtype(conn: &impl Connection, visual_id: u32) -> Option<xcb_vis
 
 /// Choose a visual to use. This function tries to find a depth=32 visual and falls back to the
 /// screen's default visual.
-fn choose_visual(screen: &Screen) -> (u8, Visualid) {
+fn choose_visual(conn: &impl Connection, screen_num: usize) -> Result<(u8, Visualid), ReplyError> {
     let depth = 32;
-    screen.allowed_depths
-        .iter()
-        // Find the depth 32. There can only be at most one
-        .find(|d| d.depth == depth)
-        // No idea how to pick a visual here. Just take the first one.
-        .and_then(|d| d.visuals.get(0))
-        .map(|v| (depth, v.visual_id))
-        .unwrap_or((screen.root_depth, screen.root_visual))
+    let screen = &conn.setup().roots[screen_num];
+
+    // Try to use XRender to find a visual with alpha support
+    let has_render = conn.extension_information(render::X11_EXTENSION_NAME)?.is_some();
+    if has_render {
+        let formats = conn.render_query_pict_formats()?.reply()?;
+        // Find the ARGB32 format that must be supported.
+        let format = formats.formats.iter()
+            .filter(|info| (info.type_, info.depth) == (PictType::Direct, depth))
+            .filter(|info| {
+                let d = info.direct;
+                (d.red_mask, d.green_mask, d.blue_mask, d.alpha_mask) == (0xff, 0xff, 0xff, 0xff)
+            })
+            .find(|info| {
+                let d = info.direct;
+                (d.red_shift, d.green_shift, d.blue_shift, d.alpha_shift) == (16, 8, 0, 24)
+            });
+        if let Some(format) = format {
+            // Now we need to find the visual that corresponds to this format
+            if let Some(visual) = formats.screens[screen_num]
+                .depths
+                .iter()
+                .flat_map(|d| &d.visuals)
+                .find(|v| v.format == format.id) {
+                return Ok((format.depth, visual.visual));
+            }
+        }
+    }
+    Ok((screen.root_depth, screen.root_visual))
 }
 
 /// Check if a composite manager is running
@@ -212,7 +234,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let screen = &conn.setup().roots[screen_num];
     let atoms = AtomCollection::new(&conn)?.reply()?;
     let (mut width, mut height) = (100, 100);
-    let (depth, visualid) = choose_visual(screen);
+    let (depth, visualid) = choose_visual(&conn, screen_num)?;
 
     // Check if a composite manager is running. In a real application, we should also react to a
     // composite manager starting/stopping at runtime.

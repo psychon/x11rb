@@ -8,7 +8,7 @@ publish = false
 
 [dependencies.x11rb]
 path = "../"
-features = ["allow-unsafe-code"]
+features = ["allow-unsafe-code", "render"]
 
 [dependencies.cairo-rs]
 version = "0.8"
