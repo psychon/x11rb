@@ -2283,6 +2283,7 @@ impl CreatePictureAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(repeat) = self.repeat {
             u32::from(repeat).serialize_into(bytes);
         }
@@ -2674,6 +2675,7 @@ impl ChangePictureAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(repeat) = self.repeat {
             u32::from(repeat).serialize_into(bytes);
         }

@@ -1390,6 +1390,7 @@ impl CreateAlarmAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(counter) = self.counter {
             counter.serialize_into(bytes);
         }
@@ -1621,6 +1622,7 @@ impl ChangeAlarmAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(counter) = self.counter {
             counter.serialize_into(bytes);
         }

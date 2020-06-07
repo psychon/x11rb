@@ -858,6 +858,7 @@ impl InputInfoInfo {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
+        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `info` has an inconsistent discriminant");
         match self {
             InputInfoInfo::Key(key) => key.serialize_into(bytes),
             InputInfoInfo::Button(button) => button.serialize_into(bytes),
@@ -4155,6 +4156,7 @@ impl FeedbackStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
+        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `data` has an inconsistent discriminant");
         match self {
             FeedbackStateData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackStateData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -5103,6 +5105,7 @@ impl FeedbackCtlData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
+        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `data` has an inconsistent discriminant");
         match self {
             FeedbackCtlData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackCtlData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -6452,6 +6455,7 @@ impl InputStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
+        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `data` has an inconsistent discriminant");
         match self {
             InputStateData::Key(key) => key.serialize_into(bytes),
             InputStateData::Button(button) => button.serialize_into(bytes),
@@ -7558,6 +7562,7 @@ impl DeviceStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
+        assert_eq!(self.switch_expr(), u32::from(control_id), "switch `data` has an inconsistent discriminant");
         match self {
             DeviceStateData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceStateData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -8402,6 +8407,7 @@ impl DeviceCtlData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
+        assert_eq!(self.switch_expr(), u32::from(control_id), "switch `data` has an inconsistent discriminant");
         match self {
             DeviceCtlData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceCtlData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -8809,6 +8815,7 @@ impl ChangeDevicePropertyAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
+        assert_eq!(self.switch_expr(), u32::from(format), "switch `items` has an inconsistent discriminant");
         match self {
             ChangeDevicePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
@@ -10356,6 +10363,7 @@ impl HierarchyChangeData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
+        assert_eq!(self.switch_expr(), u32::from(type_), "switch `data` has an inconsistent discriminant");
         match self {
             HierarchyChangeData::AddMaster(add_master) => add_master.serialize_into(bytes),
             HierarchyChangeData::RemoveMaster(remove_master) => remove_master.serialize_into(bytes),
@@ -12035,6 +12043,7 @@ impl DeviceClassData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
+        assert_eq!(self.switch_expr(), u32::from(type_), "switch `data` has an inconsistent discriminant");
         match self {
             DeviceClassData::Key(key) => key.serialize_into(bytes),
             DeviceClassData::Button(button) => button.serialize_into(bytes),
@@ -13614,6 +13623,7 @@ impl XIChangePropertyAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
+        assert_eq!(self.switch_expr(), u32::from(format), "switch `items` has an inconsistent discriminant");
         match self {
             XIChangePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");

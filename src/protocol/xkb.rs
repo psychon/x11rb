@@ -8455,6 +8455,7 @@ impl SetMapAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
+        assert_eq!(self.switch_expr(), u32::from(present), "switch `values` has an inconsistent discriminant");
         if let Some(ref types) = self.types {
             assert_eq!(types.len(), usize::try_from(n_types).unwrap(), "`types` has an incorrect length");
             types.serialize_into(bytes);
@@ -10070,6 +10071,7 @@ impl SetNamesAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
+        assert_eq!(self.switch_expr(), which, "switch `values` has an inconsistent discriminant");
         if let Some(keycodes_name) = self.keycodes_name {
             keycodes_name.serialize_into(bytes);
         }

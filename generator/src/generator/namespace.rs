@@ -4317,31 +4317,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         parent_deducible_fields: &HashMap<String, DeducibleField>,
         out: &mut Output,
     ) {
-        let needs_expr_assert =
-            !parent_deducible_fields
-                .values()
-                .any(|deducible_field| match deducible_field {
-                    DeducibleField::CaseSwitchExpr(switch_name, _) => *switch_name == switch.name,
-                    DeducibleField::BitCaseSwitchExpr(switch_name, DeducibleFieldOp::None) => {
-                        *switch_name == switch.name
-                    }
-                    DeducibleField::BitCaseSwitchExpr(_, _) | DeducibleField::LengthOf(_, _) => {
-                        false
-                    }
-                });
-
-        if needs_expr_assert {
-            let rust_field_name = to_rust_variable_name(&switch.name);
-            let switch_expr_str =
-                self.expr_to_str(&switch.expr, to_rust_variable_name, true, true, false);
-            outln!(
-                out,
-                "assert_eq!(self.switch_expr(), {}, \"switch `{}` has an inconsistent \
-                 discriminant\");",
-                switch_expr_str,
-                rust_field_name,
-            );
-        }
+        let rust_field_name = to_rust_variable_name(&switch.name);
+        let switch_expr_str =
+            self.expr_to_str(&switch.expr, to_rust_variable_name, true, true, false);
+        outln!(
+            out,
+            "assert_eq!(self.switch_expr(), {}, \"switch `{}` has an inconsistent \
+             discriminant\");",
+            switch_expr_str,
+            rust_field_name,
+        );
     }
 
     fn emit_value_serialize(
