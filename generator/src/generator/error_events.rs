@@ -236,21 +236,7 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
                 out.indent(),
                 "Error::Unknown(value) => response_type(value).unwrap(),"
             );
-            for ns in namespaces.iter() {
-                let has_feature = super::ext_has_feature(&ns.header);
-                let error_defs = sorted_errors(ns);
-                for err_name in error_defs.iter().map(|def| def.name()) {
-                    if has_feature {
-                        outln!(out.indent(), "#[cfg(feature = \"{}\")]", ns.header);
-                    }
-                    outln!(
-                        out.indent(),
-                        "Error::{}{}(value) => value.response_type,",
-                        get_ns_name_prefix(ns),
-                        err_name,
-                    );
-                }
-            }
+            outln!(out.indent(), "_ => 0",);
             outln!(out, "}}");
         });
         outln!(out, "}}");

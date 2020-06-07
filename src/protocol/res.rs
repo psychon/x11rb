@@ -497,7 +497,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub server_major: u16,
@@ -511,7 +510,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major, remaining) = u16::try_parse(remaining)?;
         let (server_minor, remaining) = u16::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, server_major, server_minor };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, server_major, server_minor };
         Ok((result, remaining))
     }
 }
@@ -572,7 +574,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub clients: Vec<Client>,
@@ -586,7 +587,10 @@ impl TryParse for QueryClientsReply {
         let (num_clients, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (clients, remaining) = crate::x11_utils::parse_list::<Client>(remaining, num_clients.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryClientsReply { response_type, sequence, length, clients };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryClientsReply { sequence, length, clients };
         Ok((result, remaining))
     }
 }
@@ -673,7 +677,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientResourcesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub types: Vec<Type>,
@@ -687,7 +690,10 @@ impl TryParse for QueryClientResourcesReply {
         let (num_types, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (types, remaining) = crate::x11_utils::parse_list::<Type>(remaining, num_types.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryClientResourcesReply { response_type, sequence, length, types };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryClientResourcesReply { sequence, length, types };
         Ok((result, remaining))
     }
 }
@@ -774,7 +780,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryClientPixmapBytesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub bytes: u32,
@@ -788,7 +793,10 @@ impl TryParse for QueryClientPixmapBytesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (bytes, remaining) = u32::try_parse(remaining)?;
         let (bytes_overflow, remaining) = u32::try_parse(remaining)?;
-        let result = QueryClientPixmapBytesReply { response_type, sequence, length, bytes, bytes_overflow };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryClientPixmapBytesReply { sequence, length, bytes, bytes_overflow };
         Ok((result, remaining))
     }
 }
@@ -866,7 +874,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientIdsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub ids: Vec<ClientIdValue>,
@@ -880,7 +887,10 @@ impl TryParse for QueryClientIdsReply {
         let (num_ids, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (ids, remaining) = crate::x11_utils::parse_list::<ClientIdValue>(remaining, num_ids.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryClientIdsReply { response_type, sequence, length, ids };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryClientIdsReply { sequence, length, ids };
         Ok((result, remaining))
     }
 }
@@ -982,7 +992,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryResourceBytesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub sizes: Vec<ResourceSizeValue>,
@@ -996,7 +1005,10 @@ impl TryParse for QueryResourceBytesReply {
         let (num_sizes, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (sizes, remaining) = crate::x11_utils::parse_list::<ResourceSizeValue>(remaining, num_sizes.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryResourceBytesReply { response_type, sequence, length, sizes };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryResourceBytesReply { sequence, length, sizes };
         Ok((result, remaining))
     }
 }

@@ -151,7 +151,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major: u16,
@@ -165,7 +164,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major, remaining) = u16::try_parse(remaining)?;
         let (minor, remaining) = u16::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, major, minor };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major, minor };
         Ok((result, remaining))
     }
 }
@@ -237,7 +239,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStateReply {
-    pub response_type: u8,
     pub state: u8,
     pub sequence: u16,
     pub length: u32,
@@ -250,7 +251,10 @@ impl TryParse for GetStateReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
-        let result = GetStateReply { response_type, state, sequence, length, window };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetStateReply { state, sequence, length, window };
         Ok((result, remaining))
     }
 }
@@ -322,7 +326,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenCountReply {
-    pub response_type: u8,
     pub screen_count: u8,
     pub sequence: u16,
     pub length: u32,
@@ -335,7 +338,10 @@ impl TryParse for GetScreenCountReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
-        let result = GetScreenCountReply { response_type, screen_count, sequence, length, window };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetScreenCountReply { screen_count, sequence, length, window };
         Ok((result, remaining))
     }
 }
@@ -416,7 +422,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSizeReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub width: u32,
@@ -434,7 +439,10 @@ impl TryParse for GetScreenSizeReply {
         let (height, remaining) = u32::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (screen, remaining) = u32::try_parse(remaining)?;
-        let result = GetScreenSizeReply { response_type, sequence, length, width, height, window, screen };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetScreenSizeReply { sequence, length, width, height, window, screen };
         Ok((result, remaining))
     }
 }
@@ -495,7 +503,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsActiveReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub state: u32,
@@ -507,7 +514,10 @@ impl TryParse for IsActiveReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
-        let result = IsActiveReply { response_type, sequence, length, state };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = IsActiveReply { sequence, length, state };
         Ok((result, remaining))
     }
 }
@@ -568,7 +578,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryScreensReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub screen_info: Vec<ScreenInfo>,
@@ -582,7 +591,10 @@ impl TryParse for QueryScreensReply {
         let (number, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (screen_info, remaining) = crate::x11_utils::parse_list::<ScreenInfo>(remaining, number.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryScreensReply { response_type, sequence, length, screen_info };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryScreensReply { sequence, length, screen_info };
         Ok((result, remaining))
     }
 }

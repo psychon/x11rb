@@ -177,7 +177,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major: u32,
@@ -191,7 +190,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major, remaining) = u32::try_parse(remaining)?;
         let (minor, remaining) = u32::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, major, minor };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major, minor };
         Ok((result, remaining))
     }
 }
@@ -263,7 +265,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSurfaceTypesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub surfaces: Vec<SurfaceInfo>,
@@ -277,7 +278,10 @@ impl TryParse for ListSurfaceTypesReply {
         let (num, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (surfaces, remaining) = crate::x11_utils::parse_list::<SurfaceInfo>(remaining, num.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListSurfaceTypesReply { response_type, sequence, length, surfaces };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListSurfaceTypesReply { sequence, length, surfaces };
         Ok((result, remaining))
     }
 }
@@ -405,7 +409,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateContextReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub width_actual: u16,
     pub height_actual: u16,
@@ -423,7 +426,10 @@ impl TryParse for CreateContextReply {
         let (flags_return, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = CreateContextReply { response_type, sequence, width_actual, height_actual, flags_return, priv_data };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CreateContextReply { sequence, width_actual, height_actual, flags_return, priv_data };
         Ok((result, remaining))
     }
 }
@@ -578,7 +584,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateSurfaceReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub priv_data: Vec<u32>,
 }
@@ -590,7 +595,10 @@ impl TryParse for CreateSurfaceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
         let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = CreateSurfaceReply { response_type, sequence, priv_data };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CreateSurfaceReply { sequence, priv_data };
         Ok((result, remaining))
     }
 }
@@ -768,7 +776,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateSubpictureReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub width_actual: u16,
     pub height_actual: u16,
@@ -791,7 +798,10 @@ impl TryParse for CreateSubpictureReply {
         let component_order = <[u8; 4]>::try_from(component_order).unwrap();
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = CreateSubpictureReply { response_type, sequence, width_actual, height_actual, num_palette_entries, entry_bytes, component_order, priv_data };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CreateSubpictureReply { sequence, width_actual, height_actual, num_palette_entries, entry_bytes, component_order, priv_data };
         Ok((result, remaining))
     }
 }
@@ -946,7 +956,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSubpictureTypesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub types: Vec<xv::ImageFormatInfo>,
@@ -960,7 +969,10 @@ impl TryParse for ListSubpictureTypesReply {
         let (num, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (types, remaining) = crate::x11_utils::parse_list::<xv::ImageFormatInfo>(remaining, num.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListSubpictureTypesReply { response_type, sequence, length, types };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListSubpictureTypesReply { sequence, length, types };
         Ok((result, remaining))
     }
 }

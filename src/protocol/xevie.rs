@@ -100,7 +100,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub server_major_version: u16,
@@ -115,7 +114,10 @@ impl TryParse for QueryVersionReply {
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let result = QueryVersionReply { response_type, sequence, length, server_major_version, server_minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, server_major_version, server_minor_version };
         Ok((result, remaining))
     }
 }
@@ -187,7 +189,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct StartReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
 }
@@ -198,7 +199,10 @@ impl TryParse for StartReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let result = StartReply { response_type, sequence, length };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = StartReply { sequence, length };
         Ok((result, remaining))
     }
 }
@@ -270,7 +274,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EndReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
 }
@@ -281,7 +284,10 @@ impl TryParse for EndReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let result = EndReply { response_type, sequence, length };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = EndReply { sequence, length };
         Ok((result, remaining))
     }
 }
@@ -585,7 +591,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SendReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
 }
@@ -596,7 +601,10 @@ impl TryParse for SendReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let result = SendReply { response_type, sequence, length };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = SendReply { sequence, length };
         Ok((result, remaining))
     }
 }
@@ -668,7 +676,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectInputReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
 }
@@ -679,7 +686,10 @@ impl TryParse for SelectInputReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let result = SelectInputReply { response_type, sequence, length };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = SelectInputReply { sequence, length };
         Ok((result, remaining))
     }
 }

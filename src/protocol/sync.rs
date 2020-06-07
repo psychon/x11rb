@@ -552,7 +552,6 @@ impl Serialize for Waitcondition {
 pub const COUNTER_ERROR: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CounterError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
     pub bad_counter: u32,
@@ -567,7 +566,10 @@ impl TryParse for CounterError {
         let (bad_counter, remaining) = u32::try_parse(remaining)?;
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
-        let result = CounterError { response_type, error_code, sequence, bad_counter, minor_opcode, major_opcode };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CounterError { error_code, sequence, bad_counter, minor_opcode, major_opcode };
         Ok((result, remaining))
     }
 }
@@ -579,7 +581,7 @@ impl TryFrom<&[u8]> for CounterError {
 }
 impl From<&CounterError> for [u8; 32] {
     fn from(input: &CounterError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         let bad_counter_bytes = input.bad_counter.serialize();
@@ -632,7 +634,6 @@ impl From<CounterError> for [u8; 32] {
 pub const ALARM_ERROR: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AlarmError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
     pub bad_alarm: u32,
@@ -647,7 +648,10 @@ impl TryParse for AlarmError {
         let (bad_alarm, remaining) = u32::try_parse(remaining)?;
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
-        let result = AlarmError { response_type, error_code, sequence, bad_alarm, minor_opcode, major_opcode };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = AlarmError { error_code, sequence, bad_alarm, minor_opcode, major_opcode };
         Ok((result, remaining))
     }
 }
@@ -659,7 +663,7 @@ impl TryFrom<&[u8]> for AlarmError {
 }
 impl From<&AlarmError> for [u8; 32] {
     fn from(input: &AlarmError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         let bad_alarm_bytes = input.bad_alarm.serialize();
@@ -774,7 +778,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InitializeReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u8,
@@ -789,7 +792,10 @@ impl TryParse for InitializeReply {
         let (major_version, remaining) = u8::try_parse(remaining)?;
         let (minor_version, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let result = InitializeReply { response_type, sequence, length, major_version, minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = InitializeReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -850,7 +856,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSystemCountersReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub counters: Vec<Systemcounter>,
@@ -864,7 +869,10 @@ impl TryParse for ListSystemCountersReply {
         let (counters_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (counters, remaining) = crate::x11_utils::parse_list::<Systemcounter>(remaining, counters_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListSystemCountersReply { response_type, sequence, length, counters };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListSystemCountersReply { sequence, length, counters };
         Ok((result, remaining))
     }
 }
@@ -1082,7 +1090,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCounterReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub counter_value: Int64,
@@ -1094,7 +1101,10 @@ impl TryParse for QueryCounterReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (counter_value, remaining) = Int64::try_parse(remaining)?;
-        let result = QueryCounterReply { response_type, sequence, length, counter_value };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryCounterReply { sequence, length, counter_value };
         Ok((result, remaining))
     }
 }
@@ -1896,7 +1906,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryAlarmReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub trigger: Trigger,
@@ -1915,8 +1924,11 @@ impl TryParse for QueryAlarmReply {
         let (events, remaining) = bool::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let state = state.try_into()?;
-        let result = QueryAlarmReply { response_type, sequence, length, trigger, delta, events, state };
+        let result = QueryAlarmReply { sequence, length, trigger, delta, events, state };
         Ok((result, remaining))
     }
 }
@@ -2056,7 +2068,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPriorityReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub priority: i32,
@@ -2068,7 +2079,10 @@ impl TryParse for GetPriorityReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (priority, remaining) = i32::try_parse(remaining)?;
-        let result = GetPriorityReply { response_type, sequence, length, priority };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPriorityReply { sequence, length, priority };
         Ok((result, remaining))
     }
 }
@@ -2394,7 +2408,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryFenceReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub triggered: bool,
@@ -2407,7 +2420,10 @@ impl TryParse for QueryFenceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (triggered, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let result = QueryFenceReply { response_type, sequence, length, triggered };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryFenceReply { sequence, length, triggered };
         Ok((result, remaining))
     }
 }

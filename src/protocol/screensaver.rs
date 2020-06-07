@@ -298,7 +298,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub server_major_version: u16,
@@ -313,7 +312,10 @@ impl TryParse for QueryVersionReply {
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let result = QueryVersionReply { response_type, sequence, length, server_major_version, server_minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, server_major_version, server_minor_version };
         Ok((result, remaining))
     }
 }
@@ -385,7 +387,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryInfoReply {
-    pub response_type: u8,
     pub state: u8,
     pub sequence: u16,
     pub length: u32,
@@ -407,8 +408,11 @@ impl TryParse for QueryInfoReply {
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let kind = kind.try_into()?;
-        let result = QueryInfoReply { response_type, state, sequence, length, saver_window, ms_until_server, ms_since_user_input, event_mask, kind };
+        let result = QueryInfoReply { state, sequence, length, saver_window, ms_until_server, ms_since_user_input, event_mask, kind };
         Ok((result, remaining))
     }
 }

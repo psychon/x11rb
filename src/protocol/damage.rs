@@ -110,7 +110,6 @@ impl TryFrom<u32> for ReportLevel {
 pub const BAD_DAMAGE_ERROR: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadDamageError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -119,7 +118,10 @@ impl TryParse for BadDamageError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadDamageError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadDamageError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -131,7 +133,7 @@ impl TryFrom<&[u8]> for BadDamageError {
 }
 impl From<&BadDamageError> for [u8; 32] {
     fn from(input: &BadDamageError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -247,7 +249,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
@@ -262,7 +263,10 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }

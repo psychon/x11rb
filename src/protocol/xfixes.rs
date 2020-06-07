@@ -107,7 +107,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
@@ -122,7 +121,10 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -1045,7 +1047,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub x: i16,
@@ -1072,7 +1073,10 @@ impl TryParse for GetCursorImageReply {
         let (cursor_serial, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (cursor_image, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(width).checked_mul(u32::from(height)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetCursorImageReply { response_type, sequence, length, x, y, width, height, xhot, yhot, cursor_serial, cursor_image };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetCursorImageReply { sequence, length, x, y, width, height, xhot, yhot, cursor_serial, cursor_image };
         Ok((result, remaining))
     }
 }
@@ -1089,7 +1093,6 @@ pub type Region = u32;
 pub const BAD_REGION_ERROR: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadRegionError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -1098,7 +1101,10 @@ impl TryParse for BadRegionError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadRegionError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadRegionError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -1110,7 +1116,7 @@ impl TryFrom<&[u8]> for BadRegionError {
 }
 impl From<&BadRegionError> for [u8; 32] {
     fn from(input: &BadRegionError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -2287,7 +2293,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FetchRegionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub extents: xproto::Rectangle,
     pub rectangles: Vec<xproto::Rectangle>,
@@ -2301,7 +2306,10 @@ impl TryParse for FetchRegionReply {
         let (extents, remaining) = xproto::Rectangle::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, length.checked_div(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = FetchRegionReply { response_type, sequence, extents, rectangles };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = FetchRegionReply { sequence, extents, rectangles };
         Ok((result, remaining))
     }
 }
@@ -2726,7 +2734,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorNameReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub atom: xproto::Atom,
@@ -2743,7 +2750,10 @@ impl TryParse for GetCursorNameReply {
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
-        let result = GetCursorNameReply { response_type, sequence, length, atom, name };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetCursorNameReply { sequence, length, atom, name };
         Ok((result, remaining))
     }
 }
@@ -2819,7 +2829,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageAndNameReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub x: i16,
@@ -2852,7 +2861,10 @@ impl TryParse for GetCursorImageAndNameReply {
         let (cursor_image, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(width).checked_mul(u32::from(height)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
-        let result = GetCursorImageAndNameReply { response_type, sequence, length, x, y, width, height, xhot, yhot, cursor_serial, cursor_atom, cursor_image, name };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetCursorImageAndNameReply { sequence, length, x, y, width, height, xhot, yhot, cursor_serial, cursor_atom, cursor_image, name };
         Ok((result, remaining))
     }
 }

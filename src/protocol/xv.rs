@@ -1176,7 +1176,6 @@ impl Serialize for ImageFormatInfo {
 pub const BAD_PORT_ERROR: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadPortError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -1185,7 +1184,10 @@ impl TryParse for BadPortError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadPortError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadPortError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -1197,7 +1199,7 @@ impl TryFrom<&[u8]> for BadPortError {
 }
 impl From<&BadPortError> for [u8; 32] {
     fn from(input: &BadPortError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -1247,7 +1249,6 @@ impl From<BadPortError> for [u8; 32] {
 pub const BAD_ENCODING_ERROR: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadEncodingError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -1256,7 +1257,10 @@ impl TryParse for BadEncodingError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadEncodingError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadEncodingError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -1268,7 +1272,7 @@ impl TryFrom<&[u8]> for BadEncodingError {
 }
 impl From<&BadEncodingError> for [u8; 32] {
     fn from(input: &BadEncodingError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -1318,7 +1322,6 @@ impl From<BadEncodingError> for [u8; 32] {
 pub const BAD_CONTROL_ERROR: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadControlError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -1327,7 +1330,10 @@ impl TryParse for BadControlError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadControlError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadControlError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -1339,7 +1345,7 @@ impl TryFrom<&[u8]> for BadControlError {
 }
 impl From<&BadControlError> for [u8; 32] {
     fn from(input: &BadControlError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -1597,7 +1603,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major: u16,
@@ -1611,7 +1616,10 @@ impl TryParse for QueryExtensionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major, remaining) = u16::try_parse(remaining)?;
         let (minor, remaining) = u16::try_parse(remaining)?;
-        let result = QueryExtensionReply { response_type, sequence, length, major, minor };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryExtensionReply { sequence, length, major, minor };
         Ok((result, remaining))
     }
 }
@@ -1683,7 +1691,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryAdaptorsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub info: Vec<AdaptorInfo>,
@@ -1697,7 +1704,10 @@ impl TryParse for QueryAdaptorsReply {
         let (num_adaptors, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (info, remaining) = crate::x11_utils::parse_list::<AdaptorInfo>(remaining, num_adaptors.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryAdaptorsReply { response_type, sequence, length, info };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryAdaptorsReply { sequence, length, info };
         Ok((result, remaining))
     }
 }
@@ -1784,7 +1794,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryEncodingsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub info: Vec<EncodingInfo>,
@@ -1798,7 +1807,10 @@ impl TryParse for QueryEncodingsReply {
         let (num_encodings, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (info, remaining) = crate::x11_utils::parse_list::<EncodingInfo>(remaining, num_encodings.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryEncodingsReply { response_type, sequence, length, info };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryEncodingsReply { sequence, length, info };
         Ok((result, remaining))
     }
 }
@@ -1896,7 +1908,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortReply {
-    pub response_type: u8,
     pub result: GrabPortStatus,
     pub sequence: u16,
     pub length: u32,
@@ -1907,8 +1918,11 @@ impl TryParse for GrabPortReply {
         let (result, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let result = result.try_into()?;
-        let result = GrabPortReply { response_type, result, sequence, length };
+        let result = GrabPortReply { result, sequence, length };
         Ok((result, remaining))
     }
 }
@@ -2826,7 +2840,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub actual_width: u16,
@@ -2840,7 +2853,10 @@ impl TryParse for QueryBestSizeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (actual_width, remaining) = u16::try_parse(remaining)?;
         let (actual_height, remaining) = u16::try_parse(remaining)?;
-        let result = QueryBestSizeReply { response_type, sequence, length, actual_width, actual_height };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryBestSizeReply { sequence, length, actual_width, actual_height };
         Ok((result, remaining))
     }
 }
@@ -2998,7 +3014,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPortAttributeReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub value: i32,
@@ -3010,7 +3025,10 @@ impl TryParse for GetPortAttributeReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value, remaining) = i32::try_parse(remaining)?;
-        let result = GetPortAttributeReply { response_type, sequence, length, value };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPortAttributeReply { sequence, length, value };
         Ok((result, remaining))
     }
 }
@@ -3082,7 +3100,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPortAttributesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub text_size: u32,
@@ -3098,7 +3115,10 @@ impl TryParse for QueryPortAttributesReply {
         let (text_size, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (attributes, remaining) = crate::x11_utils::parse_list::<AttributeInfo>(remaining, num_attributes.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryPortAttributesReply { response_type, sequence, length, text_size, attributes };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryPortAttributesReply { sequence, length, text_size, attributes };
         Ok((result, remaining))
     }
 }
@@ -3185,7 +3205,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListImageFormatsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub format: Vec<ImageFormatInfo>,
@@ -3199,7 +3218,10 @@ impl TryParse for ListImageFormatsReply {
         let (num_formats, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (format, remaining) = crate::x11_utils::parse_list::<ImageFormatInfo>(remaining, num_formats.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListImageFormatsReply { response_type, sequence, length, format };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListImageFormatsReply { sequence, length, format };
         Ok((result, remaining))
     }
 }
@@ -3309,7 +3331,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryImageAttributesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub data_size: u32,
@@ -3331,7 +3352,10 @@ impl TryParse for QueryImageAttributesReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
         let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryImageAttributesReply { response_type, sequence, length, data_size, width, height, pitches, offsets };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryImageAttributesReply { sequence, length, data_size, width, height, pitches, offsets };
         Ok((result, remaining))
     }
 }

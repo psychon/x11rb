@@ -71,9 +71,10 @@ fn run_in_request(request_def: &defs::RequestDef, module: &defs::Module) {
 fn run_in_reply(reply_def: &defs::ReplyDef, module: &defs::Module) {
     let mut fields = reply_def.fields.borrow_mut();
 
-    let response_type_field = defs::FieldDef::Normal(defs::NormalField {
+    let response_type_field = defs::FieldDef::Expr(defs::ExprField {
         name: "response_type".into(),
         type_: make_builtin_field_value_type(defs::BuiltInType::Card8),
+        expr: defs::Expression::Value(1),
     });
     let sequence_field = defs::FieldDef::Normal(defs::NormalField {
         name: "sequence".into(),
@@ -152,9 +153,10 @@ fn run_in_event(event_def: &defs::EventFullDef, module: &defs::Module) {
 fn run_in_error(error_def: &defs::ErrorFullDef, module: &defs::Module) {
     let mut fields = error_def.fields.borrow_mut();
 
-    let response_type_field = defs::FieldDef::Normal(defs::NormalField {
+    let response_type_field = defs::FieldDef::Expr(defs::ExprField {
         name: "response_type".into(),
         type_: make_builtin_field_value_type(defs::BuiltInType::Card8),
+        expr: defs::Expression::Value(0),
     });
     let error_code_field = defs::FieldDef::Normal(defs::NormalField {
         name: "error_code".into(),

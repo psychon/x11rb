@@ -318,7 +318,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u16,
@@ -332,7 +331,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -805,7 +807,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtentsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub bounding_shaped: bool,
@@ -836,7 +837,10 @@ impl TryParse for QueryExtentsReply {
         let (clip_shape_extents_y, remaining) = i16::try_parse(remaining)?;
         let (clip_shape_extents_width, remaining) = u16::try_parse(remaining)?;
         let (clip_shape_extents_height, remaining) = u16::try_parse(remaining)?;
-        let result = QueryExtentsReply { response_type, sequence, length, bounding_shaped, clip_shaped, bounding_shape_extents_x, bounding_shape_extents_y, bounding_shape_extents_width, bounding_shape_extents_height, clip_shape_extents_x, clip_shape_extents_y, clip_shape_extents_width, clip_shape_extents_height };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryExtentsReply { sequence, length, bounding_shaped, clip_shaped, bounding_shape_extents_x, bounding_shape_extents_y, bounding_shape_extents_width, bounding_shape_extents_height, clip_shape_extents_x, clip_shape_extents_y, clip_shape_extents_width, clip_shape_extents_height };
         Ok((result, remaining))
     }
 }
@@ -977,7 +981,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InputSelectedReply {
-    pub response_type: u8,
     pub enabled: bool,
     pub sequence: u16,
     pub length: u32,
@@ -988,7 +991,10 @@ impl TryParse for InputSelectedReply {
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let result = InputSelectedReply { response_type, enabled, sequence, length };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = InputSelectedReply { enabled, sequence, length };
         Ok((result, remaining))
     }
 }
@@ -1071,7 +1077,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetRectanglesReply {
-    pub response_type: u8,
     pub ordering: xproto::ClipOrdering,
     pub sequence: u16,
     pub length: u32,
@@ -1086,8 +1091,11 @@ impl TryParse for GetRectanglesReply {
         let (rectangles_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, rectangles_len.try_into().or(Err(ParseError::ParseError))?)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let ordering = ordering.try_into()?;
-        let result = GetRectanglesReply { response_type, ordering, sequence, length, rectangles };
+        let result = GetRectanglesReply { ordering, sequence, length, rectangles };
         Ok((result, remaining))
     }
 }

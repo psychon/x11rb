@@ -417,7 +417,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u16,
@@ -431,7 +430,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -504,7 +506,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetModeLineReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub dotclock: Dotclock,
@@ -542,7 +543,10 @@ impl TryParse for GetModeLineReply {
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
         let private = private.to_vec();
-        let result = GetModeLineReply { response_type, sequence, length, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetModeLineReply { sequence, length, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private };
         Ok((result, remaining))
     }
 }
@@ -857,7 +861,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMonitorReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub hsync: Vec<Syncrange>,
@@ -885,7 +888,10 @@ impl TryParse for GetMonitorReply {
         let alignment_pad = alignment_pad.to_vec();
         let (model, remaining) = crate::x11_utils::parse_u8_list(remaining, model_length.try_into().or(Err(ParseError::ParseError))?)?;
         let model = model.to_vec();
-        let result = GetMonitorReply { response_type, sequence, length, hsync, vsync, vendor, alignment_pad, model };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetMonitorReply { sequence, length, hsync, vsync, vendor, alignment_pad, model };
         Ok((result, remaining))
     }
 }
@@ -1076,7 +1082,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetAllModeLinesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub modeinfo: Vec<ModeInfo>,
@@ -1090,7 +1095,10 @@ impl TryParse for GetAllModeLinesReply {
         let (modecount, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (modeinfo, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, modecount.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetAllModeLinesReply { response_type, sequence, length, modeinfo };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetAllModeLinesReply { sequence, length, modeinfo };
         Ok((result, remaining))
     }
 }
@@ -1733,7 +1741,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ValidateModeLineReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub status: u32,
@@ -1746,7 +1753,10 @@ impl TryParse for ValidateModeLineReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let result = ValidateModeLineReply { response_type, sequence, length, status };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ValidateModeLineReply { sequence, length, status };
         Ok((result, remaining))
     }
 }
@@ -1991,7 +2001,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetViewPortReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub x: u32,
@@ -2006,7 +2015,10 @@ impl TryParse for GetViewPortReply {
         let (x, remaining) = u32::try_parse(remaining)?;
         let (y, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let result = GetViewPortReply { response_type, sequence, length, x, y };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetViewPortReply { sequence, length, x, y };
         Ok((result, remaining))
     }
 }
@@ -2157,7 +2169,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDotClocksReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub flags: u32,
@@ -2176,7 +2187,10 @@ impl TryParse for GetDotClocksReply {
         let (maxclocks, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(flags & 1u32).ok_or(ParseError::ParseError)?.checked_mul(clocks).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetDotClocksReply { response_type, sequence, length, flags, clocks, maxclocks, clock };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetDotClocksReply { sequence, length, flags, clocks, maxclocks, clock };
         Ok((result, remaining))
     }
 }
@@ -2437,7 +2451,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetGammaReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub red: u32,
@@ -2454,7 +2467,10 @@ impl TryParse for GetGammaReply {
         let (green, remaining) = u32::try_parse(remaining)?;
         let (blue, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let result = GetGammaReply { response_type, sequence, length, red, green, blue };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetGammaReply { sequence, length, red, green, blue };
         Ok((result, remaining))
     }
 }
@@ -2531,7 +2547,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetGammaRampReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub size: u16,
@@ -2550,7 +2565,10 @@ impl TryParse for GetGammaRampReply {
         let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
         let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
         let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetGammaRampReply { response_type, sequence, length, size, red, green, blue };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetGammaRampReply { sequence, length, size, red, green, blue };
         Ok((result, remaining))
     }
 }
@@ -2710,7 +2728,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetGammaRampSizeReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub size: u16,
@@ -2723,7 +2740,10 @@ impl TryParse for GetGammaRampSizeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (size, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let result = GetGammaRampSizeReply { response_type, sequence, length, size };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetGammaRampSizeReply { sequence, length, size };
         Ok((result, remaining))
     }
 }
@@ -2796,7 +2816,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPermissionsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub permissions: u32,
@@ -2809,7 +2828,10 @@ impl TryParse for GetPermissionsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (permissions, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let result = GetPermissionsReply { response_type, sequence, length, permissions };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPermissionsReply { sequence, length, permissions };
         Ok((result, remaining))
     }
 }
@@ -2824,7 +2846,6 @@ impl TryFrom<&[u8]> for GetPermissionsReply {
 pub const BAD_CLOCK_ERROR: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadClockError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -2833,7 +2854,10 @@ impl TryParse for BadClockError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadClockError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadClockError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -2845,7 +2869,7 @@ impl TryFrom<&[u8]> for BadClockError {
 }
 impl From<&BadClockError> for [u8; 32] {
     fn from(input: &BadClockError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -2895,7 +2919,6 @@ impl From<BadClockError> for [u8; 32] {
 pub const BAD_H_TIMINGS_ERROR: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadHTimingsError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -2904,7 +2927,10 @@ impl TryParse for BadHTimingsError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadHTimingsError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadHTimingsError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -2916,7 +2942,7 @@ impl TryFrom<&[u8]> for BadHTimingsError {
 }
 impl From<&BadHTimingsError> for [u8; 32] {
     fn from(input: &BadHTimingsError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -2966,7 +2992,6 @@ impl From<BadHTimingsError> for [u8; 32] {
 pub const BAD_V_TIMINGS_ERROR: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BadVTimingsError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -2975,7 +3000,10 @@ impl TryParse for BadVTimingsError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = BadVTimingsError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BadVTimingsError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -2987,7 +3015,7 @@ impl TryFrom<&[u8]> for BadVTimingsError {
 }
 impl From<&BadVTimingsError> for [u8; 32] {
     fn from(input: &BadVTimingsError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -3037,7 +3065,6 @@ impl From<BadVTimingsError> for [u8; 32] {
 pub const MODE_UNSUITABLE_ERROR: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ModeUnsuitableError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -3046,7 +3073,10 @@ impl TryParse for ModeUnsuitableError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = ModeUnsuitableError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ModeUnsuitableError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -3058,7 +3088,7 @@ impl TryFrom<&[u8]> for ModeUnsuitableError {
 }
 impl From<&ModeUnsuitableError> for [u8; 32] {
     fn from(input: &ModeUnsuitableError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -3108,7 +3138,6 @@ impl From<ModeUnsuitableError> for [u8; 32] {
 pub const EXTENSION_DISABLED_ERROR: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ExtensionDisabledError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -3117,7 +3146,10 @@ impl TryParse for ExtensionDisabledError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = ExtensionDisabledError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ExtensionDisabledError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -3129,7 +3161,7 @@ impl TryFrom<&[u8]> for ExtensionDisabledError {
 }
 impl From<&ExtensionDisabledError> for [u8; 32] {
     fn from(input: &ExtensionDisabledError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -3179,7 +3211,6 @@ impl From<ExtensionDisabledError> for [u8; 32] {
 pub const CLIENT_NOT_LOCAL_ERROR: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ClientNotLocalError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -3188,7 +3219,10 @@ impl TryParse for ClientNotLocalError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = ClientNotLocalError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ClientNotLocalError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -3200,7 +3234,7 @@ impl TryFrom<&[u8]> for ClientNotLocalError {
 }
 impl From<&ClientNotLocalError> for [u8; 32] {
     fn from(input: &ClientNotLocalError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
@@ -3250,7 +3284,6 @@ impl From<ClientNotLocalError> for [u8; 32] {
 pub const ZOOM_LOCKED_ERROR: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ZoomLockedError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
 }
@@ -3259,7 +3292,10 @@ impl TryParse for ZoomLockedError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let result = ZoomLockedError { response_type, error_code, sequence };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ZoomLockedError { error_code, sequence };
         Ok((result, remaining))
     }
 }
@@ -3271,7 +3307,7 @@ impl TryFrom<&[u8]> for ZoomLockedError {
 }
 impl From<&ZoomLockedError> for [u8; 32] {
     fn from(input: &ZoomLockedError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [

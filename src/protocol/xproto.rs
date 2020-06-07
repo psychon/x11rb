@@ -5165,7 +5165,6 @@ impl TryFrom<&[u8]> for GeGenericEvent {
 pub const REQUEST_ERROR: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RequestError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
     pub bad_value: u32,
@@ -5181,7 +5180,10 @@ impl TryParse for RequestError {
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let result = RequestError { response_type, error_code, sequence, bad_value, minor_opcode, major_opcode };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = RequestError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         Ok((result, remaining))
     }
 }
@@ -5193,7 +5195,7 @@ impl TryFrom<&[u8]> for RequestError {
 }
 impl From<&RequestError> for [u8; 32] {
     fn from(input: &RequestError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         let bad_value_bytes = input.bad_value.serialize();
@@ -5246,7 +5248,6 @@ impl From<RequestError> for [u8; 32] {
 pub const VALUE_ERROR: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ValueError {
-    pub response_type: u8,
     pub error_code: u8,
     pub sequence: u16,
     pub bad_value: u32,
@@ -5262,7 +5263,10 @@ impl TryParse for ValueError {
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let result = ValueError { response_type, error_code, sequence, bad_value, minor_opcode, major_opcode };
+        if response_type != 0 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ValueError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         Ok((result, remaining))
     }
 }
@@ -5274,7 +5278,7 @@ impl TryFrom<&[u8]> for ValueError {
 }
 impl From<&ValueError> for [u8; 32] {
     fn from(input: &ValueError) -> Self {
-        let response_type_bytes = input.response_type.serialize();
+        let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         let bad_value_bytes = input.bad_value.serialize();
@@ -6963,7 +6967,6 @@ where
 /// * `map_state` -
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetWindowAttributesReply {
-    pub response_type: u8,
     pub backing_store: BackingStore,
     pub sequence: u16,
     pub length: u32,
@@ -7003,12 +7006,15 @@ impl TryParse for GetWindowAttributesReply {
         let (your_event_mask, remaining) = u32::try_parse(remaining)?;
         let (do_not_propagate_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let backing_store = backing_store.try_into()?;
         let class = class.try_into()?;
         let bit_gravity = Gravity::try_from(bit_gravity, Gravity::BitForget)?;
         let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
         let map_state = map_state.try_into()?;
-        let result = GetWindowAttributesReply { response_type, backing_store, sequence, length, visual, class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask };
+        let result = GetWindowAttributesReply { backing_store, sequence, length, visual, class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask };
         Ok((result, remaining))
     }
 }
@@ -8690,7 +8696,6 @@ where
 /// * `depth` - The depth of the drawable (bits per pixel for the object).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetGeometryReply {
-    pub response_type: u8,
     pub depth: u8,
     pub sequence: u16,
     pub length: u32,
@@ -8714,7 +8719,10 @@ impl TryParse for GetGeometryReply {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (border_width, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let result = GetGeometryReply { response_type, depth, sequence, length, root, x, y, width, height, border_width };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetGeometryReply { depth, sequence, length, root, x, y, width, height, border_width };
         Ok((result, remaining))
     }
 }
@@ -8867,7 +8875,6 @@ where
 /// * `children_len` - The number of child windows.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryTreeReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub root: Window,
@@ -8885,7 +8892,10 @@ impl TryParse for QueryTreeReply {
         let (children_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::ParseError)?;
         let (children, remaining) = crate::x11_utils::parse_list::<Window>(remaining, children_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryTreeReply { response_type, sequence, length, root, parent, children };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryTreeReply { sequence, length, root, parent, children };
         Ok((result, remaining))
     }
 }
@@ -9074,7 +9084,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InternAtomReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub atom: Atom,
@@ -9086,7 +9095,10 @@ impl TryParse for InternAtomReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (atom, remaining) = Atom::try_parse(remaining)?;
-        let result = InternAtomReply { response_type, sequence, length, atom };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = InternAtomReply { sequence, length, atom };
         Ok((result, remaining))
     }
 }
@@ -9160,7 +9172,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetAtomNameReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub name: Vec<u8>,
@@ -9175,7 +9186,10 @@ impl TryParse for GetAtomNameReply {
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
-        let result = GetAtomNameReply { response_type, sequence, length, name };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetAtomNameReply { sequence, length, name };
         Ok((result, remaining))
     }
 }
@@ -9875,7 +9889,6 @@ impl GetPropertyReply {
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
     /// let reply = x11rb::protocol::xproto::GetPropertyReply {
-    ///     response_type: 1,
     ///     format: 8,
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -9899,7 +9912,6 @@ impl GetPropertyReply {
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
     /// let reply = x11rb::protocol::xproto::GetPropertyReply {
-    ///     response_type: 1,
     ///     format: 42, // Not allowed in X11, but used for the example
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -9930,7 +9942,6 @@ impl GetPropertyReply {
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
     /// let reply = x11rb::protocol::xproto::GetPropertyReply {
-    ///     response_type: 1,
     ///     format: 16,
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -9952,7 +9963,6 @@ impl GetPropertyReply {
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
     /// let reply = x11rb::protocol::xproto::GetPropertyReply {
-    ///     response_type: 1,
     ///     format: 42, // Not allowed in X11, but used for the example
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -9983,7 +9993,6 @@ impl GetPropertyReply {
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
     /// let reply = x11rb::protocol::xproto::GetPropertyReply {
-    ///     response_type: 1,
     ///     format: 32,
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -10004,7 +10013,6 @@ impl GetPropertyReply {
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
     /// let reply = x11rb::protocol::xproto::GetPropertyReply {
-    ///     response_type: 1,
     ///     format: 42, // Not allowed in X11, but used for the example
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -10037,7 +10045,6 @@ impl GetPropertyReply {
 /// field.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyReply {
-    pub response_type: u8,
     pub format: u8,
     pub sequence: u16,
     pub length: u32,
@@ -10058,7 +10065,10 @@ impl TryParse for GetPropertyReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let value = value.to_vec();
-        let result = GetPropertyReply { response_type, format, sequence, length, type_, bytes_after, value_len, value };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPropertyReply { format, sequence, length, type_, bytes_after, value_len, value };
         Ok((result, remaining))
     }
 }
@@ -10132,7 +10142,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListPropertiesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub atoms: Vec<Atom>,
@@ -10146,7 +10155,10 @@ impl TryParse for ListPropertiesReply {
         let (atoms_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListPropertiesReply { response_type, sequence, length, atoms };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListPropertiesReply { sequence, length, atoms };
         Ok((result, remaining))
     }
 }
@@ -10413,7 +10425,6 @@ where
 /// * `owner` - The current selection owner window.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetSelectionOwnerReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub owner: Window,
@@ -10425,7 +10436,10 @@ impl TryParse for GetSelectionOwnerReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (owner, remaining) = Window::try_parse(remaining)?;
-        let result = GetSelectionOwnerReply { response_type, sequence, length, owner };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetSelectionOwnerReply { sequence, length, owner };
         Ok((result, remaining))
     }
 }
@@ -11311,7 +11325,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPointerReply {
-    pub response_type: u8,
     pub status: GrabStatus,
     pub sequence: u16,
     pub length: u32,
@@ -11322,8 +11335,11 @@ impl TryParse for GrabPointerReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let status = status.try_into()?;
-        let result = GrabPointerReply { response_type, status, sequence, length };
+        let result = GrabPointerReply { status, sequence, length };
         Ok((result, remaining))
     }
 }
@@ -12170,7 +12186,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabKeyboardReply {
-    pub response_type: u8,
     pub status: GrabStatus,
     pub sequence: u16,
     pub length: u32,
@@ -12181,8 +12196,11 @@ impl TryParse for GrabKeyboardReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let status = status.try_into()?;
-        let result = GrabKeyboardReply { response_type, status, sequence, length };
+        let result = GrabKeyboardReply { status, sequence, length };
         Ok((result, remaining))
     }
 }
@@ -13115,7 +13133,6 @@ where
 /// physical state if device event processing is frozen.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryPointerReply {
-    pub response_type: u8,
     pub same_screen: bool,
     pub sequence: u16,
     pub length: u32,
@@ -13141,7 +13158,10 @@ impl TryParse for QueryPointerReply {
         let (win_y, remaining) = i16::try_parse(remaining)?;
         let (mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let result = QueryPointerReply { response_type, same_screen, sequence, length, root, child, root_x, root_y, win_x, win_y, mask };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryPointerReply { same_screen, sequence, length, root, child, root_x, root_y, win_x, win_y, mask };
         Ok((result, remaining))
     }
 }
@@ -13283,7 +13303,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMotionEventsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub events: Vec<Timecoord>,
@@ -13297,7 +13316,10 @@ impl TryParse for GetMotionEventsReply {
         let (events_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (events, remaining) = crate::x11_utils::parse_list::<Timecoord>(remaining, events_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetMotionEventsReply { response_type, sequence, length, events };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetMotionEventsReply { sequence, length, events };
         Ok((result, remaining))
     }
 }
@@ -13409,7 +13431,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TranslateCoordinatesReply {
-    pub response_type: u8,
     pub same_screen: bool,
     pub sequence: u16,
     pub length: u32,
@@ -13426,7 +13447,10 @@ impl TryParse for TranslateCoordinatesReply {
         let (child, remaining) = Window::try_parse(remaining)?;
         let (dst_x, remaining) = i16::try_parse(remaining)?;
         let (dst_y, remaining) = i16::try_parse(remaining)?;
-        let result = TranslateCoordinatesReply { response_type, same_screen, sequence, length, child, dst_x, dst_y };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = TranslateCoordinatesReply { same_screen, sequence, length, child, dst_x, dst_y };
         Ok((result, remaining))
     }
 }
@@ -13895,7 +13919,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetInputFocusReply {
-    pub response_type: u8,
     pub revert_to: InputFocus,
     pub sequence: u16,
     pub length: u32,
@@ -13908,8 +13931,11 @@ impl TryParse for GetInputFocusReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (focus, remaining) = Window::try_parse(remaining)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let revert_to = revert_to.try_into()?;
-        let result = GetInputFocusReply { response_type, revert_to, sequence, length, focus };
+        let result = GetInputFocusReply { revert_to, sequence, length, focus };
         Ok((result, remaining))
     }
 }
@@ -13972,7 +13998,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryKeymapReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub keys: [u8; 32],
@@ -13985,7 +14010,10 @@ impl TryParse for QueryKeymapReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let keys = <[u8; 32]>::try_from(keys).unwrap();
-        let result = QueryKeymapReply { response_type, sequence, length, keys };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryKeymapReply { sequence, length, keys };
         Ok((result, remaining))
     }
 }
@@ -14436,7 +14464,6 @@ where
 /// * `draw_direction` -
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryFontReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub min_bounds: Charinfo,
@@ -14476,8 +14503,11 @@ impl TryParse for QueryFontReply {
         let (char_infos_len, remaining) = u32::try_parse(remaining)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (char_infos, remaining) = crate::x11_utils::parse_list::<Charinfo>(remaining, char_infos_len.try_into().or(Err(ParseError::ParseError))?)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let draw_direction = draw_direction.try_into()?;
-        let result = QueryFontReply { response_type, sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, properties, char_infos };
+        let result = QueryFontReply { sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, properties, char_infos };
         Ok((result, remaining))
     }
 }
@@ -14671,7 +14701,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryTextExtentsReply {
-    pub response_type: u8,
     pub draw_direction: FontDraw,
     pub sequence: u16,
     pub length: u32,
@@ -14696,8 +14725,11 @@ impl TryParse for QueryTextExtentsReply {
         let (overall_width, remaining) = i32::try_parse(remaining)?;
         let (overall_left, remaining) = i32::try_parse(remaining)?;
         let (overall_right, remaining) = i32::try_parse(remaining)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let draw_direction = draw_direction.try_into()?;
-        let result = QueryTextExtentsReply { response_type, draw_direction, sequence, length, font_ascent, font_descent, overall_ascent, overall_descent, overall_width, overall_left, overall_right };
+        let result = QueryTextExtentsReply { draw_direction, sequence, length, font_ascent, font_descent, overall_ascent, overall_descent, overall_width, overall_left, overall_right };
         Ok((result, remaining))
     }
 }
@@ -14858,7 +14890,6 @@ where
 /// * `names_len` - The number of font names.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListFontsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub names: Vec<Str>,
@@ -14872,7 +14903,10 @@ impl TryParse for ListFontsReply {
         let (names_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListFontsReply { response_type, sequence, length, names };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListFontsReply { sequence, length, names };
         Ok((result, remaining))
     }
 }
@@ -15013,7 +15047,6 @@ where
 /// * `draw_direction` -
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListFontsWithInfoReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub min_bounds: Charinfo,
@@ -15055,8 +15088,11 @@ impl TryParse for ListFontsWithInfoReply {
         let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let draw_direction = draw_direction.try_into()?;
-        let result = ListFontsWithInfoReply { response_type, sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, replies_hint, properties, name };
+        let result = ListFontsWithInfoReply { sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, replies_hint, properties, name };
         Ok((result, remaining))
     }
 }
@@ -15215,7 +15251,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFontPathReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub path: Vec<Str>,
@@ -15229,7 +15264,10 @@ impl TryParse for GetFontPathReply {
         let (path_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (path, remaining) = crate::x11_utils::parse_list::<Str>(remaining, path_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetFontPathReply { response_type, sequence, length, path };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetFontPathReply { sequence, length, path };
         Ok((result, remaining))
     }
 }
@@ -19717,7 +19755,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetImageReply {
-    pub response_type: u8,
     pub depth: u8,
     pub sequence: u16,
     pub visual: Visualid,
@@ -19733,7 +19770,10 @@ impl TryParse for GetImageReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
-        let result = GetImageReply { response_type, depth, sequence, visual, data };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetImageReply { depth, sequence, visual, data };
         Ok((result, remaining))
     }
 }
@@ -20737,7 +20777,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListInstalledColormapsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub cmaps: Vec<Colormap>,
@@ -20751,7 +20790,10 @@ impl TryParse for ListInstalledColormapsReply {
         let (cmaps_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (cmaps, remaining) = crate::x11_utils::parse_list::<Colormap>(remaining, cmaps_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListInstalledColormapsReply { response_type, sequence, length, cmaps };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListInstalledColormapsReply { sequence, length, cmaps };
         Ok((result, remaining))
     }
 }
@@ -20900,7 +20942,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocColorReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub red: u16,
@@ -20919,7 +20960,10 @@ impl TryParse for AllocColorReply {
         let (blue, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (pixel, remaining) = u32::try_parse(remaining)?;
-        let result = AllocColorReply { response_type, sequence, length, red, green, blue, pixel };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = AllocColorReply { sequence, length, red, green, blue, pixel };
         Ok((result, remaining))
     }
 }
@@ -21008,7 +21052,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocNamedColorReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub pixel: u32,
@@ -21032,7 +21075,10 @@ impl TryParse for AllocNamedColorReply {
         let (visual_red, remaining) = u16::try_parse(remaining)?;
         let (visual_green, remaining) = u16::try_parse(remaining)?;
         let (visual_blue, remaining) = u16::try_parse(remaining)?;
-        let result = AllocNamedColorReply { response_type, sequence, length, pixel, exact_red, exact_green, exact_blue, visual_red, visual_green, visual_blue };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = AllocNamedColorReply { sequence, length, pixel, exact_red, exact_green, exact_blue, visual_red, visual_green, visual_blue };
         Ok((result, remaining))
     }
 }
@@ -21124,7 +21170,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocColorCellsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub pixels: Vec<u32>,
@@ -21141,7 +21186,10 @@ impl TryParse for AllocColorCellsReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (masks, remaining) = crate::x11_utils::parse_list::<u32>(remaining, masks_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = AllocColorCellsReply { response_type, sequence, length, pixels, masks };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = AllocColorCellsReply { sequence, length, pixels, masks };
         Ok((result, remaining))
     }
 }
@@ -21275,7 +21323,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocColorPlanesReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub red_mask: u32,
@@ -21296,7 +21343,10 @@ impl TryParse for AllocColorPlanesReply {
         let (blue_mask, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = AllocColorPlanesReply { response_type, sequence, length, red_mask, green_mask, blue_mask, pixels };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = AllocColorPlanesReply { sequence, length, red_mask, green_mask, blue_mask, pixels };
         Ok((result, remaining))
     }
 }
@@ -21826,7 +21876,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryColorsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub colors: Vec<Rgb>,
@@ -21840,7 +21889,10 @@ impl TryParse for QueryColorsReply {
         let (colors_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (colors, remaining) = crate::x11_utils::parse_list::<Rgb>(remaining, colors_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryColorsReply { response_type, sequence, length, colors };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryColorsReply { sequence, length, colors };
         Ok((result, remaining))
     }
 }
@@ -21944,7 +21996,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LookupColorReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub exact_red: u16,
@@ -21966,7 +22017,10 @@ impl TryParse for LookupColorReply {
         let (visual_red, remaining) = u16::try_parse(remaining)?;
         let (visual_green, remaining) = u16::try_parse(remaining)?;
         let (visual_blue, remaining) = u16::try_parse(remaining)?;
-        let result = LookupColorReply { response_type, sequence, length, exact_red, exact_green, exact_blue, visual_red, visual_green, visual_blue };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = LookupColorReply { sequence, length, exact_red, exact_green, exact_blue, visual_red, visual_green, visual_blue };
         Ok((result, remaining))
     }
 }
@@ -22770,7 +22824,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub width: u16,
@@ -22784,7 +22837,10 @@ impl TryParse for QueryBestSizeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let result = QueryBestSizeReply { response_type, sequence, length, width, height };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryBestSizeReply { sequence, length, width, height };
         Ok((result, remaining))
     }
 }
@@ -22914,7 +22970,6 @@ where
 /// * `first_error` - The first error code, if any.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub present: bool,
@@ -22932,7 +22987,10 @@ impl TryParse for QueryExtensionReply {
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let (first_event, remaining) = u8::try_parse(remaining)?;
         let (first_error, remaining) = u8::try_parse(remaining)?;
-        let result = QueryExtensionReply { response_type, sequence, length, present, major_opcode, first_event, first_error };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryExtensionReply { sequence, length, present, major_opcode, first_event, first_error };
         Ok((result, remaining))
     }
 }
@@ -22995,7 +23053,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListExtensionsReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub names: Vec<Str>,
@@ -23008,7 +23065,10 @@ impl TryParse for ListExtensionsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
         let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = ListExtensionsReply { response_type, sequence, length, names };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = ListExtensionsReply { sequence, length, names };
         Ok((result, remaining))
     }
 }
@@ -23182,7 +23242,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetKeyboardMappingReply {
-    pub response_type: u8,
     pub keysyms_per_keycode: u8,
     pub sequence: u16,
     pub keysyms: Vec<Keysym>,
@@ -23195,7 +23254,10 @@ impl TryParse for GetKeyboardMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetKeyboardMappingReply { response_type, keysyms_per_keycode, sequence, keysyms };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetKeyboardMappingReply { keysyms_per_keycode, sequence, keysyms };
         Ok((result, remaining))
     }
 }
@@ -23753,7 +23815,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetKeyboardControlReply {
-    pub response_type: u8,
     pub global_auto_repeat: AutoRepeatMode,
     pub sequence: u16,
     pub length: u32,
@@ -23778,8 +23839,11 @@ impl TryParse for GetKeyboardControlReply {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let global_auto_repeat = global_auto_repeat.try_into()?;
-        let result = GetKeyboardControlReply { response_type, global_auto_repeat, sequence, length, led_mask, key_click_percent, bell_percent, bell_pitch, bell_duration, auto_repeats };
+        let result = GetKeyboardControlReply { global_auto_repeat, sequence, length, led_mask, key_click_percent, bell_percent, bell_pitch, bell_duration, auto_repeats };
         Ok((result, remaining))
     }
 }
@@ -23983,7 +24047,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPointerControlReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub acceleration_numerator: u16,
@@ -24000,7 +24063,10 @@ impl TryParse for GetPointerControlReply {
         let (acceleration_denominator, remaining) = u16::try_parse(remaining)?;
         let (threshold, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
-        let result = GetPointerControlReply { response_type, sequence, length, acceleration_numerator, acceleration_denominator, threshold };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPointerControlReply { sequence, length, acceleration_numerator, acceleration_denominator, threshold };
         Ok((result, remaining))
     }
 }
@@ -24275,7 +24341,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSaverReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub timeout: u16,
@@ -24294,9 +24359,12 @@ impl TryParse for GetScreenSaverReply {
         let (prefer_blanking, remaining) = u8::try_parse(remaining)?;
         let (allow_exposures, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let prefer_blanking = prefer_blanking.try_into()?;
         let allow_exposures = allow_exposures.try_into()?;
-        let result = GetScreenSaverReply { response_type, sequence, length, timeout, interval, prefer_blanking, allow_exposures };
+        let result = GetScreenSaverReply { sequence, length, timeout, interval, prefer_blanking, allow_exposures };
         Ok((result, remaining))
     }
 }
@@ -24639,7 +24707,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListHostsReply {
-    pub response_type: u8,
     pub mode: AccessControl,
     pub sequence: u16,
     pub length: u32,
@@ -24654,8 +24721,11 @@ impl TryParse for ListHostsReply {
         let (hosts_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (hosts, remaining) = crate::x11_utils::parse_list::<Host>(remaining, hosts_len.try_into().or(Err(ParseError::ParseError))?)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let mode = mode.try_into()?;
-        let result = ListHostsReply { response_type, mode, sequence, length, hosts };
+        let result = ListHostsReply { mode, sequence, length, hosts };
         Ok((result, remaining))
     }
 }
@@ -25426,7 +25496,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPointerMappingReply {
-    pub response_type: u8,
     pub status: MappingStatus,
     pub sequence: u16,
     pub length: u32,
@@ -25437,8 +25506,11 @@ impl TryParse for SetPointerMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let status = status.try_into()?;
-        let result = SetPointerMappingReply { response_type, status, sequence, length };
+        let result = SetPointerMappingReply { status, sequence, length };
         Ok((result, remaining))
     }
 }
@@ -25501,7 +25573,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPointerMappingReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub map: Vec<u8>,
@@ -25515,7 +25586,10 @@ impl TryParse for GetPointerMappingReply {
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
         let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_len.try_into().or(Err(ParseError::ParseError))?)?;
         let map = map.to_vec();
-        let result = GetPointerMappingReply { response_type, sequence, length, map };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetPointerMappingReply { sequence, length, map };
         Ok((result, remaining))
     }
 }
@@ -25685,7 +25759,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetModifierMappingReply {
-    pub response_type: u8,
     pub status: MappingStatus,
     pub sequence: u16,
     pub length: u32,
@@ -25696,8 +25769,11 @@ impl TryParse for SetModifierMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
         let status = status.try_into()?;
-        let result = SetModifierMappingReply { response_type, status, sequence, length };
+        let result = SetModifierMappingReply { status, sequence, length };
         Ok((result, remaining))
     }
 }
@@ -25760,7 +25836,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetModifierMappingReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub keycodes: Vec<Keycode>,
@@ -25774,7 +25849,10 @@ impl TryParse for GetModifierMappingReply {
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
         let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let keycodes = keycodes.to_vec();
-        let result = GetModifierMappingReply { response_type, sequence, length, keycodes };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetModifierMappingReply { sequence, length, keycodes };
         Ok((result, remaining))
     }
 }

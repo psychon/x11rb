@@ -100,7 +100,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub server_major_version: u16,
@@ -114,7 +113,10 @@ impl TryParse for GetVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
-        let result = GetVersionReply { response_type, sequence, length, server_major_version, server_minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetVersionReply { sequence, length, server_major_version, server_minor_version };
         Ok((result, remaining))
     }
 }
@@ -175,7 +177,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetXIDRangeReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub start_id: u32,
@@ -189,7 +190,10 @@ impl TryParse for GetXIDRangeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (start_id, remaining) = u32::try_parse(remaining)?;
         let (count, remaining) = u32::try_parse(remaining)?;
-        let result = GetXIDRangeReply { response_type, sequence, length, start_id, count };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetXIDRangeReply { sequence, length, start_id, count };
         Ok((result, remaining))
     }
 }
@@ -261,7 +265,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetXIDListReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub ids: Vec<u32>,
@@ -275,7 +278,10 @@ impl TryParse for GetXIDListReply {
         let (ids_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ids_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetXIDListReply { response_type, sequence, length, ids };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetXIDListReply { sequence, length, ids };
         Ok((result, remaining))
     }
 }

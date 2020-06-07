@@ -660,7 +660,6 @@ mod test {
 
     fn get_property_reply(value: &[u8], format: u8, type_: impl Into<Atom>) -> GetPropertyReply {
         GetPropertyReply {
-            response_type: 1,
             format,
             sequence: 0,
             length: 0,

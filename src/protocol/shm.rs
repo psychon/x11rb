@@ -176,7 +176,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub shared_pixmaps: bool,
     pub sequence: u16,
     pub length: u32,
@@ -198,7 +197,10 @@ impl TryParse for QueryVersionReply {
         let (gid, remaining) = u16::try_parse(remaining)?;
         let (pixmap_format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
-        let result = QueryVersionReply { response_type, shared_pixmaps, sequence, length, major_version, minor_version, uid, gid, pixmap_format };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { shared_pixmaps, sequence, length, major_version, minor_version, uid, gid, pixmap_format };
         Ok((result, remaining))
     }
 }
@@ -634,7 +636,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetImageReply {
-    pub response_type: u8,
     pub depth: u8,
     pub sequence: u16,
     pub length: u32,
@@ -649,7 +650,10 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (size, remaining) = u32::try_parse(remaining)?;
-        let result = GetImageReply { response_type, depth, sequence, length, visual, size };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetImageReply { depth, sequence, length, visual, size };
         Ok((result, remaining))
     }
 }
@@ -926,7 +930,6 @@ where
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct CreateSegmentReply {
-    pub response_type: u8,
     pub nfd: u8,
     pub sequence: u16,
     pub length: u32,
@@ -941,7 +944,10 @@ impl CreateSegmentReply {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let shm_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let result = CreateSegmentReply { response_type, nfd, sequence, length, shm_fd };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CreateSegmentReply { nfd, sequence, length, shm_fd };
         Ok((result, remaining))
     }
 }

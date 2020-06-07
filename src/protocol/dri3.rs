@@ -105,7 +105,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
@@ -119,7 +118,10 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = QueryVersionReply { sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
 }
@@ -200,7 +202,6 @@ where
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct OpenReply {
-    pub response_type: u8,
     pub nfd: u8,
     pub sequence: u16,
     pub length: u32,
@@ -215,7 +216,10 @@ impl OpenReply {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let device_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let result = OpenReply { response_type, nfd, sequence, length, device_fd };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = OpenReply { nfd, sequence, length, device_fd };
         Ok((result, remaining))
     }
 }
@@ -405,7 +409,6 @@ where
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct BufferFromPixmapReply {
-    pub response_type: u8,
     pub nfd: u8,
     pub sequence: u16,
     pub length: u32,
@@ -432,7 +435,10 @@ impl BufferFromPixmapReply {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let pixmap_fd = fds.remove(0);
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let result = BufferFromPixmapReply { response_type, nfd, sequence, length, size, width, height, stride, depth, bpp, pixmap_fd };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BufferFromPixmapReply { nfd, sequence, length, size, width, height, stride, depth, bpp, pixmap_fd };
         Ok((result, remaining))
     }
 }
@@ -599,7 +605,6 @@ where
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct FDFromFenceReply {
-    pub response_type: u8,
     pub nfd: u8,
     pub sequence: u16,
     pub length: u32,
@@ -614,7 +619,10 @@ impl FDFromFenceReply {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let fence_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let result = FDFromFenceReply { response_type, nfd, sequence, length, fence_fd };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = FDFromFenceReply { nfd, sequence, length, fence_fd };
         Ok((result, remaining))
     }
 }
@@ -702,7 +710,6 @@ where
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSupportedModifiersReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub window_modifiers: Vec<u64>,
@@ -719,7 +726,10 @@ impl TryParse for GetSupportedModifiersReply {
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (window_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
         let (screen_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetSupportedModifiersReply { response_type, sequence, length, window_modifiers, screen_modifiers };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetSupportedModifiersReply { sequence, length, window_modifiers, screen_modifiers };
         Ok((result, remaining))
     }
 }
@@ -1016,7 +1026,6 @@ where
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct BuffersFromPixmapReply {
-    pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
     pub width: u16,
@@ -1047,7 +1056,10 @@ impl BuffersFromPixmapReply {
         if fds.len() < fds_len { return Err(ParseError::ParseError) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
-        let result = BuffersFromPixmapReply { response_type, sequence, length, width, height, modifier, depth, bpp, strides, offsets, buffers };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = BuffersFromPixmapReply { sequence, length, width, height, modifier, depth, bpp, strides, offsets, buffers };
         Ok((result, remaining))
     }
 }

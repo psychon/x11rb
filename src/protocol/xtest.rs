@@ -102,7 +102,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
-    pub response_type: u8,
     pub major_version: u8,
     pub sequence: u16,
     pub length: u32,
@@ -115,7 +114,10 @@ impl TryParse for GetVersionReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let result = GetVersionReply { response_type, major_version, sequence, length, minor_version };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = GetVersionReply { major_version, sequence, length, minor_version };
         Ok((result, remaining))
     }
 }
@@ -266,7 +268,6 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CompareCursorReply {
-    pub response_type: u8,
     pub same: bool,
     pub sequence: u16,
     pub length: u32,
@@ -277,7 +278,10 @@ impl TryParse for CompareCursorReply {
         let (same, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let result = CompareCursorReply { response_type, same, sequence, length };
+        if response_type != 1 {
+            return Err(ParseError::ParseError);
+        }
+        let result = CompareCursorReply { same, sequence, length };
         Ok((result, remaining))
     }
 }
