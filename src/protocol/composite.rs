@@ -190,7 +190,7 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
@@ -693,7 +693,7 @@ impl TryParse for GetOverlayWindowReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (overlay_win, remaining) = xproto::Window::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetOverlayWindowReply { sequence, length, overlay_win };

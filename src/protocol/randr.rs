@@ -58,7 +58,7 @@ impl TryParse for BadOutputError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadOutputError { error_code, sequence };
@@ -131,7 +131,7 @@ impl TryParse for BadCrtcError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadCrtcError { error_code, sequence };
@@ -204,7 +204,7 @@ impl TryParse for BadModeError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadModeError { error_code, sequence };
@@ -277,7 +277,7 @@ impl TryParse for BadProviderError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadProviderError { error_code, sequence };
@@ -594,7 +594,7 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
@@ -800,7 +800,7 @@ impl TryParse for SetScreenConfigReply {
         let (root, remaining) = xproto::Window::try_parse(remaining)?;
         let (subpixel_order, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -1059,7 +1059,7 @@ impl TryParse for GetScreenInfoReply {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (sizes, remaining) = crate::x11_utils::parse_list::<ScreenSize>(remaining, n_sizes.try_into().or(Err(ParseError::ParseError))?)?;
         let (rates, remaining) = crate::x11_utils::parse_list::<RefreshRates>(remaining, u32::from(n_info).checked_sub(u32::from(n_sizes)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetScreenInfoReply { rotations, sequence, length, root, timestamp, config_timestamp, size_id, rotation, rate, n_info, sizes, rates };
@@ -1167,7 +1167,7 @@ impl TryParse for GetScreenSizeRangeReply {
         let (max_width, remaining) = u16::try_parse(remaining)?;
         let (max_height, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetScreenSizeRangeReply { sequence, length, min_width, min_height, max_width, max_height };
@@ -1553,7 +1553,7 @@ impl TryParse for GetScreenResourcesReply {
         let (modes, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, num_modes.try_into().or(Err(ParseError::ParseError))?)?;
         let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
         let names = names.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetScreenResourcesReply { sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
@@ -1793,7 +1793,7 @@ impl TryParse for GetOutputInfoReply {
         let (clones, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_clones.try_into().or(Err(ParseError::ParseError))?)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -1938,7 +1938,7 @@ impl TryParse for ListOutputPropertiesReply {
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListOutputPropertiesReply { sequence, length, atoms };
@@ -2054,7 +2054,7 @@ impl TryParse for QueryOutputPropertyReply {
         let (immutable, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
         let (valid_values, remaining) = crate::x11_utils::parse_list::<i32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryOutputPropertyReply { sequence, pending, range, immutable, valid_values };
@@ -2493,7 +2493,7 @@ impl TryParse for GetOutputPropertyReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetOutputPropertyReply { format, sequence, length, type_, bytes_after, num_items, data };
@@ -2624,7 +2624,7 @@ impl TryParse for CreateModeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (mode, remaining) = Mode::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CreateModeReply { sequence, length, mode };
@@ -2935,7 +2935,7 @@ impl TryParse for GetCrtcInfoReply {
         let (num_possible_outputs, remaining) = u16::try_parse(remaining)?;
         let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs.try_into().or(Err(ParseError::ParseError))?)?;
         let (possible, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_possible_outputs.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -3120,7 +3120,7 @@ impl TryParse for SetCrtcConfigReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -3208,7 +3208,7 @@ impl TryParse for GetCrtcGammaSizeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (size, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetCrtcGammaSizeReply { sequence, length, size };
@@ -3300,7 +3300,7 @@ impl TryParse for GetCrtcGammaReply {
         let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
         let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
         let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetCrtcGammaReply { sequence, length, red, green, blue };
@@ -3506,7 +3506,7 @@ impl TryParse for GetScreenResourcesCurrentReply {
         let (modes, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, num_modes.try_into().or(Err(ParseError::ParseError))?)?;
         let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
         let names = names.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetScreenResourcesCurrentReply { sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
@@ -3878,7 +3878,7 @@ impl TryParse for GetCrtcTransformReply {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let (current_params, remaining) = crate::x11_utils::parse_list::<render::Fixed>(remaining, current_nparams.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetCrtcTransformReply { sequence, length, pending_transform, has_transforms, current_transform, pending_filter_name, pending_params, current_filter_name, current_params };
@@ -4043,7 +4043,7 @@ impl TryParse for GetPanningReply {
         let (border_top, remaining) = i16::try_parse(remaining)?;
         let (border_right, remaining) = i16::try_parse(remaining)?;
         let (border_bottom, remaining) = i16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -4224,7 +4224,7 @@ impl TryParse for SetPanningReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -4379,7 +4379,7 @@ impl TryParse for GetOutputPrimaryReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (output, remaining) = Output::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetOutputPrimaryReply { sequence, length, output };
@@ -4469,7 +4469,7 @@ impl TryParse for GetProvidersReply {
         let (num_providers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
         let (providers, remaining) = crate::x11_utils::parse_list::<Provider>(remaining, num_providers.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetProvidersReply { sequence, length, timestamp, providers };
@@ -4667,7 +4667,7 @@ impl TryParse for GetProviderInfoReply {
         let (associated_capability, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_associated_providers.try_into().or(Err(ParseError::ParseError))?)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetProviderInfoReply { status, sequence, length, timestamp, capabilities, crtcs, outputs, associated_providers, associated_capability, name };
@@ -4963,7 +4963,7 @@ impl TryParse for ListProviderPropertiesReply {
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListProviderPropertiesReply { sequence, length, atoms };
@@ -5079,7 +5079,7 @@ impl TryParse for QueryProviderPropertyReply {
         let (immutable, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
         let (valid_values, remaining) = crate::x11_utils::parse_list::<i32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryProviderPropertyReply { sequence, pending, range, immutable, valid_values };
@@ -5515,7 +5515,7 @@ impl TryParse for GetProviderPropertyReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetProviderPropertyReply { format, sequence, length, type_, bytes_after, num_items, data };
@@ -6338,7 +6338,7 @@ impl TryParse for GetMonitorsReply {
         let (n_outputs, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (monitors, remaining) = crate::x11_utils::parse_list::<MonitorInfo>(remaining, n_monitors.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetMonitorsReply { sequence, length, timestamp, n_outputs, monitors };
@@ -6610,7 +6610,7 @@ impl CreateLeaseReply {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let master_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CreateLeaseReply { nfd, sequence, length, master_fd };

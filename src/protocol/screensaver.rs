@@ -312,7 +312,7 @@ impl TryParse for QueryVersionReply {
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, server_major_version, server_minor_version };
@@ -408,7 +408,7 @@ impl TryParse for QueryInfoReply {
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let kind = kind.try_into()?;

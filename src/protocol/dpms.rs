@@ -113,7 +113,7 @@ impl TryParse for GetVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetVersionReply { sequence, length, server_major_version, server_minor_version };
@@ -189,7 +189,7 @@ impl TryParse for CapableReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (capable, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CapableReply { sequence, length, capable };
@@ -269,7 +269,7 @@ impl TryParse for GetTimeoutsReply {
         let (suspend_timeout, remaining) = u16::try_parse(remaining)?;
         let (off_timeout, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetTimeoutsReply { sequence, length, standby_timeout, suspend_timeout, off_timeout };
@@ -644,7 +644,7 @@ impl TryParse for InfoReply {
         let (power_level, remaining) = u16::try_parse(remaining)?;
         let (state, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let power_level = power_level.try_into()?;

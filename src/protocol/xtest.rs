@@ -114,7 +114,7 @@ impl TryParse for GetVersionReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetVersionReply { major_version, sequence, length, minor_version };
@@ -278,7 +278,7 @@ impl TryParse for CompareCursorReply {
         let (same, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CompareCursorReply { same, sequence, length };

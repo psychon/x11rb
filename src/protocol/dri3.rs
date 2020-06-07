@@ -118,7 +118,7 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
@@ -216,7 +216,7 @@ impl OpenReply {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let device_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = OpenReply { nfd, sequence, length, device_fd };
@@ -435,7 +435,7 @@ impl BufferFromPixmapReply {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let pixmap_fd = fds.remove(0);
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = BufferFromPixmapReply { nfd, sequence, length, size, width, height, stride, depth, bpp, pixmap_fd };
@@ -619,7 +619,7 @@ impl FDFromFenceReply {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let fence_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = FDFromFenceReply { nfd, sequence, length, fence_fd };
@@ -726,7 +726,7 @@ impl TryParse for GetSupportedModifiersReply {
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (window_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
         let (screen_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetSupportedModifiersReply { sequence, length, window_modifiers, screen_modifiers };
@@ -1056,7 +1056,7 @@ impl BuffersFromPixmapReply {
         if fds.len() < fds_len { return Err(ParseError::ParseError) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = BuffersFromPixmapReply { sequence, length, width, height, modifier, depth, bpp, strides, offsets, buffers };

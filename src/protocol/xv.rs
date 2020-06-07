@@ -1184,7 +1184,7 @@ impl TryParse for BadPortError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadPortError { error_code, sequence };
@@ -1257,7 +1257,7 @@ impl TryParse for BadEncodingError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadEncodingError { error_code, sequence };
@@ -1330,7 +1330,7 @@ impl TryParse for BadControlError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadControlError { error_code, sequence };
@@ -1616,7 +1616,7 @@ impl TryParse for QueryExtensionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major, remaining) = u16::try_parse(remaining)?;
         let (minor, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryExtensionReply { sequence, length, major, minor };
@@ -1704,7 +1704,7 @@ impl TryParse for QueryAdaptorsReply {
         let (num_adaptors, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (info, remaining) = crate::x11_utils::parse_list::<AdaptorInfo>(remaining, num_adaptors.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryAdaptorsReply { sequence, length, info };
@@ -1807,7 +1807,7 @@ impl TryParse for QueryEncodingsReply {
         let (num_encodings, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (info, remaining) = crate::x11_utils::parse_list::<EncodingInfo>(remaining, num_encodings.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryEncodingsReply { sequence, length, info };
@@ -1918,7 +1918,7 @@ impl TryParse for GrabPortReply {
         let (result, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = result.try_into()?;
@@ -2853,7 +2853,7 @@ impl TryParse for QueryBestSizeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (actual_width, remaining) = u16::try_parse(remaining)?;
         let (actual_height, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryBestSizeReply { sequence, length, actual_width, actual_height };
@@ -3025,7 +3025,7 @@ impl TryParse for GetPortAttributeReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value, remaining) = i32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetPortAttributeReply { sequence, length, value };
@@ -3115,7 +3115,7 @@ impl TryParse for QueryPortAttributesReply {
         let (text_size, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (attributes, remaining) = crate::x11_utils::parse_list::<AttributeInfo>(remaining, num_attributes.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryPortAttributesReply { sequence, length, text_size, attributes };
@@ -3218,7 +3218,7 @@ impl TryParse for ListImageFormatsReply {
         let (num_formats, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (format, remaining) = crate::x11_utils::parse_list::<ImageFormatInfo>(remaining, num_formats.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListImageFormatsReply { sequence, length, format };
@@ -3352,7 +3352,7 @@ impl TryParse for QueryImageAttributesReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
         let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryImageAttributesReply { sequence, length, data_size, width, height, pitches, offsets };

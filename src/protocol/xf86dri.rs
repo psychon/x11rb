@@ -149,7 +149,7 @@ impl TryParse for QueryVersionReply {
         let (dri_major_version, remaining) = u16::try_parse(remaining)?;
         let (dri_minor_version, remaining) = u16::try_parse(remaining)?;
         let (dri_minor_patch, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, dri_major_version, dri_minor_version, dri_minor_patch };
@@ -235,7 +235,7 @@ impl TryParse for QueryDirectRenderingCapableReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (is_capable, remaining) = bool::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryDirectRenderingCapableReply { sequence, length, is_capable };
@@ -328,7 +328,7 @@ impl TryParse for OpenConnectionReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (bus_id, remaining) = crate::x11_utils::parse_u8_list(remaining, bus_id_len.try_into().or(Err(ParseError::ParseError))?)?;
         let bus_id = bus_id.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = OpenConnectionReply { sequence, length, sarea_handle_low, sarea_handle_high, bus_id };
@@ -497,7 +497,7 @@ impl TryParse for GetClientDriverNameReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (client_driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, client_driver_name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let client_driver_name = client_driver_name.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetClientDriverNameReply { sequence, length, client_driver_major_version, client_driver_minor_version, client_driver_patch_version, client_driver_name };
@@ -616,7 +616,7 @@ impl TryParse for CreateContextReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (hw_context, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CreateContextReply { sequence, length, hw_context };
@@ -779,7 +779,7 @@ impl TryParse for CreateDrawableReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (hw_drawable_handle, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CreateDrawableReply { sequence, length, hw_drawable_handle };
@@ -962,7 +962,7 @@ impl TryParse for GetDrawableInfoReply {
         let (num_back_clip_rects, remaining) = u32::try_parse(remaining)?;
         let (clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_clip_rects.try_into().or(Err(ParseError::ParseError))?)?;
         let (back_clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_back_clip_rects.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDrawableInfoReply { sequence, length, drawable_table_index, drawable_table_stamp, drawable_origin_x, drawable_origin_y, drawable_size_w, drawable_size_h, back_x, back_y, clip_rects, back_clip_rects };
@@ -1087,7 +1087,7 @@ impl TryParse for GetDeviceInfoReply {
         let (framebuffer_stride, remaining) = u32::try_parse(remaining)?;
         let (device_private_size, remaining) = u32::try_parse(remaining)?;
         let (device_private, remaining) = crate::x11_utils::parse_list::<u32>(remaining, device_private_size.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceInfoReply { sequence, length, framebuffer_handle_low, framebuffer_handle_high, framebuffer_origin_offset, framebuffer_size, framebuffer_stride, device_private };
@@ -1197,7 +1197,7 @@ impl TryParse for AuthConnectionReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (authenticated, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = AuthConnectionReply { sequence, length, authenticated };

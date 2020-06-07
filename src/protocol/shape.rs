@@ -331,7 +331,7 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
@@ -837,7 +837,7 @@ impl TryParse for QueryExtentsReply {
         let (clip_shape_extents_y, remaining) = i16::try_parse(remaining)?;
         let (clip_shape_extents_width, remaining) = u16::try_parse(remaining)?;
         let (clip_shape_extents_height, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryExtentsReply { sequence, length, bounding_shaped, clip_shaped, bounding_shape_extents_x, bounding_shape_extents_y, bounding_shape_extents_width, bounding_shape_extents_height, clip_shape_extents_x, clip_shape_extents_y, clip_shape_extents_width, clip_shape_extents_height };
@@ -991,7 +991,7 @@ impl TryParse for InputSelectedReply {
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = InputSelectedReply { enabled, sequence, length };
@@ -1091,7 +1091,7 @@ impl TryParse for GetRectanglesReply {
         let (rectangles_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, rectangles_len.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let ordering = ordering.try_into()?;

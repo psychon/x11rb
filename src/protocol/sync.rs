@@ -566,7 +566,7 @@ impl TryParse for CounterError {
         let (bad_counter, remaining) = u32::try_parse(remaining)?;
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = CounterError { error_code, sequence, bad_counter, minor_opcode, major_opcode };
@@ -648,7 +648,7 @@ impl TryParse for AlarmError {
         let (bad_alarm, remaining) = u32::try_parse(remaining)?;
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = AlarmError { error_code, sequence, bad_alarm, minor_opcode, major_opcode };
@@ -792,7 +792,7 @@ impl TryParse for InitializeReply {
         let (major_version, remaining) = u8::try_parse(remaining)?;
         let (minor_version, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = InitializeReply { sequence, length, major_version, minor_version };
@@ -869,7 +869,7 @@ impl TryParse for ListSystemCountersReply {
         let (counters_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (counters, remaining) = crate::x11_utils::parse_list::<Systemcounter>(remaining, counters_len.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListSystemCountersReply { sequence, length, counters };
@@ -1101,7 +1101,7 @@ impl TryParse for QueryCounterReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (counter_value, remaining) = Int64::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryCounterReply { sequence, length, counter_value };
@@ -1924,7 +1924,7 @@ impl TryParse for QueryAlarmReply {
         let (events, remaining) = bool::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let state = state.try_into()?;
@@ -2079,7 +2079,7 @@ impl TryParse for GetPriorityReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (priority, remaining) = i32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetPriorityReply { sequence, length, priority };
@@ -2420,7 +2420,7 @@ impl TryParse for QueryFenceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (triggered, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryFenceReply { sequence, length, triggered };

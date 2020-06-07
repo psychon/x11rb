@@ -436,7 +436,7 @@ impl TryParse for BadContextError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (invalid_record, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadContextError { error_code, sequence, invalid_record };
@@ -577,7 +577,7 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
@@ -937,7 +937,7 @@ impl TryParse for GetContextReply {
         let (num_intercepted_clients, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (intercepted_clients, remaining) = crate::x11_utils::parse_list::<ClientInfo>(remaining, num_intercepted_clients.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetContextReply { enabled, sequence, length, element_header, intercepted_clients };
@@ -1051,7 +1051,7 @@ impl TryParse for EnableContextReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = EnableContextReply { category, sequence, element_header, client_swapped, xid_base, server_time, rec_sequence_num, data };

@@ -430,7 +430,7 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
@@ -543,7 +543,7 @@ impl TryParse for GetModeLineReply {
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
         let private = private.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetModeLineReply { sequence, length, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private };
@@ -888,7 +888,7 @@ impl TryParse for GetMonitorReply {
         let alignment_pad = alignment_pad.to_vec();
         let (model, remaining) = crate::x11_utils::parse_u8_list(remaining, model_length.try_into().or(Err(ParseError::ParseError))?)?;
         let model = model.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetMonitorReply { sequence, length, hsync, vsync, vendor, alignment_pad, model };
@@ -1095,7 +1095,7 @@ impl TryParse for GetAllModeLinesReply {
         let (modecount, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (modeinfo, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, modecount.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetAllModeLinesReply { sequence, length, modeinfo };
@@ -1753,7 +1753,7 @@ impl TryParse for ValidateModeLineReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ValidateModeLineReply { sequence, length, status };
@@ -2015,7 +2015,7 @@ impl TryParse for GetViewPortReply {
         let (x, remaining) = u32::try_parse(remaining)?;
         let (y, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetViewPortReply { sequence, length, x, y };
@@ -2187,7 +2187,7 @@ impl TryParse for GetDotClocksReply {
         let (maxclocks, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(flags & 1u32).ok_or(ParseError::ParseError)?.checked_mul(clocks).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDotClocksReply { sequence, length, flags, clocks, maxclocks, clock };
@@ -2467,7 +2467,7 @@ impl TryParse for GetGammaReply {
         let (green, remaining) = u32::try_parse(remaining)?;
         let (blue, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetGammaReply { sequence, length, red, green, blue };
@@ -2565,7 +2565,7 @@ impl TryParse for GetGammaRampReply {
         let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
         let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
         let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetGammaRampReply { sequence, length, size, red, green, blue };
@@ -2740,7 +2740,7 @@ impl TryParse for GetGammaRampSizeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (size, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetGammaRampSizeReply { sequence, length, size };
@@ -2828,7 +2828,7 @@ impl TryParse for GetPermissionsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (permissions, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetPermissionsReply { sequence, length, permissions };
@@ -2854,7 +2854,7 @@ impl TryParse for BadClockError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadClockError { error_code, sequence };
@@ -2927,7 +2927,7 @@ impl TryParse for BadHTimingsError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadHTimingsError { error_code, sequence };
@@ -3000,7 +3000,7 @@ impl TryParse for BadVTimingsError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadVTimingsError { error_code, sequence };
@@ -3073,7 +3073,7 @@ impl TryParse for ModeUnsuitableError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = ModeUnsuitableError { error_code, sequence };
@@ -3146,7 +3146,7 @@ impl TryParse for ExtensionDisabledError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = ExtensionDisabledError { error_code, sequence };
@@ -3219,7 +3219,7 @@ impl TryParse for ClientNotLocalError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = ClientNotLocalError { error_code, sequence };
@@ -3292,7 +3292,7 @@ impl TryParse for ZoomLockedError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = ZoomLockedError { error_code, sequence };

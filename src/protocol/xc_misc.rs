@@ -113,7 +113,7 @@ impl TryParse for GetVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetVersionReply { sequence, length, server_major_version, server_minor_version };
@@ -190,7 +190,7 @@ impl TryParse for GetXIDRangeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (start_id, remaining) = u32::try_parse(remaining)?;
         let (count, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetXIDRangeReply { sequence, length, start_id, count };
@@ -278,7 +278,7 @@ impl TryParse for GetXIDListReply {
         let (ids_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ids_len.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetXIDListReply { sequence, length, ids };

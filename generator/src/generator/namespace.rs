@@ -3959,8 +3959,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 expr: xcbdefs::Expression::Value(v),
                 ..
             }) => {
+                assert!(u8::try_from(*v).is_ok());
                 let rust_field_name = to_rust_variable_name(name);
-                outln!(out, "if {} as u32 != {} {{", rust_field_name, v);
+                outln!(out, "if {} != {} {{", rust_field_name, v);
                 outln!(out.indent(), "return Err(ParseError::ParseError);");
                 outln!(out, "}}");
             }

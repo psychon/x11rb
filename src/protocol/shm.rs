@@ -197,7 +197,7 @@ impl TryParse for QueryVersionReply {
         let (gid, remaining) = u16::try_parse(remaining)?;
         let (pixmap_format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { shared_pixmaps, sequence, length, major_version, minor_version, uid, gid, pixmap_format };
@@ -650,7 +650,7 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (size, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetImageReply { depth, sequence, length, visual, size };
@@ -944,7 +944,7 @@ impl CreateSegmentReply {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let shm_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CreateSegmentReply { nfd, sequence, length, shm_fd };

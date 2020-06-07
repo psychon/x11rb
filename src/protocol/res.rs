@@ -510,7 +510,7 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major, remaining) = u16::try_parse(remaining)?;
         let (server_minor, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, server_major, server_minor };
@@ -587,7 +587,7 @@ impl TryParse for QueryClientsReply {
         let (num_clients, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (clients, remaining) = crate::x11_utils::parse_list::<Client>(remaining, num_clients.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryClientsReply { sequence, length, clients };
@@ -690,7 +690,7 @@ impl TryParse for QueryClientResourcesReply {
         let (num_types, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (types, remaining) = crate::x11_utils::parse_list::<Type>(remaining, num_types.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryClientResourcesReply { sequence, length, types };
@@ -793,7 +793,7 @@ impl TryParse for QueryClientPixmapBytesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (bytes, remaining) = u32::try_parse(remaining)?;
         let (bytes_overflow, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryClientPixmapBytesReply { sequence, length, bytes, bytes_overflow };
@@ -887,7 +887,7 @@ impl TryParse for QueryClientIdsReply {
         let (num_ids, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (ids, remaining) = crate::x11_utils::parse_list::<ClientIdValue>(remaining, num_ids.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryClientIdsReply { sequence, length, ids };
@@ -1005,7 +1005,7 @@ impl TryParse for QueryResourceBytesReply {
         let (num_sizes, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (sizes, remaining) = crate::x11_utils::parse_list::<ResourceSizeValue>(remaining, num_sizes.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryResourceBytesReply { sequence, length, sizes };

@@ -170,7 +170,7 @@ impl TryParse for GetExtensionVersionReply {
         let (server_minor, remaining) = u16::try_parse(remaining)?;
         let (present, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(19..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetExtensionVersionReply { xi_reply_type, sequence, length, server_major, server_minor, present };
@@ -1035,7 +1035,7 @@ impl TryParse for ListInputDevicesReply {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListInputDevicesReply { xi_reply_type, sequence, length, devices, infos, names };
@@ -1184,7 +1184,7 @@ impl TryParse for OpenDeviceReply {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = OpenDeviceReply { xi_reply_type, sequence, length, class_info };
@@ -1354,7 +1354,7 @@ impl TryParse for SetDeviceModeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -1522,7 +1522,7 @@ impl TryParse for GetSelectedExtensionEventsReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (this_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_this_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let (all_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_all_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectedExtensionEventsReply { xi_reply_type, sequence, length, this_classes, all_classes };
@@ -1790,7 +1790,7 @@ impl TryParse for GetDeviceDontPropagateListReply {
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceDontPropagateListReply { xi_reply_type, sequence, length, classes };
@@ -1954,7 +1954,7 @@ impl TryParse for GetDeviceMotionEventsReply {
             remaining = new_remaining;
             events.push(v);
         }
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let device_mode = device_mode.try_into()?;
@@ -2059,7 +2059,7 @@ impl TryParse for ChangeKeyboardDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -2159,7 +2159,7 @@ impl TryParse for ChangePointerDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -2301,7 +2301,7 @@ impl TryParse for GrabDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -3115,7 +3115,7 @@ impl TryParse for GetDeviceFocusReply {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let revert_to = revert_to.try_into()?;
@@ -4315,7 +4315,7 @@ impl TryParse for GetFeedbackControlReply {
         let (num_feedbacks, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (feedbacks, remaining) = crate::x11_utils::parse_list::<FeedbackState>(remaining, num_feedbacks.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetFeedbackControlReply { xi_reply_type, sequence, length, feedbacks };
@@ -5421,7 +5421,7 @@ impl TryParse for GetDeviceKeyMappingReply {
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceKeyMappingReply { xi_reply_type, sequence, keysyms_per_keycode, keysyms };
@@ -5610,7 +5610,7 @@ impl TryParse for GetDeviceModifierMappingReply {
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let keymaps = keymaps.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceModifierMappingReply { xi_reply_type, sequence, length, keymaps };
@@ -5726,7 +5726,7 @@ impl TryParse for SetDeviceModifierMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -5823,7 +5823,7 @@ impl TryParse for GetDeviceButtonMappingReply {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceButtonMappingReply { xi_reply_type, sequence, length, map };
@@ -5937,7 +5937,7 @@ impl TryParse for SetDeviceButtonMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -6615,7 +6615,7 @@ impl TryParse for QueryDeviceStateReply {
         let (num_classes, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<InputState>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryDeviceStateReply { xi_reply_type, sequence, length, classes };
@@ -6809,7 +6809,7 @@ impl TryParse for SetDeviceValuatorsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -7740,7 +7740,7 @@ impl TryParse for GetDeviceControlReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let (control, remaining) = DeviceState::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceControlReply { xi_reply_type, sequence, length, status, control };
@@ -8592,7 +8592,7 @@ impl TryParse for ChangeDeviceControlReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ChangeDeviceControlReply { xi_reply_type, sequence, length, status };
@@ -8682,7 +8682,7 @@ impl TryParse for ListDevicePropertiesReply {
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListDevicePropertiesReply { xi_reply_type, sequence, length, atoms };
@@ -9249,7 +9249,7 @@ impl TryParse for GetDevicePropertyReply {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
         let (items, remaining) = GetDevicePropertyItems::try_parse(remaining, format, num_items)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDevicePropertyReply { xi_reply_type, sequence, length, type_, bytes_after, num_items, device_id, items };
@@ -9541,7 +9541,7 @@ impl TryParse for XIQueryPointerReply {
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIQueryPointerReply { sequence, length, root, child, root_x, root_y, win_x, win_y, same_screen, mods, group, buttons };
@@ -10672,7 +10672,7 @@ impl TryParse for XIGetClientPointerReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIGetClientPointerReply { sequence, length, set, deviceid };
@@ -10995,7 +10995,7 @@ impl TryParse for XIQueryVersionReply {
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIQueryVersionReply { sequence, length, major_version, minor_version };
@@ -12313,7 +12313,7 @@ impl TryParse for XIQueryDeviceReply {
         let (num_infos, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (infos, remaining) = crate::x11_utils::parse_list::<XIDeviceInfo>(remaining, num_infos.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIQueryDeviceReply { sequence, length, infos };
@@ -12500,7 +12500,7 @@ impl TryParse for XIGetFocusReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (focus, remaining) = xproto::Window::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIGetFocusReply { sequence, length, focus };
@@ -12722,7 +12722,7 @@ impl TryParse for XIGrabDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let status = status.try_into()?;
@@ -13363,7 +13363,7 @@ impl TryParse for XIPassiveGrabDeviceReply {
         let (num_modifiers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<GrabModifierInfo>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIPassiveGrabDeviceReply { sequence, length, modifiers };
@@ -13570,7 +13570,7 @@ impl TryParse for XIListPropertiesReply {
         let (num_properties, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_properties.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIListPropertiesReply { sequence, length, properties };
@@ -14074,7 +14074,7 @@ impl TryParse for XIGetPropertyReply {
         let (format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let (items, remaining) = XIGetPropertyItems::try_parse(remaining, format, num_items)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIGetPropertyReply { sequence, length, type_, bytes_after, num_items, items };
@@ -14162,7 +14162,7 @@ impl TryParse for XIGetSelectedEventsReply {
         let (num_masks, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_masks.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIGetSelectedEventsReply { sequence, length, masks };
@@ -17273,7 +17273,7 @@ impl TryParse for DeviceError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = DeviceError { error_code, sequence };
@@ -17346,7 +17346,7 @@ impl TryParse for EventError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = EventError { error_code, sequence };
@@ -17419,7 +17419,7 @@ impl TryParse for ModeError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = ModeError { error_code, sequence };
@@ -17492,7 +17492,7 @@ impl TryParse for DeviceBusyError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = DeviceBusyError { error_code, sequence };
@@ -17565,7 +17565,7 @@ impl TryParse for ClassError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = ClassError { error_code, sequence };

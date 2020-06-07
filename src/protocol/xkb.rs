@@ -4118,7 +4118,7 @@ impl TryParse for KeyboardError {
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = KeyboardError { error_code, sequence, value, minor_opcode, major_opcode };
@@ -6392,7 +6392,7 @@ impl TryParse for UseExtensionReply {
         let (server_major, remaining) = u16::try_parse(remaining)?;
         let (server_minor, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = UseExtensionReply { supported, sequence, length, server_major, server_minor };
@@ -7398,7 +7398,7 @@ impl TryParse for GetStateReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (ptr_btn_state, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(6..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let group = group.try_into()?;
@@ -7652,7 +7652,7 @@ impl TryParse for GetControlsReply {
         let (enabled_controls, remaining) = u32::try_parse(remaining)?;
         let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let per_key_repeat = <[u8; 32]>::try_from(per_key_repeat).unwrap();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetControlsReply { device_id, sequence, length, mouse_keys_dflt_btn, num_groups, groups_wrap, internal_mods_mask, ignore_lock_mods_mask, internal_mods_real_mods, ignore_lock_mods_real_mods, internal_mods_vmods, ignore_lock_mods_vmods, repeat_delay, repeat_interval, slow_keys_delay, debounce_delay, mouse_keys_delay, mouse_keys_interval, mouse_keys_time_to_max, mouse_keys_max_speed, mouse_keys_curve, access_x_option, access_x_timeout, access_x_timeout_options_mask, access_x_timeout_options_values, access_x_timeout_mask, access_x_timeout_values, enabled_controls, per_key_repeat };
@@ -8319,7 +8319,7 @@ impl TryParse for GetMapReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let (map, remaining) = GetMapMap::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetMapReply { device_id, sequence, length, min_key_code, max_key_code, first_type, n_types, total_types, first_key_sym, total_syms, n_key_syms, first_key_action, total_actions, n_key_actions, first_key_behavior, n_key_behaviors, total_key_behaviors, first_key_explicit, n_key_explicit, total_key_explicit, first_mod_map_key, n_mod_map_keys, total_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, total_v_mod_map_keys, virtual_mods, map };
@@ -8908,7 +8908,7 @@ impl TryParse for GetCompatMapReply {
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_into().or(Err(ParseError::ParseError))?)?;
         let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetCompatMapReply { device_id, sequence, length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
@@ -9121,7 +9121,7 @@ impl TryParse for GetIndicatorStateReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetIndicatorStateReply { device_id, sequence, length, state };
@@ -9225,7 +9225,7 @@ impl TryParse for GetIndicatorMapReply {
         let (n_indicators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
         let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetIndicatorMapReply { device_id, sequence, length, which, real_indicators, n_indicators, maps };
@@ -9444,7 +9444,7 @@ impl TryParse for GetNamedIndicatorReply {
         let (map_ctrls, remaining) = u32::try_parse(remaining)?;
         let (supported, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetNamedIndicatorReply { device_id, sequence, length, indicator, found, on, real_indicator, ndx, map_flags, map_which_groups, map_groups, map_which_mods, map_mods, map_real_mods, map_vmod, map_ctrls, supported };
@@ -9896,7 +9896,7 @@ impl TryParse for GetNamesReply {
         let (n_kt_levels, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (value_list, remaining) = GetNamesValueList::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetNamesReply { device_id, sequence, length, min_key_code, max_key_code, n_types, group_names, virtual_mods, first_key, n_keys, indicators, n_radio_groups, n_key_aliases, n_kt_levels, value_list };
@@ -10557,7 +10557,7 @@ impl TryParse for PerClientFlagsReply {
         let (auto_ctrls, remaining) = u32::try_parse(remaining)?;
         let (auto_ctrls_values, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PerClientFlagsReply { device_id, sequence, length, supported, value, auto_ctrls, auto_ctrls_values };
@@ -10668,7 +10668,7 @@ impl TryParse for ListComponentsReply {
         let (compat_maps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_compat_maps.try_into().or(Err(ParseError::ParseError))?)?;
         let (symbols, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_symbols.try_into().or(Err(ParseError::ParseError))?)?;
         let (geometries, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_geometries.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListComponentsReply { device_id, sequence, length, extra, keymaps, keycodes, types, compat_maps, symbols, geometries };
@@ -11472,7 +11472,7 @@ impl TryParse for GetKbdByNameReply {
         let (reported, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (replies, remaining) = GetKbdByNameReplies::try_parse(remaining, reported)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetKbdByNameReply { device_id, sequence, length, min_key_code, max_key_code, loaded, new_keyboard, found, reported, replies };
@@ -11639,7 +11639,7 @@ impl TryParse for GetDeviceInfoReply {
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns_rtrn.try_into().or(Err(ParseError::ParseError))?)?;
         let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceInfoReply { device_id, sequence, length, present, supported, unsupported, first_btn_wanted, n_btns_wanted, first_btn_rtrn, total_btns, has_own_state, dflt_kbd_fb, dflt_led_fb, dev_type, name, btn_actions, leds };
@@ -11910,7 +11910,7 @@ impl TryParse for SetDebuggingFlagsReply {
         let (supported_flags, remaining) = u32::try_parse(remaining)?;
         let (supported_ctrls, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = SetDebuggingFlagsReply { sequence, length, current_flags, current_ctrls, supported_flags, supported_ctrls };

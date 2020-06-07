@@ -468,7 +468,7 @@ impl TryParse for PrintQueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintQueryVersionReply { sequence, length, major_version, minor_version };
@@ -573,7 +573,7 @@ impl TryParse for PrintGetPrinterListReply {
         let (list_count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (printers, remaining) = crate::x11_utils::parse_list::<Printer>(remaining, list_count.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintGetPrinterListReply { sequence, length, printers };
@@ -855,7 +855,7 @@ impl TryParse for PrintGetContextReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (context, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintGetContextReply { sequence, length, context };
@@ -989,7 +989,7 @@ impl TryParse for PrintGetScreenOfContextReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (root, remaining) = xproto::Window::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintGetScreenOfContextReply { sequence, length, root };
@@ -1420,7 +1420,7 @@ impl TryParse for PrintGetDocumentDataReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintGetDocumentDataReply { sequence, length, status_code, finished_flag, data };
@@ -1710,7 +1710,7 @@ impl TryParse for PrintInputSelectedReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let (all_events_mask, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintInputSelectedReply { sequence, length, event_mask, all_events_mask };
@@ -1809,7 +1809,7 @@ impl TryParse for PrintGetAttributesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (attributes, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
         let attributes = attributes.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintGetAttributesReply { sequence, length, attributes };
@@ -1937,7 +1937,7 @@ impl TryParse for PrintGetOneAttributesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.try_into().or(Err(ParseError::ParseError))?)?;
         let value = value.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintGetOneAttributesReply { sequence, length, value };
@@ -2138,7 +2138,7 @@ impl TryParse for PrintGetPageDimensionsReply {
         let (offset_y, remaining) = u16::try_parse(remaining)?;
         let (reproducible_width, remaining) = u16::try_parse(remaining)?;
         let (reproducible_height, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintGetPageDimensionsReply { sequence, length, width, height, offset_x, offset_y, reproducible_width, reproducible_height };
@@ -2215,7 +2215,7 @@ impl TryParse for PrintQueryScreensReply {
         let (list_count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (roots, remaining) = crate::x11_utils::parse_list::<xproto::Window>(remaining, list_count.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintQueryScreensReply { sequence, length, roots };
@@ -2326,7 +2326,7 @@ impl TryParse for PrintSetImageResolutionReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (previous_resolutions, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintSetImageResolutionReply { status, sequence, length, previous_resolutions };
@@ -2412,7 +2412,7 @@ impl TryParse for PrintGetImageResolutionReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (image_resolution, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = PrintGetImageResolutionReply { sequence, length, image_resolution };
@@ -2589,7 +2589,7 @@ impl TryParse for BadContextError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadContextError { error_code, sequence };
@@ -2662,7 +2662,7 @@ impl TryParse for BadSequenceError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 0 {
+        if response_type != 0 {
             return Err(ParseError::ParseError);
         }
         let result = BadSequenceError { error_code, sequence };

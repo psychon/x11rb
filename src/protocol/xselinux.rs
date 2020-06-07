@@ -114,7 +114,7 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major, remaining) = u16::try_parse(remaining)?;
         let (server_minor, remaining) = u16::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, server_major, server_minor };
@@ -256,7 +256,7 @@ impl TryParse for GetDeviceCreateContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceCreateContextReply { sequence, length, context };
@@ -433,7 +433,7 @@ impl TryParse for GetDeviceContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceContextReply { sequence, length, context };
@@ -590,7 +590,7 @@ impl TryParse for GetWindowCreateContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetWindowCreateContextReply { sequence, length, context };
@@ -694,7 +694,7 @@ impl TryParse for GetWindowContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetWindowContextReply { sequence, length, context };
@@ -934,7 +934,7 @@ impl TryParse for GetPropertyCreateContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetPropertyCreateContextReply { sequence, length, context };
@@ -1091,7 +1091,7 @@ impl TryParse for GetPropertyUseContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetPropertyUseContextReply { sequence, length, context };
@@ -1204,7 +1204,7 @@ impl TryParse for GetPropertyContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetPropertyContextReply { sequence, length, context };
@@ -1317,7 +1317,7 @@ impl TryParse for GetPropertyDataContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetPropertyDataContextReply { sequence, length, context };
@@ -1420,7 +1420,7 @@ impl TryParse for ListPropertiesReply {
         let (properties_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<ListItem>(remaining, properties_len.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListPropertiesReply { sequence, length, properties };
@@ -1577,7 +1577,7 @@ impl TryParse for GetSelectionCreateContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectionCreateContextReply { sequence, length, context };
@@ -1734,7 +1734,7 @@ impl TryParse for GetSelectionUseContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectionUseContextReply { sequence, length, context };
@@ -1838,7 +1838,7 @@ impl TryParse for GetSelectionContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectionContextReply { sequence, length, context };
@@ -1942,7 +1942,7 @@ impl TryParse for GetSelectionDataContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectionDataContextReply { sequence, length, context };
@@ -2034,7 +2034,7 @@ impl TryParse for ListSelectionsReply {
         let (selections_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (selections, remaining) = crate::x11_utils::parse_list::<ListItem>(remaining, selections_len.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListSelectionsReply { sequence, length, selections };
@@ -2138,7 +2138,7 @@ impl TryParse for GetClientContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let context = context.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetClientContextReply { sequence, length, context };

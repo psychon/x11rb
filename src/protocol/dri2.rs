@@ -453,7 +453,7 @@ impl TryParse for QueryVersionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
@@ -559,7 +559,7 @@ impl TryParse for ConnectReply {
         let alignment_pad = alignment_pad.to_vec();
         let (device_name, remaining) = crate::x11_utils::parse_u8_list(remaining, device_name_length.try_into().or(Err(ParseError::ParseError))?)?;
         let device_name = device_name.to_vec();
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ConnectReply { sequence, length, driver_name, alignment_pad, device_name };
@@ -682,7 +682,7 @@ impl TryParse for AuthenticateReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (authenticated, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = AuthenticateReply { sequence, length, authenticated };
@@ -916,7 +916,7 @@ impl TryParse for GetBuffersReply {
         let (count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetBuffersReply { sequence, length, width, height, buffers };
@@ -1042,7 +1042,7 @@ impl TryParse for CopyRegionReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CopyRegionReply { sequence, length };
@@ -1158,7 +1158,7 @@ impl TryParse for GetBuffersWithFormatReply {
         let (count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ParseError))?)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetBuffersWithFormatReply { sequence, length, width, height, buffers };
@@ -1315,7 +1315,7 @@ impl TryParse for SwapBuffersReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (swap_hi, remaining) = u32::try_parse(remaining)?;
         let (swap_lo, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = SwapBuffersReply { sequence, length, swap_hi, swap_lo };
@@ -1411,7 +1411,7 @@ impl TryParse for GetMSCReply {
         let (msc_lo, remaining) = u32::try_parse(remaining)?;
         let (sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (sbc_lo, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetMSCReply { sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
@@ -1561,7 +1561,7 @@ impl TryParse for WaitMSCReply {
         let (msc_lo, remaining) = u32::try_parse(remaining)?;
         let (sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (sbc_lo, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = WaitMSCReply { sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
@@ -1675,7 +1675,7 @@ impl TryParse for WaitSBCReply {
         let (msc_lo, remaining) = u32::try_parse(remaining)?;
         let (sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (sbc_lo, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = WaitSBCReply { sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
@@ -1841,7 +1841,7 @@ impl TryParse for GetParamReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value_hi, remaining) = u32::try_parse(remaining)?;
         let (value_lo, remaining) = u32::try_parse(remaining)?;
-        if response_type as u32 != 1 {
+        if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetParamReply { is_param_recognized, sequence, length, value_hi, value_lo };
