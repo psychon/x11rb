@@ -438,12 +438,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             if let Some(aux_start_align) = switch_fields[0].required_start_align {
                 assert_eq!(aux_start_align.offset(), 0);
             }
-            self.generate_aux(
-                request_def,
-                switch_fields[0],
-                &function_name,
-                out,
-            );
+            self.generate_aux(request_def, switch_fields[0], &function_name, out);
         }
 
         outln!(out, "/// Opcode for the {} request", name);
@@ -547,27 +542,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let aux_name = format!("{}Aux", request_def.name);
 
         if switch_field.kind == xcbdefs::SwitchKind::Case {
-            self.emit_switch_type(
-                switch_field,
-                &aux_name,
-                true,
-                true,
-                None,
-                out,
-            );
+            self.emit_switch_type(switch_field, &aux_name, true, true, None, out);
         } else {
             let doc = format!(
                 "Auxiliary and optional information for the `{}` function",
                 function_name,
             );
-            let cases_infos = self.emit_switch_type(
-                switch_field,
-                &aux_name,
-                true,
-                true,
-                Some(&doc),
-                out,
-            );
+            let cases_infos =
+                self.emit_switch_type(switch_field, &aux_name, true, true, Some(&doc), out);
 
             outln!(out, "impl {} {{", aux_name);
             out.indented(|out| {
@@ -2990,20 +2972,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         if generate_serialize {
             if let Some(size) = switch.size() {
-                self.emit_fixed_size_switch_serialize(
-                    switch,
-                    name,
-                    &case_infos,
-                    size,
-                    out,
-                );
+                self.emit_fixed_size_switch_serialize(switch, name, &case_infos, size, out);
             } else {
-                self.emit_variable_size_switch_serialize(
-                    switch,
-                    name,
-                    &case_infos,
-                    out,
-                );
+                self.emit_variable_size_switch_serialize(switch, name, &case_infos, out);
             }
         }
 
@@ -4296,11 +4267,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     }
 
     /// Emits an assert that checks the consistency of switch expressions
-    fn emit_assert_for_switch_serialize(
-        &self,
-        switch: &xcbdefs::SwitchField,
-        out: &mut Output,
-    ) {
+    fn emit_assert_for_switch_serialize(&self, switch: &xcbdefs::SwitchField, out: &mut Output) {
         let rust_field_name = to_rust_variable_name(&switch.name);
         let switch_expr_str =
             self.expr_to_str(&switch.expr, to_rust_variable_name, true, true, false);
