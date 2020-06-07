@@ -68,21 +68,48 @@ fn find_xcb_visualtype(conn: &impl Connection, visual_id: u32) -> Option<xcb_vis
     None
 }
 
+/// Choose a visual to use. This function tries to find a depth=32 visual and falls back to the
+/// screen's default visual.
+fn choose_visual(screen: &Screen) -> (u8, Visualid) {
+    let depth = 32;
+    screen.allowed_depths
+        .iter()
+        // Find the depth 32. There can only be at most one
+        .find(|d| d.depth == depth)
+        // No idea how to pick a visual here. Just take the first one.
+        .and_then(|d| d.visuals.get(0))
+        .map(|v| (depth, v.visual_id))
+        .unwrap_or((screen.root_depth, screen.root_visual))
+}
+
 /// Create a window for us.
 fn create_window<C>(
     conn: &C,
     screen: &x11rb::protocol::xproto::Screen,
     atoms: &AtomCollection,
     (width, height): (u16, u16),
+    depth: u8,
+    visual_id: Visualid,
 ) -> Result<Window, ReplyOrIdError>
 where
     C: Connection,
 {
     let window = conn.generate_id()?;
+    let colormap = conn.generate_id()?;
+    conn.create_colormap(
+        ColormapAlloc::None,
+        colormap,
+        screen.root,
+        visual_id,
+    )?;
     let win_aux =
-        CreateWindowAux::new().event_mask(EventMask::Exposure | EventMask::StructureNotify);
+        CreateWindowAux::new()
+        .event_mask(EventMask::Exposure | EventMask::StructureNotify)
+        .background_pixel(x11rb::NONE)
+        .border_pixel(screen.black_pixel)
+        .colormap(colormap);
     conn.create_window(
-        screen.root_depth,
+        depth,
         window,
         screen.root,
         0,
@@ -91,9 +118,10 @@ where
         height,
         0,
         WindowClass::InputOutput,
-        0,
+        visual_id,
         &win_aux,
     )?;
+    conn.free_colormap(colormap)?;
 
     let title = "Simple Window";
     conn.change_property8(
@@ -168,10 +196,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let screen = &conn.setup().roots[screen_num];
     let atoms = AtomCollection::new(&conn)?.reply()?;
     let (mut width, mut height) = (100, 100);
-    let window = create_window(&conn, &screen, &atoms, (width, height))?;
+    let (depth, visualid) = choose_visual(screen);
+    let window = create_window(&conn, &screen, &atoms, (width, height), depth, visualid)?;
 
     // Here comes all the interaction between cairo and x11rb:
-    let mut visual = find_xcb_visualtype(&conn, screen.root_visual).unwrap();
+    let mut visual = find_xcb_visualtype(&conn, visualid).unwrap();
     // SAFETY: cairo-rs just passes the pointer to C code and C code uses the xcb_connection_t, so
     // "nothing really" happens here, except that the borrow checked cannot check the lifetimes.
     let cairo_conn =
