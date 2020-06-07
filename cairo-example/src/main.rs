@@ -9,7 +9,8 @@
 
 use x11rb::atom_manager;
 use x11rb::connection::Connection;
-use x11rb::errors::ReplyOrIdError;
+use x11rb::errors::{ReplyError, ReplyOrIdError};
+use x11rb::protocol::render::{self, ConnectionExt as _, PictType};
 use x11rb::protocol::xproto::{ConnectionExt as _, *};
 use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt;
@@ -68,21 +69,79 @@ fn find_xcb_visualtype(conn: &impl Connection, visual_id: u32) -> Option<xcb_vis
     None
 }
 
+/// Choose a visual to use. This function tries to find a depth=32 visual and falls back to the
+/// screen's default visual.
+fn choose_visual(conn: &impl Connection, screen_num: usize) -> Result<(u8, Visualid), ReplyError> {
+    let depth = 32;
+    let screen = &conn.setup().roots[screen_num];
+
+    // Try to use XRender to find a visual with alpha support
+    let has_render = conn
+        .extension_information(render::X11_EXTENSION_NAME)?
+        .is_some();
+    if has_render {
+        let formats = conn.render_query_pict_formats()?.reply()?;
+        // Find the ARGB32 format that must be supported.
+        let format = formats
+            .formats
+            .iter()
+            .filter(|info| (info.type_, info.depth) == (PictType::Direct, depth))
+            .filter(|info| {
+                let d = info.direct;
+                (d.red_mask, d.green_mask, d.blue_mask, d.alpha_mask) == (0xff, 0xff, 0xff, 0xff)
+            })
+            .find(|info| {
+                let d = info.direct;
+                (d.red_shift, d.green_shift, d.blue_shift, d.alpha_shift) == (16, 8, 0, 24)
+            });
+        if let Some(format) = format {
+            // Now we need to find the visual that corresponds to this format
+            if let Some(visual) = formats.screens[screen_num]
+                .depths
+                .iter()
+                .flat_map(|d| &d.visuals)
+                .find(|v| v.format == format.id)
+            {
+                return Ok((format.depth, visual.visual));
+            }
+        }
+    }
+    Ok((screen.root_depth, screen.root_visual))
+}
+
+/// Check if a composite manager is running
+fn composite_manager_running(
+    conn: &impl Connection,
+    screen_num: usize,
+) -> Result<bool, ReplyError> {
+    let atom = format!("_NET_WM_CM_S{}", screen_num);
+    let atom = conn.intern_atom(false, atom.as_bytes())?.reply()?.atom;
+    let owner = conn.get_selection_owner(atom)?.reply()?;
+    Ok(owner.owner != x11rb::NONE)
+}
+
 /// Create a window for us.
 fn create_window<C>(
     conn: &C,
     screen: &x11rb::protocol::xproto::Screen,
     atoms: &AtomCollection,
     (width, height): (u16, u16),
+    depth: u8,
+    visual_id: Visualid,
 ) -> Result<Window, ReplyOrIdError>
 where
     C: Connection,
 {
     let window = conn.generate_id()?;
-    let win_aux =
-        CreateWindowAux::new().event_mask(EventMask::Exposure | EventMask::StructureNotify);
+    let colormap = conn.generate_id()?;
+    conn.create_colormap(ColormapAlloc::None, colormap, screen.root, visual_id)?;
+    let win_aux = CreateWindowAux::new()
+        .event_mask(EventMask::Exposure | EventMask::StructureNotify)
+        .background_pixel(x11rb::NONE)
+        .border_pixel(screen.black_pixel)
+        .colormap(colormap);
     conn.create_window(
-        screen.root_depth,
+        depth,
         window,
         screen.root,
         0,
@@ -91,9 +150,10 @@ where
         height,
         0,
         WindowClass::InputOutput,
-        0,
+        visual_id,
         &win_aux,
     )?;
+    conn.free_colormap(colormap)?;
 
     let title = "Simple Window";
     conn.change_property8(
@@ -130,12 +190,20 @@ where
 }
 
 /// Draw the window content
-fn do_draw(cr: &cairo::Context, (width, height): (f64, f64)) {
+fn do_draw(cr: &cairo::Context, (width, height): (f64, f64), transparency: bool) {
     use std::f64::consts::PI;
 
     // Draw a background
-    cr.set_source_rgb(0.9, 1.0, 0.9);
+    if transparency {
+        cr.set_operator(cairo::Operator::Source);
+        cr.set_source_rgba(0.9, 1.0, 0.9, 0.5);
+    } else {
+        cr.set_source_rgb(0.9, 1.0, 0.9);
+    }
     cr.paint();
+    if transparency {
+        cr.set_operator(cairo::Operator::Over);
+    }
 
     // Everybody likes odd geometrical shapes, right?
     let radius = width.min(height) / 3.0;
@@ -168,10 +236,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let screen = &conn.setup().roots[screen_num];
     let atoms = AtomCollection::new(&conn)?.reply()?;
     let (mut width, mut height) = (100, 100);
-    let window = create_window(&conn, &screen, &atoms, (width, height))?;
+    let (depth, visualid) = choose_visual(&conn, screen_num)?;
+
+    // Check if a composite manager is running. In a real application, we should also react to a
+    // composite manager starting/stopping at runtime.
+    let transparency = composite_manager_running(&conn, screen_num)?;
+
+    let window = create_window(&conn, &screen, &atoms, (width, height), depth, visualid)?;
 
     // Here comes all the interaction between cairo and x11rb:
-    let mut visual = find_xcb_visualtype(&conn, screen.root_visual).unwrap();
+    let mut visual = find_xcb_visualtype(&conn, visualid).unwrap();
     // SAFETY: cairo-rs just passes the pointer to C code and C code uses the xcb_connection_t, so
     // "nothing really" happens here, except that the borrow checked cannot check the lifetimes.
     let cairo_conn =
@@ -220,7 +294,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         if need_redraw {
             let cr = cairo::Context::new(&surface);
-            do_draw(&cr, (width as _, height as _));
+            do_draw(&cr, (width as _, height as _), transparency);
             surface.flush();
         }
     }
