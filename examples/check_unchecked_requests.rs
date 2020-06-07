@@ -8,6 +8,7 @@
 extern crate x11rb;
 
 use x11rb::connection::Connection;
+use x11rb::errors::ReplyError;
 use x11rb::protocol::xproto::ConnectionExt as _;
 use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt as _;
@@ -46,8 +47,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // For requests without responses, there are three possibilities
 
     // We can check for errors explicitly
-    let res = conn.destroy_window(INVALID_WINDOW)?.check()?;
-    assert!(res.is_some());
+    match conn.destroy_window(INVALID_WINDOW)?.check() {
+        Err(ReplyError::X11Error(_)) => {}
+        e => panic!("{:?} unexpected", e),
+    }
 
     // We can silently ignore the error
     conn.destroy_window(INVALID_WINDOW)?.ignore_error();

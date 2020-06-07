@@ -6,7 +6,6 @@ use std::marker::PhantomData;
 use crate::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::protocol::xproto::ListFontsWithInfoReply;
-use crate::protocol::Error;
 use crate::utils::RawFdContainer;
 
 /// A handle to a possible error from the X11 server.
@@ -49,7 +48,7 @@ where
     }
 
     /// Check if the original request caused an X11 error.
-    pub fn check(self) -> Result<Option<Error>, ConnectionError> {
+    pub fn check(self) -> Result<(), ReplyError> {
         let (connection, sequence) = self.consume();
         connection.check_for_error(sequence)
     }
