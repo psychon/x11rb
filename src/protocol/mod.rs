@@ -6,6 +6,7 @@
 //! Each sub-module of this module corresponds to one X11 extension. It contains all the
 //! definitions from that extension. The core X11 protocol is in [`xproto`](xproto/index.html).
 
+use std::borrow::Cow;
 use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
 use crate::utils::RawFdContainer;
@@ -74,7 +75,7 @@ pub mod xvmc;
 #[derive(Debug)]
 #[allow(clippy::large_enum_variant)]
 pub enum Request<'input> {
-    Unknown(RequestHeader, &'input [u8]),
+    Unknown(RequestHeader, Cow<'input, [u8]>),
     CreateWindow(xproto::CreateWindowRequest<'input>),
     ChangeWindowAttributes(xproto::ChangeWindowAttributesRequest<'input>),
     GetWindowAttributes(xproto::GetWindowAttributesRequest),
@@ -2108,7 +2109,7 @@ impl<'input> Request<'input> {
             }
             _ => (),
         }
-        Ok(Request::Unknown(header, remaining))
+        Ok(Request::Unknown(header, Cow::Borrowed(remaining)))
     }
     /// Get the matching reply parser (if any) for this request.
     /// For `Request::Unknown`, `None` is also returned.

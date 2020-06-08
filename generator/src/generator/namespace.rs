@@ -52,7 +52,7 @@ pub(super) fn generate_request_reply_enum(
     outln!(out, "#[allow(clippy::large_enum_variant)]");
     outln!(out, "pub enum Request<'input> {{");
     out.indented(|out| {
-        outln!(out, "Unknown(RequestHeader, &'input [u8]),");
+        outln!(out, "Unknown(RequestHeader, Cow<'input, [u8]>),");
         for ns in namespaces.iter() {
             let has_feature = super::ext_has_feature(&ns.header);
 
@@ -151,7 +151,10 @@ pub(super) fn generate_request_reply_enum(
                 outln!(out, "_ => (),");
             });
             outln!(out, "}}");
-            outln!(out, "Ok(Request::Unknown(header, remaining))");
+            outln!(
+                out,
+                "Ok(Request::Unknown(header, Cow::Borrowed(remaining)))"
+            );
         });
         outln!(out, "}}");
         outln!(
