@@ -119,7 +119,21 @@ pub fn parse_request_header(
 /// A type implementing this trait is an X11 request.
 pub trait Request {
     type Reply: Into<crate::protocol::Reply> + TryParseFd;
+
+    fn parse_reply<'a>(
+        bytes: &'a [u8],
+        fds: &mut Vec<RawFdContainer>,
+    ) -> Result<(crate::protocol::Reply, &'a [u8]), ParseError> {
+        let (reply, remaining) = Self::Reply::try_parse_fd(bytes, fds)?;
+        Ok((reply.into(), remaining))
+    }
 }
+
+/// A type alias for reply parsers (matches the signature of TryParseFd).
+pub type ReplyParsingFunction<'a> = fn(
+    &'a [u8],
+    &mut Vec<RawFdContainer>,
+) -> Result<(crate::protocol::Reply, &'a [u8]), ParseError>;
 
 /// A type implementing this trait can be serialized into X11 raw bytes.
 pub trait Serialize {
