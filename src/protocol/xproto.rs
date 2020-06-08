@@ -6264,6 +6264,22 @@ impl<'input> CreateWindowRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this CreateWindowRequest.
+    pub fn into_owned(self) -> CreateWindowRequest<'static> {
+        CreateWindowRequest {
+            depth: self.depth,
+            wid: self.wid,
+            parent: self.parent,
+            x: self.x,
+            y: self.y,
+            width: self.width,
+            height: self.height,
+            border_width: self.border_width,
+            class: self.class,
+            visual: self.visual,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateWindowRequest<'input> {
     type Reply = ();
@@ -6762,6 +6778,13 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
             window,
             value_list: Cow::Owned(value_list),
         })
+    }
+    /// Clone all borrowed data in this ChangeWindowAttributesRequest.
+    pub fn into_owned(self) -> ChangeWindowAttributesRequest<'static> {
+        ChangeWindowAttributesRequest {
+            window: self.window,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeWindowAttributesRequest<'input> {
@@ -8314,6 +8337,13 @@ impl<'input> ConfigureWindowRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this ConfigureWindowRequest.
+    pub fn into_owned(self) -> ConfigureWindowRequest<'static> {
+        ConfigureWindowRequest {
+            window: self.window,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ConfigureWindowRequest<'input> {
     type Reply = ();
@@ -9023,6 +9053,13 @@ impl<'input> InternAtomRequest<'input> {
             name: Cow::Borrowed(name),
         })
     }
+    /// Clone all borrowed data in this InternAtomRequest.
+    pub fn into_owned(self) -> InternAtomRequest<'static> {
+        InternAtomRequest {
+            only_if_exists: self.only_if_exists,
+            name: Cow::Owned(self.name.into_owned()),
+        }
+    }
 }
 impl<'input> Request for InternAtomRequest<'input> {
     type Reply = InternAtomReply;
@@ -9431,6 +9468,18 @@ impl<'input> ChangePropertyRequest<'input> {
             data_len,
             data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this ChangePropertyRequest.
+    pub fn into_owned(self) -> ChangePropertyRequest<'static> {
+        ChangePropertyRequest {
+            mode: self.mode,
+            window: self.window,
+            property: self.property,
+            type_: self.type_,
+            format: self.format,
+            data_len: self.data_len,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangePropertyRequest<'input> {
@@ -10757,6 +10806,15 @@ impl<'input> SendEventRequest<'input> {
             event_mask,
             event: Cow::Borrowed(event),
         })
+    }
+    /// Clone all borrowed data in this SendEventRequest.
+    pub fn into_owned(self) -> SendEventRequest<'static> {
+        SendEventRequest {
+            propagate: self.propagate,
+            destination: self.destination,
+            event_mask: self.event_mask,
+            event: Cow::Owned(self.event.into_owned()),
+        }
     }
 }
 impl<'input> Request for SendEventRequest<'input> {
@@ -14105,6 +14163,13 @@ impl<'input> OpenFontRequest<'input> {
             name: Cow::Borrowed(name),
         })
     }
+    /// Clone all borrowed data in this OpenFontRequest.
+    pub fn into_owned(self) -> OpenFontRequest<'static> {
+        OpenFontRequest {
+            fid: self.fid,
+            name: Cow::Owned(self.name.into_owned()),
+        }
+    }
 }
 impl<'input> Request for OpenFontRequest<'input> {
     type Reply = ();
@@ -14650,6 +14715,13 @@ impl<'input> QueryTextExtentsRequest<'input> {
             string: Cow::Owned(string),
         })
     }
+    /// Clone all borrowed data in this QueryTextExtentsRequest.
+    pub fn into_owned(self) -> QueryTextExtentsRequest<'static> {
+        QueryTextExtentsRequest {
+            font: self.font,
+            string: Cow::Owned(self.string.into_owned()),
+        }
+    }
 }
 impl<'input> Request for QueryTextExtentsRequest<'input> {
     type Reply = QueryTextExtentsReply;
@@ -14857,6 +14929,13 @@ impl<'input> ListFontsRequest<'input> {
             pattern: Cow::Borrowed(pattern),
         })
     }
+    /// Clone all borrowed data in this ListFontsRequest.
+    pub fn into_owned(self) -> ListFontsRequest<'static> {
+        ListFontsRequest {
+            max_names: self.max_names,
+            pattern: Cow::Owned(self.pattern.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ListFontsRequest<'input> {
     type Reply = ListFontsReply;
@@ -15000,6 +15079,13 @@ impl<'input> ListFontsWithInfoRequest<'input> {
             max_names,
             pattern: Cow::Borrowed(pattern),
         })
+    }
+    /// Clone all borrowed data in this ListFontsWithInfoRequest.
+    pub fn into_owned(self) -> ListFontsWithInfoRequest<'static> {
+        ListFontsWithInfoRequest {
+            max_names: self.max_names,
+            pattern: Cow::Owned(self.pattern.into_owned()),
+        }
     }
 }
 impl<'input> Request for ListFontsWithInfoRequest<'input> {
@@ -15184,6 +15270,12 @@ impl<'input> SetFontPathRequest<'input> {
         Ok(SetFontPathRequest {
             font: Cow::Owned(font),
         })
+    }
+    /// Clone all borrowed data in this SetFontPathRequest.
+    pub fn into_owned(self) -> SetFontPathRequest<'static> {
+        SetFontPathRequest {
+            font: Cow::Owned(self.font.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetFontPathRequest<'input> {
@@ -16884,6 +16976,14 @@ impl<'input> CreateGCRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this CreateGCRequest.
+    pub fn into_owned(self) -> CreateGCRequest<'static> {
+        CreateGCRequest {
+            cid: self.cid,
+            drawable: self.drawable,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateGCRequest<'input> {
     type Reply = ();
@@ -17533,6 +17633,13 @@ impl<'input> ChangeGCRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this ChangeGCRequest.
+    pub fn into_owned(self) -> ChangeGCRequest<'static> {
+        ChangeGCRequest {
+            gc: self.gc,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ChangeGCRequest<'input> {
     type Reply = ();
@@ -17738,6 +17845,14 @@ impl<'input> SetDashesRequest<'input> {
             dashes: Cow::Borrowed(dashes),
         })
     }
+    /// Clone all borrowed data in this SetDashesRequest.
+    pub fn into_owned(self) -> SetDashesRequest<'static> {
+        SetDashesRequest {
+            gc: self.gc,
+            dash_offset: self.dash_offset,
+            dashes: Cow::Owned(self.dashes.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetDashesRequest<'input> {
     type Reply = ();
@@ -17898,6 +18013,16 @@ impl<'input> SetClipRectanglesRequest<'input> {
             clip_y_origin,
             rectangles: Cow::Owned(rectangles),
         })
+    }
+    /// Clone all borrowed data in this SetClipRectanglesRequest.
+    pub fn into_owned(self) -> SetClipRectanglesRequest<'static> {
+        SetClipRectanglesRequest {
+            ordering: self.ordering,
+            gc: self.gc,
+            clip_x_origin: self.clip_x_origin,
+            clip_y_origin: self.clip_y_origin,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetClipRectanglesRequest<'input> {
@@ -18533,6 +18658,15 @@ impl<'input> PolyPointRequest<'input> {
             points: Cow::Owned(points),
         })
     }
+    /// Clone all borrowed data in this PolyPointRequest.
+    pub fn into_owned(self) -> PolyPointRequest<'static> {
+        PolyPointRequest {
+            coordinate_mode: self.coordinate_mode,
+            drawable: self.drawable,
+            gc: self.gc,
+            points: Cow::Owned(self.points.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolyPointRequest<'input> {
     type Reply = ();
@@ -18661,6 +18795,15 @@ impl<'input> PolyLineRequest<'input> {
             gc,
             points: Cow::Owned(points),
         })
+    }
+    /// Clone all borrowed data in this PolyLineRequest.
+    pub fn into_owned(self) -> PolyLineRequest<'static> {
+        PolyLineRequest {
+            coordinate_mode: self.coordinate_mode,
+            drawable: self.drawable,
+            gc: self.gc,
+            points: Cow::Owned(self.points.into_owned()),
+        }
     }
 }
 impl<'input> Request for PolyLineRequest<'input> {
@@ -18863,6 +19006,14 @@ impl<'input> PolySegmentRequest<'input> {
             segments: Cow::Owned(segments),
         })
     }
+    /// Clone all borrowed data in this PolySegmentRequest.
+    pub fn into_owned(self) -> PolySegmentRequest<'static> {
+        PolySegmentRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            segments: Cow::Owned(self.segments.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolySegmentRequest<'input> {
     type Reply = ();
@@ -18974,6 +19125,14 @@ impl<'input> PolyRectangleRequest<'input> {
             rectangles: Cow::Owned(rectangles),
         })
     }
+    /// Clone all borrowed data in this PolyRectangleRequest.
+    pub fn into_owned(self) -> PolyRectangleRequest<'static> {
+        PolyRectangleRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolyRectangleRequest<'input> {
     type Reply = ();
@@ -19058,6 +19217,14 @@ impl<'input> PolyArcRequest<'input> {
             gc,
             arcs: Cow::Owned(arcs),
         })
+    }
+    /// Clone all borrowed data in this PolyArcRequest.
+    pub fn into_owned(self) -> PolyArcRequest<'static> {
+        PolyArcRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            arcs: Cow::Owned(self.arcs.into_owned()),
+        }
     }
 }
 impl<'input> Request for PolyArcRequest<'input> {
@@ -19224,6 +19391,16 @@ impl<'input> FillPolyRequest<'input> {
             points: Cow::Owned(points),
         })
     }
+    /// Clone all borrowed data in this FillPolyRequest.
+    pub fn into_owned(self) -> FillPolyRequest<'static> {
+        FillPolyRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            shape: self.shape,
+            coordinate_mode: self.coordinate_mode,
+            points: Cow::Owned(self.points.into_owned()),
+        }
+    }
 }
 impl<'input> Request for FillPolyRequest<'input> {
     type Reply = ();
@@ -19336,6 +19513,14 @@ impl<'input> PolyFillRectangleRequest<'input> {
             rectangles: Cow::Owned(rectangles),
         })
     }
+    /// Clone all borrowed data in this PolyFillRectangleRequest.
+    pub fn into_owned(self) -> PolyFillRectangleRequest<'static> {
+        PolyFillRectangleRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolyFillRectangleRequest<'input> {
     type Reply = ();
@@ -19445,6 +19630,14 @@ impl<'input> PolyFillArcRequest<'input> {
             gc,
             arcs: Cow::Owned(arcs),
         })
+    }
+    /// Clone all borrowed data in this PolyFillArcRequest.
+    pub fn into_owned(self) -> PolyFillArcRequest<'static> {
+        PolyFillArcRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            arcs: Cow::Owned(self.arcs.into_owned()),
+        }
     }
 }
 impl<'input> Request for PolyFillArcRequest<'input> {
@@ -19628,6 +19821,21 @@ impl<'input> PutImageRequest<'input> {
             depth,
             data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this PutImageRequest.
+    pub fn into_owned(self) -> PutImageRequest<'static> {
+        PutImageRequest {
+            format: self.format,
+            drawable: self.drawable,
+            gc: self.gc,
+            width: self.width,
+            height: self.height,
+            dst_x: self.dst_x,
+            dst_y: self.dst_y,
+            left_pad: self.left_pad,
+            depth: self.depth,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for PutImageRequest<'input> {
@@ -19875,6 +20083,16 @@ impl<'input> PolyText8Request<'input> {
             items: Cow::Borrowed(items),
         })
     }
+    /// Clone all borrowed data in this PolyText8Request.
+    pub fn into_owned(self) -> PolyText8Request<'static> {
+        PolyText8Request {
+            drawable: self.drawable,
+            gc: self.gc,
+            x: self.x,
+            y: self.y,
+            items: Cow::Owned(self.items.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolyText8Request<'input> {
     type Reply = ();
@@ -19965,6 +20183,16 @@ impl<'input> PolyText16Request<'input> {
             y,
             items: Cow::Borrowed(items),
         })
+    }
+    /// Clone all borrowed data in this PolyText16Request.
+    pub fn into_owned(self) -> PolyText16Request<'static> {
+        PolyText16Request {
+            drawable: self.drawable,
+            gc: self.gc,
+            x: self.x,
+            y: self.y,
+            items: Cow::Owned(self.items.into_owned()),
+        }
     }
 }
 impl<'input> Request for PolyText16Request<'input> {
@@ -20092,6 +20320,16 @@ impl<'input> ImageText8Request<'input> {
             y,
             string: Cow::Borrowed(string),
         })
+    }
+    /// Clone all borrowed data in this ImageText8Request.
+    pub fn into_owned(self) -> ImageText8Request<'static> {
+        ImageText8Request {
+            drawable: self.drawable,
+            gc: self.gc,
+            x: self.x,
+            y: self.y,
+            string: Cow::Owned(self.string.into_owned()),
+        }
     }
 }
 impl<'input> Request for ImageText8Request<'input> {
@@ -20255,6 +20493,16 @@ impl<'input> ImageText16Request<'input> {
             y,
             string: Cow::Owned(string),
         })
+    }
+    /// Clone all borrowed data in this ImageText16Request.
+    pub fn into_owned(self) -> ImageText16Request<'static> {
+        ImageText16Request {
+            drawable: self.drawable,
+            gc: self.gc,
+            x: self.x,
+            y: self.y,
+            string: Cow::Owned(self.string.into_owned()),
+        }
     }
 }
 impl<'input> Request for ImageText16Request<'input> {
@@ -21037,6 +21285,13 @@ impl<'input> AllocNamedColorRequest<'input> {
             name: Cow::Borrowed(name),
         })
     }
+    /// Clone all borrowed data in this AllocNamedColorRequest.
+    pub fn into_owned(self) -> AllocNamedColorRequest<'static> {
+        AllocNamedColorRequest {
+            cmap: self.cmap,
+            name: Cow::Owned(self.name.into_owned()),
+        }
+    }
 }
 impl<'input> Request for AllocNamedColorRequest<'input> {
     type Reply = AllocNamedColorReply;
@@ -21443,6 +21698,14 @@ impl<'input> FreeColorsRequest<'input> {
             pixels: Cow::Owned(pixels),
         })
     }
+    /// Clone all borrowed data in this FreeColorsRequest.
+    pub fn into_owned(self) -> FreeColorsRequest<'static> {
+        FreeColorsRequest {
+            cmap: self.cmap,
+            plane_mask: self.plane_mask,
+            pixels: Cow::Owned(self.pixels.into_owned()),
+        }
+    }
 }
 impl<'input> Request for FreeColorsRequest<'input> {
     type Reply = ();
@@ -21646,6 +21909,13 @@ impl<'input> StoreColorsRequest<'input> {
             items: Cow::Owned(items),
         })
     }
+    /// Clone all borrowed data in this StoreColorsRequest.
+    pub fn into_owned(self) -> StoreColorsRequest<'static> {
+        StoreColorsRequest {
+            cmap: self.cmap,
+            items: Cow::Owned(self.items.into_owned()),
+        }
+    }
 }
 impl<'input> Request for StoreColorsRequest<'input> {
     type Reply = ();
@@ -21732,6 +22002,15 @@ impl<'input> StoreNamedColorRequest<'input> {
             pixel,
             name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this StoreNamedColorRequest.
+    pub fn into_owned(self) -> StoreNamedColorRequest<'static> {
+        StoreNamedColorRequest {
+            flags: self.flags,
+            cmap: self.cmap,
+            pixel: self.pixel,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for StoreNamedColorRequest<'input> {
@@ -21861,6 +22140,13 @@ impl<'input> QueryColorsRequest<'input> {
             pixels: Cow::Owned(pixels),
         })
     }
+    /// Clone all borrowed data in this QueryColorsRequest.
+    pub fn into_owned(self) -> QueryColorsRequest<'static> {
+        QueryColorsRequest {
+            cmap: self.cmap,
+            pixels: Cow::Owned(self.pixels.into_owned()),
+        }
+    }
 }
 impl<'input> Request for QueryColorsRequest<'input> {
     type Reply = QueryColorsReply;
@@ -21980,6 +22266,13 @@ impl<'input> LookupColorRequest<'input> {
             cmap,
             name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this LookupColorRequest.
+    pub fn into_owned(self) -> LookupColorRequest<'static> {
+        LookupColorRequest {
+            cmap: self.cmap,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for LookupColorRequest<'input> {
@@ -22928,6 +23221,12 @@ impl<'input> QueryExtensionRequest<'input> {
             name: Cow::Borrowed(name),
         })
     }
+    /// Clone all borrowed data in this QueryExtensionRequest.
+    pub fn into_owned(self) -> QueryExtensionRequest<'static> {
+        QueryExtensionRequest {
+            name: Cow::Owned(self.name.into_owned()),
+        }
+    }
 }
 impl<'input> Request for QueryExtensionRequest<'input> {
     type Reply = QueryExtensionReply;
@@ -23158,6 +23457,15 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
             keysyms_per_keycode,
             keysyms: Cow::Owned(keysyms),
         })
+    }
+    /// Clone all borrowed data in this ChangeKeyboardMappingRequest.
+    pub fn into_owned(self) -> ChangeKeyboardMappingRequest<'static> {
+        ChangeKeyboardMappingRequest {
+            keycode_count: self.keycode_count,
+            first_keycode: self.first_keycode,
+            keysyms_per_keycode: self.keysyms_per_keycode,
+            keysyms: Cow::Owned(self.keysyms.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeKeyboardMappingRequest<'input> {
@@ -23751,6 +24059,12 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         Ok(ChangeKeyboardControlRequest {
             value_list: Cow::Owned(value_list),
         })
+    }
+    /// Clone all borrowed data in this ChangeKeyboardControlRequest.
+    pub fn into_owned(self) -> ChangeKeyboardControlRequest<'static> {
+        ChangeKeyboardControlRequest {
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeKeyboardControlRequest<'input> {
@@ -24581,6 +24895,14 @@ impl<'input> ChangeHostsRequest<'input> {
             address: Cow::Borrowed(address),
         })
     }
+    /// Clone all borrowed data in this ChangeHostsRequest.
+    pub fn into_owned(self) -> ChangeHostsRequest<'static> {
+        ChangeHostsRequest {
+            mode: self.mode,
+            family: self.family,
+            address: Cow::Owned(self.address.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ChangeHostsRequest<'input> {
     type Reply = ();
@@ -25228,6 +25550,14 @@ impl<'input> RotatePropertiesRequest<'input> {
             atoms: Cow::Owned(atoms),
         })
     }
+    /// Clone all borrowed data in this RotatePropertiesRequest.
+    pub fn into_owned(self) -> RotatePropertiesRequest<'static> {
+        RotatePropertiesRequest {
+            window: self.window,
+            delta: self.delta,
+            atoms: Cow::Owned(self.atoms.into_owned()),
+        }
+    }
 }
 impl<'input> Request for RotatePropertiesRequest<'input> {
     type Reply = ();
@@ -25482,6 +25812,12 @@ impl<'input> SetPointerMappingRequest<'input> {
         Ok(SetPointerMappingRequest {
             map: Cow::Borrowed(map),
         })
+    }
+    /// Clone all borrowed data in this SetPointerMappingRequest.
+    pub fn into_owned(self) -> SetPointerMappingRequest<'static> {
+        SetPointerMappingRequest {
+            map: Cow::Owned(self.map.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetPointerMappingRequest<'input> {
@@ -25745,6 +26081,12 @@ impl<'input> SetModifierMappingRequest<'input> {
         Ok(SetModifierMappingRequest {
             keycodes: Cow::Borrowed(keycodes),
         })
+    }
+    /// Clone all borrowed data in this SetModifierMappingRequest.
+    pub fn into_owned(self) -> SetModifierMappingRequest<'static> {
+        SetModifierMappingRequest {
+            keycodes: Cow::Owned(self.keycodes.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetModifierMappingRequest<'input> {

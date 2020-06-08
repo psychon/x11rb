@@ -879,6 +879,14 @@ impl<'input> GetBuffersRequest<'input> {
             attachments: Cow::Owned(attachments),
         })
     }
+    /// Clone all borrowed data in this GetBuffersRequest.
+    pub fn into_owned(self) -> GetBuffersRequest<'static> {
+        GetBuffersRequest {
+            drawable: self.drawable,
+            count: self.count,
+            attachments: Cow::Owned(self.attachments.into_owned()),
+        }
+    }
 }
 impl<'input> Request for GetBuffersRequest<'input> {
     type Reply = GetBuffersReply;
@@ -1120,6 +1128,14 @@ impl<'input> GetBuffersWithFormatRequest<'input> {
             count,
             attachments: Cow::Owned(attachments),
         })
+    }
+    /// Clone all borrowed data in this GetBuffersWithFormatRequest.
+    pub fn into_owned(self) -> GetBuffersWithFormatRequest<'static> {
+        GetBuffersWithFormatRequest {
+            drawable: self.drawable,
+            count: self.count,
+            attachments: Cow::Owned(self.attachments.into_owned()),
+        }
     }
 }
 impl<'input> Request for GetBuffersWithFormatRequest<'input> {

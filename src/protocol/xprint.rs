@@ -541,6 +541,13 @@ impl<'input> PrintGetPrinterListRequest<'input> {
             locale: Cow::Borrowed(locale),
         })
     }
+    /// Clone all borrowed data in this PrintGetPrinterListRequest.
+    pub fn into_owned(self) -> PrintGetPrinterListRequest<'static> {
+        PrintGetPrinterListRequest {
+            printer_name: Cow::Owned(self.printer_name.into_owned()),
+            locale: Cow::Owned(self.locale.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PrintGetPrinterListRequest<'input> {
     type Reply = PrintGetPrinterListReply;
@@ -716,6 +723,14 @@ impl<'input> CreateContextRequest<'input> {
             printer_name: Cow::Borrowed(printer_name),
             locale: Cow::Borrowed(locale),
         })
+    }
+    /// Clone all borrowed data in this CreateContextRequest.
+    pub fn into_owned(self) -> CreateContextRequest<'static> {
+        CreateContextRequest {
+            context_id: self.context_id,
+            printer_name: Cow::Owned(self.printer_name.into_owned()),
+            locale: Cow::Owned(self.locale.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreateContextRequest<'input> {
@@ -1313,6 +1328,15 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
             options: Cow::Borrowed(options),
         })
     }
+    /// Clone all borrowed data in this PrintPutDocumentDataRequest.
+    pub fn into_owned(self) -> PrintPutDocumentDataRequest<'static> {
+        PrintPutDocumentDataRequest {
+            drawable: self.drawable,
+            data: Cow::Owned(self.data.into_owned()),
+            doc_format: Cow::Owned(self.doc_format.into_owned()),
+            options: Cow::Owned(self.options.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PrintPutDocumentDataRequest<'input> {
     type Reply = ();
@@ -1903,6 +1927,14 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
             name: Cow::Borrowed(name),
         })
     }
+    /// Clone all borrowed data in this PrintGetOneAttributesRequest.
+    pub fn into_owned(self) -> PrintGetOneAttributesRequest<'static> {
+        PrintGetOneAttributesRequest {
+            context: self.context,
+            pool: self.pool,
+            name: Cow::Owned(self.name.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PrintGetOneAttributesRequest<'input> {
     type Reply = PrintGetOneAttributesReply;
@@ -2035,6 +2067,16 @@ impl<'input> PrintSetAttributesRequest<'input> {
             rule,
             attributes: Cow::Borrowed(attributes),
         })
+    }
+    /// Clone all borrowed data in this PrintSetAttributesRequest.
+    pub fn into_owned(self) -> PrintSetAttributesRequest<'static> {
+        PrintSetAttributesRequest {
+            context: self.context,
+            string_len: self.string_len,
+            pool: self.pool,
+            rule: self.rule,
+            attributes: Cow::Owned(self.attributes.into_owned()),
+        }
     }
 }
 impl<'input> Request for PrintSetAttributesRequest<'input> {

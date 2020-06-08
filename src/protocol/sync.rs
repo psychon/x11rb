@@ -1164,6 +1164,12 @@ impl<'input> AwaitRequest<'input> {
             wait_list: Cow::Owned(wait_list),
         })
     }
+    /// Clone all borrowed data in this AwaitRequest.
+    pub fn into_owned(self) -> AwaitRequest<'static> {
+        AwaitRequest {
+            wait_list: Cow::Owned(self.wait_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for AwaitRequest<'input> {
     type Reply = ();
@@ -1539,6 +1545,13 @@ impl<'input> CreateAlarmRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this CreateAlarmRequest.
+    pub fn into_owned(self) -> CreateAlarmRequest<'static> {
+        CreateAlarmRequest {
+            id: self.id,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateAlarmRequest<'input> {
     type Reply = ();
@@ -1770,6 +1783,13 @@ impl<'input> ChangeAlarmRequest<'input> {
             id,
             value_list: Cow::Owned(value_list),
         })
+    }
+    /// Clone all borrowed data in this ChangeAlarmRequest.
+    pub fn into_owned(self) -> ChangeAlarmRequest<'static> {
+        ChangeAlarmRequest {
+            id: self.id,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeAlarmRequest<'input> {
@@ -2484,6 +2504,12 @@ impl<'input> AwaitFenceRequest<'input> {
         Ok(AwaitFenceRequest {
             fence_list: Cow::Owned(fence_list),
         })
+    }
+    /// Clone all borrowed data in this AwaitFenceRequest.
+    pub fn into_owned(self) -> AwaitFenceRequest<'static> {
+        AwaitFenceRequest {
+            fence_list: Cow::Owned(self.fence_list.into_owned()),
+        }
     }
 }
 impl<'input> Request for AwaitFenceRequest<'input> {

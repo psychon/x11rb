@@ -706,6 +706,23 @@ impl<'input> ModModeLineRequest<'input> {
             private: Cow::Borrowed(private),
         })
     }
+    /// Clone all borrowed data in this ModModeLineRequest.
+    pub fn into_owned(self) -> ModModeLineRequest<'static> {
+        ModModeLineRequest {
+            screen: self.screen,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ModModeLineRequest<'input> {
     type Reply = ();
@@ -1352,6 +1369,35 @@ impl<'input> AddModeLineRequest<'input> {
             private: Cow::Borrowed(private),
         })
     }
+    /// Clone all borrowed data in this AddModeLineRequest.
+    pub fn into_owned(self) -> AddModeLineRequest<'static> {
+        AddModeLineRequest {
+            screen: self.screen,
+            dotclock: self.dotclock,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            after_dotclock: self.after_dotclock,
+            after_hdisplay: self.after_hdisplay,
+            after_hsyncstart: self.after_hsyncstart,
+            after_hsyncend: self.after_hsyncend,
+            after_htotal: self.after_htotal,
+            after_hskew: self.after_hskew,
+            after_vdisplay: self.after_vdisplay,
+            after_vsyncstart: self.after_vsyncstart,
+            after_vsyncend: self.after_vsyncend,
+            after_vtotal: self.after_vtotal,
+            after_flags: self.after_flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
+    }
 }
 impl<'input> Request for AddModeLineRequest<'input> {
     type Reply = ();
@@ -1537,6 +1583,24 @@ impl<'input> DeleteModeLineRequest<'input> {
             private: Cow::Borrowed(private),
         })
     }
+    /// Clone all borrowed data in this DeleteModeLineRequest.
+    pub fn into_owned(self) -> DeleteModeLineRequest<'static> {
+        DeleteModeLineRequest {
+            screen: self.screen,
+            dotclock: self.dotclock,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
+    }
 }
 impl<'input> Request for DeleteModeLineRequest<'input> {
     type Reply = ();
@@ -1708,6 +1772,24 @@ impl<'input> ValidateModeLineRequest<'input> {
             flags,
             private: Cow::Borrowed(private),
         })
+    }
+    /// Clone all borrowed data in this ValidateModeLineRequest.
+    pub fn into_owned(self) -> ValidateModeLineRequest<'static> {
+        ValidateModeLineRequest {
+            screen: self.screen,
+            dotclock: self.dotclock,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
     }
 }
 impl<'input> Request for ValidateModeLineRequest<'input> {
@@ -1908,6 +1990,24 @@ impl<'input> SwitchToModeRequest<'input> {
             flags,
             private: Cow::Borrowed(private),
         })
+    }
+    /// Clone all borrowed data in this SwitchToModeRequest.
+    pub fn into_owned(self) -> SwitchToModeRequest<'static> {
+        SwitchToModeRequest {
+            screen: self.screen,
+            dotclock: self.dotclock,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
     }
 }
 impl<'input> Request for SwitchToModeRequest<'input> {
@@ -2645,6 +2745,16 @@ impl<'input> SetGammaRampRequest<'input> {
             green: Cow::Owned(green),
             blue: Cow::Owned(blue),
         })
+    }
+    /// Clone all borrowed data in this SetGammaRampRequest.
+    pub fn into_owned(self) -> SetGammaRampRequest<'static> {
+        SetGammaRampRequest {
+            screen: self.screen,
+            size: self.size,
+            red: Cow::Owned(self.red.into_owned()),
+            green: Cow::Owned(self.green.into_owned()),
+            blue: Cow::Owned(self.blue.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetGammaRampRequest<'input> {

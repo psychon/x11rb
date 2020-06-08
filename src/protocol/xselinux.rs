@@ -176,6 +176,12 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
             context: Cow::Borrowed(context),
         })
     }
+    /// Clone all borrowed data in this SetDeviceCreateContextRequest.
+    pub fn into_owned(self) -> SetDeviceCreateContextRequest<'static> {
+        SetDeviceCreateContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetDeviceCreateContextRequest<'input> {
     type Reply = ();
@@ -340,6 +346,13 @@ impl<'input> SetDeviceContextRequest<'input> {
             device,
             context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetDeviceContextRequest.
+    pub fn into_owned(self) -> SetDeviceContextRequest<'static> {
+        SetDeviceContextRequest {
+            device: self.device,
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetDeviceContextRequest<'input> {
@@ -509,6 +522,12 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         Ok(SetWindowCreateContextRequest {
             context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetWindowCreateContextRequest.
+    pub fn into_owned(self) -> SetWindowCreateContextRequest<'static> {
+        SetWindowCreateContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetWindowCreateContextRequest<'input> {
@@ -854,6 +873,12 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
             context: Cow::Borrowed(context),
         })
     }
+    /// Clone all borrowed data in this SetPropertyCreateContextRequest.
+    pub fn into_owned(self) -> SetPropertyCreateContextRequest<'static> {
+        SetPropertyCreateContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetPropertyCreateContextRequest<'input> {
     type Reply = ();
@@ -1010,6 +1035,12 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         Ok(SetPropertyUseContextRequest {
             context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetPropertyUseContextRequest.
+    pub fn into_owned(self) -> SetPropertyUseContextRequest<'static> {
+        SetPropertyUseContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetPropertyUseContextRequest<'input> {
@@ -1497,6 +1528,12 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
             context: Cow::Borrowed(context),
         })
     }
+    /// Clone all borrowed data in this SetSelectionCreateContextRequest.
+    pub fn into_owned(self) -> SetSelectionCreateContextRequest<'static> {
+        SetSelectionCreateContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetSelectionCreateContextRequest<'input> {
     type Reply = ();
@@ -1653,6 +1690,12 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         Ok(SetSelectionUseContextRequest {
             context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetSelectionUseContextRequest.
+    pub fn into_owned(self) -> SetSelectionUseContextRequest<'static> {
+        SetSelectionUseContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetSelectionUseContextRequest<'input> {

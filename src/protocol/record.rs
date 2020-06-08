@@ -669,6 +669,15 @@ impl<'input> CreateContextRequest<'input> {
             ranges: Cow::Owned(ranges),
         })
     }
+    /// Clone all borrowed data in this CreateContextRequest.
+    pub fn into_owned(self) -> CreateContextRequest<'static> {
+        CreateContextRequest {
+            context: self.context,
+            element_header: self.element_header,
+            client_specs: Cow::Owned(self.client_specs.into_owned()),
+            ranges: Cow::Owned(self.ranges.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateContextRequest<'input> {
     type Reply = ();
@@ -766,6 +775,15 @@ impl<'input> RegisterClientsRequest<'input> {
             ranges: Cow::Owned(ranges),
         })
     }
+    /// Clone all borrowed data in this RegisterClientsRequest.
+    pub fn into_owned(self) -> RegisterClientsRequest<'static> {
+        RegisterClientsRequest {
+            context: self.context,
+            element_header: self.element_header,
+            client_specs: Cow::Owned(self.client_specs.into_owned()),
+            ranges: Cow::Owned(self.ranges.into_owned()),
+        }
+    }
 }
 impl<'input> Request for RegisterClientsRequest<'input> {
     type Reply = ();
@@ -841,6 +859,13 @@ impl<'input> UnregisterClientsRequest<'input> {
             context,
             client_specs: Cow::Owned(client_specs),
         })
+    }
+    /// Clone all borrowed data in this UnregisterClientsRequest.
+    pub fn into_owned(self) -> UnregisterClientsRequest<'static> {
+        UnregisterClientsRequest {
+            context: self.context,
+            client_specs: Cow::Owned(self.client_specs.into_owned()),
+        }
     }
 }
 impl<'input> Request for UnregisterClientsRequest<'input> {

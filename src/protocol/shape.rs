@@ -434,6 +434,18 @@ impl<'input> RectanglesRequest<'input> {
             rectangles: Cow::Owned(rectangles),
         })
     }
+    /// Clone all borrowed data in this RectanglesRequest.
+    pub fn into_owned(self) -> RectanglesRequest<'static> {
+        RectanglesRequest {
+            operation: self.operation,
+            destination_kind: self.destination_kind,
+            ordering: self.ordering,
+            destination_window: self.destination_window,
+            x_offset: self.x_offset,
+            y_offset: self.y_offset,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
+    }
 }
 impl<'input> Request for RectanglesRequest<'input> {
     type Reply = ();

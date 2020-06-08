@@ -7141,6 +7141,17 @@ impl<'input> SelectEventsRequest<'input> {
             details: Cow::Owned(details),
         })
     }
+    /// Clone all borrowed data in this SelectEventsRequest.
+    pub fn into_owned(self) -> SelectEventsRequest<'static> {
+        SelectEventsRequest {
+            device_spec: self.device_spec,
+            clear: self.clear,
+            select_all: self.select_all,
+            affect_map: self.affect_map,
+            map: self.map,
+            details: Cow::Owned(self.details.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SelectEventsRequest<'input> {
     type Reply = ();
@@ -7886,6 +7897,41 @@ impl<'input> SetControlsRequest<'input> {
             access_x_timeout_options_values,
             per_key_repeat: Cow::Borrowed(per_key_repeat),
         })
+    }
+    /// Clone all borrowed data in this SetControlsRequest.
+    pub fn into_owned(self) -> SetControlsRequest<'static> {
+        SetControlsRequest {
+            device_spec: self.device_spec,
+            affect_internal_real_mods: self.affect_internal_real_mods,
+            internal_real_mods: self.internal_real_mods,
+            affect_ignore_lock_real_mods: self.affect_ignore_lock_real_mods,
+            ignore_lock_real_mods: self.ignore_lock_real_mods,
+            affect_internal_virtual_mods: self.affect_internal_virtual_mods,
+            internal_virtual_mods: self.internal_virtual_mods,
+            affect_ignore_lock_virtual_mods: self.affect_ignore_lock_virtual_mods,
+            ignore_lock_virtual_mods: self.ignore_lock_virtual_mods,
+            mouse_keys_dflt_btn: self.mouse_keys_dflt_btn,
+            groups_wrap: self.groups_wrap,
+            access_x_options: self.access_x_options,
+            affect_enabled_controls: self.affect_enabled_controls,
+            enabled_controls: self.enabled_controls,
+            change_controls: self.change_controls,
+            repeat_delay: self.repeat_delay,
+            repeat_interval: self.repeat_interval,
+            slow_keys_delay: self.slow_keys_delay,
+            debounce_delay: self.debounce_delay,
+            mouse_keys_delay: self.mouse_keys_delay,
+            mouse_keys_interval: self.mouse_keys_interval,
+            mouse_keys_time_to_max: self.mouse_keys_time_to_max,
+            mouse_keys_max_speed: self.mouse_keys_max_speed,
+            mouse_keys_curve: self.mouse_keys_curve,
+            access_x_timeout: self.access_x_timeout,
+            access_x_timeout_mask: self.access_x_timeout_mask,
+            access_x_timeout_values: self.access_x_timeout_values,
+            access_x_timeout_options_mask: self.access_x_timeout_options_mask,
+            access_x_timeout_options_values: self.access_x_timeout_options_values,
+            per_key_repeat: Cow::Owned(self.per_key_repeat.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetControlsRequest<'input> {
@@ -8754,6 +8800,37 @@ impl<'input> SetMapRequest<'input> {
             values: Cow::Owned(values),
         })
     }
+    /// Clone all borrowed data in this SetMapRequest.
+    pub fn into_owned(self) -> SetMapRequest<'static> {
+        SetMapRequest {
+            device_spec: self.device_spec,
+            flags: self.flags,
+            min_key_code: self.min_key_code,
+            max_key_code: self.max_key_code,
+            first_type: self.first_type,
+            n_types: self.n_types,
+            first_key_sym: self.first_key_sym,
+            n_key_syms: self.n_key_syms,
+            total_syms: self.total_syms,
+            first_key_action: self.first_key_action,
+            n_key_actions: self.n_key_actions,
+            total_actions: self.total_actions,
+            first_key_behavior: self.first_key_behavior,
+            n_key_behaviors: self.n_key_behaviors,
+            total_key_behaviors: self.total_key_behaviors,
+            first_key_explicit: self.first_key_explicit,
+            n_key_explicit: self.n_key_explicit,
+            total_key_explicit: self.total_key_explicit,
+            first_mod_map_key: self.first_mod_map_key,
+            n_mod_map_keys: self.n_mod_map_keys,
+            total_mod_map_keys: self.total_mod_map_keys,
+            first_v_mod_map_key: self.first_v_mod_map_key,
+            n_v_mod_map_keys: self.n_v_mod_map_keys,
+            total_v_mod_map_keys: self.total_v_mod_map_keys,
+            virtual_mods: self.virtual_mods,
+            values: Cow::Owned(self.values.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetMapRequest<'input> {
     type Reply = ();
@@ -9022,6 +9099,18 @@ impl<'input> SetCompatMapRequest<'input> {
             si: Cow::Owned(si),
             group_maps: Cow::Owned(group_maps),
         })
+    }
+    /// Clone all borrowed data in this SetCompatMapRequest.
+    pub fn into_owned(self) -> SetCompatMapRequest<'static> {
+        SetCompatMapRequest {
+            device_spec: self.device_spec,
+            recompute_actions: self.recompute_actions,
+            truncate_si: self.truncate_si,
+            groups: self.groups,
+            first_si: self.first_si,
+            si: Cow::Owned(self.si.into_owned()),
+            group_maps: Cow::Owned(self.group_maps.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetCompatMapRequest<'input> {
@@ -9299,6 +9388,14 @@ impl<'input> SetIndicatorMapRequest<'input> {
             which,
             maps: Cow::Owned(maps),
         })
+    }
+    /// Clone all borrowed data in this SetIndicatorMapRequest.
+    pub fn into_owned(self) -> SetIndicatorMapRequest<'static> {
+        SetIndicatorMapRequest {
+            device_spec: self.device_spec,
+            which: self.which,
+            maps: Cow::Owned(self.maps.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetIndicatorMapRequest<'input> {
@@ -10389,6 +10486,25 @@ impl<'input> SetNamesRequest<'input> {
             total_kt_level_names,
             values: Cow::Owned(values),
         })
+    }
+    /// Clone all borrowed data in this SetNamesRequest.
+    pub fn into_owned(self) -> SetNamesRequest<'static> {
+        SetNamesRequest {
+            device_spec: self.device_spec,
+            virtual_mods: self.virtual_mods,
+            first_type: self.first_type,
+            n_types: self.n_types,
+            first_kt_levelt: self.first_kt_levelt,
+            n_kt_levels: self.n_kt_levels,
+            indicators: self.indicators,
+            group_names: self.group_names,
+            n_radio_groups: self.n_radio_groups,
+            first_key: self.first_key,
+            n_keys: self.n_keys,
+            n_key_aliases: self.n_key_aliases,
+            total_kt_level_names: self.total_kt_level_names,
+            values: Cow::Owned(self.values.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetNamesRequest<'input> {
@@ -11769,6 +11885,16 @@ impl<'input> SetDeviceInfoRequest<'input> {
             leds: Cow::Owned(leds),
         })
     }
+    /// Clone all borrowed data in this SetDeviceInfoRequest.
+    pub fn into_owned(self) -> SetDeviceInfoRequest<'static> {
+        SetDeviceInfoRequest {
+            device_spec: self.device_spec,
+            first_btn: self.first_btn,
+            change: self.change,
+            btn_actions: Cow::Owned(self.btn_actions.into_owned()),
+            leds: Cow::Owned(self.leds.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetDeviceInfoRequest<'input> {
     type Reply = ();
@@ -11871,6 +11997,16 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
             ctrls,
             message: Cow::Borrowed(message),
         })
+    }
+    /// Clone all borrowed data in this SetDebuggingFlagsRequest.
+    pub fn into_owned(self) -> SetDebuggingFlagsRequest<'static> {
+        SetDebuggingFlagsRequest {
+            affect_flags: self.affect_flags,
+            flags: self.flags,
+            affect_ctrls: self.affect_ctrls,
+            ctrls: self.ctrls,
+            message: Cow::Owned(self.message.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetDebuggingFlagsRequest<'input> {

@@ -2531,6 +2531,15 @@ impl<'input> CreatePictureRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this CreatePictureRequest.
+    pub fn into_owned(self) -> CreatePictureRequest<'static> {
+        CreatePictureRequest {
+            pid: self.pid,
+            drawable: self.drawable,
+            format: self.format,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreatePictureRequest<'input> {
     type Reply = ();
@@ -2907,6 +2916,13 @@ impl<'input> ChangePictureRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this ChangePictureRequest.
+    pub fn into_owned(self) -> ChangePictureRequest<'static> {
+        ChangePictureRequest {
+            picture: self.picture,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ChangePictureRequest<'input> {
     type Reply = ();
@@ -2992,6 +3008,15 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
             clip_y_origin,
             rectangles: Cow::Owned(rectangles),
         })
+    }
+    /// Clone all borrowed data in this SetPictureClipRectanglesRequest.
+    pub fn into_owned(self) -> SetPictureClipRectanglesRequest<'static> {
+        SetPictureClipRectanglesRequest {
+            picture: self.picture,
+            clip_x_origin: self.clip_x_origin,
+            clip_y_origin: self.clip_y_origin,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetPictureClipRectanglesRequest<'input> {
@@ -3312,6 +3337,18 @@ impl<'input> TrapezoidsRequest<'input> {
             traps: Cow::Owned(traps),
         })
     }
+    /// Clone all borrowed data in this TrapezoidsRequest.
+    pub fn into_owned(self) -> TrapezoidsRequest<'static> {
+        TrapezoidsRequest {
+            op: self.op,
+            src: self.src,
+            dst: self.dst,
+            mask_format: self.mask_format,
+            src_x: self.src_x,
+            src_y: self.src_y,
+            traps: Cow::Owned(self.traps.into_owned()),
+        }
+    }
 }
 impl<'input> Request for TrapezoidsRequest<'input> {
     type Reply = ();
@@ -3428,6 +3465,18 @@ impl<'input> TrianglesRequest<'input> {
             src_y,
             triangles: Cow::Owned(triangles),
         })
+    }
+    /// Clone all borrowed data in this TrianglesRequest.
+    pub fn into_owned(self) -> TrianglesRequest<'static> {
+        TrianglesRequest {
+            op: self.op,
+            src: self.src,
+            dst: self.dst,
+            mask_format: self.mask_format,
+            src_x: self.src_x,
+            src_y: self.src_y,
+            triangles: Cow::Owned(self.triangles.into_owned()),
+        }
     }
 }
 impl<'input> Request for TrianglesRequest<'input> {
@@ -3546,6 +3595,18 @@ impl<'input> TriStripRequest<'input> {
             points: Cow::Owned(points),
         })
     }
+    /// Clone all borrowed data in this TriStripRequest.
+    pub fn into_owned(self) -> TriStripRequest<'static> {
+        TriStripRequest {
+            op: self.op,
+            src: self.src,
+            dst: self.dst,
+            mask_format: self.mask_format,
+            src_x: self.src_x,
+            src_y: self.src_y,
+            points: Cow::Owned(self.points.into_owned()),
+        }
+    }
 }
 impl<'input> Request for TriStripRequest<'input> {
     type Reply = ();
@@ -3662,6 +3723,18 @@ impl<'input> TriFanRequest<'input> {
             src_y,
             points: Cow::Owned(points),
         })
+    }
+    /// Clone all borrowed data in this TriFanRequest.
+    pub fn into_owned(self) -> TriFanRequest<'static> {
+        TriFanRequest {
+            op: self.op,
+            src: self.src,
+            dst: self.dst,
+            mask_format: self.mask_format,
+            src_x: self.src_x,
+            src_y: self.src_y,
+            points: Cow::Owned(self.points.into_owned()),
+        }
     }
 }
 impl<'input> Request for TriFanRequest<'input> {
@@ -3947,6 +4020,15 @@ impl<'input> AddGlyphsRequest<'input> {
             data: Cow::Borrowed(data),
         })
     }
+    /// Clone all borrowed data in this AddGlyphsRequest.
+    pub fn into_owned(self) -> AddGlyphsRequest<'static> {
+        AddGlyphsRequest {
+            glyphset: self.glyphset,
+            glyphids: Cow::Owned(self.glyphids.into_owned()),
+            glyphs: Cow::Owned(self.glyphs.into_owned()),
+            data: Cow::Owned(self.data.into_owned()),
+        }
+    }
 }
 impl<'input> Request for AddGlyphsRequest<'input> {
     type Reply = ();
@@ -4022,6 +4104,13 @@ impl<'input> FreeGlyphsRequest<'input> {
             glyphset,
             glyphs: Cow::Owned(glyphs),
         })
+    }
+    /// Clone all borrowed data in this FreeGlyphsRequest.
+    pub fn into_owned(self) -> FreeGlyphsRequest<'static> {
+        FreeGlyphsRequest {
+            glyphset: self.glyphset,
+            glyphs: Cow::Owned(self.glyphs.into_owned()),
+        }
     }
 }
 impl<'input> Request for FreeGlyphsRequest<'input> {
@@ -4134,6 +4223,19 @@ impl<'input> CompositeGlyphs8Request<'input> {
             src_y,
             glyphcmds: Cow::Borrowed(glyphcmds),
         })
+    }
+    /// Clone all borrowed data in this CompositeGlyphs8Request.
+    pub fn into_owned(self) -> CompositeGlyphs8Request<'static> {
+        CompositeGlyphs8Request {
+            op: self.op,
+            src: self.src,
+            dst: self.dst,
+            mask_format: self.mask_format,
+            glyphset: self.glyphset,
+            src_x: self.src_x,
+            src_y: self.src_y,
+            glyphcmds: Cow::Owned(self.glyphcmds.into_owned()),
+        }
     }
 }
 impl<'input> Request for CompositeGlyphs8Request<'input> {
@@ -4253,6 +4355,19 @@ impl<'input> CompositeGlyphs16Request<'input> {
             glyphcmds: Cow::Borrowed(glyphcmds),
         })
     }
+    /// Clone all borrowed data in this CompositeGlyphs16Request.
+    pub fn into_owned(self) -> CompositeGlyphs16Request<'static> {
+        CompositeGlyphs16Request {
+            op: self.op,
+            src: self.src,
+            dst: self.dst,
+            mask_format: self.mask_format,
+            glyphset: self.glyphset,
+            src_x: self.src_x,
+            src_y: self.src_y,
+            glyphcmds: Cow::Owned(self.glyphcmds.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CompositeGlyphs16Request<'input> {
     type Reply = ();
@@ -4371,6 +4486,19 @@ impl<'input> CompositeGlyphs32Request<'input> {
             glyphcmds: Cow::Borrowed(glyphcmds),
         })
     }
+    /// Clone all borrowed data in this CompositeGlyphs32Request.
+    pub fn into_owned(self) -> CompositeGlyphs32Request<'static> {
+        CompositeGlyphs32Request {
+            op: self.op,
+            src: self.src,
+            dst: self.dst,
+            mask_format: self.mask_format,
+            glyphset: self.glyphset,
+            src_x: self.src_x,
+            src_y: self.src_y,
+            glyphcmds: Cow::Owned(self.glyphcmds.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CompositeGlyphs32Request<'input> {
     type Reply = ();
@@ -4472,6 +4600,15 @@ impl<'input> FillRectanglesRequest<'input> {
             color,
             rects: Cow::Owned(rects),
         })
+    }
+    /// Clone all borrowed data in this FillRectanglesRequest.
+    pub fn into_owned(self) -> FillRectanglesRequest<'static> {
+        FillRectanglesRequest {
+            op: self.op,
+            dst: self.dst,
+            color: self.color,
+            rects: Cow::Owned(self.rects.into_owned()),
+        }
     }
 }
 impl<'input> Request for FillRectanglesRequest<'input> {
@@ -4966,6 +5103,14 @@ impl<'input> SetPictureFilterRequest<'input> {
             values: Cow::Owned(values),
         })
     }
+    /// Clone all borrowed data in this SetPictureFilterRequest.
+    pub fn into_owned(self) -> SetPictureFilterRequest<'static> {
+        SetPictureFilterRequest {
+            picture: self.picture,
+            filter: Cow::Owned(self.filter.into_owned()),
+            values: Cow::Owned(self.values.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetPictureFilterRequest<'input> {
     type Reply = ();
@@ -5082,6 +5227,13 @@ impl<'input> CreateAnimCursorRequest<'input> {
             cid,
             cursors: Cow::Owned(cursors),
         })
+    }
+    /// Clone all borrowed data in this CreateAnimCursorRequest.
+    pub fn into_owned(self) -> CreateAnimCursorRequest<'static> {
+        CreateAnimCursorRequest {
+            cid: self.cid,
+            cursors: Cow::Owned(self.cursors.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreateAnimCursorRequest<'input> {
@@ -5277,6 +5429,15 @@ impl<'input> AddTrapsRequest<'input> {
             traps: Cow::Owned(traps),
         })
     }
+    /// Clone all borrowed data in this AddTrapsRequest.
+    pub fn into_owned(self) -> AddTrapsRequest<'static> {
+        AddTrapsRequest {
+            picture: self.picture,
+            x_off: self.x_off,
+            y_off: self.y_off,
+            traps: Cow::Owned(self.traps.into_owned()),
+        }
+    }
 }
 impl<'input> Request for AddTrapsRequest<'input> {
     type Reply = ();
@@ -5455,6 +5616,16 @@ impl<'input> CreateLinearGradientRequest<'input> {
             colors: Cow::Owned(colors),
         })
     }
+    /// Clone all borrowed data in this CreateLinearGradientRequest.
+    pub fn into_owned(self) -> CreateLinearGradientRequest<'static> {
+        CreateLinearGradientRequest {
+            picture: self.picture,
+            p1: self.p1,
+            p2: self.p2,
+            stops: Cow::Owned(self.stops.into_owned()),
+            colors: Cow::Owned(self.colors.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateLinearGradientRequest<'input> {
     type Reply = ();
@@ -5578,6 +5749,18 @@ impl<'input> CreateRadialGradientRequest<'input> {
             colors: Cow::Owned(colors),
         })
     }
+    /// Clone all borrowed data in this CreateRadialGradientRequest.
+    pub fn into_owned(self) -> CreateRadialGradientRequest<'static> {
+        CreateRadialGradientRequest {
+            picture: self.picture,
+            inner: self.inner,
+            outer: self.outer,
+            inner_radius: self.inner_radius,
+            outer_radius: self.outer_radius,
+            stops: Cow::Owned(self.stops.into_owned()),
+            colors: Cow::Owned(self.colors.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateRadialGradientRequest<'input> {
     type Reply = ();
@@ -5682,6 +5865,16 @@ impl<'input> CreateConicalGradientRequest<'input> {
             stops: Cow::Owned(stops),
             colors: Cow::Owned(colors),
         })
+    }
+    /// Clone all borrowed data in this CreateConicalGradientRequest.
+    pub fn into_owned(self) -> CreateConicalGradientRequest<'static> {
+        CreateConicalGradientRequest {
+            picture: self.picture,
+            center: self.center,
+            angle: self.angle,
+            stops: Cow::Owned(self.stops.into_owned()),
+            colors: Cow::Owned(self.colors.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreateConicalGradientRequest<'input> {

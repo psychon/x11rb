@@ -3514,6 +3514,26 @@ impl<'input> PutImageRequest<'input> {
             data: Cow::Borrowed(data),
         })
     }
+    /// Clone all borrowed data in this PutImageRequest.
+    pub fn into_owned(self) -> PutImageRequest<'static> {
+        PutImageRequest {
+            port: self.port,
+            drawable: self.drawable,
+            gc: self.gc,
+            id: self.id,
+            src_x: self.src_x,
+            src_y: self.src_y,
+            src_w: self.src_w,
+            src_h: self.src_h,
+            drw_x: self.drw_x,
+            drw_y: self.drw_y,
+            drw_w: self.drw_w,
+            drw_h: self.drw_h,
+            width: self.width,
+            height: self.height,
+            data: Cow::Owned(self.data.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PutImageRequest<'input> {
     type Reply = ();

@@ -1278,6 +1278,13 @@ impl<'input> CreateRegionRequest<'input> {
             rectangles: Cow::Owned(rectangles),
         })
     }
+    /// Clone all borrowed data in this CreateRegionRequest.
+    pub fn into_owned(self) -> CreateRegionRequest<'static> {
+        CreateRegionRequest {
+            region: self.region,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateRegionRequest<'input> {
     type Reply = ();
@@ -1693,6 +1700,13 @@ impl<'input> SetRegionRequest<'input> {
             region,
             rectangles: Cow::Owned(rectangles),
         })
+    }
+    /// Clone all borrowed data in this SetRegionRequest.
+    pub fn into_owned(self) -> SetRegionRequest<'static> {
+        SetRegionRequest {
+            region: self.region,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetRegionRequest<'input> {
@@ -2656,6 +2670,13 @@ impl<'input> SetCursorNameRequest<'input> {
             name: Cow::Borrowed(name),
         })
     }
+    /// Clone all borrowed data in this SetCursorNameRequest.
+    pub fn into_owned(self) -> SetCursorNameRequest<'static> {
+        SetCursorNameRequest {
+            cursor: self.cursor,
+            name: Cow::Owned(self.name.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetCursorNameRequest<'input> {
     type Reply = ();
@@ -3014,6 +3035,13 @@ impl<'input> ChangeCursorByNameRequest<'input> {
             src,
             name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this ChangeCursorByNameRequest.
+    pub fn into_owned(self) -> ChangeCursorByNameRequest<'static> {
+        ChangeCursorByNameRequest {
+            src: self.src,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeCursorByNameRequest<'input> {
@@ -3414,6 +3442,19 @@ impl<'input> CreatePointerBarrierRequest<'input> {
             directions,
             devices: Cow::Owned(devices),
         })
+    }
+    /// Clone all borrowed data in this CreatePointerBarrierRequest.
+    pub fn into_owned(self) -> CreatePointerBarrierRequest<'static> {
+        CreatePointerBarrierRequest {
+            barrier: self.barrier,
+            window: self.window,
+            x1: self.x1,
+            y1: self.y1,
+            x2: self.x2,
+            y2: self.y2,
+            directions: self.directions,
+            devices: Cow::Owned(self.devices.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreatePointerBarrierRequest<'input> {

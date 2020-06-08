@@ -2161,6 +2161,16 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
             values: Cow::Owned(values),
         })
     }
+    /// Clone all borrowed data in this ConfigureOutputPropertyRequest.
+    pub fn into_owned(self) -> ConfigureOutputPropertyRequest<'static> {
+        ConfigureOutputPropertyRequest {
+            output: self.output,
+            property: self.property,
+            pending: self.pending,
+            range: self.range,
+            values: Cow::Owned(self.values.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ConfigureOutputPropertyRequest<'input> {
     type Reply = ();
@@ -2268,6 +2278,18 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
             num_units,
             data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this ChangeOutputPropertyRequest.
+    pub fn into_owned(self) -> ChangeOutputPropertyRequest<'static> {
+        ChangeOutputPropertyRequest {
+            output: self.output,
+            property: self.property,
+            type_: self.type_,
+            format: self.format,
+            mode: self.mode,
+            num_units: self.num_units,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeOutputPropertyRequest<'input> {
@@ -2591,6 +2613,14 @@ impl<'input> CreateModeRequest<'input> {
             mode_info,
             name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this CreateModeRequest.
+    pub fn into_owned(self) -> CreateModeRequest<'static> {
+        CreateModeRequest {
+            window: self.window,
+            mode_info: self.mode_info,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreateModeRequest<'input> {
@@ -3080,6 +3110,19 @@ impl<'input> SetCrtcConfigRequest<'input> {
             outputs: Cow::Owned(outputs),
         })
     }
+    /// Clone all borrowed data in this SetCrtcConfigRequest.
+    pub fn into_owned(self) -> SetCrtcConfigRequest<'static> {
+        SetCrtcConfigRequest {
+            crtc: self.crtc,
+            timestamp: self.timestamp,
+            config_timestamp: self.config_timestamp,
+            x: self.x,
+            y: self.y,
+            mode: self.mode,
+            rotation: self.rotation,
+            outputs: Cow::Owned(self.outputs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetCrtcConfigRequest<'input> {
     type Reply = SetCrtcConfigReply;
@@ -3398,6 +3441,15 @@ impl<'input> SetCrtcGammaRequest<'input> {
             green: Cow::Owned(green),
             blue: Cow::Owned(blue),
         })
+    }
+    /// Clone all borrowed data in this SetCrtcGammaRequest.
+    pub fn into_owned(self) -> SetCrtcGammaRequest<'static> {
+        SetCrtcGammaRequest {
+            crtc: self.crtc,
+            red: Cow::Owned(self.red.into_owned()),
+            green: Cow::Owned(self.green.into_owned()),
+            blue: Cow::Owned(self.blue.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetCrtcGammaRequest<'input> {
@@ -3757,6 +3809,15 @@ impl<'input> SetCrtcTransformRequest<'input> {
             filter_name: Cow::Borrowed(filter_name),
             filter_params: Cow::Owned(filter_params),
         })
+    }
+    /// Clone all borrowed data in this SetCrtcTransformRequest.
+    pub fn into_owned(self) -> SetCrtcTransformRequest<'static> {
+        SetCrtcTransformRequest {
+            crtc: self.crtc,
+            transform: self.transform,
+            filter_name: Cow::Owned(self.filter_name.into_owned()),
+            filter_params: Cow::Owned(self.filter_params.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetCrtcTransformRequest<'input> {
@@ -5186,6 +5247,16 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
             values: Cow::Owned(values),
         })
     }
+    /// Clone all borrowed data in this ConfigureProviderPropertyRequest.
+    pub fn into_owned(self) -> ConfigureProviderPropertyRequest<'static> {
+        ConfigureProviderPropertyRequest {
+            provider: self.provider,
+            property: self.property,
+            pending: self.pending,
+            range: self.range,
+            values: Cow::Owned(self.values.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ConfigureProviderPropertyRequest<'input> {
     type Reply = ();
@@ -5292,6 +5363,18 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
             num_items,
             data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this ChangeProviderPropertyRequest.
+    pub fn into_owned(self) -> ChangeProviderPropertyRequest<'static> {
+        ChangeProviderPropertyRequest {
+            provider: self.provider,
+            property: self.property,
+            type_: self.type_,
+            format: self.format,
+            mode: self.mode,
+            num_items: self.num_items,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeProviderPropertyRequest<'input> {
@@ -6574,6 +6657,15 @@ impl<'input> CreateLeaseRequest<'input> {
             crtcs: Cow::Owned(crtcs),
             outputs: Cow::Owned(outputs),
         })
+    }
+    /// Clone all borrowed data in this CreateLeaseRequest.
+    pub fn into_owned(self) -> CreateLeaseRequest<'static> {
+        CreateLeaseRequest {
+            window: self.window,
+            lid: self.lid,
+            crtcs: Cow::Owned(self.crtcs.into_owned()),
+            outputs: Cow::Owned(self.outputs.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreateLeaseRequest<'input> {

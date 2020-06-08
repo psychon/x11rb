@@ -521,6 +521,13 @@ impl<'input> RenderRequest<'input> {
             data: Cow::Borrowed(data),
         })
     }
+    /// Clone all borrowed data in this RenderRequest.
+    pub fn into_owned(self) -> RenderRequest<'static> {
+        RenderRequest {
+            context_tag: self.context_tag,
+            data: Cow::Owned(self.data.into_owned()),
+        }
+    }
 }
 impl<'input> Request for RenderRequest<'input> {
     type Reply = ();
@@ -605,6 +612,15 @@ impl<'input> RenderLargeRequest<'input> {
             request_total,
             data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this RenderLargeRequest.
+    pub fn into_owned(self) -> RenderLargeRequest<'static> {
+        RenderLargeRequest {
+            context_tag: self.context_tag,
+            request_num: self.request_num,
+            request_total: self.request_total,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for RenderLargeRequest<'input> {
@@ -1832,6 +1848,14 @@ impl<'input> VendorPrivateRequest<'input> {
             data: Cow::Borrowed(data),
         })
     }
+    /// Clone all borrowed data in this VendorPrivateRequest.
+    pub fn into_owned(self) -> VendorPrivateRequest<'static> {
+        VendorPrivateRequest {
+            vendor_code: self.vendor_code,
+            context_tag: self.context_tag,
+            data: Cow::Owned(self.data.into_owned()),
+        }
+    }
 }
 impl<'input> Request for VendorPrivateRequest<'input> {
     type Reply = ();
@@ -1906,6 +1930,14 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
             context_tag,
             data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this VendorPrivateWithReplyRequest.
+    pub fn into_owned(self) -> VendorPrivateWithReplyRequest<'static> {
+        VendorPrivateWithReplyRequest {
+            vendor_code: self.vendor_code,
+            context_tag: self.context_tag,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for VendorPrivateWithReplyRequest<'input> {
@@ -2239,6 +2271,14 @@ impl<'input> ClientInfoRequest<'input> {
             string: Cow::Borrowed(string),
         })
     }
+    /// Clone all borrowed data in this ClientInfoRequest.
+    pub fn into_owned(self) -> ClientInfoRequest<'static> {
+        ClientInfoRequest {
+            major_version: self.major_version,
+            minor_version: self.minor_version,
+            string: Cow::Owned(self.string.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ClientInfoRequest<'input> {
     type Reply = ();
@@ -2443,6 +2483,16 @@ impl<'input> CreatePixmapRequest<'input> {
             glx_pixmap,
             attribs: Cow::Owned(attribs),
         })
+    }
+    /// Clone all borrowed data in this CreatePixmapRequest.
+    pub fn into_owned(self) -> CreatePixmapRequest<'static> {
+        CreatePixmapRequest {
+            screen: self.screen,
+            fbconfig: self.fbconfig,
+            pixmap: self.pixmap,
+            glx_pixmap: self.glx_pixmap,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreatePixmapRequest<'input> {
@@ -2920,6 +2970,15 @@ impl<'input> CreatePbufferRequest<'input> {
             attribs: Cow::Owned(attribs),
         })
     }
+    /// Clone all borrowed data in this CreatePbufferRequest.
+    pub fn into_owned(self) -> CreatePbufferRequest<'static> {
+        CreatePbufferRequest {
+            screen: self.screen,
+            fbconfig: self.fbconfig,
+            pbuffer: self.pbuffer,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreatePbufferRequest<'input> {
     type Reply = ();
@@ -3160,6 +3219,13 @@ impl<'input> ChangeDrawableAttributesRequest<'input> {
             attribs: Cow::Owned(attribs),
         })
     }
+    /// Clone all borrowed data in this ChangeDrawableAttributesRequest.
+    pub fn into_owned(self) -> ChangeDrawableAttributesRequest<'static> {
+        ChangeDrawableAttributesRequest {
+            drawable: self.drawable,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ChangeDrawableAttributesRequest<'input> {
     type Reply = ();
@@ -3258,6 +3324,16 @@ impl<'input> CreateWindowRequest<'input> {
             glx_window,
             attribs: Cow::Owned(attribs),
         })
+    }
+    /// Clone all borrowed data in this CreateWindowRequest.
+    pub fn into_owned(self) -> CreateWindowRequest<'static> {
+        CreateWindowRequest {
+            screen: self.screen,
+            fbconfig: self.fbconfig,
+            window: self.window,
+            glx_window: self.glx_window,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreateWindowRequest<'input> {
@@ -3426,6 +3502,16 @@ impl<'input> SetClientInfoARBRequest<'input> {
             glx_extension_string: Cow::Borrowed(glx_extension_string),
         })
     }
+    /// Clone all borrowed data in this SetClientInfoARBRequest.
+    pub fn into_owned(self) -> SetClientInfoARBRequest<'static> {
+        SetClientInfoARBRequest {
+            major_version: self.major_version,
+            minor_version: self.minor_version,
+            gl_versions: Cow::Owned(self.gl_versions.into_owned()),
+            gl_extension_string: Cow::Owned(self.gl_extension_string.into_owned()),
+            glx_extension_string: Cow::Owned(self.glx_extension_string.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetClientInfoARBRequest<'input> {
     type Reply = ();
@@ -3537,6 +3623,17 @@ impl<'input> CreateContextAttribsARBRequest<'input> {
             attribs: Cow::Owned(attribs),
         })
     }
+    /// Clone all borrowed data in this CreateContextAttribsARBRequest.
+    pub fn into_owned(self) -> CreateContextAttribsARBRequest<'static> {
+        CreateContextAttribsARBRequest {
+            context: self.context,
+            fbconfig: self.fbconfig,
+            screen: self.screen,
+            share_list: self.share_list,
+            is_direct: self.is_direct,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateContextAttribsARBRequest<'input> {
     type Reply = ();
@@ -3645,6 +3742,16 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
             gl_extension_string: Cow::Borrowed(gl_extension_string),
             glx_extension_string: Cow::Borrowed(glx_extension_string),
         })
+    }
+    /// Clone all borrowed data in this SetClientInfo2ARBRequest.
+    pub fn into_owned(self) -> SetClientInfo2ARBRequest<'static> {
+        SetClientInfo2ARBRequest {
+            major_version: self.major_version,
+            minor_version: self.minor_version,
+            gl_versions: Cow::Owned(self.gl_versions.into_owned()),
+            gl_extension_string: Cow::Owned(self.gl_extension_string.into_owned()),
+            glx_extension_string: Cow::Owned(self.glx_extension_string.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetClientInfo2ARBRequest<'input> {
@@ -8385,6 +8492,13 @@ impl<'input> AreTexturesResidentRequest<'input> {
             textures: Cow::Owned(textures),
         })
     }
+    /// Clone all borrowed data in this AreTexturesResidentRequest.
+    pub fn into_owned(self) -> AreTexturesResidentRequest<'static> {
+        AreTexturesResidentRequest {
+            context_tag: self.context_tag,
+            textures: Cow::Owned(self.textures.into_owned()),
+        }
+    }
 }
 impl<'input> Request for AreTexturesResidentRequest<'input> {
     type Reply = AreTexturesResidentReply;
@@ -8503,6 +8617,13 @@ impl<'input> DeleteTexturesRequest<'input> {
             context_tag,
             textures: Cow::Owned(textures),
         })
+    }
+    /// Clone all borrowed data in this DeleteTexturesRequest.
+    pub fn into_owned(self) -> DeleteTexturesRequest<'static> {
+        DeleteTexturesRequest {
+            context_tag: self.context_tag,
+            textures: Cow::Owned(self.textures.into_owned()),
+        }
     }
 }
 impl<'input> Request for DeleteTexturesRequest<'input> {
@@ -10619,6 +10740,13 @@ impl<'input> DeleteQueriesARBRequest<'input> {
             context_tag,
             ids: Cow::Owned(ids),
         })
+    }
+    /// Clone all borrowed data in this DeleteQueriesARBRequest.
+    pub fn into_owned(self) -> DeleteQueriesARBRequest<'static> {
+        DeleteQueriesARBRequest {
+            context_tag: self.context_tag,
+            ids: Cow::Owned(self.ids.into_owned()),
+        }
     }
 }
 impl<'input> Request for DeleteQueriesARBRequest<'input> {

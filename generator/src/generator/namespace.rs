@@ -664,6 +664,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         out: &mut Output,
     ) {
         let ns = request_def.namespace.upgrade().unwrap();
+        let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
 
         if let Some(ref doc) = request_def.doc {
             self.emit_doc(doc, out);
@@ -684,6 +685,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             };
 
         let has_members = !gathered.request_args.is_empty();
+        let has_cows = gathered
+            .request_args
+            .iter()
+            .any(|arg| arg.1.needs_any_cow());
         let members_start = if has_members { " {" } else { ";" };
         outln!(
             out,
@@ -1291,6 +1296,32 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "{})", members_end);
             });
             outln!(out, "}}");
+            if has_cows {
+                outln!(out, "/// Clone all borrowed data in this {}Request.", name);
+                outln!(
+                    out,
+                    "pub fn into_owned(self) -> {}Request<'static> {{",
+                    name
+                );
+                out.indented(|out| {
+                    outln!(out, "{}Request {{", name);
+                    out.indented(|out| {
+                        for (arg_name, arg_type) in gathered.args.iter() {
+                            if arg_type.needs_any_cow() || is_send_event && arg_name == "event" {
+                                outln!(
+                                    out,
+                                    "{name}: Cow::Owned(self.{name}.into_owned()),",
+                                    name = arg_name
+                                );
+                            } else {
+                                outln!(out, "{name}: self.{name},", name = arg_name);
+                            }
+                        }
+                    });
+                    outln!(out, "}}");
+                });
+                outln!(out, "}}");
+            }
         });
         outln!(out, "}}");
         outln!(
