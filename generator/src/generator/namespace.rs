@@ -160,7 +160,7 @@ pub(super) fn generate_request_reply_enum(
         );
         outln!(
             out,
-            "pub fn reply_parser<'a>(&self) -> Option<ReplyParsingFunction<'a>> {{"
+            "pub fn reply_parser(&self) -> Option<ReplyParsingFunction> {{"
         );
         out.indented(|out| {
             outln!(out, "match self {{");

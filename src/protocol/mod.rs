@@ -2111,7 +2111,7 @@ impl<'input> Request<'input> {
         Ok(Request::Unknown(header, remaining))
     }
     // Get the matching reply parser (if any) for this request
-    pub fn reply_parser<'a>(&self) -> Option<ReplyParsingFunction<'a>> {
+    pub fn reply_parser(&self) -> Option<ReplyParsingFunction> {
         match self {
             Request::Unknown(_, _) => None,
             Request::CreateWindow(_) => None,

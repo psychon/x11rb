@@ -130,10 +130,11 @@ pub trait Request {
 }
 
 /// A type alias for reply parsers (matches the signature of TryParseFd).
-pub type ReplyParsingFunction<'a> = fn(
-    &'a [u8],
-    &mut Vec<RawFdContainer>,
-) -> Result<(crate::protocol::Reply, &'a [u8]), ParseError>;
+pub type ReplyParsingFunction =
+    for<'a> fn(
+        &'a [u8],
+        &mut Vec<RawFdContainer>,
+    ) -> Result<(crate::protocol::Reply, &'a [u8]), ParseError>;
 
 /// A type implementing this trait can be serialized into X11 raw bytes.
 pub trait Serialize {
