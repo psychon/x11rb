@@ -90,7 +90,7 @@ impl Serialize for Fp3232 {
 pub const GET_EXTENSION_VERSION_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetExtensionVersionRequest<'input> {
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> GetExtensionVersionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -120,7 +120,7 @@ impl<'input> GetExtensionVersionRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -132,7 +132,7 @@ impl<'input> GetExtensionVersionRequest<'input> {
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(GetExtensionVersionRequest {
-            name,
+            name: Cow::Borrowed(name),
         })
     }
 }
@@ -144,7 +144,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetExtensionVersionRequest {
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5648,7 +5648,7 @@ pub const SET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 27;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceModifierMappingRequest<'input> {
     pub device_id: u8,
-    pub keymaps: &'input [u8],
+    pub keymaps: Cow<'input, [u8]>,
 }
 impl<'input> SetDeviceModifierMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -5680,7 +5680,7 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.keymaps.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.keymaps, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -5694,7 +5694,7 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         let _ = remaining;
         Ok(SetDeviceModifierMappingRequest {
             device_id,
-            keymaps,
+            keymaps: Cow::Borrowed(keymaps),
         })
     }
 }
@@ -5707,7 +5707,7 @@ where
 {
     let request0 = SetDeviceModifierMappingRequest {
         device_id,
-        keymaps,
+        keymaps: Cow::Borrowed(keymaps),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5860,7 +5860,7 @@ pub const SET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 29;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceButtonMappingRequest<'input> {
     pub device_id: u8,
-    pub map: &'input [u8],
+    pub map: Cow<'input, [u8]>,
 }
 impl<'input> SetDeviceButtonMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -5891,7 +5891,7 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.map.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.map, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -5905,7 +5905,7 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         let _ = remaining;
         Ok(SetDeviceButtonMappingRequest {
             device_id,
-            map,
+            map: Cow::Borrowed(map),
         })
     }
 }
@@ -5918,7 +5918,7 @@ where
 {
     let request0 = SetDeviceButtonMappingRequest {
         device_id,
-        map,
+        map: Cow::Borrowed(map),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

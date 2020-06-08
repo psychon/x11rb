@@ -11799,7 +11799,7 @@ pub struct SetDebuggingFlagsRequest<'input> {
     pub flags: u32,
     pub affect_ctrls: u32,
     pub ctrls: u32,
-    pub message: &'input [String8],
+    pub message: Cow<'input, [String8]>,
 }
 impl<'input> SetDebuggingFlagsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -11849,7 +11849,7 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.message.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.message, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -11869,7 +11869,7 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
             flags,
             affect_ctrls,
             ctrls,
-            message,
+            message: Cow::Borrowed(message),
         })
     }
 }
@@ -11885,7 +11885,7 @@ where
         flags,
         affect_ctrls,
         ctrls,
-        message,
+        message: Cow::Borrowed(message),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

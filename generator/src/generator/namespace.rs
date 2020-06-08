@@ -799,7 +799,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     align,
                                     align,
                                 );
-                                next_slice = Some(format!("padding{}", pad_count));
+                                next_slice = Some((format!("padding{}", pad_count), true));
                                 pad_count += 1;
                             }
                         },
@@ -879,7 +879,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         bytes_name,
                                         rust_field_name,
                                     );
-                                    next_slice = Some(bytes_name);
+                                    next_slice = Some((bytes_name, true));
                                 }
                             }
                         }
@@ -889,9 +889,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             if self.rust_value_type_is_u8(&list_field.element_type) {
                                 if list_length.is_some() {
                                     // If this is a fixed length array we need to erase its length.
-                                    next_slice = Some(format!("(&self.{}[..])", rust_field_name));
+                                    next_slice =
+                                        Some((format!("(&self.{}[..])", rust_field_name), true));
                                 } else {
-                                    next_slice = Some(format!("self.{}", rust_field_name));
+                                    next_slice = Some((format!("self.{}", rust_field_name), false));
                                 }
                             } else {
                                 assert_eq!(
@@ -906,7 +907,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         bytes_name,
                                         rust_field_name,
                                     );
-                                    next_slice = Some(bytes_name);
+                                    next_slice = Some((bytes_name, true));
                                 } else {
                                     let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                     outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
@@ -921,7 +922,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         );
                                     });
                                     outln!(tmp_out, "}}");
-                                    next_slice = Some(bytes_name);
+                                    next_slice = Some((bytes_name, true));
                                 }
                             }
                         }
@@ -950,7 +951,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
                                 }
                             } else {
-                                next_slice = Some(bytes_name);
+                                next_slice = Some((bytes_name, true));
                             }
                         }
                         xcbdefs::FieldDef::Fd(_) => {}
@@ -1036,13 +1037,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             fixed_fields_bytes.clear();
                             num_fixed_len_slices += 1;
                         }
-                        if let Some(next_slice) = next_slice {
+                        if let Some((next_slice, needs_conversion)) = next_slice {
                             outln!(
                                 tmp_out,
                                 "let length_so_far = length_so_far + {}.len();",
                                 next_slice,
                             );
-                            request_slices.push(format!("{}.into()", next_slice));
+                            let conversion_str = if needs_conversion { ".into()" } else { "" };
+                            request_slices.push(format!("{}{}", next_slice, conversion_str));
                         }
                     }
 
@@ -1249,8 +1251,17 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "Ok({}Request{}", name, members_start);
                 out.indented(|out| {
                     for (arg_name, arg_type) in gathered.request_args.iter() {
-                        if arg_type.needs_cow() {
+                        if arg_type.needs_owned_cow() {
+                            // Types that are parsed from raw bytes must become
+                            // Cow::Owned here because they don't exist outside
+                            // of this function, so we cannot return references
+                            // to them.
                             outln!(out, "{name}: Cow::Owned({name}),", name = arg_name);
+                        } else if arg_type.needs_borrowed_cow() {
+                            // But raw buffers of bytes can become Cow::Borrowed,
+                            // because the original buffer of bytes still exists
+                            // after we return.
+                            outln!(out, "{name}: Cow::Borrowed({name}),", name = arg_name);
                         } else {
                             outln!(out, "{name},", name = arg_name);
                         }
@@ -1356,7 +1367,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "let request0 = {}Request{}", name, members_start);
             out.indented(|out| {
                 for (arg_name, arg_type) in gathered.args.iter() {
-                    if arg_type.needs_cow() {
+                    if arg_type.needs_any_cow() {
+                        // Because the argument is passed in from outside this function,
+                        // it is always ok to use a Cow::Borrowed here.
                         outln!(out, "{name}: Cow::Borrowed({name}),", name = arg_name);
                     } else {
                         outln!(out, "{name},", name = arg_name);
@@ -5139,7 +5152,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             if let Some(list_len) = list_field.length() {
                                 Type::Simple(format!("&'input [{}; {}]", element_type, list_len))
                             } else {
-                                Type::Simple(format!("&'input [{}]", element_type))
+                                Type::VariableOwnershipRawBytes(format!("[{}]", element_type))
                             }
                         } else {
                             assert_eq!(
@@ -5817,17 +5830,36 @@ enum Type {
     /// This type is simple can we can just use the string provided.
     Simple(String),
     /// This type has a lifetime and needs to be a borrow or a Cow, depending
-    /// on the context. Note that a type that is *always* a borrow is
-    /// `Simple`.
+    /// on the context. But during parsing it has to be a Cow::Owned because
+    /// it is generated.
     VariableOwnership(String),
+    /// This type has a lifetime and needs to be a borrow or a Cow, but
+    /// when parsing it can be borrowed from the byte stream.
+    VariableOwnershipRawBytes(String),
 }
 
 impl Type {
+    /// Does this type need a Cow::Owned?
+    fn needs_owned_cow(&self) -> bool {
+        match self {
+            Type::Simple(_) | Type::VariableOwnershipRawBytes(_) => false,
+            Type::VariableOwnership(_) => true,
+        }
+    }
+
+    /// Does this type need a Cow::Borrowed?
+    fn needs_borrowed_cow(&self) -> bool {
+        match self {
+            Type::Simple(_) | Type::VariableOwnership(_) => false,
+            Type::VariableOwnershipRawBytes(_) => true,
+        }
+    }
+
     /// Does this type need a Cow?
-    fn needs_cow(&self) -> bool {
+    fn needs_any_cow(&self) -> bool {
         match self {
             Type::Simple(_) => false,
-            Type::VariableOwnership(_) => true,
+            Type::VariableOwnership(_) | Type::VariableOwnershipRawBytes(_) => true,
         }
     }
 
@@ -5835,7 +5867,9 @@ impl Type {
     fn as_argument(&self) -> Cow<'_, str> {
         match self {
             Type::Simple(ref type_) => type_.into(),
-            Type::VariableOwnership(ref type_) => format!("&'input {}", type_).into(),
+            Type::VariableOwnership(ref type_) | Type::VariableOwnershipRawBytes(ref type_) => {
+                format!("&'input {}", type_).into()
+            }
         }
     }
 
@@ -5843,7 +5877,9 @@ impl Type {
     fn as_field(&self) -> Cow<'_, str> {
         match self {
             Type::Simple(ref type_) => type_.into(),
-            Type::VariableOwnership(ref type_) => format!("Cow<'input, {}>", type_).into(),
+            Type::VariableOwnership(ref type_) | Type::VariableOwnershipRawBytes(ref type_) => {
+                format!("Cow<'input, {}>", type_).into()
+            }
         }
     }
 }

@@ -2191,7 +2191,7 @@ pub struct ChangeOutputPropertyRequest<'input> {
     pub format: u8,
     pub mode: xproto::PropMode,
     pub num_units: u32,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> ChangeOutputPropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2242,7 +2242,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2266,7 +2266,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
             format,
             mode,
             num_units,
-            data,
+            data: Cow::Borrowed(data),
         })
     }
 }
@@ -2284,7 +2284,7 @@ where
         format,
         mode,
         num_units,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2513,7 +2513,7 @@ pub const CREATE_MODE_REQUEST: u8 = 16;
 pub struct CreateModeRequest<'input> {
     pub window: xproto::Window,
     pub mode_info: ModeInfo,
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> CreateModeRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2575,7 +2575,7 @@ impl<'input> CreateModeRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2589,7 +2589,7 @@ impl<'input> CreateModeRequest<'input> {
         Ok(CreateModeRequest {
             window,
             mode_info,
-            name,
+            name: Cow::Borrowed(name),
         })
     }
 }
@@ -2603,7 +2603,7 @@ where
     let request0 = CreateModeRequest {
         window,
         mode_info,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3649,7 +3649,7 @@ pub const SET_CRTC_TRANSFORM_REQUEST: u8 = 26;
 pub struct SetCrtcTransformRequest<'input> {
     pub crtc: Crtc,
     pub transform: render::Transform,
-    pub filter_name: &'input [u8],
+    pub filter_name: Cow<'input, [u8]>,
     pub filter_params: Cow<'input, [render::Fixed]>,
 }
 impl<'input> SetCrtcTransformRequest<'input> {
@@ -3726,7 +3726,7 @@ impl<'input> SetCrtcTransformRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.filter_name.into(), padding0.into(), filter_params_bytes.into(), padding1.into()], vec![]))
+        Ok((vec![request0.into(), self.filter_name, padding0.into(), filter_params_bytes.into(), padding1.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3754,7 +3754,7 @@ impl<'input> SetCrtcTransformRequest<'input> {
         Ok(SetCrtcTransformRequest {
             crtc,
             transform,
-            filter_name,
+            filter_name: Cow::Borrowed(filter_name),
             filter_params: Cow::Owned(filter_params),
         })
     }
@@ -3769,7 +3769,7 @@ where
     let request0 = SetCrtcTransformRequest {
         crtc,
         transform,
-        filter_name,
+        filter_name: Cow::Borrowed(filter_name),
         filter_params: Cow::Borrowed(filter_params),
     };
     let (bytes, fds) = request0.serialize(conn)?;
@@ -5216,7 +5216,7 @@ pub struct ChangeProviderPropertyRequest<'input> {
     pub format: u8,
     pub mode: u8,
     pub num_items: u32,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> ChangeProviderPropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -5267,7 +5267,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -5290,7 +5290,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
             format,
             mode,
             num_items,
-            data,
+            data: Cow::Borrowed(data),
         })
     }
 }
@@ -5308,7 +5308,7 @@ where
         format,
         mode,
         num_items,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

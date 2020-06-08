@@ -587,7 +587,7 @@ pub struct ModModeLineRequest<'input> {
     pub vsyncend: u16,
     pub vtotal: u16,
     pub flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> ModModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -668,7 +668,7 @@ impl<'input> ModModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -703,7 +703,7 @@ impl<'input> ModModeLineRequest<'input> {
             vsyncend,
             vtotal,
             flags,
-            private,
+            private: Cow::Borrowed(private),
         })
     }
 }
@@ -728,7 +728,7 @@ where
         vsyncend,
         vtotal,
         flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1151,7 +1151,7 @@ pub struct AddModeLineRequest<'input> {
     pub after_vsyncend: u16,
     pub after_vtotal: u16,
     pub after_flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> AddModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1288,7 +1288,7 @@ impl<'input> AddModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1349,7 +1349,7 @@ impl<'input> AddModeLineRequest<'input> {
             after_vsyncend,
             after_vtotal,
             after_flags,
-            private,
+            private: Cow::Borrowed(private),
         })
     }
 }
@@ -1388,7 +1388,7 @@ where
         after_vsyncend,
         after_vtotal,
         after_flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1411,7 +1411,7 @@ pub struct DeleteModeLineRequest<'input> {
     pub vsyncend: u16,
     pub vtotal: u16,
     pub flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> DeleteModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1497,7 +1497,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1534,7 +1534,7 @@ impl<'input> DeleteModeLineRequest<'input> {
             vsyncend,
             vtotal,
             flags,
-            private,
+            private: Cow::Borrowed(private),
         })
     }
 }
@@ -1560,7 +1560,7 @@ where
         vsyncend,
         vtotal,
         flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1583,7 +1583,7 @@ pub struct ValidateModeLineRequest<'input> {
     pub vsyncend: u16,
     pub vtotal: u16,
     pub flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> ValidateModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1669,7 +1669,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1706,7 +1706,7 @@ impl<'input> ValidateModeLineRequest<'input> {
             vsyncend,
             vtotal,
             flags,
-            private,
+            private: Cow::Borrowed(private),
         })
     }
 }
@@ -1732,7 +1732,7 @@ where
         vsyncend,
         vtotal,
         flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1783,7 +1783,7 @@ pub struct SwitchToModeRequest<'input> {
     pub vsyncend: u16,
     pub vtotal: u16,
     pub flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> SwitchToModeRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1869,7 +1869,7 @@ impl<'input> SwitchToModeRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1906,7 +1906,7 @@ impl<'input> SwitchToModeRequest<'input> {
             vsyncend,
             vtotal,
             flags,
-            private,
+            private: Cow::Borrowed(private),
         })
     }
 }
@@ -1932,7 +1932,7 @@ where
         vsyncend,
         vtotal,
         flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

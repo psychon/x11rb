@@ -2604,7 +2604,7 @@ pub const SET_CURSOR_NAME_REQUEST: u8 = 23;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetCursorNameRequest<'input> {
     pub cursor: xproto::Cursor,
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> SetCursorNameRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2639,7 +2639,7 @@ impl<'input> SetCursorNameRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2653,7 +2653,7 @@ impl<'input> SetCursorNameRequest<'input> {
         let _ = remaining;
         Ok(SetCursorNameRequest {
             cursor,
-            name,
+            name: Cow::Borrowed(name),
         })
     }
 }
@@ -2666,7 +2666,7 @@ where
 {
     let request0 = SetCursorNameRequest {
         cursor,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2963,7 +2963,7 @@ pub const CHANGE_CURSOR_BY_NAME_REQUEST: u8 = 27;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChangeCursorByNameRequest<'input> {
     pub src: xproto::Cursor,
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> ChangeCursorByNameRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2998,7 +2998,7 @@ impl<'input> ChangeCursorByNameRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3012,7 +3012,7 @@ impl<'input> ChangeCursorByNameRequest<'input> {
         let _ = remaining;
         Ok(ChangeCursorByNameRequest {
             src,
-            name,
+            name: Cow::Borrowed(name),
         })
     }
 }
@@ -3025,7 +3025,7 @@ where
 {
     let request0 = ChangeCursorByNameRequest {
         src,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

@@ -486,8 +486,8 @@ impl TryFrom<&[u8]> for PrintQueryVersionReply {
 pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetPrinterListRequest<'input> {
-    pub printer_name: &'input [String8],
-    pub locale: &'input [String8],
+    pub printer_name: Cow<'input, [String8]>,
+    pub locale: Cow<'input, [String8]>,
 }
 impl<'input> PrintGetPrinterListRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -524,7 +524,7 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.printer_name.into(), self.locale.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.printer_name, self.locale, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -537,8 +537,8 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(PrintGetPrinterListRequest {
-            printer_name,
-            locale,
+            printer_name: Cow::Borrowed(printer_name),
+            locale: Cow::Borrowed(locale),
         })
     }
 }
@@ -550,8 +550,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = PrintGetPrinterListRequest {
-        printer_name,
-        locale,
+        printer_name: Cow::Borrowed(printer_name),
+        locale: Cow::Borrowed(locale),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -655,8 +655,8 @@ pub const CREATE_CONTEXT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateContextRequest<'input> {
     pub context_id: u32,
-    pub printer_name: &'input [String8],
-    pub locale: &'input [String8],
+    pub printer_name: Cow<'input, [String8]>,
+    pub locale: Cow<'input, [String8]>,
 }
 impl<'input> CreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -698,7 +698,7 @@ impl<'input> CreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.printer_name.into(), self.locale.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.printer_name, self.locale, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -713,8 +713,8 @@ impl<'input> CreateContextRequest<'input> {
         let _ = remaining;
         Ok(CreateContextRequest {
             context_id,
-            printer_name,
-            locale,
+            printer_name: Cow::Borrowed(printer_name),
+            locale: Cow::Borrowed(locale),
         })
     }
 }
@@ -727,8 +727,8 @@ where
 {
     let request0 = CreateContextRequest {
         context_id,
-        printer_name,
-        locale,
+        printer_name: Cow::Borrowed(printer_name),
+        locale: Cow::Borrowed(locale),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1244,9 +1244,9 @@ pub const PRINT_PUT_DOCUMENT_DATA_REQUEST: u8 = 11;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintPutDocumentDataRequest<'input> {
     pub drawable: xproto::Drawable,
-    pub data: &'input [u8],
-    pub doc_format: &'input [String8],
-    pub options: &'input [String8],
+    pub data: Cow<'input, [u8]>,
+    pub doc_format: Cow<'input, [String8]>,
+    pub options: Cow<'input, [String8]>,
 }
 impl<'input> PrintPutDocumentDataRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1291,7 +1291,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), self.doc_format.into(), self.options.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, self.doc_format, self.options, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1308,9 +1308,9 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         let _ = remaining;
         Ok(PrintPutDocumentDataRequest {
             drawable,
-            data,
-            doc_format,
-            options,
+            data: Cow::Borrowed(data),
+            doc_format: Cow::Borrowed(doc_format),
+            options: Cow::Borrowed(options),
         })
     }
 }
@@ -1323,9 +1323,9 @@ where
 {
     let request0 = PrintPutDocumentDataRequest {
         drawable,
-        data,
-        doc_format,
-        options,
+        data: Cow::Borrowed(data),
+        doc_format: Cow::Borrowed(doc_format),
+        options: Cow::Borrowed(options),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1844,7 +1844,7 @@ pub const PRINT_GET_ONE_ATTRIBUTES_REQUEST: u8 = 19;
 pub struct PrintGetOneAttributesRequest<'input> {
     pub context: Pcontext,
     pub pool: u8,
-    pub name: &'input [String8],
+    pub name: Cow<'input, [String8]>,
 }
 impl<'input> PrintGetOneAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1884,7 +1884,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1900,7 +1900,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         Ok(PrintGetOneAttributesRequest {
             context,
             pool,
-            name,
+            name: Cow::Borrowed(name),
         })
     }
 }
@@ -1914,7 +1914,7 @@ where
     let request0 = PrintGetOneAttributesRequest {
         context,
         pool,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1974,7 +1974,7 @@ pub struct PrintSetAttributesRequest<'input> {
     pub string_len: u32,
     pub pool: u8,
     pub rule: u8,
-    pub attributes: &'input [String8],
+    pub attributes: Cow<'input, [String8]>,
 }
 impl<'input> PrintSetAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2014,7 +2014,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.attributes.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.attributes, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2033,7 +2033,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
             string_len,
             pool,
             rule,
-            attributes,
+            attributes: Cow::Borrowed(attributes),
         })
     }
 }
@@ -2049,7 +2049,7 @@ where
         string_len,
         pool,
         rule,
-        attributes,
+        attributes: Cow::Borrowed(attributes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

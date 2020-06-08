@@ -3887,7 +3887,7 @@ pub struct AddGlyphsRequest<'input> {
     pub glyphset: Glyphset,
     pub glyphids: Cow<'input, [u32]>,
     pub glyphs: Cow<'input, [Glyphinfo]>,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> AddGlyphsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3927,7 +3927,7 @@ impl<'input> AddGlyphsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), glyphids_bytes.into(), glyphs_bytes.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), glyphids_bytes.into(), glyphs_bytes.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3944,7 +3944,7 @@ impl<'input> AddGlyphsRequest<'input> {
             glyphset,
             glyphids: Cow::Owned(glyphids),
             glyphs: Cow::Owned(glyphs),
-            data,
+            data: Cow::Borrowed(data),
         })
     }
 }
@@ -3959,7 +3959,7 @@ where
         glyphset,
         glyphids: Cow::Borrowed(glyphids),
         glyphs: Cow::Borrowed(glyphs),
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4051,7 +4051,7 @@ pub struct CompositeGlyphs8Request<'input> {
     pub glyphset: Glyphset,
     pub src_x: i16,
     pub src_y: i16,
-    pub glyphcmds: &'input [u8],
+    pub glyphcmds: Cow<'input, [u8]>,
 }
 impl<'input> CompositeGlyphs8Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4106,7 +4106,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.glyphcmds.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.glyphcmds, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -4132,7 +4132,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
             glyphset,
             src_x,
             src_y,
-            glyphcmds,
+            glyphcmds: Cow::Borrowed(glyphcmds),
         })
     }
 }
@@ -4151,7 +4151,7 @@ where
         glyphset,
         src_x,
         src_y,
-        glyphcmds,
+        glyphcmds: Cow::Borrowed(glyphcmds),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4169,7 +4169,7 @@ pub struct CompositeGlyphs16Request<'input> {
     pub glyphset: Glyphset,
     pub src_x: i16,
     pub src_y: i16,
-    pub glyphcmds: &'input [u8],
+    pub glyphcmds: Cow<'input, [u8]>,
 }
 impl<'input> CompositeGlyphs16Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4224,7 +4224,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.glyphcmds.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.glyphcmds, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -4250,7 +4250,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
             glyphset,
             src_x,
             src_y,
-            glyphcmds,
+            glyphcmds: Cow::Borrowed(glyphcmds),
         })
     }
 }
@@ -4269,7 +4269,7 @@ where
         glyphset,
         src_x,
         src_y,
-        glyphcmds,
+        glyphcmds: Cow::Borrowed(glyphcmds),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4287,7 +4287,7 @@ pub struct CompositeGlyphs32Request<'input> {
     pub glyphset: Glyphset,
     pub src_x: i16,
     pub src_y: i16,
-    pub glyphcmds: &'input [u8],
+    pub glyphcmds: Cow<'input, [u8]>,
 }
 impl<'input> CompositeGlyphs32Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4342,7 +4342,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.glyphcmds.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.glyphcmds, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -4368,7 +4368,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
             glyphset,
             src_x,
             src_y,
-            glyphcmds,
+            glyphcmds: Cow::Borrowed(glyphcmds),
         })
     }
 }
@@ -4387,7 +4387,7 @@ where
         glyphset,
         src_x,
         src_y,
-        glyphcmds,
+        glyphcmds: Cow::Borrowed(glyphcmds),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -4896,7 +4896,7 @@ pub const SET_PICTURE_FILTER_REQUEST: u8 = 30;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetPictureFilterRequest<'input> {
     pub picture: Picture,
-    pub filter: &'input [u8],
+    pub filter: Cow<'input, [u8]>,
     pub values: Cow<'input, [Fixed]>,
 }
 impl<'input> SetPictureFilterRequest<'input> {
@@ -4936,7 +4936,7 @@ impl<'input> SetPictureFilterRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.filter.into(), padding0.into(), values_bytes.into(), padding1.into()], vec![]))
+        Ok((vec![request0.into(), self.filter, padding0.into(), values_bytes.into(), padding1.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -4962,7 +4962,7 @@ impl<'input> SetPictureFilterRequest<'input> {
         let _ = remaining;
         Ok(SetPictureFilterRequest {
             picture,
-            filter,
+            filter: Cow::Borrowed(filter),
             values: Cow::Owned(values),
         })
     }
@@ -4976,7 +4976,7 @@ where
 {
     let request0 = SetPictureFilterRequest {
         picture,
-        filter,
+        filter: Cow::Borrowed(filter),
         values: Cow::Borrowed(values),
     };
     let (bytes, fds) = request0.serialize(conn)?;
