@@ -20,6 +20,8 @@ pub(super) struct PerModuleEnumCases {
     request_parse_cases: Vec<String>,
     /// Lines that belong in the definition of Request::reply_parser.
     reply_parse_cases: Vec<String>,
+    /// Lines that belong in the definition of Request::into_owned.
+    request_into_owned_cases: Vec<String>,
     /// Lines that belong in the Reply enum definition.
     reply_variants: Vec<String>,
     /// Impls for From<ReplyType> for Reply enum.
@@ -179,6 +181,31 @@ pub(super) fn generate_request_reply_enum(
                         .reply_parse_cases
                         .drain(..);
                     for case in reply_parse_cases {
+                        if has_feature {
+                            outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                        }
+                        outln!(out, "{}", case);
+                    }
+                }
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+        outln!(out, "/// Convert this Request into an owned version with no borrows.");
+        outln!(out, "pub fn into_owned(self) -> Request<'static> {{");
+        out.indented(|out| {
+            outln!(out, "match self {{");
+            out.indented(|out| {
+                outln!(out, "Request::Unknown(header, body) => Request::Unknown(header, Cow::Owned(body.into_owned())),");
+                for ns in namespaces.iter() {
+                    let has_feature = super::ext_has_feature(&ns.header);
+
+                    let request_into_owned_cases = enum_cases
+                        .get_mut(&ns.header)
+                        .unwrap()
+                        .request_into_owned_cases
+                        .drain(..);
+                    for case in request_into_owned_cases {
                         if has_feature {
                             outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
                         }
@@ -586,6 +613,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         } else {
             enum_cases.reply_parse_cases.push(format!(
                 "Request::{ns_prefix}{name}(_) => None,",
+                ns_prefix = ns_prefix,
+                name = name,
+            ));
+        }
+
+        if gathered.needs_lifetime {
+            enum_cases.request_into_owned_cases.push(format!(
+                "Request::{ns_prefix}{name}(req) => Request::{ns_prefix}{name}(req.into_owned()),",
+                ns_prefix = ns_prefix,
+                name = name,
+            ));
+        } else {
+            enum_cases.request_into_owned_cases.push(format!(
+                "Request::{ns_prefix}{name}(req) => Request::{ns_prefix}{name}(req),",
                 ns_prefix = ns_prefix,
                 name = name,
             ));
