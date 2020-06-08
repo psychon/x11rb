@@ -7699,7 +7699,7 @@ pub struct SetControlsRequest<'input> {
     pub access_x_timeout_values: u32,
     pub access_x_timeout_options_mask: u16,
     pub access_x_timeout_options_values: u16,
-    pub per_key_repeat: &'input [u8; 32],
+    pub per_key_repeat: Cow<'input, [u8; 32]>,
 }
 impl<'input> SetControlsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -7810,11 +7810,11 @@ impl<'input> SetControlsRequest<'input> {
             access_x_timeout_options_values_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.per_key_repeat[..]).len();
+        let length_so_far = length_so_far + self.per_key_repeat.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.per_key_repeat[..]).into()], vec![]))
+        Ok((vec![request0.into(), crate::x11_utils::cow_strip_length(self.per_key_repeat)], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -7884,7 +7884,7 @@ impl<'input> SetControlsRequest<'input> {
             access_x_timeout_values,
             access_x_timeout_options_mask,
             access_x_timeout_options_values,
-            per_key_repeat,
+            per_key_repeat: Cow::Borrowed(per_key_repeat),
         })
     }
 }
@@ -7957,7 +7957,7 @@ where
         access_x_timeout_values,
         access_x_timeout_options_mask,
         access_x_timeout_options_values,
-        per_key_repeat,
+        per_key_repeat: Cow::Borrowed(per_key_repeat),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

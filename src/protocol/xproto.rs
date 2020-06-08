@@ -10704,7 +10704,7 @@ pub struct SendEventRequest<'input> {
     pub propagate: bool,
     pub destination: Window,
     pub event_mask: u32,
-    pub event: &'input [u8; 32],
+    pub event: Cow<'input, [u8; 32]>,
 }
 impl<'input> SendEventRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -10732,11 +10732,11 @@ impl<'input> SendEventRequest<'input> {
             event_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.event[..]).len();
+        let length_so_far = length_so_far + self.event.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.event[..]).into()], vec![]))
+        Ok((vec![request0.into(), crate::x11_utils::cow_strip_length(self.event)], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -10755,7 +10755,7 @@ impl<'input> SendEventRequest<'input> {
             propagate,
             destination,
             event_mask,
-            event,
+            event: Cow::Borrowed(event),
         })
     }
 }
@@ -10844,8 +10844,7 @@ where
 {
     let destination: Window = destination.into();
     let event_mask: u32 = event_mask.into();
-    let event: [u8; 32] = event.into();
-    let event = &event;
+    let event = Cow::Owned(event.into());
     let request0 = SendEventRequest {
         propagate,
         destination,

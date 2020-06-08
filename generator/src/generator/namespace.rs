@@ -238,6 +238,16 @@ pub(super) fn generate_request_reply_enum(
     outln!(out, "");
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum IovecConversion {
+    // No conversion is required.
+    None,
+    // A simple .into() is enough.
+    Into,
+    // Call cow_strip_length.
+    CowStripLength,
+}
+
 /// Caches to avoid repeating some operations.
 #[derive(Default)]
 pub(super) struct Caches {
@@ -799,7 +809,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     align,
                                     align,
                                 );
-                                next_slice = Some((format!("padding{}", pad_count), true));
+                                next_slice =
+                                    Some((format!("padding{}", pad_count), IovecConversion::Into));
                                 pad_count += 1;
                             }
                         },
@@ -879,7 +890,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         bytes_name,
                                         rust_field_name,
                                     );
-                                    next_slice = Some((bytes_name, true));
+                                    next_slice = Some((bytes_name, IovecConversion::Into));
                                 }
                             }
                         }
@@ -887,13 +898,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             let rust_field_name = to_rust_variable_name(&list_field.name);
                             let list_length = list_field.length();
                             if self.rust_value_type_is_u8(&list_field.element_type) {
-                                if list_length.is_some() {
+                                let conversion = if list_length.is_some() {
                                     // If this is a fixed length array we need to erase its length.
-                                    next_slice =
-                                        Some((format!("(&self.{}[..])", rust_field_name), true));
+                                    IovecConversion::CowStripLength
                                 } else {
-                                    next_slice = Some((format!("self.{}", rust_field_name), false));
-                                }
+                                    IovecConversion::None
+                                };
+                                next_slice =
+                                    Some((format!("self.{}", rust_field_name), conversion));
                             } else {
                                 assert_eq!(
                                     list_length, None,
@@ -907,7 +919,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         bytes_name,
                                         rust_field_name,
                                     );
-                                    next_slice = Some((bytes_name, true));
+                                    next_slice = Some((bytes_name, IovecConversion::Into));
                                 } else {
                                     let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                     outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
@@ -922,7 +934,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         );
                                     });
                                     outln!(tmp_out, "}}");
-                                    next_slice = Some((bytes_name, true));
+                                    next_slice = Some((bytes_name, IovecConversion::Into));
                                 }
                             }
                         }
@@ -951,7 +963,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
                                 }
                             } else {
-                                next_slice = Some((bytes_name, true));
+                                next_slice = Some((bytes_name, IovecConversion::Into));
                             }
                         }
                         xcbdefs::FieldDef::Fd(_) => {}
@@ -1037,14 +1049,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             fixed_fields_bytes.clear();
                             num_fixed_len_slices += 1;
                         }
-                        if let Some((next_slice, needs_conversion)) = next_slice {
+                        if let Some((next_slice, conversion)) = next_slice {
                             outln!(
                                 tmp_out,
                                 "let length_so_far = length_so_far + {}.len();",
                                 next_slice,
                             );
-                            let conversion_str = if needs_conversion { ".into()" } else { "" };
-                            request_slices.push(format!("{}{}", next_slice, conversion_str));
+                            match conversion {
+                                IovecConversion::None => request_slices.push(next_slice),
+                                IovecConversion::Into => {
+                                    request_slices.push(format!("{}.into()", next_slice))
+                                }
+                                IovecConversion::CowStripLength => request_slices.push(format!(
+                                    "crate::x11_utils::cow_strip_length({})",
+                                    next_slice
+                                )),
+                            }
                         }
                     }
 
@@ -5136,33 +5156,34 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         args.push((list_field.name.clone(), Type::Simple(generic_param.clone())));
                         request_args.push((
                             list_field.name.clone(),
-                            Type::Simple("&'input [u8; 32]".into()),
+                            Type::VariableOwnershipRawBytes("[u8; 32]".into()),
                         ));
                         generics.push((generic_param, String::from("Into<[u8; 32]>")));
-                        preamble.push(String::from("let event: [u8; 32] = event.into();"));
-                        preamble.push(String::from("let event = &event;"));
+                        preamble.push(String::from("let event = Cow::Owned(event.into());"));
                         needs_lifetime = true;
                     } else {
                         let element_type =
                             self.field_value_type_to_rust_type(&list_field.element_type);
                         let rust_field_name = to_rust_variable_name(&list_field.name);
-                        let rust_field_type = if self
-                            .rust_value_type_is_u8(&list_field.element_type)
-                        {
-                            if let Some(list_len) = list_field.length() {
-                                Type::Simple(format!("&'input [{}; {}]", element_type, list_len))
+                        let rust_field_type =
+                            if self.rust_value_type_is_u8(&list_field.element_type) {
+                                if let Some(list_len) = list_field.length() {
+                                    Type::VariableOwnershipRawBytes(format!(
+                                        "[{}; {}]",
+                                        element_type, list_len
+                                    ))
+                                } else {
+                                    Type::VariableOwnershipRawBytes(format!("[{}]", element_type))
+                                }
                             } else {
-                                Type::VariableOwnershipRawBytes(format!("[{}]", element_type))
-                            }
-                        } else {
-                            assert_eq!(
+                                assert_eq!(
                                 list_field.length(),
                                 None,
                                 "Fixed length arrays of types other than u8 are not implemented"
                             );
 
-                            Type::VariableOwnership(format!("[{}]", element_type))
-                        };
+                                Type::VariableOwnership(format!("[{}]", element_type))
+                            };
                         args.push((rust_field_name.clone(), rust_field_type.clone()));
                         request_args.push((rust_field_name, rust_field_type));
                         needs_lifetime = true;

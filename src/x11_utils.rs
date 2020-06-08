@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::convert::TryInto;
 
 use crate::errors::ParseError;
@@ -524,4 +525,8 @@ macro_rules! __atom_manager_atom_value {
     ($field_name:ident: $atom_value:expr) => {
         $atom_value
     };
+}
+
+pub fn cow_strip_length(cow: Cow<'_, [u8; 32]>) -> Cow<'static, [u8]> {
+    Cow::Owned(cow.into_owned().into())
 }
