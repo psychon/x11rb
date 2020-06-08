@@ -50,6 +50,15 @@ pub trait TryParseFd: Sized {
     ) -> Result<(Self, &'a [u8]), ParseError>;
 }
 
+impl<T: TryParse> TryParseFd for T {
+    fn try_parse_fd<'a>(
+        value: &'a [u8],
+        _: &mut Vec<RawFdContainer>,
+    ) -> Result<(Self, &'a [u8]), ParseError> {
+        T::try_parse(value)
+    }
+}
+
 /// A representation of the header of a request.
 #[derive(Debug, Clone, Copy)]
 pub struct RequestHeader {
