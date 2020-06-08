@@ -273,7 +273,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
-            "use crate::x11_utils::{{Request, RequestHeader, Serialize, TryParse}};"
+            "use crate::x11_utils::{{Request, RequestHeader, Serialize, TryParse, TryParseFd}};"
         );
         outln!(
             out,
@@ -2351,7 +2351,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if generate_try_parse {
             if has_fds {
                 assert!(external_params.is_empty());
-                outln!(out, "impl {} {{", name);
+                outln!(out, "impl TryParseFd for {} {{", name);
                 outln!(
                     out.indent(),
                     "fn try_parse_fd<'a>({}) -> Result<(Self, &'a [u8]), ParseError> {{",

@@ -1,6 +1,7 @@
 use std::convert::TryInto;
 
 use crate::errors::ParseError;
+use crate::utils::RawFdContainer;
 
 /// Information about a X11 extension.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -35,6 +36,18 @@ pub trait TryParse: Sized {
     /// If parsing is successful, an instance of the type and a slice for the remaining data should
     /// be returned. Otherwise, an error is returned.
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>;
+}
+
+/// A type implementing this trait can be parsed from some raw bytes and a list of fds.
+pub trait TryParseFd: Sized {
+    /// Try to parse the given values into an instance of this type.
+    ///
+    /// If parsing is successful, an instance of the type and a slice for the remaining data should
+    /// be returned. Otherwise, an error is returned.
+    fn try_parse_fd<'a>(
+        value: &'a [u8],
+        fds: &mut Vec<RawFdContainer>,
+    ) -> Result<(Self, &'a [u8]), ParseError>;
 }
 
 /// A representation of the header of a request.
