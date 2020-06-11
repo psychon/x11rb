@@ -42,6 +42,11 @@ pub trait TryParse: Sized {
 pub trait TryParseFd: Sized {
     /// Try to parse the given values into an instance of this type.
     ///
+    /// File descriptors are consumed by removing them from the beginning of the given `fds` `Vec`.
+    /// If a file descriptor is expected, but missing, a `ParseError` should be returned. If more file
+    /// descriptors are provided than expected, this is not an error and the remaining descriptors
+    /// should be left in the `Vec`.
+    ///
     /// If parsing is successful, an instance of the type and a slice for the remaining data should
     /// be returned. Otherwise, an error is returned.
     fn try_parse_fd<'a>(
