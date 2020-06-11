@@ -156,8 +156,9 @@ pub(super) fn generate_request_reply_enum(
         outln!(out, "}}");
         outln!(
             out,
-            "// Get the matching reply parser (if any) for this request"
+            "/// Get the matching reply parser (if any) for this request."
         );
+        outln!(out, "/// For `Request::Unknown`, `None` is also returned.");
         outln!(
             out,
             "pub fn reply_parser(&self) -> Option<ReplyParsingFunction> {{"

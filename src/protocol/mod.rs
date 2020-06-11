@@ -2110,7 +2110,8 @@ impl<'input> Request<'input> {
         }
         Ok(Request::Unknown(header, remaining))
     }
-    // Get the matching reply parser (if any) for this request
+    /// Get the matching reply parser (if any) for this request.
+    /// For `Request::Unknown`, `None` is also returned.
     pub fn reply_parser(&self) -> Option<ReplyParsingFunction> {
         match self {
             Request::Unknown(_, _) => None,
