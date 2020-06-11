@@ -18,6 +18,8 @@ pub(super) struct PerModuleEnumCases {
     request_variants: Vec<String>,
     /// Lines that belong in definition of Request::parse.
     request_parse_cases: Vec<String>,
+    /// Lines that belong in the definition of Request::reply_parser.
+    reply_parse_cases: Vec<String>,
     /// Lines that belong in the Reply enum definition.
     reply_variants: Vec<String>,
     /// Impls for From<ReplyType> for Reply enum.
@@ -152,6 +154,38 @@ pub(super) fn generate_request_reply_enum(
             outln!(out, "Ok(Request::Unknown(header, remaining))");
         });
         outln!(out, "}}");
+        outln!(
+            out,
+            "/// Get the matching reply parser (if any) for this request."
+        );
+        outln!(out, "/// For `Request::Unknown`, `None` is also returned.");
+        outln!(
+            out,
+            "pub fn reply_parser(&self) -> Option<ReplyParsingFunction> {{"
+        );
+        out.indented(|out| {
+            outln!(out, "match self {{");
+            out.indented(|out| {
+                outln!(out, "Request::Unknown(_, _) => None,");
+                for ns in namespaces.iter() {
+                    let has_feature = super::ext_has_feature(&ns.header);
+
+                    let reply_parse_cases = enum_cases
+                        .get_mut(&ns.header)
+                        .unwrap()
+                        .reply_parse_cases
+                        .drain(..);
+                    for case in reply_parse_cases {
+                        if has_feature {
+                            outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                        }
+                        outln!(out, "{}", case);
+                    }
+                }
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
     });
     outln!(out, "}}");
     outln!(out, "");
@@ -273,7 +307,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
-            "use crate::x11_utils::{{Request, RequestHeader, Serialize, TryParse}};"
+            "use crate::x11_utils::{{Request, RequestHeader, Serialize, TryParse, TryParseFd}};"
         );
         outln!(
             out,
@@ -502,6 +536,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 name = name,
                 header = self.ns.header,
             ));
+            enum_cases.reply_parse_cases.push(format!(
+                "Request::{ns_prefix}{name}(_) => Some({header}::{name}Request::parse_reply),",
+                ns_prefix = ns_prefix,
+                name = name,
+                header = self.ns.header,
+            ));
             enum_cases.reply_from_cases.push(format!(
                 r#"impl From<{header}::{name}Reply> for Reply {{
   fn from(reply: {header}::{name}Reply) -> Reply {{
@@ -530,6 +570,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             );
 
             outln!(out, "");
+        } else {
+            enum_cases.reply_parse_cases.push(format!(
+                "Request::{ns_prefix}{name}(_) => None,",
+                ns_prefix = ns_prefix,
+                name = name,
+            ));
         }
     }
 
@@ -2351,7 +2397,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if generate_try_parse {
             if has_fds {
                 assert!(external_params.is_empty());
-                outln!(out, "impl {} {{", name);
+                outln!(out, "impl TryParseFd for {} {{", name);
                 outln!(
                     out.indent(),
                     "fn try_parse_fd<'a>({}) -> Result<(Self, &'a [u8]), ParseError> {{",

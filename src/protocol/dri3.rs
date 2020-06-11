@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -207,7 +207,7 @@ pub struct OpenReply {
     pub length: u32,
     pub device_fd: RawFdContainer,
 }
-impl OpenReply {
+impl TryParseFd for OpenReply {
     fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (nfd, remaining) = u8::try_parse(remaining)?;
@@ -420,7 +420,7 @@ pub struct BufferFromPixmapReply {
     pub bpp: u8,
     pub pixmap_fd: RawFdContainer,
 }
-impl BufferFromPixmapReply {
+impl TryParseFd for BufferFromPixmapReply {
     fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (nfd, remaining) = u8::try_parse(remaining)?;
@@ -610,7 +610,7 @@ pub struct FDFromFenceReply {
     pub length: u32,
     pub fence_fd: RawFdContainer,
 }
-impl FDFromFenceReply {
+impl TryParseFd for FDFromFenceReply {
     fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (nfd, remaining) = u8::try_parse(remaining)?;
@@ -1037,7 +1037,7 @@ pub struct BuffersFromPixmapReply {
     pub offsets: Vec<u32>,
     pub buffers: Vec<RawFdContainer>,
 }
-impl BuffersFromPixmapReply {
+impl TryParseFd for BuffersFromPixmapReply {
     fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (nfd, remaining) = u8::try_parse(remaining)?;
