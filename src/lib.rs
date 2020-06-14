@@ -108,6 +108,7 @@
     unused_import_braces,
     unused_qualifications,
     unused_results,
+    clippy::cast_lossless,
 )]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 
