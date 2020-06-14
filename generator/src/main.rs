@@ -9,6 +9,10 @@
 )]
 #![forbid(unsafe_code)]
 
+// Or patterns are not available in Rust 1.37.0. I am not quite sure when (and if) they went
+// stable.
+#![allow(clippy::unnested_or_patterns)]
+
 use std::io::{Read as _, Write as _};
 use std::path::{Path, PathBuf};
 

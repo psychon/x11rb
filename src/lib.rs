@@ -96,10 +96,6 @@
 // is Rust 1.37.0, just disable the lint.
 #![allow(clippy::option_as_ref_deref)]
 
-// Or patterns are not available in Rust 1.37.0. I am not quite sure when (and if) they went
-// stable.
-#![allow(clippy::unnested_or_patterns)]
-
 #![deny(
     missing_copy_implementations,
     missing_debug_implementations,
