@@ -63,7 +63,7 @@ impl<C: Connection> Cookie<'_, C> {
         Ok(Self::from_replies(
             self.conn,
             self.screen,
-            resource_manager,
+            &resource_manager,
             render_version,
             picture_format,
         )?)
@@ -95,7 +95,7 @@ impl<C: Connection> Cookie<'_, C> {
         Ok(Some(Self::from_replies(
             self.conn,
             self.screen,
-            resource_manager,
+            &resource_manager,
             render_version,
             picture_format,
         )?))
@@ -104,7 +104,7 @@ impl<C: Connection> Cookie<'_, C> {
     fn from_replies(
         conn: &C,
         screen: &xproto::Screen,
-        resource_manager: xproto::GetPropertyReply,
+        resource_manager: &xproto::GetPropertyReply,
         render_version: (u32, u32),
         _picture_format: u32,
     ) -> Result<Handle, ReplyOrIdError> {

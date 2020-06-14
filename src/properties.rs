@@ -165,14 +165,14 @@ where
 
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<WmSizeHints, ReplyError> {
-        Ok(WmSizeHints::from_reply(self.0.reply()?)?)
+        Ok(WmSizeHints::from_reply(&self.0.reply()?)?)
     }
 
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<WmSizeHints>, ConnectionError> {
         self.0
             .reply_unchecked()?
-            .map(WmSizeHints::from_reply)
+            .map(|r| WmSizeHints::from_reply(&r))
             .transpose()
             .map_err(Into::into)
     }
@@ -268,7 +268,7 @@ impl WmSizeHints {
     ///
     /// The original `WmSizeHints` request must have been for a `WM_SIZE_HINTS` property for this
     /// function to return sensible results.
-    pub fn from_reply(reply: GetPropertyReply) -> Result<Self, ParseError> {
+    pub fn from_reply(reply: &GetPropertyReply) -> Result<Self, ParseError> {
         if reply.type_ != AtomEnum::WM_SIZE_HINTS.into() || reply.format != 32 {
             return Err(ParseError::ParseError);
         }
@@ -461,14 +461,14 @@ where
 
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<WmHints, ReplyError> {
-        Ok(WmHints::from_reply(self.0.reply()?)?)
+        Ok(WmHints::from_reply(&self.0.reply()?)?)
     }
 
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<WmHints>, ConnectionError> {
         self.0
             .reply_unchecked()?
-            .map(WmHints::from_reply)
+            .map(|r| WmHints::from_reply(&r))
             .transpose()
             .map_err(Into::into)
     }
@@ -524,7 +524,7 @@ impl WmHints {
     ///
     /// The original `WmHints` request must have been for a `WM_HINTS` property for this
     /// function to return sensible results.
-    pub fn from_reply(reply: GetPropertyReply) -> Result<Self, ParseError> {
+    pub fn from_reply(reply: &GetPropertyReply) -> Result<Self, ParseError> {
         if reply.type_ != AtomEnum::WM_HINTS.into() || reply.format != 32 {
             return Err(ParseError::ParseError);
         }
@@ -718,7 +718,7 @@ mod test {
             .flat_map(|v| u32::serialize(v).to_vec())
             .collect::<Vec<u8>>();
         let wm_size_hints =
-            WmSizeHints::from_reply(get_property_reply(&input, 32, AtomEnum::WM_SIZE_HINTS))
+            WmSizeHints::from_reply(&get_property_reply(&input, 32, AtomEnum::WM_SIZE_HINTS))
                 .unwrap();
 
         assert!(
@@ -757,7 +757,7 @@ mod test {
             .flat_map(|v| u32::serialize(v).to_vec())
             .collect::<Vec<u8>>();
         let wm_hints =
-            WmHints::from_reply(get_property_reply(&input, 32, AtomEnum::WM_HINTS)).unwrap();
+            WmHints::from_reply(&get_property_reply(&input, 32, AtomEnum::WM_HINTS)).unwrap();
 
         assert_eq!(wm_hints.input, Some(true));
         match wm_hints.initial_state {
