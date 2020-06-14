@@ -549,8 +549,10 @@ pub fn compute_length_field<'b>(
         return Err(ConnectionError::MaximumRequestLengthExceeded);
     }
 
-    // Okay, we need to use big requests.
+    // Okay, we need to use big requests (thus four extra bytes, "+1" below)
     let wire_length: u32 = wire_length
+        .checked_add(1)
+        .ok_or(ConnectionError::MaximumRequestLengthExceeded)?
         .try_into()
         .expect("X11 request larger than 2^34 bytes?!?");
     let wire_length = wire_length.to_ne_bytes();
