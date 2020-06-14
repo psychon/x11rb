@@ -79,6 +79,7 @@ pub(crate) struct xcb_generic_error_t {
     pub(crate) full_sequence: u32,
 }
 
+#[derive(Clone, Copy)]
 #[allow(non_camel_case_types)]
 #[repr(C)]
 pub(crate) struct xcb_void_cookie_t {

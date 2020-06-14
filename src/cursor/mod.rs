@@ -57,13 +57,13 @@ impl<C: Connection> Cookie<'_, C> {
             if let Some((version, formats)) = self.render_info {
                 let version = version.reply()?;
                 render_version = (version.major_version, version.minor_version);
-                picture_format = find_format(formats.reply()?);
+                picture_format = find_format(&formats.reply()?);
             }
         }
         Ok(Self::from_replies(
             self.conn,
             self.screen,
-            resource_manager,
+            &resource_manager,
             render_version,
             picture_format,
         )?)
@@ -82,7 +82,7 @@ impl<C: Connection> Cookie<'_, C> {
                 match (version.reply_unchecked()?, formats.reply_unchecked()?) {
                     (Some(version), Some(formats)) => {
                         render_version = (version.major_version, version.minor_version);
-                        picture_format = find_format(formats);
+                        picture_format = find_format(&formats);
                     }
                     _ => return Ok(None),
                 }
@@ -95,7 +95,7 @@ impl<C: Connection> Cookie<'_, C> {
         Ok(Some(Self::from_replies(
             self.conn,
             self.screen,
-            resource_manager,
+            &resource_manager,
             render_version,
             picture_format,
         )?))
@@ -104,7 +104,7 @@ impl<C: Connection> Cookie<'_, C> {
     fn from_replies(
         conn: &C,
         screen: &xproto::Screen,
-        resource_manager: xproto::GetPropertyReply,
+        resource_manager: &xproto::GetPropertyReply,
         render_version: (u32, u32),
         _picture_format: u32,
     ) -> Result<Handle, ReplyOrIdError> {
@@ -363,7 +363,7 @@ fn load_cursor<C: Connection>(
 }
 
 #[cfg(feature = "render")]
-fn find_format(reply: render::QueryPictFormatsReply) -> Pictformat {
+fn find_format(reply: &render::QueryPictFormatsReply) -> Pictformat {
     reply
         .formats
         .iter()

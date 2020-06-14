@@ -108,6 +108,8 @@
     unused_import_braces,
     unused_qualifications,
     unused_results,
+    clippy::cast_lossless,
+    clippy::needless_pass_by_value,
 )]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 

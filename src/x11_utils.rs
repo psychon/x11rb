@@ -109,7 +109,7 @@ pub fn parse_request_header(
         (length - 2, remaining)
     } else {
         // Adjust length for the size of this header (one 4 byte unit).
-        (length as u32 - 1, remaining)
+        (u32::from(length) - 1, remaining)
     };
     Ok((
         RequestHeader {
