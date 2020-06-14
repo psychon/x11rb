@@ -205,7 +205,8 @@ fn test_big_requests() -> Result<(), ConnectionError> {
     let x: i16 = 21;
     let y: i16 = 7;
     let padding = 3; // big_buffer's size rounded up to a multiple of 4
-    let length: u32 = (16 + big_buffer.len() as u32 + padding) / 4;
+    let big_request_length_field = 4;
+    let length: u32 = (16 + big_request_length_field + big_buffer.len() as u32 + padding) / 4;
     conn.poly_text16(drawable, gc, x, y, &big_buffer)?;
 
     let mut expected = Vec::new();
