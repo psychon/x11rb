@@ -57,7 +57,7 @@ impl<C: Connection> Cookie<'_, C> {
             if let Some((version, formats)) = self.render_info {
                 let version = version.reply()?;
                 render_version = (version.major_version, version.minor_version);
-                picture_format = find_format(formats.reply()?);
+                picture_format = find_format(&formats.reply()?);
             }
         }
         Ok(Self::from_replies(
@@ -82,7 +82,7 @@ impl<C: Connection> Cookie<'_, C> {
                 match (version.reply_unchecked()?, formats.reply_unchecked()?) {
                     (Some(version), Some(formats)) => {
                         render_version = (version.major_version, version.minor_version);
-                        picture_format = find_format(formats);
+                        picture_format = find_format(&formats);
                     }
                     _ => return Ok(None),
                 }
@@ -363,7 +363,7 @@ fn load_cursor<C: Connection>(
 }
 
 #[cfg(feature = "render")]
-fn find_format(reply: render::QueryPictFormatsReply) -> Pictformat {
+fn find_format(reply: &render::QueryPictFormatsReply) -> Pictformat {
     reply
         .formats
         .iter()
