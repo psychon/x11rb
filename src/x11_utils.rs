@@ -527,6 +527,7 @@ macro_rules! __atom_manager_atom_value {
     };
 }
 
+#[allow(clippy::ptr_arg)]
 pub(crate) fn cow_strip_length(cow: &Cow<'_, [u8; 32]>) -> Cow<'static, [u8]> {
     Cow::Owned(cow.to_vec())
 }
