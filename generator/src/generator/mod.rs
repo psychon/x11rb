@@ -27,6 +27,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
          [`xproto`](xproto/index.html).",
     );
     outln!(main_out, "");
+    outln!(main_out, "use std::borrow::Cow;");
     outln!(main_out, "use std::convert::{{TryFrom, TryInto}};");
     outln!(main_out, "use crate::errors::ParseError;");
     outln!(main_out, "use crate::utils::RawFdContainer;");

@@ -477,7 +477,7 @@ pub const RENDER_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RenderRequest<'input> {
     pub context_tag: ContextTag,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> RenderRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -506,7 +506,7 @@ impl<'input> RenderRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -518,8 +518,15 @@ impl<'input> RenderRequest<'input> {
         let _ = remaining;
         Ok(RenderRequest {
             context_tag,
-            data,
+            data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this RenderRequest.
+    pub fn into_owned(self) -> RenderRequest<'static> {
+        RenderRequest {
+            context_tag: self.context_tag,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for RenderRequest<'input> {
@@ -531,7 +538,7 @@ where
 {
     let request0 = RenderRequest {
         context_tag,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -545,7 +552,7 @@ pub struct RenderLargeRequest<'input> {
     pub context_tag: ContextTag,
     pub request_num: u16,
     pub request_total: u16,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> RenderLargeRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -586,7 +593,7 @@ impl<'input> RenderLargeRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -603,8 +610,17 @@ impl<'input> RenderLargeRequest<'input> {
             context_tag,
             request_num,
             request_total,
-            data,
+            data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this RenderLargeRequest.
+    pub fn into_owned(self) -> RenderLargeRequest<'static> {
+        RenderLargeRequest {
+            context_tag: self.context_tag,
+            request_num: self.request_num,
+            request_total: self.request_total,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for RenderLargeRequest<'input> {
@@ -618,7 +634,7 @@ where
         context_tag,
         request_num,
         request_total,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1781,7 +1797,7 @@ pub const VENDOR_PRIVATE_REQUEST: u8 = 16;
 pub struct VendorPrivateRequest<'input> {
     pub vendor_code: u32,
     pub context_tag: ContextTag,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> VendorPrivateRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1815,7 +1831,7 @@ impl<'input> VendorPrivateRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1829,8 +1845,16 @@ impl<'input> VendorPrivateRequest<'input> {
         Ok(VendorPrivateRequest {
             vendor_code,
             context_tag,
-            data,
+            data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this VendorPrivateRequest.
+    pub fn into_owned(self) -> VendorPrivateRequest<'static> {
+        VendorPrivateRequest {
+            vendor_code: self.vendor_code,
+            context_tag: self.context_tag,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for VendorPrivateRequest<'input> {
@@ -1843,7 +1867,7 @@ where
     let request0 = VendorPrivateRequest {
         vendor_code,
         context_tag,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1856,7 +1880,7 @@ pub const VENDOR_PRIVATE_WITH_REPLY_REQUEST: u8 = 17;
 pub struct VendorPrivateWithReplyRequest<'input> {
     pub vendor_code: u32,
     pub context_tag: ContextTag,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> VendorPrivateWithReplyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1890,7 +1914,7 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1904,8 +1928,16 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
         Ok(VendorPrivateWithReplyRequest {
             vendor_code,
             context_tag,
-            data,
+            data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this VendorPrivateWithReplyRequest.
+    pub fn into_owned(self) -> VendorPrivateWithReplyRequest<'static> {
+        VendorPrivateWithReplyRequest {
+            vendor_code: self.vendor_code,
+            context_tag: self.context_tag,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for VendorPrivateWithReplyRequest<'input> {
@@ -1918,7 +1950,7 @@ where
     let request0 = VendorPrivateWithReplyRequest {
         vendor_code,
         context_tag,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2181,7 +2213,7 @@ pub const CLIENT_INFO_REQUEST: u8 = 20;
 pub struct ClientInfoRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
-    pub string: &'input [u8],
+    pub string: Cow<'input, [u8]>,
 }
 impl<'input> ClientInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2221,7 +2253,7 @@ impl<'input> ClientInfoRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.string.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.string, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2236,8 +2268,16 @@ impl<'input> ClientInfoRequest<'input> {
         Ok(ClientInfoRequest {
             major_version,
             minor_version,
-            string,
+            string: Cow::Borrowed(string),
         })
+    }
+    /// Clone all borrowed data in this ClientInfoRequest.
+    pub fn into_owned(self) -> ClientInfoRequest<'static> {
+        ClientInfoRequest {
+            major_version: self.major_version,
+            minor_version: self.minor_version,
+            string: Cow::Owned(self.string.into_owned()),
+        }
     }
 }
 impl<'input> Request for ClientInfoRequest<'input> {
@@ -2250,7 +2290,7 @@ where
     let request0 = ClientInfoRequest {
         major_version,
         minor_version,
-        string,
+        string: Cow::Borrowed(string),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2443,6 +2483,16 @@ impl<'input> CreatePixmapRequest<'input> {
             glx_pixmap,
             attribs: Cow::Owned(attribs),
         })
+    }
+    /// Clone all borrowed data in this CreatePixmapRequest.
+    pub fn into_owned(self) -> CreatePixmapRequest<'static> {
+        CreatePixmapRequest {
+            screen: self.screen,
+            fbconfig: self.fbconfig,
+            pixmap: self.pixmap,
+            glx_pixmap: self.glx_pixmap,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreatePixmapRequest<'input> {
@@ -2920,6 +2970,15 @@ impl<'input> CreatePbufferRequest<'input> {
             attribs: Cow::Owned(attribs),
         })
     }
+    /// Clone all borrowed data in this CreatePbufferRequest.
+    pub fn into_owned(self) -> CreatePbufferRequest<'static> {
+        CreatePbufferRequest {
+            screen: self.screen,
+            fbconfig: self.fbconfig,
+            pbuffer: self.pbuffer,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreatePbufferRequest<'input> {
     type Reply = ();
@@ -3160,6 +3219,13 @@ impl<'input> ChangeDrawableAttributesRequest<'input> {
             attribs: Cow::Owned(attribs),
         })
     }
+    /// Clone all borrowed data in this ChangeDrawableAttributesRequest.
+    pub fn into_owned(self) -> ChangeDrawableAttributesRequest<'static> {
+        ChangeDrawableAttributesRequest {
+            drawable: self.drawable,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ChangeDrawableAttributesRequest<'input> {
     type Reply = ();
@@ -3259,6 +3325,16 @@ impl<'input> CreateWindowRequest<'input> {
             attribs: Cow::Owned(attribs),
         })
     }
+    /// Clone all borrowed data in this CreateWindowRequest.
+    pub fn into_owned(self) -> CreateWindowRequest<'static> {
+        CreateWindowRequest {
+            screen: self.screen,
+            fbconfig: self.fbconfig,
+            window: self.window,
+            glx_window: self.glx_window,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateWindowRequest<'input> {
     type Reply = ();
@@ -3345,8 +3421,8 @@ pub struct SetClientInfoARBRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
     pub gl_versions: Cow<'input, [u32]>,
-    pub gl_extension_string: &'input [u8],
-    pub glx_extension_string: &'input [u8],
+    pub gl_extension_string: Cow<'input, [u8]>,
+    pub glx_extension_string: Cow<'input, [u8]>,
 }
 impl<'input> SetClientInfoARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3402,7 +3478,7 @@ impl<'input> SetClientInfoARBRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string.into(), self.glx_extension_string.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string, self.glx_extension_string, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3422,9 +3498,19 @@ impl<'input> SetClientInfoARBRequest<'input> {
             major_version,
             minor_version,
             gl_versions: Cow::Owned(gl_versions),
-            gl_extension_string,
-            glx_extension_string,
+            gl_extension_string: Cow::Borrowed(gl_extension_string),
+            glx_extension_string: Cow::Borrowed(glx_extension_string),
         })
+    }
+    /// Clone all borrowed data in this SetClientInfoARBRequest.
+    pub fn into_owned(self) -> SetClientInfoARBRequest<'static> {
+        SetClientInfoARBRequest {
+            major_version: self.major_version,
+            minor_version: self.minor_version,
+            gl_versions: Cow::Owned(self.gl_versions.into_owned()),
+            gl_extension_string: Cow::Owned(self.gl_extension_string.into_owned()),
+            glx_extension_string: Cow::Owned(self.glx_extension_string.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetClientInfoARBRequest<'input> {
@@ -3438,8 +3524,8 @@ where
         major_version,
         minor_version,
         gl_versions: Cow::Borrowed(gl_versions),
-        gl_extension_string,
-        glx_extension_string,
+        gl_extension_string: Cow::Borrowed(gl_extension_string),
+        glx_extension_string: Cow::Borrowed(glx_extension_string),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3537,6 +3623,17 @@ impl<'input> CreateContextAttribsARBRequest<'input> {
             attribs: Cow::Owned(attribs),
         })
     }
+    /// Clone all borrowed data in this CreateContextAttribsARBRequest.
+    pub fn into_owned(self) -> CreateContextAttribsARBRequest<'static> {
+        CreateContextAttribsARBRequest {
+            context: self.context,
+            fbconfig: self.fbconfig,
+            screen: self.screen,
+            share_list: self.share_list,
+            is_direct: self.is_direct,
+            attribs: Cow::Owned(self.attribs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateContextAttribsARBRequest<'input> {
     type Reply = ();
@@ -3565,8 +3662,8 @@ pub struct SetClientInfo2ARBRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
     pub gl_versions: Cow<'input, [u32]>,
-    pub gl_extension_string: &'input [u8],
-    pub glx_extension_string: &'input [u8],
+    pub gl_extension_string: Cow<'input, [u8]>,
+    pub glx_extension_string: Cow<'input, [u8]>,
 }
 impl<'input> SetClientInfo2ARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3622,7 +3719,7 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string.into(), self.glx_extension_string.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string, self.glx_extension_string, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3642,9 +3739,19 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
             major_version,
             minor_version,
             gl_versions: Cow::Owned(gl_versions),
-            gl_extension_string,
-            glx_extension_string,
+            gl_extension_string: Cow::Borrowed(gl_extension_string),
+            glx_extension_string: Cow::Borrowed(glx_extension_string),
         })
+    }
+    /// Clone all borrowed data in this SetClientInfo2ARBRequest.
+    pub fn into_owned(self) -> SetClientInfo2ARBRequest<'static> {
+        SetClientInfo2ARBRequest {
+            major_version: self.major_version,
+            minor_version: self.minor_version,
+            gl_versions: Cow::Owned(self.gl_versions.into_owned()),
+            gl_extension_string: Cow::Owned(self.gl_extension_string.into_owned()),
+            glx_extension_string: Cow::Owned(self.glx_extension_string.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetClientInfo2ARBRequest<'input> {
@@ -3658,8 +3765,8 @@ where
         major_version,
         minor_version,
         gl_versions: Cow::Borrowed(gl_versions),
-        gl_extension_string,
-        glx_extension_string,
+        gl_extension_string: Cow::Borrowed(gl_extension_string),
+        glx_extension_string: Cow::Borrowed(glx_extension_string),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -8385,6 +8492,13 @@ impl<'input> AreTexturesResidentRequest<'input> {
             textures: Cow::Owned(textures),
         })
     }
+    /// Clone all borrowed data in this AreTexturesResidentRequest.
+    pub fn into_owned(self) -> AreTexturesResidentRequest<'static> {
+        AreTexturesResidentRequest {
+            context_tag: self.context_tag,
+            textures: Cow::Owned(self.textures.into_owned()),
+        }
+    }
 }
 impl<'input> Request for AreTexturesResidentRequest<'input> {
     type Reply = AreTexturesResidentReply;
@@ -8503,6 +8617,13 @@ impl<'input> DeleteTexturesRequest<'input> {
             context_tag,
             textures: Cow::Owned(textures),
         })
+    }
+    /// Clone all borrowed data in this DeleteTexturesRequest.
+    pub fn into_owned(self) -> DeleteTexturesRequest<'static> {
+        DeleteTexturesRequest {
+            context_tag: self.context_tag,
+            textures: Cow::Owned(self.textures.into_owned()),
+        }
     }
 }
 impl<'input> Request for DeleteTexturesRequest<'input> {
@@ -10619,6 +10740,13 @@ impl<'input> DeleteQueriesARBRequest<'input> {
             context_tag,
             ids: Cow::Owned(ids),
         })
+    }
+    /// Clone all borrowed data in this DeleteQueriesARBRequest.
+    pub fn into_owned(self) -> DeleteQueriesARBRequest<'static> {
+        DeleteQueriesARBRequest {
+            context_tag: self.context_tag,
+            ids: Cow::Owned(self.ids.into_owned()),
+        }
     }
 }
 impl<'input> Request for DeleteQueriesARBRequest<'input> {

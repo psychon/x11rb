@@ -90,7 +90,7 @@ impl Serialize for Fp3232 {
 pub const GET_EXTENSION_VERSION_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetExtensionVersionRequest<'input> {
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> GetExtensionVersionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -120,7 +120,7 @@ impl<'input> GetExtensionVersionRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -132,8 +132,14 @@ impl<'input> GetExtensionVersionRequest<'input> {
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(GetExtensionVersionRequest {
-            name,
+            name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this GetExtensionVersionRequest.
+    pub fn into_owned(self) -> GetExtensionVersionRequest<'static> {
+        GetExtensionVersionRequest {
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for GetExtensionVersionRequest<'input> {
@@ -144,7 +150,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetExtensionVersionRequest {
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1428,6 +1434,13 @@ impl<'input> SelectExtensionEventRequest<'input> {
             classes: Cow::Owned(classes),
         })
     }
+    /// Clone all borrowed data in this SelectExtensionEventRequest.
+    pub fn into_owned(self) -> SelectExtensionEventRequest<'static> {
+        SelectExtensionEventRequest {
+            window: self.window,
+            classes: Cow::Owned(self.classes.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SelectExtensionEventRequest<'input> {
     type Reply = ();
@@ -1697,6 +1710,14 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
             mode,
             classes: Cow::Owned(classes),
         })
+    }
+    /// Clone all borrowed data in this ChangeDeviceDontPropagateListRequest.
+    pub fn into_owned(self) -> ChangeDeviceDontPropagateListRequest<'static> {
+        ChangeDeviceDontPropagateListRequest {
+            window: self.window,
+            mode: self.mode,
+            classes: Cow::Owned(self.classes.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeDeviceDontPropagateListRequest<'input> {
@@ -2263,6 +2284,18 @@ impl<'input> GrabDeviceRequest<'input> {
             classes: Cow::Owned(classes),
         })
     }
+    /// Clone all borrowed data in this GrabDeviceRequest.
+    pub fn into_owned(self) -> GrabDeviceRequest<'static> {
+        GrabDeviceRequest {
+            grab_window: self.grab_window,
+            time: self.time,
+            this_device_mode: self.this_device_mode,
+            other_device_mode: self.other_device_mode,
+            owner_events: self.owner_events,
+            device_id: self.device_id,
+            classes: Cow::Owned(self.classes.into_owned()),
+        }
+    }
 }
 impl<'input> Request for GrabDeviceRequest<'input> {
     type Reply = GrabDeviceReply;
@@ -2543,6 +2576,20 @@ impl<'input> GrabDeviceKeyRequest<'input> {
             classes: Cow::Owned(classes),
         })
     }
+    /// Clone all borrowed data in this GrabDeviceKeyRequest.
+    pub fn into_owned(self) -> GrabDeviceKeyRequest<'static> {
+        GrabDeviceKeyRequest {
+            grab_window: self.grab_window,
+            modifiers: self.modifiers,
+            modifier_device: self.modifier_device,
+            grabbed_device: self.grabbed_device,
+            key: self.key,
+            this_device_mode: self.this_device_mode,
+            other_device_mode: self.other_device_mode,
+            owner_events: self.owner_events,
+            classes: Cow::Owned(self.classes.into_owned()),
+        }
+    }
 }
 impl<'input> Request for GrabDeviceKeyRequest<'input> {
     type Reply = ();
@@ -2761,6 +2808,20 @@ impl<'input> GrabDeviceButtonRequest<'input> {
             owner_events,
             classes: Cow::Owned(classes),
         })
+    }
+    /// Clone all borrowed data in this GrabDeviceButtonRequest.
+    pub fn into_owned(self) -> GrabDeviceButtonRequest<'static> {
+        GrabDeviceButtonRequest {
+            grab_window: self.grab_window,
+            grabbed_device: self.grabbed_device,
+            modifier_device: self.modifier_device,
+            modifiers: self.modifiers,
+            this_device_mode: self.this_device_mode,
+            other_device_mode: self.other_device_mode,
+            button: self.button,
+            owner_events: self.owner_events,
+            classes: Cow::Owned(self.classes.into_owned()),
+        }
     }
 }
 impl<'input> Request for GrabDeviceButtonRequest<'input> {
@@ -5516,6 +5577,16 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
             keysyms: Cow::Owned(keysyms),
         })
     }
+    /// Clone all borrowed data in this ChangeDeviceKeyMappingRequest.
+    pub fn into_owned(self) -> ChangeDeviceKeyMappingRequest<'static> {
+        ChangeDeviceKeyMappingRequest {
+            device_id: self.device_id,
+            first_keycode: self.first_keycode,
+            keysyms_per_keycode: self.keysyms_per_keycode,
+            keycode_count: self.keycode_count,
+            keysyms: Cow::Owned(self.keysyms.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ChangeDeviceKeyMappingRequest<'input> {
     type Reply = ();
@@ -5648,7 +5719,7 @@ pub const SET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 27;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceModifierMappingRequest<'input> {
     pub device_id: u8,
-    pub keymaps: &'input [u8],
+    pub keymaps: Cow<'input, [u8]>,
 }
 impl<'input> SetDeviceModifierMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -5680,7 +5751,7 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.keymaps.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.keymaps, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -5694,8 +5765,15 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         let _ = remaining;
         Ok(SetDeviceModifierMappingRequest {
             device_id,
-            keymaps,
+            keymaps: Cow::Borrowed(keymaps),
         })
+    }
+    /// Clone all borrowed data in this SetDeviceModifierMappingRequest.
+    pub fn into_owned(self) -> SetDeviceModifierMappingRequest<'static> {
+        SetDeviceModifierMappingRequest {
+            device_id: self.device_id,
+            keymaps: Cow::Owned(self.keymaps.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetDeviceModifierMappingRequest<'input> {
@@ -5707,7 +5785,7 @@ where
 {
     let request0 = SetDeviceModifierMappingRequest {
         device_id,
-        keymaps,
+        keymaps: Cow::Borrowed(keymaps),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -5860,7 +5938,7 @@ pub const SET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 29;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceButtonMappingRequest<'input> {
     pub device_id: u8,
-    pub map: &'input [u8],
+    pub map: Cow<'input, [u8]>,
 }
 impl<'input> SetDeviceButtonMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -5891,7 +5969,7 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.map.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.map, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -5905,8 +5983,15 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         let _ = remaining;
         Ok(SetDeviceButtonMappingRequest {
             device_id,
-            map,
+            map: Cow::Borrowed(map),
         })
+    }
+    /// Clone all borrowed data in this SetDeviceButtonMappingRequest.
+    pub fn into_owned(self) -> SetDeviceButtonMappingRequest<'static> {
+        SetDeviceButtonMappingRequest {
+            device_id: self.device_id,
+            map: Cow::Owned(self.map.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetDeviceButtonMappingRequest<'input> {
@@ -5918,7 +6003,7 @@ where
 {
     let request0 = SetDeviceButtonMappingRequest {
         device_id,
-        map,
+        map: Cow::Borrowed(map),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6779,6 +6864,14 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
             first_valuator,
             valuators: Cow::Owned(valuators),
         })
+    }
+    /// Clone all borrowed data in this SetDeviceValuatorsRequest.
+    pub fn into_owned(self) -> SetDeviceValuatorsRequest<'static> {
+        SetDeviceValuatorsRequest {
+            device_id: self.device_id,
+            first_valuator: self.first_valuator,
+            valuators: Cow::Owned(self.valuators.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetDeviceValuatorsRequest<'input> {
@@ -8971,6 +9064,17 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
             items: Cow::Owned(items),
         })
     }
+    /// Clone all borrowed data in this ChangeDevicePropertyRequest.
+    pub fn into_owned(self) -> ChangeDevicePropertyRequest<'static> {
+        ChangeDevicePropertyRequest {
+            property: self.property,
+            type_: self.type_,
+            device_id: self.device_id,
+            mode: self.mode,
+            num_items: self.num_items,
+            items: Cow::Owned(self.items.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ChangeDevicePropertyRequest<'input> {
     type Reply = ();
@@ -10517,6 +10621,12 @@ impl<'input> XIChangeHierarchyRequest<'input> {
             changes: Cow::Owned(changes),
         })
     }
+    /// Clone all borrowed data in this XIChangeHierarchyRequest.
+    pub fn into_owned(self) -> XIChangeHierarchyRequest<'static> {
+        XIChangeHierarchyRequest {
+            changes: Cow::Owned(self.changes.into_owned()),
+        }
+    }
 }
 impl<'input> Request for XIChangeHierarchyRequest<'input> {
     type Reply = ();
@@ -10905,6 +11015,13 @@ impl<'input> XISelectEventsRequest<'input> {
             window,
             masks: Cow::Owned(masks),
         })
+    }
+    /// Clone all borrowed data in this XISelectEventsRequest.
+    pub fn into_owned(self) -> XISelectEventsRequest<'static> {
+        XISelectEventsRequest {
+            window: self.window,
+            masks: Cow::Owned(self.masks.into_owned()),
+        }
     }
 }
 impl<'input> Request for XISelectEventsRequest<'input> {
@@ -12690,6 +12807,19 @@ impl<'input> XIGrabDeviceRequest<'input> {
             mask: Cow::Owned(mask),
         })
     }
+    /// Clone all borrowed data in this XIGrabDeviceRequest.
+    pub fn into_owned(self) -> XIGrabDeviceRequest<'static> {
+        XIGrabDeviceRequest {
+            window: self.window,
+            time: self.time,
+            cursor: self.cursor,
+            deviceid: self.deviceid,
+            mode: self.mode,
+            paired_device_mode: self.paired_device_mode,
+            owner_events: self.owner_events,
+            mask: Cow::Owned(self.mask.into_owned()),
+        }
+    }
 }
 impl<'input> Request for XIGrabDeviceRequest<'input> {
     type Reply = XIGrabDeviceReply;
@@ -13327,6 +13457,22 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
             modifiers: Cow::Owned(modifiers),
         })
     }
+    /// Clone all borrowed data in this XIPassiveGrabDeviceRequest.
+    pub fn into_owned(self) -> XIPassiveGrabDeviceRequest<'static> {
+        XIPassiveGrabDeviceRequest {
+            time: self.time,
+            grab_window: self.grab_window,
+            cursor: self.cursor,
+            detail: self.detail,
+            deviceid: self.deviceid,
+            grab_type: self.grab_type,
+            grab_mode: self.grab_mode,
+            paired_device_mode: self.paired_device_mode,
+            owner_events: self.owner_events,
+            mask: Cow::Owned(self.mask.into_owned()),
+            modifiers: Cow::Owned(self.modifiers.into_owned()),
+        }
+    }
 }
 impl<'input> Request for XIPassiveGrabDeviceRequest<'input> {
     type Reply = XIPassiveGrabDeviceReply;
@@ -13479,6 +13625,16 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
             grab_type,
             modifiers: Cow::Owned(modifiers),
         })
+    }
+    /// Clone all borrowed data in this XIPassiveUngrabDeviceRequest.
+    pub fn into_owned(self) -> XIPassiveUngrabDeviceRequest<'static> {
+        XIPassiveUngrabDeviceRequest {
+            grab_window: self.grab_window,
+            detail: self.detail,
+            deviceid: self.deviceid,
+            grab_type: self.grab_type,
+            modifiers: Cow::Owned(self.modifiers.into_owned()),
+        }
     }
 }
 impl<'input> Request for XIPassiveUngrabDeviceRequest<'input> {
@@ -13795,6 +13951,17 @@ impl<'input> XIChangePropertyRequest<'input> {
             num_items,
             items: Cow::Owned(items),
         })
+    }
+    /// Clone all borrowed data in this XIChangePropertyRequest.
+    pub fn into_owned(self) -> XIChangePropertyRequest<'static> {
+        XIChangePropertyRequest {
+            deviceid: self.deviceid,
+            mode: self.mode,
+            property: self.property,
+            type_: self.type_,
+            num_items: self.num_items,
+            items: Cow::Owned(self.items.into_owned()),
+        }
     }
 }
 impl<'input> Request for XIChangePropertyRequest<'input> {
@@ -14301,6 +14468,12 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
         Ok(XIBarrierReleasePointerRequest {
             barriers: Cow::Owned(barriers),
         })
+    }
+    /// Clone all borrowed data in this XIBarrierReleasePointerRequest.
+    pub fn into_owned(self) -> XIBarrierReleasePointerRequest<'static> {
+        XIBarrierReleasePointerRequest {
+            barriers: Cow::Owned(self.barriers.into_owned()),
+        }
     }
 }
 impl<'input> Request for XIBarrierReleasePointerRequest<'input> {
@@ -17250,6 +17423,16 @@ impl<'input> SendExtensionEventRequest<'input> {
             events: Cow::Owned(events),
             classes: Cow::Owned(classes),
         })
+    }
+    /// Clone all borrowed data in this SendExtensionEventRequest.
+    pub fn into_owned(self) -> SendExtensionEventRequest<'static> {
+        SendExtensionEventRequest {
+            destination: self.destination,
+            device_id: self.device_id,
+            propagate: self.propagate,
+            events: Cow::Owned(self.events.into_owned()),
+            classes: Cow::Owned(self.classes.into_owned()),
+        }
     }
 }
 impl<'input> Request for SendExtensionEventRequest<'input> {

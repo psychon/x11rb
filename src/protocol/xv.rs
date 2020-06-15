@@ -3399,7 +3399,7 @@ pub struct PutImageRequest<'input> {
     pub drw_h: u16,
     pub width: u16,
     pub height: u16,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> PutImageRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3473,7 +3473,7 @@ impl<'input> PutImageRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3511,8 +3511,28 @@ impl<'input> PutImageRequest<'input> {
             drw_h,
             width,
             height,
-            data,
+            data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this PutImageRequest.
+    pub fn into_owned(self) -> PutImageRequest<'static> {
+        PutImageRequest {
+            port: self.port,
+            drawable: self.drawable,
+            gc: self.gc,
+            id: self.id,
+            src_x: self.src_x,
+            src_y: self.src_y,
+            src_w: self.src_w,
+            src_h: self.src_h,
+            drw_x: self.drw_x,
+            drw_y: self.drw_y,
+            drw_w: self.drw_w,
+            drw_h: self.drw_h,
+            width: self.width,
+            height: self.height,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for PutImageRequest<'input> {
@@ -3537,7 +3557,7 @@ where
         drw_h,
         width,
         height,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

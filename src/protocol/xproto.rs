@@ -6264,6 +6264,22 @@ impl<'input> CreateWindowRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this CreateWindowRequest.
+    pub fn into_owned(self) -> CreateWindowRequest<'static> {
+        CreateWindowRequest {
+            depth: self.depth,
+            wid: self.wid,
+            parent: self.parent,
+            x: self.x,
+            y: self.y,
+            width: self.width,
+            height: self.height,
+            border_width: self.border_width,
+            class: self.class,
+            visual: self.visual,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateWindowRequest<'input> {
     type Reply = ();
@@ -6762,6 +6778,13 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
             window,
             value_list: Cow::Owned(value_list),
         })
+    }
+    /// Clone all borrowed data in this ChangeWindowAttributesRequest.
+    pub fn into_owned(self) -> ChangeWindowAttributesRequest<'static> {
+        ChangeWindowAttributesRequest {
+            window: self.window,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeWindowAttributesRequest<'input> {
@@ -8314,6 +8337,13 @@ impl<'input> ConfigureWindowRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this ConfigureWindowRequest.
+    pub fn into_owned(self) -> ConfigureWindowRequest<'static> {
+        ConfigureWindowRequest {
+            window: self.window,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ConfigureWindowRequest<'input> {
     type Reply = ();
@@ -8974,7 +9004,7 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InternAtomRequest<'input> {
     pub only_if_exists: bool,
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> InternAtomRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -9004,7 +9034,7 @@ impl<'input> InternAtomRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -9020,8 +9050,15 @@ impl<'input> InternAtomRequest<'input> {
         let _ = remaining;
         Ok(InternAtomRequest {
             only_if_exists,
-            name,
+            name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this InternAtomRequest.
+    pub fn into_owned(self) -> InternAtomRequest<'static> {
+        InternAtomRequest {
+            only_if_exists: self.only_if_exists,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for InternAtomRequest<'input> {
@@ -9078,7 +9115,7 @@ where
 {
     let request0 = InternAtomRequest {
         only_if_exists,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -9353,7 +9390,7 @@ pub struct ChangePropertyRequest<'input> {
     pub type_: Atom,
     pub format: u8,
     pub data_len: u32,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> ChangePropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -9403,7 +9440,7 @@ impl<'input> ChangePropertyRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -9429,8 +9466,20 @@ impl<'input> ChangePropertyRequest<'input> {
             type_,
             format,
             data_len,
-            data,
+            data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this ChangePropertyRequest.
+    pub fn into_owned(self) -> ChangePropertyRequest<'static> {
+        ChangePropertyRequest {
+            mode: self.mode,
+            window: self.window,
+            property: self.property,
+            type_: self.type_,
+            format: self.format,
+            data_len: self.data_len,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangePropertyRequest<'input> {
@@ -9502,7 +9551,7 @@ where
         type_,
         format,
         data_len,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -10704,7 +10753,7 @@ pub struct SendEventRequest<'input> {
     pub propagate: bool,
     pub destination: Window,
     pub event_mask: u32,
-    pub event: &'input [u8; 32],
+    pub event: Cow<'input, [u8; 32]>,
 }
 impl<'input> SendEventRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -10732,11 +10781,11 @@ impl<'input> SendEventRequest<'input> {
             event_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let length_so_far = length_so_far + (&self.event[..]).len();
+        let length_so_far = length_so_far + self.event.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), (&self.event[..]).into()], vec![]))
+        Ok((vec![request0.into(), crate::x11_utils::cow_strip_length(&self.event)], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -10755,8 +10804,17 @@ impl<'input> SendEventRequest<'input> {
             propagate,
             destination,
             event_mask,
-            event,
+            event: Cow::Borrowed(event),
         })
+    }
+    /// Clone all borrowed data in this SendEventRequest.
+    pub fn into_owned(self) -> SendEventRequest<'static> {
+        SendEventRequest {
+            propagate: self.propagate,
+            destination: self.destination,
+            event_mask: self.event_mask,
+            event: Cow::Owned(self.event.into_owned()),
+        }
     }
 }
 impl<'input> Request for SendEventRequest<'input> {
@@ -10844,8 +10902,7 @@ where
 {
     let destination: Window = destination.into();
     let event_mask: u32 = event_mask.into();
-    let event: [u8; 32] = event.into();
-    let event = &event;
+    let event = Cow::Owned(event.into());
     let request0 = SendEventRequest {
         propagate,
         destination,
@@ -14052,7 +14109,7 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenFontRequest<'input> {
     pub fid: Font,
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> OpenFontRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -14086,7 +14143,7 @@ impl<'input> OpenFontRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -14103,8 +14160,15 @@ impl<'input> OpenFontRequest<'input> {
         let _ = remaining;
         Ok(OpenFontRequest {
             fid,
-            name,
+            name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this OpenFontRequest.
+    pub fn into_owned(self) -> OpenFontRequest<'static> {
+        OpenFontRequest {
+            fid: self.fid,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for OpenFontRequest<'input> {
@@ -14136,7 +14200,7 @@ where
 {
     let request0 = OpenFontRequest {
         fid,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -14651,6 +14715,13 @@ impl<'input> QueryTextExtentsRequest<'input> {
             string: Cow::Owned(string),
         })
     }
+    /// Clone all borrowed data in this QueryTextExtentsRequest.
+    pub fn into_owned(self) -> QueryTextExtentsRequest<'static> {
+        QueryTextExtentsRequest {
+            font: self.font,
+            string: Cow::Owned(self.string.into_owned()),
+        }
+    }
 }
 impl<'input> Request for QueryTextExtentsRequest<'input> {
     type Reply = QueryTextExtentsReply;
@@ -14809,7 +14880,7 @@ pub const LIST_FONTS_REQUEST: u8 = 49;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListFontsRequest<'input> {
     pub max_names: u16,
-    pub pattern: &'input [u8],
+    pub pattern: Cow<'input, [u8]>,
 }
 impl<'input> ListFontsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -14839,7 +14910,7 @@ impl<'input> ListFontsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.pattern.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.pattern, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -14855,8 +14926,15 @@ impl<'input> ListFontsRequest<'input> {
         let _ = remaining;
         Ok(ListFontsRequest {
             max_names,
-            pattern,
+            pattern: Cow::Borrowed(pattern),
         })
+    }
+    /// Clone all borrowed data in this ListFontsRequest.
+    pub fn into_owned(self) -> ListFontsRequest<'static> {
+        ListFontsRequest {
+            max_names: self.max_names,
+            pattern: Cow::Owned(self.pattern.into_owned()),
+        }
     }
 }
 impl<'input> Request for ListFontsRequest<'input> {
@@ -14881,7 +14959,7 @@ where
 {
     let request0 = ListFontsRequest {
         max_names,
-        pattern,
+        pattern: Cow::Borrowed(pattern),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -14953,7 +15031,7 @@ pub const LIST_FONTS_WITH_INFO_REQUEST: u8 = 50;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListFontsWithInfoRequest<'input> {
     pub max_names: u16,
-    pub pattern: &'input [u8],
+    pub pattern: Cow<'input, [u8]>,
 }
 impl<'input> ListFontsWithInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -14983,7 +15061,7 @@ impl<'input> ListFontsWithInfoRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.pattern.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.pattern, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -14999,8 +15077,15 @@ impl<'input> ListFontsWithInfoRequest<'input> {
         let _ = remaining;
         Ok(ListFontsWithInfoRequest {
             max_names,
-            pattern,
+            pattern: Cow::Borrowed(pattern),
         })
+    }
+    /// Clone all borrowed data in this ListFontsWithInfoRequest.
+    pub fn into_owned(self) -> ListFontsWithInfoRequest<'static> {
+        ListFontsWithInfoRequest {
+            max_names: self.max_names,
+            pattern: Cow::Owned(self.pattern.into_owned()),
+        }
     }
 }
 impl<'input> Request for ListFontsWithInfoRequest<'input> {
@@ -15025,7 +15110,7 @@ where
 {
     let request0 = ListFontsWithInfoRequest {
         max_names,
-        pattern,
+        pattern: Cow::Borrowed(pattern),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -15185,6 +15270,12 @@ impl<'input> SetFontPathRequest<'input> {
         Ok(SetFontPathRequest {
             font: Cow::Owned(font),
         })
+    }
+    /// Clone all borrowed data in this SetFontPathRequest.
+    pub fn into_owned(self) -> SetFontPathRequest<'static> {
+        SetFontPathRequest {
+            font: Cow::Owned(self.font.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetFontPathRequest<'input> {
@@ -16885,6 +16976,14 @@ impl<'input> CreateGCRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this CreateGCRequest.
+    pub fn into_owned(self) -> CreateGCRequest<'static> {
+        CreateGCRequest {
+            cid: self.cid,
+            drawable: self.drawable,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for CreateGCRequest<'input> {
     type Reply = ();
@@ -17534,6 +17633,13 @@ impl<'input> ChangeGCRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this ChangeGCRequest.
+    pub fn into_owned(self) -> ChangeGCRequest<'static> {
+        ChangeGCRequest {
+            gc: self.gc,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ChangeGCRequest<'input> {
     type Reply = ();
@@ -17683,7 +17789,7 @@ pub const SET_DASHES_REQUEST: u8 = 58;
 pub struct SetDashesRequest<'input> {
     pub gc: Gcontext,
     pub dash_offset: u16,
-    pub dashes: &'input [u8],
+    pub dashes: Cow<'input, [u8]>,
 }
 impl<'input> SetDashesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -17718,7 +17824,7 @@ impl<'input> SetDashesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.dashes.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.dashes, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -17736,8 +17842,16 @@ impl<'input> SetDashesRequest<'input> {
         Ok(SetDashesRequest {
             gc,
             dash_offset,
-            dashes,
+            dashes: Cow::Borrowed(dashes),
         })
+    }
+    /// Clone all borrowed data in this SetDashesRequest.
+    pub fn into_owned(self) -> SetDashesRequest<'static> {
+        SetDashesRequest {
+            gc: self.gc,
+            dash_offset: self.dash_offset,
+            dashes: Cow::Owned(self.dashes.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetDashesRequest<'input> {
@@ -17750,7 +17864,7 @@ where
     let request0 = SetDashesRequest {
         gc,
         dash_offset,
-        dashes,
+        dashes: Cow::Borrowed(dashes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -17899,6 +18013,16 @@ impl<'input> SetClipRectanglesRequest<'input> {
             clip_y_origin,
             rectangles: Cow::Owned(rectangles),
         })
+    }
+    /// Clone all borrowed data in this SetClipRectanglesRequest.
+    pub fn into_owned(self) -> SetClipRectanglesRequest<'static> {
+        SetClipRectanglesRequest {
+            ordering: self.ordering,
+            gc: self.gc,
+            clip_x_origin: self.clip_x_origin,
+            clip_y_origin: self.clip_y_origin,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetClipRectanglesRequest<'input> {
@@ -18534,6 +18658,15 @@ impl<'input> PolyPointRequest<'input> {
             points: Cow::Owned(points),
         })
     }
+    /// Clone all borrowed data in this PolyPointRequest.
+    pub fn into_owned(self) -> PolyPointRequest<'static> {
+        PolyPointRequest {
+            coordinate_mode: self.coordinate_mode,
+            drawable: self.drawable,
+            gc: self.gc,
+            points: Cow::Owned(self.points.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolyPointRequest<'input> {
     type Reply = ();
@@ -18662,6 +18795,15 @@ impl<'input> PolyLineRequest<'input> {
             gc,
             points: Cow::Owned(points),
         })
+    }
+    /// Clone all borrowed data in this PolyLineRequest.
+    pub fn into_owned(self) -> PolyLineRequest<'static> {
+        PolyLineRequest {
+            coordinate_mode: self.coordinate_mode,
+            drawable: self.drawable,
+            gc: self.gc,
+            points: Cow::Owned(self.points.into_owned()),
+        }
     }
 }
 impl<'input> Request for PolyLineRequest<'input> {
@@ -18864,6 +19006,14 @@ impl<'input> PolySegmentRequest<'input> {
             segments: Cow::Owned(segments),
         })
     }
+    /// Clone all borrowed data in this PolySegmentRequest.
+    pub fn into_owned(self) -> PolySegmentRequest<'static> {
+        PolySegmentRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            segments: Cow::Owned(self.segments.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolySegmentRequest<'input> {
     type Reply = ();
@@ -18975,6 +19125,14 @@ impl<'input> PolyRectangleRequest<'input> {
             rectangles: Cow::Owned(rectangles),
         })
     }
+    /// Clone all borrowed data in this PolyRectangleRequest.
+    pub fn into_owned(self) -> PolyRectangleRequest<'static> {
+        PolyRectangleRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolyRectangleRequest<'input> {
     type Reply = ();
@@ -19059,6 +19217,14 @@ impl<'input> PolyArcRequest<'input> {
             gc,
             arcs: Cow::Owned(arcs),
         })
+    }
+    /// Clone all borrowed data in this PolyArcRequest.
+    pub fn into_owned(self) -> PolyArcRequest<'static> {
+        PolyArcRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            arcs: Cow::Owned(self.arcs.into_owned()),
+        }
     }
 }
 impl<'input> Request for PolyArcRequest<'input> {
@@ -19225,6 +19391,16 @@ impl<'input> FillPolyRequest<'input> {
             points: Cow::Owned(points),
         })
     }
+    /// Clone all borrowed data in this FillPolyRequest.
+    pub fn into_owned(self) -> FillPolyRequest<'static> {
+        FillPolyRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            shape: self.shape,
+            coordinate_mode: self.coordinate_mode,
+            points: Cow::Owned(self.points.into_owned()),
+        }
+    }
 }
 impl<'input> Request for FillPolyRequest<'input> {
     type Reply = ();
@@ -19337,6 +19513,14 @@ impl<'input> PolyFillRectangleRequest<'input> {
             rectangles: Cow::Owned(rectangles),
         })
     }
+    /// Clone all borrowed data in this PolyFillRectangleRequest.
+    pub fn into_owned(self) -> PolyFillRectangleRequest<'static> {
+        PolyFillRectangleRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            rectangles: Cow::Owned(self.rectangles.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolyFillRectangleRequest<'input> {
     type Reply = ();
@@ -19447,6 +19631,14 @@ impl<'input> PolyFillArcRequest<'input> {
             arcs: Cow::Owned(arcs),
         })
     }
+    /// Clone all borrowed data in this PolyFillArcRequest.
+    pub fn into_owned(self) -> PolyFillArcRequest<'static> {
+        PolyFillArcRequest {
+            drawable: self.drawable,
+            gc: self.gc,
+            arcs: Cow::Owned(self.arcs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PolyFillArcRequest<'input> {
     type Reply = ();
@@ -19543,7 +19735,7 @@ pub struct PutImageRequest<'input> {
     pub dst_y: i16,
     pub left_pad: u8,
     pub depth: u8,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> PutImageRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -19595,7 +19787,7 @@ impl<'input> PutImageRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -19627,8 +19819,23 @@ impl<'input> PutImageRequest<'input> {
             dst_y,
             left_pad,
             depth,
-            data,
+            data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this PutImageRequest.
+    pub fn into_owned(self) -> PutImageRequest<'static> {
+        PutImageRequest {
+            format: self.format,
+            drawable: self.drawable,
+            gc: self.gc,
+            width: self.width,
+            height: self.height,
+            dst_x: self.dst_x,
+            dst_y: self.dst_y,
+            left_pad: self.left_pad,
+            depth: self.depth,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for PutImageRequest<'input> {
@@ -19648,7 +19855,7 @@ where
         dst_y,
         left_pad,
         depth,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -19813,7 +20020,7 @@ pub struct PolyText8Request<'input> {
     pub gc: Gcontext,
     pub x: i16,
     pub y: i16,
-    pub items: &'input [u8],
+    pub items: Cow<'input, [u8]>,
 }
 impl<'input> PolyText8Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -19852,7 +20059,7 @@ impl<'input> PolyText8Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.items.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.items, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -19873,8 +20080,18 @@ impl<'input> PolyText8Request<'input> {
             gc,
             x,
             y,
-            items,
+            items: Cow::Borrowed(items),
         })
+    }
+    /// Clone all borrowed data in this PolyText8Request.
+    pub fn into_owned(self) -> PolyText8Request<'static> {
+        PolyText8Request {
+            drawable: self.drawable,
+            gc: self.gc,
+            x: self.x,
+            y: self.y,
+            items: Cow::Owned(self.items.into_owned()),
+        }
     }
 }
 impl<'input> Request for PolyText8Request<'input> {
@@ -19889,7 +20106,7 @@ where
         gc,
         x,
         y,
-        items,
+        items: Cow::Borrowed(items),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -19904,7 +20121,7 @@ pub struct PolyText16Request<'input> {
     pub gc: Gcontext,
     pub x: i16,
     pub y: i16,
-    pub items: &'input [u8],
+    pub items: Cow<'input, [u8]>,
 }
 impl<'input> PolyText16Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -19943,7 +20160,7 @@ impl<'input> PolyText16Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.items.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.items, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -19964,8 +20181,18 @@ impl<'input> PolyText16Request<'input> {
             gc,
             x,
             y,
-            items,
+            items: Cow::Borrowed(items),
         })
+    }
+    /// Clone all borrowed data in this PolyText16Request.
+    pub fn into_owned(self) -> PolyText16Request<'static> {
+        PolyText16Request {
+            drawable: self.drawable,
+            gc: self.gc,
+            x: self.x,
+            y: self.y,
+            items: Cow::Owned(self.items.into_owned()),
+        }
     }
 }
 impl<'input> Request for PolyText16Request<'input> {
@@ -19980,7 +20207,7 @@ where
         gc,
         x,
         y,
-        items,
+        items: Cow::Borrowed(items),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -20029,7 +20256,7 @@ pub struct ImageText8Request<'input> {
     pub gc: Gcontext,
     pub x: i16,
     pub y: i16,
-    pub string: &'input [u8],
+    pub string: Cow<'input, [u8]>,
 }
 impl<'input> ImageText8Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -20070,7 +20297,7 @@ impl<'input> ImageText8Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.string.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.string, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -20091,8 +20318,18 @@ impl<'input> ImageText8Request<'input> {
             gc,
             x,
             y,
-            string,
+            string: Cow::Borrowed(string),
         })
+    }
+    /// Clone all borrowed data in this ImageText8Request.
+    pub fn into_owned(self) -> ImageText8Request<'static> {
+        ImageText8Request {
+            drawable: self.drawable,
+            gc: self.gc,
+            x: self.x,
+            y: self.y,
+            string: Cow::Owned(self.string.into_owned()),
+        }
     }
 }
 impl<'input> Request for ImageText8Request<'input> {
@@ -20141,7 +20378,7 @@ where
         gc,
         x,
         y,
-        string,
+        string: Cow::Borrowed(string),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -20256,6 +20493,16 @@ impl<'input> ImageText16Request<'input> {
             y,
             string: Cow::Owned(string),
         })
+    }
+    /// Clone all borrowed data in this ImageText16Request.
+    pub fn into_owned(self) -> ImageText16Request<'static> {
+        ImageText16Request {
+            drawable: self.drawable,
+            gc: self.gc,
+            x: self.x,
+            y: self.y,
+            string: Cow::Owned(self.string.into_owned()),
+        }
     }
 }
 impl<'input> Request for ImageText16Request<'input> {
@@ -20984,7 +21231,7 @@ pub const ALLOC_NAMED_COLOR_REQUEST: u8 = 85;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocNamedColorRequest<'input> {
     pub cmap: Colormap,
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> AllocNamedColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -21018,7 +21265,7 @@ impl<'input> AllocNamedColorRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -21035,8 +21282,15 @@ impl<'input> AllocNamedColorRequest<'input> {
         let _ = remaining;
         Ok(AllocNamedColorRequest {
             cmap,
-            name,
+            name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this AllocNamedColorRequest.
+    pub fn into_owned(self) -> AllocNamedColorRequest<'static> {
+        AllocNamedColorRequest {
+            cmap: self.cmap,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for AllocNamedColorRequest<'input> {
@@ -21048,7 +21302,7 @@ where
 {
     let request0 = AllocNamedColorRequest {
         cmap,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -21444,6 +21698,14 @@ impl<'input> FreeColorsRequest<'input> {
             pixels: Cow::Owned(pixels),
         })
     }
+    /// Clone all borrowed data in this FreeColorsRequest.
+    pub fn into_owned(self) -> FreeColorsRequest<'static> {
+        FreeColorsRequest {
+            cmap: self.cmap,
+            plane_mask: self.plane_mask,
+            pixels: Cow::Owned(self.pixels.into_owned()),
+        }
+    }
 }
 impl<'input> Request for FreeColorsRequest<'input> {
     type Reply = ();
@@ -21647,6 +21909,13 @@ impl<'input> StoreColorsRequest<'input> {
             items: Cow::Owned(items),
         })
     }
+    /// Clone all borrowed data in this StoreColorsRequest.
+    pub fn into_owned(self) -> StoreColorsRequest<'static> {
+        StoreColorsRequest {
+            cmap: self.cmap,
+            items: Cow::Owned(self.items.into_owned()),
+        }
+    }
 }
 impl<'input> Request for StoreColorsRequest<'input> {
     type Reply = ();
@@ -21671,7 +21940,7 @@ pub struct StoreNamedColorRequest<'input> {
     pub flags: u8,
     pub cmap: Colormap,
     pub pixel: u32,
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> StoreNamedColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -21711,7 +21980,7 @@ impl<'input> StoreNamedColorRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -21731,8 +22000,17 @@ impl<'input> StoreNamedColorRequest<'input> {
             flags,
             cmap,
             pixel,
-            name,
+            name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this StoreNamedColorRequest.
+    pub fn into_owned(self) -> StoreNamedColorRequest<'static> {
+        StoreNamedColorRequest {
+            flags: self.flags,
+            cmap: self.cmap,
+            pixel: self.pixel,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for StoreNamedColorRequest<'input> {
@@ -21748,7 +22026,7 @@ where
         flags,
         cmap,
         pixel,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -21862,6 +22140,13 @@ impl<'input> QueryColorsRequest<'input> {
             pixels: Cow::Owned(pixels),
         })
     }
+    /// Clone all borrowed data in this QueryColorsRequest.
+    pub fn into_owned(self) -> QueryColorsRequest<'static> {
+        QueryColorsRequest {
+            cmap: self.cmap,
+            pixels: Cow::Owned(self.pixels.into_owned()),
+        }
+    }
 }
 impl<'input> Request for QueryColorsRequest<'input> {
     type Reply = QueryColorsReply;
@@ -21928,7 +22213,7 @@ pub const LOOKUP_COLOR_REQUEST: u8 = 92;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LookupColorRequest<'input> {
     pub cmap: Colormap,
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> LookupColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -21962,7 +22247,7 @@ impl<'input> LookupColorRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -21979,8 +22264,15 @@ impl<'input> LookupColorRequest<'input> {
         let _ = remaining;
         Ok(LookupColorRequest {
             cmap,
-            name,
+            name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this LookupColorRequest.
+    pub fn into_owned(self) -> LookupColorRequest<'static> {
+        LookupColorRequest {
+            cmap: self.cmap,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for LookupColorRequest<'input> {
@@ -21992,7 +22284,7 @@ where
 {
     let request0 = LookupColorRequest {
         cmap,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -22882,7 +23174,7 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 /// * `xcb_get_extension_data`: function
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryExtensionRequest<'input> {
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> QueryExtensionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -22911,7 +23203,7 @@ impl<'input> QueryExtensionRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -22926,8 +23218,14 @@ impl<'input> QueryExtensionRequest<'input> {
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(QueryExtensionRequest {
-            name,
+            name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this QueryExtensionRequest.
+    pub fn into_owned(self) -> QueryExtensionRequest<'static> {
+        QueryExtensionRequest {
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for QueryExtensionRequest<'input> {
@@ -22960,7 +23258,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryExtensionRequest {
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -23159,6 +23457,15 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
             keysyms_per_keycode,
             keysyms: Cow::Owned(keysyms),
         })
+    }
+    /// Clone all borrowed data in this ChangeKeyboardMappingRequest.
+    pub fn into_owned(self) -> ChangeKeyboardMappingRequest<'static> {
+        ChangeKeyboardMappingRequest {
+            keycode_count: self.keycode_count,
+            first_keycode: self.first_keycode,
+            keysyms_per_keycode: self.keysyms_per_keycode,
+            keysyms: Cow::Owned(self.keysyms.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeKeyboardMappingRequest<'input> {
@@ -23752,6 +24059,12 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         Ok(ChangeKeyboardControlRequest {
             value_list: Cow::Owned(value_list),
         })
+    }
+    /// Clone all borrowed data in this ChangeKeyboardControlRequest.
+    pub fn into_owned(self) -> ChangeKeyboardControlRequest<'static> {
+        ChangeKeyboardControlRequest {
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeKeyboardControlRequest<'input> {
@@ -24528,7 +24841,7 @@ pub const CHANGE_HOSTS_REQUEST: u8 = 109;
 pub struct ChangeHostsRequest<'input> {
     pub mode: HostMode,
     pub family: Family,
-    pub address: &'input [u8],
+    pub address: Cow<'input, [u8]>,
 }
 impl<'input> ChangeHostsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -24559,7 +24872,7 @@ impl<'input> ChangeHostsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.address.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.address, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -24579,8 +24892,16 @@ impl<'input> ChangeHostsRequest<'input> {
         Ok(ChangeHostsRequest {
             mode,
             family,
-            address,
+            address: Cow::Borrowed(address),
         })
+    }
+    /// Clone all borrowed data in this ChangeHostsRequest.
+    pub fn into_owned(self) -> ChangeHostsRequest<'static> {
+        ChangeHostsRequest {
+            mode: self.mode,
+            family: self.family,
+            address: Cow::Owned(self.address.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeHostsRequest<'input> {
@@ -24593,7 +24914,7 @@ where
     let request0 = ChangeHostsRequest {
         mode,
         family,
-        address,
+        address: Cow::Borrowed(address),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -25229,6 +25550,14 @@ impl<'input> RotatePropertiesRequest<'input> {
             atoms: Cow::Owned(atoms),
         })
     }
+    /// Clone all borrowed data in this RotatePropertiesRequest.
+    pub fn into_owned(self) -> RotatePropertiesRequest<'static> {
+        RotatePropertiesRequest {
+            window: self.window,
+            delta: self.delta,
+            atoms: Cow::Owned(self.atoms.into_owned()),
+        }
+    }
 }
 impl<'input> Request for RotatePropertiesRequest<'input> {
     type Reply = ();
@@ -25443,7 +25772,7 @@ impl TryFrom<u32> for MappingStatus {
 pub const SET_POINTER_MAPPING_REQUEST: u8 = 116;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetPointerMappingRequest<'input> {
-    pub map: &'input [u8],
+    pub map: Cow<'input, [u8]>,
 }
 impl<'input> SetPointerMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -25468,7 +25797,7 @@ impl<'input> SetPointerMappingRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.map.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.map, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -25481,8 +25810,14 @@ impl<'input> SetPointerMappingRequest<'input> {
         let (map, remaining) = crate::x11_utils::parse_u8_list(value, map_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetPointerMappingRequest {
-            map,
+            map: Cow::Borrowed(map),
         })
+    }
+    /// Clone all borrowed data in this SetPointerMappingRequest.
+    pub fn into_owned(self) -> SetPointerMappingRequest<'static> {
+        SetPointerMappingRequest {
+            map: Cow::Owned(self.map.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetPointerMappingRequest<'input> {
@@ -25493,7 +25828,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPointerMappingRequest {
-        map,
+        map: Cow::Borrowed(map),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -25705,7 +26040,7 @@ impl TryFrom<u32> for MapIndex {
 pub const SET_MODIFIER_MAPPING_REQUEST: u8 = 118;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetModifierMappingRequest<'input> {
-    pub keycodes: &'input [Keycode],
+    pub keycodes: Cow<'input, [Keycode]>,
 }
 impl<'input> SetModifierMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -25731,7 +26066,7 @@ impl<'input> SetModifierMappingRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.keycodes.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.keycodes, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -25744,8 +26079,14 @@ impl<'input> SetModifierMappingRequest<'input> {
         let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetModifierMappingRequest {
-            keycodes,
+            keycodes: Cow::Borrowed(keycodes),
         })
+    }
+    /// Clone all borrowed data in this SetModifierMappingRequest.
+    pub fn into_owned(self) -> SetModifierMappingRequest<'static> {
+        SetModifierMappingRequest {
+            keycodes: Cow::Owned(self.keycodes.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetModifierMappingRequest<'input> {
@@ -25756,7 +26097,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetModifierMappingRequest {
-        keycodes,
+        keycodes: Cow::Borrowed(keycodes),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

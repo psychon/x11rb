@@ -20,6 +20,8 @@ pub(super) struct PerModuleEnumCases {
     request_parse_cases: Vec<String>,
     /// Lines that belong in the definition of Request::reply_parser.
     reply_parse_cases: Vec<String>,
+    /// Lines that belong in the definition of Request::into_owned.
+    request_into_owned_cases: Vec<String>,
     /// Lines that belong in the Reply enum definition.
     reply_variants: Vec<String>,
     /// Impls for From<ReplyType> for Reply enum.
@@ -52,7 +54,7 @@ pub(super) fn generate_request_reply_enum(
     outln!(out, "#[allow(clippy::large_enum_variant)]");
     outln!(out, "pub enum Request<'input> {{");
     out.indented(|out| {
-        outln!(out, "Unknown(RequestHeader, &'input [u8]),");
+        outln!(out, "Unknown(RequestHeader, Cow<'input, [u8]>),");
         for ns in namespaces.iter() {
             let has_feature = super::ext_has_feature(&ns.header);
 
@@ -151,7 +153,10 @@ pub(super) fn generate_request_reply_enum(
                 outln!(out, "_ => (),");
             });
             outln!(out, "}}");
-            outln!(out, "Ok(Request::Unknown(header, remaining))");
+            outln!(
+                out,
+                "Ok(Request::Unknown(header, Cow::Borrowed(remaining)))"
+            );
         });
         outln!(out, "}}");
         outln!(
@@ -176,6 +181,31 @@ pub(super) fn generate_request_reply_enum(
                         .reply_parse_cases
                         .drain(..);
                     for case in reply_parse_cases {
+                        if has_feature {
+                            outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                        }
+                        outln!(out, "{}", case);
+                    }
+                }
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+        outln!(out, "/// Convert this Request into an owned version with no borrows.");
+        outln!(out, "pub fn into_owned(self) -> Request<'static> {{");
+        out.indented(|out| {
+            outln!(out, "match self {{");
+            out.indented(|out| {
+                outln!(out, "Request::Unknown(header, body) => Request::Unknown(header, Cow::Owned(body.into_owned())),");
+                for ns in namespaces.iter() {
+                    let has_feature = super::ext_has_feature(&ns.header);
+
+                    let request_into_owned_cases = enum_cases
+                        .get_mut(&ns.header)
+                        .unwrap()
+                        .request_into_owned_cases
+                        .drain(..);
+                    for case in request_into_owned_cases {
                         if has_feature {
                             outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
                         }
@@ -236,6 +266,16 @@ pub(super) fn generate_request_reply_enum(
         }
     }
     outln!(out, "");
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum IovecConversion {
+    // No conversion is required.
+    None,
+    // A simple .into() is enough.
+    Into,
+    // Call cow_strip_length.
+    CowStripLength,
 }
 
 /// Caches to avoid repeating some operations.
@@ -577,6 +617,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 name = name,
             ));
         }
+
+        if gathered.needs_lifetime {
+            enum_cases.request_into_owned_cases.push(format!(
+                "Request::{ns_prefix}{name}(req) => Request::{ns_prefix}{name}(req.into_owned()),",
+                ns_prefix = ns_prefix,
+                name = name,
+            ));
+        } else {
+            enum_cases.request_into_owned_cases.push(format!(
+                "Request::{ns_prefix}{name}(req) => Request::{ns_prefix}{name}(req),",
+                ns_prefix = ns_prefix,
+                name = name,
+            ));
+        }
     }
 
     fn generate_aux(
@@ -654,6 +708,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         out: &mut Output,
     ) {
         let ns = request_def.namespace.upgrade().unwrap();
+        let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
 
         if let Some(ref doc) = request_def.doc {
             self.emit_doc(doc, out);
@@ -674,6 +729,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             };
 
         let has_members = !gathered.request_args.is_empty();
+        let has_cows = gathered
+            .request_args
+            .iter()
+            .any(|arg| arg.1.needs_any_cow());
         let members_start = if has_members { " {" } else { ";" };
         outln!(
             out,
@@ -799,7 +858,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     align,
                                     align,
                                 );
-                                next_slice = Some(format!("padding{}", pad_count));
+                                next_slice =
+                                    Some((format!("padding{}", pad_count), IovecConversion::Into));
                                 pad_count += 1;
                             }
                         },
@@ -879,7 +939,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         bytes_name,
                                         rust_field_name,
                                     );
-                                    next_slice = Some(bytes_name);
+                                    next_slice = Some((bytes_name, IovecConversion::Into));
                                 }
                             }
                         }
@@ -887,12 +947,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             let rust_field_name = to_rust_variable_name(&list_field.name);
                             let list_length = list_field.length();
                             if self.rust_value_type_is_u8(&list_field.element_type) {
-                                if list_length.is_some() {
+                                let conversion = if list_length.is_some() {
                                     // If this is a fixed length array we need to erase its length.
-                                    next_slice = Some(format!("(&self.{}[..])", rust_field_name));
+                                    IovecConversion::CowStripLength
                                 } else {
-                                    next_slice = Some(format!("self.{}", rust_field_name));
-                                }
+                                    IovecConversion::None
+                                };
+                                next_slice =
+                                    Some((format!("self.{}", rust_field_name), conversion));
                             } else {
                                 assert_eq!(
                                     list_length, None,
@@ -906,7 +968,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         bytes_name,
                                         rust_field_name,
                                     );
-                                    next_slice = Some(bytes_name);
+                                    next_slice = Some((bytes_name, IovecConversion::Into));
                                 } else {
                                     let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                     outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
@@ -921,7 +983,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         );
                                     });
                                     outln!(tmp_out, "}}");
-                                    next_slice = Some(bytes_name);
+                                    next_slice = Some((bytes_name, IovecConversion::Into));
                                 }
                             }
                         }
@@ -950,7 +1012,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
                                 }
                             } else {
-                                next_slice = Some(bytes_name);
+                                next_slice = Some((bytes_name, IovecConversion::Into));
                             }
                         }
                         xcbdefs::FieldDef::Fd(_) => {}
@@ -1036,13 +1098,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             fixed_fields_bytes.clear();
                             num_fixed_len_slices += 1;
                         }
-                        if let Some(next_slice) = next_slice {
+                        if let Some((next_slice, conversion)) = next_slice {
                             outln!(
                                 tmp_out,
                                 "let length_so_far = length_so_far + {}.len();",
                                 next_slice,
                             );
-                            request_slices.push(format!("{}.into()", next_slice));
+                            match conversion {
+                                IovecConversion::None => request_slices.push(next_slice),
+                                IovecConversion::Into => {
+                                    request_slices.push(format!("{}.into()", next_slice))
+                                }
+                                IovecConversion::CowStripLength => request_slices.push(format!(
+                                    "crate::x11_utils::cow_strip_length(&{})",
+                                    next_slice
+                                )),
+                            }
                         }
                     }
 
@@ -1249,8 +1320,17 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "Ok({}Request{}", name, members_start);
                 out.indented(|out| {
                     for (arg_name, arg_type) in gathered.request_args.iter() {
-                        if arg_type.needs_cow() {
+                        if arg_type.needs_owned_cow() {
+                            // Types that are parsed from raw bytes must become
+                            // Cow::Owned here because they don't exist outside
+                            // of this function, so we cannot return references
+                            // to them.
                             outln!(out, "{name}: Cow::Owned({name}),", name = arg_name);
+                        } else if arg_type.needs_borrowed_cow() {
+                            // But raw buffers of bytes can become Cow::Borrowed,
+                            // because the original buffer of bytes still exists
+                            // after we return.
+                            outln!(out, "{name}: Cow::Borrowed({name}),", name = arg_name);
                         } else {
                             outln!(out, "{name},", name = arg_name);
                         }
@@ -1260,6 +1340,32 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "{})", members_end);
             });
             outln!(out, "}}");
+            if has_cows {
+                outln!(out, "/// Clone all borrowed data in this {}Request.", name);
+                outln!(
+                    out,
+                    "pub fn into_owned(self) -> {}Request<'static> {{",
+                    name
+                );
+                out.indented(|out| {
+                    outln!(out, "{}Request {{", name);
+                    out.indented(|out| {
+                        for (arg_name, arg_type) in gathered.args.iter() {
+                            if arg_type.needs_any_cow() || is_send_event && arg_name == "event" {
+                                outln!(
+                                    out,
+                                    "{name}: Cow::Owned(self.{name}.into_owned()),",
+                                    name = arg_name
+                                );
+                            } else {
+                                outln!(out, "{name}: self.{name},", name = arg_name);
+                            }
+                        }
+                    });
+                    outln!(out, "}}");
+                });
+                outln!(out, "}}");
+            }
         });
         outln!(out, "}}");
         outln!(
@@ -1356,7 +1462,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "let request0 = {}Request{}", name, members_start);
             out.indented(|out| {
                 for (arg_name, arg_type) in gathered.args.iter() {
-                    if arg_type.needs_cow() {
+                    if arg_type.needs_any_cow() {
+                        // Because the argument is passed in from outside this function,
+                        // it is always ok to use a Cow::Borrowed here.
                         outln!(out, "{name}: Cow::Borrowed({name}),", name = arg_name);
                     } else {
                         outln!(out, "{name},", name = arg_name);
@@ -5123,33 +5231,34 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         args.push((list_field.name.clone(), Type::Simple(generic_param.clone())));
                         request_args.push((
                             list_field.name.clone(),
-                            Type::Simple("&'input [u8; 32]".into()),
+                            Type::VariableOwnershipRawBytes("[u8; 32]".into()),
                         ));
                         generics.push((generic_param, String::from("Into<[u8; 32]>")));
-                        preamble.push(String::from("let event: [u8; 32] = event.into();"));
-                        preamble.push(String::from("let event = &event;"));
+                        preamble.push(String::from("let event = Cow::Owned(event.into());"));
                         needs_lifetime = true;
                     } else {
                         let element_type =
                             self.field_value_type_to_rust_type(&list_field.element_type);
                         let rust_field_name = to_rust_variable_name(&list_field.name);
-                        let rust_field_type = if self
-                            .rust_value_type_is_u8(&list_field.element_type)
-                        {
-                            if let Some(list_len) = list_field.length() {
-                                Type::Simple(format!("&'input [{}; {}]", element_type, list_len))
+                        let rust_field_type =
+                            if self.rust_value_type_is_u8(&list_field.element_type) {
+                                if let Some(list_len) = list_field.length() {
+                                    Type::VariableOwnershipRawBytes(format!(
+                                        "[{}; {}]",
+                                        element_type, list_len
+                                    ))
+                                } else {
+                                    Type::VariableOwnershipRawBytes(format!("[{}]", element_type))
+                                }
                             } else {
-                                Type::Simple(format!("&'input [{}]", element_type))
-                            }
-                        } else {
-                            assert_eq!(
+                                assert_eq!(
                                 list_field.length(),
                                 None,
                                 "Fixed length arrays of types other than u8 are not implemented"
                             );
 
-                            Type::VariableOwnership(format!("[{}]", element_type))
-                        };
+                                Type::VariableOwnership(format!("[{}]", element_type))
+                            };
                         args.push((rust_field_name.clone(), rust_field_type.clone()));
                         request_args.push((rust_field_name, rust_field_type));
                         needs_lifetime = true;
@@ -5817,17 +5926,36 @@ enum Type {
     /// This type is simple can we can just use the string provided.
     Simple(String),
     /// This type has a lifetime and needs to be a borrow or a Cow, depending
-    /// on the context. Note that a type that is *always* a borrow is
-    /// `Simple`.
+    /// on the context. But during parsing it has to be a Cow::Owned because
+    /// it is generated.
     VariableOwnership(String),
+    /// This type has a lifetime and needs to be a borrow or a Cow, but
+    /// when parsing it can be borrowed from the byte stream.
+    VariableOwnershipRawBytes(String),
 }
 
 impl Type {
+    /// Does this type need a Cow::Owned?
+    fn needs_owned_cow(&self) -> bool {
+        match self {
+            Type::Simple(_) | Type::VariableOwnershipRawBytes(_) => false,
+            Type::VariableOwnership(_) => true,
+        }
+    }
+
+    /// Does this type need a Cow::Borrowed?
+    fn needs_borrowed_cow(&self) -> bool {
+        match self {
+            Type::Simple(_) | Type::VariableOwnership(_) => false,
+            Type::VariableOwnershipRawBytes(_) => true,
+        }
+    }
+
     /// Does this type need a Cow?
-    fn needs_cow(&self) -> bool {
+    fn needs_any_cow(&self) -> bool {
         match self {
             Type::Simple(_) => false,
-            Type::VariableOwnership(_) => true,
+            Type::VariableOwnership(_) | Type::VariableOwnershipRawBytes(_) => true,
         }
     }
 
@@ -5835,7 +5963,9 @@ impl Type {
     fn as_argument(&self) -> Cow<'_, str> {
         match self {
             Type::Simple(ref type_) => type_.into(),
-            Type::VariableOwnership(ref type_) => format!("&'input {}", type_).into(),
+            Type::VariableOwnership(ref type_) | Type::VariableOwnershipRawBytes(ref type_) => {
+                format!("&'input {}", type_).into()
+            }
         }
     }
 
@@ -5843,7 +5973,9 @@ impl Type {
     fn as_field(&self) -> Cow<'_, str> {
         match self {
             Type::Simple(ref type_) => type_.into(),
-            Type::VariableOwnership(ref type_) => format!("Cow<'input, {}>", type_).into(),
+            Type::VariableOwnership(ref type_) | Type::VariableOwnershipRawBytes(ref type_) => {
+                format!("Cow<'input, {}>", type_).into()
+            }
         }
     }
 }

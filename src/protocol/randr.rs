@@ -2161,6 +2161,16 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
             values: Cow::Owned(values),
         })
     }
+    /// Clone all borrowed data in this ConfigureOutputPropertyRequest.
+    pub fn into_owned(self) -> ConfigureOutputPropertyRequest<'static> {
+        ConfigureOutputPropertyRequest {
+            output: self.output,
+            property: self.property,
+            pending: self.pending,
+            range: self.range,
+            values: Cow::Owned(self.values.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ConfigureOutputPropertyRequest<'input> {
     type Reply = ();
@@ -2191,7 +2201,7 @@ pub struct ChangeOutputPropertyRequest<'input> {
     pub format: u8,
     pub mode: xproto::PropMode,
     pub num_units: u32,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> ChangeOutputPropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2242,7 +2252,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2266,8 +2276,20 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
             format,
             mode,
             num_units,
-            data,
+            data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this ChangeOutputPropertyRequest.
+    pub fn into_owned(self) -> ChangeOutputPropertyRequest<'static> {
+        ChangeOutputPropertyRequest {
+            output: self.output,
+            property: self.property,
+            type_: self.type_,
+            format: self.format,
+            mode: self.mode,
+            num_units: self.num_units,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeOutputPropertyRequest<'input> {
@@ -2284,7 +2306,7 @@ where
         format,
         mode,
         num_units,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2513,7 +2535,7 @@ pub const CREATE_MODE_REQUEST: u8 = 16;
 pub struct CreateModeRequest<'input> {
     pub window: xproto::Window,
     pub mode_info: ModeInfo,
-    pub name: &'input [u8],
+    pub name: Cow<'input, [u8]>,
 }
 impl<'input> CreateModeRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2575,7 +2597,7 @@ impl<'input> CreateModeRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2589,8 +2611,16 @@ impl<'input> CreateModeRequest<'input> {
         Ok(CreateModeRequest {
             window,
             mode_info,
-            name,
+            name: Cow::Borrowed(name),
         })
+    }
+    /// Clone all borrowed data in this CreateModeRequest.
+    pub fn into_owned(self) -> CreateModeRequest<'static> {
+        CreateModeRequest {
+            window: self.window,
+            mode_info: self.mode_info,
+            name: Cow::Owned(self.name.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreateModeRequest<'input> {
@@ -2603,7 +2633,7 @@ where
     let request0 = CreateModeRequest {
         window,
         mode_info,
-        name,
+        name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -3080,6 +3110,19 @@ impl<'input> SetCrtcConfigRequest<'input> {
             outputs: Cow::Owned(outputs),
         })
     }
+    /// Clone all borrowed data in this SetCrtcConfigRequest.
+    pub fn into_owned(self) -> SetCrtcConfigRequest<'static> {
+        SetCrtcConfigRequest {
+            crtc: self.crtc,
+            timestamp: self.timestamp,
+            config_timestamp: self.config_timestamp,
+            x: self.x,
+            y: self.y,
+            mode: self.mode,
+            rotation: self.rotation,
+            outputs: Cow::Owned(self.outputs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetCrtcConfigRequest<'input> {
     type Reply = SetCrtcConfigReply;
@@ -3399,6 +3442,15 @@ impl<'input> SetCrtcGammaRequest<'input> {
             blue: Cow::Owned(blue),
         })
     }
+    /// Clone all borrowed data in this SetCrtcGammaRequest.
+    pub fn into_owned(self) -> SetCrtcGammaRequest<'static> {
+        SetCrtcGammaRequest {
+            crtc: self.crtc,
+            red: Cow::Owned(self.red.into_owned()),
+            green: Cow::Owned(self.green.into_owned()),
+            blue: Cow::Owned(self.blue.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetCrtcGammaRequest<'input> {
     type Reply = ();
@@ -3649,7 +3701,7 @@ pub const SET_CRTC_TRANSFORM_REQUEST: u8 = 26;
 pub struct SetCrtcTransformRequest<'input> {
     pub crtc: Crtc,
     pub transform: render::Transform,
-    pub filter_name: &'input [u8],
+    pub filter_name: Cow<'input, [u8]>,
     pub filter_params: Cow<'input, [render::Fixed]>,
 }
 impl<'input> SetCrtcTransformRequest<'input> {
@@ -3726,7 +3778,7 @@ impl<'input> SetCrtcTransformRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.filter_name.into(), padding0.into(), filter_params_bytes.into(), padding1.into()], vec![]))
+        Ok((vec![request0.into(), self.filter_name, padding0.into(), filter_params_bytes.into(), padding1.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3754,9 +3806,18 @@ impl<'input> SetCrtcTransformRequest<'input> {
         Ok(SetCrtcTransformRequest {
             crtc,
             transform,
-            filter_name,
+            filter_name: Cow::Borrowed(filter_name),
             filter_params: Cow::Owned(filter_params),
         })
+    }
+    /// Clone all borrowed data in this SetCrtcTransformRequest.
+    pub fn into_owned(self) -> SetCrtcTransformRequest<'static> {
+        SetCrtcTransformRequest {
+            crtc: self.crtc,
+            transform: self.transform,
+            filter_name: Cow::Owned(self.filter_name.into_owned()),
+            filter_params: Cow::Owned(self.filter_params.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetCrtcTransformRequest<'input> {
@@ -3769,7 +3830,7 @@ where
     let request0 = SetCrtcTransformRequest {
         crtc,
         transform,
-        filter_name,
+        filter_name: Cow::Borrowed(filter_name),
         filter_params: Cow::Borrowed(filter_params),
     };
     let (bytes, fds) = request0.serialize(conn)?;
@@ -5186,6 +5247,16 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
             values: Cow::Owned(values),
         })
     }
+    /// Clone all borrowed data in this ConfigureProviderPropertyRequest.
+    pub fn into_owned(self) -> ConfigureProviderPropertyRequest<'static> {
+        ConfigureProviderPropertyRequest {
+            provider: self.provider,
+            property: self.property,
+            pending: self.pending,
+            range: self.range,
+            values: Cow::Owned(self.values.into_owned()),
+        }
+    }
 }
 impl<'input> Request for ConfigureProviderPropertyRequest<'input> {
     type Reply = ();
@@ -5216,7 +5287,7 @@ pub struct ChangeProviderPropertyRequest<'input> {
     pub format: u8,
     pub mode: u8,
     pub num_items: u32,
-    pub data: &'input [u8],
+    pub data: Cow<'input, [u8]>,
 }
 impl<'input> ChangeProviderPropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -5267,7 +5338,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -5290,8 +5361,20 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
             format,
             mode,
             num_items,
-            data,
+            data: Cow::Borrowed(data),
         })
+    }
+    /// Clone all borrowed data in this ChangeProviderPropertyRequest.
+    pub fn into_owned(self) -> ChangeProviderPropertyRequest<'static> {
+        ChangeProviderPropertyRequest {
+            provider: self.provider,
+            property: self.property,
+            type_: self.type_,
+            format: self.format,
+            mode: self.mode,
+            num_items: self.num_items,
+            data: Cow::Owned(self.data.into_owned()),
+        }
     }
 }
 impl<'input> Request for ChangeProviderPropertyRequest<'input> {
@@ -5308,7 +5391,7 @@ where
         format,
         mode,
         num_items,
-        data,
+        data: Cow::Borrowed(data),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -6574,6 +6657,15 @@ impl<'input> CreateLeaseRequest<'input> {
             crtcs: Cow::Owned(crtcs),
             outputs: Cow::Owned(outputs),
         })
+    }
+    /// Clone all borrowed data in this CreateLeaseRequest.
+    pub fn into_owned(self) -> CreateLeaseRequest<'static> {
+        CreateLeaseRequest {
+            window: self.window,
+            lid: self.lid,
+            crtcs: Cow::Owned(self.crtcs.into_owned()),
+            outputs: Cow::Owned(self.outputs.into_owned()),
+        }
     }
 }
 impl<'input> Request for CreateLeaseRequest<'input> {

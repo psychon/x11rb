@@ -132,7 +132,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceCreateContextRequest<'input> {
-    pub context: &'input [u8],
+    pub context: Cow<'input, [u8]>,
 }
 impl<'input> SetDeviceCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -162,7 +162,7 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -173,8 +173,14 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetDeviceCreateContextRequest {
-            context,
+            context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetDeviceCreateContextRequest.
+    pub fn into_owned(self) -> SetDeviceCreateContextRequest<'static> {
+        SetDeviceCreateContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetDeviceCreateContextRequest<'input> {
@@ -185,7 +191,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetDeviceCreateContextRequest {
-        context,
+        context: Cow::Borrowed(context),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -290,7 +296,7 @@ pub const SET_DEVICE_CONTEXT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetDeviceContextRequest<'input> {
     pub device: u32,
-    pub context: &'input [u8],
+    pub context: Cow<'input, [u8]>,
 }
 impl<'input> SetDeviceContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -325,7 +331,7 @@ impl<'input> SetDeviceContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -338,8 +344,15 @@ impl<'input> SetDeviceContextRequest<'input> {
         let _ = remaining;
         Ok(SetDeviceContextRequest {
             device,
-            context,
+            context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetDeviceContextRequest.
+    pub fn into_owned(self) -> SetDeviceContextRequest<'static> {
+        SetDeviceContextRequest {
+            device: self.device,
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetDeviceContextRequest<'input> {
@@ -351,7 +364,7 @@ where
 {
     let request0 = SetDeviceContextRequest {
         device,
-        context,
+        context: Cow::Borrowed(context),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -466,7 +479,7 @@ impl GetDeviceContextReply {
 pub const SET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 5;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetWindowCreateContextRequest<'input> {
-    pub context: &'input [u8],
+    pub context: Cow<'input, [u8]>,
 }
 impl<'input> SetWindowCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -496,7 +509,7 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -507,8 +520,14 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetWindowCreateContextRequest {
-            context,
+            context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetWindowCreateContextRequest.
+    pub fn into_owned(self) -> SetWindowCreateContextRequest<'static> {
+        SetWindowCreateContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetWindowCreateContextRequest<'input> {
@@ -519,7 +538,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetWindowCreateContextRequest {
-        context,
+        context: Cow::Borrowed(context),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -810,7 +829,7 @@ impl ListItem {
 pub const SET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 8;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetPropertyCreateContextRequest<'input> {
-    pub context: &'input [u8],
+    pub context: Cow<'input, [u8]>,
 }
 impl<'input> SetPropertyCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -840,7 +859,7 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -851,8 +870,14 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetPropertyCreateContextRequest {
-            context,
+            context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetPropertyCreateContextRequest.
+    pub fn into_owned(self) -> SetPropertyCreateContextRequest<'static> {
+        SetPropertyCreateContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetPropertyCreateContextRequest<'input> {
@@ -863,7 +888,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPropertyCreateContextRequest {
-        context,
+        context: Cow::Borrowed(context),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -967,7 +992,7 @@ impl GetPropertyCreateContextReply {
 pub const SET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 10;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetPropertyUseContextRequest<'input> {
-    pub context: &'input [u8],
+    pub context: Cow<'input, [u8]>,
 }
 impl<'input> SetPropertyUseContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -997,7 +1022,7 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1008,8 +1033,14 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetPropertyUseContextRequest {
-            context,
+            context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetPropertyUseContextRequest.
+    pub fn into_owned(self) -> SetPropertyUseContextRequest<'static> {
+        SetPropertyUseContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetPropertyUseContextRequest<'input> {
@@ -1020,7 +1051,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetPropertyUseContextRequest {
-        context,
+        context: Cow::Borrowed(context),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1453,7 +1484,7 @@ impl ListPropertiesReply {
 pub const SET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 15;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetSelectionCreateContextRequest<'input> {
-    pub context: &'input [u8],
+    pub context: Cow<'input, [u8]>,
 }
 impl<'input> SetSelectionCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1483,7 +1514,7 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1494,8 +1525,14 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetSelectionCreateContextRequest {
-            context,
+            context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetSelectionCreateContextRequest.
+    pub fn into_owned(self) -> SetSelectionCreateContextRequest<'static> {
+        SetSelectionCreateContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetSelectionCreateContextRequest<'input> {
@@ -1506,7 +1543,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetSelectionCreateContextRequest {
-        context,
+        context: Cow::Borrowed(context),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1610,7 +1647,7 @@ impl GetSelectionCreateContextReply {
 pub const SET_SELECTION_USE_CONTEXT_REQUEST: u8 = 17;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetSelectionUseContextRequest<'input> {
-    pub context: &'input [u8],
+    pub context: Cow<'input, [u8]>,
 }
 impl<'input> SetSelectionUseContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1640,7 +1677,7 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.context.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.context, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1651,8 +1688,14 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         let (context, remaining) = crate::x11_utils::parse_u8_list(remaining, context_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetSelectionUseContextRequest {
-            context,
+            context: Cow::Borrowed(context),
         })
+    }
+    /// Clone all borrowed data in this SetSelectionUseContextRequest.
+    pub fn into_owned(self) -> SetSelectionUseContextRequest<'static> {
+        SetSelectionUseContextRequest {
+            context: Cow::Owned(self.context.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetSelectionUseContextRequest<'input> {
@@ -1663,7 +1706,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = SetSelectionUseContextRequest {
-        context,
+        context: Cow::Borrowed(context),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();

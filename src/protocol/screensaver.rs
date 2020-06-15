@@ -938,6 +938,21 @@ impl<'input> SetAttributesRequest<'input> {
             value_list: Cow::Owned(value_list),
         })
     }
+    /// Clone all borrowed data in this SetAttributesRequest.
+    pub fn into_owned(self) -> SetAttributesRequest<'static> {
+        SetAttributesRequest {
+            drawable: self.drawable,
+            x: self.x,
+            y: self.y,
+            width: self.width,
+            height: self.height,
+            border_width: self.border_width,
+            class: self.class,
+            depth: self.depth,
+            visual: self.visual,
+            value_list: Cow::Owned(self.value_list.into_owned()),
+        }
+    }
 }
 impl<'input> Request for SetAttributesRequest<'input> {
     type Reply = ();

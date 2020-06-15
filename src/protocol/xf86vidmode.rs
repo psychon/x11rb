@@ -587,7 +587,7 @@ pub struct ModModeLineRequest<'input> {
     pub vsyncend: u16,
     pub vtotal: u16,
     pub flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> ModModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -668,7 +668,7 @@ impl<'input> ModModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -703,8 +703,25 @@ impl<'input> ModModeLineRequest<'input> {
             vsyncend,
             vtotal,
             flags,
-            private,
+            private: Cow::Borrowed(private),
         })
+    }
+    /// Clone all borrowed data in this ModModeLineRequest.
+    pub fn into_owned(self) -> ModModeLineRequest<'static> {
+        ModModeLineRequest {
+            screen: self.screen,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
     }
 }
 impl<'input> Request for ModModeLineRequest<'input> {
@@ -728,7 +745,7 @@ where
         vsyncend,
         vtotal,
         flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1151,7 +1168,7 @@ pub struct AddModeLineRequest<'input> {
     pub after_vsyncend: u16,
     pub after_vtotal: u16,
     pub after_flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> AddModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1288,7 +1305,7 @@ impl<'input> AddModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1349,8 +1366,37 @@ impl<'input> AddModeLineRequest<'input> {
             after_vsyncend,
             after_vtotal,
             after_flags,
-            private,
+            private: Cow::Borrowed(private),
         })
+    }
+    /// Clone all borrowed data in this AddModeLineRequest.
+    pub fn into_owned(self) -> AddModeLineRequest<'static> {
+        AddModeLineRequest {
+            screen: self.screen,
+            dotclock: self.dotclock,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            after_dotclock: self.after_dotclock,
+            after_hdisplay: self.after_hdisplay,
+            after_hsyncstart: self.after_hsyncstart,
+            after_hsyncend: self.after_hsyncend,
+            after_htotal: self.after_htotal,
+            after_hskew: self.after_hskew,
+            after_vdisplay: self.after_vdisplay,
+            after_vsyncstart: self.after_vsyncstart,
+            after_vsyncend: self.after_vsyncend,
+            after_vtotal: self.after_vtotal,
+            after_flags: self.after_flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
     }
 }
 impl<'input> Request for AddModeLineRequest<'input> {
@@ -1388,7 +1434,7 @@ where
         after_vsyncend,
         after_vtotal,
         after_flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1411,7 +1457,7 @@ pub struct DeleteModeLineRequest<'input> {
     pub vsyncend: u16,
     pub vtotal: u16,
     pub flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> DeleteModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1497,7 +1543,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1534,8 +1580,26 @@ impl<'input> DeleteModeLineRequest<'input> {
             vsyncend,
             vtotal,
             flags,
-            private,
+            private: Cow::Borrowed(private),
         })
+    }
+    /// Clone all borrowed data in this DeleteModeLineRequest.
+    pub fn into_owned(self) -> DeleteModeLineRequest<'static> {
+        DeleteModeLineRequest {
+            screen: self.screen,
+            dotclock: self.dotclock,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
     }
 }
 impl<'input> Request for DeleteModeLineRequest<'input> {
@@ -1560,7 +1624,7 @@ where
         vsyncend,
         vtotal,
         flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1583,7 +1647,7 @@ pub struct ValidateModeLineRequest<'input> {
     pub vsyncend: u16,
     pub vtotal: u16,
     pub flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> ValidateModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1669,7 +1733,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1706,8 +1770,26 @@ impl<'input> ValidateModeLineRequest<'input> {
             vsyncend,
             vtotal,
             flags,
-            private,
+            private: Cow::Borrowed(private),
         })
+    }
+    /// Clone all borrowed data in this ValidateModeLineRequest.
+    pub fn into_owned(self) -> ValidateModeLineRequest<'static> {
+        ValidateModeLineRequest {
+            screen: self.screen,
+            dotclock: self.dotclock,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
     }
 }
 impl<'input> Request for ValidateModeLineRequest<'input> {
@@ -1732,7 +1814,7 @@ where
         vsyncend,
         vtotal,
         flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -1783,7 +1865,7 @@ pub struct SwitchToModeRequest<'input> {
     pub vsyncend: u16,
     pub vtotal: u16,
     pub flags: u32,
-    pub private: &'input [u8],
+    pub private: Cow<'input, [u8]>,
 }
 impl<'input> SwitchToModeRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1869,7 +1951,7 @@ impl<'input> SwitchToModeRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.private.into(), padding0.into()], vec![]))
+        Ok((vec![request0.into(), self.private, padding0.into()], vec![]))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1906,8 +1988,26 @@ impl<'input> SwitchToModeRequest<'input> {
             vsyncend,
             vtotal,
             flags,
-            private,
+            private: Cow::Borrowed(private),
         })
+    }
+    /// Clone all borrowed data in this SwitchToModeRequest.
+    pub fn into_owned(self) -> SwitchToModeRequest<'static> {
+        SwitchToModeRequest {
+            screen: self.screen,
+            dotclock: self.dotclock,
+            hdisplay: self.hdisplay,
+            hsyncstart: self.hsyncstart,
+            hsyncend: self.hsyncend,
+            htotal: self.htotal,
+            hskew: self.hskew,
+            vdisplay: self.vdisplay,
+            vsyncstart: self.vsyncstart,
+            vsyncend: self.vsyncend,
+            vtotal: self.vtotal,
+            flags: self.flags,
+            private: Cow::Owned(self.private.into_owned()),
+        }
     }
 }
 impl<'input> Request for SwitchToModeRequest<'input> {
@@ -1932,7 +2032,7 @@ where
         vsyncend,
         vtotal,
         flags,
-        private,
+        private: Cow::Borrowed(private),
     };
     let (bytes, fds) = request0.serialize(conn)?;
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
@@ -2645,6 +2745,16 @@ impl<'input> SetGammaRampRequest<'input> {
             green: Cow::Owned(green),
             blue: Cow::Owned(blue),
         })
+    }
+    /// Clone all borrowed data in this SetGammaRampRequest.
+    pub fn into_owned(self) -> SetGammaRampRequest<'static> {
+        SetGammaRampRequest {
+            screen: self.screen,
+            size: self.size,
+            red: Cow::Owned(self.red.into_owned()),
+            green: Cow::Owned(self.green.into_owned()),
+            blue: Cow::Owned(self.blue.into_owned()),
+        }
     }
 }
 impl<'input> Request for SetGammaRampRequest<'input> {

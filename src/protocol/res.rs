@@ -856,6 +856,12 @@ impl<'input> QueryClientIdsRequest<'input> {
             specs: Cow::Owned(specs),
         })
     }
+    /// Clone all borrowed data in this QueryClientIdsRequest.
+    pub fn into_owned(self) -> QueryClientIdsRequest<'static> {
+        QueryClientIdsRequest {
+            specs: Cow::Owned(self.specs.into_owned()),
+        }
+    }
 }
 impl<'input> Request for QueryClientIdsRequest<'input> {
     type Reply = QueryClientIdsReply;
@@ -972,6 +978,13 @@ impl<'input> QueryResourceBytesRequest<'input> {
             client,
             specs: Cow::Owned(specs),
         })
+    }
+    /// Clone all borrowed data in this QueryResourceBytesRequest.
+    pub fn into_owned(self) -> QueryResourceBytesRequest<'static> {
+        QueryResourceBytesRequest {
+            client: self.client,
+            specs: Cow::Owned(self.specs.into_owned()),
+        }
     }
 }
 impl<'input> Request for QueryResourceBytesRequest<'input> {

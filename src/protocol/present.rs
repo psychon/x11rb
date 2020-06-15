@@ -772,6 +772,26 @@ impl<'input> PixmapRequest<'input> {
             notifies: Cow::Owned(notifies),
         })
     }
+    /// Clone all borrowed data in this PixmapRequest.
+    pub fn into_owned(self) -> PixmapRequest<'static> {
+        PixmapRequest {
+            window: self.window,
+            pixmap: self.pixmap,
+            serial: self.serial,
+            valid: self.valid,
+            update: self.update,
+            x_off: self.x_off,
+            y_off: self.y_off,
+            target_crtc: self.target_crtc,
+            wait_fence: self.wait_fence,
+            idle_fence: self.idle_fence,
+            options: self.options,
+            target_msc: self.target_msc,
+            divisor: self.divisor,
+            remainder: self.remainder,
+            notifies: Cow::Owned(self.notifies.into_owned()),
+        }
+    }
 }
 impl<'input> Request for PixmapRequest<'input> {
     type Reply = ();
