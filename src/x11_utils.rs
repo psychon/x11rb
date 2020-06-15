@@ -527,6 +527,6 @@ macro_rules! __atom_manager_atom_value {
     };
 }
 
-pub fn cow_strip_length(cow: Cow<'_, [u8; 32]>) -> Cow<'static, [u8]> {
+pub(crate) fn cow_strip_length(cow: Cow<'_, [u8; 32]>) -> Cow<'static, [u8]> {
     Cow::Owned(cow.into_owned().into())
 }
