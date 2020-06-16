@@ -191,7 +191,8 @@ pub struct NotifyEvent {
     pub shaped: bool,
 }
 impl TryParse for NotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (shape_kind, remaining) = Kind::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -205,6 +206,9 @@ impl TryParse for NotifyEvent {
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let shape_kind = shape_kind.try_into()?;
         let result = NotifyEvent { response_type, shape_kind, sequence, affected_window, extents_x, extents_y, extents_width, extents_height, server_time, shaped };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -324,7 +328,8 @@ pub struct QueryVersionReply {
     pub minor_version: u16,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -335,6 +340,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -833,7 +841,8 @@ pub struct QueryExtentsReply {
     pub clip_shape_extents_height: u16,
 }
 impl TryParse for QueryExtentsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -853,6 +862,9 @@ impl TryParse for QueryExtentsReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryExtentsReply { sequence, length, bounding_shaped, clip_shaped, bounding_shape_extents_x, bounding_shape_extents_y, bounding_shape_extents_width, bounding_shape_extents_height, clip_shape_extents_x, clip_shape_extents_y, clip_shape_extents_width, clip_shape_extents_height };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -998,7 +1010,8 @@ pub struct InputSelectedReply {
     pub length: u32,
 }
 impl TryParse for InputSelectedReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1007,6 +1020,9 @@ impl TryParse for InputSelectedReply {
             return Err(ParseError::ParseError);
         }
         let result = InputSelectedReply { enabled, sequence, length };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1095,7 +1111,8 @@ pub struct GetRectanglesReply {
     pub rectangles: Vec<xproto::Rectangle>,
 }
 impl TryParse for GetRectanglesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (ordering, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1108,6 +1125,9 @@ impl TryParse for GetRectanglesReply {
         }
         let ordering = ordering.try_into()?;
         let result = GetRectanglesReply { ordering, sequence, length, rectangles };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

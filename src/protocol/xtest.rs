@@ -108,7 +108,8 @@ pub struct GetVersionReply {
     pub minor_version: u16,
 }
 impl TryParse for GetVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (major_version, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -118,6 +119,9 @@ impl TryParse for GetVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = GetVersionReply { major_version, sequence, length, minor_version };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -273,7 +277,8 @@ pub struct CompareCursorReply {
     pub length: u32,
 }
 impl TryParse for CompareCursorReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (same, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -282,6 +287,9 @@ impl TryParse for CompareCursorReply {
             return Err(ParseError::ParseError);
         }
         let result = CompareCursorReply { same, sequence, length };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

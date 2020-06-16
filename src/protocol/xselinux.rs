@@ -107,7 +107,8 @@ pub struct QueryVersionReply {
     pub server_minor: u16,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -118,6 +119,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, server_major, server_minor };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -253,7 +257,8 @@ pub struct GetDeviceCreateContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetDeviceCreateContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -266,6 +271,9 @@ impl TryParse for GetDeviceCreateContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceCreateContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -437,7 +445,8 @@ pub struct GetDeviceContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetDeviceContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -450,6 +459,9 @@ impl TryParse for GetDeviceContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -600,7 +612,8 @@ pub struct GetWindowCreateContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetWindowCreateContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -613,6 +626,9 @@ impl TryParse for GetWindowCreateContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetWindowCreateContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -704,7 +720,8 @@ pub struct GetWindowContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetWindowContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -717,6 +734,9 @@ impl TryParse for GetWindowContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetWindowContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -950,7 +970,8 @@ pub struct GetPropertyCreateContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetPropertyCreateContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -963,6 +984,9 @@ impl TryParse for GetPropertyCreateContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetPropertyCreateContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1113,7 +1137,8 @@ pub struct GetPropertyUseContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetPropertyUseContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1126,6 +1151,9 @@ impl TryParse for GetPropertyUseContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetPropertyUseContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1226,7 +1254,8 @@ pub struct GetPropertyContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetPropertyContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1239,6 +1268,9 @@ impl TryParse for GetPropertyContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetPropertyContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1339,7 +1371,8 @@ pub struct GetPropertyDataContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetPropertyDataContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1352,6 +1385,9 @@ impl TryParse for GetPropertyDataContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetPropertyDataContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1443,7 +1479,8 @@ pub struct ListPropertiesReply {
     pub properties: Vec<ListItem>,
 }
 impl TryParse for ListPropertiesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1455,6 +1492,9 @@ impl TryParse for ListPropertiesReply {
             return Err(ParseError::ParseError);
         }
         let result = ListPropertiesReply { sequence, length, properties };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1605,7 +1645,8 @@ pub struct GetSelectionCreateContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetSelectionCreateContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1618,6 +1659,9 @@ impl TryParse for GetSelectionCreateContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectionCreateContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1768,7 +1812,8 @@ pub struct GetSelectionUseContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetSelectionUseContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1781,6 +1826,9 @@ impl TryParse for GetSelectionUseContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectionUseContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1872,7 +1920,8 @@ pub struct GetSelectionContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetSelectionContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1885,6 +1934,9 @@ impl TryParse for GetSelectionContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectionContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1976,7 +2028,8 @@ pub struct GetSelectionDataContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetSelectionDataContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1989,6 +2042,9 @@ impl TryParse for GetSelectionDataContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectionDataContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2069,7 +2125,8 @@ pub struct ListSelectionsReply {
     pub selections: Vec<ListItem>,
 }
 impl TryParse for ListSelectionsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2081,6 +2138,9 @@ impl TryParse for ListSelectionsReply {
             return Err(ParseError::ParseError);
         }
         let result = ListSelectionsReply { sequence, length, selections };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2172,7 +2232,8 @@ pub struct GetClientContextReply {
     pub context: Vec<u8>,
 }
 impl TryParse for GetClientContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2185,6 +2246,9 @@ impl TryParse for GetClientContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetClientContextReply { sequence, length, context };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

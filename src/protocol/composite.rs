@@ -182,7 +182,8 @@ pub struct QueryVersionReply {
     pub minor_version: u32,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -194,6 +195,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -686,7 +690,8 @@ pub struct GetOverlayWindowReply {
     pub overlay_win: xproto::Window,
 }
 impl TryParse for GetOverlayWindowReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -697,6 +702,9 @@ impl TryParse for GetOverlayWindowReply {
             return Err(ParseError::ParseError);
         }
         let result = GetOverlayWindowReply { sequence, length, overlay_win };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

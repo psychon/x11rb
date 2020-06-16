@@ -759,7 +759,8 @@ pub struct PictFormatError {
     pub sequence: u16,
 }
 impl TryParse for PictFormatError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -767,6 +768,9 @@ impl TryParse for PictFormatError {
             return Err(ParseError::ParseError);
         }
         let result = PictFormatError { error_code, sequence };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -832,7 +836,8 @@ pub struct PictureError {
     pub sequence: u16,
 }
 impl TryParse for PictureError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -840,6 +845,9 @@ impl TryParse for PictureError {
             return Err(ParseError::ParseError);
         }
         let result = PictureError { error_code, sequence };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -905,7 +913,8 @@ pub struct PictOpError {
     pub sequence: u16,
 }
 impl TryParse for PictOpError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -913,6 +922,9 @@ impl TryParse for PictOpError {
             return Err(ParseError::ParseError);
         }
         let result = PictOpError { error_code, sequence };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -978,7 +990,8 @@ pub struct GlyphSetError {
     pub sequence: u16,
 }
 impl TryParse for GlyphSetError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -986,6 +999,9 @@ impl TryParse for GlyphSetError {
             return Err(ParseError::ParseError);
         }
         let result = GlyphSetError { error_code, sequence };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1051,7 +1067,8 @@ pub struct GlyphError {
     pub sequence: u16,
 }
 impl TryParse for GlyphError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1059,6 +1076,9 @@ impl TryParse for GlyphError {
             return Err(ParseError::ParseError);
         }
         let result = GlyphError { error_code, sequence };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1897,7 +1917,8 @@ pub struct QueryVersionReply {
     pub minor_version: u32,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1909,6 +1930,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1978,7 +2002,8 @@ pub struct QueryPictFormatsReply {
     pub subpixels: Vec<SubPixel>,
 }
 impl TryParse for QueryPictFormatsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2004,6 +2029,9 @@ impl TryParse for QueryPictFormatsReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryPictFormatsReply { sequence, length, num_depths, num_visuals, formats, screens, subpixels };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2121,7 +2149,8 @@ pub struct QueryPictIndexValuesReply {
     pub values: Vec<Indexvalue>,
 }
 impl TryParse for QueryPictIndexValuesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2133,6 +2162,9 @@ impl TryParse for QueryPictIndexValuesReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryPictIndexValuesReply { sequence, length, values };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4976,7 +5008,8 @@ pub struct QueryFiltersReply {
     pub filters: Vec<xproto::Str>,
 }
 impl TryParse for QueryFiltersReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4990,6 +5023,9 @@ impl TryParse for QueryFiltersReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryFiltersReply { sequence, length, aliases, filters };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

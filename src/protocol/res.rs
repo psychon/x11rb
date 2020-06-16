@@ -503,7 +503,8 @@ pub struct QueryVersionReply {
     pub server_minor: u16,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -514,6 +515,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, server_major, server_minor };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -579,7 +583,8 @@ pub struct QueryClientsReply {
     pub clients: Vec<Client>,
 }
 impl TryParse for QueryClientsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -591,6 +596,9 @@ impl TryParse for QueryClientsReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryClientsReply { sequence, length, clients };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -682,7 +690,8 @@ pub struct QueryClientResourcesReply {
     pub types: Vec<Type>,
 }
 impl TryParse for QueryClientResourcesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -694,6 +703,9 @@ impl TryParse for QueryClientResourcesReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryClientResourcesReply { sequence, length, types };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -786,7 +798,8 @@ pub struct QueryClientPixmapBytesReply {
     pub bytes_overflow: u32,
 }
 impl TryParse for QueryClientPixmapBytesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -797,6 +810,9 @@ impl TryParse for QueryClientPixmapBytesReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryClientPixmapBytesReply { sequence, length, bytes, bytes_overflow };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -885,7 +901,8 @@ pub struct QueryClientIdsReply {
     pub ids: Vec<ClientIdValue>,
 }
 impl TryParse for QueryClientIdsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -897,6 +914,9 @@ impl TryParse for QueryClientIdsReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryClientIdsReply { sequence, length, ids };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1010,7 +1030,8 @@ pub struct QueryResourceBytesReply {
     pub sizes: Vec<ResourceSizeValue>,
 }
 impl TryParse for QueryResourceBytesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1022,6 +1043,9 @@ impl TryParse for QueryResourceBytesReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryResourceBytesReply { sequence, length, sizes };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

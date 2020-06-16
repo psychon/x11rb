@@ -603,6 +603,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 &[],
                 false,
                 true,
+                StructSizeConstraint::EmbeddedLength { minimum: 32 },
                 false,
                 false,
                 reply.doc.as_ref(),
@@ -1628,6 +1629,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         event_full_def: &xcbdefs::EventFullDef,
         out: &mut Output,
     ) {
+        let size_constraint = if event_full_def.xge {
+            StructSizeConstraint::EmbeddedLength { minimum: 32 }
+        } else {
+            StructSizeConstraint::Fixed(32)
+        };
         self.emit_event_opcode(name, number, &event_full_def, out);
 
         let full_name = format!("{}Event", name);
@@ -1644,6 +1650,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             &[],
             false,
             true,
+            size_constraint,
             false,
             true,
             event_full_def.doc.as_ref(),
@@ -1724,6 +1731,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             &[],
             false,
             true,
+            StructSizeConstraint::Fixed(32),
             false,
             true,
             None,
@@ -1821,6 +1829,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             &*struct_def.external_params.borrow(),
             false,
             true,
+            StructSizeConstraint::None,
             true,
             true,
             None,
@@ -2456,12 +2465,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         external_params: &[xcbdefs::ExternalParam],
         skip_length_field: bool,
         generate_try_parse: bool,
+        parse_size_constraint: StructSizeConstraint,
         generate_serialize: bool,
         fields_need_serialize: bool,
         doc: Option<&xcbdefs::Doc>,
         out: &mut Output,
     ) {
         assert!(!(generate_serialize && !fields_need_serialize));
+        assert!(parse_size_constraint == StructSizeConstraint::None || generate_try_parse);
 
         let deducible_fields = gather_deducible_fields(fields);
 
@@ -2503,13 +2514,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         });
 
         if generate_try_parse {
+            let input_name = if parse_size_constraint != StructSizeConstraint::None {
+                "initial_value"
+            } else {
+                "remaining"
+            };
             if has_fds {
                 assert!(external_params.is_empty());
                 outln!(out, "impl TryParseFd for {} {{", name);
                 outln!(
                     out.indent(),
-                    "fn try_parse_fd<'a>({}) -> Result<(Self, &'a [u8]), ParseError> {{",
-                    "remaining: &'a [u8], fds: &mut Vec<RawFdContainer>",
+                    "fn try_parse_fd<'a>({}: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {{",
+                    input_name,
                 );
             } else if !external_params.is_empty() {
                 outln!(out, "impl {} {{", name);
@@ -2525,20 +2541,25 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     .collect::<Vec<_>>();
                 outln!(
                     out.indent(),
-                    "pub fn try_parse(remaining: &[u8], {}) -> Result<(Self, &[u8]), ParseError> \
+                    "pub fn try_parse({}: &[u8], {}) -> Result<(Self, &[u8]), ParseError> \
                      {{",
+                    input_name,
                     p.join(", "),
                 );
             } else {
                 outln!(out, "impl TryParse for {} {{", name);
                 outln!(
                     out.indent(),
-                    "fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {{",
+                    "fn try_parse({}: &[u8]) -> Result<(Self, &[u8]), ParseError> {{",
+                    input_name,
                 );
             }
 
             out.indented(|out| {
                 out.indented(|out| {
+                    if parse_size_constraint != StructSizeConstraint::None {
+                        outln!(out, "let remaining = initial_value;");
+                    }
                     Self::emit_let_value_for_dynamic_align(fields, out);
                     for field in fields.iter() {
                         self.emit_field_parse(
@@ -2574,6 +2595,23 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         name,
                         field_names.join(", ")
                     );
+                    match parse_size_constraint {
+                        StructSizeConstraint::None => (),
+                        StructSizeConstraint::Fixed(fixed_size) => {
+                            outln!(out, "let _ = remaining;");
+                            outln!(out, "let remaining = initial_value.get({}..)", fixed_size);
+                            outln!(out.indent(), ".ok_or(ParseError::ParseError)?;");
+                        }
+                        StructSizeConstraint::EmbeddedLength { minimum } => {
+                            outln!(out, "let _ = remaining;");
+                            outln!(
+                                out,
+                                "let remaining = initial_value.get({} + length as usize * 4..)",
+                                minimum
+                            );
+                            outln!(out.indent(), ".ok_or(ParseError::ParseError)?;");
+                        }
+                    }
                     outln!(out, "Ok((result, remaining))");
                 })
             });
@@ -2994,6 +3032,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     &*ext_params,
                     false,
                     generate_try_parse,
+                    StructSizeConstraint::None,
                     generate_serialize,
                     generate_serialize,
                     None,
@@ -5703,6 +5742,21 @@ impl Derives {
         }
         list
     }
+}
+
+/// Constraints on the wire format of a struct.
+#[derive(Debug, PartialEq, Eq)]
+enum StructSizeConstraint {
+    /// No code constraining the size is emitted.
+    None,
+    /// This is a fixed size struct.
+    Fixed(u8),
+    /// This struct has a "length" field embedded that tells us how long it
+    /// should be (in 4-byte units).
+    EmbeddedLength {
+        /// The minimum size.
+        minimum: u8,
+    },
 }
 
 /// Information about a switch case

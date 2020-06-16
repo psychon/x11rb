@@ -304,7 +304,8 @@ pub struct QueryVersionReply {
     pub server_minor_version: u16,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -316,6 +317,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, server_major_version, server_minor_version };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -397,7 +401,8 @@ pub struct QueryInfoReply {
     pub kind: Kind,
 }
 impl TryParse for QueryInfoReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -413,6 +418,9 @@ impl TryParse for QueryInfoReply {
         }
         let kind = kind.try_into()?;
         let result = QueryInfoReply { state, sequence, length, saver_window, ms_until_server, ms_since_user_input, event_mask, kind };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1110,7 +1118,8 @@ pub struct NotifyEvent {
     pub forced: bool,
 }
 impl TryParse for NotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1123,6 +1132,9 @@ impl TryParse for NotifyEvent {
         let state = state.try_into()?;
         let kind = kind.try_into()?;
         let result = NotifyEvent { response_type, state, sequence, time, root, window, kind, forced };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

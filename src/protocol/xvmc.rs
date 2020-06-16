@@ -183,7 +183,8 @@ pub struct QueryVersionReply {
     pub minor: u32,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -194,6 +195,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major, minor };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -270,7 +274,8 @@ pub struct ListSurfaceTypesReply {
     pub surfaces: Vec<SurfaceInfo>,
 }
 impl TryParse for ListSurfaceTypesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -282,6 +287,9 @@ impl TryParse for ListSurfaceTypesReply {
             return Err(ParseError::ParseError);
         }
         let result = ListSurfaceTypesReply { sequence, length, surfaces };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -416,7 +424,8 @@ pub struct CreateContextReply {
     pub priv_data: Vec<u32>,
 }
 impl TryParse for CreateContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -430,6 +439,9 @@ impl TryParse for CreateContextReply {
             return Err(ParseError::ParseError);
         }
         let result = CreateContextReply { sequence, width_actual, height_actual, flags_return, priv_data };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -588,7 +600,8 @@ pub struct CreateSurfaceReply {
     pub priv_data: Vec<u32>,
 }
 impl TryParse for CreateSurfaceReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -599,6 +612,9 @@ impl TryParse for CreateSurfaceReply {
             return Err(ParseError::ParseError);
         }
         let result = CreateSurfaceReply { sequence, priv_data };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -785,7 +801,8 @@ pub struct CreateSubpictureReply {
     pub priv_data: Vec<u32>,
 }
 impl TryParse for CreateSubpictureReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -802,6 +819,9 @@ impl TryParse for CreateSubpictureReply {
             return Err(ParseError::ParseError);
         }
         let result = CreateSubpictureReply { sequence, width_actual, height_actual, num_palette_entries, entry_bytes, component_order, priv_data };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -961,7 +981,8 @@ pub struct ListSubpictureTypesReply {
     pub types: Vec<xv::ImageFormatInfo>,
 }
 impl TryParse for ListSubpictureTypesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -973,6 +994,9 @@ impl TryParse for ListSubpictureTypesReply {
             return Err(ParseError::ParseError);
         }
         let result = ListSubpictureTypesReply { sequence, length, types };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

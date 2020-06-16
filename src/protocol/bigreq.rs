@@ -89,7 +89,8 @@ pub struct EnableReply {
     pub maximum_request_length: u32,
 }
 impl TryParse for EnableReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -99,6 +100,9 @@ impl TryParse for EnableReply {
             return Err(ParseError::ParseError);
         }
         let result = EnableReply { sequence, length, maximum_request_length };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

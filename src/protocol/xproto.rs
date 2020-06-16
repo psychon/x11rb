@@ -1441,7 +1441,8 @@ pub struct KeyPressEvent {
     pub same_screen: bool,
 }
 impl TryParse for KeyPressEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = Keycode::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1457,6 +1458,9 @@ impl TryParse for KeyPressEvent {
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = KeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1629,7 +1633,8 @@ pub struct ButtonPressEvent {
     pub same_screen: bool,
 }
 impl TryParse for ButtonPressEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = Button::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1645,6 +1650,9 @@ impl TryParse for ButtonPressEvent {
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = ButtonPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1828,7 +1836,8 @@ pub struct MotionNotifyEvent {
     pub same_screen: bool,
 }
 impl TryParse for MotionNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1845,6 +1854,9 @@ impl TryParse for MotionNotifyEvent {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let detail = detail.try_into()?;
         let result = MotionNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2094,7 +2106,8 @@ pub struct EnterNotifyEvent {
     pub same_screen_focus: u8,
 }
 impl TryParse for EnterNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2112,6 +2125,9 @@ impl TryParse for EnterNotifyEvent {
         let detail = detail.try_into()?;
         let mode = mode.try_into()?;
         let result = EnterNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, mode, same_screen_focus };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2202,7 +2218,8 @@ pub struct FocusInEvent {
     pub mode: NotifyMode,
 }
 impl TryParse for FocusInEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2212,6 +2229,9 @@ impl TryParse for FocusInEvent {
         let detail = detail.try_into()?;
         let mode = mode.try_into()?;
         let result = FocusInEvent { response_type, detail, sequence, event, mode };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2283,11 +2303,15 @@ pub struct KeymapNotifyEvent {
     pub keys: [u8; 31],
 }
 impl TryParse for KeymapNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 31)?;
         let keys = <[u8; 31]>::try_from(keys).unwrap();
         let result = KeymapNotifyEvent { response_type, keys };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2371,7 +2395,8 @@ pub struct ExposeEvent {
     pub count: u16,
 }
 impl TryParse for ExposeEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2383,6 +2408,9 @@ impl TryParse for ExposeEvent {
         let (count, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = ExposeEvent { response_type, sequence, window, x, y, width, height, count };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2461,7 +2489,8 @@ pub struct GraphicsExposureEvent {
     pub major_opcode: u8,
 }
 impl TryParse for GraphicsExposureEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2475,6 +2504,9 @@ impl TryParse for GraphicsExposureEvent {
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = GraphicsExposureEvent { response_type, sequence, drawable, x, y, width, height, minor_opcode, count, major_opcode };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2550,7 +2582,8 @@ pub struct NoExposureEvent {
     pub major_opcode: u8,
 }
 impl TryParse for NoExposureEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2559,6 +2592,9 @@ impl TryParse for NoExposureEvent {
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = NoExposureEvent { response_type, sequence, drawable, minor_opcode, major_opcode };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2693,7 +2729,8 @@ pub struct VisibilityNotifyEvent {
     pub state: Visibility,
 }
 impl TryParse for VisibilityNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2702,6 +2739,9 @@ impl TryParse for VisibilityNotifyEvent {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let state = state.try_into()?;
         let result = VisibilityNotifyEvent { response_type, sequence, window, state };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2776,7 +2816,8 @@ pub struct CreateNotifyEvent {
     pub override_redirect: bool,
 }
 impl TryParse for CreateNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2790,6 +2831,9 @@ impl TryParse for CreateNotifyEvent {
         let (override_redirect, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = CreateNotifyEvent { response_type, sequence, parent, window, x, y, width, height, border_width, override_redirect };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2875,13 +2919,17 @@ pub struct DestroyNotifyEvent {
     pub window: Window,
 }
 impl TryParse for DestroyNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (event, remaining) = Window::try_parse(remaining)?;
         let (window, remaining) = Window::try_parse(remaining)?;
         let result = DestroyNotifyEvent { response_type, sequence, event, window };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2964,7 +3012,8 @@ pub struct UnmapNotifyEvent {
     pub from_configure: bool,
 }
 impl TryParse for UnmapNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2973,6 +3022,9 @@ impl TryParse for UnmapNotifyEvent {
         let (from_configure, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = UnmapNotifyEvent { response_type, sequence, event, window, from_configure };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3055,7 +3107,8 @@ pub struct MapNotifyEvent {
     pub override_redirect: bool,
 }
 impl TryParse for MapNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3064,6 +3117,9 @@ impl TryParse for MapNotifyEvent {
         let (override_redirect, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = MapNotifyEvent { response_type, sequence, event, window, override_redirect };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3143,13 +3199,17 @@ pub struct MapRequestEvent {
     pub window: Window,
 }
 impl TryParse for MapRequestEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (parent, remaining) = Window::try_parse(remaining)?;
         let (window, remaining) = Window::try_parse(remaining)?;
         let result = MapRequestEvent { response_type, sequence, parent, window };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3222,7 +3282,8 @@ pub struct ReparentNotifyEvent {
     pub override_redirect: bool,
 }
 impl TryParse for ReparentNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3234,6 +3295,9 @@ impl TryParse for ReparentNotifyEvent {
         let (override_redirect, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = ReparentNotifyEvent { response_type, sequence, event, window, parent, x, y, override_redirect };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3335,7 +3399,8 @@ pub struct ConfigureNotifyEvent {
     pub override_redirect: bool,
 }
 impl TryParse for ConfigureNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3350,6 +3415,9 @@ impl TryParse for ConfigureNotifyEvent {
         let (override_redirect, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = ConfigureNotifyEvent { response_type, sequence, event, window, above_sibling, x, y, width, height, border_width, override_redirect };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3433,7 +3501,8 @@ pub struct ConfigureRequestEvent {
     pub value_mask: u16,
 }
 impl TryParse for ConfigureRequestEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (stack_mode, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3448,6 +3517,9 @@ impl TryParse for ConfigureRequestEvent {
         let (value_mask, remaining) = u16::try_parse(remaining)?;
         let stack_mode = stack_mode.try_into()?;
         let result = ConfigureRequestEvent { response_type, stack_mode, sequence, parent, window, sibling, x, y, width, height, border_width, value_mask };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3526,7 +3598,8 @@ pub struct GravityNotifyEvent {
     pub y: i16,
 }
 impl TryParse for GravityNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3535,6 +3608,9 @@ impl TryParse for GravityNotifyEvent {
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let result = GravityNotifyEvent { response_type, sequence, event, window, x, y };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3606,7 +3682,8 @@ pub struct ResizeRequestEvent {
     pub height: u16,
 }
 impl TryParse for ResizeRequestEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3614,6 +3691,9 @@ impl TryParse for ResizeRequestEvent {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let result = ResizeRequestEvent { response_type, sequence, window, width, height };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3770,7 +3850,8 @@ pub struct CirculateNotifyEvent {
     pub place: Place,
 }
 impl TryParse for CirculateNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3781,6 +3862,9 @@ impl TryParse for CirculateNotifyEvent {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let place = place.try_into()?;
         let result = CirculateNotifyEvent { response_type, sequence, event, window, place };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3938,7 +4022,8 @@ pub struct PropertyNotifyEvent {
     pub state: Property,
 }
 impl TryParse for PropertyNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3949,6 +4034,9 @@ impl TryParse for PropertyNotifyEvent {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let state = state.try_into()?;
         let result = PropertyNotifyEvent { response_type, sequence, window, atom, time, state };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4020,7 +4108,8 @@ pub struct SelectionClearEvent {
     pub selection: Atom,
 }
 impl TryParse for SelectionClearEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4028,6 +4117,9 @@ impl TryParse for SelectionClearEvent {
         let (owner, remaining) = Window::try_parse(remaining)?;
         let (selection, remaining) = Atom::try_parse(remaining)?;
         let result = SelectionClearEvent { response_type, sequence, time, owner, selection };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4336,7 +4428,8 @@ pub struct SelectionRequestEvent {
     pub property: Atom,
 }
 impl TryParse for SelectionRequestEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4347,6 +4440,9 @@ impl TryParse for SelectionRequestEvent {
         let (target, remaining) = Atom::try_parse(remaining)?;
         let (property, remaining) = Atom::try_parse(remaining)?;
         let result = SelectionRequestEvent { response_type, sequence, time, owner, requestor, selection, target, property };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4422,7 +4518,8 @@ pub struct SelectionNotifyEvent {
     pub property: Atom,
 }
 impl TryParse for SelectionNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4432,6 +4529,9 @@ impl TryParse for SelectionNotifyEvent {
         let (target, remaining) = Atom::try_parse(remaining)?;
         let (property, remaining) = Atom::try_parse(remaining)?;
         let result = SelectionNotifyEvent { response_type, sequence, time, requestor, selection, target, property };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4651,7 +4751,8 @@ pub struct ColormapNotifyEvent {
     pub state: ColormapState,
 }
 impl TryParse for ColormapNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4662,6 +4763,9 @@ impl TryParse for ColormapNotifyEvent {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let state = state.try_into()?;
         let result = ColormapNotifyEvent { response_type, sequence, window, colormap, new, state };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4906,7 +5010,8 @@ pub struct ClientMessageEvent {
     pub data: ClientMessageData,
 }
 impl TryParse for ClientMessageEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4914,6 +5019,9 @@ impl TryParse for ClientMessageEvent {
         let (type_, remaining) = Atom::try_parse(remaining)?;
         let (data, remaining) = ClientMessageData::try_parse(remaining)?;
         let result = ClientMessageEvent { response_type, format, sequence, window, type_, data };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -5056,7 +5164,8 @@ pub struct MappingNotifyEvent {
     pub count: u8,
 }
 impl TryParse for MappingNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5066,6 +5175,9 @@ impl TryParse for MappingNotifyEvent {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let request = request.try_into()?;
         let result = MappingNotifyEvent { response_type, sequence, request, first_keycode, count };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -5143,7 +5255,8 @@ pub struct GeGenericEvent {
     pub event_type: u16,
 }
 impl TryParse for GeGenericEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5151,6 +5264,9 @@ impl TryParse for GeGenericEvent {
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let result = GeGenericEvent { response_type, extension, sequence, length, event_type };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -5172,7 +5288,8 @@ pub struct RequestError {
     pub major_opcode: u8,
 }
 impl TryParse for RequestError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5184,6 +5301,9 @@ impl TryParse for RequestError {
             return Err(ParseError::ParseError);
         }
         let result = RequestError { error_code, sequence, bad_value, minor_opcode, major_opcode };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -5255,7 +5375,8 @@ pub struct ValueError {
     pub major_opcode: u8,
 }
 impl TryParse for ValueError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5267,6 +5388,9 @@ impl TryParse for ValueError {
             return Err(ParseError::ParseError);
         }
         let result = ValueError { error_code, sequence, bad_value, minor_opcode, major_opcode };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -7011,7 +7135,8 @@ pub struct GetWindowAttributesReply {
     pub do_not_propagate_mask: u16,
 }
 impl TryParse for GetWindowAttributesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (backing_store, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7040,6 +7165,9 @@ impl TryParse for GetWindowAttributesReply {
         let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
         let map_state = map_state.try_into()?;
         let result = GetWindowAttributesReply { backing_store, sequence, length, visual, class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -8740,7 +8868,8 @@ pub struct GetGeometryReply {
     pub border_width: u16,
 }
 impl TryParse for GetGeometryReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8756,6 +8885,9 @@ impl TryParse for GetGeometryReply {
             return Err(ParseError::ParseError);
         }
         let result = GetGeometryReply { depth, sequence, length, root, x, y, width, height, border_width };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -8915,7 +9047,8 @@ pub struct QueryTreeReply {
     pub children: Vec<Window>,
 }
 impl TryParse for QueryTreeReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8929,6 +9062,9 @@ impl TryParse for QueryTreeReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryTreeReply { sequence, length, root, parent, children };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -9129,7 +9265,8 @@ pub struct InternAtomReply {
     pub atom: Atom,
 }
 impl TryParse for InternAtomReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9139,6 +9276,9 @@ impl TryParse for InternAtomReply {
             return Err(ParseError::ParseError);
         }
         let result = InternAtomReply { sequence, length, atom };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -9217,7 +9357,8 @@ pub struct GetAtomNameReply {
     pub name: Vec<u8>,
 }
 impl TryParse for GetAtomNameReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9230,6 +9371,9 @@ impl TryParse for GetAtomNameReply {
             return Err(ParseError::ParseError);
         }
         let result = GetAtomNameReply { sequence, length, name };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -10106,7 +10250,8 @@ pub struct GetPropertyReply {
     pub value: Vec<u8>,
 }
 impl TryParse for GetPropertyReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10121,6 +10266,9 @@ impl TryParse for GetPropertyReply {
             return Err(ParseError::ParseError);
         }
         let result = GetPropertyReply { format, sequence, length, type_, bytes_after, value_len, value };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -10199,7 +10347,8 @@ pub struct ListPropertiesReply {
     pub atoms: Vec<Atom>,
 }
 impl TryParse for ListPropertiesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10211,6 +10360,9 @@ impl TryParse for ListPropertiesReply {
             return Err(ParseError::ParseError);
         }
         let result = ListPropertiesReply { sequence, length, atoms };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -10482,7 +10634,8 @@ pub struct GetSelectionOwnerReply {
     pub owner: Window,
 }
 impl TryParse for GetSelectionOwnerReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10492,6 +10645,9 @@ impl TryParse for GetSelectionOwnerReply {
             return Err(ParseError::ParseError);
         }
         let result = GetSelectionOwnerReply { sequence, length, owner };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -11390,7 +11546,8 @@ pub struct GrabPointerReply {
     pub length: u32,
 }
 impl TryParse for GrabPointerReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11400,6 +11557,9 @@ impl TryParse for GrabPointerReply {
         }
         let status = status.try_into()?;
         let result = GrabPointerReply { status, sequence, length };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -12251,7 +12411,8 @@ pub struct GrabKeyboardReply {
     pub length: u32,
 }
 impl TryParse for GrabKeyboardReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12261,6 +12422,9 @@ impl TryParse for GrabKeyboardReply {
         }
         let status = status.try_into()?;
         let result = GrabKeyboardReply { status, sequence, length };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -13205,7 +13369,8 @@ pub struct QueryPointerReply {
     pub mask: u16,
 }
 impl TryParse for QueryPointerReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13222,6 +13387,9 @@ impl TryParse for QueryPointerReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryPointerReply { same_screen, sequence, length, root, child, root_x, root_y, win_x, win_y, mask };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -13368,7 +13536,8 @@ pub struct GetMotionEventsReply {
     pub events: Vec<Timecoord>,
 }
 impl TryParse for GetMotionEventsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13380,6 +13549,9 @@ impl TryParse for GetMotionEventsReply {
             return Err(ParseError::ParseError);
         }
         let result = GetMotionEventsReply { sequence, length, events };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -13499,7 +13671,8 @@ pub struct TranslateCoordinatesReply {
     pub dst_y: i16,
 }
 impl TryParse for TranslateCoordinatesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13511,6 +13684,9 @@ impl TryParse for TranslateCoordinatesReply {
             return Err(ParseError::ParseError);
         }
         let result = TranslateCoordinatesReply { same_screen, sequence, length, child, dst_x, dst_y };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -13985,7 +14161,8 @@ pub struct GetInputFocusReply {
     pub focus: Window,
 }
 impl TryParse for GetInputFocusReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13996,6 +14173,9 @@ impl TryParse for GetInputFocusReply {
         }
         let revert_to = revert_to.try_into()?;
         let result = GetInputFocusReply { revert_to, sequence, length, focus };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -14063,7 +14243,8 @@ pub struct QueryKeymapReply {
     pub keys: [u8; 32],
 }
 impl TryParse for QueryKeymapReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14074,6 +14255,9 @@ impl TryParse for QueryKeymapReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryKeymapReply { sequence, length, keys };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -14548,7 +14732,8 @@ pub struct QueryFontReply {
     pub char_infos: Vec<Charinfo>,
 }
 impl TryParse for QueryFontReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14575,6 +14760,9 @@ impl TryParse for QueryFontReply {
         }
         let draw_direction = draw_direction.try_into()?;
         let result = QueryFontReply { sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, properties, char_infos };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -14787,7 +14975,8 @@ pub struct QueryTextExtentsReply {
     pub overall_right: i32,
 }
 impl TryParse for QueryTextExtentsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (draw_direction, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14804,6 +14993,9 @@ impl TryParse for QueryTextExtentsReply {
         }
         let draw_direction = draw_direction.try_into()?;
         let result = QueryTextExtentsReply { draw_direction, sequence, length, font_ascent, font_descent, overall_ascent, overall_descent, overall_width, overall_left, overall_right };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -14976,7 +15168,8 @@ pub struct ListFontsReply {
     pub names: Vec<Str>,
 }
 impl TryParse for ListFontsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14988,6 +15181,9 @@ impl TryParse for ListFontsReply {
             return Err(ParseError::ParseError);
         }
         let result = ListFontsReply { sequence, length, names };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -15153,7 +15349,8 @@ pub struct ListFontsWithInfoReply {
     pub name: Vec<u8>,
 }
 impl TryParse for ListFontsWithInfoReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (name_len, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15181,6 +15378,9 @@ impl TryParse for ListFontsWithInfoReply {
         }
         let draw_direction = draw_direction.try_into()?;
         let result = ListFontsWithInfoReply { sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, replies_hint, properties, name };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -15350,7 +15550,8 @@ pub struct GetFontPathReply {
     pub path: Vec<Str>,
 }
 impl TryParse for GetFontPathReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15362,6 +15563,9 @@ impl TryParse for GetFontPathReply {
             return Err(ParseError::ParseError);
         }
         let result = GetFontPathReply { sequence, length, path };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -19973,7 +20177,8 @@ pub struct GetImageReply {
     pub data: Vec<u8>,
 }
 impl TryParse for GetImageReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -19986,6 +20191,9 @@ impl TryParse for GetImageReply {
             return Err(ParseError::ParseError);
         }
         let result = GetImageReply { depth, sequence, visual, data };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -21034,7 +21242,8 @@ pub struct ListInstalledColormapsReply {
     pub cmaps: Vec<Colormap>,
 }
 impl TryParse for ListInstalledColormapsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -21046,6 +21255,9 @@ impl TryParse for ListInstalledColormapsReply {
             return Err(ParseError::ParseError);
         }
         let result = ListInstalledColormapsReply { sequence, length, cmaps };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -21202,7 +21414,8 @@ pub struct AllocColorReply {
     pub pixel: u32,
 }
 impl TryParse for AllocColorReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -21216,6 +21429,9 @@ impl TryParse for AllocColorReply {
             return Err(ParseError::ParseError);
         }
         let result = AllocColorReply { sequence, length, red, green, blue, pixel };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -21322,7 +21538,8 @@ pub struct AllocNamedColorReply {
     pub visual_blue: u16,
 }
 impl TryParse for AllocNamedColorReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -21338,6 +21555,9 @@ impl TryParse for AllocNamedColorReply {
             return Err(ParseError::ParseError);
         }
         let result = AllocNamedColorReply { sequence, length, pixel, exact_red, exact_green, exact_blue, visual_red, visual_green, visual_blue };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -21435,7 +21655,8 @@ pub struct AllocColorCellsReply {
     pub masks: Vec<u32>,
 }
 impl TryParse for AllocColorCellsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -21449,6 +21670,9 @@ impl TryParse for AllocColorCellsReply {
             return Err(ParseError::ParseError);
         }
         let result = AllocColorCellsReply { sequence, length, pixels, masks };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -21590,7 +21814,8 @@ pub struct AllocColorPlanesReply {
     pub pixels: Vec<u32>,
 }
 impl TryParse for AllocColorPlanesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -21606,6 +21831,9 @@ impl TryParse for AllocColorPlanesReply {
             return Err(ParseError::ParseError);
         }
         let result = AllocColorPlanesReply { sequence, length, red_mask, green_mask, blue_mask, pixels };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -22171,7 +22399,8 @@ pub struct QueryColorsReply {
     pub colors: Vec<Rgb>,
 }
 impl TryParse for QueryColorsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -22183,6 +22412,9 @@ impl TryParse for QueryColorsReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryColorsReply { sequence, length, colors };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -22303,7 +22535,8 @@ pub struct LookupColorReply {
     pub visual_blue: u16,
 }
 impl TryParse for LookupColorReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -22318,6 +22551,9 @@ impl TryParse for LookupColorReply {
             return Err(ParseError::ParseError);
         }
         let result = LookupColorReply { sequence, length, exact_red, exact_green, exact_blue, visual_red, visual_green, visual_blue };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -23127,7 +23363,8 @@ pub struct QueryBestSizeReply {
     pub height: u16,
 }
 impl TryParse for QueryBestSizeReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -23138,6 +23375,9 @@ impl TryParse for QueryBestSizeReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryBestSizeReply { sequence, length, width, height };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -23281,7 +23521,8 @@ pub struct QueryExtensionReply {
     pub first_error: u8,
 }
 impl TryParse for QueryExtensionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -23294,6 +23535,9 @@ impl TryParse for QueryExtensionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryExtensionReply { sequence, length, present, major_opcode, first_event, first_error };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -23361,7 +23605,8 @@ pub struct ListExtensionsReply {
     pub names: Vec<Str>,
 }
 impl TryParse for ListExtensionsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (names_len, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -23372,6 +23617,9 @@ impl TryParse for ListExtensionsReply {
             return Err(ParseError::ParseError);
         }
         let result = ListExtensionsReply { sequence, length, names };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -23559,7 +23807,8 @@ pub struct GetKeyboardMappingReply {
     pub keysyms: Vec<Keysym>,
 }
 impl TryParse for GetKeyboardMappingReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -23570,6 +23819,9 @@ impl TryParse for GetKeyboardMappingReply {
             return Err(ParseError::ParseError);
         }
         let result = GetKeyboardMappingReply { keysyms_per_keycode, sequence, keysyms };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -24145,7 +24397,8 @@ pub struct GetKeyboardControlReply {
     pub auto_repeats: [u8; 32],
 }
 impl TryParse for GetKeyboardControlReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (global_auto_repeat, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -24163,6 +24416,9 @@ impl TryParse for GetKeyboardControlReply {
         }
         let global_auto_repeat = global_auto_repeat.try_into()?;
         let result = GetKeyboardControlReply { global_auto_repeat, sequence, length, led_mask, key_click_percent, bell_percent, bell_pitch, bell_duration, auto_repeats };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -24373,7 +24629,8 @@ pub struct GetPointerControlReply {
     pub threshold: u16,
 }
 impl TryParse for GetPointerControlReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -24386,6 +24643,9 @@ impl TryParse for GetPointerControlReply {
             return Err(ParseError::ParseError);
         }
         let result = GetPointerControlReply { sequence, length, acceleration_numerator, acceleration_denominator, threshold };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -24668,7 +24928,8 @@ pub struct GetScreenSaverReply {
     pub allow_exposures: Exposures,
 }
 impl TryParse for GetScreenSaverReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -24684,6 +24945,9 @@ impl TryParse for GetScreenSaverReply {
         let prefer_blanking = prefer_blanking.try_into()?;
         let allow_exposures = allow_exposures.try_into()?;
         let result = GetScreenSaverReply { sequence, length, timeout, interval, prefer_blanking, allow_exposures };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -25040,7 +25304,8 @@ pub struct ListHostsReply {
     pub hosts: Vec<Host>,
 }
 impl TryParse for ListHostsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -25053,6 +25318,9 @@ impl TryParse for ListHostsReply {
         }
         let mode = mode.try_into()?;
         let result = ListHostsReply { mode, sequence, length, hosts };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -25842,7 +26110,8 @@ pub struct SetPointerMappingReply {
     pub length: u32,
 }
 impl TryParse for SetPointerMappingReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -25852,6 +26121,9 @@ impl TryParse for SetPointerMappingReply {
         }
         let status = status.try_into()?;
         let result = SetPointerMappingReply { status, sequence, length };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -25919,7 +26191,8 @@ pub struct GetPointerMappingReply {
     pub map: Vec<u8>,
 }
 impl TryParse for GetPointerMappingReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (map_len, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -25931,6 +26204,9 @@ impl TryParse for GetPointerMappingReply {
             return Err(ParseError::ParseError);
         }
         let result = GetPointerMappingReply { sequence, length, map };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -26111,7 +26387,8 @@ pub struct SetModifierMappingReply {
     pub length: u32,
 }
 impl TryParse for SetModifierMappingReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -26121,6 +26398,9 @@ impl TryParse for SetModifierMappingReply {
         }
         let status = status.try_into()?;
         let result = SetModifierMappingReply { status, sequence, length };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -26188,7 +26468,8 @@ pub struct GetModifierMappingReply {
     pub keycodes: Vec<Keycode>,
 }
 impl TryParse for GetModifierMappingReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -26200,6 +26481,9 @@ impl TryParse for GetModifierMappingReply {
             return Err(ParseError::ParseError);
         }
         let result = GetModifierMappingReply { sequence, length, keycodes };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

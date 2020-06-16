@@ -431,7 +431,8 @@ pub struct BadContextError {
     pub invalid_record: u32,
 }
 impl TryParse for BadContextError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -440,6 +441,9 @@ impl TryParse for BadContextError {
             return Err(ParseError::ParseError);
         }
         let result = BadContextError { error_code, sequence, invalid_record };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -570,7 +574,8 @@ pub struct QueryVersionReply {
     pub minor_version: u16,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -581,6 +586,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -952,7 +960,8 @@ pub struct GetContextReply {
     pub intercepted_clients: Vec<ClientInfo>,
 }
 impl TryParse for GetContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -966,6 +975,9 @@ impl TryParse for GetContextReply {
             return Err(ParseError::ParseError);
         }
         let result = GetContextReply { enabled, sequence, length, element_header, intercepted_clients };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1062,7 +1074,8 @@ pub struct EnableContextReply {
     pub data: Vec<u8>,
 }
 impl TryParse for EnableContextReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (category, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1080,6 +1093,9 @@ impl TryParse for EnableContextReply {
             return Err(ParseError::ParseError);
         }
         let result = EnableContextReply { category, sequence, element_header, client_swapped, xid_base, server_time, rec_sequence_num, data };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

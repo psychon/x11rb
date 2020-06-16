@@ -106,7 +106,8 @@ pub struct GetVersionReply {
     pub server_minor_version: u16,
 }
 impl TryParse for GetVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -117,6 +118,9 @@ impl TryParse for GetVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = GetVersionReply { sequence, length, server_major_version, server_minor_version };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -183,7 +187,8 @@ pub struct GetXIDRangeReply {
     pub count: u32,
 }
 impl TryParse for GetXIDRangeReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -194,6 +199,9 @@ impl TryParse for GetXIDRangeReply {
             return Err(ParseError::ParseError);
         }
         let result = GetXIDRangeReply { sequence, length, start_id, count };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -270,7 +278,8 @@ pub struct GetXIDListReply {
     pub ids: Vec<u32>,
 }
 impl TryParse for GetXIDListReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -282,6 +291,9 @@ impl TryParse for GetXIDListReply {
             return Err(ParseError::ParseError);
         }
         let result = GetXIDListReply { sequence, length, ids };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
