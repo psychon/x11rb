@@ -1,10 +1,64 @@
+# Version 0.6.0 (2020-06-19)
+
+New features:
+* The examples in this repository where extended:
+  * New `xclock_utc` example shows a clock. This is useful to see how to get a
+    wakeup once per second.
+  * `cairo-example` uses a transparent background if a EWMH compliant composite
+    manager is running.
+* The value of length fields are not part of the generated code. This release
+  adds accessors that allow recomputing their value. The motivation for this
+  change was `xproto::GetModiferMappingReply`'s `keycodes_per_modifier` field.
+* Added `struct`s for X11 requests and added infrastructure for parsing
+  requests. Interested users should start with the `protocol::Request` enum.
+* Added a `protocol::Reply` enum over all possible replies.
+* Added a `TryParseFd` trait for types that can be parsed from a combination of
+  raw bytes and a list of file descriptors.
+
+Fixes:
+* Use nonblocking reads and writes for all interactions with the X11 server.
+  This fixes a theoretical deadlock with the X11 server that was never seen in
+  practice. Bindings for `poll()` are now required.
+* `RustConnection::poll_for_event()` previously only checked for pending queued
+  event, but did not actually try to read new events from the X11 server.
+* There was a possible deadlock on low-level socket errors. A thread could end
+  up waiting on a condition variable without ever getting woken up.
+* The support for big requests was broken. Big requests are requests with more
+  than 2^18 bytes. An incorrect length field was sent, cutting of the last four
+  bytes of the request and causing them to be interpreted as a new request.
+* The parsing codes for errors, events, and replies now return a correct
+  `remaining` slice.
+
+Breaking changes:
+* The whole code around `rust_connection`'s low level stream abstraction was
+  redesigned. This now uses an abstraction over the `poll()` function from libc
+  (and requires similar support for all alternative transport implementations).
+* The `allow-unsafe-code` feature is no longer enabled by default.
+* `xkb_select_event`'s `affect_which` field is now deduced based on other
+  arguments and no longer has to be provided explicitly.
+* Changed return type of `VoidCookie::check()` from `Result<Option<Error>,
+  ConnectionError>` to `Result<(), ReplyError>`. This still has the same
+  possible errors as before, but they are represented differently.
+* Remove the `response_type` fields from errors and replies, because they always
+  have a fixed value (`0` for errors and `1` for replies).
+
+Minor changes:
+* `x11rb::rust_connection::Stream` now implements the traits `AsRawFd`,
+  `IntoRawFd`, `AsRawSocket`, and `IntoRawSocket`.
+* `x11rb::rust_connection::RustConnection` provides immutable access to its low
+  level stream via the `stream()` method.
+* Reworked CI integration. Tests are now also run on a big endian platform.
+* Brought back the [explanation of the generated code](generated_code.md).
+* Added a module-level doc comment to the generated code.
+* Satisfy the newest version of our clippy overload for she has many complaints.
+
 # Version 0.5.0 (2020-05-10)
 
 New features:
 * The new `Connection::prefetch_maximum_request_bytes()` API allows avoiding a
   round-trip when sending large requests.
 * Use enums to represent values in structs where it makes sense. Previously,
-  numeric types like `u8` were used.  This simplifies usage of much of the API.
+  numeric types like `u8` were used. This simplifies usage of much of the API.
 * `x11rb::extension_manager::ExtensionInformation` can now provide information
   about all the extensions that are known to be present.
 * New enums `x11rb::protocol::Error` and `Event` allow representing any possible
