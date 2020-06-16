@@ -50,7 +50,8 @@ pub struct CompletionEvent {
     pub offset: u32,
 }
 impl TryParse for CompletionEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -61,6 +62,9 @@ impl TryParse for CompletionEvent {
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
         let result = CompletionEvent { response_type, sequence, drawable, minor_event, major_event, shmseg, offset };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -186,7 +190,8 @@ pub struct QueryVersionReply {
     pub pixmap_format: u8,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (shared_pixmaps, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -201,6 +206,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { shared_pixmaps, sequence, length, major_version, minor_version, uid, gid, pixmap_format };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -643,7 +651,8 @@ pub struct GetImageReply {
     pub size: u32,
 }
 impl TryParse for GetImageReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -654,6 +663,9 @@ impl TryParse for GetImageReply {
             return Err(ParseError::ParseError);
         }
         let result = GetImageReply { depth, sequence, length, visual, size };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -936,7 +948,8 @@ pub struct CreateSegmentReply {
     pub shm_fd: RawFdContainer,
 }
 impl TryParseFd for CreateSegmentReply {
-    fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
+    fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (nfd, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -948,6 +961,9 @@ impl TryParseFd for CreateSegmentReply {
             return Err(ParseError::ParseError);
         }
         let result = CreateSegmentReply { nfd, sequence, length, shm_fd };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

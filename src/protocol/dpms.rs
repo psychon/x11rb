@@ -106,7 +106,8 @@ pub struct GetVersionReply {
     pub server_minor_version: u16,
 }
 impl TryParse for GetVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -117,6 +118,9 @@ impl TryParse for GetVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = GetVersionReply { sequence, length, server_major_version, server_minor_version };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -182,7 +186,8 @@ pub struct CapableReply {
     pub capable: bool,
 }
 impl TryParse for CapableReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -193,6 +198,9 @@ impl TryParse for CapableReply {
             return Err(ParseError::ParseError);
         }
         let result = CapableReply { sequence, length, capable };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -260,7 +268,8 @@ pub struct GetTimeoutsReply {
     pub off_timeout: u16,
 }
 impl TryParse for GetTimeoutsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -273,6 +282,9 @@ impl TryParse for GetTimeoutsReply {
             return Err(ParseError::ParseError);
         }
         let result = GetTimeoutsReply { sequence, length, standby_timeout, suspend_timeout, off_timeout };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -636,7 +648,8 @@ pub struct InfoReply {
     pub state: bool,
 }
 impl TryParse for InfoReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -649,6 +662,9 @@ impl TryParse for InfoReply {
         }
         let power_level = power_level.try_into()?;
         let result = InfoReply { sequence, length, power_level, state };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }

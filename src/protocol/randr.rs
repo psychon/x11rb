@@ -54,7 +54,8 @@ pub struct BadOutputError {
     pub sequence: u16,
 }
 impl TryParse for BadOutputError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -62,6 +63,9 @@ impl TryParse for BadOutputError {
             return Err(ParseError::ParseError);
         }
         let result = BadOutputError { error_code, sequence };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -127,7 +131,8 @@ pub struct BadCrtcError {
     pub sequence: u16,
 }
 impl TryParse for BadCrtcError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -135,6 +140,9 @@ impl TryParse for BadCrtcError {
             return Err(ParseError::ParseError);
         }
         let result = BadCrtcError { error_code, sequence };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -200,7 +208,8 @@ pub struct BadModeError {
     pub sequence: u16,
 }
 impl TryParse for BadModeError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -208,6 +217,9 @@ impl TryParse for BadModeError {
             return Err(ParseError::ParseError);
         }
         let result = BadModeError { error_code, sequence };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -273,7 +285,8 @@ pub struct BadProviderError {
     pub sequence: u16,
 }
 impl TryParse for BadProviderError {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -281,6 +294,9 @@ impl TryParse for BadProviderError {
             return Err(ParseError::ParseError);
         }
         let result = BadProviderError { error_code, sequence };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -586,7 +602,8 @@ pub struct QueryVersionReply {
     pub minor_version: u32,
 }
 impl TryParse for QueryVersionReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -598,6 +615,9 @@ impl TryParse for QueryVersionReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -790,7 +810,8 @@ pub struct SetScreenConfigReply {
     pub subpixel_order: render::SubPixel,
 }
 impl TryParse for SetScreenConfigReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -806,6 +827,9 @@ impl TryParse for SetScreenConfigReply {
         let status = status.try_into()?;
         let subpixel_order = subpixel_order.try_into()?;
         let result = SetScreenConfigReply { status, sequence, length, new_timestamp, config_timestamp, root, subpixel_order };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1043,7 +1067,8 @@ pub struct GetScreenInfoReply {
     pub rates: Vec<RefreshRates>,
 }
 impl TryParse for GetScreenInfoReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (rotations, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1063,6 +1088,9 @@ impl TryParse for GetScreenInfoReply {
             return Err(ParseError::ParseError);
         }
         let result = GetScreenInfoReply { rotations, sequence, length, root, timestamp, config_timestamp, size_id, rotation, rate, n_info, sizes, rates };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1157,7 +1185,8 @@ pub struct GetScreenSizeRangeReply {
     pub max_height: u16,
 }
 impl TryParse for GetScreenSizeRangeReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1171,6 +1200,9 @@ impl TryParse for GetScreenSizeRangeReply {
             return Err(ParseError::ParseError);
         }
         let result = GetScreenSizeRangeReply { sequence, length, min_width, min_height, max_width, max_height };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1536,7 +1568,8 @@ pub struct GetScreenResourcesReply {
     pub names: Vec<u8>,
 }
 impl TryParse for GetScreenResourcesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1557,6 +1590,9 @@ impl TryParse for GetScreenResourcesReply {
             return Err(ParseError::ParseError);
         }
         let result = GetScreenResourcesReply { sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1772,7 +1808,8 @@ pub struct GetOutputInfoReply {
     pub name: Vec<u8>,
 }
 impl TryParse for GetOutputInfoReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1800,6 +1837,9 @@ impl TryParse for GetOutputInfoReply {
         let connection = connection.try_into()?;
         let subpixel_order = subpixel_order.try_into()?;
         let result = GetOutputInfoReply { status, sequence, length, timestamp, crtc, mm_width, mm_height, connection, subpixel_order, num_preferred, crtcs, modes, clones, name };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -1930,7 +1970,8 @@ pub struct ListOutputPropertiesReply {
     pub atoms: Vec<xproto::Atom>,
 }
 impl TryParse for ListOutputPropertiesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1942,6 +1983,9 @@ impl TryParse for ListOutputPropertiesReply {
             return Err(ParseError::ParseError);
         }
         let result = ListOutputPropertiesReply { sequence, length, atoms };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2044,7 +2088,8 @@ pub struct QueryOutputPropertyReply {
     pub valid_values: Vec<i32>,
 }
 impl TryParse for QueryOutputPropertyReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2058,6 +2103,9 @@ impl TryParse for QueryOutputPropertyReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryOutputPropertyReply { sequence, pending, range, immutable, valid_values };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2504,7 +2552,8 @@ pub struct GetOutputPropertyReply {
     pub data: Vec<u8>,
 }
 impl TryParse for GetOutputPropertyReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2519,6 +2568,9 @@ impl TryParse for GetOutputPropertyReply {
             return Err(ParseError::ParseError);
         }
         let result = GetOutputPropertyReply { format, sequence, length, type_, bytes_after, num_items, data };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2647,7 +2699,8 @@ pub struct CreateModeReply {
     pub mode: Mode,
 }
 impl TryParse for CreateModeReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2658,6 +2711,9 @@ impl TryParse for CreateModeReply {
             return Err(ParseError::ParseError);
         }
         let result = CreateModeReply { sequence, length, mode };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -2948,7 +3004,8 @@ pub struct GetCrtcInfoReply {
     pub possible: Vec<Output>,
 }
 impl TryParse for GetCrtcInfoReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2970,6 +3027,9 @@ impl TryParse for GetCrtcInfoReply {
         }
         let status = status.try_into()?;
         let result = GetCrtcInfoReply { status, sequence, length, timestamp, x, y, width, height, mode, rotation, rotations, outputs, possible };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3156,7 +3216,8 @@ pub struct SetCrtcConfigReply {
     pub timestamp: xproto::Timestamp,
 }
 impl TryParse for SetCrtcConfigReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3168,6 +3229,9 @@ impl TryParse for SetCrtcConfigReply {
         }
         let status = status.try_into()?;
         let result = SetCrtcConfigReply { status, sequence, length, timestamp };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3244,7 +3308,8 @@ pub struct GetCrtcGammaSizeReply {
     pub size: u16,
 }
 impl TryParse for GetCrtcGammaSizeReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3255,6 +3320,9 @@ impl TryParse for GetCrtcGammaSizeReply {
             return Err(ParseError::ParseError);
         }
         let result = GetCrtcGammaSizeReply { sequence, length, size };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3333,7 +3401,8 @@ pub struct GetCrtcGammaReply {
     pub blue: Vec<u16>,
 }
 impl TryParse for GetCrtcGammaReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3347,6 +3416,9 @@ impl TryParse for GetCrtcGammaReply {
             return Err(ParseError::ParseError);
         }
         let result = GetCrtcGammaReply { sequence, length, red, green, blue };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3541,7 +3613,8 @@ pub struct GetScreenResourcesCurrentReply {
     pub names: Vec<u8>,
 }
 impl TryParse for GetScreenResourcesCurrentReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3562,6 +3635,9 @@ impl TryParse for GetScreenResourcesCurrentReply {
             return Err(ParseError::ParseError);
         }
         let result = GetScreenResourcesCurrentReply { sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -3910,7 +3986,8 @@ pub struct GetCrtcTransformReply {
     pub current_params: Vec<render::Fixed>,
 }
 impl TryParse for GetCrtcTransformReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let value = remaining;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -3943,6 +4020,9 @@ impl TryParse for GetCrtcTransformReply {
             return Err(ParseError::ParseError);
         }
         let result = GetCrtcTransformReply { sequence, length, pending_transform, has_transforms, current_transform, pending_filter_name, pending_params, current_filter_name, current_params };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4086,7 +4166,8 @@ pub struct GetPanningReply {
     pub border_bottom: i16,
 }
 impl TryParse for GetPanningReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4109,6 +4190,9 @@ impl TryParse for GetPanningReply {
         }
         let status = status.try_into()?;
         let result = GetPanningReply { status, sequence, length, timestamp, left, top, width, height, track_left, track_top, track_width, track_height, border_left, border_top, border_right, border_bottom };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4279,7 +4363,8 @@ pub struct SetPanningReply {
     pub timestamp: xproto::Timestamp,
 }
 impl TryParse for SetPanningReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4290,6 +4375,9 @@ impl TryParse for SetPanningReply {
         }
         let status = status.try_into()?;
         let result = SetPanningReply { status, sequence, length, timestamp };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4434,7 +4522,8 @@ pub struct GetOutputPrimaryReply {
     pub output: Output,
 }
 impl TryParse for GetOutputPrimaryReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4444,6 +4533,9 @@ impl TryParse for GetOutputPrimaryReply {
             return Err(ParseError::ParseError);
         }
         let result = GetOutputPrimaryReply { sequence, length, output };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4521,7 +4613,8 @@ pub struct GetProvidersReply {
     pub providers: Vec<Provider>,
 }
 impl TryParse for GetProvidersReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4534,6 +4627,9 @@ impl TryParse for GetProvidersReply {
             return Err(ParseError::ParseError);
         }
         let result = GetProvidersReply { sequence, length, timestamp, providers };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -4710,7 +4806,8 @@ pub struct GetProviderInfoReply {
     pub name: Vec<u8>,
 }
 impl TryParse for GetProviderInfoReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4732,6 +4829,9 @@ impl TryParse for GetProviderInfoReply {
             return Err(ParseError::ParseError);
         }
         let result = GetProviderInfoReply { status, sequence, length, timestamp, capabilities, crtcs, outputs, associated_providers, associated_capability, name };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -5016,7 +5116,8 @@ pub struct ListProviderPropertiesReply {
     pub atoms: Vec<xproto::Atom>,
 }
 impl TryParse for ListProviderPropertiesReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5028,6 +5129,9 @@ impl TryParse for ListProviderPropertiesReply {
             return Err(ParseError::ParseError);
         }
         let result = ListProviderPropertiesReply { sequence, length, atoms };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -5130,7 +5234,8 @@ pub struct QueryProviderPropertyReply {
     pub valid_values: Vec<i32>,
 }
 impl TryParse for QueryProviderPropertyReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5144,6 +5249,9 @@ impl TryParse for QueryProviderPropertyReply {
             return Err(ParseError::ParseError);
         }
         let result = QueryProviderPropertyReply { sequence, pending, range, immutable, valid_values };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -5587,7 +5695,8 @@ pub struct GetProviderPropertyReply {
     pub data: Vec<u8>,
 }
 impl TryParse for GetProviderPropertyReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5602,6 +5711,9 @@ impl TryParse for GetProviderPropertyReply {
             return Err(ParseError::ParseError);
         }
         let result = GetProviderPropertyReply { format, sequence, length, type_, bytes_after, num_items, data };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -5631,7 +5743,8 @@ pub struct ScreenChangeNotifyEvent {
     pub mheight: u16,
 }
 impl TryParse for ScreenChangeNotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (rotation, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5647,6 +5760,9 @@ impl TryParse for ScreenChangeNotifyEvent {
         let (mheight, remaining) = u16::try_parse(remaining)?;
         let subpixel_order = subpixel_order.try_into()?;
         let result = ScreenChangeNotifyEvent { response_type, rotation, sequence, timestamp, config_timestamp, root, request_window, size_id, subpixel_order, width, height, mwidth, mheight };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -6411,7 +6527,8 @@ pub struct GetMonitorsReply {
     pub monitors: Vec<MonitorInfo>,
 }
 impl TryParse for GetMonitorsReply {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6425,6 +6542,9 @@ impl TryParse for GetMonitorsReply {
             return Err(ParseError::ParseError);
         }
         let result = GetMonitorsReply { sequence, length, timestamp, n_outputs, monitors };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -6694,7 +6814,8 @@ pub struct CreateLeaseReply {
     pub master_fd: RawFdContainer,
 }
 impl TryParseFd for CreateLeaseReply {
-    fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
+    fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (nfd, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6706,6 +6827,9 @@ impl TryParseFd for CreateLeaseReply {
             return Err(ParseError::ParseError);
         }
         let result = CreateLeaseReply { nfd, sequence, length, master_fd };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
@@ -6989,13 +7113,17 @@ pub struct NotifyEvent {
     pub u: NotifyData,
 }
 impl TryParse for NotifyEvent {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (sub_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (u, remaining) = NotifyData::try_parse(remaining)?;
         let sub_code = sub_code.try_into()?;
         let result = NotifyEvent { response_type, sub_code, sequence, u };
+        let _ = remaining;
+        let remaining = initial_value.get(32..)
+            .ok_or(ParseError::ParseError)?;
         Ok((result, remaining))
     }
 }
