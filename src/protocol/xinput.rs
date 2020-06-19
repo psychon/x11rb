@@ -14726,6 +14726,33 @@ impl From<DeviceValuatorEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl DeviceValuatorEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (device_state, remaining) = u16::try_parse(remaining)?;
+        let (num_valuators, remaining) = u8::try_parse(remaining)?;
+        let (first_valuator, remaining) = u8::try_parse(remaining)?;
+        let (valuators_0, remaining) = i32::try_parse(remaining)?;
+        let (valuators_1, remaining) = i32::try_parse(remaining)?;
+        let (valuators_2, remaining) = i32::try_parse(remaining)?;
+        let (valuators_3, remaining) = i32::try_parse(remaining)?;
+        let (valuators_4, remaining) = i32::try_parse(remaining)?;
+        let (valuators_5, remaining) = i32::try_parse(remaining)?;
+        let valuators = [
+            valuators_0,
+            valuators_1,
+            valuators_2,
+            valuators_3,
+            valuators_4,
+            valuators_5,
+        ];
+        let _ = remaining;
+        let result = DeviceValuatorEvent { response_type, device_id, sequence, device_state, num_valuators, first_valuator, valuators };
+        Ok(super::Event::XinputDeviceValuator(result))
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -14893,6 +14920,27 @@ impl From<DeviceKeyPressEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl DeviceKeyPressEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event, remaining) = xproto::Window::try_parse(remaining)?;
+        let (child, remaining) = xproto::Window::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let _ = remaining;
+        let result = DeviceKeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen, device_id };
+        Ok(super::Event::XinputDeviceKeyPress(result))
+    }
+}
 
 /// Opcode for the DeviceKeyRelease event
 pub const DEVICE_KEY_RELEASE_EVENT: u8 = 2;
@@ -14996,6 +15044,23 @@ impl From<&DeviceFocusInEvent> for [u8; 32] {
 impl From<DeviceFocusInEvent> for [u8; 32] {
     fn from(input: DeviceFocusInEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl DeviceFocusInEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let result = DeviceFocusInEvent { response_type, detail, sequence, time, window, mode, device_id };
+        Ok(super::Event::XinputDeviceFocusIn(result))
     }
 }
 
@@ -15189,6 +15254,33 @@ impl From<DeviceStateNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl DeviceStateNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (num_keys, remaining) = u8::try_parse(remaining)?;
+        let (num_buttons, remaining) = u8::try_parse(remaining)?;
+        let (num_valuators, remaining) = u8::try_parse(remaining)?;
+        let (classes_reported, remaining) = u8::try_parse(remaining)?;
+        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
+        let buttons = <[u8; 4]>::try_from(buttons).unwrap();
+        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
+        let keys = <[u8; 4]>::try_from(keys).unwrap();
+        let (valuators_0, remaining) = u32::try_parse(remaining)?;
+        let (valuators_1, remaining) = u32::try_parse(remaining)?;
+        let (valuators_2, remaining) = u32::try_parse(remaining)?;
+        let valuators = [
+            valuators_0,
+            valuators_1,
+            valuators_2,
+        ];
+        let _ = remaining;
+        let result = DeviceStateNotifyEvent { response_type, device_id, sequence, time, num_keys, num_buttons, num_valuators, classes_reported, buttons, keys, valuators };
+        Ok(super::Event::XinputDeviceStateNotify(result))
+    }
+}
 
 /// Opcode for the DeviceMappingNotify event
 pub const DEVICE_MAPPING_NOTIFY_EVENT: u8 = 11;
@@ -15276,6 +15368,23 @@ impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
 impl From<DeviceMappingNotifyEvent> for [u8; 32] {
     fn from(input: DeviceMappingNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl DeviceMappingNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (request, remaining) = u8::try_parse(remaining)?;
+        let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
+        let (count, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let request = request.try_into()?;
+        let _ = remaining;
+        let result = DeviceMappingNotifyEvent { response_type, device_id, sequence, request, first_keycode, count, time };
+        Ok(super::Event::XinputDeviceMappingNotify(result))
     }
 }
 
@@ -15430,6 +15539,20 @@ impl From<ChangeDeviceNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl ChangeDeviceNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (request, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let request = request.try_into()?;
+        let _ = remaining;
+        let result = ChangeDeviceNotifyEvent { response_type, device_id, sequence, time, request };
+        Ok(super::Event::XinputChangeDeviceNotify(result))
+    }
+}
 
 /// Opcode for the DeviceKeyStateNotify event
 pub const DEVICE_KEY_STATE_NOTIFY_EVENT: u8 = 13;
@@ -15507,6 +15630,18 @@ impl From<DeviceKeyStateNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl DeviceKeyStateNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 28)?;
+        let keys = <[u8; 28]>::try_from(keys).unwrap();
+        let _ = remaining;
+        let result = DeviceKeyStateNotifyEvent { response_type, device_id, sequence, keys };
+        Ok(super::Event::XinputDeviceKeyStateNotify(result))
+    }
+}
 
 /// Opcode for the DeviceButtonStateNotify event
 pub const DEVICE_BUTTON_STATE_NOTIFY_EVENT: u8 = 14;
@@ -15582,6 +15717,18 @@ impl From<&DeviceButtonStateNotifyEvent> for [u8; 32] {
 impl From<DeviceButtonStateNotifyEvent> for [u8; 32] {
     fn from(input: DeviceButtonStateNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl DeviceButtonStateNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 28)?;
+        let buttons = <[u8; 28]>::try_from(buttons).unwrap();
+        let _ = remaining;
+        let result = DeviceButtonStateNotifyEvent { response_type, device_id, sequence, buttons };
+        Ok(super::Event::XinputDeviceButtonStateNotify(result))
     }
 }
 
@@ -15744,6 +15891,22 @@ impl From<DevicePresenceNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl DevicePresenceNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (devchange, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (control, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let devchange = devchange.try_into()?;
+        let _ = remaining;
+        let result = DevicePresenceNotifyEvent { response_type, sequence, time, devchange, device_id, control };
+        Ok(super::Event::XinputDevicePresenceNotify(result))
+    }
+}
 
 /// Opcode for the DevicePropertyNotify event
 pub const DEVICE_PROPERTY_NOTIFY_EVENT: u8 = 16;
@@ -15827,6 +15990,21 @@ impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
 impl From<DevicePropertyNotifyEvent> for [u8; 32] {
     fn from(input: DevicePropertyNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl DevicePropertyNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let remaining = remaining.get(19..).ok_or(ParseError::ParseError)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let state = state.try_into()?;
+        let _ = remaining;
+        let result = DevicePropertyNotifyEvent { response_type, state, sequence, time, property, device_id };
+        Ok(super::Event::XinputDevicePropertyNotify(result))
     }
 }
 
@@ -15949,6 +16127,26 @@ impl DeviceChangedEvent {
     pub fn num_classes(&self) -> u16 {
         self.classes.len()
             .try_into().unwrap()
+    }
+}
+impl DeviceChangedEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (reason, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let reason = reason.try_into()?;
+        let _ = remaining;
+        let result = DeviceChangedEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, reason, classes };
+        Ok(super::Event::XinputDeviceChanged(result))
     }
 }
 
@@ -16074,6 +16272,38 @@ impl KeyPressEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+impl KeyPressEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event, remaining) = xproto::Window::try_parse(remaining)?;
+        let (child, remaining) = xproto::Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        let result = KeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
+        Ok(super::Event::XinputKeyPress(result))
     }
 }
 
@@ -16203,6 +16433,38 @@ impl ButtonPressEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+impl ButtonPressEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event, remaining) = xproto::Window::try_parse(remaining)?;
+        let (child, remaining) = xproto::Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        let result = ButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
+        Ok(super::Event::XinputButtonPress(result))
     }
 }
 
@@ -16451,6 +16713,38 @@ impl EnterEvent {
             .try_into().unwrap()
     }
 }
+impl EnterEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event, remaining) = xproto::Window::try_parse(remaining)?;
+        let (child, remaining) = xproto::Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (focus, remaining) = bool::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let mode = mode.try_into()?;
+        let detail = detail.try_into()?;
+        let _ = remaining;
+        let result = EnterEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
+        Ok(super::Event::XinputEnter(result))
+    }
+}
 
 /// Opcode for the Leave event
 pub const LEAVE_EVENT: u16 = 8;
@@ -16662,6 +16956,24 @@ impl HierarchyEvent {
             .try_into().unwrap()
     }
 }
+impl HierarchyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (num_infos, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<HierarchyInfo>(remaining, num_infos.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        let result = HierarchyEvent { response_type, extension, sequence, length, event_type, deviceid, time, flags, infos };
+        Ok(super::Event::XinputHierarchy(result))
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -16769,6 +17081,24 @@ impl TryFrom<&[u8]> for PropertyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl PropertyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (property, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (what, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let what = what.try_into()?;
+        let _ = remaining;
+        let result = PropertyEvent { response_type, extension, sequence, length, event_type, deviceid, time, property, what };
+        Ok(super::Event::XinputProperty(result))
+    }
+}
 
 /// Opcode for the RawKeyPress event
 pub const RAW_KEY_PRESS_EVENT: u16 = 13;
@@ -16832,6 +17162,28 @@ impl RawKeyPressEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+impl RawKeyPressEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        let result = RawKeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
+        Ok(super::Event::XinputRawKeyPress(result))
     }
 }
 
@@ -16901,6 +17253,28 @@ impl RawButtonPressEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+impl RawButtonPressEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        let result = RawButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
+        Ok(super::Event::XinputRawButtonPress(result))
     }
 }
 
@@ -17039,6 +17413,38 @@ impl TouchBeginEvent {
             .try_into().unwrap()
     }
 }
+impl TouchBeginEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event, remaining) = xproto::Window::try_parse(remaining)?;
+        let (child, remaining) = xproto::Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        let result = TouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
+        Ok(super::Event::XinputTouchBegin(result))
+    }
+}
 
 /// Opcode for the TouchUpdate event
 pub const TOUCH_UPDATE_EVENT: u16 = 19;
@@ -17157,6 +17563,29 @@ impl TryFrom<&[u8]> for TouchOwnershipEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl TouchOwnershipEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (touchid, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event, remaining) = xproto::Window::try_parse(remaining)?;
+        let (child, remaining) = xproto::Window::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let flags = flags.try_into()?;
+        let _ = remaining;
+        let result = TouchOwnershipEvent { response_type, extension, sequence, length, event_type, deviceid, time, touchid, root, event, child, sourceid, flags };
+        Ok(super::Event::XinputTouchOwnership(result))
+    }
+}
 
 /// Opcode for the RawTouchBegin event
 pub const RAW_TOUCH_BEGIN_EVENT: u16 = 22;
@@ -17220,6 +17649,28 @@ impl RawTouchBeginEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+impl RawTouchBeginEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let _ = remaining;
+        let result = RawTouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
+        Ok(super::Event::XinputRawTouchBegin(result))
     }
 }
 
@@ -17350,6 +17801,32 @@ impl TryFrom<&[u8]> for BarrierHitEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl BarrierHitEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (eventid, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event, remaining) = xproto::Window::try_parse(remaining)?;
+        let (barrier, remaining) = xfixes::Barrier::try_parse(remaining)?;
+        let (dtime, remaining) = u32::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (dx, remaining) = Fp3232::try_parse(remaining)?;
+        let (dy, remaining) = Fp3232::try_parse(remaining)?;
+        let _ = remaining;
+        let result = BarrierHitEvent { response_type, extension, sequence, length, event_type, deviceid, time, eventid, root, event, barrier, dtime, flags, sourceid, root_x, root_y, dx, dy };
+        Ok(super::Event::XinputBarrierHit(result))
     }
 }
 

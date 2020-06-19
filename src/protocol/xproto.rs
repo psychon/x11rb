@@ -1526,6 +1526,27 @@ impl From<KeyPressEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl KeyPressEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = Keycode::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = KeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
+        Ok(super::Event::KeyPress(result))
+    }
+}
 
 /// Opcode for the KeyRelease event
 pub const KEY_RELEASE_EVENT: u8 = 3;
@@ -1716,6 +1737,27 @@ impl From<&ButtonPressEvent> for [u8; 32] {
 impl From<ButtonPressEvent> for [u8; 32] {
     fn from(input: ButtonPressEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl ButtonPressEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = Button::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = ButtonPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
+        Ok(super::Event::ButtonPress(result))
     }
 }
 
@@ -1920,6 +1962,28 @@ impl From<&MotionNotifyEvent> for [u8; 32] {
 impl From<MotionNotifyEvent> for [u8; 32] {
     fn from(input: MotionNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl MotionNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
+        let _ = remaining;
+        let result = MotionNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
+        Ok(super::Event::MotionNotify(result))
     }
 }
 
@@ -2194,6 +2258,29 @@ impl From<EnterNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl EnterNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (same_screen_focus, remaining) = u8::try_parse(remaining)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let result = EnterNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, mode, same_screen_focus };
+        Ok(super::Event::EnterNotify(result))
+    }
+}
 
 /// Opcode for the LeaveNotify event
 pub const LEAVE_NOTIFY_EVENT: u8 = 8;
@@ -2290,6 +2377,21 @@ impl From<FocusInEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl FocusInEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let result = FocusInEvent { response_type, detail, sequence, event, mode };
+        Ok(super::Event::FocusIn(result))
+    }
+}
 
 /// Opcode for the FocusOut event
 pub const FOCUS_OUT_EVENT: u8 = 10;
@@ -2363,6 +2465,16 @@ impl From<&KeymapNotifyEvent> for [u8; 32] {
 impl From<KeymapNotifyEvent> for [u8; 32] {
     fn from(input: KeymapNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl KeymapNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 31)?;
+        let keys = <[u8; 31]>::try_from(keys).unwrap();
+        let _ = remaining;
+        let result = KeymapNotifyEvent { response_type, keys };
+        Ok(super::Event::KeymapNotify(result))
     }
 }
 
@@ -2472,6 +2584,23 @@ impl From<ExposeEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl ExposeEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (x, remaining) = u16::try_parse(remaining)?;
+        let (y, remaining) = u16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (count, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = ExposeEvent { response_type, sequence, window, x, y, width, height, count };
+        Ok(super::Event::Expose(result))
+    }
+}
 
 /// Opcode for the GraphicsExposure event
 pub const GRAPHICS_EXPOSURE_EVENT: u8 = 13;
@@ -2570,6 +2699,25 @@ impl From<GraphicsExposureEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl GraphicsExposureEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (x, remaining) = u16::try_parse(remaining)?;
+        let (y, remaining) = u16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (count, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = GraphicsExposureEvent { response_type, sequence, drawable, x, y, width, height, minor_opcode, count, major_opcode };
+        Ok(super::Event::GraphicsExposure(result))
+    }
+}
 
 /// Opcode for the NoExposure event
 pub const NO_EXPOSURE_EVENT: u8 = 14;
@@ -2651,6 +2799,20 @@ impl From<&NoExposureEvent> for [u8; 32] {
 impl From<NoExposureEvent> for [u8; 32] {
     fn from(input: NoExposureEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl NoExposureEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = NoExposureEvent { response_type, sequence, drawable, minor_opcode, major_opcode };
+        Ok(super::Event::NoExposure(result))
     }
 }
 
@@ -2799,6 +2961,20 @@ impl From<VisibilityNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl VisibilityNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
+        let _ = remaining;
+        let result = VisibilityNotifyEvent { response_type, sequence, window, state };
+        Ok(super::Event::VisibilityNotify(result))
+    }
+}
 
 /// Opcode for the CreateNotify event
 pub const CREATE_NOTIFY_EVENT: u8 = 16;
@@ -2897,6 +3073,25 @@ impl From<CreateNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl CreateNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (border_width, remaining) = u16::try_parse(remaining)?;
+        let (override_redirect, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = CreateNotifyEvent { response_type, sequence, parent, window, x, y, width, height, border_width, override_redirect };
+        Ok(super::Event::CreateNotify(result))
+    }
+}
 
 /// Opcode for the DestroyNotify event
 pub const DESTROY_NOTIFY_EVENT: u8 = 17;
@@ -2985,6 +3180,18 @@ impl From<&DestroyNotifyEvent> for [u8; 32] {
 impl From<DestroyNotifyEvent> for [u8; 32] {
     fn from(input: DestroyNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl DestroyNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let _ = remaining;
+        let result = DestroyNotifyEvent { response_type, sequence, event, window };
+        Ok(super::Event::DestroyNotify(result))
     }
 }
 
@@ -3083,6 +3290,20 @@ impl From<UnmapNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl UnmapNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (from_configure, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = UnmapNotifyEvent { response_type, sequence, event, window, from_configure };
+        Ok(super::Event::UnmapNotify(result))
+    }
+}
 
 /// Opcode for the MapNotify event
 pub const MAP_NOTIFY_EVENT: u8 = 19;
@@ -3178,6 +3399,20 @@ impl From<MapNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl MapNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (override_redirect, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = MapNotifyEvent { response_type, sequence, event, window, override_redirect };
+        Ok(super::Event::MapNotify(result))
+    }
+}
 
 /// Opcode for the MapRequest event
 pub const MAP_REQUEST_EVENT: u8 = 20;
@@ -3265,6 +3500,18 @@ impl From<&MapRequestEvent> for [u8; 32] {
 impl From<MapRequestEvent> for [u8; 32] {
     fn from(input: MapRequestEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl MapRequestEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let _ = remaining;
+        let result = MapRequestEvent { response_type, sequence, parent, window };
+        Ok(super::Event::MapRequest(result))
     }
 }
 
@@ -3357,6 +3604,23 @@ impl From<&ReparentNotifyEvent> for [u8; 32] {
 impl From<ReparentNotifyEvent> for [u8; 32] {
     fn from(input: ReparentNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl ReparentNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (override_redirect, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = ReparentNotifyEvent { response_type, sequence, event, window, parent, x, y, override_redirect };
+        Ok(super::Event::ReparentNotify(result))
     }
 }
 
@@ -3482,6 +3746,26 @@ impl From<ConfigureNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl ConfigureNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (above_sibling, remaining) = Window::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (border_width, remaining) = u16::try_parse(remaining)?;
+        let (override_redirect, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = ConfigureNotifyEvent { response_type, sequence, event, window, above_sibling, x, y, width, height, border_width, override_redirect };
+        Ok(super::Event::ConfigureNotify(result))
+    }
+}
 
 /// Opcode for the ConfigureRequest event
 pub const CONFIGURE_REQUEST_EVENT: u8 = 23;
@@ -3585,6 +3869,26 @@ impl From<ConfigureRequestEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl ConfigureRequestEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (stack_mode, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (sibling, remaining) = Window::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (border_width, remaining) = u16::try_parse(remaining)?;
+        let (value_mask, remaining) = u16::try_parse(remaining)?;
+        let stack_mode = stack_mode.try_into()?;
+        let _ = remaining;
+        let result = ConfigureRequestEvent { response_type, stack_mode, sequence, parent, window, sibling, x, y, width, height, border_width, value_mask };
+        Ok(super::Event::ConfigureRequest(result))
+    }
+}
 
 /// Opcode for the GravityNotify event
 pub const GRAVITY_NOTIFY_EVENT: u8 = 24;
@@ -3670,6 +3974,20 @@ impl From<GravityNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl GravityNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let _ = remaining;
+        let result = GravityNotifyEvent { response_type, sequence, event, window, x, y };
+        Ok(super::Event::GravityNotify(result))
+    }
+}
 
 /// Opcode for the ResizeRequest event
 pub const RESIZE_REQUEST_EVENT: u8 = 25;
@@ -3750,6 +4068,19 @@ impl From<&ResizeRequestEvent> for [u8; 32] {
 impl From<ResizeRequestEvent> for [u8; 32] {
     fn from(input: ResizeRequestEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl ResizeRequestEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let _ = remaining;
+        let result = ResizeRequestEvent { response_type, sequence, window, width, height };
+        Ok(super::Event::ResizeRequest(result))
     }
 }
 
@@ -3921,6 +4252,22 @@ impl From<&CirculateNotifyEvent> for [u8; 32] {
 impl From<CirculateNotifyEvent> for [u8; 32] {
     fn from(input: CirculateNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl CirculateNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (place, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let place = place.try_into()?;
+        let _ = remaining;
+        let result = CirculateNotifyEvent { response_type, sequence, event, window, place };
+        Ok(super::Event::CirculateNotify(result))
     }
 }
 
@@ -4096,6 +4443,22 @@ impl From<PropertyNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl PropertyNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (atom, remaining) = Atom::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
+        let _ = remaining;
+        let result = PropertyNotifyEvent { response_type, sequence, window, atom, time, state };
+        Ok(super::Event::PropertyNotify(result))
+    }
+}
 
 /// Opcode for the SelectionClear event
 pub const SELECTION_CLEAR_EVENT: u8 = 29;
@@ -4176,6 +4539,19 @@ impl From<&SelectionClearEvent> for [u8; 32] {
 impl From<SelectionClearEvent> for [u8; 32] {
     fn from(input: SelectionClearEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl SelectionClearEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (owner, remaining) = Window::try_parse(remaining)?;
+        let (selection, remaining) = Atom::try_parse(remaining)?;
+        let _ = remaining;
+        let result = SelectionClearEvent { response_type, sequence, time, owner, selection };
+        Ok(super::Event::SelectionClear(result))
     }
 }
 
@@ -4504,6 +4880,22 @@ impl From<SelectionRequestEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl SelectionRequestEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (owner, remaining) = Window::try_parse(remaining)?;
+        let (requestor, remaining) = Window::try_parse(remaining)?;
+        let (selection, remaining) = Atom::try_parse(remaining)?;
+        let (target, remaining) = Atom::try_parse(remaining)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
+        let _ = remaining;
+        let result = SelectionRequestEvent { response_type, sequence, time, owner, requestor, selection, target, property };
+        Ok(super::Event::SelectionRequest(result))
+    }
+}
 
 /// Opcode for the SelectionNotify event
 pub const SELECTION_NOTIFY_EVENT: u8 = 31;
@@ -4590,6 +4982,21 @@ impl From<&SelectionNotifyEvent> for [u8; 32] {
 impl From<SelectionNotifyEvent> for [u8; 32] {
     fn from(input: SelectionNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl SelectionNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (requestor, remaining) = Window::try_parse(remaining)?;
+        let (selection, remaining) = Atom::try_parse(remaining)?;
+        let (target, remaining) = Atom::try_parse(remaining)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
+        let _ = remaining;
+        let result = SelectionNotifyEvent { response_type, sequence, time, requestor, selection, target, property };
+        Ok(super::Event::SelectionNotify(result))
     }
 }
 
@@ -4823,6 +5230,22 @@ impl From<&ColormapNotifyEvent> for [u8; 32] {
 impl From<ColormapNotifyEvent> for [u8; 32] {
     fn from(input: ColormapNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl ColormapNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (colormap, remaining) = Colormap::try_parse(remaining)?;
+        let (new, remaining) = bool::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
+        let _ = remaining;
+        let result = ColormapNotifyEvent { response_type, sequence, window, colormap, new, state };
+        Ok(super::Event::ColormapNotify(result))
     }
 }
 
@@ -5080,6 +5503,19 @@ impl From<ClientMessageEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl ClientMessageEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (type_, remaining) = Atom::try_parse(remaining)?;
+        let (data, remaining) = ClientMessageData::try_parse(remaining)?;
+        let _ = remaining;
+        let result = ClientMessageEvent { response_type, format, sequence, window, type_, data };
+        Ok(super::Event::ClientMessage(result))
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -5236,6 +5672,21 @@ impl From<MappingNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl MappingNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (request, remaining) = u8::try_parse(remaining)?;
+        let (first_keycode, remaining) = Keycode::try_parse(remaining)?;
+        let (count, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let request = request.try_into()?;
+        let _ = remaining;
+        let result = MappingNotifyEvent { response_type, sequence, request, first_keycode, count };
+        Ok(super::Event::MappingNotify(result))
+    }
+}
 
 /// Opcode for the GeGeneric event
 pub const GE_GENERIC_EVENT: u8 = 35;
@@ -5274,6 +5725,19 @@ impl TryFrom<&[u8]> for GeGenericEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GeGenericEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = GeGenericEvent { response_type, extension, sequence, length, event_type };
+        Ok(super::Event::GeGeneric(result))
     }
 }
 

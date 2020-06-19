@@ -2596,6 +2596,18 @@ impl From<NotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl NotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (context, remaining) = Pcontext::try_parse(remaining)?;
+        let (cancel, remaining) = bool::try_parse(remaining)?;
+        let _ = remaining;
+        let result = NotifyEvent { response_type, detail, sequence, context, cancel };
+        Ok(super::Event::XprintNotify(result))
+    }
+}
 
 /// Opcode for the AttributNotify event
 pub const ATTRIBUT_NOTIFY_EVENT: u8 = 1;
@@ -2672,6 +2684,17 @@ impl From<&AttributNotifyEvent> for [u8; 32] {
 impl From<AttributNotifyEvent> for [u8; 32] {
     fn from(input: AttributNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl AttributNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (context, remaining) = Pcontext::try_parse(remaining)?;
+        let _ = remaining;
+        let result = AttributNotifyEvent { response_type, detail, sequence, context };
+        Ok(super::Event::XprintAttributNotify(result))
     }
 }
 

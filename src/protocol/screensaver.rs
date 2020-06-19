@@ -1195,6 +1195,24 @@ impl From<NotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl NotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (kind, remaining) = u8::try_parse(remaining)?;
+        let (forced, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(14..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
+        let kind = kind.try_into()?;
+        let _ = remaining;
+        let result = NotifyEvent { response_type, state, sequence, time, root, window, kind, forced };
+        Ok(super::Event::ScreensaverNotify(result))
+    }
+}
 
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {

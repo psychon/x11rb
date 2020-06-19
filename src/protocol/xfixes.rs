@@ -652,6 +652,23 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl SelectionNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (subtype, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (owner, remaining) = xproto::Window::try_parse(remaining)?;
+        let (selection, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (selection_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let subtype = subtype.try_into()?;
+        let _ = remaining;
+        let result = SelectionNotifyEvent { response_type, subtype, sequence, window, owner, selection, timestamp, selection_timestamp };
+        Ok(super::Event::XfixesSelectionNotify(result))
+    }
+}
 
 /// Opcode for the SelectSelectionInput request
 pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
@@ -936,6 +953,22 @@ impl From<&CursorNotifyEvent> for [u8; 32] {
 impl From<CursorNotifyEvent> for [u8; 32] {
     fn from(input: CursorNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl CursorNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (subtype, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (cursor_serial, remaining) = u32::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (name, remaining) = xproto::Atom::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let subtype = subtype.try_into()?;
+        let _ = remaining;
+        let result = CursorNotifyEvent { response_type, subtype, sequence, window, cursor_serial, timestamp, name };
+        Ok(super::Event::XfixesCursorNotify(result))
     }
 }
 

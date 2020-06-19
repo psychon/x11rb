@@ -2651,6 +2651,23 @@ impl From<CounterNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl CounterNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (kind, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (counter, remaining) = Counter::try_parse(remaining)?;
+        let (wait_value, remaining) = Int64::try_parse(remaining)?;
+        let (counter_value, remaining) = Int64::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (count, remaining) = u16::try_parse(remaining)?;
+        let (destroyed, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = CounterNotifyEvent { response_type, kind, sequence, counter, wait_value, counter_value, timestamp, count, destroyed };
+        Ok(super::Event::SyncCounterNotify(result))
+    }
+}
 
 /// Opcode for the AlarmNotify event
 pub const ALARM_NOTIFY_EVENT: u8 = 1;
@@ -2740,6 +2757,23 @@ impl From<&AlarmNotifyEvent> for [u8; 32] {
 impl From<AlarmNotifyEvent> for [u8; 32] {
     fn from(input: AlarmNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl AlarmNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (kind, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (alarm, remaining) = Alarm::try_parse(remaining)?;
+        let (counter_value, remaining) = Int64::try_parse(remaining)?;
+        let (alarm_value, remaining) = Int64::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
+        let _ = remaining;
+        let result = AlarmNotifyEvent { response_type, kind, sequence, alarm, counter_value, alarm_value, timestamp, state };
+        Ok(super::Event::SyncAlarmNotify(result))
     }
 }
 

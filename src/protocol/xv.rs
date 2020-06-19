@@ -1487,6 +1487,20 @@ impl From<VideoNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl VideoNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (reason, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (port, remaining) = Port::try_parse(remaining)?;
+        let reason = reason.try_into()?;
+        let _ = remaining;
+        let result = VideoNotifyEvent { response_type, reason, sequence, time, drawable, port };
+        Ok(super::Event::XvVideoNotify(result))
+    }
+}
 
 /// Opcode for the PortNotify event
 pub const PORT_NOTIFY_EVENT: u8 = 1;
@@ -1570,6 +1584,20 @@ impl From<&PortNotifyEvent> for [u8; 32] {
 impl From<PortNotifyEvent> for [u8; 32] {
     fn from(input: PortNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl PortNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (port, remaining) = Port::try_parse(remaining)?;
+        let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (value, remaining) = i32::try_parse(remaining)?;
+        let _ = remaining;
+        let result = PortNotifyEvent { response_type, sequence, time, port, attribute, value };
+        Ok(super::Event::XvPortNotify(result))
     }
 }
 

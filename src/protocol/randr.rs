@@ -5828,6 +5828,27 @@ impl From<ScreenChangeNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl ScreenChangeNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (rotation, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (request_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (size_id, remaining) = u16::try_parse(remaining)?;
+        let (subpixel_order, remaining) = u16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (mwidth, remaining) = u16::try_parse(remaining)?;
+        let (mheight, remaining) = u16::try_parse(remaining)?;
+        let subpixel_order = subpixel_order.try_into()?;
+        let _ = remaining;
+        let result = ScreenChangeNotifyEvent { response_type, rotation, sequence, timestamp, config_timestamp, root, request_window, size_id, subpixel_order, width, height, mwidth, mheight };
+        Ok(super::Event::RandrScreenChangeNotify(result))
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -7178,6 +7199,18 @@ impl From<&NotifyEvent> for [u8; 32] {
 impl From<NotifyEvent> for [u8; 32] {
     fn from(input: NotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl NotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (sub_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (u, remaining) = NotifyData::try_parse(remaining)?;
+        let sub_code = sub_code.try_into()?;
+        let _ = remaining;
+        let result = NotifyEvent { response_type, sub_code, sequence, u };
+        Ok(super::Event::RandrNotify(result))
     }
 }
 

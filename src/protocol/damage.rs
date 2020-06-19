@@ -661,6 +661,22 @@ impl From<NotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl NotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (level, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (damage, remaining) = Damage::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (area, remaining) = xproto::Rectangle::try_parse(remaining)?;
+        let (geometry, remaining) = xproto::Rectangle::try_parse(remaining)?;
+        let level = level.try_into()?;
+        let _ = remaining;
+        let result = NotifyEvent { response_type, level, sequence, drawable, damage, timestamp, area, geometry };
+        Ok(super::Event::DamageNotify(result))
+    }
+}
 
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {

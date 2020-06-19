@@ -1193,6 +1193,20 @@ impl From<GenericEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl GenericEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (evtype, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
+        let _ = remaining;
+        let result = GenericEvent { response_type, extension, sequence, length, evtype, event };
+        Ok(super::Event::PresentGeneric(result))
+    }
+}
 
 /// Opcode for the ConfigureNotify event
 pub const CONFIGURE_NOTIFY_EVENT: u16 = 0;
@@ -1248,6 +1262,30 @@ impl TryFrom<&[u8]> for ConfigureNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl ConfigureNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (off_x, remaining) = i16::try_parse(remaining)?;
+        let (off_y, remaining) = i16::try_parse(remaining)?;
+        let (pixmap_width, remaining) = u16::try_parse(remaining)?;
+        let (pixmap_height, remaining) = u16::try_parse(remaining)?;
+        let (pixmap_flags, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        let result = ConfigureNotifyEvent { response_type, extension, sequence, length, event_type, event, window, x, y, width, height, off_x, off_y, pixmap_width, pixmap_height, pixmap_flags };
+        Ok(super::Event::PresentConfigureNotify(result))
+    }
+}
 
 /// Opcode for the CompleteNotify event
 pub const COMPLETE_NOTIFY_EVENT: u16 = 1;
@@ -1296,6 +1334,27 @@ impl TryFrom<&[u8]> for CompleteNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl CompleteNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (kind, remaining) = u8::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
+        let (ust, remaining) = u64::try_parse(remaining)?;
+        let (msc, remaining) = u64::try_parse(remaining)?;
+        let kind = kind.try_into()?;
+        let mode = mode.try_into()?;
+        let _ = remaining;
+        let result = CompleteNotifyEvent { response_type, extension, sequence, length, event_type, kind, mode, event, window, serial, ust, msc };
+        Ok(super::Event::PresentCompleteNotify(result))
+    }
+}
 
 /// Opcode for the IdleNotify event
 pub const IDLE_NOTIFY_EVENT: u16 = 2;
@@ -1337,6 +1396,24 @@ impl TryFrom<&[u8]> for IdleNotifyEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl IdleNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let (idle_fence, remaining) = sync::Fence::try_parse(remaining)?;
+        let _ = remaining;
+        let result = IdleNotifyEvent { response_type, extension, sequence, length, event_type, event, window, serial, pixmap, idle_fence };
+        Ok(super::Event::PresentIdleNotify(result))
     }
 }
 
@@ -1418,6 +1495,47 @@ impl TryFrom<&[u8]> for RedirectNotifyEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl RedirectNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (update_window, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
+        let (event_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
+        let (valid_region, remaining) = xfixes::Region::try_parse(remaining)?;
+        let (update_region, remaining) = xfixes::Region::try_parse(remaining)?;
+        let (valid_rect, remaining) = xproto::Rectangle::try_parse(remaining)?;
+        let (update_rect, remaining) = xproto::Rectangle::try_parse(remaining)?;
+        let (x_off, remaining) = i16::try_parse(remaining)?;
+        let (y_off, remaining) = i16::try_parse(remaining)?;
+        let (target_crtc, remaining) = randr::Crtc::try_parse(remaining)?;
+        let (wait_fence, remaining) = sync::Fence::try_parse(remaining)?;
+        let (idle_fence, remaining) = sync::Fence::try_parse(remaining)?;
+        let (options, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (target_msc, remaining) = u64::try_parse(remaining)?;
+        let (divisor, remaining) = u64::try_parse(remaining)?;
+        let (remainder, remaining) = u64::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut notifies = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Notify::try_parse(remaining)?;
+            remaining = new_remaining;
+            notifies.push(v);
+        }
+        let _ = remaining;
+        let result = RedirectNotifyEvent { response_type, extension, sequence, length, event_type, update_window, event, event_window, window, pixmap, serial, valid_region, update_region, valid_rect, update_rect, x_off, y_off, target_crtc, wait_fence, idle_fence, options, target_msc, divisor, remainder, notifies };
+        Ok(super::Event::PresentRedirectNotify(result))
     }
 }
 

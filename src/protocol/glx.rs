@@ -297,6 +297,27 @@ impl From<PbufferClobberEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl PbufferClobberEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (draw_type, remaining) = u16::try_parse(remaining)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (b_mask, remaining) = u32::try_parse(remaining)?;
+        let (aux_buffer, remaining) = u16::try_parse(remaining)?;
+        let (x, remaining) = u16::try_parse(remaining)?;
+        let (y, remaining) = u16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (count, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = PbufferClobberEvent { response_type, sequence, event_type, draw_type, drawable, b_mask, aux_buffer, x, y, width, height, count };
+        Ok(super::Event::GlxPbufferClobber(result))
+    }
+}
 
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 1;
@@ -389,6 +410,24 @@ impl From<&BufferSwapCompleteEvent> for [u8; 32] {
 impl From<BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: BufferSwapCompleteEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl BufferSwapCompleteEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (ust_hi, remaining) = u32::try_parse(remaining)?;
+        let (ust_lo, remaining) = u32::try_parse(remaining)?;
+        let (msc_hi, remaining) = u32::try_parse(remaining)?;
+        let (msc_lo, remaining) = u32::try_parse(remaining)?;
+        let (sbc, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        let result = BufferSwapCompleteEvent { response_type, sequence, event_type, drawable, ust_hi, ust_lo, msc_hi, msc_lo, sbc };
+        Ok(super::Event::GlxBufferSwapComplete(result))
     }
 }
 
