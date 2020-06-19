@@ -43,6 +43,11 @@ pub struct Range8 {
 }
 impl TryParse for Range8 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (first, remaining) = u8::try_parse(remaining)?;
         let (last, remaining) = u8::try_parse(remaining)?;
         let result = Range8 { first, last };
@@ -79,6 +84,11 @@ pub struct Range16 {
 }
 impl TryParse for Range16 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (first, remaining) = u16::try_parse(remaining)?;
         let (last, remaining) = u16::try_parse(remaining)?;
         let result = Range16 { first, last };
@@ -117,6 +127,11 @@ pub struct ExtRange {
 }
 impl TryParse for ExtRange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 6 {
+            return Err(ParseError::ParseError);
+        }
         let (major, remaining) = Range8::try_parse(remaining)?;
         let (minor, remaining) = Range16::try_parse(remaining)?;
         let result = ExtRange { major, minor };
@@ -164,6 +179,11 @@ pub struct Range {
 }
 impl TryParse for Range {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 24 {
+            return Err(ParseError::ParseError);
+        }
         let (core_requests, remaining) = Range8::try_parse(remaining)?;
         let (core_replies, remaining) = Range8::try_parse(remaining)?;
         let (ext_requests, remaining) = ExtRange::try_parse(remaining)?;
@@ -378,6 +398,11 @@ pub struct ClientInfo {
 }
 impl TryParse for ClientInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (client_resource, remaining) = ClientSpec::try_parse(remaining)?;
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
         let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
@@ -433,6 +458,11 @@ pub struct BadContextError {
 impl TryParse for BadContextError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -576,6 +606,11 @@ pub struct QueryVersionReply {
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -962,6 +997,11 @@ pub struct GetContextReply {
 impl TryParse for GetContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1076,6 +1116,11 @@ pub struct EnableContextReply {
 impl TryParse for EnableContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (category, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

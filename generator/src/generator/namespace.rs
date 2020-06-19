@@ -2560,6 +2560,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if parse_size_constraint != StructSizeConstraint::None {
                         outln!(out, "let remaining = initial_value;");
                     }
+                    // Get the minimum size that this struct can have
+                    let mut minimum_size: u32 = fields.iter()
+                        .map(|field| field.size().unwrap_or(0))
+                        .sum();
+                    if let Some(size) = match parse_size_constraint {
+                        StructSizeConstraint::None => None,
+                        StructSizeConstraint::Fixed(size) => Some(size),
+                        StructSizeConstraint::EmbeddedLength { minimum } => Some(minimum),
+                    } {
+                        minimum_size = minimum_size.max(size.into());
+                    }
+                    outln!(out, "// Check that enough bytes for the minimum possible size is available.");
+                    outln!(out, "// This allows the compiler to optimise away some length checks.");
+                    outln!(out, "if remaining.len() < {} {{", minimum_size);
+                    outln!(out.indent(), "return Err(ParseError::ParseError);");
+                    outln!(out, "}}");
                     Self::emit_let_value_for_dynamic_align(fields, out);
                     for field in fields.iter() {
                         self.emit_field_parse(
