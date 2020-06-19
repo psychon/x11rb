@@ -42,6 +42,11 @@ pub struct Client {
 }
 impl TryParse for Client {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (resource_base, remaining) = u32::try_parse(remaining)?;
         let (resource_mask, remaining) = u32::try_parse(remaining)?;
         let result = Client { resource_base, resource_mask };
@@ -84,6 +89,11 @@ pub struct Type {
 }
 impl TryParse for Type {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (resource_type, remaining) = xproto::Atom::try_parse(remaining)?;
         let (count, remaining) = u32::try_parse(remaining)?;
         let result = Type { resource_type, count };
@@ -189,6 +199,11 @@ pub struct ClientIdSpec {
 }
 impl TryParse for ClientIdSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (client, remaining) = u32::try_parse(remaining)?;
         let (mask, remaining) = u32::try_parse(remaining)?;
         let result = ClientIdSpec { client, mask };
@@ -231,6 +246,11 @@ pub struct ClientIdValue {
 }
 impl TryParse for ClientIdValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 12 {
+            return Err(ParseError::ParseError);
+        }
         let (spec, remaining) = ClientIdSpec::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.checked_div(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
@@ -283,6 +303,11 @@ pub struct ResourceIdSpec {
 }
 impl TryParse for ResourceIdSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (resource, remaining) = u32::try_parse(remaining)?;
         let (type_, remaining) = u32::try_parse(remaining)?;
         let result = ResourceIdSpec { resource, type_ };
@@ -327,6 +352,11 @@ pub struct ResourceSizeSpec {
 }
 impl TryParse for ResourceSizeSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 20 {
+            return Err(ParseError::ParseError);
+        }
         let (spec, remaining) = ResourceIdSpec::try_parse(remaining)?;
         let (bytes, remaining) = u32::try_parse(remaining)?;
         let (ref_count, remaining) = u32::try_parse(remaining)?;
@@ -387,6 +417,11 @@ pub struct ResourceSizeValue {
 }
 impl TryParse for ResourceSizeValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 24 {
+            return Err(ParseError::ParseError);
+        }
         let (size, remaining) = ResourceSizeSpec::try_parse(remaining)?;
         let (num_cross_references, remaining) = u32::try_parse(remaining)?;
         let (cross_references, remaining) = crate::x11_utils::parse_list::<ResourceSizeSpec>(remaining, num_cross_references.try_into().or(Err(ParseError::ParseError))?)?;
@@ -505,6 +540,11 @@ pub struct QueryVersionReply {
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -585,6 +625,11 @@ pub struct QueryClientsReply {
 impl TryParse for QueryClientsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -692,6 +737,11 @@ pub struct QueryClientResourcesReply {
 impl TryParse for QueryClientResourcesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -800,6 +850,11 @@ pub struct QueryClientPixmapBytesReply {
 impl TryParse for QueryClientPixmapBytesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -903,6 +958,11 @@ pub struct QueryClientIdsReply {
 impl TryParse for QueryClientIdsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1032,6 +1092,11 @@ pub struct QueryResourceBytesReply {
 impl TryParse for QueryResourceBytesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

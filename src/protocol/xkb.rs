@@ -2052,6 +2052,11 @@ pub struct IndicatorMap {
 }
 impl TryParse for IndicatorMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 12 {
+            return Err(ParseError::ParseError);
+        }
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (which_groups, remaining) = u8::try_parse(remaining)?;
         let (groups, remaining) = u8::try_parse(remaining)?;
@@ -2492,6 +2497,11 @@ pub struct ModDef {
 }
 impl TryParse for ModDef {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (mask, remaining) = u8::try_parse(remaining)?;
         let (real_mods, remaining) = u8::try_parse(remaining)?;
         let (vmods, remaining) = u16::try_parse(remaining)?;
@@ -2532,6 +2542,11 @@ pub struct KeyName {
 }
 impl TryParse for KeyName {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
         let name = <[u8; 4]>::try_from(name).unwrap();
         let result = KeyName { name };
@@ -2567,6 +2582,11 @@ pub struct KeyAlias {
 }
 impl TryParse for KeyAlias {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (real, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
         let real = <[u8; 4]>::try_from(real).unwrap();
         let (alias, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
@@ -2609,6 +2629,11 @@ pub struct CountedString16 {
 }
 impl TryParse for CountedString16 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (length, remaining) = u16::try_parse(remaining)?;
         let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
         let string = string.to_vec();
@@ -2665,6 +2690,11 @@ pub struct KTMapEntry {
 }
 impl TryParse for KTMapEntry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (active, remaining) = bool::try_parse(remaining)?;
         let (mods_mask, remaining) = u8::try_parse(remaining)?;
         let (level, remaining) = u8::try_parse(remaining)?;
@@ -2723,6 +2753,11 @@ pub struct KeyType {
 }
 impl TryParse for KeyType {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (mods_mask, remaining) = u8::try_parse(remaining)?;
         let (mods_mods, remaining) = u8::try_parse(remaining)?;
         let (mods_vmods, remaining) = u16::try_parse(remaining)?;
@@ -2789,6 +2824,11 @@ pub struct KeySymMap {
 }
 impl TryParse for KeySymMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (kt_index, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
         let kt_index = <[u8; 4]>::try_from(kt_index).unwrap();
         let (group_info, remaining) = u8::try_parse(remaining)?;
@@ -2845,6 +2885,11 @@ pub struct CommonBehavior {
 }
 impl TryParse for CommonBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (data, remaining) = u8::try_parse(remaining)?;
         let result = CommonBehavior { type_, data };
@@ -2880,6 +2925,11 @@ pub struct DefaultBehavior {
 }
 impl TryParse for DefaultBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = DefaultBehavior { type_ };
@@ -2917,6 +2967,11 @@ pub struct RadioGroupBehavior {
 }
 impl TryParse for RadioGroupBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (group, remaining) = u8::try_parse(remaining)?;
         let result = RadioGroupBehavior { type_, group };
@@ -2953,6 +3008,11 @@ pub struct OverlayBehavior {
 }
 impl TryParse for OverlayBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (key, remaining) = xproto::Keycode::try_parse(remaining)?;
         let result = OverlayBehavior { type_, key };
@@ -3224,6 +3284,11 @@ pub struct SetBehavior {
 }
 impl TryParse for SetBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (behavior, remaining) = Behavior::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -3264,6 +3329,11 @@ pub struct SetExplicit {
 }
 impl TryParse for SetExplicit {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (explicit, remaining) = u8::try_parse(remaining)?;
         let result = SetExplicit { keycode, explicit };
@@ -3300,6 +3370,11 @@ pub struct KeyModMap {
 }
 impl TryParse for KeyModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (mods, remaining) = u8::try_parse(remaining)?;
         let result = KeyModMap { keycode, mods };
@@ -3336,6 +3411,11 @@ pub struct KeyVModMap {
 }
 impl TryParse for KeyVModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (vmods, remaining) = u16::try_parse(remaining)?;
@@ -3377,6 +3457,11 @@ pub struct KTSetMapEntry {
 }
 impl TryParse for KTSetMapEntry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (level, remaining) = u8::try_parse(remaining)?;
         let (real_mods, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
@@ -3423,6 +3508,11 @@ pub struct SetKeyType {
 }
 impl TryParse for SetKeyType {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (mask, remaining) = u8::try_parse(remaining)?;
         let (real_mods, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
@@ -3489,6 +3579,11 @@ pub struct Outline {
 }
 impl TryParse for Outline {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (n_points, remaining) = u8::try_parse(remaining)?;
         let (corner_radius, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -3544,6 +3639,11 @@ pub struct Shape {
 }
 impl TryParse for Shape {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
         let (n_outlines, remaining) = u8::try_parse(remaining)?;
         let (primary_ndx, remaining) = u8::try_parse(remaining)?;
@@ -3603,6 +3703,11 @@ pub struct Key {
 }
 impl TryParse for Key {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
         let name = <[u8; 4]>::try_from(name).unwrap();
         let (gap, remaining) = i16::try_parse(remaining)?;
@@ -3651,6 +3756,11 @@ pub struct OverlayKey {
 }
 impl TryParse for OverlayKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (over, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
         let over = <[u8; 4]>::try_from(over).unwrap();
         let (under, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
@@ -3693,6 +3803,11 @@ pub struct OverlayRow {
 }
 impl TryParse for OverlayRow {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (row_under, remaining) = u8::try_parse(remaining)?;
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -3746,6 +3861,11 @@ pub struct Overlay {
 }
 impl TryParse for Overlay {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
         let (n_rows, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -3801,6 +3921,11 @@ pub struct Row {
 }
 impl TryParse for Row {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (top, remaining) = i16::try_parse(remaining)?;
         let (left, remaining) = i16::try_parse(remaining)?;
         let (n_keys, remaining) = u8::try_parse(remaining)?;
@@ -3929,6 +4054,11 @@ pub struct Listing {
 }
 impl TryParse for Listing {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let value = remaining;
         let (flags, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u16::try_parse(remaining)?;
@@ -3993,6 +4123,11 @@ pub struct DeviceLedInfo {
 }
 impl TryParse for DeviceLedInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 20 {
+            return Err(ParseError::ParseError);
+        }
         let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
         let (led_id, remaining) = IDSpec::try_parse(remaining)?;
         let (names_present, remaining) = u32::try_parse(remaining)?;
@@ -4112,6 +4247,11 @@ pub struct KeyboardError {
 impl TryParse for KeyboardError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4354,6 +4494,11 @@ pub struct SANoAction {
 }
 impl TryParse for SANoAction {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
         let type_ = type_.try_into()?;
@@ -4400,6 +4545,11 @@ pub struct SASetMods {
 }
 impl TryParse for SASetMods {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (mask, remaining) = u8::try_parse(remaining)?;
@@ -4462,6 +4612,11 @@ pub struct SASetGroup {
 }
 impl TryParse for SASetGroup {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (group, remaining) = i8::try_parse(remaining)?;
@@ -4584,6 +4739,11 @@ pub struct SAMovePtr {
 }
 impl TryParse for SAMovePtr {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (x_high, remaining) = i8::try_parse(remaining)?;
@@ -4643,6 +4803,11 @@ pub struct SAPtrBtn {
 }
 impl TryParse for SAPtrBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
@@ -4695,6 +4860,11 @@ pub struct SALockPtrBtn {
 }
 impl TryParse for SALockPtrBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -4810,6 +4980,11 @@ pub struct SASetPtrDflt {
 }
 impl TryParse for SASetPtrDflt {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (affect, remaining) = u8::try_parse(remaining)?;
@@ -4982,6 +5157,11 @@ pub struct SAIsoLock {
 }
 impl TryParse for SAIsoLock {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (mask, remaining) = u8::try_parse(remaining)?;
@@ -5042,6 +5222,11 @@ pub struct SATerminate {
 }
 impl TryParse for SATerminate {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
         let type_ = type_.try_into()?;
@@ -5148,6 +5333,11 @@ pub struct SASwitchScreen {
 }
 impl TryParse for SASwitchScreen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (new_screen, remaining) = i8::try_parse(remaining)?;
@@ -5350,6 +5540,11 @@ pub struct SASetControls {
 }
 impl TryParse for SASetControls {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (bool_ctrls_high, remaining) = u8::try_parse(remaining)?;
@@ -5469,6 +5664,11 @@ pub struct SAActionMessage {
 }
 impl TryParse for SAActionMessage {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 6)?;
@@ -5521,6 +5721,11 @@ pub struct SARedirectKey {
 }
 impl TryParse for SARedirectKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (newkey, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (mask, remaining) = u8::try_parse(remaining)?;
@@ -5585,6 +5790,11 @@ pub struct SADeviceBtn {
 }
 impl TryParse for SADeviceBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
@@ -5704,6 +5914,11 @@ pub struct SALockDeviceBtn {
 }
 impl TryParse for SALockDeviceBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -5837,6 +6052,11 @@ pub struct SADeviceValuator {
 }
 impl TryParse for SADeviceValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (device, remaining) = u8::try_parse(remaining)?;
         let (val1what, remaining) = u8::try_parse(remaining)?;
@@ -5900,6 +6120,11 @@ pub struct SIAction {
 }
 impl TryParse for SIAction {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, 7)?;
         let data = <[u8; 7]>::try_from(data).unwrap();
@@ -5947,6 +6172,11 @@ pub struct SymInterpret {
 }
 impl TryParse for SymInterpret {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 16 {
+            return Err(ParseError::ParseError);
+        }
         let (sym, remaining) = xproto::Keysym::try_parse(remaining)?;
         let (mods, remaining) = u8::try_parse(remaining)?;
         let (match_, remaining) = u8::try_parse(remaining)?;
@@ -6390,6 +6620,11 @@ pub struct UseExtensionReply {
 impl TryParse for UseExtensionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (supported, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6421,6 +6656,11 @@ pub struct SelectEventsAuxBitcase1 {
 }
 impl TryParse for SelectEventsAuxBitcase1 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_new_keyboard, remaining) = u16::try_parse(remaining)?;
         let (new_keyboard_details, remaining) = u16::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase1 { affect_new_keyboard, new_keyboard_details };
@@ -6458,6 +6698,11 @@ pub struct SelectEventsAuxBitcase2 {
 }
 impl TryParse for SelectEventsAuxBitcase2 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_state, remaining) = u16::try_parse(remaining)?;
         let (state_details, remaining) = u16::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase2 { affect_state, state_details };
@@ -6495,6 +6740,11 @@ pub struct SelectEventsAuxBitcase3 {
 }
 impl TryParse for SelectEventsAuxBitcase3 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
         let (ctrl_details, remaining) = u32::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase3 { affect_ctrls, ctrl_details };
@@ -6536,6 +6786,11 @@ pub struct SelectEventsAuxBitcase4 {
 }
 impl TryParse for SelectEventsAuxBitcase4 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_indicator_state, remaining) = u32::try_parse(remaining)?;
         let (indicator_state_details, remaining) = u32::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase4 { affect_indicator_state, indicator_state_details };
@@ -6577,6 +6832,11 @@ pub struct SelectEventsAuxBitcase5 {
 }
 impl TryParse for SelectEventsAuxBitcase5 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_indicator_map, remaining) = u32::try_parse(remaining)?;
         let (indicator_map_details, remaining) = u32::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase5 { affect_indicator_map, indicator_map_details };
@@ -6618,6 +6878,11 @@ pub struct SelectEventsAuxBitcase6 {
 }
 impl TryParse for SelectEventsAuxBitcase6 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_names, remaining) = u16::try_parse(remaining)?;
         let (names_details, remaining) = u16::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase6 { affect_names, names_details };
@@ -6655,6 +6920,11 @@ pub struct SelectEventsAuxBitcase7 {
 }
 impl TryParse for SelectEventsAuxBitcase7 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_compat, remaining) = u8::try_parse(remaining)?;
         let (compat_details, remaining) = u8::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase7 { affect_compat, compat_details };
@@ -6690,6 +6960,11 @@ pub struct SelectEventsAuxBitcase8 {
 }
 impl TryParse for SelectEventsAuxBitcase8 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_bell, remaining) = u8::try_parse(remaining)?;
         let (bell_details, remaining) = u8::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase8 { affect_bell, bell_details };
@@ -6725,6 +7000,11 @@ pub struct SelectEventsAuxBitcase9 {
 }
 impl TryParse for SelectEventsAuxBitcase9 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 2 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_msg_details, remaining) = u8::try_parse(remaining)?;
         let (msg_details, remaining) = u8::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase9 { affect_msg_details, msg_details };
@@ -6760,6 +7040,11 @@ pub struct SelectEventsAuxBitcase10 {
 }
 impl TryParse for SelectEventsAuxBitcase10 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_access_x, remaining) = u16::try_parse(remaining)?;
         let (access_x_details, remaining) = u16::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase10 { affect_access_x, access_x_details };
@@ -6797,6 +7082,11 @@ pub struct SelectEventsAuxBitcase11 {
 }
 impl TryParse for SelectEventsAuxBitcase11 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 4 {
+            return Err(ParseError::ParseError);
+        }
         let (affect_ext_dev, remaining) = u16::try_parse(remaining)?;
         let (extdev_details, remaining) = u16::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase11 { affect_ext_dev, extdev_details };
@@ -7398,6 +7688,11 @@ pub struct GetStateReply {
 impl TryParse for GetStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7643,6 +7938,11 @@ pub struct GetControlsReply {
 impl TryParse for GetControlsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 92 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8204,6 +8504,11 @@ pub struct GetMapMapBitcase3 {
 }
 impl GetMapMapBitcase3 {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 0 {
+            return Err(ParseError::ParseError);
+        }
         let value = remaining;
         let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ParseError))?)?;
         let acts_rtrn_count = acts_rtrn_count.to_vec();
@@ -8350,6 +8655,11 @@ pub struct GetMapReply {
 impl TryParse for GetMapReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 40 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8406,6 +8716,11 @@ pub struct SetMapAuxBitcase3 {
 }
 impl SetMapAuxBitcase3 {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 0 {
+            return Err(ParseError::ParseError);
+        }
         let value = remaining;
         let (actions_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ParseError))?)?;
         let actions_count = actions_count.to_vec();
@@ -8995,6 +9310,11 @@ pub struct GetCompatMapReply {
 impl TryParse for GetCompatMapReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9230,6 +9550,11 @@ pub struct GetIndicatorStateReply {
 impl TryParse for GetIndicatorStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9335,6 +9660,11 @@ pub struct GetIndicatorMapReply {
 impl TryParse for GetIndicatorMapReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9556,6 +9886,11 @@ pub struct GetNamedIndicatorReply {
 impl TryParse for GetNamedIndicatorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9842,6 +10177,11 @@ pub struct GetNamesValueListBitcase8 {
 }
 impl GetNamesValueListBitcase8 {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 0 {
+            return Err(ParseError::ParseError);
+        }
         let value = remaining;
         let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
         let n_levels_per_type = n_levels_per_type.to_vec();
@@ -10013,6 +10353,11 @@ pub struct GetNamesReply {
 impl TryParse for GetNamesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10055,6 +10400,11 @@ pub struct SetNamesAuxBitcase8 {
 }
 impl SetNamesAuxBitcase8 {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 0 {
+            return Err(ParseError::ParseError);
+        }
         let value = remaining;
         let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
         let n_levels_per_type = n_levels_per_type.to_vec();
@@ -10707,6 +11057,11 @@ pub struct PerClientFlagsReply {
 impl TryParse for PerClientFlagsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10813,6 +11168,11 @@ pub struct ListComponentsReply {
 impl TryParse for ListComponentsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11018,6 +11378,11 @@ pub struct GetKbdByNameRepliesTypesMapBitcase3 {
 }
 impl GetKbdByNameRepliesTypesMapBitcase3 {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 0 {
+            return Err(ParseError::ParseError);
+        }
         let value = remaining;
         let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ParseError))?)?;
         let acts_rtrn_count = acts_rtrn_count.to_vec();
@@ -11164,6 +11529,11 @@ pub struct GetKbdByNameRepliesTypes {
 }
 impl TryParse for GetKbdByNameRepliesTypes {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 40 {
+            return Err(ParseError::ParseError);
+        }
         let (getmap_type, remaining) = u8::try_parse(remaining)?;
         let (type_device_id, remaining) = u8::try_parse(remaining)?;
         let (getmap_sequence, remaining) = u16::try_parse(remaining)?;
@@ -11220,6 +11590,11 @@ pub struct GetKbdByNameRepliesCompatMap {
 }
 impl TryParse for GetKbdByNameRepliesCompatMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (compatmap_type, remaining) = u8::try_parse(remaining)?;
         let (compat_device_id, remaining) = u8::try_parse(remaining)?;
         let (compatmap_sequence, remaining) = u16::try_parse(remaining)?;
@@ -11269,6 +11644,11 @@ pub struct GetKbdByNameRepliesIndicatorMaps {
 }
 impl TryParse for GetKbdByNameRepliesIndicatorMaps {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (indicatormap_type, remaining) = u8::try_parse(remaining)?;
         let (indicator_device_id, remaining) = u8::try_parse(remaining)?;
         let (indicatormap_sequence, remaining) = u16::try_parse(remaining)?;
@@ -11310,6 +11690,11 @@ pub struct GetKbdByNameRepliesKeyNamesValueListBitcase8 {
 }
 impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 0 {
+            return Err(ParseError::ParseError);
+        }
         let value = remaining;
         let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
         let n_levels_per_type = n_levels_per_type.to_vec();
@@ -11481,6 +11866,11 @@ pub struct GetKbdByNameRepliesKeyNames {
 }
 impl TryParse for GetKbdByNameRepliesKeyNames {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (keyname_type, remaining) = u8::try_parse(remaining)?;
         let (key_device_id, remaining) = u8::try_parse(remaining)?;
         let (keyname_sequence, remaining) = u16::try_parse(remaining)?;
@@ -11531,6 +11921,11 @@ pub struct GetKbdByNameRepliesGeometry {
 }
 impl TryParse for GetKbdByNameRepliesGeometry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (geometry_type, remaining) = u8::try_parse(remaining)?;
         let (geometry_device_id, remaining) = u8::try_parse(remaining)?;
         let (geometry_sequence, remaining) = u16::try_parse(remaining)?;
@@ -11627,6 +12022,11 @@ pub struct GetKbdByNameReply {
 impl TryParse for GetKbdByNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11782,6 +12182,11 @@ pub struct GetDeviceInfoReply {
 impl TryParse for GetDeviceInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 34 {
+            return Err(ParseError::ParseError);
+        }
         let value = remaining;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -12096,6 +12501,11 @@ pub struct SetDebuggingFlagsReply {
 impl TryParse for SetDebuggingFlagsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12143,6 +12553,11 @@ pub struct NewKeyboardNotifyEvent {
 impl TryParse for NewKeyboardNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12259,6 +12674,11 @@ pub struct MapNotifyEvent {
 impl TryParse for MapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12397,6 +12817,11 @@ pub struct StateNotifyEvent {
 impl TryParse for StateNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12525,6 +12950,11 @@ pub struct ControlsNotifyEvent {
 impl TryParse for ControlsNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12625,6 +13055,11 @@ pub struct IndicatorStateNotifyEvent {
 impl TryParse for IndicatorStateNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12713,6 +13148,11 @@ pub struct IndicatorMapNotifyEvent {
 impl TryParse for IndicatorMapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12811,6 +13251,11 @@ pub struct NamesNotifyEvent {
 impl TryParse for NamesNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12922,6 +13367,11 @@ pub struct CompatMapNotifyEvent {
 impl TryParse for CompatMapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13019,6 +13469,11 @@ pub struct BellNotifyEvent {
 impl TryParse for BellNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13123,6 +13578,11 @@ pub struct ActionMessageEvent {
 impl TryParse for ActionMessageEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13221,6 +13681,11 @@ pub struct AccessXNotifyEvent {
 impl TryParse for AccessXNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13319,6 +13784,11 @@ pub struct ExtensionDeviceNotifyEvent {
 impl TryParse for ExtensionDeviceNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

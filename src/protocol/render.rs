@@ -761,6 +761,11 @@ pub struct PictFormatError {
 impl TryParse for PictFormatError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -838,6 +843,11 @@ pub struct PictureError {
 impl TryParse for PictureError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -915,6 +925,11 @@ pub struct PictOpError {
 impl TryParse for PictOpError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -992,6 +1007,11 @@ pub struct GlyphSetError {
 impl TryParse for GlyphSetError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1069,6 +1089,11 @@ pub struct GlyphError {
 impl TryParse for GlyphError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1149,6 +1174,11 @@ pub struct Directformat {
 }
 impl TryParse for Directformat {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 16 {
+            return Err(ParseError::ParseError);
+        }
         let (red_shift, remaining) = u16::try_parse(remaining)?;
         let (red_mask, remaining) = u16::try_parse(remaining)?;
         let (green_shift, remaining) = u16::try_parse(remaining)?;
@@ -1220,6 +1250,11 @@ pub struct Pictforminfo {
 }
 impl TryParse for Pictforminfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 28 {
+            return Err(ParseError::ParseError);
+        }
         let (id, remaining) = Pictformat::try_parse(remaining)?;
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
@@ -1294,6 +1329,11 @@ pub struct Pictvisual {
 }
 impl TryParse for Pictvisual {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (format, remaining) = Pictformat::try_parse(remaining)?;
         let result = Pictvisual { visual, format };
@@ -1336,6 +1376,11 @@ pub struct Pictdepth {
 }
 impl TryParse for Pictdepth {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (depth, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (num_visuals, remaining) = u16::try_parse(remaining)?;
@@ -1391,6 +1436,11 @@ pub struct Pictscreen {
 }
 impl TryParse for Pictscreen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (num_depths, remaining) = u32::try_parse(remaining)?;
         let (fallback, remaining) = Pictformat::try_parse(remaining)?;
         let (depths, remaining) = crate::x11_utils::parse_list::<Pictdepth>(remaining, num_depths.try_into().or(Err(ParseError::ParseError))?)?;
@@ -1445,6 +1495,11 @@ pub struct Indexvalue {
 }
 impl TryParse for Indexvalue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 12 {
+            return Err(ParseError::ParseError);
+        }
         let (pixel, remaining) = u32::try_parse(remaining)?;
         let (red, remaining) = u16::try_parse(remaining)?;
         let (green, remaining) = u16::try_parse(remaining)?;
@@ -1502,6 +1557,11 @@ pub struct Color {
 }
 impl TryParse for Color {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (red, remaining) = u16::try_parse(remaining)?;
         let (green, remaining) = u16::try_parse(remaining)?;
         let (blue, remaining) = u16::try_parse(remaining)?;
@@ -1550,6 +1610,11 @@ pub struct Pointfix {
 }
 impl TryParse for Pointfix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (x, remaining) = Fixed::try_parse(remaining)?;
         let (y, remaining) = Fixed::try_parse(remaining)?;
         let result = Pointfix { x, y };
@@ -1592,6 +1657,11 @@ pub struct Linefix {
 }
 impl TryParse for Linefix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 16 {
+            return Err(ParseError::ParseError);
+        }
         let (p1, remaining) = Pointfix::try_parse(remaining)?;
         let (p2, remaining) = Pointfix::try_parse(remaining)?;
         let result = Linefix { p1, p2 };
@@ -1643,6 +1713,11 @@ pub struct Triangle {
 }
 impl TryParse for Triangle {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 24 {
+            return Err(ParseError::ParseError);
+        }
         let (p1, remaining) = Pointfix::try_parse(remaining)?;
         let (p2, remaining) = Pointfix::try_parse(remaining)?;
         let (p3, remaining) = Pointfix::try_parse(remaining)?;
@@ -1706,6 +1781,11 @@ pub struct Trapezoid {
 }
 impl TryParse for Trapezoid {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 40 {
+            return Err(ParseError::ParseError);
+        }
         let (top, remaining) = Fixed::try_parse(remaining)?;
         let (bottom, remaining) = Fixed::try_parse(remaining)?;
         let (left, remaining) = Linefix::try_parse(remaining)?;
@@ -1790,6 +1870,11 @@ pub struct Glyphinfo {
 }
 impl TryParse for Glyphinfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 12 {
+            return Err(ParseError::ParseError);
+        }
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
@@ -1919,6 +2004,11 @@ pub struct QueryVersionReply {
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2004,6 +2094,11 @@ pub struct QueryPictFormatsReply {
 impl TryParse for QueryPictFormatsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2151,6 +2246,11 @@ pub struct QueryPictIndexValuesReply {
 impl TryParse for QueryPictIndexValuesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4757,6 +4857,11 @@ pub struct Transform {
 }
 impl TryParse for Transform {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 36 {
+            return Err(ParseError::ParseError);
+        }
         let (matrix11, remaining) = Fixed::try_parse(remaining)?;
         let (matrix12, remaining) = Fixed::try_parse(remaining)?;
         let (matrix13, remaining) = Fixed::try_parse(remaining)?;
@@ -5010,6 +5115,11 @@ pub struct QueryFiltersReply {
 impl TryParse for QueryFiltersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 32 {
+            return Err(ParseError::ParseError);
+        }
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5172,6 +5282,11 @@ pub struct Animcursorelt {
 }
 impl TryParse for Animcursorelt {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 8 {
+            return Err(ParseError::ParseError);
+        }
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
         let (delay, remaining) = u32::try_parse(remaining)?;
         let result = Animcursorelt { cursor, delay };
@@ -5296,6 +5411,11 @@ pub struct Spanfix {
 }
 impl TryParse for Spanfix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 12 {
+            return Err(ParseError::ParseError);
+        }
         let (l, remaining) = Fixed::try_parse(remaining)?;
         let (r, remaining) = Fixed::try_parse(remaining)?;
         let (y, remaining) = Fixed::try_parse(remaining)?;
@@ -5345,6 +5465,11 @@ pub struct Trap {
 }
 impl TryParse for Trap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Check that enough bytes for the minimum possible size is available.
+        // This allows the compiler to optimise away some length checks.
+        if remaining.len() < 24 {
+            return Err(ParseError::ParseError);
+        }
         let (top, remaining) = Spanfix::try_parse(remaining)?;
         let (bot, remaining) = Spanfix::try_parse(remaining)?;
         let result = Trap { top, bot };
