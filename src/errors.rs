@@ -6,7 +6,9 @@ use crate::protocol::Error;
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseError {
-    /// Error while parsing some data
+    /// Not enough data was provided.
+    InsufficientData,
+    /// Another error while parsing some data.
     ParseError,
 }
 
@@ -14,7 +16,10 @@ impl std::error::Error for ParseError {}
 
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Error while parsing (not enough data?)")
+        match self {
+            ParseError::InsufficientData => write!(f, "Insufficient data was provided"),
+            ParseError::ParseError => write!(f, "Error while parsing"),
+        }
     }
 }
 
@@ -89,6 +94,7 @@ impl std::fmt::Display for ConnectError {
 impl From<ParseError> for ConnectError {
     fn from(err: ParseError) -> Self {
         match err {
+            ParseError::InsufficientData => ConnectError::ParseError,
             ParseError::ParseError => ConnectError::ParseError,
         }
     }
@@ -153,6 +159,7 @@ impl std::fmt::Display for ConnectionError {
 impl From<ParseError> for ConnectionError {
     fn from(err: ParseError) -> Self {
         match err {
+            ParseError::InsufficientData => ConnectionError::ParseError,
             ParseError::ParseError => ConnectionError::ParseError,
         }
     }

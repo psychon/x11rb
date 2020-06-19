@@ -1913,7 +1913,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     union_size,
                     union_size,
                 );
-                outln!(out.indent(), ".ok_or(ParseError::ParseError)?");
+                outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?");
                 outln!(out.indent(), ".try_into()");
                 outln!(out.indent(), ".unwrap();");
                 outln!(out, "let result = {}(inner);", rust_name);
@@ -2077,7 +2077,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             );
             out.indented(|out| {
                 outln!(out, "let inner: [u8; 32] = value.get(..32)");
-                outln!(out.indent(), ".ok_or(ParseError::ParseError)?");
+                outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?");
                 outln!(out.indent(), ".try_into()");
                 outln!(out.indent(), ".unwrap();");
                 outln!(out, "let result = {}(inner);", rust_name);
@@ -2600,7 +2600,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         StructSizeConstraint::Fixed(fixed_size) => {
                             outln!(out, "let _ = remaining;");
                             outln!(out, "let remaining = initial_value.get({}..)", fixed_size);
-                            outln!(out.indent(), ".ok_or(ParseError::ParseError)?;");
+                            outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
                         }
                         StructSizeConstraint::EmbeddedLength { minimum } => {
                             outln!(out, "let _ = remaining;");
@@ -2609,7 +2609,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 "let remaining = initial_value.get({} + length as usize * 4..)",
                                 minimum
                             );
-                            outln!(out.indent(), ".ok_or(ParseError::ParseError)?;");
+                            outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
                         }
                     }
                     outln!(out, "Ok((result, remaining))");
@@ -3859,7 +3859,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 };
                 outln!(
                     out,
-                    "let remaining = {from}.get({pad}..).ok_or(ParseError::ParseError)?;",
+                    "let remaining = {from}.get({pad}..).ok_or(ParseError::InsufficientData)?;",
                     from = from,
                     pad = pad_size,
                 );

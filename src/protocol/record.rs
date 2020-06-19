@@ -443,7 +443,7 @@ impl TryParse for BadContextError {
         let result = BadContextError { error_code, sequence, invalid_record };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -577,7 +577,7 @@ impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
@@ -588,7 +588,7 @@ impl TryParse for QueryVersionReply {
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -664,7 +664,7 @@ impl<'input> CreateContextRequest<'input> {
         }
         let (context, remaining) = Context::try_parse(value)?;
         let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (num_client_specs, remaining) = u32::try_parse(remaining)?;
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
         let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
@@ -770,7 +770,7 @@ impl<'input> RegisterClientsRequest<'input> {
         }
         let (context, remaining) = Context::try_parse(value)?;
         let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (num_client_specs, remaining) = u32::try_parse(remaining)?;
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
         let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
@@ -967,9 +967,9 @@ impl TryParse for GetContextReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (num_intercepted_clients, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (intercepted_clients, remaining) = crate::x11_utils::parse_list::<ClientInfo>(remaining, num_intercepted_clients.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -977,7 +977,7 @@ impl TryParse for GetContextReply {
         let result = GetContextReply { enabled, sequence, length, element_header, intercepted_clients };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1082,11 +1082,11 @@ impl TryParse for EnableContextReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
         let (client_swapped, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (xid_base, remaining) = u32::try_parse(remaining)?;
         let (server_time, remaining) = u32::try_parse(remaining)?;
         let (rec_sequence_num, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
         if response_type != 1 {
@@ -1095,7 +1095,7 @@ impl TryParse for EnableContextReply {
         let result = EnableContextReply { category, sequence, element_header, client_swapped, xid_base, server_time, rec_sequence_num, data };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

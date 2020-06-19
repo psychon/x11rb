@@ -7844,7 +7844,7 @@ impl Event {
                 if event_code != ext_info.first_event {
                     return Ok(Self::Unknown(event.to_vec()));
                 }
-                match *event.get(1).ok_or(ParseError::ParseError)? {
+                match *event.get(1).ok_or(ParseError::InsufficientData)? {
                     xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(event.try_into()?)),
                     xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(event.try_into()?)),
                     xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(event.try_into()?)),
@@ -8364,19 +8364,19 @@ impl Event {
 fn response_type(raw_bytes: &[u8]) -> Result<u8, ParseError> {
     raw_bytes.get(0)
         .map(|x| x & 0x7f)
-        .ok_or(ParseError::ParseError)
+        .ok_or(ParseError::InsufficientData)
 }
 
 /// Get the error code out of the raw bytes of an X11 error.
 fn error_code(raw_bytes: &[u8]) -> Result<u8, ParseError> {
     raw_bytes.get(1)
         .copied()
-        .ok_or(ParseError::ParseError)
+        .ok_or(ParseError::InsufficientData)
 }
 
 /// Get the sequence number out of an X11 packet.
 fn sequence_number(raw_bytes: &[u8]) -> Result<u16, ParseError> {
     raw_bytes.get(2..4)
         .map(|b| u16::from_ne_bytes(b.try_into().unwrap()))
-        .ok_or(ParseError::ParseError)
+        .ok_or(ParseError::InsufficientData)
 }

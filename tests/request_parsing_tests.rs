@@ -35,7 +35,7 @@ fn test_bad_request_header_length() {
     let body = &[];
     assert_eq!(
         CreateWindowRequest::try_parse_request(header, body),
-        Err(ParseError::ParseError)
+        Err(ParseError::InsufficientData)
     );
 }
 

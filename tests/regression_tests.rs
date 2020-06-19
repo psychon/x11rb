@@ -299,7 +299,7 @@ fn test_client_message_data_parse() {
     let short_array = [0, 0, 0];
     let err = ClientMessageData::try_parse(&short_array);
     assert!(err.is_err());
-    assert_eq!(err.unwrap_err(), ParseError::ParseError);
+    assert_eq!(err.unwrap_err(), ParseError::InsufficientData);
 }
 
 #[test]

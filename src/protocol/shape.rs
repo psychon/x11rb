@@ -203,12 +203,12 @@ impl TryParse for NotifyEvent {
         let (extents_height, remaining) = u16::try_parse(remaining)?;
         let (server_time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (shaped, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
         let shape_kind = shape_kind.try_into()?;
         let result = NotifyEvent { response_type, shape_kind, sequence, affected_window, extents_x, extents_y, extents_width, extents_height, server_time, shaped };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -331,7 +331,7 @@ impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
@@ -342,7 +342,7 @@ impl TryParse for QueryVersionReply {
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -419,7 +419,7 @@ impl<'input> RectanglesRequest<'input> {
         let destination_kind = destination_kind.try_into()?;
         let (ordering, remaining) = u8::try_parse(remaining)?;
         let ordering = ordering.try_into()?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
@@ -539,7 +539,7 @@ impl MaskRequest {
         let operation = operation.try_into()?;
         let (destination_kind, remaining) = Kind::try_parse(remaining)?;
         let destination_kind = destination_kind.try_into()?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
@@ -644,7 +644,7 @@ impl CombineRequest {
         let destination_kind = destination_kind.try_into()?;
         let (source_kind, remaining) = Kind::try_parse(remaining)?;
         let source_kind = source_kind.try_into()?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
@@ -735,7 +735,7 @@ impl OffsetRequest {
         }
         let (destination_kind, remaining) = Kind::try_parse(value)?;
         let destination_kind = destination_kind.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
@@ -844,12 +844,12 @@ impl TryParse for QueryExtentsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (bounding_shaped, remaining) = bool::try_parse(remaining)?;
         let (clip_shaped, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (bounding_shape_extents_x, remaining) = i16::try_parse(remaining)?;
         let (bounding_shape_extents_y, remaining) = i16::try_parse(remaining)?;
         let (bounding_shape_extents_width, remaining) = u16::try_parse(remaining)?;
@@ -864,7 +864,7 @@ impl TryParse for QueryExtentsReply {
         let result = QueryExtentsReply { sequence, length, bounding_shaped, clip_shaped, bounding_shape_extents_x, bounding_shape_extents_y, bounding_shape_extents_width, bounding_shape_extents_height, clip_shape_extents_x, clip_shape_extents_y, clip_shape_extents_width, clip_shape_extents_height };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -920,7 +920,7 @@ impl SelectInputRequest {
         }
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(SelectInputRequest {
             destination_window,
@@ -1022,7 +1022,7 @@ impl TryParse for InputSelectedReply {
         let result = InputSelectedReply { enabled, sequence, length };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1079,7 +1079,7 @@ impl GetRectanglesRequest {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (source_kind, remaining) = Kind::try_parse(remaining)?;
         let source_kind = source_kind.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetRectanglesRequest {
             window,
@@ -1118,7 +1118,7 @@ impl TryParse for GetRectanglesReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (rectangles_len, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, rectangles_len.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -1127,7 +1127,7 @@ impl TryParse for GetRectanglesReply {
         let result = GetRectanglesReply { ordering, sequence, length, rectangles };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

@@ -580,7 +580,7 @@ impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
@@ -591,7 +591,7 @@ impl TryParse for QueryVersionReply {
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -745,7 +745,7 @@ impl<'input> PixmapRequest<'input> {
         let (wait_fence, remaining) = sync::Fence::try_parse(remaining)?;
         let (idle_fence, remaining) = sync::Fence::try_parse(remaining)?;
         let (options, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (target_msc, remaining) = u64::try_parse(remaining)?;
         let (divisor, remaining) = u64::try_parse(remaining)?;
         let (remainder, remaining) = u64::try_parse(remaining)?;
@@ -905,7 +905,7 @@ impl NotifyMSCRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (serial, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (target_msc, remaining) = u64::try_parse(remaining)?;
         let (divisor, remaining) = u64::try_parse(remaining)?;
         let (remainder, remaining) = u64::try_parse(remaining)?;
@@ -1088,7 +1088,7 @@ impl TryParse for QueryCapabilitiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (capabilities, remaining) = u32::try_parse(remaining)?;
@@ -1098,7 +1098,7 @@ impl TryParse for QueryCapabilitiesReply {
         let result = QueryCapabilitiesReply { sequence, length, capabilities };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1128,12 +1128,12 @@ impl TryParse for GenericEvent {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (evtype, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (event, remaining) = Event::try_parse(remaining)?;
         let result = GenericEvent { response_type, extension, sequence, length, evtype, event };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1223,7 +1223,7 @@ impl TryParse for ConfigureNotifyEvent {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (event, remaining) = Event::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
@@ -1238,7 +1238,7 @@ impl TryParse for ConfigureNotifyEvent {
         let result = ConfigureNotifyEvent { response_type, extension, sequence, length, event_type, event, window, x, y, width, height, off_x, off_y, pixmap_width, pixmap_height, pixmap_flags };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1286,7 +1286,7 @@ impl TryParse for CompleteNotifyEvent {
         let result = CompleteNotifyEvent { response_type, extension, sequence, length, event_type, kind, mode, event, window, serial, ust, msc };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1320,7 +1320,7 @@ impl TryParse for IdleNotifyEvent {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (event, remaining) = Event::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (serial, remaining) = u32::try_parse(remaining)?;
@@ -1329,7 +1329,7 @@ impl TryParse for IdleNotifyEvent {
         let result = IdleNotifyEvent { response_type, extension, sequence, length, event_type, event, window, serial, pixmap, idle_fence };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1379,7 +1379,7 @@ impl TryParse for RedirectNotifyEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (update_window, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (event, remaining) = Event::try_parse(remaining)?;
         let (event_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -1395,7 +1395,7 @@ impl TryParse for RedirectNotifyEvent {
         let (wait_fence, remaining) = sync::Fence::try_parse(remaining)?;
         let (idle_fence, remaining) = sync::Fence::try_parse(remaining)?;
         let (options, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (target_msc, remaining) = u64::try_parse(remaining)?;
         let (divisor, remaining) = u64::try_parse(remaining)?;
         let (remainder, remaining) = u64::try_parse(remaining)?;
@@ -1410,7 +1410,7 @@ impl TryParse for RedirectNotifyEvent {
         let result = RedirectNotifyEvent { response_type, extension, sequence, length, event_type, update_window, event, event_window, window, pixmap, serial, valid_region, update_region, valid_rect, update_rect, x_off, y_off, target_crtc, wait_fence, idle_fence, options, target_msc, divisor, remainder, notifies };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

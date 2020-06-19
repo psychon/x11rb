@@ -114,7 +114,7 @@ impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
@@ -125,7 +125,7 @@ impl TryParse for QueryVersionReply {
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -220,14 +220,14 @@ impl TryParseFd for OpenReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let device_fd = fds.remove(0);
-        let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = OpenReply { nfd, sequence, length, device_fd };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -443,14 +443,14 @@ impl TryParseFd for BufferFromPixmapReply {
         let (bpp, remaining) = u8::try_parse(remaining)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let pixmap_fd = fds.remove(0);
-        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = BufferFromPixmapReply { nfd, sequence, length, size, width, height, stride, depth, bpp, pixmap_fd };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -515,7 +515,7 @@ impl FenceFromFDRequest {
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (fence, remaining) = u32::try_parse(remaining)?;
         let (initially_triggered, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let fence_fd = fds.remove(0);
         let _ = remaining;
@@ -631,14 +631,14 @@ impl TryParseFd for FDFromFenceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let fence_fd = fds.remove(0);
-        let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = FDFromFenceReply { nfd, sequence, length, fence_fd };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -698,7 +698,7 @@ impl GetSupportedModifiersRequest {
         let (window, remaining) = u32::try_parse(value)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (bpp, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetSupportedModifiersRequest {
             window,
@@ -735,12 +735,12 @@ impl TryParse for GetSupportedModifiersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_window_modifiers, remaining) = u32::try_parse(remaining)?;
         let (num_screen_modifiers, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (window_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
         let (screen_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
@@ -749,7 +749,7 @@ impl TryParse for GetSupportedModifiersReply {
         let result = GetSupportedModifiersReply { sequence, length, window_modifiers, screen_modifiers };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -915,7 +915,7 @@ impl PixmapFromBuffersRequest {
         let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (num_buffers, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (stride0, remaining) = u32::try_parse(remaining)?;
@@ -928,7 +928,7 @@ impl PixmapFromBuffersRequest {
         let (offset3, remaining) = u32::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (bpp, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (modifier, remaining) = u64::try_parse(remaining)?;
         let fds_len = usize::try_from(num_buffers).or(Err(ParseError::ParseError))?;
         if fds.len() < fds_len { return Err(ParseError::ParseError) }
@@ -1066,11 +1066,11 @@ impl TryParseFd for BuffersFromPixmapReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (modifier, remaining) = u64::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (bpp, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(6..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(6..).ok_or(ParseError::InsufficientData)?;
         let (strides, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_into().or(Err(ParseError::ParseError))?)?;
         let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_into().or(Err(ParseError::ParseError))?)?;
         let fds_len = usize::try_from(nfd).or(Err(ParseError::ParseError))?;
@@ -1083,7 +1083,7 @@ impl TryParseFd for BuffersFromPixmapReply {
         let result = BuffersFromPixmapReply { sequence, length, width, height, modifier, depth, bpp, strides, offsets, buffers };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
