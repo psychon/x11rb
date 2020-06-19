@@ -1,6 +1,6 @@
 # Examples of the generated code
 
-This crate uses some python code to generate rust code for the X11 protocol. You
+This crate uses a code generator to generate rust code for the X11 protocol. You
 might be curious what the generated code looks like. This document is there to
 answer this question.
 
@@ -10,7 +10,7 @@ followed by the Rust code that is generated for it.
 
 The following code is generated at the beginning of a module:
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L1-L21
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L1-L30
 
 ## XID types
 
@@ -22,7 +22,7 @@ XIDs simply are numbers. They uniquely identify, for example, a window.
 
 Since all XIDs are 32 bit numbers, the generated code is a type alias:
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L59
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L68
 
 ## Structs
 
@@ -41,10 +41,10 @@ that is implemented on structs. This trait is used by the generated code, for
 example to parse a list of `Point`s. For easier use, additionally `TryFrom` is
 implemented for some inputs.
 
-We must also be able to send structs to the server. This is handled by the
-`to_ne_bytes()` method. 'ne' stands for 'native endian'.
+We must also be able to send structs to the server. This is handled through the
+`Serialize` trait that produces data in the native endian.
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L91-L127
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L100-L136
 
 ### Variable length structs
 
@@ -62,7 +62,7 @@ contain lists of other structs. This example demonstrates this.
 </struct>
 ```
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L444-L482
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L453-L506
 
 ## Enumerations
 
@@ -75,10 +75,10 @@ https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/s
   <item name="Always">    <value>2</value></item>
 </enum>
 ```
-Depending on the largest value, appropriate `From` implementations are
-generated.
+Depending on the largest value, appropriate `From` and `TryFrom` implementations
+are generated.
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L587-L650
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L611-L674
 
 ### Bitmask enumerations
 
@@ -96,7 +96,7 @@ implementations of `BitOr` and `BitOrAssign`.
 </enum>
 ```
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L6794-L6871
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L8031-L8108
 
 ## Unions
 
@@ -116,7 +116,7 @@ ClientMessageData.
 The union contains an array of unparsed data. The data is then parsed as the
 requested type in the accessor functions.
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L4586-L4739
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L4829-L4982
 
 ## Events
 
@@ -138,7 +138,7 @@ https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/s
 </event>
 ```
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L1262-L1385
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L1401-L1528
 
 ## Errors
 
@@ -151,7 +151,7 @@ https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/s
 </error>
 ```
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L5025-L5104
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L5280-L5365
 
 ## Requests
 
@@ -172,11 +172,11 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 ```
 This code is generated in the module:
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L17666-L17684
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L26513-L26561
 
 And this code is in the extension trait:
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L19762-L19765
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L28639-L28642
 
 ### Request with a reply
 
@@ -190,11 +190,11 @@ https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/s
 ```
 This code is generated in the module:
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L10420-L10438
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L14106-L14154
 
 And this code is in the extension trait:
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L18959-L18962
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L27836-L27839
 
 ### Requests with a switch
 
@@ -243,12 +243,12 @@ generated.
 ```
 The switch is represented via a helper struct:
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L6944-L7055
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L8181-L8356
 
 This code is generated for the actual request:
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L7057-L7138
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L8410-L8540
 
 And this code is in the extension trait:
 
-https://github.com/psychon/x11rb/blob/e9dab004d422297dea2262905e28baca27730efc/src/protocol/xproto.rs#L18001-L18004
+https://github.com/psychon/x11rb/blob/a6bd1453fd8e931394b9b1f2185fad48b7cca5fe/src/protocol/xproto.rs#L26878-L26881
