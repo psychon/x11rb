@@ -2009,6 +2009,25 @@ impl From<BufferSwapCompleteEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl BufferSwapCompleteEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (ust_hi, remaining) = u32::try_parse(remaining)?;
+        let (ust_lo, remaining) = u32::try_parse(remaining)?;
+        let (msc_hi, remaining) = u32::try_parse(remaining)?;
+        let (msc_lo, remaining) = u32::try_parse(remaining)?;
+        let (sbc, remaining) = u32::try_parse(remaining)?;
+        let event_type = event_type.try_into()?;
+        let _ = remaining;
+        let result = BufferSwapCompleteEvent { response_type, sequence, event_type, drawable, ust_hi, ust_lo, msc_hi, msc_lo, sbc };
+        Ok(super::Event::Dri2BufferSwapComplete(result))
+    }
+}
 
 /// Opcode for the InvalidateBuffers event
 pub const INVALIDATE_BUFFERS_EVENT: u8 = 1;
@@ -2083,6 +2102,17 @@ impl From<&InvalidateBuffersEvent> for [u8; 32] {
 impl From<InvalidateBuffersEvent> for [u8; 32] {
     fn from(input: InvalidateBuffersEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl InvalidateBuffersEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let _ = remaining;
+        let result = InvalidateBuffersEvent { response_type, sequence, drawable };
+        Ok(super::Event::Dri2InvalidateBuffers(result))
     }
 }
 

@@ -1662,6 +1662,59 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             self.emit_event_or_error_serialize(&full_name, &*fields, &deducible_fields, out);
         }
 
+        let deducible_fields = gather_deducible_fields(&*fields);
+        outln!(out, "impl {name} {{", name=full_name);
+        out.indented(|out| {
+            outln!(out, "pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {{");
+            out.indented(|out| {
+                Self::emit_let_value_for_dynamic_align(&fields, out);
+                for field in fields.iter() {
+                    self.emit_field_parse(
+                        field,
+                        "",
+                        "remaining",
+                        FieldContainer::Other,
+                        out,
+                    );
+                }
+                for field in fields.iter() {
+                    if !field
+                        .name()
+                        .map(|field_name| deducible_fields.contains_key(field_name))
+                        .unwrap_or(false)
+                    {
+                        self.emit_field_post_parse(field, out);
+                    }
+                }
+                let field_names = fields
+                    .iter()
+                    .filter_map(|field| {
+                        if self.field_is_visible(field, &deducible_fields) {
+                            Some(to_rust_variable_name(field.name().unwrap()))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<_>>();
+                outln!(out, "let _ = remaining;");
+                outln!(
+                    out,
+                    "let result = {}Event {{ {} }};",
+                    name,
+                    field_names.join(", ")
+                );
+                let prefix = get_ns_name_prefix(&self.ns);
+                outln!(
+                    out,
+                    "Ok(super::Event::{}{}(result))",
+                    prefix,
+                    name
+                );
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+
         outln!(out, "");
     }
 

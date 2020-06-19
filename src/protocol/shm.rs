@@ -125,6 +125,22 @@ impl From<CompletionEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl CompletionEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        let (minor_event, remaining) = u16::try_parse(remaining)?;
+        let (major_event, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (shmseg, remaining) = Seg::try_parse(remaining)?;
+        let (offset, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        let result = CompletionEvent { response_type, sequence, drawable, minor_event, major_event, shmseg, offset };
+        Ok(super::Event::ShmCompletion(result))
+    }
+}
 
 /// Opcode for the BadSeg error
 pub const BAD_SEG_ERROR: u8 = 0;

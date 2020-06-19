@@ -271,6 +271,25 @@ impl From<NotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl NotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (shape_kind, remaining) = Kind::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (affected_window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (extents_x, remaining) = i16::try_parse(remaining)?;
+        let (extents_y, remaining) = i16::try_parse(remaining)?;
+        let (extents_width, remaining) = u16::try_parse(remaining)?;
+        let (extents_height, remaining) = u16::try_parse(remaining)?;
+        let (server_time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (shaped, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let shape_kind = shape_kind.try_into()?;
+        let _ = remaining;
+        let result = NotifyEvent { response_type, shape_kind, sequence, affected_window, extents_x, extents_y, extents_width, extents_height, server_time, shaped };
+        Ok(super::Event::ShapeNotify(result))
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;

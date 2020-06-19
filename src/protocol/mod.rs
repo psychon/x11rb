@@ -7702,39 +7702,39 @@ impl Event {
         // Check if this is a core protocol event or error, or from the generic event extension
         match event_code {
             0 => return Ok(Self::Error(Error::parse(event, ext_info_provider)?)),
-            xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(event.try_into()?)),
-            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(event.try_into()?)),
-            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(event.try_into()?)),
-            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::CirculateRequest(event.try_into()?)),
-            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::ClientMessage(event.try_into()?)),
-            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::ColormapNotify(event.try_into()?)),
-            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::ConfigureNotify(event.try_into()?)),
-            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::ConfigureRequest(event.try_into()?)),
-            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::CreateNotify(event.try_into()?)),
-            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::DestroyNotify(event.try_into()?)),
-            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::EnterNotify(event.try_into()?)),
-            xproto::EXPOSE_EVENT => return Ok(Self::Expose(event.try_into()?)),
-            xproto::FOCUS_IN_EVENT => return Ok(Self::FocusIn(event.try_into()?)),
-            xproto::FOCUS_OUT_EVENT => return Ok(Self::FocusOut(event.try_into()?)),
-            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::GraphicsExposure(event.try_into()?)),
-            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::GravityNotify(event.try_into()?)),
-            xproto::KEY_PRESS_EVENT => return Ok(Self::KeyPress(event.try_into()?)),
-            xproto::KEY_RELEASE_EVENT => return Ok(Self::KeyRelease(event.try_into()?)),
-            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::KeymapNotify(event.try_into()?)),
-            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::LeaveNotify(event.try_into()?)),
-            xproto::MAP_NOTIFY_EVENT => return Ok(Self::MapNotify(event.try_into()?)),
-            xproto::MAP_REQUEST_EVENT => return Ok(Self::MapRequest(event.try_into()?)),
-            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::MappingNotify(event.try_into()?)),
-            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::MotionNotify(event.try_into()?)),
-            xproto::NO_EXPOSURE_EVENT => return Ok(Self::NoExposure(event.try_into()?)),
-            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::PropertyNotify(event.try_into()?)),
-            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::ReparentNotify(event.try_into()?)),
-            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::ResizeRequest(event.try_into()?)),
-            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::SelectionClear(event.try_into()?)),
-            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::SelectionNotify(event.try_into()?)),
-            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::SelectionRequest(event.try_into()?)),
-            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::UnmapNotify(event.try_into()?)),
-            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::VisibilityNotify(event.try_into()?)),
+            xproto::BUTTON_PRESS_EVENT => return xproto::ButtonPressEvent::ugly_hack(event),
+            xproto::BUTTON_RELEASE_EVENT => return xproto::ButtonReleaseEvent::ugly_hack(event),
+            xproto::CIRCULATE_NOTIFY_EVENT => return xproto::CirculateNotifyEvent::ugly_hack(event),
+            xproto::CIRCULATE_REQUEST_EVENT => return xproto::CirculateRequestEvent::ugly_hack(event),
+            xproto::CLIENT_MESSAGE_EVENT => return xproto::ClientMessageEvent::ugly_hack(event),
+            xproto::COLORMAP_NOTIFY_EVENT => return xproto::ColormapNotifyEvent::ugly_hack(event),
+            xproto::CONFIGURE_NOTIFY_EVENT => return xproto::ConfigureNotifyEvent::ugly_hack(event),
+            xproto::CONFIGURE_REQUEST_EVENT => return xproto::ConfigureRequestEvent::ugly_hack(event),
+            xproto::CREATE_NOTIFY_EVENT => return xproto::CreateNotifyEvent::ugly_hack(event),
+            xproto::DESTROY_NOTIFY_EVENT => return xproto::DestroyNotifyEvent::ugly_hack(event),
+            xproto::ENTER_NOTIFY_EVENT => return xproto::EnterNotifyEvent::ugly_hack(event),
+            xproto::EXPOSE_EVENT => return xproto::ExposeEvent::ugly_hack(event),
+            xproto::FOCUS_IN_EVENT => return xproto::FocusInEvent::ugly_hack(event),
+            xproto::FOCUS_OUT_EVENT => return xproto::FocusOutEvent::ugly_hack(event),
+            xproto::GRAPHICS_EXPOSURE_EVENT => return xproto::GraphicsExposureEvent::ugly_hack(event),
+            xproto::GRAVITY_NOTIFY_EVENT => return xproto::GravityNotifyEvent::ugly_hack(event),
+            xproto::KEY_PRESS_EVENT => return xproto::KeyPressEvent::ugly_hack(event),
+            xproto::KEY_RELEASE_EVENT => return xproto::KeyReleaseEvent::ugly_hack(event),
+            xproto::KEYMAP_NOTIFY_EVENT => return xproto::KeymapNotifyEvent::ugly_hack(event),
+            xproto::LEAVE_NOTIFY_EVENT => return xproto::LeaveNotifyEvent::ugly_hack(event),
+            xproto::MAP_NOTIFY_EVENT => return xproto::MapNotifyEvent::ugly_hack(event),
+            xproto::MAP_REQUEST_EVENT => return xproto::MapRequestEvent::ugly_hack(event),
+            xproto::MAPPING_NOTIFY_EVENT => return xproto::MappingNotifyEvent::ugly_hack(event),
+            xproto::MOTION_NOTIFY_EVENT => return xproto::MotionNotifyEvent::ugly_hack(event),
+            xproto::NO_EXPOSURE_EVENT => return xproto::NoExposureEvent::ugly_hack(event),
+            xproto::PROPERTY_NOTIFY_EVENT => return xproto::PropertyNotifyEvent::ugly_hack(event),
+            xproto::REPARENT_NOTIFY_EVENT => return xproto::ReparentNotifyEvent::ugly_hack(event),
+            xproto::RESIZE_REQUEST_EVENT => return xproto::ResizeRequestEvent::ugly_hack(event),
+            xproto::SELECTION_CLEAR_EVENT => return xproto::SelectionClearEvent::ugly_hack(event),
+            xproto::SELECTION_NOTIFY_EVENT => return xproto::SelectionNotifyEvent::ugly_hack(event),
+            xproto::SELECTION_REQUEST_EVENT => return xproto::SelectionRequestEvent::ugly_hack(event),
+            xproto::UNMAP_NOTIFY_EVENT => return xproto::UnmapNotifyEvent::ugly_hack(event),
+            xproto::VISIBILITY_NOTIFY_EVENT => return xproto::VisibilityNotifyEvent::ugly_hack(event),
             xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, ext_info_provider),
             _ => {}
         }
@@ -7744,98 +7744,98 @@ impl Event {
             #[cfg(feature = "damage")]
             Some((damage::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    damage::NOTIFY_EVENT => Ok(Self::DamageNotify(event.try_into()?)),
+                    damage::NOTIFY_EVENT => damage::NotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "dri2")]
             Some((dri2::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapComplete(event.try_into()?)),
-                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffers(event.try_into()?)),
+                    dri2::BUFFER_SWAP_COMPLETE_EVENT => dri2::BufferSwapCompleteEvent::ugly_hack(event),
+                    dri2::INVALIDATE_BUFFERS_EVENT => dri2::InvalidateBuffersEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "glx")]
             Some((glx::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapComplete(event.try_into()?)),
-                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobber(event.try_into()?)),
+                    glx::BUFFER_SWAP_COMPLETE_EVENT => glx::BufferSwapCompleteEvent::ugly_hack(event),
+                    glx::PBUFFER_CLOBBER_EVENT => glx::PbufferClobberEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "present")]
             Some((present::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    present::GENERIC_EVENT => Ok(Self::PresentGeneric(event.try_into()?)),
+                    present::GENERIC_EVENT => present::GenericEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "randr")]
             Some((randr::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    randr::NOTIFY_EVENT => Ok(Self::RandrNotify(event.try_into()?)),
-                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotify(event.try_into()?)),
+                    randr::NOTIFY_EVENT => randr::NotifyEvent::ugly_hack(event),
+                    randr::SCREEN_CHANGE_NOTIFY_EVENT => randr::ScreenChangeNotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "screensaver")]
             Some((screensaver::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotify(event.try_into()?)),
+                    screensaver::NOTIFY_EVENT => screensaver::NotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "shape")]
             Some((shape::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotify(event.try_into()?)),
+                    shape::NOTIFY_EVENT => shape::NotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "shm")]
             Some((shm::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletion(event.try_into()?)),
+                    shm::COMPLETION_EVENT => shm::CompletionEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "sync")]
             Some((sync::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotify(event.try_into()?)),
-                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotify(event.try_into()?)),
+                    sync::ALARM_NOTIFY_EVENT => sync::AlarmNotifyEvent::ugly_hack(event),
+                    sync::COUNTER_NOTIFY_EVENT => sync::CounterNotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xfixes")]
             Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotify(event.try_into()?)),
-                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotify(event.try_into()?)),
+                    xfixes::CURSOR_NOTIFY_EVENT => xfixes::CursorNotifyEvent::ugly_hack(event),
+                    xfixes::SELECTION_NOTIFY_EVENT => xfixes::SelectionNotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xinput")]
             Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotify(event.try_into()?)),
-                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPress(event.try_into()?)),
-                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonRelease(event.try_into()?)),
-                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotify(event.try_into()?)),
-                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusIn(event.try_into()?)),
-                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOut(event.try_into()?)),
-                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPress(event.try_into()?)),
-                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyRelease(event.try_into()?)),
-                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotify(event.try_into()?)),
-                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotify(event.try_into()?)),
-                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotify(event.try_into()?)),
-                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotify(event.try_into()?)),
-                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotify(event.try_into()?)),
-                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotify(event.try_into()?)),
-                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuator(event.try_into()?)),
-                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityIn(event.try_into()?)),
-                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOut(event.try_into()?)),
+                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => xinput::ChangeDeviceNotifyEvent::ugly_hack(event),
+                    xinput::DEVICE_BUTTON_PRESS_EVENT => xinput::DeviceButtonPressEvent::ugly_hack(event),
+                    xinput::DEVICE_BUTTON_RELEASE_EVENT => xinput::DeviceButtonReleaseEvent::ugly_hack(event),
+                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => xinput::DeviceButtonStateNotifyEvent::ugly_hack(event),
+                    xinput::DEVICE_FOCUS_IN_EVENT => xinput::DeviceFocusInEvent::ugly_hack(event),
+                    xinput::DEVICE_FOCUS_OUT_EVENT => xinput::DeviceFocusOutEvent::ugly_hack(event),
+                    xinput::DEVICE_KEY_PRESS_EVENT => xinput::DeviceKeyPressEvent::ugly_hack(event),
+                    xinput::DEVICE_KEY_RELEASE_EVENT => xinput::DeviceKeyReleaseEvent::ugly_hack(event),
+                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => xinput::DeviceKeyStateNotifyEvent::ugly_hack(event),
+                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => xinput::DeviceMappingNotifyEvent::ugly_hack(event),
+                    xinput::DEVICE_MOTION_NOTIFY_EVENT => xinput::DeviceMotionNotifyEvent::ugly_hack(event),
+                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => xinput::DevicePresenceNotifyEvent::ugly_hack(event),
+                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => xinput::DevicePropertyNotifyEvent::ugly_hack(event),
+                    xinput::DEVICE_STATE_NOTIFY_EVENT => xinput::DeviceStateNotifyEvent::ugly_hack(event),
+                    xinput::DEVICE_VALUATOR_EVENT => xinput::DeviceValuatorEvent::ugly_hack(event),
+                    xinput::PROXIMITY_IN_EVENT => xinput::ProximityInEvent::ugly_hack(event),
+                    xinput::PROXIMITY_OUT_EVENT => xinput::ProximityOutEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
@@ -7845,34 +7845,34 @@ impl Event {
                     return Ok(Self::Unknown(event.to_vec()));
                 }
                 match *event.get(1).ok_or(ParseError::ParseError)? {
-                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(event.try_into()?)),
-                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(event.try_into()?)),
-                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(event.try_into()?)),
-                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotify(event.try_into()?)),
-                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotify(event.try_into()?)),
-                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotify(event.try_into()?)),
-                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotify(event.try_into()?)),
-                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotify(event.try_into()?)),
-                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotify(event.try_into()?)),
-                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotify(event.try_into()?)),
-                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotify(event.try_into()?)),
-                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotify(event.try_into()?)),
+                    xkb::ACCESS_X_NOTIFY_EVENT => xkb::AccessXNotifyEvent::ugly_hack(event),
+                    xkb::ACTION_MESSAGE_EVENT => xkb::ActionMessageEvent::ugly_hack(event),
+                    xkb::BELL_NOTIFY_EVENT => xkb::BellNotifyEvent::ugly_hack(event),
+                    xkb::COMPAT_MAP_NOTIFY_EVENT => xkb::CompatMapNotifyEvent::ugly_hack(event),
+                    xkb::CONTROLS_NOTIFY_EVENT => xkb::ControlsNotifyEvent::ugly_hack(event),
+                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => xkb::ExtensionDeviceNotifyEvent::ugly_hack(event),
+                    xkb::INDICATOR_MAP_NOTIFY_EVENT => xkb::IndicatorMapNotifyEvent::ugly_hack(event),
+                    xkb::INDICATOR_STATE_NOTIFY_EVENT => xkb::IndicatorStateNotifyEvent::ugly_hack(event),
+                    xkb::MAP_NOTIFY_EVENT => xkb::MapNotifyEvent::ugly_hack(event),
+                    xkb::NAMES_NOTIFY_EVENT => xkb::NamesNotifyEvent::ugly_hack(event),
+                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => xkb::NewKeyboardNotifyEvent::ugly_hack(event),
+                    xkb::STATE_NOTIFY_EVENT => xkb::StateNotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xprint")]
             Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotify(event.try_into()?)),
-                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotify(event.try_into()?)),
+                    xprint::ATTRIBUT_NOTIFY_EVENT => xprint::AttributNotifyEvent::ugly_hack(event),
+                    xprint::NOTIFY_EVENT => xprint::NotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xv")]
             Some((xv::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotify(event.try_into()?)),
-                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotify(event.try_into()?)),
+                    xv::PORT_NOTIFY_EVENT => xv::PortNotifyEvent::ugly_hack(event),
+                    xv::VIDEO_NOTIFY_EVENT => xv::VideoNotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
@@ -7893,42 +7893,42 @@ impl Event {
             #[cfg(feature = "present")]
             Some(present::X11_EXTENSION_NAME) => {
                 match ge_event.event_type {
-                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotify(event.try_into()?)),
-                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotify(event.try_into()?)),
-                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotify(event.try_into()?)),
-                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotify(event.try_into()?)),
+                    present::COMPLETE_NOTIFY_EVENT => present::CompleteNotifyEvent::ugly_hack(event),
+                    present::CONFIGURE_NOTIFY_EVENT => present::ConfigureNotifyEvent::ugly_hack(event),
+                    present::IDLE_NOTIFY_EVENT => present::IdleNotifyEvent::ugly_hack(event),
+                    present::REDIRECT_NOTIFY_EVENT => present::RedirectNotifyEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xinput")]
             Some(xinput::X11_EXTENSION_NAME) => {
                 match ge_event.event_type {
-                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHit(event.try_into()?)),
-                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeave(event.try_into()?)),
-                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPress(event.try_into()?)),
-                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonRelease(event.try_into()?)),
-                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChanged(event.try_into()?)),
-                    xinput::ENTER_EVENT => Ok(Self::XinputEnter(event.try_into()?)),
-                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusIn(event.try_into()?)),
-                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOut(event.try_into()?)),
-                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchy(event.try_into()?)),
-                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPress(event.try_into()?)),
-                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyRelease(event.try_into()?)),
-                    xinput::LEAVE_EVENT => Ok(Self::XinputLeave(event.try_into()?)),
-                    xinput::MOTION_EVENT => Ok(Self::XinputMotion(event.try_into()?)),
-                    xinput::PROPERTY_EVENT => Ok(Self::XinputProperty(event.try_into()?)),
-                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPress(event.try_into()?)),
-                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonRelease(event.try_into()?)),
-                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPress(event.try_into()?)),
-                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyRelease(event.try_into()?)),
-                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotion(event.try_into()?)),
-                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBegin(event.try_into()?)),
-                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEnd(event.try_into()?)),
-                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdate(event.try_into()?)),
-                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBegin(event.try_into()?)),
-                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEnd(event.try_into()?)),
-                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnership(event.try_into()?)),
-                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdate(event.try_into()?)),
+                    xinput::BARRIER_HIT_EVENT => xinput::BarrierHitEvent::ugly_hack(event),
+                    xinput::BARRIER_LEAVE_EVENT => xinput::BarrierLeaveEvent::ugly_hack(event),
+                    xinput::BUTTON_PRESS_EVENT => xinput::ButtonPressEvent::ugly_hack(event),
+                    xinput::BUTTON_RELEASE_EVENT => xinput::ButtonReleaseEvent::ugly_hack(event),
+                    xinput::DEVICE_CHANGED_EVENT => xinput::DeviceChangedEvent::ugly_hack(event),
+                    xinput::ENTER_EVENT => xinput::EnterEvent::ugly_hack(event),
+                    xinput::FOCUS_IN_EVENT => xinput::FocusInEvent::ugly_hack(event),
+                    xinput::FOCUS_OUT_EVENT => xinput::FocusOutEvent::ugly_hack(event),
+                    xinput::HIERARCHY_EVENT => xinput::HierarchyEvent::ugly_hack(event),
+                    xinput::KEY_PRESS_EVENT => xinput::KeyPressEvent::ugly_hack(event),
+                    xinput::KEY_RELEASE_EVENT => xinput::KeyReleaseEvent::ugly_hack(event),
+                    xinput::LEAVE_EVENT => xinput::LeaveEvent::ugly_hack(event),
+                    xinput::MOTION_EVENT => xinput::MotionEvent::ugly_hack(event),
+                    xinput::PROPERTY_EVENT => xinput::PropertyEvent::ugly_hack(event),
+                    xinput::RAW_BUTTON_PRESS_EVENT => xinput::RawButtonPressEvent::ugly_hack(event),
+                    xinput::RAW_BUTTON_RELEASE_EVENT => xinput::RawButtonReleaseEvent::ugly_hack(event),
+                    xinput::RAW_KEY_PRESS_EVENT => xinput::RawKeyPressEvent::ugly_hack(event),
+                    xinput::RAW_KEY_RELEASE_EVENT => xinput::RawKeyReleaseEvent::ugly_hack(event),
+                    xinput::RAW_MOTION_EVENT => xinput::RawMotionEvent::ugly_hack(event),
+                    xinput::RAW_TOUCH_BEGIN_EVENT => xinput::RawTouchBeginEvent::ugly_hack(event),
+                    xinput::RAW_TOUCH_END_EVENT => xinput::RawTouchEndEvent::ugly_hack(event),
+                    xinput::RAW_TOUCH_UPDATE_EVENT => xinput::RawTouchUpdateEvent::ugly_hack(event),
+                    xinput::TOUCH_BEGIN_EVENT => xinput::TouchBeginEvent::ugly_hack(event),
+                    xinput::TOUCH_END_EVENT => xinput::TouchEndEvent::ugly_hack(event),
+                    xinput::TOUCH_OWNERSHIP_EVENT => xinput::TouchOwnershipEvent::ugly_hack(event),
+                    xinput::TOUCH_UPDATE_EVENT => xinput::TouchUpdateEvent::ugly_hack(event),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }

@@ -12226,6 +12226,27 @@ impl From<NewKeyboardNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl NewKeyboardNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (old_device_id, remaining) = u8::try_parse(remaining)?;
+        let (min_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (max_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (old_min_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (old_max_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (request_major, remaining) = u8::try_parse(remaining)?;
+        let (request_minor, remaining) = u8::try_parse(remaining)?;
+        let (changed, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(14..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = NewKeyboardNotifyEvent { response_type, xkb_type, sequence, time, device_id, old_device_id, min_key_code, max_key_code, old_min_key_code, old_max_key_code, request_major, request_minor, changed };
+        Ok(super::Event::XkbNewKeyboardNotify(result))
+    }
+}
 
 /// Opcode for the MapNotify event
 pub const MAP_NOTIFY_EVENT: u8 = 1;
@@ -12362,6 +12383,38 @@ impl From<&MapNotifyEvent> for [u8; 32] {
 impl From<MapNotifyEvent> for [u8; 32] {
     fn from(input: MapNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl MapNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (ptr_btn_actions, remaining) = u8::try_parse(remaining)?;
+        let (changed, remaining) = u16::try_parse(remaining)?;
+        let (min_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (max_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_key_sym, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_syms, remaining) = u8::try_parse(remaining)?;
+        let (first_key_act, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_acts, remaining) = u8::try_parse(remaining)?;
+        let (first_key_behavior, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_behavior, remaining) = u8::try_parse(remaining)?;
+        let (first_key_explicit, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (first_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (first_v_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = MapNotifyEvent { response_type, xkb_type, sequence, time, device_id, ptr_btn_actions, changed, min_key_code, max_key_code, first_type, n_types, first_key_sym, n_key_syms, first_key_act, n_key_acts, first_key_behavior, n_key_behavior, first_key_explicit, n_key_explicit, first_mod_map_key, n_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, virtual_mods };
+        Ok(super::Event::XkbMapNotify(result))
     }
 }
 
@@ -12503,6 +12556,39 @@ impl From<StateNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl StateNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (mods, remaining) = u8::try_parse(remaining)?;
+        let (base_mods, remaining) = u8::try_parse(remaining)?;
+        let (latched_mods, remaining) = u8::try_parse(remaining)?;
+        let (locked_mods, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = u8::try_parse(remaining)?;
+        let (base_group, remaining) = i16::try_parse(remaining)?;
+        let (latched_group, remaining) = i16::try_parse(remaining)?;
+        let (locked_group, remaining) = u8::try_parse(remaining)?;
+        let (compat_state, remaining) = u8::try_parse(remaining)?;
+        let (grab_mods, remaining) = u8::try_parse(remaining)?;
+        let (compat_grab_mods, remaining) = u8::try_parse(remaining)?;
+        let (lookup_mods, remaining) = u8::try_parse(remaining)?;
+        let (compat_loockup_mods, remaining) = u8::try_parse(remaining)?;
+        let (ptr_btn_state, remaining) = u16::try_parse(remaining)?;
+        let (changed, remaining) = u16::try_parse(remaining)?;
+        let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (event_type, remaining) = u8::try_parse(remaining)?;
+        let (request_major, remaining) = u8::try_parse(remaining)?;
+        let (request_minor, remaining) = u8::try_parse(remaining)?;
+        let group = group.try_into()?;
+        let locked_group = locked_group.try_into()?;
+        let _ = remaining;
+        let result = StateNotifyEvent { response_type, xkb_type, sequence, time, device_id, mods, base_mods, latched_mods, locked_mods, group, base_group, latched_group, locked_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_loockup_mods, ptr_btn_state, changed, keycode, event_type, request_major, request_minor };
+        Ok(super::Event::XkbStateNotify(result))
+    }
+}
 
 /// Opcode for the ControlsNotify event
 pub const CONTROLS_NOTIFY_EVENT: u8 = 3;
@@ -12609,6 +12695,28 @@ impl From<ControlsNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl ControlsNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (num_groups, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (changed_controls, remaining) = u32::try_parse(remaining)?;
+        let (enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let (enabled_control_changes, remaining) = u32::try_parse(remaining)?;
+        let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (event_type, remaining) = u8::try_parse(remaining)?;
+        let (request_major, remaining) = u8::try_parse(remaining)?;
+        let (request_minor, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = ControlsNotifyEvent { response_type, xkb_type, sequence, time, device_id, num_groups, changed_controls, enabled_controls, enabled_control_changes, keycode, event_type, request_major, request_minor };
+        Ok(super::Event::XkbControlsNotify(result))
+    }
+}
 
 /// Opcode for the IndicatorStateNotify event
 pub const INDICATOR_STATE_NOTIFY_EVENT: u8 = 4;
@@ -12697,6 +12805,22 @@ impl From<IndicatorStateNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl IndicatorStateNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (state, remaining) = u32::try_parse(remaining)?;
+        let (state_changed, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = IndicatorStateNotifyEvent { response_type, xkb_type, sequence, time, device_id, state, state_changed };
+        Ok(super::Event::XkbIndicatorStateNotify(result))
+    }
+}
 
 /// Opcode for the IndicatorMapNotify event
 pub const INDICATOR_MAP_NOTIFY_EVENT: u8 = 5;
@@ -12783,6 +12907,22 @@ impl From<&IndicatorMapNotifyEvent> for [u8; 32] {
 impl From<IndicatorMapNotifyEvent> for [u8; 32] {
     fn from(input: IndicatorMapNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl IndicatorMapNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (state, remaining) = u32::try_parse(remaining)?;
+        let (map_changed, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = IndicatorMapNotifyEvent { response_type, xkb_type, sequence, time, device_id, state, map_changed };
+        Ok(super::Event::XkbIndicatorMapNotify(result))
     }
 }
 
@@ -12904,6 +13044,33 @@ impl From<NamesNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl NamesNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (changed, remaining) = u16::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_level_name, remaining) = u8::try_parse(remaining)?;
+        let (n_level_names, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (n_radio_groups, remaining) = u8::try_parse(remaining)?;
+        let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
+        let (changed_group_names, remaining) = u8::try_parse(remaining)?;
+        let (changed_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (first_key, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (n_keys, remaining) = u8::try_parse(remaining)?;
+        let (changed_indicators, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = NamesNotifyEvent { response_type, xkb_type, sequence, time, device_id, changed, first_type, n_types, first_level_name, n_level_names, n_radio_groups, n_key_aliases, changed_group_names, changed_virtual_mods, first_key, n_keys, changed_indicators };
+        Ok(super::Event::XkbNamesNotify(result))
+    }
+}
 
 /// Opcode for the CompatMapNotify event
 pub const COMPAT_MAP_NOTIFY_EVENT: u8 = 7;
@@ -12995,6 +13162,23 @@ impl From<&CompatMapNotifyEvent> for [u8; 32] {
 impl From<CompatMapNotifyEvent> for [u8; 32] {
     fn from(input: CompatMapNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl CompatMapNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (changed_groups, remaining) = u8::try_parse(remaining)?;
+        let (first_si, remaining) = u16::try_parse(remaining)?;
+        let (n_si, remaining) = u16::try_parse(remaining)?;
+        let (n_total_si, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = CompatMapNotifyEvent { response_type, xkb_type, sequence, time, device_id, changed_groups, first_si, n_si, n_total_si };
+        Ok(super::Event::XkbCompatMapNotify(result))
     }
 }
 
@@ -13103,6 +13287,28 @@ impl From<BellNotifyEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl BellNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (bell_class, remaining) = u8::try_parse(remaining)?;
+        let (bell_id, remaining) = u8::try_parse(remaining)?;
+        let (percent, remaining) = u8::try_parse(remaining)?;
+        let (pitch, remaining) = u16::try_parse(remaining)?;
+        let (duration, remaining) = u16::try_parse(remaining)?;
+        let (name, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event_only, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
+        let bell_class = bell_class.try_into()?;
+        let _ = remaining;
+        let result = BellNotifyEvent { response_type, xkb_type, sequence, time, device_id, bell_class, bell_id, percent, pitch, duration, name, window, event_only };
+        Ok(super::Event::XkbBellNotify(result))
+    }
+}
 
 /// Opcode for the ActionMessage event
 pub const ACTION_MESSAGE_EVENT: u8 = 9;
@@ -13203,6 +13409,27 @@ impl From<ActionMessageEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl ActionMessageEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (press, remaining) = bool::try_parse(remaining)?;
+        let (key_event_follows, remaining) = bool::try_parse(remaining)?;
+        let (mods, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = u8::try_parse(remaining)?;
+        let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 8)?;
+        let message = <[u8; 8]>::try_from(message).unwrap();
+        let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let group = group.try_into()?;
+        let _ = remaining;
+        let result = ActionMessageEvent { response_type, xkb_type, sequence, time, device_id, keycode, press, key_event_follows, mods, group, message };
+        Ok(super::Event::XkbActionMessage(result))
+    }
+}
 
 /// Opcode for the AccessXNotify event
 pub const ACCESS_X_NOTIFY_EVENT: u8 = 10;
@@ -13294,6 +13521,23 @@ impl From<&AccessXNotifyEvent> for [u8; 32] {
 impl From<AccessXNotifyEvent> for [u8; 32] {
     fn from(input: AccessXNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl AccessXNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
+        let (detailt, remaining) = u16::try_parse(remaining)?;
+        let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
+        let (debounce_delay, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let _ = remaining;
+        let result = AccessXNotifyEvent { response_type, xkb_type, sequence, time, device_id, keycode, detailt, slow_keys_delay, debounce_delay };
+        Ok(super::Event::XkbAccessXNotify(result))
     }
 }
 
@@ -13404,6 +13648,30 @@ impl From<&ExtensionDeviceNotifyEvent> for [u8; 32] {
 impl From<ExtensionDeviceNotifyEvent> for [u8; 32] {
     fn from(input: ExtensionDeviceNotifyEvent) -> Self {
         Self::from(&input)
+    }
+}
+impl ExtensionDeviceNotifyEvent {
+    pub(crate) fn ugly_hack(remaining: &[u8]) -> Result<super::Event, ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (reason, remaining) = u16::try_parse(remaining)?;
+        let (led_class, remaining) = u16::try_parse(remaining)?;
+        let (led_id, remaining) = u16::try_parse(remaining)?;
+        let (leds_defined, remaining) = u32::try_parse(remaining)?;
+        let (led_state, remaining) = u32::try_parse(remaining)?;
+        let (first_button, remaining) = u8::try_parse(remaining)?;
+        let (n_buttons, remaining) = u8::try_parse(remaining)?;
+        let (supported, remaining) = u16::try_parse(remaining)?;
+        let (unsupported, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let led_class = led_class.try_into()?;
+        let _ = remaining;
+        let result = ExtensionDeviceNotifyEvent { response_type, xkb_type, sequence, time, device_id, reason, led_class, led_id, leds_defined, led_state, first_button, n_buttons, supported, unsupported };
+        Ok(super::Event::XkbExtensionDeviceNotify(result))
     }
 }
 
