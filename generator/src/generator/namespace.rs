@@ -3465,7 +3465,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(out, "}}");
                     }
                     outln!(out, "match parse_result {{");
-                    outln!(out.indent(), "None => Err(ParseError::ParseError),");
+                    outln!(out.indent(), "None => Err(ParseError::InvalidValue),");
                     outln!(
                         out.indent(),
                         "Some(result) => Ok((result, outer_remaining)),",
