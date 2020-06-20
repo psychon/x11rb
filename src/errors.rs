@@ -33,9 +33,6 @@ pub enum ParseError {
 
     /// Some file descriptors were expected, but none were received.
     MissingFileDescriptors,
-
-    /// Another error while parsing some data.
-    ParseError,
 }
 
 impl std::error::Error for ParseError {}
@@ -48,7 +45,6 @@ impl std::fmt::Display for ParseError {
             ParseError::InvalidExpression => write!(f, "An expression could not be computed, e.g. due to overflow"),
             ParseError::InvalidValue => write!(f, "A value could not be parsed into an enumeration"),
             ParseError::MissingFileDescriptors => write!(f, "Missing file descriptors"),
-            ParseError::ParseError => write!(f, "Error while parsing"),
         }
     }
 }
