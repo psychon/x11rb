@@ -120,6 +120,7 @@ pub mod xcb_ffi;
 pub mod x11_utils;
 pub mod connection;
 pub mod cookie;
+#[cfg(feature = "cursor")]
 pub mod cursor;
 pub mod errors;
 pub mod extension_manager;

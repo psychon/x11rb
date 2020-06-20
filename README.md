@@ -42,6 +42,9 @@ Additionally, the `allow-unsafe-code` feature enables `XCBConnection`. This uses
 `libxcb` internally and allows sharing the underlying `xcb_connection_t` pointer
 with other code.
 
+The `cursor` feature enables X11 cursor support via the `cursor` module. This
+module helps with loading cursors from the current cursor theme.
+
 
 ## Current state
 
