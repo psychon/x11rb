@@ -4835,7 +4835,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let err_handler = if panic_on_overflow {
                     ".unwrap()"
                 } else {
-                    ".ok_or(ParseError::ParseError)?"
+                    ".ok_or(ParseError::InvalidExpression)?"
                 };
                 match bin_op_expr.operator {
                     xcbdefs::BinaryOperator::Add => format!(
@@ -5048,7 +5048,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 } else {
                     format!(
                         "{}.iter().try_fold(0u32, |acc, x| \
-                         acc.checked_add({}).ok_or(ParseError::ParseError))?",
+                         acc.checked_add({}).ok_or(ParseError::InvalidExpression))?",
                         field_value,
                         self.expr_to_str_impl(
                             &sum_of_expr.operand,

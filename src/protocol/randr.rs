@@ -1083,7 +1083,7 @@ impl TryParse for GetScreenInfoReply {
         let (n_info, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (sizes, remaining) = crate::x11_utils::parse_list::<ScreenSize>(remaining, n_sizes.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (rates, remaining) = crate::x11_utils::parse_list::<RefreshRates>(remaining, u32::from(n_info).checked_sub(u32::from(n_sizes)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (rates, remaining) = crate::x11_utils::parse_list::<RefreshRates>(remaining, u32::from(n_info).checked_sub(u32::from(n_sizes)).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -2315,7 +2315,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         let mode = mode.try_into()?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_units, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_units.checked_mul(u32::from(format)).ok_or(ParseError::ParseError)?.checked_div(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_units.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangeOutputPropertyRequest {
             output,
@@ -2562,7 +2562,7 @@ impl TryParse for GetOutputPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -5460,7 +5460,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangeProviderPropertyRequest {
             provider,
@@ -5705,7 +5705,7 @@ impl TryParse for GetProviderPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);

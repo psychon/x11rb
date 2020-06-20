@@ -931,7 +931,7 @@ impl TryParse for SetupAuthenticate {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::InsufficientData)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let reason = reason.to_vec();
         let result = SetupAuthenticate { status, reason };
         Ok((result, remaining))
@@ -9601,7 +9601,7 @@ impl<'input> ChangePropertyRequest<'input> {
         let (format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::ParseError)?.checked_div(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangePropertyRequest {
             mode,
@@ -10260,7 +10260,7 @@ impl TryParse for GetPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let value = value.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -20185,7 +20185,7 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -23697,7 +23697,7 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         let (first_keycode, remaining) = Keycode::try_parse(value)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangeKeyboardMappingRequest {
             keycode_count,
@@ -26352,7 +26352,7 @@ impl<'input> SetModifierMappingRequest<'input> {
         let remaining = &[header.minor_opcode];
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let _ = remaining;
-        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetModifierMappingRequest {
             keycodes: Cow::Borrowed(keycodes),
@@ -26475,7 +26475,7 @@ impl TryParse for GetModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let keycodes = keycodes.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);

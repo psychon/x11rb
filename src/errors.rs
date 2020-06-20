@@ -15,6 +15,13 @@ pub enum ParseError {
     /// into an `usize`.
     ConversionFailed,
 
+    /// The value of an expression could not be computed.
+    ///
+    /// As an example, the length of the data in `xproto`'s `GetPropertyReply` is described by
+    /// `value_len * (format / 8)`. The multiplication could cause an overflow, which would be
+    /// represented by this error.
+    InvalidExpression,
+
     /// A value was outside of its valid range.
     ///
     /// When parsing the value of an enumeration, not all possible integer values have a defined
@@ -35,6 +42,7 @@ impl std::fmt::Display for ParseError {
         match self {
             ParseError::InsufficientData => write!(f, "Insufficient data was provided"),
             ParseError::ConversionFailed => write!(f, "A value conversion failed due to out of range data"),
+            ParseError::InvalidExpression => write!(f, "An expression could not be computed, e.g. due to overflow"),
             ParseError::InvalidValue => write!(f, "A value could not be parsed into an enumeration"),
             ParseError::ParseError => write!(f, "Error while parsing"),
         }

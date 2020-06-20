@@ -1041,7 +1041,7 @@ impl TryParse for ListInputDevicesReply {
         let (devices_len, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (devices, remaining) = crate::x11_utils::parse_list::<DeviceInfo>(remaining, devices_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(x.num_class_info)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(x.num_class_info)).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (names, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, devices_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -5619,7 +5619,7 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let (keycode_count, remaining) = u8::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangeDeviceKeyMappingRequest {
             device_id,
@@ -5735,7 +5735,7 @@ impl TryParse for GetDeviceModifierMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
-        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let keymaps = keymaps.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -5817,7 +5817,7 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         let (device_id, remaining) = u8::try_parse(value)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetDeviceModifierMappingRequest {
             device_id,
@@ -11581,7 +11581,7 @@ impl TryParse for ButtonClass {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
-        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::ParseError)?.checked_div(32u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::InvalidExpression)?.checked_div(32u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let type_ = type_.try_into()?;
         let result = ButtonClass { type_, len, sourceid, state, labels };
@@ -11993,7 +11993,7 @@ pub struct DeviceClassDataButton {
 impl TryParse for DeviceClassDataButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
-        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::ParseError)?.checked_div(32u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::InvalidExpression)?.checked_div(32u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = DeviceClassDataButton { state, labels };
         Ok((result, remaining))
@@ -16034,7 +16034,7 @@ impl TryParse for KeyPressEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = KeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16163,7 +16163,7 @@ impl TryParse for ButtonPressEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = ButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16804,8 +16804,8 @@ impl TryParse for RawKeyPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = RawKeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16873,8 +16873,8 @@ impl TryParse for RawButtonPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = RawButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16997,7 +16997,7 @@ impl TryParse for TouchBeginEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = TouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -17192,8 +17192,8 @@ impl TryParse for RawTouchBeginEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = RawTouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)

@@ -560,7 +560,7 @@ impl TryParse for ConnectReply {
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, driver_name_length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let driver_name = driver_name.to_vec();
-        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (driver_name_length.checked_add(3u32).ok_or(ParseError::ParseError)? & (!3u32)).checked_sub(driver_name_length).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (driver_name_length.checked_add(3u32).ok_or(ParseError::InvalidExpression)? & (!3u32)).checked_sub(driver_name_length).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let alignment_pad = alignment_pad.to_vec();
         let (device_name, remaining) = crate::x11_utils::parse_u8_list(remaining, device_name_length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let device_name = device_name.to_vec();
