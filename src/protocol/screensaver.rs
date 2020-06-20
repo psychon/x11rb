@@ -83,20 +83,20 @@ impl TryFrom<u8> for Kind {
             0 => Ok(Kind::Blanked),
             1 => Ok(Kind::Internal),
             2 => Ok(Kind::External),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Kind {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Kind {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -145,20 +145,20 @@ impl TryFrom<u8> for Event {
         match value {
             1 => Ok(Event::NotifyMask),
             2 => Ok(Event::CycleMask),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Event {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Event {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(Event, u8);
@@ -214,20 +214,20 @@ impl TryFrom<u8> for State {
             1 => Ok(State::On),
             2 => Ok(State::Cycle),
             3 => Ok(State::Disabled),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for State {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for State {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 

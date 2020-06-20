@@ -94,20 +94,20 @@ impl TryFrom<u8> for Type {
             4 => Ok(Type::VideoMask),
             8 => Ok(Type::StillMask),
             16 => Ok(Type::ImageMask),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Type {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Type {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(Type, u8);
@@ -166,20 +166,20 @@ impl TryFrom<u8> for ImageFormatInfoType {
         match value {
             0 => Ok(ImageFormatInfoType::RGB),
             1 => Ok(ImageFormatInfoType::YUV),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ImageFormatInfoType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ImageFormatInfoType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -236,20 +236,20 @@ impl TryFrom<u8> for ImageFormatInfoFormat {
         match value {
             0 => Ok(ImageFormatInfoFormat::Packed),
             1 => Ok(ImageFormatInfoFormat::Planar),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ImageFormatInfoFormat {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ImageFormatInfoFormat {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -298,20 +298,20 @@ impl TryFrom<u8> for AttributeFlag {
         match value {
             1 => Ok(AttributeFlag::Gettable),
             2 => Ok(AttributeFlag::Settable),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for AttributeFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for AttributeFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(AttributeFlag, u8);
@@ -370,20 +370,20 @@ impl TryFrom<u8> for VideoNotifyReason {
             2 => Ok(VideoNotifyReason::Busy),
             3 => Ok(VideoNotifyReason::Preempted),
             4 => Ok(VideoNotifyReason::HardError),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for VideoNotifyReason {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for VideoNotifyReason {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -440,20 +440,20 @@ impl TryFrom<u8> for ScanlineOrder {
         match value {
             0 => Ok(ScanlineOrder::TopToBottom),
             1 => Ok(ScanlineOrder::BottomToTop),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ScanlineOrder {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ScanlineOrder {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -514,20 +514,20 @@ impl TryFrom<u8> for GrabPortStatus {
             3 => Ok(GrabPortStatus::InvalidTime),
             4 => Ok(GrabPortStatus::BadReply),
             5 => Ok(GrabPortStatus::BadAlloc),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for GrabPortStatus {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for GrabPortStatus {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 

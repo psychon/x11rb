@@ -515,20 +515,20 @@ impl TryFrom<u8> for DPMSMode {
             1 => Ok(DPMSMode::Standby),
             2 => Ok(DPMSMode::Suspend),
             3 => Ok(DPMSMode::Off),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for DPMSMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for DPMSMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 

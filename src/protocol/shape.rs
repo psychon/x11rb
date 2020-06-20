@@ -93,20 +93,20 @@ impl TryFrom<u8> for SO {
             2 => Ok(SO::Intersect),
             3 => Ok(SO::Subtract),
             4 => Ok(SO::Invert),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for SO {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for SO {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -158,20 +158,20 @@ impl TryFrom<u8> for SK {
             0 => Ok(SK::Bounding),
             1 => Ok(SK::Clip),
             2 => Ok(SK::Input),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for SK {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for SK {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 

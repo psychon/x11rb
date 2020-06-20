@@ -107,20 +107,20 @@ impl TryFrom<u8> for Attachment {
             8 => Ok(Attachment::BufferFakeFrontRight),
             9 => Ok(Attachment::BufferDepthStencil),
             10 => Ok(Attachment::BufferHiz),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Attachment {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Attachment {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -178,20 +178,20 @@ impl TryFrom<u8> for DriverType {
         match value {
             0 => Ok(DriverType::DRI),
             1 => Ok(DriverType::VDPAU),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for DriverType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for DriverType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -243,20 +243,20 @@ impl TryFrom<u8> for EventType {
             1 => Ok(EventType::ExchangeComplete),
             2 => Ok(EventType::BlitComplete),
             3 => Ok(EventType::FlipComplete),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for EventType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for EventType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 

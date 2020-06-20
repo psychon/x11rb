@@ -15,6 +15,15 @@ pub enum ParseError {
     /// into an `usize`.
     ConversionFailed,
 
+    /// A value was outside of its valid range.
+    ///
+    /// When parsing the value of an enumeration, not all possible integer values have a defined
+    /// meaning. This error occurs when an invalid value is encountered in this context.
+    ///
+    /// For example, `xproto` has an enumeration `Place` with possible values `OnTop` (0) and
+    /// `OnBottom` (1). Any value other than 0 or 1 generates an `InvalidValue` when parsing.
+    InvalidValue,
+
     /// Another error while parsing some data.
     ParseError,
 }
@@ -26,6 +35,7 @@ impl std::fmt::Display for ParseError {
         match self {
             ParseError::InsufficientData => write!(f, "Insufficient data was provided"),
             ParseError::ConversionFailed => write!(f, "A value conversion failed due to out of range data"),
+            ParseError::InvalidValue => write!(f, "A value could not be parsed into an enumeration"),
             ParseError::ParseError => write!(f, "Error while parsing"),
         }
     }

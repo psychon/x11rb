@@ -106,14 +106,14 @@ impl TryFrom<u16> for ModeFlag {
             1024 => Ok(ModeFlag::Pixmux),
             2048 => Ok(ModeFlag::DoubleClock),
             4096 => Ok(ModeFlag::HalfClock),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u32> for ModeFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(ModeFlag, u16);
@@ -160,20 +160,20 @@ impl TryFrom<u8> for ClockFlag {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             1 => Ok(ClockFlag::Programable),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ClockFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ClockFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(ClockFlag, u8);
@@ -223,20 +223,20 @@ impl TryFrom<u8> for Permission {
         match value {
             1 => Ok(Permission::Read),
             2 => Ok(Permission::Write),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Permission {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Permission {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(Permission, u8);

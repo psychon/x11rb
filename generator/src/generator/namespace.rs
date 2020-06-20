@@ -2350,7 +2350,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             }
                         }
                     }
-                    outln!(out.indent(), "_ => Err(ParseError::ParseError),");
+                    outln!(out.indent(), "_ => Err(ParseError::InvalidValue),");
                     outln!(out, "}}");
                 });
                 outln!(out, "}}");
@@ -2369,7 +2369,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         );
                         outln!(
                             out.indent(),
-                            "Self::try_from({}::try_from(value).or(Err(ParseError::ParseError))?)",
+                            "Self::try_from({}::try_from(value).or(Err(ParseError::InvalidValue))?)",
                             to_type,
                         );
                         outln!(out, "}}");
