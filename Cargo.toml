@@ -114,5 +114,9 @@ required-features = ["libc", "shm"]
 name = "xeyes"
 required-features = ["shape"]
 
+[[example]]
+name = "simple_window"
+required-features = ["cursor"]
+
 [workspace]
 members = ["generator", "xcbgen-rs", "cairo-example"]
