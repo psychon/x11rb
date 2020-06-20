@@ -8,4 +8,4 @@ publish = false
 
 [dependencies]
 once_cell = "1.4.0"
-roxmltree = "0.11.0"
+roxmltree = "0.13.0"
