@@ -272,7 +272,7 @@ impl QueryVersionRequest {
         }
         let (client_major_version, remaining) = u8::try_parse(value)?;
         let (client_minor_version, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(QueryVersionRequest {
             client_major_version,
@@ -307,19 +307,19 @@ impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, server_major_version, server_minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -412,7 +412,7 @@ impl TryParse for QueryInfoReply {
         let (ms_since_user_input, remaining) = u32::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(7..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -420,7 +420,7 @@ impl TryParse for QueryInfoReply {
         let result = QueryInfoReply { state, sequence, length, saver_window, ms_until_server, ms_since_user_input, event_mask, kind };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1128,13 +1128,13 @@ impl TryParse for NotifyEvent {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let (forced, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(14..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(14..).ok_or(ParseError::InsufficientData)?;
         let state = state.try_into()?;
         let kind = kind.try_into()?;
         let result = NotifyEvent { response_type, state, sequence, time, root, window, kind, forced };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

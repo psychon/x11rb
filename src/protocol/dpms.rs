@@ -109,7 +109,7 @@ impl TryParse for GetVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
@@ -120,7 +120,7 @@ impl TryParse for GetVersionReply {
         let result = GetVersionReply { sequence, length, server_major_version, server_minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -189,18 +189,18 @@ impl TryParse for CapableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (capable, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CapableReply { sequence, length, capable };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -271,20 +271,20 @@ impl TryParse for GetTimeoutsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (standby_timeout, remaining) = u16::try_parse(remaining)?;
         let (suspend_timeout, remaining) = u16::try_parse(remaining)?;
         let (off_timeout, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetTimeoutsReply { sequence, length, standby_timeout, suspend_timeout, off_timeout };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -651,12 +651,12 @@ impl TryParse for InfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (power_level, remaining) = u16::try_parse(remaining)?;
         let (state, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(21..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -664,7 +664,7 @@ impl TryParse for InfoReply {
         let result = InfoReply { sequence, length, power_level, state };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

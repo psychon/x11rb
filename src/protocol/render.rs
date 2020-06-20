@@ -770,7 +770,7 @@ impl TryParse for PictFormatError {
         let result = PictFormatError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -847,7 +847,7 @@ impl TryParse for PictureError {
         let result = PictureError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -924,7 +924,7 @@ impl TryParse for PictOpError {
         let result = PictOpError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1001,7 +1001,7 @@ impl TryParse for GlyphSetError {
         let result = GlyphSetError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1078,7 +1078,7 @@ impl TryParse for GlyphError {
         let result = GlyphError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1223,7 +1223,7 @@ impl TryParse for Pictforminfo {
         let (id, remaining) = Pictformat::try_parse(remaining)?;
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (direct, remaining) = Directformat::try_parse(remaining)?;
         let (colormap, remaining) = xproto::Colormap::try_parse(remaining)?;
         let type_ = type_.try_into()?;
@@ -1337,9 +1337,9 @@ pub struct Pictdepth {
 impl TryParse for Pictdepth {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (depth, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (num_visuals, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (visuals, remaining) = crate::x11_utils::parse_list::<Pictvisual>(remaining, num_visuals.try_into().or(Err(ParseError::ParseError))?)?;
         let result = Pictdepth { depth, visuals };
         Ok((result, remaining))
@@ -1920,19 +1920,19 @@ impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2005,7 +2005,7 @@ impl TryParse for QueryPictFormatsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_formats, remaining) = u32::try_parse(remaining)?;
@@ -2013,7 +2013,7 @@ impl TryParse for QueryPictFormatsReply {
         let (num_depths, remaining) = u32::try_parse(remaining)?;
         let (num_visuals, remaining) = u32::try_parse(remaining)?;
         let (num_subpixel, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (formats, remaining) = crate::x11_utils::parse_list::<Pictforminfo>(remaining, num_formats.try_into().or(Err(ParseError::ParseError))?)?;
         let (screens, remaining) = crate::x11_utils::parse_list::<Pictscreen>(remaining, num_screens.try_into().or(Err(ParseError::ParseError))?)?;
         let mut remaining = remaining;
@@ -2031,7 +2031,7 @@ impl TryParse for QueryPictFormatsReply {
         let result = QueryPictFormatsReply { sequence, length, num_depths, num_visuals, formats, screens, subpixels };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2152,11 +2152,11 @@ impl TryParse for QueryPictIndexValuesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_values, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (values, remaining) = crate::x11_utils::parse_list::<Indexvalue>(remaining, num_values.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -2164,7 +2164,7 @@ impl TryParse for QueryPictIndexValuesReply {
         let result = QueryPictIndexValuesReply { sequence, length, values };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -3217,7 +3217,7 @@ impl CompositeRequest {
         }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (mask, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
@@ -3344,7 +3344,7 @@ impl<'input> TrapezoidsRequest<'input> {
         }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
         let (mask_format, remaining) = Pictformat::try_parse(remaining)?;
@@ -3473,7 +3473,7 @@ impl<'input> TrianglesRequest<'input> {
         }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
         let (mask_format, remaining) = Pictformat::try_parse(remaining)?;
@@ -3602,7 +3602,7 @@ impl<'input> TriStripRequest<'input> {
         }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
         let (mask_format, remaining) = Pictformat::try_parse(remaining)?;
@@ -3731,7 +3731,7 @@ impl<'input> TriFanRequest<'input> {
         }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
         let (mask_format, remaining) = Pictformat::try_parse(remaining)?;
@@ -4236,7 +4236,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
         }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
         let (mask_format, remaining) = Pictformat::try_parse(remaining)?;
@@ -4367,7 +4367,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
         }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
         let (mask_format, remaining) = Pictformat::try_parse(remaining)?;
@@ -4498,7 +4498,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
         }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
         let (mask_format, remaining) = Pictformat::try_parse(remaining)?;
@@ -4614,7 +4614,7 @@ impl<'input> FillRectanglesRequest<'input> {
         }
         let (op, remaining) = u8::try_parse(value)?;
         let op = op.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
         let (color, remaining) = Color::try_parse(remaining)?;
         let mut remaining = remaining;
@@ -5011,12 +5011,12 @@ impl TryParse for QueryFiltersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_aliases, remaining) = u32::try_parse(remaining)?;
         let (num_filters, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (aliases, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_aliases.try_into().or(Err(ParseError::ParseError))?)?;
         let (filters, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, num_filters.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
@@ -5025,7 +5025,7 @@ impl TryParse for QueryFiltersReply {
         let result = QueryFiltersReply { sequence, length, aliases, filters };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -5118,12 +5118,12 @@ impl<'input> SetPictureFilterRequest<'input> {
         }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (filter_len, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (filter, remaining) = crate::x11_utils::parse_u8_list(remaining, filter_len.try_into().or(Err(ParseError::ParseError))?)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
         let mut values = Vec::new();

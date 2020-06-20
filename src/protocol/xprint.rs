@@ -51,14 +51,14 @@ impl TryParse for Printer {
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (desc_len, remaining) = u32::try_parse(remaining)?;
         let (description, remaining) = crate::x11_utils::parse_u8_list(remaining, desc_len.try_into().or(Err(ParseError::ParseError))?)?;
         let description = description.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let result = Printer { name, description };
         Ok((result, remaining))
     }
@@ -464,7 +464,7 @@ impl TryParse for PrintQueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
@@ -475,7 +475,7 @@ impl TryParse for PrintQueryVersionReply {
         let result = PrintQueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -579,11 +579,11 @@ impl TryParse for PrintGetPrinterListReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (list_count, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (printers, remaining) = crate::x11_utils::parse_list::<Printer>(remaining, list_count.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -591,7 +591,7 @@ impl TryParse for PrintGetPrinterListReply {
         let result = PrintGetPrinterListReply { sequence, length, printers };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -875,7 +875,7 @@ impl TryParse for PrintGetContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (context, remaining) = u32::try_parse(remaining)?;
@@ -885,7 +885,7 @@ impl TryParse for PrintGetContextReply {
         let result = PrintGetContextReply { sequence, length, context };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1013,7 +1013,7 @@ impl TryParse for PrintGetScreenOfContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (root, remaining) = xproto::Window::try_parse(remaining)?;
@@ -1023,7 +1023,7 @@ impl TryParse for PrintGetScreenOfContextReply {
         let result = PrintGetScreenOfContextReply { sequence, length, root };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1452,13 +1452,13 @@ impl TryParse for PrintGetDocumentDataReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status_code, remaining) = u32::try_parse(remaining)?;
         let (finished_flag, remaining) = u32::try_parse(remaining)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
         if response_type != 1 {
@@ -1467,7 +1467,7 @@ impl TryParse for PrintGetDocumentDataReply {
         let result = PrintGetDocumentDataReply { sequence, length, status_code, finished_flag, data };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1590,7 +1590,7 @@ impl PrintEndPageRequest {
             return Err(ParseError::ParseError);
         }
         let (cancel, remaining) = bool::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(PrintEndPageRequest {
             cancel,
@@ -1750,7 +1750,7 @@ impl TryParse for PrintInputSelectedReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
@@ -1761,7 +1761,7 @@ impl TryParse for PrintInputSelectedReply {
         let result = PrintInputSelectedReply { sequence, length, event_mask, all_events_mask };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1817,7 +1817,7 @@ impl PrintGetAttributesRequest {
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (pool, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(PrintGetAttributesRequest {
             context,
@@ -1851,11 +1851,11 @@ impl TryParse for PrintGetAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (string_len, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (attributes, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
         let attributes = attributes.to_vec();
         if response_type != 1 {
@@ -1864,7 +1864,7 @@ impl TryParse for PrintGetAttributesReply {
         let result = PrintGetAttributesReply { sequence, length, attributes };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1946,7 +1946,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (name_len, remaining) = u32::try_parse(remaining)?;
         let (pool, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(PrintGetOneAttributesRequest {
@@ -1991,11 +1991,11 @@ impl TryParse for PrintGetOneAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.try_into().or(Err(ParseError::ParseError))?)?;
         let value = value.to_vec();
         if response_type != 1 {
@@ -2004,7 +2004,7 @@ impl TryParse for PrintGetOneAttributesReply {
         let result = PrintGetOneAttributesReply { sequence, length, value };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2089,7 +2089,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
         let (string_len, remaining) = u32::try_parse(remaining)?;
         let (pool, remaining) = u8::try_parse(remaining)?;
         let (rule, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (attributes, remaining) = remaining.split_at(remaining.len());
         let _ = remaining;
         Ok(PrintSetAttributesRequest {
@@ -2204,7 +2204,7 @@ impl TryParse for PrintGetPageDimensionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -2219,7 +2219,7 @@ impl TryParse for PrintGetPageDimensionsReply {
         let result = PrintGetPageDimensionsReply { sequence, length, width, height, offset_x, offset_y, reproducible_width, reproducible_height };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2288,11 +2288,11 @@ impl TryParse for PrintQueryScreensReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (list_count, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (roots, remaining) = crate::x11_utils::parse_list::<xproto::Window>(remaining, list_count.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -2300,7 +2300,7 @@ impl TryParse for PrintQueryScreensReply {
         let result = PrintQueryScreensReply { sequence, length, roots };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2415,7 +2415,7 @@ impl TryParse for PrintSetImageResolutionReply {
         let result = PrintSetImageResolutionReply { status, sequence, length, previous_resolutions };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2495,7 +2495,7 @@ impl TryParse for PrintGetImageResolutionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (image_resolution, remaining) = u16::try_parse(remaining)?;
@@ -2505,7 +2505,7 @@ impl TryParse for PrintGetImageResolutionReply {
         let result = PrintGetImageResolutionReply { sequence, length, image_resolution };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2537,7 +2537,7 @@ impl TryParse for NotifyEvent {
         let result = NotifyEvent { response_type, detail, sequence, context, cancel };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2616,7 +2616,7 @@ impl TryParse for AttributNotifyEvent {
         let result = AttributNotifyEvent { response_type, detail, sequence, context };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2694,7 +2694,7 @@ impl TryParse for BadContextError {
         let result = BadContextError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2771,7 +2771,7 @@ impl TryParse for BadSequenceError {
         let result = BadSequenceError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

@@ -109,7 +109,7 @@ impl TryParse for GetVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
@@ -120,7 +120,7 @@ impl TryParse for GetVersionReply {
         let result = GetVersionReply { sequence, length, server_major_version, server_minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -190,7 +190,7 @@ impl TryParse for GetXIDRangeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (start_id, remaining) = u32::try_parse(remaining)?;
@@ -201,7 +201,7 @@ impl TryParse for GetXIDRangeReply {
         let result = GetXIDRangeReply { sequence, length, start_id, count };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -281,11 +281,11 @@ impl TryParse for GetXIDListReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (ids_len, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ids_len.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -293,7 +293,7 @@ impl TryParse for GetXIDListReply {
         let result = GetXIDListReply { sequence, length, ids };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

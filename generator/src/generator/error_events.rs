@@ -17,7 +17,7 @@ pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
     out.indented(|out| {
         outln!(out, "raw_bytes.get(0)");
         outln!(out.indent(), ".map(|x| x & 0x7f)");
-        outln!(out.indent(), ".ok_or(ParseError::ParseError)");
+        outln!(out.indent(), ".ok_or(ParseError::InsufficientData)");
     });
     outln!(out, "}}");
     outln!(out, "");
@@ -32,7 +32,7 @@ pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
     out.indented(|out| {
         outln!(out, "raw_bytes.get(1)");
         outln!(out.indent(), ".copied()");
-        outln!(out.indent(), ".ok_or(ParseError::ParseError)");
+        outln!(out.indent(), ".ok_or(ParseError::InsufficientData)");
     });
     outln!(out, "}}");
     outln!(out, "");
@@ -47,7 +47,7 @@ pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
             out.indent(),
             ".map(|b| u16::from_ne_bytes(b.try_into().unwrap()))"
         );
-        outln!(out.indent(), ".ok_or(ParseError::ParseError)");
+        outln!(out.indent(), ".ok_or(ParseError::InsufficientData)");
     });
     outln!(out, "}}");
 }
@@ -357,7 +357,10 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                             outln!(out, "if event_code != ext_info.first_event {{");
                             outln!(out.indent(), "return Ok(Self::Unknown(event.to_vec()));");
                             outln!(out, "}}");
-                            outln!(out, "match *event.get(1).ok_or(ParseError::ParseError)? {{");
+                            outln!(
+                                out,
+                                "match *event.get(1).ok_or(ParseError::InsufficientData)? {{"
+                            );
                         } else {
                             outln!(out, "match event_code - ext_info.first_event {{");
                         }

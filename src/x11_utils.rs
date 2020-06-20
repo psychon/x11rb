@@ -171,7 +171,7 @@ macro_rules! implement_try_parse {
                 let len = std::mem::size_of::<$t>();
                 let bytes = value
                     .get(..len)
-                    .ok_or(ParseError::ParseError)?
+                    .ok_or(ParseError::InsufficientData)?
                     .try_into() // TryInto<[u8; len]>
                     .unwrap();
                 Ok((<$t>::from_ne_bytes(bytes), &value[len..]))
@@ -350,7 +350,7 @@ where
 /// Parse a list of `u8` from the given data.
 pub fn parse_u8_list(data: &[u8], list_length: usize) -> Result<(&[u8], &[u8]), ParseError> {
     if data.len() < list_length {
-        Err(ParseError::ParseError)
+        Err(ParseError::InsufficientData)
     } else {
         Ok(data.split_at(list_length))
     }

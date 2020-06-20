@@ -125,7 +125,7 @@ impl TryParse for BadDamageError {
         let result = BadDamageError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -262,19 +262,19 @@ impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -338,7 +338,7 @@ impl CreateRequest {
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (level, remaining) = u8::try_parse(remaining)?;
         let level = level.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(CreateRequest {
             damage,
@@ -600,7 +600,7 @@ impl TryParse for NotifyEvent {
         let result = NotifyEvent { response_type, level, sequence, drawable, damage, timestamp, area, geometry };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

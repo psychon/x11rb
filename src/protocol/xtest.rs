@@ -75,7 +75,7 @@ impl GetVersionRequest {
             return Err(ParseError::ParseError);
         }
         let (major_version, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
         let _ = remaining;
         Ok(GetVersionRequest {
@@ -121,7 +121,7 @@ impl TryParse for GetVersionReply {
         let result = GetVersionReply { major_version, sequence, length, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -289,7 +289,7 @@ impl TryParse for CompareCursorReply {
         let result = CompareCursorReply { same, sequence, length };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -379,13 +379,13 @@ impl FakeInputRequest {
         }
         let (type_, remaining) = u8::try_parse(value)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (time, remaining) = u32::try_parse(remaining)?;
         let (root, remaining) = xproto::Window::try_parse(remaining)?;
-        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
-        let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(7..).ok_or(ParseError::InsufficientData)?;
         let (deviceid, remaining) = u8::try_parse(remaining)?;
         let _ = remaining;
         Ok(FakeInputRequest {
@@ -458,7 +458,7 @@ impl GrabControlRequest {
             return Err(ParseError::ParseError);
         }
         let (impervious, remaining) = bool::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GrabControlRequest {
             impervious,

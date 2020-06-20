@@ -53,18 +53,18 @@ impl TryParse for CompletionEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (minor_event, remaining) = u16::try_parse(remaining)?;
         let (major_event, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
         let result = CompletionEvent { response_type, sequence, drawable, minor_event, major_event, shmseg, offset };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -201,14 +201,14 @@ impl TryParse for QueryVersionReply {
         let (uid, remaining) = u16::try_parse(remaining)?;
         let (gid, remaining) = u16::try_parse(remaining)?;
         let (pixmap_format, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { shared_pixmaps, sequence, length, major_version, minor_version, uid, gid, pixmap_format };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -271,7 +271,7 @@ impl AttachRequest {
         let (shmseg, remaining) = Seg::try_parse(value)?;
         let (shmid, remaining) = u32::try_parse(remaining)?;
         let (read_only, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(AttachRequest {
             shmseg,
@@ -466,7 +466,7 @@ impl PutImageRequest {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (send_event, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
         let _ = remaining;
@@ -602,7 +602,7 @@ impl GetImageRequest {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (plane_mask, remaining) = u32::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
         let _ = remaining;
@@ -665,7 +665,7 @@ impl TryParse for GetImageReply {
         let result = GetImageReply { depth, sequence, length, visual, size };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -750,7 +750,7 @@ impl CreatePixmapRequest {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (shmseg, remaining) = Seg::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
         let _ = remaining;
@@ -834,7 +834,7 @@ impl AttachFdRequest {
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let shm_fd = fds.remove(0);
         let (read_only, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(AttachFdRequest {
             shmseg,
@@ -914,7 +914,7 @@ impl CreateSegmentRequest {
         let (shmseg, remaining) = Seg::try_parse(value)?;
         let (size, remaining) = u32::try_parse(remaining)?;
         let (read_only, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(CreateSegmentRequest {
             shmseg,
@@ -956,14 +956,14 @@ impl TryParseFd for CreateSegmentReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let shm_fd = fds.remove(0);
-        let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = CreateSegmentReply { nfd, sequence, length, shm_fd };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

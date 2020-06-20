@@ -128,7 +128,7 @@ impl<'input> GetExtensionVersionRequest<'input> {
             return Err(ParseError::ParseError);
         }
         let (name_len, remaining) = u16::try_parse(value)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(GetExtensionVersionRequest {
@@ -176,14 +176,14 @@ impl TryParse for GetExtensionVersionReply {
         let (server_major, remaining) = u16::try_parse(remaining)?;
         let (server_minor, remaining) = u16::try_parse(remaining)?;
         let (present, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(19..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(19..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetExtensionVersionReply { xi_reply_type, sequence, length, server_major, server_minor, present };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -425,7 +425,7 @@ impl TryParse for DeviceInfo {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (num_class_info, remaining) = u8::try_parse(remaining)?;
         let (device_use, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let device_use = device_use.try_into()?;
         let result = DeviceInfo { device_type, device_id, num_class_info, device_use };
         Ok((result, remaining))
@@ -480,7 +480,7 @@ impl TryParse for KeyInfo {
         let (min_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (max_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (num_keys, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let class_id = class_id.try_into()?;
         let result = KeyInfo { class_id, len, min_keycode, max_keycode, num_keys };
         Ok((result, remaining))
@@ -688,7 +688,7 @@ impl TryParse for InputInfoInfoKey {
         let (min_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (max_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (num_keys, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let result = InputInfoInfoKey { min_keycode, max_keycode, num_keys };
         Ok((result, remaining))
     }
@@ -1039,21 +1039,21 @@ impl TryParse for ListInputDevicesReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (devices_len, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (devices, remaining) = crate::x11_utils::parse_list::<DeviceInfo>(remaining, devices_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(x.num_class_info)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let (names, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, devices_len.try_into().or(Err(ParseError::ParseError))?)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ListInputDevicesReply { xi_reply_type, sequence, length, devices, infos, names };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1156,7 +1156,7 @@ impl OpenDeviceRequest {
             return Err(ParseError::ParseError);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(OpenDeviceRequest {
             device_id,
@@ -1194,19 +1194,19 @@ impl TryParse for OpenDeviceReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_classes, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (class_info, remaining) = crate::x11_utils::parse_list::<InputClassInfo>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = OpenDeviceReply { xi_reply_type, sequence, length, class_info };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1270,7 +1270,7 @@ impl CloseDeviceRequest {
             return Err(ParseError::ParseError);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(CloseDeviceRequest {
             device_id,
@@ -1334,7 +1334,7 @@ impl SetDeviceModeRequest {
         let (device_id, remaining) = u8::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(SetDeviceModeRequest {
             device_id,
@@ -1373,7 +1373,7 @@ impl TryParse for SetDeviceModeReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -1381,7 +1381,7 @@ impl TryParse for SetDeviceModeReply {
         let result = SetDeviceModeReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1442,7 +1442,7 @@ impl<'input> SelectExtensionEventRequest<'input> {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SelectExtensionEventRequest {
@@ -1550,7 +1550,7 @@ impl TryParse for GetSelectedExtensionEventsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_this_classes, remaining) = u16::try_parse(remaining)?;
         let (num_all_classes, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (this_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_this_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let (all_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_all_classes.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
@@ -1559,7 +1559,7 @@ impl TryParse for GetSelectedExtensionEventsReply {
         let result = GetSelectedExtensionEventsReply { xi_reply_type, sequence, length, this_classes, all_classes };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1722,7 +1722,7 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(ChangeDeviceDontPropagateListRequest {
@@ -1831,7 +1831,7 @@ impl TryParse for GetDeviceDontPropagateListReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -1839,7 +1839,7 @@ impl TryParse for GetDeviceDontPropagateListReply {
         let result = GetDeviceDontPropagateListReply { xi_reply_type, sequence, length, classes };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1945,7 +1945,7 @@ impl GetDeviceMotionEventsRequest {
         let (start, remaining) = xproto::Timestamp::try_parse(value)?;
         let (stop, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetDeviceMotionEventsRequest {
             start,
@@ -1992,7 +1992,7 @@ impl TryParse for GetDeviceMotionEventsReply {
         let (num_events, remaining) = u32::try_parse(remaining)?;
         let (num_axes, remaining) = u8::try_parse(remaining)?;
         let (device_mode, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
         let mut remaining = remaining;
         let list_length = usize::try_from(num_events).or(Err(ParseError::ParseError))?;
         let mut events = Vec::with_capacity(list_length);
@@ -2008,7 +2008,7 @@ impl TryParse for GetDeviceMotionEventsReply {
         let result = GetDeviceMotionEventsReply { xi_reply_type, sequence, length, num_axes, device_mode, events };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2072,7 +2072,7 @@ impl ChangeKeyboardDeviceRequest {
             return Err(ParseError::ParseError);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(ChangeKeyboardDeviceRequest {
             device_id,
@@ -2109,7 +2109,7 @@ impl TryParse for ChangeKeyboardDeviceReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -2117,7 +2117,7 @@ impl TryParse for ChangeKeyboardDeviceReply {
         let result = ChangeKeyboardDeviceReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2172,7 +2172,7 @@ impl ChangePointerDeviceRequest {
         let (x_axis, remaining) = u8::try_parse(value)?;
         let (y_axis, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(ChangePointerDeviceRequest {
             x_axis,
@@ -2213,7 +2213,7 @@ impl TryParse for ChangePointerDeviceReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -2221,7 +2221,7 @@ impl TryParse for ChangePointerDeviceReply {
         let result = ChangePointerDeviceReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2307,7 +2307,7 @@ impl<'input> GrabDeviceRequest<'input> {
         let other_device_mode = other_device_mode.try_into()?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(GrabDeviceRequest {
@@ -2371,7 +2371,7 @@ impl TryParse for GrabDeviceReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -2379,7 +2379,7 @@ impl TryParse for GrabDeviceReply {
         let result = GrabDeviceReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2435,7 +2435,7 @@ impl UngrabDeviceRequest {
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(UngrabDeviceRequest {
             time,
@@ -2601,7 +2601,7 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         let (other_device_mode, remaining) = u8::try_parse(remaining)?;
         let other_device_mode = other_device_mode.try_into()?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(GrabDeviceKeyRequest {
@@ -2834,7 +2834,7 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         let other_device_mode = other_device_mode.try_into()?;
         let (button, remaining) = u8::try_parse(remaining)?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(GrabDeviceButtonRequest {
@@ -2951,7 +2951,7 @@ impl UngrabDeviceButtonRequest {
         let (modifier_device, remaining) = u8::try_parse(remaining)?;
         let (button, remaining) = u8::try_parse(remaining)?;
         let (grabbed_device, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(UngrabDeviceButtonRequest {
             grab_window,
@@ -3110,7 +3110,7 @@ impl AllowDeviceEventsRequest {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(AllowDeviceEventsRequest {
             time,
@@ -3176,7 +3176,7 @@ impl GetDeviceFocusRequest {
             return Err(ParseError::ParseError);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetDeviceFocusRequest {
             device_id,
@@ -3217,7 +3217,7 @@ impl TryParse for GetDeviceFocusReply {
         let (focus, remaining) = xproto::Window::try_parse(remaining)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (revert_to, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -3225,7 +3225,7 @@ impl TryParse for GetDeviceFocusReply {
         let result = GetDeviceFocusReply { xi_reply_type, sequence, length, focus, time, revert_to };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -3292,7 +3292,7 @@ impl SetDeviceFocusRequest {
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let revert_to = revert_to.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(SetDeviceFocusRequest {
             focus,
@@ -3424,7 +3424,7 @@ impl TryParse for KbdFeedbackState {
         let (global_auto_repeat, remaining) = bool::try_parse(remaining)?;
         let (click, remaining) = u8::try_parse(remaining)?;
         let (percent, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
         let class_id = class_id.try_into()?;
@@ -3537,7 +3537,7 @@ impl TryParse for PtrFeedbackState {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (accel_num, remaining) = u16::try_parse(remaining)?;
         let (accel_denom, remaining) = u16::try_parse(remaining)?;
         let (threshold, remaining) = u16::try_parse(remaining)?;
@@ -3731,7 +3731,7 @@ impl TryParse for BellFeedbackState {
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (percent, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (pitch, remaining) = u16::try_parse(remaining)?;
         let (duration, remaining) = u16::try_parse(remaining)?;
         let class_id = class_id.try_into()?;
@@ -3860,7 +3860,7 @@ impl TryParse for FeedbackStateDataKeyboard {
         let (global_auto_repeat, remaining) = bool::try_parse(remaining)?;
         let (click, remaining) = u8::try_parse(remaining)?;
         let (percent, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
         let result = FeedbackStateDataKeyboard { pitch, duration, led_mask, led_values, global_auto_repeat, click, percent, auto_repeats };
@@ -3955,7 +3955,7 @@ pub struct FeedbackStateDataPointer {
 }
 impl TryParse for FeedbackStateDataPointer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (accel_num, remaining) = u16::try_parse(remaining)?;
         let (accel_denom, remaining) = u16::try_parse(remaining)?;
         let (threshold, remaining) = u16::try_parse(remaining)?;
@@ -4143,7 +4143,7 @@ pub struct FeedbackStateDataBell {
 impl TryParse for FeedbackStateDataBell {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (percent, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (pitch, remaining) = u16::try_parse(remaining)?;
         let (duration, remaining) = u16::try_parse(remaining)?;
         let result = FeedbackStateDataBell { percent, pitch, duration };
@@ -4384,7 +4384,7 @@ impl GetFeedbackControlRequest {
             return Err(ParseError::ParseError);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetFeedbackControlRequest {
             device_id,
@@ -4421,7 +4421,7 @@ impl TryParse for GetFeedbackControlReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_feedbacks, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (feedbacks, remaining) = crate::x11_utils::parse_list::<FeedbackState>(remaining, num_feedbacks.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -4429,7 +4429,7 @@ impl TryParse for GetFeedbackControlReply {
         let result = GetFeedbackControlReply { xi_reply_type, sequence, length, feedbacks };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -4560,7 +4560,7 @@ impl TryParse for PtrFeedbackCtl {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num, remaining) = i16::try_parse(remaining)?;
         let (denom, remaining) = i16::try_parse(remaining)?;
         let (threshold, remaining) = i16::try_parse(remaining)?;
@@ -4674,7 +4674,7 @@ impl TryParse for StringFeedbackCtl {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
         let class_id = class_id.try_into()?;
@@ -4737,7 +4737,7 @@ impl TryParse for BellFeedbackCtl {
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (percent, remaining) = i8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (pitch, remaining) = i16::try_parse(remaining)?;
         let (duration, remaining) = i16::try_parse(remaining)?;
         let class_id = class_id.try_into()?;
@@ -4927,7 +4927,7 @@ pub struct FeedbackCtlDataPointer {
 }
 impl TryParse for FeedbackCtlDataPointer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num, remaining) = i16::try_parse(remaining)?;
         let (denom, remaining) = i16::try_parse(remaining)?;
         let (threshold, remaining) = i16::try_parse(remaining)?;
@@ -4972,7 +4972,7 @@ pub struct FeedbackCtlDataString {
 }
 impl TryParse for FeedbackCtlDataString {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
         let result = FeedbackCtlDataString { keysyms };
@@ -5098,7 +5098,7 @@ pub struct FeedbackCtlDataBell {
 impl TryParse for FeedbackCtlDataBell {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (percent, remaining) = i8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (pitch, remaining) = i16::try_parse(remaining)?;
         let (duration, remaining) = i16::try_parse(remaining)?;
         let result = FeedbackCtlDataBell { percent, pitch, duration };
@@ -5416,7 +5416,7 @@ impl ChangeFeedbackControlRequest {
         let (mask, remaining) = u32::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (feedback, remaining) = FeedbackCtl::try_parse(remaining)?;
         let _ = remaining;
         Ok(ChangeFeedbackControlRequest {
@@ -5491,7 +5491,7 @@ impl GetDeviceKeyMappingRequest {
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetDeviceKeyMappingRequest {
             device_id,
@@ -5532,7 +5532,7 @@ impl TryParse for GetDeviceKeyMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -5540,7 +5540,7 @@ impl TryParse for GetDeviceKeyMappingReply {
         let result = GetDeviceKeyMappingReply { xi_reply_type, sequence, keysyms_per_keycode, keysyms };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -5697,7 +5697,7 @@ impl GetDeviceModifierMappingRequest {
             return Err(ParseError::ParseError);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetDeviceModifierMappingRequest {
             device_id,
@@ -5734,7 +5734,7 @@ impl TryParse for GetDeviceModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let keymaps = keymaps.to_vec();
         if response_type != 1 {
@@ -5743,7 +5743,7 @@ impl TryParse for GetDeviceModifierMappingReply {
         let result = GetDeviceModifierMappingReply { xi_reply_type, sequence, length, keymaps };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -5816,7 +5816,7 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetDeviceModifierMappingRequest {
@@ -5863,7 +5863,7 @@ impl TryParse for SetDeviceModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -5871,7 +5871,7 @@ impl TryParse for SetDeviceModifierMappingReply {
         let result = SetDeviceModifierMappingReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -5920,7 +5920,7 @@ impl GetDeviceButtonMappingRequest {
             return Err(ParseError::ParseError);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetDeviceButtonMappingRequest {
             device_id,
@@ -5958,20 +5958,20 @@ impl TryParse for GetDeviceButtonMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (map_size, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ParseError))?)?;
         let map = map.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = GetDeviceButtonMappingReply { xi_reply_type, sequence, length, map };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -6042,7 +6042,7 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (map_size, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetDeviceButtonMappingRequest {
@@ -6089,7 +6089,7 @@ impl TryParse for SetDeviceButtonMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6097,7 +6097,7 @@ impl TryParse for SetDeviceButtonMappingReply {
         let result = SetDeviceButtonMappingReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -6120,7 +6120,7 @@ impl TryParse for KeyState {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_keys, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let keys = <[u8; 32]>::try_from(keys).unwrap();
         let class_id = class_id.try_into()?;
@@ -6201,7 +6201,7 @@ impl TryParse for ButtonState {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let buttons = <[u8; 32]>::try_from(buttons).unwrap();
         let class_id = class_id.try_into()?;
@@ -6399,7 +6399,7 @@ pub struct InputStateDataKey {
 impl TryParse for InputStateDataKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_keys, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let keys = <[u8; 32]>::try_from(keys).unwrap();
         let result = InputStateDataKey { num_keys, keys };
@@ -6468,7 +6468,7 @@ pub struct InputStateDataButton {
 impl TryParse for InputStateDataButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let buttons = <[u8; 32]>::try_from(buttons).unwrap();
         let result = InputStateDataButton { num_buttons, buttons };
@@ -6734,7 +6734,7 @@ impl QueryDeviceStateRequest {
             return Err(ParseError::ParseError);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(QueryDeviceStateRequest {
             device_id,
@@ -6771,7 +6771,7 @@ impl TryParse for QueryDeviceStateReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_classes, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<InputState>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -6779,7 +6779,7 @@ impl TryParse for QueryDeviceStateReply {
         let result = QueryDeviceStateReply { xi_reply_type, sequence, length, classes };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -6928,7 +6928,7 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetDeviceValuatorsRequest {
@@ -6978,7 +6978,7 @@ impl TryParse for SetDeviceValuatorsReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6986,7 +6986,7 @@ impl TryParse for SetDeviceValuatorsReply {
         let result = SetDeviceValuatorsReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -7334,7 +7334,7 @@ impl TryParse for DeviceCoreState {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (iscore, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let control_id = control_id.try_into()?;
         let result = DeviceCoreState { control_id, len, status, iscore };
         Ok((result, remaining))
@@ -7385,7 +7385,7 @@ impl TryParse for DeviceEnableState {
         let (control_id, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (enable, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let control_id = control_id.try_into()?;
         let result = DeviceEnableState { control_id, len, enable };
         Ok((result, remaining))
@@ -7575,7 +7575,7 @@ impl TryParse for DeviceStateDataCore {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (iscore, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let result = DeviceStateDataCore { status, iscore };
         Ok((result, remaining))
     }
@@ -7712,7 +7712,7 @@ impl DeviceStateData {
         if switch_expr == u32::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
-            let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Enable(enable));
@@ -7873,7 +7873,7 @@ impl GetDeviceControlRequest {
         let (control_id, remaining) = u16::try_parse(value)?;
         let control_id = control_id.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetDeviceControlRequest {
             control_id,
@@ -7913,7 +7913,7 @@ impl TryParse for GetDeviceControlReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (control, remaining) = DeviceState::try_parse(remaining)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -7921,7 +7921,7 @@ impl TryParse for GetDeviceControlReply {
         let result = GetDeviceControlReply { xi_reply_type, sequence, length, status, control };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -7945,7 +7945,7 @@ impl TryParse for DeviceResolutionCtl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let control_id = control_id.try_into()?;
         let result = DeviceResolutionCtl { control_id, len, first_valuator, resolution_values };
@@ -8193,7 +8193,7 @@ impl TryParse for DeviceCoreCtrl {
         let (control_id, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let control_id = control_id.try_into()?;
         let result = DeviceCoreCtrl { control_id, len, status };
         Ok((result, remaining))
@@ -8242,7 +8242,7 @@ impl TryParse for DeviceEnableCtrl {
         let (control_id, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (enable, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let control_id = control_id.try_into()?;
         let result = DeviceEnableCtrl { control_id, len, enable };
         Ok((result, remaining))
@@ -8289,7 +8289,7 @@ impl TryParse for DeviceCtlDataResolution {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let result = DeviceCtlDataResolution { first_valuator, resolution_values };
         Ok((result, remaining))
@@ -8428,7 +8428,7 @@ pub struct DeviceCtlDataCore {
 impl TryParse for DeviceCtlDataCore {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let result = DeviceCtlDataCore { status };
         Ok((result, remaining))
     }
@@ -8563,7 +8563,7 @@ impl DeviceCtlData {
         if switch_expr == u32::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
-            let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Enable(enable));
@@ -8729,7 +8729,7 @@ impl ChangeDeviceControlRequest {
         let (control_id, remaining) = u16::try_parse(value)?;
         let control_id = control_id.try_into()?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (control, remaining) = DeviceCtl::try_parse(remaining)?;
         let _ = remaining;
         Ok(ChangeDeviceControlRequest {
@@ -8771,14 +8771,14 @@ impl TryParse for ChangeDeviceControlReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = ChangeDeviceControlReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -8827,7 +8827,7 @@ impl ListDevicePropertiesRequest {
             return Err(ParseError::ParseError);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(ListDevicePropertiesRequest {
             device_id,
@@ -8864,7 +8864,7 @@ impl TryParse for ListDevicePropertiesReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -8872,7 +8872,7 @@ impl TryParse for ListDevicePropertiesReply {
         let result = ListDevicePropertiesReply { xi_reply_type, sequence, length, atoms };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -8982,7 +8982,7 @@ impl ChangeDevicePropertyAux {
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(ChangeDevicePropertyAux::Data8(data8));
@@ -8994,7 +8994,7 @@ impl ChangeDevicePropertyAux {
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(ChangeDevicePropertyAux::Data16(data16));
@@ -9139,7 +9139,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let (format, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (items, remaining) = ChangeDevicePropertyAux::try_parse(remaining, format, num_items)?;
         let _ = remaining;
@@ -9229,7 +9229,7 @@ impl DeleteDevicePropertyRequest {
         }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(DeleteDevicePropertyRequest {
             property,
@@ -9322,7 +9322,7 @@ impl GetDevicePropertyRequest {
         let (len, remaining) = u32::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (delete, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetDevicePropertyRequest {
             property,
@@ -9373,7 +9373,7 @@ impl GetDevicePropertyItems {
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data8(data8));
@@ -9385,7 +9385,7 @@ impl GetDevicePropertyItems {
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data16(data16));
@@ -9447,7 +9447,7 @@ impl TryParse for GetDevicePropertyReply {
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
         let (items, remaining) = GetDevicePropertyItems::try_parse(remaining, format, num_items)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -9455,7 +9455,7 @@ impl TryParse for GetDevicePropertyReply {
         let result = GetDevicePropertyReply { xi_reply_type, sequence, length, type_, bytes_after, num_items, device_id, items };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -9685,7 +9685,7 @@ impl XIQueryPointerRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(XIQueryPointerRequest {
             window,
@@ -9730,7 +9730,7 @@ impl TryParse for XIQueryPointerReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (root, remaining) = xproto::Window::try_parse(remaining)?;
@@ -9740,7 +9740,7 @@ impl TryParse for XIQueryPointerReply {
         let (win_x, remaining) = Fp1616::try_parse(remaining)?;
         let (win_y, remaining) = Fp1616::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
@@ -9751,7 +9751,7 @@ impl TryParse for XIQueryPointerReply {
         let result = XIQueryPointerReply { sequence, length, root, child, root_x, root_y, win_x, win_y, same_screen, mods, group, buttons };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -9867,7 +9867,7 @@ impl XIWarpPointerRequest {
         let (dst_x, remaining) = Fp1616::try_parse(remaining)?;
         let (dst_y, remaining) = Fp1616::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(XIWarpPointerRequest {
             src_win,
@@ -9959,7 +9959,7 @@ impl XIChangeCursorRequest {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(XIChangeCursorRequest {
             window,
@@ -10138,7 +10138,7 @@ impl TryParse for AddMaster {
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.try_into()?;
         let result = AddMaster { type_, len, send_core, enable, name };
         Ok((result, remaining))
@@ -10200,7 +10200,7 @@ impl TryParse for RemoveMaster {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (return_mode, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (return_pointer, remaining) = DeviceId::try_parse(remaining)?;
         let (return_keyboard, remaining) = DeviceId::try_parse(remaining)?;
         let type_ = type_.try_into()?;
@@ -10313,7 +10313,7 @@ impl TryParse for DetachSlave {
         let (type_, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.try_into()?;
         let result = DetachSlave { type_, len, deviceid };
         Ok((result, remaining))
@@ -10368,7 +10368,7 @@ impl TryParse for HierarchyChangeDataAddMaster {
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let result = HierarchyChangeDataAddMaster { send_core, enable, name };
         Ok((result, remaining))
     }
@@ -10422,7 +10422,7 @@ impl TryParse for HierarchyChangeDataRemoveMaster {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (return_mode, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (return_pointer, remaining) = DeviceId::try_parse(remaining)?;
         let (return_keyboard, remaining) = DeviceId::try_parse(remaining)?;
         let return_mode = return_mode.try_into()?;
@@ -10507,7 +10507,7 @@ pub struct HierarchyChangeDataDetachSlave {
 impl TryParse for HierarchyChangeDataDetachSlave {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let result = HierarchyChangeDataDetachSlave { deviceid };
         Ok((result, remaining))
     }
@@ -10710,7 +10710,7 @@ impl<'input> XIChangeHierarchyRequest<'input> {
             return Err(ParseError::ParseError);
         }
         let (num_changes, remaining) = u8::try_parse(value)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (changes, remaining) = crate::x11_utils::parse_list::<HierarchyChange>(remaining, num_changes.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(XIChangeHierarchyRequest {
@@ -10784,7 +10784,7 @@ impl XISetClientPointerRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(XISetClientPointerRequest {
             window,
@@ -10880,20 +10880,20 @@ impl TryParse for XIGetClientPointerReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (set, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIGetClientPointerReply { sequence, length, set, deviceid };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -11108,7 +11108,7 @@ impl<'input> XISelectEventsRequest<'input> {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_mask, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_mask.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(XISelectEventsRequest {
@@ -11215,19 +11215,19 @@ impl TryParse for XIQueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIQueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -11704,7 +11704,7 @@ impl TryParse for ScrollClass {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (number, remaining) = u16::try_parse(remaining)?;
         let (scroll_type, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (increment, remaining) = Fp3232::try_parse(remaining)?;
         let type_ = type_.try_into()?;
@@ -11850,7 +11850,7 @@ impl TryParse for ValuatorClass {
         let (value, remaining) = Fp3232::try_parse(remaining)?;
         let (resolution, remaining) = u32::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.try_into()?;
         let mode = mode.try_into()?;
         let result = ValuatorClass { type_, len, sourceid, number, label, min, max, value, resolution, mode };
@@ -12054,7 +12054,7 @@ impl TryParse for DeviceClassDataValuator {
         let (value, remaining) = Fp3232::try_parse(remaining)?;
         let (resolution, remaining) = u32::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let mode = mode.try_into()?;
         let result = DeviceClassDataValuator { number, label, min, max, value, resolution, mode };
         Ok((result, remaining))
@@ -12140,7 +12140,7 @@ impl TryParse for DeviceClassDataScroll {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (number, remaining) = u16::try_parse(remaining)?;
         let (scroll_type, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (increment, remaining) = Fp3232::try_parse(remaining)?;
         let scroll_type = scroll_type.try_into()?;
@@ -12395,13 +12395,13 @@ impl TryParse for XIDeviceInfo {
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let type_ = type_.try_into()?;
         let result = XIDeviceInfo { deviceid, type_, attachment, enabled, name, classes };
@@ -12504,7 +12504,7 @@ impl XIQueryDeviceRequest {
             return Err(ParseError::ParseError);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(XIQueryDeviceRequest {
             deviceid,
@@ -12538,11 +12538,11 @@ impl TryParse for XIQueryDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_infos, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (infos, remaining) = crate::x11_utils::parse_list::<XIDeviceInfo>(remaining, num_infos.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -12550,7 +12550,7 @@ impl TryParse for XIQueryDeviceReply {
         let result = XIQueryDeviceReply { sequence, length, infos };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -12628,7 +12628,7 @@ impl XISetFocusRequest {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(XISetFocusRequest {
             window,
@@ -12696,7 +12696,7 @@ impl XIGetFocusRequest {
             return Err(ParseError::ParseError);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(XIGetFocusRequest {
             deviceid,
@@ -12730,18 +12730,18 @@ impl TryParse for XIGetFocusReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (focus, remaining) = xproto::Window::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = XIGetFocusReply { sequence, length, focus };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -12904,7 +12904,7 @@ impl<'input> XIGrabDeviceRequest<'input> {
         let paired_device_mode = paired_device_mode.try_into()?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let owner_events = u8::from(owner_events).try_into()?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (mask_len, remaining) = u16::try_parse(remaining)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
@@ -12969,11 +12969,11 @@ impl TryParse for XIGrabDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -12981,7 +12981,7 @@ impl TryParse for XIGrabDeviceReply {
         let result = XIGrabDeviceReply { sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -13037,7 +13037,7 @@ impl XIUngrabDeviceRequest {
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(XIUngrabDeviceRequest {
             time,
@@ -13206,7 +13206,7 @@ impl XIAllowEventsRequest {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (event_mode, remaining) = u8::try_parse(remaining)?;
         let event_mode = event_mode.try_into()?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (touchid, remaining) = u32::try_parse(remaining)?;
         let (grab_window, remaining) = xproto::Window::try_parse(remaining)?;
         let _ = remaining;
@@ -13415,7 +13415,7 @@ impl TryParse for GrabModifierInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (modifiers, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let status = status.try_into()?;
         let result = GrabModifierInfo { modifiers, status };
         Ok((result, remaining))
@@ -13555,7 +13555,7 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         let paired_device_mode = paired_device_mode.try_into()?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let owner_events = u8::from(owner_events).try_into()?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
@@ -13629,11 +13629,11 @@ impl TryParse for XIPassiveGrabDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_modifiers, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<GrabModifierInfo>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -13641,7 +13641,7 @@ impl TryParse for XIPassiveGrabDeviceReply {
         let result = XIPassiveGrabDeviceReply { sequence, length, modifiers };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -13735,7 +13735,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         let (num_modifiers, remaining) = u16::try_parse(remaining)?;
         let (grab_type, remaining) = u8::try_parse(remaining)?;
         let grab_type = grab_type.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(XIPassiveUngrabDeviceRequest {
@@ -13816,7 +13816,7 @@ impl XIListPropertiesRequest {
             return Err(ParseError::ParseError);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(XIListPropertiesRequest {
             deviceid,
@@ -13850,11 +13850,11 @@ impl TryParse for XIListPropertiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_properties, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_properties.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -13862,7 +13862,7 @@ impl TryParse for XIListPropertiesReply {
         let result = XIListPropertiesReply { sequence, length, properties };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -13907,7 +13907,7 @@ impl XIChangePropertyAux {
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIChangePropertyAux::Data8(data8));
@@ -13919,7 +13919,7 @@ impl XIChangePropertyAux {
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIChangePropertyAux::Data16(data16));
@@ -14154,7 +14154,7 @@ impl XIDeletePropertyRequest {
             return Err(ParseError::ParseError);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
         let _ = remaining;
         Ok(XIDeletePropertyRequest {
@@ -14246,7 +14246,7 @@ impl XIGetPropertyRequest {
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let (delete, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (offset, remaining) = u32::try_parse(remaining)?;
@@ -14303,7 +14303,7 @@ impl XIGetPropertyItems {
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data8(data8));
@@ -14315,7 +14315,7 @@ impl XIGetPropertyItems {
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data16(data16));
@@ -14367,14 +14367,14 @@ impl TryParse for XIGetPropertyReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
         let (items, remaining) = XIGetPropertyItems::try_parse(remaining, format, num_items)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -14382,7 +14382,7 @@ impl TryParse for XIGetPropertyReply {
         let result = XIGetPropertyReply { sequence, length, type_, bytes_after, num_items, items };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -14462,11 +14462,11 @@ impl TryParse for XIGetSelectedEventsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_masks, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_masks.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -14474,7 +14474,7 @@ impl TryParse for XIGetSelectedEventsReply {
         let result = XIGetSelectedEventsReply { sequence, length, masks };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -14509,7 +14509,7 @@ pub struct BarrierReleasePointerInfo {
 impl TryParse for BarrierReleasePointerInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (barrier, remaining) = xfixes::Barrier::try_parse(remaining)?;
         let (eventid, remaining) = u32::try_parse(remaining)?;
         let result = BarrierReleasePointerInfo { deviceid, barrier, eventid };
@@ -14661,7 +14661,7 @@ impl TryParse for DeviceValuatorEvent {
         let result = DeviceValuatorEvent { response_type, device_id, sequence, device_state, num_valuators, first_valuator, valuators };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -14826,7 +14826,7 @@ impl TryParse for DeviceKeyPressEvent {
         let result = DeviceKeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen, device_id };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -14932,13 +14932,13 @@ impl TryParse for DeviceFocusInEvent {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
         let detail = detail.try_into()?;
         let mode = mode.try_into()?;
         let result = DeviceFocusInEvent { response_type, detail, sequence, time, window, mode, device_id };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -15125,7 +15125,7 @@ impl TryParse for DeviceStateNotifyEvent {
         let result = DeviceStateNotifyEvent { response_type, device_id, sequence, time, num_keys, num_buttons, num_valuators, classes_reported, buttons, keys, valuators };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -15211,14 +15211,14 @@ impl TryParse for DeviceMappingNotifyEvent {
         let (request, remaining) = u8::try_parse(remaining)?;
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let request = request.try_into()?;
         let result = DeviceMappingNotifyEvent { response_type, device_id, sequence, request, first_keycode, count, time };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -15367,12 +15367,12 @@ impl TryParse for ChangeDeviceNotifyEvent {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (request, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let request = request.try_into()?;
         let result = ChangeDeviceNotifyEvent { response_type, device_id, sequence, time, request };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -15451,7 +15451,7 @@ impl TryParse for DeviceKeyStateNotifyEvent {
         let result = DeviceKeyStateNotifyEvent { response_type, device_id, sequence, keys };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -15528,7 +15528,7 @@ impl TryParse for DeviceButtonStateNotifyEvent {
         let result = DeviceButtonStateNotifyEvent { response_type, device_id, sequence, buttons };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -15674,18 +15674,18 @@ impl TryParse for DevicePresenceNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (devchange, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (control, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let devchange = devchange.try_into()?;
         let result = DevicePresenceNotifyEvent { response_type, sequence, time, devchange, device_id, control };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -15764,13 +15764,13 @@ impl TryParse for DevicePropertyNotifyEvent {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
-        let remaining = remaining.get(19..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(19..).ok_or(ParseError::InsufficientData)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let state = state.try_into()?;
         let result = DevicePropertyNotifyEvent { response_type, state, sequence, time, property, device_id };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -15920,13 +15920,13 @@ impl TryParse for DeviceChangedEvent {
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (reason, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let reason = reason.try_into()?;
         let result = DeviceChangedEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, reason, classes };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -16028,7 +16028,7 @@ impl TryParse for KeyPressEvent {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
@@ -16038,7 +16038,7 @@ impl TryParse for KeyPressEvent {
         let result = KeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -16157,7 +16157,7 @@ impl TryParse for ButtonPressEvent {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
@@ -16167,7 +16167,7 @@ impl TryParse for ButtonPressEvent {
         let result = ButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -16426,7 +16426,7 @@ impl TryParse for EnterEvent {
         let result = EnterEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -16559,7 +16559,7 @@ impl TryParse for HierarchyInfo {
         let (attachment, remaining) = DeviceId::try_parse(remaining)?;
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let type_ = type_.try_into()?;
         let result = HierarchyInfo { deviceid, attachment, type_, enabled, flags };
@@ -16632,12 +16632,12 @@ impl TryParse for HierarchyEvent {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (num_infos, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
         let (infos, remaining) = crate::x11_utils::parse_list::<HierarchyInfo>(remaining, num_infos.try_into().or(Err(ParseError::ParseError))?)?;
         let result = HierarchyEvent { response_type, extension, sequence, length, event_type, deviceid, time, flags, infos };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -16754,12 +16754,12 @@ impl TryParse for PropertyEvent {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
         let (what, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
         let what = what.try_into()?;
         let result = PropertyEvent { response_type, extension, sequence, length, event_type, deviceid, time, property, what };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -16802,14 +16802,14 @@ impl TryParse for RawKeyPressEvent {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawKeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -16871,14 +16871,14 @@ impl TryParse for RawButtonPressEvent {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -16991,7 +16991,7 @@ impl TryParse for TouchBeginEvent {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
@@ -17001,7 +17001,7 @@ impl TryParse for TouchBeginEvent {
         let result = TouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -17140,14 +17140,14 @@ impl TryParse for TouchOwnershipEvent {
         let (event, remaining) = xproto::Window::try_parse(remaining)?;
         let (child, remaining) = xproto::Window::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let flags = flags.try_into()?;
         let result = TouchOwnershipEvent { response_type, extension, sequence, length, event_type, deviceid, time, touchid, root, event, child, sourceid, flags };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -17190,14 +17190,14 @@ impl TryParse for RawTouchBeginEvent {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
         let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawTouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -17334,7 +17334,7 @@ impl TryParse for BarrierHitEvent {
         let (dtime, remaining) = u32::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (root_x, remaining) = Fp1616::try_parse(remaining)?;
         let (root_y, remaining) = Fp1616::try_parse(remaining)?;
         let (dx, remaining) = Fp3232::try_parse(remaining)?;
@@ -17342,7 +17342,7 @@ impl TryParse for BarrierHitEvent {
         let result = BarrierHitEvent { response_type, extension, sequence, length, event_type, deviceid, time, eventid, root, event, barrier, dtime, flags, sourceid, root_x, root_y, dx, dy };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -17458,7 +17458,7 @@ impl Serialize for EventForSend {
 impl TryParse for EventForSend {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let inner: [u8; 32] = value.get(..32)
-            .ok_or(ParseError::ParseError)?
+            .ok_or(ParseError::InsufficientData)?
             .try_into()
             .unwrap();
         let result = EventForSend(inner);
@@ -17632,7 +17632,7 @@ impl<'input> SendExtensionEventRequest<'input> {
         let (propagate, remaining) = bool::try_parse(remaining)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (num_events, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (events, remaining) = crate::x11_utils::parse_list::<EventForSend>(remaining, num_events.try_into().or(Err(ParseError::ParseError))?)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
@@ -17693,7 +17693,7 @@ impl TryParse for DeviceError {
         let result = DeviceError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -17770,7 +17770,7 @@ impl TryParse for EventError {
         let result = EventError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -17847,7 +17847,7 @@ impl TryParse for ModeError {
         let result = ModeError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -17924,7 +17924,7 @@ impl TryParse for DeviceBusyError {
         let result = DeviceBusyError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -18001,7 +18001,7 @@ impl TryParse for ClassError {
         let result = ClassError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }

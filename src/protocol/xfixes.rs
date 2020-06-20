@@ -116,19 +116,19 @@ impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -402,7 +402,7 @@ impl ChangeSaveSetRequest {
         let target = target.try_into()?;
         let (map, remaining) = u8::try_parse(remaining)?;
         let map = map.try_into()?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let _ = remaining;
         Ok(ChangeSaveSetRequest {
@@ -586,12 +586,12 @@ impl TryParse for SelectionNotifyEvent {
         let (selection, remaining) = xproto::Atom::try_parse(remaining)?;
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (selection_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let subtype = subtype.try_into()?;
         let result = SelectionNotifyEvent { response_type, subtype, sequence, window, owner, selection, timestamp, selection_timestamp };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -873,12 +873,12 @@ impl TryParse for CursorNotifyEvent {
         let (cursor_serial, remaining) = u32::try_parse(remaining)?;
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
-        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let subtype = subtype.try_into()?;
         let result = CursorNotifyEvent { response_type, subtype, sequence, window, cursor_serial, timestamp, name };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1074,7 +1074,7 @@ impl TryParse for GetCursorImageReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
@@ -1084,7 +1084,7 @@ impl TryParse for GetCursorImageReply {
         let (xhot, remaining) = u16::try_parse(remaining)?;
         let (yhot, remaining) = u16::try_parse(remaining)?;
         let (cursor_serial, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let (cursor_image, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(width).checked_mul(u32::from(height)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -1092,7 +1092,7 @@ impl TryParse for GetCursorImageReply {
         let result = GetCursorImageReply { sequence, length, x, y, width, height, xhot, yhot, cursor_serial, cursor_image };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1124,7 +1124,7 @@ impl TryParse for BadRegionError {
         let result = BadRegionError { error_code, sequence };
         let _ = remaining;
         let remaining = initial_value.get(32..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1443,7 +1443,7 @@ impl CreateRegionFromWindowRequest {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (kind, remaining) = shape::Kind::try_parse(remaining)?;
         let kind = kind.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(CreateRegionFromWindowRequest {
             region,
@@ -2335,11 +2335,11 @@ impl TryParse for FetchRegionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (extents, remaining) = xproto::Rectangle::try_parse(remaining)?;
-        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, length.checked_div(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -2347,7 +2347,7 @@ impl TryParse for FetchRegionReply {
         let result = FetchRegionReply { sequence, extents, rectangles };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2518,7 +2518,7 @@ impl SetWindowShapeRegionRequest {
         let (dest, remaining) = xproto::Window::try_parse(value)?;
         let (dest_kind, remaining) = shape::Kind::try_parse(remaining)?;
         let dest_kind = dest_kind.try_into()?;
-        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
         let (region, remaining) = Region::try_parse(remaining)?;
@@ -2686,7 +2686,7 @@ impl<'input> SetCursorNameRequest<'input> {
         }
         let (cursor, remaining) = xproto::Cursor::try_parse(value)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(SetCursorNameRequest {
@@ -2788,12 +2788,12 @@ impl TryParse for GetCursorNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (atom, remaining) = xproto::Atom::try_parse(remaining)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         if response_type != 1 {
@@ -2802,7 +2802,7 @@ impl TryParse for GetCursorNameReply {
         let result = GetCursorNameReply { sequence, length, atom, name };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -2895,7 +2895,7 @@ impl TryParse for GetCursorImageAndNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
@@ -2907,7 +2907,7 @@ impl TryParse for GetCursorImageAndNameReply {
         let (cursor_serial, remaining) = u32::try_parse(remaining)?;
         let (cursor_atom, remaining) = xproto::Atom::try_parse(remaining)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (cursor_image, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(width).checked_mul(u32::from(height)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
@@ -2917,7 +2917,7 @@ impl TryParse for GetCursorImageAndNameReply {
         let result = GetCursorImageAndNameReply { sequence, length, x, y, width, height, xhot, yhot, cursor_serial, cursor_atom, cursor_image, name };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -3060,7 +3060,7 @@ impl<'input> ChangeCursorByNameRequest<'input> {
         }
         let (src, remaining) = xproto::Cursor::try_parse(value)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;
         Ok(ChangeCursorByNameRequest {
@@ -3460,7 +3460,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         let (x2, remaining) = u16::try_parse(remaining)?;
         let (y2, remaining) = u16::try_parse(remaining)?;
         let (directions, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_devices, remaining) = u16::try_parse(remaining)?;
         let (devices, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_devices.try_into().or(Err(ParseError::ParseError))?)?;
         let _ = remaining;

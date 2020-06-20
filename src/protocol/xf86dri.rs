@@ -144,7 +144,7 @@ impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (dri_major_version, remaining) = u16::try_parse(remaining)?;
@@ -156,7 +156,7 @@ impl TryParse for QueryVersionReply {
         let result = QueryVersionReply { sequence, length, dri_major_version, dri_minor_version, dri_minor_patch };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -236,7 +236,7 @@ impl TryParse for QueryDirectRenderingCapableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (is_capable, remaining) = bool::try_parse(remaining)?;
@@ -246,7 +246,7 @@ impl TryParse for QueryDirectRenderingCapableReply {
         let result = QueryDirectRenderingCapableReply { sequence, length, is_capable };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -328,13 +328,13 @@ impl TryParse for OpenConnectionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (sarea_handle_low, remaining) = u32::try_parse(remaining)?;
         let (sarea_handle_high, remaining) = u32::try_parse(remaining)?;
         let (bus_id_len, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (bus_id, remaining) = crate::x11_utils::parse_u8_list(remaining, bus_id_len.try_into().or(Err(ParseError::ParseError))?)?;
         let bus_id = bus_id.to_vec();
         if response_type != 1 {
@@ -343,7 +343,7 @@ impl TryParse for OpenConnectionReply {
         let result = OpenConnectionReply { sequence, length, sarea_handle_low, sarea_handle_high, bus_id };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -500,14 +500,14 @@ impl TryParse for GetClientDriverNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (client_driver_major_version, remaining) = u32::try_parse(remaining)?;
         let (client_driver_minor_version, remaining) = u32::try_parse(remaining)?;
         let (client_driver_patch_version, remaining) = u32::try_parse(remaining)?;
         let (client_driver_name_len, remaining) = u32::try_parse(remaining)?;
-        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let (client_driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, client_driver_name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let client_driver_name = client_driver_name.to_vec();
         if response_type != 1 {
@@ -516,7 +516,7 @@ impl TryParse for GetClientDriverNameReply {
         let result = GetClientDriverNameReply { sequence, length, client_driver_major_version, client_driver_minor_version, client_driver_patch_version, client_driver_name };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -629,7 +629,7 @@ impl TryParse for CreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (hw_context, remaining) = u32::try_parse(remaining)?;
@@ -639,7 +639,7 @@ impl TryParse for CreateContextReply {
         let result = CreateContextReply { sequence, length, hw_context };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -796,7 +796,7 @@ impl TryParse for CreateDrawableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (hw_drawable_handle, remaining) = u32::try_parse(remaining)?;
@@ -806,7 +806,7 @@ impl TryParse for CreateDrawableReply {
         let result = CreateDrawableReply { sequence, length, hw_drawable_handle };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -972,7 +972,7 @@ impl TryParse for GetDrawableInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (drawable_table_index, remaining) = u32::try_parse(remaining)?;
@@ -993,7 +993,7 @@ impl TryParse for GetDrawableInfoReply {
         let result = GetDrawableInfoReply { sequence, length, drawable_table_index, drawable_table_stamp, drawable_origin_x, drawable_origin_y, drawable_size_w, drawable_size_h, back_x, back_y, clip_rects, back_clip_rects };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1106,7 +1106,7 @@ impl TryParse for GetDeviceInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (framebuffer_handle_low, remaining) = u32::try_parse(remaining)?;
@@ -1122,7 +1122,7 @@ impl TryParse for GetDeviceInfoReply {
         let result = GetDeviceInfoReply { sequence, length, framebuffer_handle_low, framebuffer_handle_high, framebuffer_origin_offset, framebuffer_size, framebuffer_stride, device_private };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -1226,7 +1226,7 @@ impl TryParse for AuthConnectionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (authenticated, remaining) = u32::try_parse(remaining)?;
@@ -1236,7 +1236,7 @@ impl TryParse for AuthConnectionReply {
         let result = AuthConnectionReply { sequence, length, authenticated };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
-            .ok_or(ParseError::ParseError)?;
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
