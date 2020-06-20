@@ -15,6 +15,7 @@ exclude = [
     "/xcb-proto-1.14-1-g2b3559c",
     "/Makefile",
     "/.mergify.yml",
+    "/appveyor.yml",
 ]
 
 [dependencies]
