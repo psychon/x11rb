@@ -268,7 +268,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (client_major_version, remaining) = u8::try_parse(value)?;
         let (client_minor_version, remaining) = u8::try_parse(remaining)?;
@@ -314,7 +314,7 @@ impl TryParse for QueryVersionReply {
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, server_major_version, server_minor_version };
         let _ = remaining;
@@ -365,7 +365,7 @@ impl QueryInfoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_INFO_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let _ = remaining;
@@ -414,7 +414,7 @@ impl TryParse for QueryInfoReply {
         let (kind, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let kind = kind.try_into()?;
         let result = QueryInfoReply { state, sequence, length, saver_window, ms_until_server, ms_since_user_input, event_mask, kind };
@@ -472,7 +472,7 @@ impl SelectInputRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_INPUT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
@@ -918,7 +918,7 @@ impl<'input> SetAttributesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_ATTRIBUTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (x, remaining) = i16::try_parse(remaining)?;
@@ -1021,7 +1021,7 @@ impl UnsetAttributesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNSET_ATTRIBUTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let _ = remaining;
@@ -1080,7 +1080,7 @@ impl SuspendRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SUSPEND_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (suspend, remaining) = u32::try_parse(value)?;
         let _ = remaining;

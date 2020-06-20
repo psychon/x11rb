@@ -1238,7 +1238,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         "if header.minor_opcode != {}_REQUEST {{",
                         super::camel_case_to_upper_snake(&name),
                     );
-                    outln!(out.indent(), "return Err(ParseError::ParseError);");
+                    outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                     outln!(out, "}}");
                 } else {
                     // The minor opcode could be repurposed to store data for this request, so there's
@@ -1248,7 +1248,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         "if header.major_opcode != {}_REQUEST {{",
                         super::camel_case_to_upper_snake(&name),
                     );
-                    outln!(out.indent(), "return Err(ParseError::ParseError);");
+                    outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                     outln!(out, "}}");
                 };
 
@@ -1309,7 +1309,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(out, "if odd_length {{");
                     out.indented(|out| {
                         outln!(out, "if string.is_empty() {{");
-                        outln!(out.indent(), "return Err(ParseError::ParseError);");
+                        outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                         outln!(out, "}}");
                         outln!(out, "string.truncate(string.len() - 1);");
                     });
@@ -4111,7 +4111,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 assert!(u8::try_from(*v).is_ok());
                 let rust_field_name = to_rust_variable_name(name);
                 outln!(out, "if {} != {} {{", rust_field_name, v);
-                outln!(out.indent(), "return Err(ParseError::ParseError);");
+                outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                 outln!(out, "}}");
             }
             _ => (),

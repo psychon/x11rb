@@ -155,7 +155,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(QueryVersionRequest
@@ -192,7 +192,7 @@ impl TryParse for QueryVersionReply {
         let (major, remaining) = u32::try_parse(remaining)?;
         let (minor, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major, minor };
         let _ = remaining;
@@ -243,7 +243,7 @@ impl ListSurfaceTypesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_SURFACE_TYPES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port_id, remaining) = xv::Port::try_parse(value)?;
         let _ = remaining;
@@ -284,7 +284,7 @@ impl TryParse for ListSurfaceTypesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (surfaces, remaining) = crate::x11_utils::parse_list::<SurfaceInfo>(remaining, num.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListSurfaceTypesReply { sequence, length, surfaces };
         let _ = remaining;
@@ -376,7 +376,7 @@ impl CreateContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context_id, remaining) = Context::try_parse(value)?;
         let (port_id, remaining) = xv::Port::try_parse(remaining)?;
@@ -436,7 +436,7 @@ impl TryParse for CreateContextReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = CreateContextReply { sequence, width_actual, height_actual, flags_return, priv_data };
         let _ = remaining;
@@ -502,7 +502,7 @@ impl DestroyContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context_id, remaining) = Context::try_parse(value)?;
         let _ = remaining;
@@ -567,7 +567,7 @@ impl CreateSurfaceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_SURFACE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (surface_id, remaining) = Surface::try_parse(value)?;
         let (context_id, remaining) = Context::try_parse(remaining)?;
@@ -609,7 +609,7 @@ impl TryParse for CreateSurfaceReply {
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = CreateSurfaceReply { sequence, priv_data };
         let _ = remaining;
@@ -675,7 +675,7 @@ impl DestroySurfaceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_SURFACE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (surface_id, remaining) = Surface::try_parse(value)?;
         let _ = remaining;
@@ -754,7 +754,7 @@ impl CreateSubpictureRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_SUBPICTURE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (subpicture_id, remaining) = Subpicture::try_parse(value)?;
         let (context, remaining) = Context::try_parse(remaining)?;
@@ -816,7 +816,7 @@ impl TryParse for CreateSubpictureReply {
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = CreateSubpictureReply { sequence, width_actual, height_actual, num_palette_entries, entry_bytes, component_order, priv_data };
         let _ = remaining;
@@ -882,7 +882,7 @@ impl DestroySubpictureRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_SUBPICTURE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (subpicture_id, remaining) = Subpicture::try_parse(value)?;
         let _ = remaining;
@@ -947,7 +947,7 @@ impl ListSubpictureTypesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_SUBPICTURE_TYPES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port_id, remaining) = xv::Port::try_parse(value)?;
         let (surface_id, remaining) = Surface::try_parse(remaining)?;
@@ -991,7 +991,7 @@ impl TryParse for ListSubpictureTypesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (types, remaining) = crate::x11_utils::parse_list::<xv::ImageFormatInfo>(remaining, num.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListSubpictureTypesReply { sequence, length, types };
         let _ = remaining;

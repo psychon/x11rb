@@ -433,7 +433,7 @@ impl PrintQueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(PrintQueryVersionRequest
@@ -470,7 +470,7 @@ impl TryParse for PrintQueryVersionReply {
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintQueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -533,7 +533,7 @@ impl<'input> PrintGetPrinterListRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_PRINTER_LIST_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (printer_name_len, remaining) = u32::try_parse(value)?;
         let (locale_len, remaining) = u32::try_parse(remaining)?;
@@ -586,7 +586,7 @@ impl TryParse for PrintGetPrinterListReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (printers, remaining) = crate::x11_utils::parse_list::<Printer>(remaining, list_count.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintGetPrinterListReply { sequence, length, printers };
         let _ = remaining;
@@ -645,7 +645,7 @@ impl PrintRehashPrinterListRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_REHASH_PRINTER_LIST_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(PrintRehashPrinterListRequest
@@ -718,7 +718,7 @@ impl<'input> CreateContextRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context_id, remaining) = u32::try_parse(value)?;
         let (printer_name_len, remaining) = u32::try_parse(remaining)?;
@@ -793,7 +793,7 @@ impl PrintSetContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SET_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = u32::try_parse(value)?;
         let _ = remaining;
@@ -845,7 +845,7 @@ impl PrintGetContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(PrintGetContextRequest
@@ -880,7 +880,7 @@ impl TryParse for PrintGetContextReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (context, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintGetContextReply { sequence, length, context };
         let _ = remaining;
@@ -931,7 +931,7 @@ impl PrintDestroyContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_DESTROY_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = u32::try_parse(value)?;
         let _ = remaining;
@@ -983,7 +983,7 @@ impl PrintGetScreenOfContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_SCREEN_OF_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(PrintGetScreenOfContextRequest
@@ -1018,7 +1018,7 @@ impl TryParse for PrintGetScreenOfContextReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (root, remaining) = xproto::Window::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintGetScreenOfContextReply { sequence, length, root };
         let _ = remaining;
@@ -1069,7 +1069,7 @@ impl PrintStartJobRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_START_JOB_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output_mode, remaining) = u8::try_parse(value)?;
         let _ = remaining;
@@ -1128,7 +1128,7 @@ impl PrintEndJobRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_END_JOB_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (cancel, remaining) = bool::try_parse(value)?;
         let _ = remaining;
@@ -1187,7 +1187,7 @@ impl PrintStartDocRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_START_DOC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (driver_mode, remaining) = u8::try_parse(value)?;
         let _ = remaining;
@@ -1246,7 +1246,7 @@ impl PrintEndDocRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_END_DOC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (cancel, remaining) = bool::try_parse(value)?;
         let _ = remaining;
@@ -1327,7 +1327,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_PUT_DOCUMENT_DATA_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (len_data, remaining) = u32::try_parse(remaining)?;
@@ -1413,7 +1413,7 @@ impl PrintGetDocumentDataRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_DOCUMENT_DATA_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (max_bytes, remaining) = u32::try_parse(remaining)?;
@@ -1462,7 +1462,7 @@ impl TryParse for PrintGetDocumentDataReply {
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintGetDocumentDataReply { sequence, length, status_code, finished_flag, data };
         let _ = remaining;
@@ -1528,7 +1528,7 @@ impl PrintStartPageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_START_PAGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1587,7 +1587,7 @@ impl PrintEndPageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_END_PAGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (cancel, remaining) = bool::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -1653,7 +1653,7 @@ impl PrintSelectInputRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SELECT_INPUT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
@@ -1715,7 +1715,7 @@ impl PrintInputSelectedRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_INPUT_SELECTED_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let _ = remaining;
@@ -1756,7 +1756,7 @@ impl TryParse for PrintInputSelectedReply {
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let (all_events_mask, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintInputSelectedReply { sequence, length, event_mask, all_events_mask };
         let _ = remaining;
@@ -1813,7 +1813,7 @@ impl PrintGetAttributesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_ATTRIBUTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (pool, remaining) = u8::try_parse(remaining)?;
@@ -1859,7 +1859,7 @@ impl TryParse for PrintGetAttributesReply {
         let (attributes, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let attributes = attributes.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintGetAttributesReply { sequence, length, attributes };
         let _ = remaining;
@@ -1941,7 +1941,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_ONE_ATTRIBUTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (name_len, remaining) = u32::try_parse(remaining)?;
@@ -1999,7 +1999,7 @@ impl TryParse for PrintGetOneAttributesReply {
         let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let value = value.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintGetOneAttributesReply { sequence, length, value };
         let _ = remaining;
@@ -2083,7 +2083,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SET_ATTRIBUTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (string_len, remaining) = u32::try_parse(remaining)?;
@@ -2165,7 +2165,7 @@ impl PrintGetPageDimensionsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_PAGE_DIMENSIONS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let _ = remaining;
@@ -2214,7 +2214,7 @@ impl TryParse for PrintGetPageDimensionsReply {
         let (reproducible_width, remaining) = u16::try_parse(remaining)?;
         let (reproducible_height, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintGetPageDimensionsReply { sequence, length, width, height, offset_x, offset_y, reproducible_width, reproducible_height };
         let _ = remaining;
@@ -2258,7 +2258,7 @@ impl PrintQueryScreensRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_QUERY_SCREENS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(PrintQueryScreensRequest
@@ -2295,7 +2295,7 @@ impl TryParse for PrintQueryScreensReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (roots, remaining) = crate::x11_utils::parse_list::<xproto::Window>(remaining, list_count.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintQueryScreensReply { sequence, length, roots };
         let _ = remaining;
@@ -2367,7 +2367,7 @@ impl PrintSetImageResolutionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SET_IMAGE_RESOLUTION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let (image_resolution, remaining) = u16::try_parse(remaining)?;
@@ -2410,7 +2410,7 @@ impl TryParse for PrintSetImageResolutionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (previous_resolutions, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintSetImageResolutionReply { status, sequence, length, previous_resolutions };
         let _ = remaining;
@@ -2461,7 +2461,7 @@ impl PrintGetImageResolutionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_IMAGE_RESOLUTION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Pcontext::try_parse(value)?;
         let _ = remaining;
@@ -2500,7 +2500,7 @@ impl TryParse for PrintGetImageResolutionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (image_resolution, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = PrintGetImageResolutionReply { sequence, length, image_resolution };
         let _ = remaining;
@@ -2689,7 +2689,7 @@ impl TryParse for BadContextError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadContextError { error_code, sequence };
         let _ = remaining;
@@ -2766,7 +2766,7 @@ impl TryParse for BadSequenceError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadSequenceError { error_code, sequence };
         let _ = remaining;

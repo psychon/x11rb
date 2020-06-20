@@ -125,7 +125,7 @@ impl<'input> GetExtensionVersionRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_EXTENSION_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -178,7 +178,7 @@ impl TryParse for GetExtensionVersionReply {
         let (present, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(19..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetExtensionVersionReply { xi_reply_type, sequence, length, server_major, server_minor, present };
         let _ = remaining;
@@ -1001,7 +1001,7 @@ impl ListInputDevicesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_INPUT_DEVICES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(ListInputDevicesRequest
@@ -1048,7 +1048,7 @@ impl TryParse for ListInputDevicesReply {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListInputDevicesReply { xi_reply_type, sequence, length, devices, infos, names };
         let _ = remaining;
@@ -1153,7 +1153,7 @@ impl OpenDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != OPEN_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -1201,7 +1201,7 @@ impl TryParse for OpenDeviceReply {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = OpenDeviceReply { xi_reply_type, sequence, length, class_info };
         let _ = remaining;
@@ -1267,7 +1267,7 @@ impl CloseDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CLOSE_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -1329,7 +1329,7 @@ impl SetDeviceModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_MODE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -1375,7 +1375,7 @@ impl TryParse for SetDeviceModeReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetDeviceModeReply { xi_reply_type, sequence, length, status };
@@ -1438,7 +1438,7 @@ impl<'input> SelectExtensionEventRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_EXTENSION_EVENT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
@@ -1509,7 +1509,7 @@ impl GetSelectedExtensionEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SELECTED_EXTENSION_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1554,7 +1554,7 @@ impl TryParse for GetSelectedExtensionEventsReply {
         let (this_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_this_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (all_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_all_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetSelectedExtensionEventsReply { xi_reply_type, sequence, length, this_classes, all_classes };
         let _ = remaining;
@@ -1716,7 +1716,7 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
@@ -1792,7 +1792,7 @@ impl GetDeviceDontPropagateListRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1834,7 +1834,7 @@ impl TryParse for GetDeviceDontPropagateListReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceDontPropagateListReply { xi_reply_type, sequence, length, classes };
         let _ = remaining;
@@ -1940,7 +1940,7 @@ impl GetDeviceMotionEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_MOTION_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (start, remaining) = xproto::Timestamp::try_parse(value)?;
         let (stop, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -2002,7 +2002,7 @@ impl TryParse for GetDeviceMotionEventsReply {
             events.push(v);
         }
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let device_mode = device_mode.try_into()?;
         let result = GetDeviceMotionEventsReply { xi_reply_type, sequence, length, num_axes, device_mode, events };
@@ -2069,7 +2069,7 @@ impl ChangeKeyboardDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_KEYBOARD_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -2111,7 +2111,7 @@ impl TryParse for ChangeKeyboardDeviceReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = ChangeKeyboardDeviceReply { xi_reply_type, sequence, length, status };
@@ -2167,7 +2167,7 @@ impl ChangePointerDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_POINTER_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (x_axis, remaining) = u8::try_parse(value)?;
         let (y_axis, remaining) = u8::try_parse(remaining)?;
@@ -2215,7 +2215,7 @@ impl TryParse for ChangePointerDeviceReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = ChangePointerDeviceReply { xi_reply_type, sequence, length, status };
@@ -2296,7 +2296,7 @@ impl<'input> GrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -2373,7 +2373,7 @@ impl TryParse for GrabDeviceReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = GrabDeviceReply { xi_reply_type, sequence, length, status };
@@ -2431,7 +2431,7 @@ impl UngrabDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -2588,7 +2588,7 @@ impl<'input> GrabDeviceKeyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_DEVICE_KEY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
@@ -2711,7 +2711,7 @@ impl UngrabDeviceKeyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_DEVICE_KEY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
@@ -2821,7 +2821,7 @@ impl<'input> GrabDeviceButtonRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_DEVICE_BUTTON_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (grabbed_device, remaining) = u8::try_parse(remaining)?;
@@ -2944,7 +2944,7 @@ impl UngrabDeviceButtonRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_DEVICE_BUTTON_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
@@ -3104,7 +3104,7 @@ impl AllowDeviceEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ALLOW_DEVICE_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -3173,7 +3173,7 @@ impl GetDeviceFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -3219,7 +3219,7 @@ impl TryParse for GetDeviceFocusReply {
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let revert_to = revert_to.try_into()?;
         let result = GetDeviceFocusReply { xi_reply_type, sequence, length, focus, time, revert_to };
@@ -3285,7 +3285,7 @@ impl SetDeviceFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (focus, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -4381,7 +4381,7 @@ impl GetFeedbackControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_FEEDBACK_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -4424,7 +4424,7 @@ impl TryParse for GetFeedbackControlReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (feedbacks, remaining) = crate::x11_utils::parse_list::<FeedbackState>(remaining, num_feedbacks.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetFeedbackControlReply { xi_reply_type, sequence, length, feedbacks };
         let _ = remaining;
@@ -5411,7 +5411,7 @@ impl ChangeFeedbackControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_FEEDBACK_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (mask, remaining) = u32::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -5486,7 +5486,7 @@ impl GetDeviceKeyMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_KEY_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
@@ -5535,7 +5535,7 @@ impl TryParse for GetDeviceKeyMappingReply {
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceKeyMappingReply { xi_reply_type, sequence, keysyms_per_keycode, keysyms };
         let _ = remaining;
@@ -5613,7 +5613,7 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_KEY_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
@@ -5694,7 +5694,7 @@ impl GetDeviceModifierMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_MODIFIER_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -5738,7 +5738,7 @@ impl TryParse for GetDeviceModifierMappingReply {
         let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let keymaps = keymaps.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceModifierMappingReply { xi_reply_type, sequence, length, keymaps };
         let _ = remaining;
@@ -5812,7 +5812,7 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_MODIFIER_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
@@ -5865,7 +5865,7 @@ impl TryParse for SetDeviceModifierMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetDeviceModifierMappingReply { xi_reply_type, sequence, length, status };
@@ -5917,7 +5917,7 @@ impl GetDeviceButtonMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_BUTTON_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -5966,7 +5966,7 @@ impl TryParse for GetDeviceButtonMappingReply {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceButtonMappingReply { xi_reply_type, sequence, length, map };
         let _ = remaining;
@@ -6038,7 +6038,7 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_BUTTON_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (map_size, remaining) = u8::try_parse(remaining)?;
@@ -6091,7 +6091,7 @@ impl TryParse for SetDeviceButtonMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetDeviceButtonMappingReply { xi_reply_type, sequence, length, status };
@@ -6731,7 +6731,7 @@ impl QueryDeviceStateRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_DEVICE_STATE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -6774,7 +6774,7 @@ impl TryParse for QueryDeviceStateReply {
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<InputState>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryDeviceStateReply { xi_reply_type, sequence, length, classes };
         let _ = remaining;
@@ -6846,7 +6846,7 @@ impl DeviceBellRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DEVICE_BELL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
@@ -6923,7 +6923,7 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_VALUATORS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
@@ -6980,7 +6980,7 @@ impl TryParse for SetDeviceValuatorsReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetDeviceValuatorsReply { xi_reply_type, sequence, length, status };
@@ -7868,7 +7868,7 @@ impl GetDeviceControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (control_id, remaining) = u16::try_parse(value)?;
         let control_id = control_id.try_into()?;
@@ -7916,7 +7916,7 @@ impl TryParse for GetDeviceControlReply {
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (control, remaining) = DeviceState::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceControlReply { xi_reply_type, sequence, length, status, control };
         let _ = remaining;
@@ -8724,7 +8724,7 @@ impl ChangeDeviceControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (control_id, remaining) = u16::try_parse(value)?;
         let control_id = control_id.try_into()?;
@@ -8773,7 +8773,7 @@ impl TryParse for ChangeDeviceControlReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ChangeDeviceControlReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
@@ -8824,7 +8824,7 @@ impl ListDevicePropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_DEVICE_PROPERTIES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -8867,7 +8867,7 @@ impl TryParse for ListDevicePropertiesReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListDevicePropertiesReply { xi_reply_type, sequence, length, atoms };
         let _ = remaining;
@@ -9131,7 +9131,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -9225,7 +9225,7 @@ impl DeleteDevicePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_DEVICE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -9314,7 +9314,7 @@ impl GetDevicePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -9450,7 +9450,7 @@ impl TryParse for GetDevicePropertyReply {
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
         let (items, remaining) = GetDevicePropertyItems::try_parse(remaining, format, num_items)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDevicePropertyReply { xi_reply_type, sequence, length, type_, bytes_after, num_items, device_id, items };
         let _ = remaining;
@@ -9681,7 +9681,7 @@ impl XIQueryPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_QUERY_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -9746,7 +9746,7 @@ impl TryParse for XIQueryPointerReply {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIQueryPointerReply { sequence, length, root, child, root_x, root_y, win_x, win_y, same_screen, mods, group, buttons };
         let _ = remaining;
@@ -9856,7 +9856,7 @@ impl XIWarpPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_WARP_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (src_win, remaining) = xproto::Window::try_parse(value)?;
         let (dst_win, remaining) = xproto::Window::try_parse(remaining)?;
@@ -9954,7 +9954,7 @@ impl XIChangeCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_CHANGE_CURSOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
@@ -10707,7 +10707,7 @@ impl<'input> XIChangeHierarchyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_CHANGE_HIERARCHY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (num_changes, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -10780,7 +10780,7 @@ impl XISetClientPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_SET_CLIENT_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -10845,7 +10845,7 @@ impl XIGetClientPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_CLIENT_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -10888,7 +10888,7 @@ impl TryParse for XIGetClientPointerReply {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIGetClientPointerReply { sequence, length, set, deviceid };
         let _ = remaining;
@@ -11104,7 +11104,7 @@ impl<'input> XISelectEventsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_SELECT_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_mask, remaining) = u16::try_parse(remaining)?;
@@ -11177,7 +11177,7 @@ impl XIQueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (major_version, remaining) = u16::try_parse(value)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
@@ -11222,7 +11222,7 @@ impl TryParse for XIQueryVersionReply {
         let (minor_version, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIQueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -12501,7 +12501,7 @@ impl XIQueryDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_QUERY_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -12545,7 +12545,7 @@ impl TryParse for XIQueryDeviceReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (infos, remaining) = crate::x11_utils::parse_list::<XIDeviceInfo>(remaining, num_infos.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIQueryDeviceReply { sequence, length, infos };
         let _ = remaining;
@@ -12623,7 +12623,7 @@ impl XISetFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_SET_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -12693,7 +12693,7 @@ impl XIGetFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -12736,7 +12736,7 @@ impl TryParse for XIGetFocusReply {
         let (focus, remaining) = xproto::Window::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIGetFocusReply { sequence, length, focus };
         let _ = remaining;
@@ -12892,7 +12892,7 @@ impl<'input> XIGrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -12975,7 +12975,7 @@ impl TryParse for XIGrabDeviceReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = XIGrabDeviceReply { sequence, length, status };
@@ -13033,7 +13033,7 @@ impl XIUngrabDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_UNGRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -13200,7 +13200,7 @@ impl XIAllowEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_ALLOW_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -13538,7 +13538,7 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_PASSIVE_GRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (grab_window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -13636,7 +13636,7 @@ impl TryParse for XIPassiveGrabDeviceReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<GrabModifierInfo>(remaining, num_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIPassiveGrabDeviceReply { sequence, length, modifiers };
         let _ = remaining;
@@ -13727,7 +13727,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_PASSIVE_UNGRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
@@ -13813,7 +13813,7 @@ impl XIListPropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_LIST_PROPERTIES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -13857,7 +13857,7 @@ impl TryParse for XIListPropertiesReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_properties.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIListPropertiesReply { sequence, length, properties };
         let _ = remaining;
@@ -14056,7 +14056,7 @@ impl<'input> XIChangePropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_CHANGE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -14151,7 +14151,7 @@ impl XIDeletePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_DELETE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -14242,7 +14242,7 @@ impl XIGetPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let (delete, remaining) = bool::try_parse(remaining)?;
@@ -14377,7 +14377,7 @@ impl TryParse for XIGetPropertyReply {
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
         let (items, remaining) = XIGetPropertyItems::try_parse(remaining, format, num_items)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIGetPropertyReply { sequence, length, type_, bytes_after, num_items, items };
         let _ = remaining;
@@ -14428,7 +14428,7 @@ impl XIGetSelectedEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_SELECTED_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -14469,7 +14469,7 @@ impl TryParse for XIGetSelectedEventsReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_masks.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIGetSelectedEventsReply { sequence, length, masks };
         let _ = remaining;
@@ -14592,7 +14592,7 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_BARRIER_RELEASE_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (num_barriers, remaining) = u32::try_parse(value)?;
         let (barriers, remaining) = crate::x11_utils::parse_list::<BarrierReleasePointerInfo>(remaining, num_barriers.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -17625,7 +17625,7 @@ impl<'input> SendExtensionEventRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SEND_EXTENSION_EVENT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (destination, remaining) = xproto::Window::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -17688,7 +17688,7 @@ impl TryParse for DeviceError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = DeviceError { error_code, sequence };
         let _ = remaining;
@@ -17765,7 +17765,7 @@ impl TryParse for EventError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = EventError { error_code, sequence };
         let _ = remaining;
@@ -17842,7 +17842,7 @@ impl TryParse for ModeError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ModeError { error_code, sequence };
         let _ = remaining;
@@ -17919,7 +17919,7 @@ impl TryParse for DeviceBusyError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = DeviceBusyError { error_code, sequence };
         let _ = remaining;
@@ -17996,7 +17996,7 @@ impl TryParse for ClassError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ClassError { error_code, sequence };
         let _ = remaining;

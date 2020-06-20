@@ -542,7 +542,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
@@ -586,7 +586,7 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -732,7 +732,7 @@ impl<'input> PixmapRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PIXMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
@@ -901,7 +901,7 @@ impl NotifyMSCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != NOTIFY_MSC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (serial, remaining) = u32::try_parse(remaining)?;
@@ -987,7 +987,7 @@ impl SelectInputRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_INPUT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (eid, remaining) = Event::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -1054,7 +1054,7 @@ impl QueryCapabilitiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CAPABILITIES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (target, remaining) = u32::try_parse(value)?;
         let _ = remaining;
@@ -1093,7 +1093,7 @@ impl TryParse for QueryCapabilitiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (capabilities, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryCapabilitiesReply { sequence, length, capabilities };
         let _ = remaining;

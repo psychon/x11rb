@@ -78,7 +78,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (client_major_version, remaining) = u32::try_parse(value)?;
         let (client_minor_version, remaining) = u32::try_parse(remaining)?;
@@ -123,7 +123,7 @@ impl TryParse for QueryVersionReply {
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -394,7 +394,7 @@ impl ChangeSaveSetRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_SAVE_SET_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (mode, remaining) = u8::try_parse(value)?;
         let mode = mode.try_into()?;
@@ -700,7 +700,7 @@ impl SelectSelectionInputRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_SELECTION_INPUT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (selection, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -980,7 +980,7 @@ impl SelectCursorInputRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_CURSOR_INPUT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
@@ -1037,7 +1037,7 @@ impl GetCursorImageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CURSOR_IMAGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(GetCursorImageRequest
@@ -1087,7 +1087,7 @@ impl TryParse for GetCursorImageReply {
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let (cursor_image, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(width).checked_mul(u32::from(height)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetCursorImageReply { sequence, length, x, y, width, height, xhot, yhot, cursor_serial, cursor_image };
         let _ = remaining;
@@ -1119,7 +1119,7 @@ impl TryParse for BadRegionError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadRegionError { error_code, sequence };
         let _ = remaining;
@@ -1281,7 +1281,7 @@ impl<'input> CreateRegionRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (region, remaining) = Region::try_parse(value)?;
         let mut remaining = remaining;
@@ -1363,7 +1363,7 @@ impl CreateRegionFromBitmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_FROM_BITMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (region, remaining) = Region::try_parse(value)?;
         let (bitmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
@@ -1437,7 +1437,7 @@ impl CreateRegionFromWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_FROM_WINDOW_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (region, remaining) = Region::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -1510,7 +1510,7 @@ impl CreateRegionFromGCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_FROM_GC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (region, remaining) = Region::try_parse(value)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
@@ -1578,7 +1578,7 @@ impl CreateRegionFromPictureRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_FROM_PICTURE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (region, remaining) = Region::try_parse(value)?;
         let (picture, remaining) = render::Picture::try_parse(remaining)?;
@@ -1640,7 +1640,7 @@ impl DestroyRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (region, remaining) = Region::try_parse(value)?;
         let _ = remaining;
@@ -1704,7 +1704,7 @@ impl<'input> SetRegionRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (region, remaining) = Region::try_parse(value)?;
         let mut remaining = remaining;
@@ -1786,7 +1786,7 @@ impl CopyRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COPY_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (source, remaining) = Region::try_parse(value)?;
         let (destination, remaining) = Region::try_parse(remaining)?;
@@ -1860,7 +1860,7 @@ impl UnionRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNION_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (source1, remaining) = Region::try_parse(value)?;
         let (source2, remaining) = Region::try_parse(remaining)?;
@@ -1937,7 +1937,7 @@ impl IntersectRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != INTERSECT_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (source1, remaining) = Region::try_parse(value)?;
         let (source2, remaining) = Region::try_parse(remaining)?;
@@ -2014,7 +2014,7 @@ impl SubtractRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SUBTRACT_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (source1, remaining) = Region::try_parse(value)?;
         let (source2, remaining) = Region::try_parse(remaining)?;
@@ -2095,7 +2095,7 @@ impl InvertRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != INVERT_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (source, remaining) = Region::try_parse(value)?;
         let (bounds, remaining) = xproto::Rectangle::try_parse(remaining)?;
@@ -2168,7 +2168,7 @@ impl TranslateRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRANSLATE_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (region, remaining) = Region::try_parse(value)?;
         let (dx, remaining) = i16::try_parse(remaining)?;
@@ -2239,7 +2239,7 @@ impl RegionExtentsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != REGION_EXTENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (source, remaining) = Region::try_parse(value)?;
         let (destination, remaining) = Region::try_parse(remaining)?;
@@ -2301,7 +2301,7 @@ impl FetchRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FETCH_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (region, remaining) = Region::try_parse(value)?;
         let _ = remaining;
@@ -2342,7 +2342,7 @@ impl TryParse for FetchRegionReply {
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, length.checked_div(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = FetchRegionReply { sequence, extents, rectangles };
         let _ = remaining;
@@ -2423,7 +2423,7 @@ impl SetGCClipRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_GC_CLIP_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (gc, remaining) = xproto::Gcontext::try_parse(value)?;
         let (region, remaining) = Region::try_parse(remaining)?;
@@ -2513,7 +2513,7 @@ impl SetWindowShapeRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_WINDOW_SHAPE_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (dest, remaining) = xproto::Window::try_parse(value)?;
         let (dest_kind, remaining) = shape::Kind::try_parse(remaining)?;
@@ -2602,7 +2602,7 @@ impl SetPictureClipRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PICTURE_CLIP_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (picture, remaining) = render::Picture::try_parse(value)?;
         let (region, remaining) = Region::try_parse(remaining)?;
@@ -2682,7 +2682,7 @@ impl<'input> SetCursorNameRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CURSOR_NAME_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (cursor, remaining) = xproto::Cursor::try_parse(value)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
@@ -2753,7 +2753,7 @@ impl GetCursorNameRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CURSOR_NAME_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (cursor, remaining) = xproto::Cursor::try_parse(value)?;
         let _ = remaining;
@@ -2797,7 +2797,7 @@ impl TryParse for GetCursorNameReply {
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetCursorNameReply { sequence, length, atom, name };
         let _ = remaining;
@@ -2856,7 +2856,7 @@ impl GetCursorImageAndNameRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CURSOR_IMAGE_AND_NAME_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(GetCursorImageAndNameRequest
@@ -2912,7 +2912,7 @@ impl TryParse for GetCursorImageAndNameReply {
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetCursorImageAndNameReply { sequence, length, x, y, width, height, xhot, yhot, cursor_serial, cursor_atom, cursor_image, name };
         let _ = remaining;
@@ -2984,7 +2984,7 @@ impl ChangeCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_CURSOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (source, remaining) = xproto::Cursor::try_parse(value)?;
         let (destination, remaining) = xproto::Cursor::try_parse(remaining)?;
@@ -3056,7 +3056,7 @@ impl<'input> ChangeCursorByNameRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_CURSOR_BY_NAME_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (src, remaining) = xproto::Cursor::try_parse(value)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
@@ -3149,7 +3149,7 @@ impl ExpandRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != EXPAND_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (source, remaining) = Region::try_parse(value)?;
         let (destination, remaining) = Region::try_parse(remaining)?;
@@ -3223,7 +3223,7 @@ impl HideCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != HIDE_CURSOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -3282,7 +3282,7 @@ impl ShowCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SHOW_CURSOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -3451,7 +3451,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_POINTER_BARRIER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (barrier, remaining) = Barrier::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -3548,7 +3548,7 @@ impl DeletePointerBarrierRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_POINTER_BARRIER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (barrier, remaining) = Barrier::try_parse(value)?;
         let _ = remaining;

@@ -300,7 +300,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(QueryVersionRequest
@@ -337,7 +337,7 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -411,7 +411,7 @@ impl<'input> RectanglesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != RECTANGLES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (operation, remaining) = Op::try_parse(value)?;
         let operation = operation.try_into()?;
@@ -533,7 +533,7 @@ impl MaskRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != MASK_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (operation, remaining) = Op::try_parse(value)?;
         let operation = operation.try_into()?;
@@ -636,7 +636,7 @@ impl CombineRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMBINE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (operation, remaining) = Op::try_parse(value)?;
         let operation = operation.try_into()?;
@@ -731,7 +731,7 @@ impl OffsetRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != OFFSET_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (destination_kind, remaining) = Kind::try_parse(value)?;
         let destination_kind = destination_kind.try_into()?;
@@ -801,7 +801,7 @@ impl QueryExtentsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_EXTENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -859,7 +859,7 @@ impl TryParse for QueryExtentsReply {
         let (clip_shape_extents_width, remaining) = u16::try_parse(remaining)?;
         let (clip_shape_extents_height, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryExtentsReply { sequence, length, bounding_shaped, clip_shaped, bounding_shape_extents_x, bounding_shape_extents_y, bounding_shape_extents_width, bounding_shape_extents_height, clip_shape_extents_x, clip_shape_extents_y, clip_shape_extents_width, clip_shape_extents_height };
         let _ = remaining;
@@ -916,7 +916,7 @@ impl SelectInputRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_INPUT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
@@ -979,7 +979,7 @@ impl InputSelectedRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != INPUT_SELECTED_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (destination_window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1017,7 +1017,7 @@ impl TryParse for InputSelectedReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = InputSelectedReply { enabled, sequence, length };
         let _ = remaining;
@@ -1074,7 +1074,7 @@ impl GetRectanglesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_RECTANGLES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (source_kind, remaining) = Kind::try_parse(remaining)?;
@@ -1121,7 +1121,7 @@ impl TryParse for GetRectanglesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, rectangles_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let ordering = ordering.try_into()?;
         let result = GetRectanglesReply { ordering, sequence, length, rectangles };

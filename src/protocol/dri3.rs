@@ -76,7 +76,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
@@ -120,7 +120,7 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -177,7 +177,7 @@ impl OpenRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != OPEN_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (provider, remaining) = u32::try_parse(remaining)?;
@@ -222,7 +222,7 @@ impl TryParseFd for OpenReply {
         let device_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = OpenReply { nfd, sequence, length, device_fd };
         let _ = remaining;
@@ -305,7 +305,7 @@ impl PixmapFromBufferRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         if header.minor_opcode != PIXMAP_FROM_BUFFER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
@@ -391,7 +391,7 @@ impl BufferFromPixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != BUFFER_FROM_PIXMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
         let _ = remaining;
@@ -445,7 +445,7 @@ impl TryParseFd for BufferFromPixmapReply {
         let pixmap_fd = fds.remove(0);
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BufferFromPixmapReply { nfd, sequence, length, size, width, height, stride, depth, bpp, pixmap_fd };
         let _ = remaining;
@@ -510,7 +510,7 @@ impl FenceFromFDRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         if header.minor_opcode != FENCE_FROM_FD_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (fence, remaining) = u32::try_parse(remaining)?;
@@ -588,7 +588,7 @@ impl FDFromFenceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FD_FROM_FENCE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (fence, remaining) = u32::try_parse(remaining)?;
@@ -633,7 +633,7 @@ impl TryParseFd for FDFromFenceReply {
         let fence_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = FDFromFenceReply { nfd, sequence, length, fence_fd };
         let _ = remaining;
@@ -693,7 +693,7 @@ impl GetSupportedModifiersRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SUPPORTED_MODIFIERS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = u32::try_parse(value)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
@@ -744,7 +744,7 @@ impl TryParse for GetSupportedModifiersReply {
         let (window_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (screen_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetSupportedModifiersReply { sequence, length, window_modifiers, screen_modifiers };
         let _ = remaining;
@@ -910,7 +910,7 @@ impl PixmapFromBuffersRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         if header.minor_opcode != PIXMAP_FROM_BUFFERS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -1020,7 +1020,7 @@ impl BuffersFromPixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != BUFFERS_FROM_PIXMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (pixmap, remaining) = xproto::Pixmap::try_parse(value)?;
         let _ = remaining;
@@ -1078,7 +1078,7 @@ impl TryParseFd for BuffersFromPixmapReply {
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BuffersFromPixmapReply { sequence, length, width, height, modifier, depth, bpp, strides, offsets, buffers };
         let _ = remaining;

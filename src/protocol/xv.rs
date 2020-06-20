@@ -1186,7 +1186,7 @@ impl TryParse for BadPortError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadPortError { error_code, sequence };
         let _ = remaining;
@@ -1263,7 +1263,7 @@ impl TryParse for BadEncodingError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadEncodingError { error_code, sequence };
         let _ = remaining;
@@ -1340,7 +1340,7 @@ impl TryParse for BadControlError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadControlError { error_code, sequence };
         let _ = remaining;
@@ -1601,7 +1601,7 @@ impl QueryExtensionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_EXTENSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(QueryExtensionRequest
@@ -1638,7 +1638,7 @@ impl TryParse for QueryExtensionReply {
         let (major, remaining) = u16::try_parse(remaining)?;
         let (minor, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryExtensionReply { sequence, length, major, minor };
         let _ = remaining;
@@ -1689,7 +1689,7 @@ impl QueryAdaptorsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_ADAPTORS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1730,7 +1730,7 @@ impl TryParse for QueryAdaptorsReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (info, remaining) = crate::x11_utils::parse_list::<AdaptorInfo>(remaining, num_adaptors.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryAdaptorsReply { sequence, length, info };
         let _ = remaining;
@@ -1796,7 +1796,7 @@ impl QueryEncodingsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_ENCODINGS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let _ = remaining;
@@ -1837,7 +1837,7 @@ impl TryParse for QueryEncodingsReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (info, remaining) = crate::x11_utils::parse_list::<EncodingInfo>(remaining, num_encodings.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryEncodingsReply { sequence, length, info };
         let _ = remaining;
@@ -1909,7 +1909,7 @@ impl GrabPortRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_PORT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -1952,7 +1952,7 @@ impl TryParse for GrabPortReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = result.try_into()?;
         let result = GrabPortReply { result, sequence, length };
@@ -2010,7 +2010,7 @@ impl UngrabPortRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_PORT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -2118,7 +2118,7 @@ impl PutVideoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PUT_VIDEO_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
@@ -2251,7 +2251,7 @@ impl PutStillRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PUT_STILL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
@@ -2384,7 +2384,7 @@ impl GetVideoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VIDEO_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
@@ -2517,7 +2517,7 @@ impl GetStillRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_STILL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
@@ -2612,7 +2612,7 @@ impl StopVideoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != STOP_VIDEO_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
@@ -2680,7 +2680,7 @@ impl SelectVideoNotifyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_VIDEO_NOTIFY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (onoff, remaining) = bool::try_parse(remaining)?;
@@ -2749,7 +2749,7 @@ impl SelectPortNotifyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_PORT_NOTIFY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (onoff, remaining) = bool::try_parse(remaining)?;
@@ -2834,7 +2834,7 @@ impl QueryBestSizeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_BEST_SIZE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (vid_w, remaining) = u16::try_parse(remaining)?;
@@ -2891,7 +2891,7 @@ impl TryParse for QueryBestSizeReply {
         let (actual_width, remaining) = u16::try_parse(remaining)?;
         let (actual_height, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryBestSizeReply { sequence, length, actual_width, actual_height };
         let _ = remaining;
@@ -2954,7 +2954,7 @@ impl SetPortAttributeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PORT_ATTRIBUTE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -3025,7 +3025,7 @@ impl GetPortAttributeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PORT_ATTRIBUTE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -3067,7 +3067,7 @@ impl TryParse for GetPortAttributeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value, remaining) = i32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetPortAttributeReply { sequence, length, value };
         let _ = remaining;
@@ -3118,7 +3118,7 @@ impl QueryPortAttributesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_PORT_ATTRIBUTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let _ = remaining;
@@ -3161,7 +3161,7 @@ impl TryParse for QueryPortAttributesReply {
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (attributes, remaining) = crate::x11_utils::parse_list::<AttributeInfo>(remaining, num_attributes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryPortAttributesReply { sequence, length, text_size, attributes };
         let _ = remaining;
@@ -3227,7 +3227,7 @@ impl ListImageFormatsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_IMAGE_FORMATS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let _ = remaining;
@@ -3268,7 +3268,7 @@ impl TryParse for ListImageFormatsReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (format, remaining) = crate::x11_utils::parse_list::<ImageFormatInfo>(remaining, num_formats.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListImageFormatsReply { sequence, length, format };
         let _ = remaining;
@@ -3348,7 +3348,7 @@ impl QueryImageAttributesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_IMAGE_ATTRIBUTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (id, remaining) = u32::try_parse(remaining)?;
@@ -3406,7 +3406,7 @@ impl TryParse for QueryImageAttributesReply {
         let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryImageAttributesReply { sequence, length, data_size, width, height, pitches, offsets };
         let _ = remaining;
@@ -3534,7 +3534,7 @@ impl<'input> PutImageRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PUT_IMAGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
@@ -3731,7 +3731,7 @@ impl ShmPutImageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SHM_PUT_IMAGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (port, remaining) = Port::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;

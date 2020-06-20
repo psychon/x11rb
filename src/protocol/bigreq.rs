@@ -62,7 +62,7 @@ impl EnableRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ENABLE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(EnableRequest
@@ -97,7 +97,7 @@ impl TryParse for EnableReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (maximum_request_length, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = EnableReply { sequence, length, maximum_request_length };
         let _ = remaining;

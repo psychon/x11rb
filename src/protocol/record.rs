@@ -438,7 +438,7 @@ impl TryParse for BadContextError {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (invalid_record, remaining) = u32::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadContextError { error_code, sequence, invalid_record };
         let _ = remaining;
@@ -539,7 +539,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (major_version, remaining) = u16::try_parse(value)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
@@ -583,7 +583,7 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -660,7 +660,7 @@ impl<'input> CreateContextRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Context::try_parse(value)?;
         let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
@@ -766,7 +766,7 @@ impl<'input> RegisterClientsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != REGISTER_CLIENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Context::try_parse(value)?;
         let (element_header, remaining) = ElementHeader::try_parse(remaining)?;
@@ -857,7 +857,7 @@ impl<'input> UnregisterClientsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNREGISTER_CLIENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Context::try_parse(value)?;
         let (num_client_specs, remaining) = u32::try_parse(remaining)?;
@@ -927,7 +927,7 @@ impl GetContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Context::try_parse(value)?;
         let _ = remaining;
@@ -972,7 +972,7 @@ impl TryParse for GetContextReply {
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (intercepted_clients, remaining) = crate::x11_utils::parse_list::<ClientInfo>(remaining, num_intercepted_clients.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetContextReply { enabled, sequence, length, element_header, intercepted_clients };
         let _ = remaining;
@@ -1038,7 +1038,7 @@ impl EnableContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ENABLE_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Context::try_parse(value)?;
         let _ = remaining;
@@ -1090,7 +1090,7 @@ impl TryParse for EnableContextReply {
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = EnableContextReply { category, sequence, element_header, client_swapped, xid_base, server_time, rec_sequence_num, data };
         let _ = remaining;
@@ -1157,7 +1157,7 @@ impl DisableContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DISABLE_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Context::try_parse(value)?;
         let _ = remaining;
@@ -1216,7 +1216,7 @@ impl FreeContextRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FREE_CONTEXT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (context, remaining) = Context::try_parse(value)?;
         let _ = remaining;

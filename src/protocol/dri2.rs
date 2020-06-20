@@ -411,7 +411,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
@@ -455,7 +455,7 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u32::try_parse(remaining)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -512,7 +512,7 @@ impl ConnectRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CONNECT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (driver_type, remaining) = u32::try_parse(remaining)?;
@@ -565,7 +565,7 @@ impl TryParse for ConnectReply {
         let (device_name, remaining) = crate::x11_utils::parse_u8_list(remaining, device_name_length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let device_name = device_name.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ConnectReply { sequence, length, driver_name, alignment_pad, device_name };
         let _ = remaining;
@@ -650,7 +650,7 @@ impl AuthenticateRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != AUTHENTICATE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (magic, remaining) = u32::try_parse(remaining)?;
@@ -692,7 +692,7 @@ impl TryParse for AuthenticateReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (authenticated, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = AuthenticateReply { sequence, length, authenticated };
         let _ = remaining;
@@ -743,7 +743,7 @@ impl CreateDrawableRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_DRAWABLE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let _ = remaining;
@@ -802,7 +802,7 @@ impl DestroyDrawableRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_DRAWABLE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let _ = remaining;
@@ -872,7 +872,7 @@ impl<'input> GetBuffersRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_BUFFERS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (count, remaining) = u32::try_parse(remaining)?;
@@ -938,7 +938,7 @@ impl TryParse for GetBuffersReply {
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetBuffersReply { sequence, length, width, height, buffers };
         let _ = remaining;
@@ -1022,7 +1022,7 @@ impl CopyRegionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COPY_REGION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (region, remaining) = u32::try_parse(remaining)?;
@@ -1068,7 +1068,7 @@ impl TryParse for CopyRegionReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = CopyRegionReply { sequence, length };
         let _ = remaining;
@@ -1130,7 +1130,7 @@ impl<'input> GetBuffersWithFormatRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_BUFFERS_WITH_FORMAT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (count, remaining) = u32::try_parse(remaining)?;
@@ -1196,7 +1196,7 @@ impl TryParse for GetBuffersWithFormatReply {
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetBuffersWithFormatReply { sequence, length, width, height, buffers };
         let _ = remaining;
@@ -1298,7 +1298,7 @@ impl SwapBuffersRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SWAP_BUFFERS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (target_msc_hi, remaining) = u32::try_parse(remaining)?;
@@ -1357,7 +1357,7 @@ impl TryParse for SwapBuffersReply {
         let (swap_hi, remaining) = u32::try_parse(remaining)?;
         let (swap_lo, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = SwapBuffersReply { sequence, length, swap_hi, swap_lo };
         let _ = remaining;
@@ -1408,7 +1408,7 @@ impl GetMSCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MSC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let _ = remaining;
@@ -1457,7 +1457,7 @@ impl TryParse for GetMSCReply {
         let (sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (sbc_lo, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetMSCReply { sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
         let _ = remaining;
@@ -1544,7 +1544,7 @@ impl WaitMSCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != WAIT_MSC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (target_msc_hi, remaining) = u32::try_parse(remaining)?;
@@ -1611,7 +1611,7 @@ impl TryParse for WaitMSCReply {
         let (sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (sbc_lo, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = WaitMSCReply { sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
         let _ = remaining;
@@ -1674,7 +1674,7 @@ impl WaitSBCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != WAIT_SBC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (target_sbc_hi, remaining) = u32::try_parse(remaining)?;
@@ -1729,7 +1729,7 @@ impl TryParse for WaitSBCReply {
         let (sbc_hi, remaining) = u32::try_parse(remaining)?;
         let (sbc_lo, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = WaitSBCReply { sequence, length, ust_hi, ust_lo, msc_hi, msc_lo, sbc_hi, sbc_lo };
         let _ = remaining;
@@ -1786,7 +1786,7 @@ impl SwapIntervalRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SWAP_INTERVAL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (interval, remaining) = u32::try_parse(remaining)?;
@@ -1854,7 +1854,7 @@ impl GetParamRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PARAM_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (param, remaining) = u32::try_parse(remaining)?;
@@ -1899,7 +1899,7 @@ impl TryParse for GetParamReply {
         let (value_hi, remaining) = u32::try_parse(remaining)?;
         let (value_lo, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetParamReply { is_param_recognized, sequence, length, value_hi, value_lo };
         let _ = remaining;

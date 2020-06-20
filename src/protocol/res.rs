@@ -468,7 +468,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (client_major, remaining) = u8::try_parse(value)?;
         let (client_minor, remaining) = u8::try_parse(remaining)?;
@@ -512,7 +512,7 @@ impl TryParse for QueryVersionReply {
         let (server_major, remaining) = u16::try_parse(remaining)?;
         let (server_minor, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, server_major, server_minor };
         let _ = remaining;
@@ -556,7 +556,7 @@ impl QueryClientsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CLIENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(QueryClientsRequest
@@ -593,7 +593,7 @@ impl TryParse for QueryClientsReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (clients, remaining) = crate::x11_utils::parse_list::<Client>(remaining, num_clients.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryClientsReply { sequence, length, clients };
         let _ = remaining;
@@ -659,7 +659,7 @@ impl QueryClientResourcesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CLIENT_RESOURCES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (xid, remaining) = u32::try_parse(value)?;
         let _ = remaining;
@@ -700,7 +700,7 @@ impl TryParse for QueryClientResourcesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (types, remaining) = crate::x11_utils::parse_list::<Type>(remaining, num_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryClientResourcesReply { sequence, length, types };
         let _ = remaining;
@@ -766,7 +766,7 @@ impl QueryClientPixmapBytesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CLIENT_PIXMAP_BYTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (xid, remaining) = u32::try_parse(value)?;
         let _ = remaining;
@@ -807,7 +807,7 @@ impl TryParse for QueryClientPixmapBytesReply {
         let (bytes, remaining) = u32::try_parse(remaining)?;
         let (bytes_overflow, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryClientPixmapBytesReply { sequence, length, bytes, bytes_overflow };
         let _ = remaining;
@@ -863,7 +863,7 @@ impl<'input> QueryClientIdsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CLIENT_IDS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (num_specs, remaining) = u32::try_parse(value)?;
         let (specs, remaining) = crate::x11_utils::parse_list::<ClientIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -911,7 +911,7 @@ impl TryParse for QueryClientIdsReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (ids, remaining) = crate::x11_utils::parse_list::<ClientIdValue>(remaining, num_ids.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryClientIdsReply { sequence, length, ids };
         let _ = remaining;
@@ -988,7 +988,7 @@ impl<'input> QueryResourceBytesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_RESOURCE_BYTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (client, remaining) = u32::try_parse(value)?;
         let (num_specs, remaining) = u32::try_parse(remaining)?;
@@ -1040,7 +1040,7 @@ impl TryParse for QueryResourceBytesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (sizes, remaining) = crate::x11_utils::parse_list::<ResourceSizeValue>(remaining, num_sizes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryResourceBytesReply { sequence, length, sizes };
         let _ = remaining;

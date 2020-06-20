@@ -60,7 +60,7 @@ impl TryParse for BadOutputError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadOutputError { error_code, sequence };
         let _ = remaining;
@@ -137,7 +137,7 @@ impl TryParse for BadCrtcError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadCrtcError { error_code, sequence };
         let _ = remaining;
@@ -214,7 +214,7 @@ impl TryParse for BadModeError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadModeError { error_code, sequence };
         let _ = remaining;
@@ -291,7 +291,7 @@ impl TryParse for BadProviderError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadProviderError { error_code, sequence };
         let _ = remaining;
@@ -567,7 +567,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
@@ -612,7 +612,7 @@ impl TryParse for QueryVersionReply {
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -757,7 +757,7 @@ impl SetScreenConfigRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_SCREEN_CONFIG_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -822,7 +822,7 @@ impl TryParse for SetScreenConfigReply {
         let (subpixel_order, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let subpixel_order = subpixel_order.try_into()?;
@@ -962,7 +962,7 @@ impl SelectInputRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_INPUT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (enable, remaining) = u16::try_parse(remaining)?;
@@ -1027,7 +1027,7 @@ impl GetScreenInfoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_INFO_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1085,7 +1085,7 @@ impl TryParse for GetScreenInfoReply {
         let (sizes, remaining) = crate::x11_utils::parse_list::<ScreenSize>(remaining, n_sizes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (rates, remaining) = crate::x11_utils::parse_list::<RefreshRates>(remaining, u32::from(n_info).checked_sub(u32::from(n_sizes)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetScreenInfoReply { rotations, sequence, length, root, timestamp, config_timestamp, size_id, rotation, rate, n_info, sizes, rates };
         let _ = remaining;
@@ -1151,7 +1151,7 @@ impl GetScreenSizeRangeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_SIZE_RANGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1197,7 +1197,7 @@ impl TryParse for GetScreenSizeRangeReply {
         let (max_height, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetScreenSizeRangeReply { sequence, length, min_width, min_height, max_width, max_height };
         let _ = remaining;
@@ -1268,7 +1268,7 @@ impl SetScreenSizeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_SCREEN_SIZE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -1532,7 +1532,7 @@ impl GetScreenResourcesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_RESOURCES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1587,7 +1587,7 @@ impl TryParse for GetScreenResourcesReply {
         let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let names = names.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetScreenResourcesReply { sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
         let _ = remaining;
@@ -1763,7 +1763,7 @@ impl GetOutputInfoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_OUTPUT_INFO_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output, remaining) = Output::try_parse(value)?;
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -1831,7 +1831,7 @@ impl TryParse for GetOutputInfoReply {
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let connection = connection.try_into()?;
@@ -1939,7 +1939,7 @@ impl ListOutputPropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_OUTPUT_PROPERTIES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output, remaining) = Output::try_parse(value)?;
         let _ = remaining;
@@ -1980,7 +1980,7 @@ impl TryParse for ListOutputPropertiesReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListOutputPropertiesReply { sequence, length, atoms };
         let _ = remaining;
@@ -2052,7 +2052,7 @@ impl QueryOutputPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_OUTPUT_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output, remaining) = Output::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -2100,7 +2100,7 @@ impl TryParse for QueryOutputPropertyReply {
         let remaining = remaining.get(21..).ok_or(ParseError::InsufficientData)?;
         let (valid_values, remaining) = crate::x11_utils::parse_list::<i32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryOutputPropertyReply { sequence, pending, range, immutable, valid_values };
         let _ = remaining;
@@ -2185,7 +2185,7 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CONFIGURE_OUTPUT_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output, remaining) = Output::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -2305,7 +2305,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_OUTPUT_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output, remaining) = Output::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -2402,7 +2402,7 @@ impl DeleteOutputPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_OUTPUT_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output, remaining) = Output::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -2496,7 +2496,7 @@ impl GetOutputPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_OUTPUT_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output, remaining) = Output::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -2565,7 +2565,7 @@ impl TryParse for GetOutputPropertyReply {
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetOutputPropertyReply { format, sequence, length, type_, bytes_after, num_items, data };
         let _ = remaining;
@@ -2654,7 +2654,7 @@ impl<'input> CreateModeRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_MODE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (mode_info, remaining) = ModeInfo::try_parse(remaining)?;
@@ -2708,7 +2708,7 @@ impl TryParse for CreateModeReply {
         let (mode, remaining) = Mode::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = CreateModeReply { sequence, length, mode };
         let _ = remaining;
@@ -2759,7 +2759,7 @@ impl DestroyModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_MODE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (mode, remaining) = Mode::try_parse(value)?;
         let _ = remaining;
@@ -2824,7 +2824,7 @@ impl AddOutputModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ADD_OUTPUT_MODE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output, remaining) = Output::try_parse(value)?;
         let (mode, remaining) = Mode::try_parse(remaining)?;
@@ -2892,7 +2892,7 @@ impl DeleteOutputModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_OUTPUT_MODE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (output, remaining) = Output::try_parse(value)?;
         let (mode, remaining) = Mode::try_parse(remaining)?;
@@ -2960,7 +2960,7 @@ impl GetCrtcInfoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CRTC_INFO_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -3023,7 +3023,7 @@ impl TryParse for GetCrtcInfoReply {
         let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (possible, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_possible_outputs.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = GetCrtcInfoReply { status, sequence, length, timestamp, x, y, width, height, mode, rotation, rotations, outputs, possible };
@@ -3140,7 +3140,7 @@ impl<'input> SetCrtcConfigRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CRTC_CONFIG_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -3225,7 +3225,7 @@ impl TryParse for SetCrtcConfigReply {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetCrtcConfigReply { status, sequence, length, timestamp };
@@ -3277,7 +3277,7 @@ impl GetCrtcGammaSizeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CRTC_GAMMA_SIZE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let _ = remaining;
@@ -3317,7 +3317,7 @@ impl TryParse for GetCrtcGammaSizeReply {
         let (size, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetCrtcGammaSizeReply { sequence, length, size };
         let _ = remaining;
@@ -3368,7 +3368,7 @@ impl GetCrtcGammaRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CRTC_GAMMA_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let _ = remaining;
@@ -3413,7 +3413,7 @@ impl TryParse for GetCrtcGammaReply {
         let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetCrtcGammaReply { sequence, length, red, green, blue };
         let _ = remaining;
@@ -3498,7 +3498,7 @@ impl<'input> SetCrtcGammaRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CRTC_GAMMA_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let (size, remaining) = u16::try_parse(remaining)?;
@@ -3577,7 +3577,7 @@ impl GetScreenResourcesCurrentRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_RESOURCES_CURRENT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -3632,7 +3632,7 @@ impl TryParse for GetScreenResourcesCurrentReply {
         let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let names = names.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetScreenResourcesCurrentReply { sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
         let _ = remaining;
@@ -3859,7 +3859,7 @@ impl<'input> SetCrtcTransformRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CRTC_TRANSFORM_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let (transform, remaining) = render::Transform::try_parse(remaining)?;
@@ -3949,7 +3949,7 @@ impl GetCrtcTransformRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CRTC_TRANSFORM_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let _ = remaining;
@@ -4017,7 +4017,7 @@ impl TryParse for GetCrtcTransformReply {
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (current_params, remaining) = crate::x11_utils::parse_list::<render::Fixed>(remaining, current_nparams.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetCrtcTransformReply { sequence, length, pending_transform, has_transforms, current_transform, pending_filter_name, pending_params, current_filter_name, current_params };
         let _ = remaining;
@@ -4122,7 +4122,7 @@ impl GetPanningRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PANNING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let _ = remaining;
@@ -4186,7 +4186,7 @@ impl TryParse for GetPanningReply {
         let (border_right, remaining) = i16::try_parse(remaining)?;
         let (border_bottom, remaining) = i16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = GetPanningReply { status, sequence, length, timestamp, left, top, width, height, track_left, track_top, track_width, track_height, border_left, border_top, border_right, border_bottom };
@@ -4292,7 +4292,7 @@ impl SetPanningRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PANNING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (crtc, remaining) = Crtc::try_parse(value)?;
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -4371,7 +4371,7 @@ impl TryParse for SetPanningReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetPanningReply { status, sequence, length, timestamp };
@@ -4429,7 +4429,7 @@ impl SetOutputPrimaryRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_OUTPUT_PRIMARY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (output, remaining) = Output::try_parse(remaining)?;
@@ -4491,7 +4491,7 @@ impl GetOutputPrimaryRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_OUTPUT_PRIMARY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -4530,7 +4530,7 @@ impl TryParse for GetOutputPrimaryReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (output, remaining) = Output::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetOutputPrimaryReply { sequence, length, output };
         let _ = remaining;
@@ -4581,7 +4581,7 @@ impl GetProvidersRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROVIDERS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -4624,7 +4624,7 @@ impl TryParse for GetProvidersReply {
         let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
         let (providers, remaining) = crate::x11_utils::parse_list::<Provider>(remaining, num_providers.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetProvidersReply { sequence, length, timestamp, providers };
         let _ = remaining;
@@ -4765,7 +4765,7 @@ impl GetProviderInfoRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROVIDER_INFO_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (provider, remaining) = Provider::try_parse(value)?;
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -4826,7 +4826,7 @@ impl TryParse for GetProviderInfoReply {
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetProviderInfoReply { status, sequence, length, timestamp, capabilities, crtcs, outputs, associated_providers, associated_capability, name };
         let _ = remaining;
@@ -4943,7 +4943,7 @@ impl SetProviderOffloadSinkRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PROVIDER_OFFLOAD_SINK_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (provider, remaining) = Provider::try_parse(value)?;
         let (sink_provider, remaining) = Provider::try_parse(remaining)?;
@@ -5020,7 +5020,7 @@ impl SetProviderOutputSourceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PROVIDER_OUTPUT_SOURCE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (provider, remaining) = Provider::try_parse(value)?;
         let (source_provider, remaining) = Provider::try_parse(remaining)?;
@@ -5085,7 +5085,7 @@ impl ListProviderPropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_PROVIDER_PROPERTIES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (provider, remaining) = Provider::try_parse(value)?;
         let _ = remaining;
@@ -5126,7 +5126,7 @@ impl TryParse for ListProviderPropertiesReply {
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListProviderPropertiesReply { sequence, length, atoms };
         let _ = remaining;
@@ -5198,7 +5198,7 @@ impl QueryProviderPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_PROVIDER_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (provider, remaining) = Provider::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -5246,7 +5246,7 @@ impl TryParse for QueryProviderPropertyReply {
         let remaining = remaining.get(21..).ok_or(ParseError::InsufficientData)?;
         let (valid_values, remaining) = crate::x11_utils::parse_list::<i32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryProviderPropertyReply { sequence, pending, range, immutable, valid_values };
         let _ = remaining;
@@ -5331,7 +5331,7 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CONFIGURE_PROVIDER_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (provider, remaining) = Provider::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -5451,7 +5451,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_PROVIDER_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (provider, remaining) = Provider::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -5547,7 +5547,7 @@ impl DeleteProviderPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_PROVIDER_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (provider, remaining) = Provider::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -5641,7 +5641,7 @@ impl GetProviderPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROVIDER_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (provider, remaining) = Provider::try_parse(value)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -5708,7 +5708,7 @@ impl TryParse for GetProviderPropertyReply {
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetProviderPropertyReply { format, sequence, length, type_, bytes_after, num_items, data };
         let _ = remaining;
@@ -6491,7 +6491,7 @@ impl GetMonitorsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MONITORS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (get_active, remaining) = bool::try_parse(remaining)?;
@@ -6539,7 +6539,7 @@ impl TryParse for GetMonitorsReply {
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (monitors, remaining) = crate::x11_utils::parse_list::<MonitorInfo>(remaining, n_monitors.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetMonitorsReply { sequence, length, timestamp, n_outputs, monitors };
         let _ = remaining;
@@ -6610,7 +6610,7 @@ impl SetMonitorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_MONITOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (monitorinfo, remaining) = MonitorInfo::try_parse(remaining)?;
@@ -6678,7 +6678,7 @@ impl DeleteMonitorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_MONITOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -6762,7 +6762,7 @@ impl<'input> CreateLeaseRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_LEASE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (lid, remaining) = Lease::try_parse(remaining)?;
@@ -6824,7 +6824,7 @@ impl TryParseFd for CreateLeaseReply {
         let master_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = CreateLeaseReply { nfd, sequence, length, master_fd };
         let _ = remaining;
@@ -6882,7 +6882,7 @@ impl FreeLeaseRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FREE_LEASE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (lid, remaining) = Lease::try_parse(value)?;
         let (terminate, remaining) = u8::try_parse(remaining)?;

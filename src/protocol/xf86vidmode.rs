@@ -395,7 +395,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(QueryVersionRequest
@@ -432,7 +432,7 @@ impl TryParse for QueryVersionReply {
         let (major_version, remaining) = u16::try_parse(remaining)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -483,7 +483,7 @@ impl GetModeLineRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MODE_LINE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -549,7 +549,7 @@ impl TryParse for GetModeLineReply {
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let private = private.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetModeLineReply { sequence, length, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private };
         let _ = remaining;
@@ -681,7 +681,7 @@ impl<'input> ModModeLineRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != MOD_MODE_LINE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u32::try_parse(value)?;
         let (hdisplay, remaining) = u16::try_parse(remaining)?;
@@ -797,7 +797,7 @@ impl SwitchModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SWITCH_MODE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let (zoom, remaining) = u16::try_parse(remaining)?;
@@ -859,7 +859,7 @@ impl GetMonitorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MONITOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -915,7 +915,7 @@ impl TryParse for GetMonitorReply {
         let (model, remaining) = crate::x11_utils::parse_u8_list(remaining, model_length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let model = model.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetMonitorReply { sequence, length, hsync, vsync, vendor, alignment_pad, model };
         let _ = remaining;
@@ -1022,7 +1022,7 @@ impl LockModeSwitchRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LOCK_MODE_SWITCH_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let (lock, remaining) = u16::try_parse(remaining)?;
@@ -1084,7 +1084,7 @@ impl GetAllModeLinesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_ALL_MODE_LINES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -1126,7 +1126,7 @@ impl TryParse for GetAllModeLinesReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (modeinfo, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, modecount.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetAllModeLinesReply { sequence, length, modeinfo };
         let _ = remaining;
@@ -1326,7 +1326,7 @@ impl<'input> AddModeLineRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ADD_MODE_LINE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u32::try_parse(value)?;
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
@@ -1564,7 +1564,7 @@ impl<'input> DeleteModeLineRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_MODE_LINE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u32::try_parse(value)?;
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
@@ -1754,7 +1754,7 @@ impl<'input> ValidateModeLineRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != VALIDATE_MODE_LINE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u32::try_parse(value)?;
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
@@ -1853,7 +1853,7 @@ impl TryParse for ValidateModeLineReply {
         let (status, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ValidateModeLineReply { sequence, length, status };
         let _ = remaining;
@@ -1976,7 +1976,7 @@ impl<'input> SwitchToModeRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SWITCH_TO_MODE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u32::try_parse(value)?;
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
@@ -2094,7 +2094,7 @@ impl GetViewPortRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VIEW_PORT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -2137,7 +2137,7 @@ impl TryParse for GetViewPortReply {
         let (y, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetViewPortReply { sequence, length, x, y };
         let _ = remaining;
@@ -2200,7 +2200,7 @@ impl SetViewPortRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_VIEW_PORT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -2266,7 +2266,7 @@ impl GetDotClocksRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DOT_CLOCKS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -2313,7 +2313,7 @@ impl TryParse for GetDotClocksReply {
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(flags & 1u32).ok_or(ParseError::ParseError)?.checked_mul(clocks).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDotClocksReply { sequence, length, flags, clocks, maxclocks, clock };
         let _ = remaining;
@@ -2366,7 +2366,7 @@ impl SetClientVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CLIENT_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (major, remaining) = u16::try_parse(value)?;
         let (minor, remaining) = u16::try_parse(remaining)?;
@@ -2458,7 +2458,7 @@ impl SetGammaRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_GAMMA_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -2552,7 +2552,7 @@ impl GetGammaRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_GAMMA_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(26..).ok_or(ParseError::InsufficientData)?;
@@ -2597,7 +2597,7 @@ impl TryParse for GetGammaReply {
         let (blue, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetGammaReply { sequence, length, red, green, blue };
         let _ = remaining;
@@ -2650,7 +2650,7 @@ impl GetGammaRampRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_GAMMA_RAMP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let (size, remaining) = u16::try_parse(remaining)?;
@@ -2699,7 +2699,7 @@ impl TryParse for GetGammaRampReply {
         let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetGammaRampReply { sequence, length, size, red, green, blue };
         let _ = remaining;
@@ -2766,7 +2766,7 @@ impl<'input> SetGammaRampRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_GAMMA_RAMP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let (size, remaining) = u16::try_parse(remaining)?;
@@ -2847,7 +2847,7 @@ impl GetGammaRampSizeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_GAMMA_RAMP_SIZE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -2888,7 +2888,7 @@ impl TryParse for GetGammaRampSizeReply {
         let (size, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetGammaRampSizeReply { sequence, length, size };
         let _ = remaining;
@@ -2939,7 +2939,7 @@ impl GetPermissionsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PERMISSIONS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -2980,7 +2980,7 @@ impl TryParse for GetPermissionsReply {
         let (permissions, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetPermissionsReply { sequence, length, permissions };
         let _ = remaining;
@@ -3010,7 +3010,7 @@ impl TryParse for BadClockError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadClockError { error_code, sequence };
         let _ = remaining;
@@ -3087,7 +3087,7 @@ impl TryParse for BadHTimingsError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadHTimingsError { error_code, sequence };
         let _ = remaining;
@@ -3164,7 +3164,7 @@ impl TryParse for BadVTimingsError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = BadVTimingsError { error_code, sequence };
         let _ = remaining;
@@ -3241,7 +3241,7 @@ impl TryParse for ModeUnsuitableError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ModeUnsuitableError { error_code, sequence };
         let _ = remaining;
@@ -3318,7 +3318,7 @@ impl TryParse for ExtensionDisabledError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ExtensionDisabledError { error_code, sequence };
         let _ = remaining;
@@ -3395,7 +3395,7 @@ impl TryParse for ClientNotLocalError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ClientNotLocalError { error_code, sequence };
         let _ = remaining;
@@ -3472,7 +3472,7 @@ impl TryParse for ZoomLockedError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ZoomLockedError { error_code, sequence };
         let _ = remaining;

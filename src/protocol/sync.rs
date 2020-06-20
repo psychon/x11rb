@@ -568,7 +568,7 @@ impl TryParse for CounterError {
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = CounterError { error_code, sequence, bad_counter, minor_opcode, major_opcode };
         let _ = remaining;
@@ -654,7 +654,7 @@ impl TryParse for AlarmError {
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = AlarmError { error_code, sequence, bad_alarm, minor_opcode, major_opcode };
         let _ = remaining;
@@ -757,7 +757,7 @@ impl InitializeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != INITIALIZE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (desired_major_version, remaining) = u8::try_parse(value)?;
         let (desired_minor_version, remaining) = u8::try_parse(remaining)?;
@@ -802,7 +802,7 @@ impl TryParse for InitializeReply {
         let (minor_version, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = InitializeReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -846,7 +846,7 @@ impl ListSystemCountersRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_SYSTEM_COUNTERS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(ListSystemCountersRequest
@@ -883,7 +883,7 @@ impl TryParse for ListSystemCountersReply {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let (counters, remaining) = crate::x11_utils::parse_list::<Systemcounter>(remaining, counters_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListSystemCountersReply { sequence, length, counters };
         let _ = remaining;
@@ -959,7 +959,7 @@ impl CreateCounterRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_COUNTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (id, remaining) = Counter::try_parse(value)?;
         let (initial_value, remaining) = Int64::try_parse(remaining)?;
@@ -1021,7 +1021,7 @@ impl DestroyCounterRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_COUNTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (counter, remaining) = Counter::try_parse(value)?;
         let _ = remaining;
@@ -1080,7 +1080,7 @@ impl QueryCounterRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_COUNTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (counter, remaining) = Counter::try_parse(value)?;
         let _ = remaining;
@@ -1119,7 +1119,7 @@ impl TryParse for QueryCounterReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (counter_value, remaining) = Int64::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryCounterReply { sequence, length, counter_value };
         let _ = remaining;
@@ -1169,7 +1169,7 @@ impl<'input> AwaitRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != AWAIT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let mut remaining = value;
         // Length is 'everything left in the input'
@@ -1251,7 +1251,7 @@ impl ChangeCounterRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_COUNTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (counter, remaining) = Counter::try_parse(value)?;
         let (amount, remaining) = Int64::try_parse(remaining)?;
@@ -1323,7 +1323,7 @@ impl SetCounterRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_COUNTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (counter, remaining) = Counter::try_parse(value)?;
         let (value, remaining) = Int64::try_parse(remaining)?;
@@ -1554,7 +1554,7 @@ impl<'input> CreateAlarmRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_ALARM_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (id, remaining) = Alarm::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
@@ -1793,7 +1793,7 @@ impl<'input> ChangeAlarmRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_ALARM_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (id, remaining) = Alarm::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
@@ -1863,7 +1863,7 @@ impl DestroyAlarmRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_ALARM_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (alarm, remaining) = Alarm::try_parse(value)?;
         let _ = remaining;
@@ -1922,7 +1922,7 @@ impl QueryAlarmRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_ALARM_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (alarm, remaining) = Alarm::try_parse(value)?;
         let _ = remaining;
@@ -1968,7 +1968,7 @@ impl TryParse for QueryAlarmReply {
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let state = state.try_into()?;
         let result = QueryAlarmReply { sequence, length, trigger, delta, events, state };
@@ -2026,7 +2026,7 @@ impl SetPriorityRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PRIORITY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (id, remaining) = u32::try_parse(value)?;
         let (priority, remaining) = i32::try_parse(remaining)?;
@@ -2088,7 +2088,7 @@ impl GetPriorityRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PRIORITY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (id, remaining) = u32::try_parse(value)?;
         let _ = remaining;
@@ -2127,7 +2127,7 @@ impl TryParse for GetPriorityReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (priority, remaining) = i32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetPriorityReply { sequence, length, priority };
         let _ = remaining;
@@ -2190,7 +2190,7 @@ impl CreateFenceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_FENCE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (fence, remaining) = Fence::try_parse(remaining)?;
@@ -2255,7 +2255,7 @@ impl TriggerFenceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRIGGER_FENCE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (fence, remaining) = Fence::try_parse(value)?;
         let _ = remaining;
@@ -2314,7 +2314,7 @@ impl ResetFenceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != RESET_FENCE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (fence, remaining) = Fence::try_parse(value)?;
         let _ = remaining;
@@ -2373,7 +2373,7 @@ impl DestroyFenceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_FENCE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (fence, remaining) = Fence::try_parse(value)?;
         let _ = remaining;
@@ -2432,7 +2432,7 @@ impl QueryFenceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_FENCE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (fence, remaining) = Fence::try_parse(value)?;
         let _ = remaining;
@@ -2472,7 +2472,7 @@ impl TryParse for QueryFenceReply {
         let (triggered, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryFenceReply { sequence, length, triggered };
         let _ = remaining;
@@ -2522,7 +2522,7 @@ impl<'input> AwaitFenceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != AWAIT_FENCE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let mut remaining = value;
         // Length is 'everything left in the input'
