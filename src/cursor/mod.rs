@@ -148,15 +148,16 @@ impl Handle {
             0,
             1 << 20,
         )?;
-        let mut render_info = None;
-        if conn
+        let render_info = if conn
             .extension_information(render::X11_EXTENSION_NAME)?
             .is_some()
         {
             let render_version = render::query_version(conn, 0, 8)?;
             let render_pict_format = render::query_pict_formats(conn)?;
-            render_info = Some((render_version, render_pict_format));
-        }
+            Some((render_version, render_pict_format))
+        } else {
+            None
+        };
         Ok(Cookie {
             conn,
             screen,
@@ -292,9 +293,8 @@ fn load_cursor<C: Connection>(
 
     // Load the cursor from the file
     use std::io::BufReader;
-    let images =
-        parse_cursor::parse_cursor(&mut BufReader::new(cursor_file), handle.cursor_size)
-            .or(Err(crate::errors::ParseError::ParseError))?;
+    let images = parse_cursor::parse_cursor(&mut BufReader::new(cursor_file), handle.cursor_size)
+        .or(Err(crate::errors::ParseError::ParseError))?;
     let mut images = &images[..];
 
     // No animated cursor support? Only use the first image
