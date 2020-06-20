@@ -634,13 +634,13 @@ impl TryParse for AdaptorInfo {
         let (num_formats, remaining) = u16::try_parse(remaining)?;
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_size.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, num_formats.try_into().or(Err(ParseError::ParseError))?)?;
+        let (formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, num_formats.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = AdaptorInfo { base_id, num_ports, type_, name, formats };
         Ok((result, remaining))
     }
@@ -719,7 +719,7 @@ impl TryParse for EncodingInfo {
         let (height, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (rate, remaining) = Rational::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_size.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -787,9 +787,9 @@ impl TryParse for Image {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (data_size, remaining) = u32::try_parse(remaining)?;
         let (num_planes, remaining) = u32::try_parse(remaining)?;
-        let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
-        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_size.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         let result = Image { id, width, height, pitches, offsets, data };
         Ok((result, remaining))
@@ -866,7 +866,7 @@ impl TryParse for AttributeInfo {
         let (min, remaining) = i32::try_parse(remaining)?;
         let (max, remaining) = i32::try_parse(remaining)?;
         let (size, remaining) = u32::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, size.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -1728,7 +1728,7 @@ impl TryParse for QueryAdaptorsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_adaptors, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (info, remaining) = crate::x11_utils::parse_list::<AdaptorInfo>(remaining, num_adaptors.try_into().or(Err(ParseError::ParseError))?)?;
+        let (info, remaining) = crate::x11_utils::parse_list::<AdaptorInfo>(remaining, num_adaptors.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -1835,7 +1835,7 @@ impl TryParse for QueryEncodingsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_encodings, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (info, remaining) = crate::x11_utils::parse_list::<EncodingInfo>(remaining, num_encodings.try_into().or(Err(ParseError::ParseError))?)?;
+        let (info, remaining) = crate::x11_utils::parse_list::<EncodingInfo>(remaining, num_encodings.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -3159,7 +3159,7 @@ impl TryParse for QueryPortAttributesReply {
         let (num_attributes, remaining) = u32::try_parse(remaining)?;
         let (text_size, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (attributes, remaining) = crate::x11_utils::parse_list::<AttributeInfo>(remaining, num_attributes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (attributes, remaining) = crate::x11_utils::parse_list::<AttributeInfo>(remaining, num_attributes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -3266,7 +3266,7 @@ impl TryParse for ListImageFormatsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_formats, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (format, remaining) = crate::x11_utils::parse_list::<ImageFormatInfo>(remaining, num_formats.try_into().or(Err(ParseError::ParseError))?)?;
+        let (format, remaining) = crate::x11_utils::parse_list::<ImageFormatInfo>(remaining, num_formats.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -3403,8 +3403,8 @@ impl TryParse for QueryImageAttributesReply {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
-        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }

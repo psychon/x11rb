@@ -8,6 +8,13 @@ use crate::protocol::Error;
 pub enum ParseError {
     /// Not enough data was provided.
     InsufficientData,
+
+    /// A value did not fit.
+    ///
+    /// This error can e.g. happen when a value that was received from the X11 server does not fit
+    /// into an `usize`.
+    ConversionFailed,
+
     /// Another error while parsing some data.
     ParseError,
 }
@@ -18,6 +25,7 @@ impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ParseError::InsufficientData => write!(f, "Insufficient data was provided"),
+            ParseError::ConversionFailed => write!(f, "A value conversion failed due to out of range data"),
             ParseError::ParseError => write!(f, "Error while parsing"),
         }
     }

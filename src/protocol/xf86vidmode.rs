@@ -546,7 +546,7 @@ impl TryParse for GetModeLineReply {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
-        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let private = private.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -697,7 +697,7 @@ impl<'input> ModModeLineRequest<'input> {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
-        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ModModeLineRequest {
             screen,
@@ -906,13 +906,13 @@ impl TryParse for GetMonitorReply {
         let (num_hsync, remaining) = u8::try_parse(remaining)?;
         let (num_vsync, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (hsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_hsync.try_into().or(Err(ParseError::ParseError))?)?;
-        let (vsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_vsync.try_into().or(Err(ParseError::ParseError))?)?;
-        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (hsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_hsync.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (vsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_vsync.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let vendor = vendor.to_vec();
-        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (u32::from(vendor_length).checked_add(3u32).ok_or(ParseError::ParseError)? & (!3u32)).checked_sub(u32::from(vendor_length)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (u32::from(vendor_length).checked_add(3u32).ok_or(ParseError::ParseError)? & (!3u32)).checked_sub(u32::from(vendor_length)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let alignment_pad = alignment_pad.to_vec();
-        let (model, remaining) = crate::x11_utils::parse_u8_list(remaining, model_length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (model, remaining) = crate::x11_utils::parse_u8_list(remaining, model_length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let model = model.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -1124,7 +1124,7 @@ impl TryParse for GetAllModeLinesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (modecount, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (modeinfo, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, modecount.try_into().or(Err(ParseError::ParseError))?)?;
+        let (modeinfo, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, modecount.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -1356,7 +1356,7 @@ impl<'input> AddModeLineRequest<'input> {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (after_flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(AddModeLineRequest {
             screen,
@@ -1581,7 +1581,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
-        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(DeleteModeLineRequest {
             screen,
@@ -1771,7 +1771,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
-        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ValidateModeLineRequest {
             screen,
@@ -1993,7 +1993,7 @@ impl<'input> SwitchToModeRequest<'input> {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
-        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SwitchToModeRequest {
             screen,
@@ -2311,7 +2311,7 @@ impl TryParse for GetDotClocksReply {
         let (clocks, remaining) = u32::try_parse(remaining)?;
         let (maxclocks, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(flags & 1u32).ok_or(ParseError::ParseError)?.checked_mul(clocks).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(flags & 1u32).ok_or(ParseError::ParseError)?.checked_mul(clocks).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -2695,9 +2695,9 @@ impl TryParse for GetGammaRampReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (size, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
-        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
-        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -2770,9 +2770,9 @@ impl<'input> SetGammaRampRequest<'input> {
         }
         let (screen, remaining) = u16::try_parse(value)?;
         let (size, remaining) = u16::try_parse(remaining)?;
-        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
-        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
-        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetGammaRampRequest {
             screen,

@@ -3909,7 +3909,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(
                             out,
                             "let ({}, remaining) = crate::x11_utils::parse_u8_list({}, \
-                             {}.try_into().or(Err(ParseError::ParseError))?)?;",
+                             {}.try_into().or(Err(ParseError::ConversionFailed))?)?;",
                             rust_field_name,
                             from,
                             self.expr_to_str(
@@ -3951,7 +3951,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(
                         out,
                         "let ({}, remaining) = crate::x11_utils::parse_list::<{}>(remaining, \
-                         {}.try_into().or(Err(ParseError::ParseError))?)?;",
+                         {}.try_into().or(Err(ParseError::ConversionFailed))?)?;",
                         rust_field_name,
                         rust_element_type,
                         self.expr_to_str(
@@ -3985,7 +3985,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(
                             out,
                             "let list_length = \
-                             usize::try_from({}).or(Err(ParseError::ParseError))?;",
+                             usize::try_from({}).or(Err(ParseError::ConversionFailed))?;",
                             self.expr_to_str(
                                 length_expr,
                                 to_rust_variable_name,
@@ -4051,7 +4051,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
                 outln!(
                     out,
-                    "let fds_len = usize::try_from({}).or(Err(ParseError::ParseError))?;",
+                    "let fds_len = usize::try_from({}).or(Err(ParseError::ConversionFailed))?;",
                     self.expr_to_str(
                         &fd_list_field.length_expr,
                         to_rust_variable_name,

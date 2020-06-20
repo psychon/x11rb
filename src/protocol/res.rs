@@ -233,7 +233,7 @@ impl TryParse for ClientIdValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (spec, remaining) = ClientIdSpec::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (value, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.checked_div(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (value, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.checked_div(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = ClientIdValue { spec, value };
         Ok((result, remaining))
     }
@@ -389,7 +389,7 @@ impl TryParse for ResourceSizeValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (size, remaining) = ResourceSizeSpec::try_parse(remaining)?;
         let (num_cross_references, remaining) = u32::try_parse(remaining)?;
-        let (cross_references, remaining) = crate::x11_utils::parse_list::<ResourceSizeSpec>(remaining, num_cross_references.try_into().or(Err(ParseError::ParseError))?)?;
+        let (cross_references, remaining) = crate::x11_utils::parse_list::<ResourceSizeSpec>(remaining, num_cross_references.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = ResourceSizeValue { size, cross_references };
         Ok((result, remaining))
     }
@@ -591,7 +591,7 @@ impl TryParse for QueryClientsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_clients, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (clients, remaining) = crate::x11_utils::parse_list::<Client>(remaining, num_clients.try_into().or(Err(ParseError::ParseError))?)?;
+        let (clients, remaining) = crate::x11_utils::parse_list::<Client>(remaining, num_clients.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -698,7 +698,7 @@ impl TryParse for QueryClientResourcesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_types, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (types, remaining) = crate::x11_utils::parse_list::<Type>(remaining, num_types.try_into().or(Err(ParseError::ParseError))?)?;
+        let (types, remaining) = crate::x11_utils::parse_list::<Type>(remaining, num_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -866,7 +866,7 @@ impl<'input> QueryClientIdsRequest<'input> {
             return Err(ParseError::ParseError);
         }
         let (num_specs, remaining) = u32::try_parse(value)?;
-        let (specs, remaining) = crate::x11_utils::parse_list::<ClientIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (specs, remaining) = crate::x11_utils::parse_list::<ClientIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(QueryClientIdsRequest {
             specs: Cow::Owned(specs),
@@ -909,7 +909,7 @@ impl TryParse for QueryClientIdsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_ids, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (ids, remaining) = crate::x11_utils::parse_list::<ClientIdValue>(remaining, num_ids.try_into().or(Err(ParseError::ParseError))?)?;
+        let (ids, remaining) = crate::x11_utils::parse_list::<ClientIdValue>(remaining, num_ids.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -992,7 +992,7 @@ impl<'input> QueryResourceBytesRequest<'input> {
         }
         let (client, remaining) = u32::try_parse(value)?;
         let (num_specs, remaining) = u32::try_parse(remaining)?;
-        let (specs, remaining) = crate::x11_utils::parse_list::<ResourceIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (specs, remaining) = crate::x11_utils::parse_list::<ResourceIdSpec>(remaining, num_specs.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(QueryResourceBytesRequest {
             client,
@@ -1038,7 +1038,7 @@ impl TryParse for QueryResourceBytesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_sizes, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (sizes, remaining) = crate::x11_utils::parse_list::<ResourceSizeValue>(remaining, num_sizes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (sizes, remaining) = crate::x11_utils::parse_list::<ResourceSizeValue>(remaining, num_sizes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }

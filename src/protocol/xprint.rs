@@ -46,14 +46,14 @@ impl TryParse for Printer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (name_len, remaining) = u32::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (desc_len, remaining) = u32::try_parse(remaining)?;
-        let (description, remaining) = crate::x11_utils::parse_u8_list(remaining, desc_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (description, remaining) = crate::x11_utils::parse_u8_list(remaining, desc_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let description = description.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -537,8 +537,8 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         }
         let (printer_name_len, remaining) = u32::try_parse(value)?;
         let (locale_len, remaining) = u32::try_parse(remaining)?;
-        let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(PrintGetPrinterListRequest {
             printer_name: Cow::Borrowed(printer_name),
@@ -584,7 +584,7 @@ impl TryParse for PrintGetPrinterListReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (list_count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (printers, remaining) = crate::x11_utils::parse_list::<Printer>(remaining, list_count.try_into().or(Err(ParseError::ParseError))?)?;
+        let (printers, remaining) = crate::x11_utils::parse_list::<Printer>(remaining, list_count.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -723,8 +723,8 @@ impl<'input> CreateContextRequest<'input> {
         let (context_id, remaining) = u32::try_parse(value)?;
         let (printer_name_len, remaining) = u32::try_parse(remaining)?;
         let (locale_len, remaining) = u32::try_parse(remaining)?;
-        let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(CreateContextRequest {
             context_id,
@@ -1333,9 +1333,9 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         let (len_data, remaining) = u32::try_parse(remaining)?;
         let (len_fmt, remaining) = u16::try_parse(remaining)?;
         let (len_options, remaining) = u16::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, len_data.try_into().or(Err(ParseError::ParseError))?)?;
-        let (doc_format, remaining) = crate::x11_utils::parse_u8_list(remaining, len_fmt.try_into().or(Err(ParseError::ParseError))?)?;
-        let (options, remaining) = crate::x11_utils::parse_u8_list(remaining, len_options.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, len_data.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (doc_format, remaining) = crate::x11_utils::parse_u8_list(remaining, len_fmt.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (options, remaining) = crate::x11_utils::parse_u8_list(remaining, len_options.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(PrintPutDocumentDataRequest {
             drawable,
@@ -1459,7 +1459,7 @@ impl TryParse for PrintGetDocumentDataReply {
         let (finished_flag, remaining) = u32::try_parse(remaining)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -1856,7 +1856,7 @@ impl TryParse for PrintGetAttributesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (string_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (attributes, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (attributes, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let attributes = attributes.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -1947,7 +1947,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         let (name_len, remaining) = u32::try_parse(remaining)?;
         let (pool, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(PrintGetOneAttributesRequest {
             context,
@@ -1996,7 +1996,7 @@ impl TryParse for PrintGetOneAttributesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let value = value.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -2293,7 +2293,7 @@ impl TryParse for PrintQueryScreensReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (list_count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (roots, remaining) = crate::x11_utils::parse_list::<xproto::Window>(remaining, list_count.try_into().or(Err(ParseError::ParseError))?)?;
+        let (roots, remaining) = crate::x11_utils::parse_list::<xproto::Window>(remaining, list_count.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }

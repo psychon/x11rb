@@ -558,11 +558,11 @@ impl TryParse for ConnectReply {
         let (driver_name_length, remaining) = u32::try_parse(remaining)?;
         let (device_name_length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, driver_name_length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, driver_name_length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let driver_name = driver_name.to_vec();
-        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (driver_name_length.checked_add(3u32).ok_or(ParseError::ParseError)? & (!3u32)).checked_sub(driver_name_length).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (driver_name_length.checked_add(3u32).ok_or(ParseError::ParseError)? & (!3u32)).checked_sub(driver_name_length).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let alignment_pad = alignment_pad.to_vec();
-        let (device_name, remaining) = crate::x11_utils::parse_u8_list(remaining, device_name_length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (device_name, remaining) = crate::x11_utils::parse_u8_list(remaining, device_name_length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let device_name = device_name.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -936,7 +936,7 @@ impl TryParse for GetBuffersReply {
         let (height, remaining) = u32::try_parse(remaining)?;
         let (count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ParseError))?)?;
+        let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -1194,7 +1194,7 @@ impl TryParse for GetBuffersWithFormatReply {
         let (height, remaining) = u32::try_parse(remaining)?;
         let (count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ParseError))?)?;
+        let (buffers, remaining) = crate::x11_utils::parse_list::<DRI2Buffer>(remaining, count.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }

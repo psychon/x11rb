@@ -380,7 +380,7 @@ impl TryParse for ClientInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (client_resource, remaining) = ClientSpec::try_parse(remaining)?;
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
-        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
+        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = ClientInfo { client_resource, ranges };
         Ok((result, remaining))
     }
@@ -667,8 +667,8 @@ impl<'input> CreateContextRequest<'input> {
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (num_client_specs, remaining) = u32::try_parse(remaining)?;
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
-        let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
-        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
+        let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(CreateContextRequest {
             context,
@@ -773,8 +773,8 @@ impl<'input> RegisterClientsRequest<'input> {
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (num_client_specs, remaining) = u32::try_parse(remaining)?;
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
-        let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
-        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
+        let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(RegisterClientsRequest {
             context,
@@ -861,7 +861,7 @@ impl<'input> UnregisterClientsRequest<'input> {
         }
         let (context, remaining) = Context::try_parse(value)?;
         let (num_client_specs, remaining) = u32::try_parse(remaining)?;
-        let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (client_specs, remaining) = crate::x11_utils::parse_list::<ClientSpec>(remaining, num_client_specs.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(UnregisterClientsRequest {
             context,
@@ -970,7 +970,7 @@ impl TryParse for GetContextReply {
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (num_intercepted_clients, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (intercepted_clients, remaining) = crate::x11_utils::parse_list::<ClientInfo>(remaining, num_intercepted_clients.try_into().or(Err(ParseError::ParseError))?)?;
+        let (intercepted_clients, remaining) = crate::x11_utils::parse_list::<ClientInfo>(remaining, num_intercepted_clients.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -1087,7 +1087,7 @@ impl TryParse for EnableContextReply {
         let (server_time, remaining) = u32::try_parse(remaining)?;
         let (rec_sequence_num, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);

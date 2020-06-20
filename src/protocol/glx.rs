@@ -616,7 +616,7 @@ impl<'input> RenderLargeRequest<'input> {
         let (request_num, remaining) = u16::try_parse(remaining)?;
         let (request_total, remaining) = u16::try_parse(remaining)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(RenderLargeRequest {
             context_tag,
@@ -1727,7 +1727,7 @@ impl TryParse for GetVisualConfigsReply {
         let (num_visuals, remaining) = u32::try_parse(remaining)?;
         let (num_properties, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (property_list, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (property_list, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -2002,7 +2002,7 @@ impl TryParse for VendorPrivateWithReplyReply {
         let (retval, remaining) = u32::try_parse(remaining)?;
         let (data1, remaining) = crate::x11_utils::parse_u8_list(remaining, 24)?;
         let data1 = <[u8; 24]>::try_from(data1).unwrap();
-        let (data2, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data2, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data2 = data2.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -2213,7 +2213,7 @@ impl TryParse for QueryServerStringReply {
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (str_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, str_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, str_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let string = string.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -2303,7 +2303,7 @@ impl<'input> ClientInfoRequest<'input> {
         let (major_version, remaining) = u32::try_parse(value)?;
         let (minor_version, remaining) = u32::try_parse(remaining)?;
         let (str_len, remaining) = u32::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, str_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, str_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ClientInfoRequest {
             major_version,
@@ -2413,7 +2413,7 @@ impl TryParse for GetFBConfigsReply {
         let (num_fb_configs, remaining) = u32::try_parse(remaining)?;
         let (num_properties, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (property_list, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (property_list, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -2518,7 +2518,7 @@ impl<'input> CreatePixmapRequest<'input> {
         let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
         let (glx_pixmap, remaining) = Pixmap::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
-        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(CreatePixmapRequest {
             screen,
@@ -2796,7 +2796,7 @@ impl TryParse for QueryContextReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -3013,7 +3013,7 @@ impl<'input> CreatePbufferRequest<'input> {
         let (fbconfig, remaining) = Fbconfig::try_parse(remaining)?;
         let (pbuffer, remaining) = Pbuffer::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
-        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(CreatePbufferRequest {
             screen,
@@ -3183,7 +3183,7 @@ impl TryParse for GetDrawableAttributesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -3268,7 +3268,7 @@ impl<'input> ChangeDrawableAttributesRequest<'input> {
         }
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
-        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangeDrawableAttributesRequest {
             drawable,
@@ -3371,7 +3371,7 @@ impl<'input> CreateWindowRequest<'input> {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (glx_window, remaining) = Window::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
-        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(CreateWindowRequest {
             screen,
@@ -3546,9 +3546,9 @@ impl<'input> SetClientInfoARBRequest<'input> {
         let (num_versions, remaining) = u32::try_parse(remaining)?;
         let (gl_str_len, remaining) = u32::try_parse(remaining)?;
         let (glx_str_len, remaining) = u32::try_parse(remaining)?;
-        let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_versions.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_versions.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetClientInfoARBRequest {
             major_version,
@@ -3668,7 +3668,7 @@ impl<'input> CreateContextAttribsARBRequest<'input> {
         let (is_direct, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
-        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_attribs.checked_mul(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(CreateContextAttribsARBRequest {
             context,
@@ -3787,9 +3787,9 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         let (num_versions, remaining) = u32::try_parse(remaining)?;
         let (gl_str_len, remaining) = u32::try_parse(remaining)?;
         let (glx_str_len, remaining) = u32::try_parse(remaining)?;
-        let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_versions.checked_mul(3u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_versions.checked_mul(3u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetClientInfo2ARBRequest {
             major_version,
@@ -4373,7 +4373,7 @@ impl TryParse for RenderModeReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (new_mode, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -4838,7 +4838,7 @@ impl TryParse for ReadPixelsReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -4959,7 +4959,7 @@ impl TryParse for GetBooleanvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<bool>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<bool>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -5073,7 +5073,7 @@ impl TryParse for GetClipPlaneReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, length.checked_div(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, length.checked_div(2u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -5193,7 +5193,7 @@ impl TryParse for GetDoublevReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float64::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -5402,7 +5402,7 @@ impl TryParse for GetFloatvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -5521,7 +5521,7 @@ impl TryParse for GetIntegervReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -5649,7 +5649,7 @@ impl TryParse for GetLightfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -5777,7 +5777,7 @@ impl TryParse for GetLightivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -5905,7 +5905,7 @@ impl TryParse for GetMapdvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float64::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6033,7 +6033,7 @@ impl TryParse for GetMapfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6161,7 +6161,7 @@ impl TryParse for GetMapivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6289,7 +6289,7 @@ impl TryParse for GetMaterialfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6417,7 +6417,7 @@ impl TryParse for GetMaterialivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6536,7 +6536,7 @@ impl TryParse for GetPixelMapfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6655,7 +6655,7 @@ impl TryParse for GetPixelMapuivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6774,7 +6774,7 @@ impl TryParse for GetPixelMapusvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u16>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u16>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -6888,7 +6888,7 @@ impl TryParse for GetPolygonStippleReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -7007,7 +7007,7 @@ impl TryParse for GetStringReply {
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (n, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let string = string.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -7136,7 +7136,7 @@ impl TryParse for GetTexEnvfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -7264,7 +7264,7 @@ impl TryParse for GetTexEnvivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -7392,7 +7392,7 @@ impl TryParse for GetTexGendvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float64::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -7520,7 +7520,7 @@ impl TryParse for GetTexGenfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -7648,7 +7648,7 @@ impl TryParse for GetTexGenivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -7805,7 +7805,7 @@ impl TryParse for GetTexImageReply {
         let (height, remaining) = i32::try_parse(remaining)?;
         let (depth, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -7935,7 +7935,7 @@ impl TryParse for GetTexParameterfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -8063,7 +8063,7 @@ impl TryParse for GetTexParameterivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -8200,7 +8200,7 @@ impl TryParse for GetTexLevelParameterfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -8337,7 +8337,7 @@ impl TryParse for GetTexLevelParameterivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -8677,7 +8677,7 @@ impl<'input> AreTexturesResidentRequest<'input> {
         }
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (n, remaining) = i32::try_parse(remaining)?;
-        let (textures, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (textures, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(AreTexturesResidentRequest {
             context_tag,
@@ -8723,7 +8723,7 @@ impl TryParse for AreTexturesResidentReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (ret_val, remaining) = Bool32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<bool>(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<bool>(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -8807,7 +8807,7 @@ impl<'input> DeleteTexturesRequest<'input> {
         }
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (n, remaining) = i32::try_parse(remaining)?;
-        let (textures, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (textures, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(DeleteTexturesRequest {
             context_tag,
@@ -8919,7 +8919,7 @@ impl TryParse for GenTexturesReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -9162,7 +9162,7 @@ impl TryParse for GetColorTableReply {
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let (width, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -9292,7 +9292,7 @@ impl TryParse for GetColorTableParameterfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -9420,7 +9420,7 @@ impl TryParse for GetColorTableParameterivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -9566,7 +9566,7 @@ impl TryParse for GetConvolutionFilterReply {
         let (width, remaining) = i32::try_parse(remaining)?;
         let (height, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -9696,7 +9696,7 @@ impl TryParse for GetConvolutionParameterfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -9824,7 +9824,7 @@ impl TryParse for GetConvolutionParameterivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -9970,7 +9970,7 @@ impl TryParse for GetSeparableFilterReply {
         let (row_w, remaining) = i32::try_parse(remaining)?;
         let (col_h, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let (rows_and_cols, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (rows_and_cols, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let rows_and_cols = rows_and_cols.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -10121,7 +10121,7 @@ impl TryParse for GetHistogramReply {
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let (width, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -10251,7 +10251,7 @@ impl TryParse for GetHistogramParameterfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -10379,7 +10379,7 @@ impl TryParse for GetHistogramParameterivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -10525,7 +10525,7 @@ impl TryParse for GetMinmaxReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -10655,7 +10655,7 @@ impl TryParse for GetMinmaxParameterfvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -10783,7 +10783,7 @@ impl TryParse for GetMinmaxParameterivReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -10909,7 +10909,7 @@ impl TryParse for GetCompressedTexImageARBReply {
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
         let (size, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::ParseError);
@@ -10994,7 +10994,7 @@ impl<'input> DeleteQueriesARBRequest<'input> {
         }
         let (context_tag, remaining) = ContextTag::try_parse(value)?;
         let (n, remaining) = i32::try_parse(remaining)?;
-        let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(DeleteQueriesARBRequest {
             context_tag,
@@ -11106,7 +11106,7 @@ impl TryParse for GenQueriesARBReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -11333,7 +11333,7 @@ impl TryParse for GetQueryivARBReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -11461,7 +11461,7 @@ impl TryParse for GetQueryObjectivARBReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<i32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
@@ -11589,7 +11589,7 @@ impl TryParse for GetQueryObjectuivARBReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, n.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }

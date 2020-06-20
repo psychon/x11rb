@@ -373,7 +373,7 @@ impl TryParse for Systemcounter {
         let (counter, remaining) = Counter::try_parse(remaining)?;
         let (resolution, remaining) = Int64::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -881,7 +881,7 @@ impl TryParse for ListSystemCountersReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (counters_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (counters, remaining) = crate::x11_utils::parse_list::<Systemcounter>(remaining, counters_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (counters, remaining) = crate::x11_utils::parse_list::<Systemcounter>(remaining, counters_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }

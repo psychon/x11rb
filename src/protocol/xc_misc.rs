@@ -286,7 +286,7 @@ impl TryParse for GetXIDListReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (ids_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ids_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ids_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
             return Err(ParseError::ParseError);
         }
