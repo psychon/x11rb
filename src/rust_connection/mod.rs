@@ -729,7 +729,7 @@ fn read_setup(stream: &impl Stream) -> Result<Setup, ConnectError> {
         // 2 is SetupAuthenticate
         2 => Err(ConnectError::SetupAuthenticate((&setup[..]).try_into()?)),
         // Uhm... no other cases are defined
-        _ => Err(ParseError::ParseError.into()),
+        _ => Err(ParseError::InvalidValue.into()),
     }
 }
 

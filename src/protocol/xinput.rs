@@ -125,11 +125,11 @@ impl<'input> GetExtensionVersionRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_EXTENSION_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(GetExtensionVersionRequest {
             name: Cow::Borrowed(name),
@@ -178,7 +178,7 @@ impl TryParse for GetExtensionVersionReply {
         let (present, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(19..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetExtensionVersionReply { xi_reply_type, sequence, length, server_major, server_minor, present };
         let _ = remaining;
@@ -248,20 +248,20 @@ impl TryFrom<u8> for DeviceUse {
             2 => Ok(DeviceUse::IsXExtensionDevice),
             3 => Ok(DeviceUse::IsXExtensionKeyboard),
             4 => Ok(DeviceUse::IsXExtensionPointer),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for DeviceUse {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for DeviceUse {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -325,20 +325,20 @@ impl TryFrom<u8> for InputClass {
             4 => Ok(InputClass::Proximity),
             5 => Ok(InputClass::Focus),
             6 => Ok(InputClass::Other),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for InputClass {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for InputClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -395,20 +395,20 @@ impl TryFrom<u8> for ValuatorMode {
         match value {
             0 => Ok(ValuatorMode::Relative),
             1 => Ok(ValuatorMode::Absolute),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ValuatorMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ValuatorMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -630,7 +630,7 @@ impl TryParse for ValuatorInfo {
         let (axes_len, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (motion_size, remaining) = u32::try_parse(remaining)?;
-        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let class_id = class_id.try_into()?;
         let mode = mode.try_into()?;
         let result = ValuatorInfo { class_id, len, mode, motion_size, axes };
@@ -764,7 +764,7 @@ impl TryParse for InputInfoInfoValuator {
         let (axes_len, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (motion_size, remaining) = u32::try_parse(remaining)?;
-        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let mode = mode.try_into()?;
         let result = InputInfoInfoValuator { mode, motion_size, axes };
         Ok((result, remaining))
@@ -837,7 +837,7 @@ impl InputInfoInfo {
             parse_result = Some(InputInfoInfo::Valuator(valuator));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -931,7 +931,7 @@ pub struct DeviceName {
 impl TryParse for DeviceName {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (len, remaining) = u8::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let string = string.to_vec();
         let result = DeviceName { string };
         Ok((result, remaining))
@@ -1001,7 +1001,7 @@ impl ListInputDevicesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_INPUT_DEVICES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(ListInputDevicesRequest
@@ -1040,15 +1040,15 @@ impl TryParse for ListInputDevicesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (devices_len, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
-        let (devices, remaining) = crate::x11_utils::parse_list::<DeviceInfo>(remaining, devices_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(x.num_class_info)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, devices_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (devices, remaining) = crate::x11_utils::parse_list::<DeviceInfo>(remaining, devices_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(x.num_class_info)).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, devices_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListInputDevicesReply { xi_reply_type, sequence, length, devices, infos, names };
         let _ = remaining;
@@ -1153,7 +1153,7 @@ impl OpenDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != OPEN_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -1195,13 +1195,13 @@ impl TryParse for OpenDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_classes, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
-        let (class_info, remaining) = crate::x11_utils::parse_list::<InputClassInfo>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (class_info, remaining) = crate::x11_utils::parse_list::<InputClassInfo>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = OpenDeviceReply { xi_reply_type, sequence, length, class_info };
         let _ = remaining;
@@ -1267,7 +1267,7 @@ impl CloseDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CLOSE_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -1329,7 +1329,7 @@ impl SetDeviceModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_MODE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -1375,7 +1375,7 @@ impl TryParse for SetDeviceModeReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetDeviceModeReply { xi_reply_type, sequence, length, status };
@@ -1438,12 +1438,12 @@ impl<'input> SelectExtensionEventRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_EXTENSION_EVENT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SelectExtensionEventRequest {
             window,
@@ -1509,7 +1509,7 @@ impl GetSelectedExtensionEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SELECTED_EXTENSION_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1551,10 +1551,10 @@ impl TryParse for GetSelectedExtensionEventsReply {
         let (num_this_classes, remaining) = u16::try_parse(remaining)?;
         let (num_all_classes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (this_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_this_classes.try_into().or(Err(ParseError::ParseError))?)?;
-        let (all_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_all_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (this_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_this_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (all_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_all_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetSelectedExtensionEventsReply { xi_reply_type, sequence, length, this_classes, all_classes };
         let _ = remaining;
@@ -1651,20 +1651,20 @@ impl TryFrom<u8> for PropagateMode {
         match value {
             0 => Ok(PropagateMode::AddToList),
             1 => Ok(PropagateMode::DeleteFromList),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for PropagateMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for PropagateMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -1716,14 +1716,14 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let mode = mode.try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangeDeviceDontPropagateListRequest {
             window,
@@ -1792,7 +1792,7 @@ impl GetDeviceDontPropagateListRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -1832,9 +1832,9 @@ impl TryParse for GetDeviceDontPropagateListReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceDontPropagateListReply { xi_reply_type, sequence, length, classes };
         let _ = remaining;
@@ -1873,7 +1873,7 @@ pub struct DeviceTimeCoord {
 impl DeviceTimeCoord {
     pub fn try_parse(remaining: &[u8], num_axes: u8) -> Result<(Self, &[u8]), ParseError> {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_axes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_axes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = DeviceTimeCoord { time, axisvalues };
         Ok((result, remaining))
     }
@@ -1940,7 +1940,7 @@ impl GetDeviceMotionEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_MOTION_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (start, remaining) = xproto::Timestamp::try_parse(value)?;
         let (stop, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -1994,7 +1994,7 @@ impl TryParse for GetDeviceMotionEventsReply {
         let (device_mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
         let mut remaining = remaining;
-        let list_length = usize::try_from(num_events).or(Err(ParseError::ParseError))?;
+        let list_length = usize::try_from(num_events).or(Err(ParseError::ConversionFailed))?;
         let mut events = Vec::with_capacity(list_length);
         for _ in 0..list_length {
             let (v, new_remaining) = DeviceTimeCoord::try_parse(remaining, num_axes)?;
@@ -2002,7 +2002,7 @@ impl TryParse for GetDeviceMotionEventsReply {
             events.push(v);
         }
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let device_mode = device_mode.try_into()?;
         let result = GetDeviceMotionEventsReply { xi_reply_type, sequence, length, num_axes, device_mode, events };
@@ -2069,7 +2069,7 @@ impl ChangeKeyboardDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_KEYBOARD_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -2111,7 +2111,7 @@ impl TryParse for ChangeKeyboardDeviceReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = ChangeKeyboardDeviceReply { xi_reply_type, sequence, length, status };
@@ -2167,7 +2167,7 @@ impl ChangePointerDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_POINTER_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (x_axis, remaining) = u8::try_parse(value)?;
         let (y_axis, remaining) = u8::try_parse(remaining)?;
@@ -2215,7 +2215,7 @@ impl TryParse for ChangePointerDeviceReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = ChangePointerDeviceReply { xi_reply_type, sequence, length, status };
@@ -2296,7 +2296,7 @@ impl<'input> GrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -2308,7 +2308,7 @@ impl<'input> GrabDeviceRequest<'input> {
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(GrabDeviceRequest {
             grab_window,
@@ -2373,7 +2373,7 @@ impl TryParse for GrabDeviceReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = GrabDeviceReply { xi_reply_type, sequence, length, status };
@@ -2431,7 +2431,7 @@ impl UngrabDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -2503,20 +2503,20 @@ impl TryFrom<u8> for ModifierDevice {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             255 => Ok(ModifierDevice::UseXKeyboard),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ModifierDevice {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ModifierDevice {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -2588,7 +2588,7 @@ impl<'input> GrabDeviceKeyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_DEVICE_KEY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
@@ -2602,7 +2602,7 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         let other_device_mode = other_device_mode.try_into()?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(GrabDeviceKeyRequest {
             grab_window,
@@ -2711,7 +2711,7 @@ impl UngrabDeviceKeyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_DEVICE_KEY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
@@ -2821,7 +2821,7 @@ impl<'input> GrabDeviceButtonRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_DEVICE_BUTTON_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (grabbed_device, remaining) = u8::try_parse(remaining)?;
@@ -2835,7 +2835,7 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         let (button, remaining) = u8::try_parse(remaining)?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(GrabDeviceButtonRequest {
             grab_window,
@@ -2944,7 +2944,7 @@ impl UngrabDeviceButtonRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_DEVICE_BUTTON_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
@@ -3044,20 +3044,20 @@ impl TryFrom<u8> for DeviceInputMode {
             3 => Ok(DeviceInputMode::AsyncOtherDevices),
             4 => Ok(DeviceInputMode::AsyncAll),
             5 => Ok(DeviceInputMode::SyncAll),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for DeviceInputMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for DeviceInputMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -3104,7 +3104,7 @@ impl AllowDeviceEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ALLOW_DEVICE_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -3173,7 +3173,7 @@ impl GetDeviceFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -3219,7 +3219,7 @@ impl TryParse for GetDeviceFocusReply {
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let revert_to = revert_to.try_into()?;
         let result = GetDeviceFocusReply { xi_reply_type, sequence, length, focus, time, revert_to };
@@ -3285,7 +3285,7 @@ impl SetDeviceFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (focus, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -3381,20 +3381,20 @@ impl TryFrom<u8> for FeedbackClass {
             3 => Ok(FeedbackClass::Integer),
             4 => Ok(FeedbackClass::Led),
             5 => Ok(FeedbackClass::Bell),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for FeedbackClass {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for FeedbackClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -3670,7 +3670,7 @@ impl TryParse for StringFeedbackState {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (max_symbols, remaining) = u16::try_parse(remaining)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let class_id = class_id.try_into()?;
         let result = StringFeedbackState { class_id, feedback_id, len, max_symbols, keysyms };
         Ok((result, remaining))
@@ -4003,7 +4003,7 @@ impl TryParse for FeedbackStateDataString {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (max_symbols, remaining) = u16::try_parse(remaining)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = FeedbackStateDataString { max_symbols, keysyms };
         Ok((result, remaining))
     }
@@ -4232,7 +4232,7 @@ impl FeedbackStateData {
             parse_result = Some(FeedbackStateData::Bell(bell));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -4381,7 +4381,7 @@ impl GetFeedbackControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_FEEDBACK_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -4422,9 +4422,9 @@ impl TryParse for GetFeedbackControlReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_feedbacks, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (feedbacks, remaining) = crate::x11_utils::parse_list::<FeedbackState>(remaining, num_feedbacks.try_into().or(Err(ParseError::ParseError))?)?;
+        let (feedbacks, remaining) = crate::x11_utils::parse_list::<FeedbackState>(remaining, num_feedbacks.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetFeedbackControlReply { xi_reply_type, sequence, length, feedbacks };
         let _ = remaining;
@@ -4676,7 +4676,7 @@ impl TryParse for StringFeedbackCtl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let class_id = class_id.try_into()?;
         let result = StringFeedbackCtl { class_id, feedback_id, len, keysyms };
         Ok((result, remaining))
@@ -4974,7 +4974,7 @@ impl TryParse for FeedbackCtlDataString {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = FeedbackCtlDataString { keysyms };
         Ok((result, remaining))
     }
@@ -5187,7 +5187,7 @@ impl FeedbackCtlData {
             parse_result = Some(FeedbackCtlData::Bell(bell));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -5411,7 +5411,7 @@ impl ChangeFeedbackControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_FEEDBACK_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (mask, remaining) = u32::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -5486,7 +5486,7 @@ impl GetDeviceKeyMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_KEY_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
@@ -5533,9 +5533,9 @@ impl TryParse for GetDeviceKeyMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceKeyMappingReply { xi_reply_type, sequence, keysyms_per_keycode, keysyms };
         let _ = remaining;
@@ -5613,13 +5613,13 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_KEY_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let (keycode_count, remaining) = u8::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangeDeviceKeyMappingRequest {
             device_id,
@@ -5694,7 +5694,7 @@ impl GetDeviceModifierMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_MODIFIER_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -5735,10 +5735,10 @@ impl TryParse for GetDeviceModifierMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
-        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let keymaps = keymaps.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceModifierMappingReply { xi_reply_type, sequence, length, keymaps };
         let _ = remaining;
@@ -5812,12 +5812,12 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_MODIFIER_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetDeviceModifierMappingRequest {
             device_id,
@@ -5865,7 +5865,7 @@ impl TryParse for SetDeviceModifierMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetDeviceModifierMappingReply { xi_reply_type, sequence, length, status };
@@ -5917,7 +5917,7 @@ impl GetDeviceButtonMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_BUTTON_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -5959,14 +5959,14 @@ impl TryParse for GetDeviceButtonMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (map_size, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
-        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let map = map.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceButtonMappingReply { xi_reply_type, sequence, length, map };
         let _ = remaining;
@@ -6038,12 +6038,12 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_BUTTON_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (map_size, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetDeviceButtonMappingRequest {
             device_id,
@@ -6091,7 +6091,7 @@ impl TryParse for SetDeviceButtonMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetDeviceButtonMappingReply { xi_reply_type, sequence, length, status };
@@ -6315,20 +6315,20 @@ impl TryFrom<u8> for ValuatorStateModeMask {
         match value {
             1 => Ok(ValuatorStateModeMask::DeviceModeAbsolute),
             2 => Ok(ValuatorStateModeMask::OutOfProximity),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ValuatorStateModeMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ValuatorStateModeMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(ValuatorStateModeMask, u8);
@@ -6346,7 +6346,7 @@ impl TryParse for ValuatorState {
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let class_id = class_id.try_into()?;
         let result = ValuatorState { class_id, len, mode, valuators };
         Ok((result, remaining))
@@ -6538,7 +6538,7 @@ impl TryParse for InputStateDataValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = InputStateDataValuator { mode, valuators };
         Ok((result, remaining))
     }
@@ -6609,7 +6609,7 @@ impl InputStateData {
             parse_result = Some(InputStateData::Valuator(valuator));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -6731,7 +6731,7 @@ impl QueryDeviceStateRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_DEVICE_STATE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -6772,9 +6772,9 @@ impl TryParse for QueryDeviceStateReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_classes, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<InputState>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<InputState>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryDeviceStateReply { xi_reply_type, sequence, length, classes };
         let _ = remaining;
@@ -6846,7 +6846,7 @@ impl DeviceBellRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DEVICE_BELL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
@@ -6923,13 +6923,13 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_VALUATORS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetDeviceValuatorsRequest {
             device_id,
@@ -6980,7 +6980,7 @@ impl TryParse for SetDeviceValuatorsReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetDeviceValuatorsReply { xi_reply_type, sequence, length, status };
@@ -7051,20 +7051,20 @@ impl TryFrom<u8> for DeviceControl {
             3 => Ok(DeviceControl::Core),
             4 => Ok(DeviceControl::Enable),
             5 => Ok(DeviceControl::Absarea),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for DeviceControl {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for DeviceControl {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -7081,9 +7081,9 @@ impl TryParse for DeviceResolutionState {
         let (control_id, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (num_valuators, remaining) = u32::try_parse(remaining)?;
-        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
-        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
-        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let control_id = control_id.try_into()?;
         let result = DeviceResolutionState { control_id, len, resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
@@ -7432,9 +7432,9 @@ pub struct DeviceStateDataResolution {
 impl TryParse for DeviceStateDataResolution {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_valuators, remaining) = u32::try_parse(remaining)?;
-        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
-        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
-        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = DeviceStateDataResolution { resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
@@ -7724,7 +7724,7 @@ impl DeviceStateData {
             parse_result = Some(DeviceStateData::AbsArea(abs_area));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -7868,7 +7868,7 @@ impl GetDeviceControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (control_id, remaining) = u16::try_parse(value)?;
         let control_id = control_id.try_into()?;
@@ -7916,7 +7916,7 @@ impl TryParse for GetDeviceControlReply {
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         let (control, remaining) = DeviceState::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDeviceControlReply { xi_reply_type, sequence, length, status, control };
         let _ = remaining;
@@ -7946,7 +7946,7 @@ impl TryParse for DeviceResolutionCtl {
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let control_id = control_id.try_into()?;
         let result = DeviceResolutionCtl { control_id, len, first_valuator, resolution_values };
         Ok((result, remaining))
@@ -8290,7 +8290,7 @@ impl TryParse for DeviceCtlDataResolution {
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = DeviceCtlDataResolution { first_valuator, resolution_values };
         Ok((result, remaining))
     }
@@ -8575,7 +8575,7 @@ impl DeviceCtlData {
             parse_result = Some(DeviceCtlData::AbsArea(abs_area));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -8724,7 +8724,7 @@ impl ChangeDeviceControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (control_id, remaining) = u16::try_parse(value)?;
         let control_id = control_id.try_into()?;
@@ -8773,7 +8773,7 @@ impl TryParse for ChangeDeviceControlReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ChangeDeviceControlReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
@@ -8824,7 +8824,7 @@ impl ListDevicePropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_DEVICE_PROPERTIES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -8865,9 +8865,9 @@ impl TryParse for ListDevicePropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ParseError))?)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListDevicePropertiesReply { xi_reply_type, sequence, length, atoms };
         let _ = remaining;
@@ -8946,20 +8946,20 @@ impl TryFrom<u8> for PropertyFormat {
             8 => Ok(PropertyFormat::M8Bits),
             16 => Ok(PropertyFormat::M16Bits),
             32 => Ok(PropertyFormat::M32Bits),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for PropertyFormat {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for PropertyFormat {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -8977,7 +8977,7 @@ impl ChangeDevicePropertyAux {
         if switch_expr == u32::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             let data8 = data8.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -8990,7 +8990,7 @@ impl ChangeDevicePropertyAux {
         if switch_expr == u32::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -9001,13 +9001,13 @@ impl ChangeDevicePropertyAux {
         }
         if switch_expr == u32::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
-            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(ChangeDevicePropertyAux::Data32(data32));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -9131,7 +9131,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -9225,7 +9225,7 @@ impl DeleteDevicePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_DEVICE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -9314,7 +9314,7 @@ impl GetDevicePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (property, remaining) = xproto::Atom::try_parse(value)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -9368,7 +9368,7 @@ impl GetDevicePropertyItems {
         if switch_expr == u32::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             let data8 = data8.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -9381,7 +9381,7 @@ impl GetDevicePropertyItems {
         if switch_expr == u32::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -9392,13 +9392,13 @@ impl GetDevicePropertyItems {
         }
         if switch_expr == u32::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
-            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data32(data32));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -9450,7 +9450,7 @@ impl TryParse for GetDevicePropertyReply {
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
         let (items, remaining) = GetDevicePropertyItems::try_parse(remaining, format, num_items)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetDevicePropertyReply { xi_reply_type, sequence, length, type_, bytes_after, num_items, device_id, items };
         let _ = remaining;
@@ -9519,20 +9519,20 @@ impl TryFrom<u8> for Device {
         match value {
             0 => Ok(Device::All),
             1 => Ok(Device::AllMaster),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Device {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Device {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -9681,7 +9681,7 @@ impl XIQueryPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_QUERY_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -9744,9 +9744,9 @@ impl TryParse for XIQueryPointerReply {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIQueryPointerReply { sequence, length, root, child, root_x, root_y, win_x, win_y, same_screen, mods, group, buttons };
         let _ = remaining;
@@ -9856,7 +9856,7 @@ impl XIWarpPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_WARP_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (src_win, remaining) = xproto::Window::try_parse(value)?;
         let (dst_win, remaining) = xproto::Window::try_parse(remaining)?;
@@ -9954,7 +9954,7 @@ impl XIChangeCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_CHANGE_CURSOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
@@ -10038,20 +10038,20 @@ impl TryFrom<u8> for HierarchyChangeType {
             2 => Ok(HierarchyChangeType::RemoveMaster),
             3 => Ok(HierarchyChangeType::AttachSlave),
             4 => Ok(HierarchyChangeType::DetachSlave),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for HierarchyChangeType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for HierarchyChangeType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -10100,20 +10100,20 @@ impl TryFrom<u8> for ChangeMode {
         match value {
             1 => Ok(ChangeMode::Attach),
             2 => Ok(ChangeMode::Float),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ChangeMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ChangeMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -10133,7 +10133,7 @@ impl TryParse for AddMaster {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (send_core, remaining) = bool::try_parse(remaining)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -10363,7 +10363,7 @@ impl TryParse for HierarchyChangeDataAddMaster {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (send_core, remaining) = bool::try_parse(remaining)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -10572,7 +10572,7 @@ impl HierarchyChangeData {
             parse_result = Some(HierarchyChangeData::DetachSlave(detach_slave));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -10707,11 +10707,11 @@ impl<'input> XIChangeHierarchyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_CHANGE_HIERARCHY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (num_changes, remaining) = u8::try_parse(value)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let (changes, remaining) = crate::x11_utils::parse_list::<HierarchyChange>(remaining, num_changes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (changes, remaining) = crate::x11_utils::parse_list::<HierarchyChange>(remaining, num_changes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(XIChangeHierarchyRequest {
             changes: Cow::Owned(changes),
@@ -10780,7 +10780,7 @@ impl XISetClientPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_SET_CLIENT_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -10845,7 +10845,7 @@ impl XIGetClientPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_CLIENT_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -10888,7 +10888,7 @@ impl TryParse for XIGetClientPointerReply {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIGetClientPointerReply { sequence, length, set, deviceid };
         let _ = remaining;
@@ -11001,7 +11001,7 @@ impl TryFrom<u32> for XIEventMask {
             16_777_216 => Ok(XIEventMask::RawTouchEnd),
             33_554_432 => Ok(XIEventMask::BarrierHit),
             67_108_864 => Ok(XIEventMask::BarrierLeave),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
@@ -11016,7 +11016,7 @@ impl TryParse for EventMask {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (mask_len, remaining) = u16::try_parse(remaining)?;
-        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = EventMask { deviceid, mask };
         Ok((result, remaining))
     }
@@ -11104,12 +11104,12 @@ impl<'input> XISelectEventsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_SELECT_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_mask.try_into().or(Err(ParseError::ParseError))?)?;
+        let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_mask.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(XISelectEventsRequest {
             window,
@@ -11177,7 +11177,7 @@ impl XIQueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (major_version, remaining) = u16::try_parse(value)?;
         let (minor_version, remaining) = u16::try_parse(remaining)?;
@@ -11222,7 +11222,7 @@ impl TryParse for XIQueryVersionReply {
         let (minor_version, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIQueryVersionReply { sequence, length, major_version, minor_version };
         let _ = remaining;
@@ -11292,20 +11292,20 @@ impl TryFrom<u8> for DeviceClassType {
             2 => Ok(DeviceClassType::Valuator),
             3 => Ok(DeviceClassType::Scroll),
             8 => Ok(DeviceClassType::Touch),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for DeviceClassType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for DeviceClassType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -11363,20 +11363,20 @@ impl TryFrom<u8> for DeviceType {
             3 => Ok(DeviceType::SlavePointer),
             4 => Ok(DeviceType::SlaveKeyboard),
             5 => Ok(DeviceType::FloatingSlave),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for DeviceType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for DeviceType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -11425,20 +11425,20 @@ impl TryFrom<u8> for ScrollFlags {
         match value {
             1 => Ok(ScrollFlags::NoEmulation),
             2 => Ok(ScrollFlags::Preferred),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ScrollFlags {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ScrollFlags {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(ScrollFlags, u8);
@@ -11488,20 +11488,20 @@ impl TryFrom<u8> for ScrollType {
         match value {
             1 => Ok(ScrollType::Vertical),
             2 => Ok(ScrollType::Horizontal),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ScrollType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ScrollType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -11550,20 +11550,20 @@ impl TryFrom<u8> for TouchMode {
         match value {
             1 => Ok(TouchMode::Direct),
             2 => Ok(TouchMode::Dependent),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for TouchMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for TouchMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -11581,8 +11581,8 @@ impl TryParse for ButtonClass {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
-        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::ParseError)?.checked_div(32u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_into().or(Err(ParseError::ParseError))?)?;
+        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::InvalidExpression)?.checked_div(32u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let type_ = type_.try_into()?;
         let result = ButtonClass { type_, len, sourceid, state, labels };
         Ok((result, remaining))
@@ -11642,7 +11642,7 @@ impl TryParse for KeyClass {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (num_keys, remaining) = u16::try_parse(remaining)?;
-        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let type_ = type_.try_into()?;
         let result = KeyClass { type_, len, sourceid, keys };
         Ok((result, remaining))
@@ -11946,7 +11946,7 @@ pub struct DeviceClassDataKey {
 impl TryParse for DeviceClassDataKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_keys, remaining) = u16::try_parse(remaining)?;
-        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = DeviceClassDataKey { keys };
         Ok((result, remaining))
     }
@@ -11993,8 +11993,8 @@ pub struct DeviceClassDataButton {
 impl TryParse for DeviceClassDataButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
-        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::ParseError)?.checked_div(32u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
-        let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_into().or(Err(ParseError::ParseError))?)?;
+        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::InvalidExpression)?.checked_div(32u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = DeviceClassDataButton { state, labels };
         Ok((result, remaining))
     }
@@ -12271,7 +12271,7 @@ impl DeviceClassData {
             parse_result = Some(DeviceClassData::Touch(touch));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -12396,13 +12396,13 @@ impl TryParse for XIDeviceInfo {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let type_ = type_.try_into()?;
         let result = XIDeviceInfo { deviceid, type_, attachment, enabled, name, classes };
         Ok((result, remaining))
@@ -12501,7 +12501,7 @@ impl XIQueryDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_QUERY_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -12543,9 +12543,9 @@ impl TryParse for XIQueryDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_infos, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (infos, remaining) = crate::x11_utils::parse_list::<XIDeviceInfo>(remaining, num_infos.try_into().or(Err(ParseError::ParseError))?)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<XIDeviceInfo>(remaining, num_infos.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIQueryDeviceReply { sequence, length, infos };
         let _ = remaining;
@@ -12623,7 +12623,7 @@ impl XISetFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_SET_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -12693,7 +12693,7 @@ impl XIGetFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -12736,7 +12736,7 @@ impl TryParse for XIGetFocusReply {
         let (focus, remaining) = xproto::Window::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIGetFocusReply { sequence, length, focus };
         let _ = remaining;
@@ -12805,20 +12805,20 @@ impl TryFrom<u8> for GrabOwner {
         match value {
             0 => Ok(GrabOwner::NoOwner),
             1 => Ok(GrabOwner::Owner),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for GrabOwner {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for GrabOwner {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -12892,7 +12892,7 @@ impl<'input> XIGrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -12906,7 +12906,7 @@ impl<'input> XIGrabDeviceRequest<'input> {
         let owner_events = u8::from(owner_events).try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (mask_len, remaining) = u16::try_parse(remaining)?;
-        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(XIGrabDeviceRequest {
             window,
@@ -12975,7 +12975,7 @@ impl TryParse for XIGrabDeviceReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = XIGrabDeviceReply { sequence, length, status };
@@ -13033,7 +13033,7 @@ impl XIUngrabDeviceRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_UNGRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -13128,20 +13128,20 @@ impl TryFrom<u8> for EventMode {
             5 => Ok(EventMode::SyncPair),
             6 => Ok(EventMode::AcceptTouch),
             7 => Ok(EventMode::RejectTouch),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for EventMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for EventMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -13200,7 +13200,7 @@ impl XIAllowEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_ALLOW_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -13290,20 +13290,20 @@ impl TryFrom<u8> for GrabMode22 {
             0 => Ok(GrabMode22::Sync),
             1 => Ok(GrabMode22::Async),
             2 => Ok(GrabMode22::Touch),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for GrabMode22 {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for GrabMode22 {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -13361,20 +13361,20 @@ impl TryFrom<u8> for GrabType {
             2 => Ok(GrabType::Enter),
             3 => Ok(GrabType::FocusIn),
             4 => Ok(GrabType::TouchBegin),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for GrabType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for GrabType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -13400,7 +13400,7 @@ impl TryFrom<u32> for ModifierMask {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             2_147_483_648 => Ok(ModifierMask::Any),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
@@ -13538,7 +13538,7 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_PASSIVE_GRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (grab_window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -13556,8 +13556,8 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let owner_events = u8::from(owner_events).try_into()?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
+        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(XIPassiveGrabDeviceRequest {
             time,
@@ -13634,9 +13634,9 @@ impl TryParse for XIPassiveGrabDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_modifiers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (modifiers, remaining) = crate::x11_utils::parse_list::<GrabModifierInfo>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
+        let (modifiers, remaining) = crate::x11_utils::parse_list::<GrabModifierInfo>(remaining, num_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIPassiveGrabDeviceReply { sequence, length, modifiers };
         let _ = remaining;
@@ -13727,7 +13727,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_PASSIVE_UNGRAB_DEVICE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (grab_window, remaining) = xproto::Window::try_parse(value)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
@@ -13736,7 +13736,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         let (grab_type, remaining) = u8::try_parse(remaining)?;
         let grab_type = grab_type.try_into()?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
+        let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(XIPassiveUngrabDeviceRequest {
             grab_window,
@@ -13813,7 +13813,7 @@ impl XIListPropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_LIST_PROPERTIES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -13855,9 +13855,9 @@ impl TryParse for XIListPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_properties, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (properties, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_properties.try_into().or(Err(ParseError::ParseError))?)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_properties.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIListPropertiesReply { sequence, length, properties };
         let _ = remaining;
@@ -13902,7 +13902,7 @@ impl XIChangePropertyAux {
         if switch_expr == u32::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             let data8 = data8.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -13915,7 +13915,7 @@ impl XIChangePropertyAux {
         if switch_expr == u32::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -13926,13 +13926,13 @@ impl XIChangePropertyAux {
         }
         if switch_expr == u32::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
-            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIChangePropertyAux::Data32(data32));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -14056,7 +14056,7 @@ impl<'input> XIChangePropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_CHANGE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -14151,7 +14151,7 @@ impl XIDeletePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_DELETE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -14242,7 +14242,7 @@ impl XIGetPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let (delete, remaining) = bool::try_parse(remaining)?;
@@ -14298,7 +14298,7 @@ impl XIGetPropertyItems {
         if switch_expr == u32::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             let data8 = data8.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -14311,7 +14311,7 @@ impl XIGetPropertyItems {
         if switch_expr == u32::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -14322,13 +14322,13 @@ impl XIGetPropertyItems {
         }
         if switch_expr == u32::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
-            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data32(data32));
         }
         match parse_result {
-            None => Err(ParseError::ParseError),
+            None => Err(ParseError::InvalidValue),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -14377,7 +14377,7 @@ impl TryParse for XIGetPropertyReply {
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
         let (items, remaining) = XIGetPropertyItems::try_parse(remaining, format, num_items)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIGetPropertyReply { sequence, length, type_, bytes_after, num_items, items };
         let _ = remaining;
@@ -14428,7 +14428,7 @@ impl XIGetSelectedEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_SELECTED_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -14467,9 +14467,9 @@ impl TryParse for XIGetSelectedEventsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_masks, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_masks.try_into().or(Err(ParseError::ParseError))?)?;
+        let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_masks.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = XIGetSelectedEventsReply { sequence, length, masks };
         let _ = remaining;
@@ -14592,10 +14592,10 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_BARRIER_RELEASE_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (num_barriers, remaining) = u32::try_parse(value)?;
-        let (barriers, remaining) = crate::x11_utils::parse_list::<BarrierReleasePointerInfo>(remaining, num_barriers.try_into().or(Err(ParseError::ParseError))?)?;
+        let (barriers, remaining) = crate::x11_utils::parse_list::<BarrierReleasePointerInfo>(remaining, num_barriers.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(XIBarrierReleasePointerRequest {
             barriers: Cow::Owned(barriers),
@@ -14769,20 +14769,20 @@ impl TryFrom<u8> for MoreEventsMask {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             128 => Ok(MoreEventsMask::MoreEvents),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for MoreEventsMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for MoreEventsMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(MoreEventsMask, u8);
@@ -15065,20 +15065,20 @@ impl TryFrom<u8> for ClassesReportedMask {
             4 => Ok(ClassesReportedMask::ReportingValuators),
             2 => Ok(ClassesReportedMask::ReportingButtons),
             1 => Ok(ClassesReportedMask::ReportingKeys),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ClassesReportedMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ClassesReportedMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(ClassesReportedMask, u8);
@@ -15332,20 +15332,20 @@ impl TryFrom<u8> for ChangeDevice {
         match value {
             0 => Ok(ChangeDevice::NewPointer),
             1 => Ok(ChangeDevice::NewKeyboard),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ChangeDevice {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ChangeDevice {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -15642,20 +15642,20 @@ impl TryFrom<u8> for DeviceChange {
             3 => Ok(DeviceChange::Disabled),
             4 => Ok(DeviceChange::Unrecoverable),
             5 => Ok(DeviceChange::ControlChanged),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for DeviceChange {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for DeviceChange {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -15875,20 +15875,20 @@ impl TryFrom<u8> for ChangeReason {
         match value {
             1 => Ok(ChangeReason::SlaveSwitch),
             2 => Ok(ChangeReason::DeviceChange),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ChangeReason {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ChangeReason {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -15921,7 +15921,7 @@ impl TryParse for DeviceChangedEvent {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (reason, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let reason = reason.try_into()?;
         let result = DeviceChangedEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, reason, classes };
         let _ = remaining;
@@ -15974,7 +15974,7 @@ impl TryFrom<u32> for KeyEventFlags {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             65536 => Ok(KeyEventFlags::KeyRepeat),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
@@ -16032,9 +16032,9 @@ impl TryParse for KeyPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = KeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16103,7 +16103,7 @@ impl TryFrom<u32> for PointerEventFlags {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             65536 => Ok(PointerEventFlags::PointerEmulated),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
@@ -16161,9 +16161,9 @@ impl TryParse for ButtonPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = ButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16271,20 +16271,20 @@ impl TryFrom<u8> for NotifyMode {
             3 => Ok(NotifyMode::WhileGrabbed),
             4 => Ok(NotifyMode::PassiveGrab),
             5 => Ok(NotifyMode::PassiveUngrab),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for NotifyMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for NotifyMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16351,20 +16351,20 @@ impl TryFrom<u8> for NotifyDetail {
             5 => Ok(NotifyDetail::Pointer),
             6 => Ok(NotifyDetail::PointerRoot),
             7 => Ok(NotifyDetail::None),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for NotifyDetail {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for NotifyDetail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16420,7 +16420,7 @@ impl TryParse for EnterEvent {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let mode = mode.try_into()?;
         let detail = detail.try_into()?;
         let result = EnterEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
@@ -16527,20 +16527,20 @@ impl TryFrom<u8> for HierarchyMask {
             32 => Ok(HierarchyMask::SlaveDetached),
             64 => Ok(HierarchyMask::DeviceEnabled),
             128 => Ok(HierarchyMask::DeviceDisabled),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for HierarchyMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for HierarchyMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(HierarchyMask, u8);
@@ -16633,7 +16633,7 @@ impl TryParse for HierarchyEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (num_infos, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
-        let (infos, remaining) = crate::x11_utils::parse_list::<HierarchyInfo>(remaining, num_infos.try_into().or(Err(ParseError::ParseError))?)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<HierarchyInfo>(remaining, num_infos.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = HierarchyEvent { response_type, extension, sequence, length, event_type, deviceid, time, flags, infos };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16711,20 +16711,20 @@ impl TryFrom<u8> for PropertyFlag {
             0 => Ok(PropertyFlag::Deleted),
             1 => Ok(PropertyFlag::Created),
             2 => Ok(PropertyFlag::Modified),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for PropertyFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for PropertyFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16803,9 +16803,9 @@ impl TryParse for RawKeyPressEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = RawKeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16872,9 +16872,9 @@ impl TryParse for RawButtonPressEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = RawButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16937,7 +16937,7 @@ impl TryFrom<u32> for TouchEventFlags {
         match value {
             65536 => Ok(TouchEventFlags::TouchPendingEnd),
             131_072 => Ok(TouchEventFlags::TouchEmulatingPointer),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
@@ -16995,9 +16995,9 @@ impl TryParse for TouchBeginEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = TouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -17090,20 +17090,20 @@ impl TryFrom<u8> for TouchOwnershipFlags {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(TouchOwnershipFlags::None),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for TouchOwnershipFlags {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for TouchOwnershipFlags {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -17191,9 +17191,9 @@ impl TryParse for RawTouchBeginEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = RawTouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -17276,20 +17276,20 @@ impl TryFrom<u8> for BarrierFlags {
         match value {
             1 => Ok(BarrierFlags::PointerReleased),
             2 => Ok(BarrierFlags::DeviceIsGrabbed),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for BarrierFlags {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for BarrierFlags {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(BarrierFlags, u8);
@@ -17625,7 +17625,7 @@ impl<'input> SendExtensionEventRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SEND_EXTENSION_EVENT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (destination, remaining) = xproto::Window::try_parse(value)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
@@ -17633,8 +17633,8 @@ impl<'input> SendExtensionEventRequest<'input> {
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (num_events, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let (events, remaining) = crate::x11_utils::parse_list::<EventForSend>(remaining, num_events.try_into().or(Err(ParseError::ParseError))?)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (events, remaining) = crate::x11_utils::parse_list::<EventForSend>(remaining, num_events.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SendExtensionEventRequest {
             destination,
@@ -17688,7 +17688,7 @@ impl TryParse for DeviceError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = DeviceError { error_code, sequence };
         let _ = remaining;
@@ -17765,7 +17765,7 @@ impl TryParse for EventError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = EventError { error_code, sequence };
         let _ = remaining;
@@ -17842,7 +17842,7 @@ impl TryParse for ModeError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ModeError { error_code, sequence };
         let _ = remaining;
@@ -17919,7 +17919,7 @@ impl TryParse for DeviceBusyError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = DeviceBusyError { error_code, sequence };
         let _ = remaining;
@@ -17996,7 +17996,7 @@ impl TryParse for ClassError {
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ClassError { error_code, sequence };
         let _ = remaining;

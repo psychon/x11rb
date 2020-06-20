@@ -8,8 +8,31 @@ use crate::protocol::Error;
 pub enum ParseError {
     /// Not enough data was provided.
     InsufficientData,
-    /// Another error while parsing some data.
-    ParseError,
+
+    /// A value did not fit.
+    ///
+    /// This error can e.g. happen when a value that was received from the X11 server does not fit
+    /// into an `usize`.
+    ConversionFailed,
+
+    /// The value of an expression could not be computed.
+    ///
+    /// As an example, the length of the data in `xproto`'s `GetPropertyReply` is described by
+    /// `value_len * (format / 8)`. The multiplication could cause an overflow, which would be
+    /// represented by this error.
+    InvalidExpression,
+
+    /// A value was outside of its valid range.
+    ///
+    /// When parsing the value of an enumeration, not all possible integer values have a defined
+    /// meaning. This error occurs when an invalid value is encountered in this context.
+    ///
+    /// For example, `xproto` has an enumeration `Place` with possible values `OnTop` (0) and
+    /// `OnBottom` (1). Any value other than 0 or 1 generates an `InvalidValue` when parsing.
+    InvalidValue,
+
+    /// Some file descriptors were expected, but none were received.
+    MissingFileDescriptors,
 }
 
 impl std::error::Error for ParseError {}
@@ -18,7 +41,17 @@ impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ParseError::InsufficientData => write!(f, "Insufficient data was provided"),
-            ParseError::ParseError => write!(f, "Error while parsing"),
+            ParseError::ConversionFailed => {
+                write!(f, "A value conversion failed due to out of range data")
+            }
+            ParseError::InvalidExpression => write!(
+                f,
+                "An expression could not be computed, e.g. due to overflow"
+            ),
+            ParseError::InvalidValue => {
+                write!(f, "A value could not be parsed into an enumeration")
+            }
+            ParseError::MissingFileDescriptors => write!(f, "Missing file descriptors"),
         }
     }
 }
@@ -29,7 +62,7 @@ pub enum ConnectError {
     UnknownError,
 
     /// Error while parsing some data, see `ParseError`.
-    ParseError,
+    ParseError(ParseError),
 
     /// Out of memory.
     ///
@@ -80,7 +113,7 @@ impl std::fmt::Display for ConnectError {
             ConnectError::InsufficientMemory => write!(f, "Insufficient memory"),
             ConnectError::DisplayParsingError => write!(f, "Display parsing error"),
             ConnectError::InvalidScreen => write!(f, "Invalid screen"),
-            ConnectError::ParseError => write!(f, "Parsing error"),
+            ConnectError::ParseError(err) => err.fmt(f),
             ConnectError::IOError(err) => err.fmt(f),
             ConnectError::ZeroIDMask => write!(f, "XID mask was zero"),
             ConnectError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
@@ -93,10 +126,7 @@ impl std::fmt::Display for ConnectError {
 
 impl From<ParseError> for ConnectError {
     fn from(err: ParseError) -> Self {
-        match err {
-            ParseError::InsufficientData => ConnectError::ParseError,
-            ParseError::ParseError => ConnectError::ParseError,
-        }
+        ConnectError::ParseError(err)
     }
 }
 
@@ -127,7 +157,7 @@ pub enum ConnectionError {
     FDPassingFailed,
 
     /// Error while parsing some data, see `ParseError`.
-    ParseError,
+    ParseError(ParseError),
 
     /// Out of memory.
     ///
@@ -150,7 +180,7 @@ impl std::fmt::Display for ConnectionError {
                 write!(f, "Maximum request length exceeded")
             }
             ConnectionError::FDPassingFailed => write!(f, "FD passing failed"),
-            ConnectionError::ParseError => write!(f, "Parsing error"),
+            ConnectionError::ParseError(err) => err.fmt(f),
             ConnectionError::IOError(err) => err.fmt(f),
         }
     }
@@ -158,10 +188,7 @@ impl std::fmt::Display for ConnectionError {
 
 impl From<ParseError> for ConnectionError {
     fn from(err: ParseError) -> Self {
-        match err {
-            ParseError::InsufficientData => ConnectionError::ParseError,
-            ParseError::ParseError => ConnectionError::ParseError,
-        }
+        ConnectionError::ParseError(err)
     }
 }
 

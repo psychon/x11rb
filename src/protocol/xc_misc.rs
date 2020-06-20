@@ -71,7 +71,7 @@ impl GetVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (client_major_version, remaining) = u16::try_parse(value)?;
         let (client_minor_version, remaining) = u16::try_parse(remaining)?;
@@ -115,7 +115,7 @@ impl TryParse for GetVersionReply {
         let (server_major_version, remaining) = u16::try_parse(remaining)?;
         let (server_minor_version, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetVersionReply { sequence, length, server_major_version, server_minor_version };
         let _ = remaining;
@@ -159,7 +159,7 @@ impl GetXIDRangeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_XID_RANGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(GetXIDRangeRequest
@@ -196,7 +196,7 @@ impl TryParse for GetXIDRangeReply {
         let (start_id, remaining) = u32::try_parse(remaining)?;
         let (count, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetXIDRangeReply { sequence, length, start_id, count };
         let _ = remaining;
@@ -247,7 +247,7 @@ impl GetXIDListRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_XID_LIST_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (count, remaining) = u32::try_parse(value)?;
         let _ = remaining;
@@ -286,9 +286,9 @@ impl TryParse for GetXIDListReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (ids_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ids_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (ids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ids_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetXIDListReply { sequence, length, ids };
         let _ = remaining;

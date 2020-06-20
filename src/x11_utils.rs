@@ -99,12 +99,12 @@ pub fn parse_request_header(
     let (length, remaining) = u16::try_parse(remaining)?;
     let (remaining_length, finally_remaining) = if length == 0 {
         if big_requests_enabled == BigRequests::NotEnabled {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
 
         let (length, remaining) = u32::try_parse(remaining)?;
         if length < 2 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         // Adjust length for the size of this header (two 4 byte units).
         (length - 2, remaining)

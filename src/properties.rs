@@ -94,7 +94,7 @@ impl WmClass {
     /// function to return sensible results.
     pub fn from_reply(reply: GetPropertyReply) -> Result<Self, ParseError> {
         if reply.type_ != AtomEnum::STRING.into() || reply.format != 8 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         // Find the first zero byte in the value
         let offset = reply
@@ -270,7 +270,7 @@ impl WmSizeHints {
     /// function to return sensible results.
     pub fn from_reply(reply: &GetPropertyReply) -> Result<Self, ParseError> {
         if reply.type_ != AtomEnum::WM_SIZE_HINTS.into() || reply.format != 32 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         Ok(Self::try_parse(&reply.value)?.0)
     }
@@ -346,7 +346,7 @@ impl TryParse for WmSizeHints {
             Some(9) => Some(xproto::Gravity::SouthEast),
             Some(10) => Some(xproto::Gravity::Static),
             // BitForget and WinUnmap are not allowed here
-            _ => return Err(ParseError::ParseError),
+            _ => return Err(ParseError::InvalidValue),
         };
         assert_eq!(wire_win_gravity, win_gravity.map(Into::into));
 
@@ -526,7 +526,7 @@ impl WmHints {
     /// function to return sensible results.
     pub fn from_reply(reply: &GetPropertyReply) -> Result<Self, ParseError> {
         if reply.type_ != AtomEnum::WM_HINTS.into() || reply.format != 32 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
 
         Ok(Self::try_parse(&reply.value)?.0)
@@ -577,7 +577,7 @@ impl TryParse for WmHints {
             None => None,
             Some(1) => Some(WmHintsState::Normal),
             Some(3) => Some(WmHintsState::Iconic),
-            _ => return Err(ParseError::ParseError),
+            _ => return Err(ParseError::InvalidValue),
         };
 
         let urgent = flags & HINT_URGENCY != 0;

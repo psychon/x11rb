@@ -294,7 +294,7 @@ fn load_cursor<C: Connection>(
     // Load the cursor from the file
     use std::io::BufReader;
     let images = parse_cursor::parse_cursor(&mut BufReader::new(cursor_file), handle.cursor_size)
-        .or(Err(crate::errors::ParseError::ParseError))?;
+        .or(Err(crate::errors::ParseError::InvalidValue))?;
     let mut images = &images[..];
 
     // No animated cursor support? Only use the first image

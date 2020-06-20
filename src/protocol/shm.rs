@@ -158,7 +158,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(QueryVersionRequest
@@ -203,7 +203,7 @@ impl TryParse for QueryVersionReply {
         let (pixmap_format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { shared_pixmaps, sequence, length, major_version, minor_version, uid, gid, pixmap_format };
         let _ = remaining;
@@ -266,7 +266,7 @@ impl AttachRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ATTACH_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (shmseg, remaining) = Seg::try_parse(value)?;
         let (shmid, remaining) = u32::try_parse(remaining)?;
@@ -332,7 +332,7 @@ impl DetachRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DETACH_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (shmseg, remaining) = Seg::try_parse(value)?;
         let _ = remaining;
@@ -451,7 +451,7 @@ impl PutImageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PUT_IMAGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (gc, remaining) = xproto::Gcontext::try_parse(remaining)?;
@@ -593,7 +593,7 @@ impl GetImageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_IMAGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (x, remaining) = i16::try_parse(remaining)?;
@@ -660,7 +660,7 @@ impl TryParse for GetImageReply {
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (size, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetImageReply { depth, sequence, length, visual, size };
         let _ = remaining;
@@ -743,7 +743,7 @@ impl CreatePixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_PIXMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (pid, remaining) = xproto::Pixmap::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
@@ -828,10 +828,10 @@ impl AttachFdRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         if header.minor_opcode != ATTACH_FD_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (shmseg, remaining) = Seg::try_parse(value)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let shm_fd = fds.remove(0);
         let (read_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -909,7 +909,7 @@ impl CreateSegmentRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_SEGMENT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (shmseg, remaining) = Seg::try_parse(value)?;
         let (size, remaining) = u32::try_parse(remaining)?;
@@ -954,11 +954,11 @@ impl TryParseFd for CreateSegmentReply {
         let (nfd, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let shm_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = CreateSegmentReply { nfd, sequence, length, shm_fd };
         let _ = remaining;

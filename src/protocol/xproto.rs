@@ -352,20 +352,20 @@ impl TryFrom<u8> for VisualClass {
             3 => Ok(VisualClass::PseudoColor),
             4 => Ok(VisualClass::TrueColor),
             5 => Ok(VisualClass::DirectColor),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for VisualClass {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for VisualClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -461,7 +461,7 @@ impl TryParse for Depth {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (visuals_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (visuals, remaining) = crate::x11_utils::parse_list::<Visualtype>(remaining, visuals_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (visuals, remaining) = crate::x11_utils::parse_list::<Visualtype>(remaining, visuals_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let result = Depth { depth, visuals };
         Ok((result, remaining))
     }
@@ -602,7 +602,7 @@ impl TryFrom<u32> for EventMask {
             4_194_304 => Ok(EventMask::PropertyChange),
             8_388_608 => Ok(EventMask::ColorMapChange),
             16_777_216 => Ok(EventMask::OwnerGrabButton),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
@@ -656,20 +656,20 @@ impl TryFrom<u8> for BackingStore {
             0 => Ok(BackingStore::NotUseful),
             1 => Ok(BackingStore::WhenMapped),
             2 => Ok(BackingStore::Always),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for BackingStore {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for BackingStore {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -710,7 +710,7 @@ impl TryParse for Screen {
         let (save_unders, remaining) = bool::try_parse(remaining)?;
         let (root_depth, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths_len, remaining) = u8::try_parse(remaining)?;
-        let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let backing_stores = backing_stores.try_into()?;
         let result = Screen { root, default_colormap, white_pixel, black_pixel, current_input_masks, width_in_pixels, height_in_pixels, width_in_millimeters, height_in_millimeters, min_installed_maps, max_installed_maps, root_visual, backing_stores, save_unders, root_depth, allowed_depths };
         Ok((result, remaining))
@@ -785,13 +785,13 @@ impl TryParse for SetupRequest {
         let (authorization_protocol_name_len, remaining) = u16::try_parse(remaining)?;
         let (authorization_protocol_data_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (authorization_protocol_name, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (authorization_protocol_name, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let authorization_protocol_name = authorization_protocol_name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (authorization_protocol_data, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_data_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (authorization_protocol_data, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_data_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let authorization_protocol_data = authorization_protocol_data.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -875,7 +875,7 @@ impl TryParse for SetupFailed {
         let (protocol_major_version, remaining) = u16::try_parse(remaining)?;
         let (protocol_minor_version, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, reason_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, reason_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let reason = reason.to_vec();
         let result = SetupFailed { status, protocol_major_version, protocol_minor_version, length, reason };
         Ok((result, remaining))
@@ -931,7 +931,7 @@ impl TryParse for SetupAuthenticate {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::InsufficientData)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let reason = reason.to_vec();
         let result = SetupAuthenticate { status, reason };
         Ok((result, remaining))
@@ -1030,20 +1030,20 @@ impl TryFrom<u8> for ImageOrder {
         match value {
             0 => Ok(ImageOrder::LSBFirst),
             1 => Ok(ImageOrder::MSBFirst),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ImageOrder {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ImageOrder {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -1091,14 +1091,14 @@ impl TryParse for Setup {
         let (min_keycode, remaining) = Keycode::try_parse(remaining)?;
         let (max_keycode, remaining) = Keycode::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let vendor = vendor.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (pixmap_formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, pixmap_formats_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (roots, remaining) = crate::x11_utils::parse_list::<Screen>(remaining, roots_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (pixmap_formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, pixmap_formats_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (roots, remaining) = crate::x11_utils::parse_list::<Screen>(remaining, roots_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let image_byte_order = image_byte_order.try_into()?;
         let bitmap_format_bit_order = bitmap_format_bit_order.try_into()?;
         let result = Setup { status, protocol_major_version, protocol_minor_version, length, release_number, resource_id_base, resource_id_mask, motion_buffer_size, maximum_request_length, image_byte_order, bitmap_format_bit_order, bitmap_format_scanline_unit, bitmap_format_scanline_pad, min_keycode, max_keycode, vendor, pixmap_formats, roots };
@@ -1247,14 +1247,14 @@ impl TryFrom<u16> for ModMask {
             64 => Ok(ModMask::M4),
             128 => Ok(ModMask::M5),
             32768 => Ok(ModMask::Any),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u32> for ModMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(ModMask, u16);
@@ -1327,14 +1327,14 @@ impl TryFrom<u16> for KeyButMask {
             1024 => Ok(KeyButMask::Button3),
             2048 => Ok(KeyButMask::Button4),
             4096 => Ok(KeyButMask::Button5),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u32> for KeyButMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(KeyButMask, u16);
@@ -1381,20 +1381,20 @@ impl TryFrom<u8> for WindowEnum {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(WindowEnum::None),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for WindowEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for WindowEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -1578,14 +1578,14 @@ impl TryFrom<u16> for ButtonMask {
             2048 => Ok(ButtonMask::M4),
             4096 => Ok(ButtonMask::M5),
             32768 => Ok(ButtonMask::Any),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u32> for ButtonMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(ButtonMask, u16);
@@ -1776,20 +1776,20 @@ impl TryFrom<u8> for Motion {
         match value {
             0 => Ok(Motion::Normal),
             1 => Ok(Motion::Hint),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Motion {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Motion {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -1986,20 +1986,20 @@ impl TryFrom<u8> for NotifyDetail {
             5 => Ok(NotifyDetail::Pointer),
             6 => Ok(NotifyDetail::PointerRoot),
             7 => Ok(NotifyDetail::None),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for NotifyDetail {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for NotifyDetail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -2054,20 +2054,20 @@ impl TryFrom<u8> for NotifyMode {
             1 => Ok(NotifyMode::Grab),
             2 => Ok(NotifyMode::Ungrab),
             3 => Ok(NotifyMode::WhileGrabbed),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for NotifyMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for NotifyMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -2702,20 +2702,20 @@ impl TryFrom<u8> for Visibility {
             0 => Ok(Visibility::Unobscured),
             1 => Ok(Visibility::PartiallyObscured),
             2 => Ok(Visibility::FullyObscured),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Visibility {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Visibility {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -3810,20 +3810,20 @@ impl TryFrom<u8> for Place {
         match value {
             0 => Ok(Place::OnTop),
             1 => Ok(Place::OnBottom),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Place {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Place {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -3981,20 +3981,20 @@ impl TryFrom<u8> for Property {
         match value {
             0 => Ok(Property::NewValue),
             1 => Ok(Property::Delete),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Property {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Property {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -4221,20 +4221,20 @@ impl TryFrom<u8> for Time {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(Time::CurrentTime),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Time {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Time {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -4650,20 +4650,20 @@ impl TryFrom<u8> for ColormapState {
         match value {
             0 => Ok(ColormapState::Uninstalled),
             1 => Ok(ColormapState::Installed),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ColormapState {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ColormapState {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -4709,20 +4709,20 @@ impl TryFrom<u8> for ColormapEnum {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(ColormapEnum::None),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ColormapEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ColormapEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -5129,20 +5129,20 @@ impl TryFrom<u8> for Mapping {
             0 => Ok(Mapping::Modifier),
             1 => Ok(Mapping::Keyboard),
             2 => Ok(Mapping::Pointer),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Mapping {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Mapping {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -5298,7 +5298,7 @@ impl TryParse for RequestError {
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = RequestError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
@@ -5385,7 +5385,7 @@ impl TryParse for ValueError {
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         if response_type != 0 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ValueError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
@@ -5559,20 +5559,20 @@ impl TryFrom<u8> for WindowClass {
             0 => Ok(WindowClass::CopyFromParent),
             1 => Ok(WindowClass::InputOutput),
             2 => Ok(WindowClass::InputOnly),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for WindowClass {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for WindowClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -5720,14 +5720,14 @@ impl TryFrom<u16> for CW {
             4096 => Ok(CW::DontPropagate),
             8192 => Ok(CW::Colormap),
             16384 => Ok(CW::Cursor),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u32> for CW {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(CW, u16);
@@ -5785,20 +5785,20 @@ impl TryFrom<u8> for BackPixmap {
         match value {
             0 => Ok(BackPixmap::None),
             1 => Ok(BackPixmap::ParentRelative),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for BackPixmap {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for BackPixmap {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -5875,7 +5875,7 @@ impl Gravity {
             8 => Ok(Gravity::South),
             9 => Ok(Gravity::SouthEast),
             10 => Ok(Gravity::Static),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
@@ -6356,7 +6356,7 @@ impl<'input> CreateWindowRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CREATE_WINDOW_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (depth, remaining) = u8::try_parse(remaining)?;
@@ -6889,7 +6889,7 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CHANGE_WINDOW_ATTRIBUTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -6996,20 +6996,20 @@ impl TryFrom<u8> for MapState {
             0 => Ok(MapState::Unmapped),
             1 => Ok(MapState::Unviewable),
             2 => Ok(MapState::Viewable),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for MapState {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for MapState {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -7059,7 +7059,7 @@ impl GetWindowAttributesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_WINDOW_ATTRIBUTES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -7157,7 +7157,7 @@ impl TryParse for GetWindowAttributesReply {
         let (do_not_propagate_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let backing_store = backing_store.try_into()?;
         let class = class.try_into()?;
@@ -7234,7 +7234,7 @@ impl DestroyWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != DESTROY_WINDOW_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -7317,7 +7317,7 @@ impl DestroySubwindowsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != DESTROY_SUBWINDOWS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -7397,20 +7397,20 @@ impl TryFrom<u8> for SetMode {
         match value {
             0 => Ok(SetMode::Insert),
             1 => Ok(SetMode::Delete),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for SetMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for SetMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -7472,7 +7472,7 @@ impl ChangeSaveSetRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CHANGE_SAVE_SET_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -7604,7 +7604,7 @@ impl ReparentWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != REPARENT_WINDOW_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -7741,7 +7741,7 @@ impl MapWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != MAP_WINDOW_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -7837,7 +7837,7 @@ impl MapSubwindowsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != MAP_SUBWINDOWS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -7919,7 +7919,7 @@ impl UnmapWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != UNMAP_WINDOW_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -8001,7 +8001,7 @@ impl UnmapSubwindowsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != UNMAP_SUBWINDOWS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -8089,20 +8089,20 @@ impl TryFrom<u8> for ConfigWindow {
             16 => Ok(ConfigWindow::BorderWidth),
             32 => Ok(ConfigWindow::Sibling),
             64 => Ok(ConfigWindow::StackMode),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ConfigWindow {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ConfigWindow {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(ConfigWindow, u8);
@@ -8161,20 +8161,20 @@ impl TryFrom<u8> for StackMode {
             2 => Ok(StackMode::TopIf),
             3 => Ok(StackMode::BottomIf),
             4 => Ok(StackMode::Opposite),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for StackMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for StackMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -8450,7 +8450,7 @@ impl<'input> ConfigureWindowRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CONFIGURE_WINDOW_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -8592,20 +8592,20 @@ impl TryFrom<u8> for Circulate {
         match value {
             0 => Ok(Circulate::RaiseLowest),
             1 => Ok(Circulate::LowerHighest),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Circulate {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Circulate {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -8662,7 +8662,7 @@ impl CirculateWindowRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CIRCULATE_WINDOW_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (direction, remaining) = u8::try_parse(remaining)?;
@@ -8779,7 +8779,7 @@ impl GetGeometryRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_GEOMETRY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -8882,7 +8882,7 @@ impl TryParse for GetGeometryReply {
         let (border_width, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetGeometryReply { depth, sequence, length, root, x, y, width, height, border_width };
         let _ = remaining;
@@ -8969,7 +8969,7 @@ impl QueryTreeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != QUERY_TREE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -9057,9 +9057,9 @@ impl TryParse for QueryTreeReply {
         let (parent, remaining) = Window::try_parse(remaining)?;
         let (children_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::InsufficientData)?;
-        let (children, remaining) = crate::x11_utils::parse_list::<Window>(remaining, children_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (children, remaining) = crate::x11_utils::parse_list::<Window>(remaining, children_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryTreeReply { sequence, length, root, parent, children };
         let _ = remaining;
@@ -9175,14 +9175,14 @@ impl<'input> InternAtomRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != INTERN_ATOM_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (only_if_exists, remaining) = bool::try_parse(remaining)?;
         let _ = remaining;
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(InternAtomRequest {
             only_if_exists,
@@ -9273,7 +9273,7 @@ impl TryParse for InternAtomReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (atom, remaining) = Atom::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = InternAtomReply { sequence, length, atom };
         let _ = remaining;
@@ -9323,7 +9323,7 @@ impl GetAtomNameRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_ATOM_NAME_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -9365,10 +9365,10 @@ impl TryParse for GetAtomNameReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetAtomNameReply { sequence, length, name };
         let _ = remaining;
@@ -9456,20 +9456,20 @@ impl TryFrom<u8> for PropMode {
             0 => Ok(PropMode::Replace),
             1 => Ok(PropMode::Prepend),
             2 => Ok(PropMode::Append),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for PropMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for PropMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -9589,7 +9589,7 @@ impl<'input> ChangePropertyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CHANGE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -9601,7 +9601,7 @@ impl<'input> ChangePropertyRequest<'input> {
         let (format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::ParseError)?.checked_div(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangePropertyRequest {
             mode,
@@ -9742,7 +9742,7 @@ impl DeletePropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != DELETE_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -9814,20 +9814,20 @@ impl TryFrom<u8> for GetPropertyType {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(GetPropertyType::Any),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for GetPropertyType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for GetPropertyType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -9959,7 +9959,7 @@ impl GetPropertyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_PROPERTY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (delete, remaining) = bool::try_parse(remaining)?;
@@ -10260,10 +10260,10 @@ impl TryParse for GetPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let value = value.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetPropertyReply { format, sequence, length, type_, bytes_after, value_len, value };
         let _ = remaining;
@@ -10313,7 +10313,7 @@ impl ListPropertiesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != LIST_PROPERTIES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -10355,9 +10355,9 @@ impl TryParse for ListPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (atoms_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListPropertiesReply { sequence, length, atoms };
         let _ = remaining;
@@ -10463,7 +10463,7 @@ impl SetSelectionOwnerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_SELECTION_OWNER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -10580,7 +10580,7 @@ impl GetSelectionOwnerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_SELECTION_OWNER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -10642,7 +10642,7 @@ impl TryParse for GetSelectionOwnerReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (owner, remaining) = Window::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetSelectionOwnerReply { sequence, length, owner };
         let _ = remaining;
@@ -10716,7 +10716,7 @@ impl ConvertSelectionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CONVERT_SELECTION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -10812,20 +10812,20 @@ impl TryFrom<u8> for SendEventDest {
         match value {
             0 => Ok(SendEventDest::PointerWindow),
             1 => Ok(SendEventDest::ItemFocus),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for SendEventDest {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for SendEventDest {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -10946,7 +10946,7 @@ impl<'input> SendEventRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SEND_EVENT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (propagate, remaining) = bool::try_parse(remaining)?;
@@ -11129,20 +11129,20 @@ impl TryFrom<u8> for GrabMode {
         match value {
             0 => Ok(GrabMode::Sync),
             1 => Ok(GrabMode::Async),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for GrabMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for GrabMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -11200,20 +11200,20 @@ impl TryFrom<u8> for GrabStatus {
             2 => Ok(GrabStatus::InvalidTime),
             3 => Ok(GrabStatus::NotViewable),
             4 => Ok(GrabStatus::Frozen),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for GrabStatus {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for GrabStatus {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -11259,20 +11259,20 @@ impl TryFrom<u8> for CursorEnum {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(CursorEnum::None),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for CursorEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for CursorEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -11411,7 +11411,7 @@ impl GrabPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GRAB_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (owner_events, remaining) = bool::try_parse(remaining)?;
@@ -11553,7 +11553,7 @@ impl TryParse for GrabPointerReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = GrabPointerReply { status, sequence, length };
@@ -11627,7 +11627,7 @@ impl UngrabPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != UNGRAB_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -11744,20 +11744,20 @@ impl TryFrom<u8> for ButtonIndex {
             3 => Ok(ButtonIndex::M3),
             4 => Ok(ButtonIndex::M4),
             5 => Ok(ButtonIndex::M5),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ButtonIndex {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ButtonIndex {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -11894,7 +11894,7 @@ impl GrabButtonRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GRAB_BUTTON_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (owner_events, remaining) = bool::try_parse(remaining)?;
@@ -12065,7 +12065,7 @@ impl UngrabButtonRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != UNGRAB_BUTTON_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (button, remaining) = u8::try_parse(remaining)?;
@@ -12147,7 +12147,7 @@ impl ChangeActivePointerGrabRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CHANGE_ACTIVE_POINTER_GRAB_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -12299,7 +12299,7 @@ impl GrabKeyboardRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GRAB_KEYBOARD_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (owner_events, remaining) = bool::try_parse(remaining)?;
@@ -12418,7 +12418,7 @@ impl TryParse for GrabKeyboardReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = GrabKeyboardReply { status, sequence, length };
@@ -12469,7 +12469,7 @@ impl UngrabKeyboardRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != UNGRAB_KEYBOARD_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -12540,20 +12540,20 @@ impl TryFrom<u8> for Grab {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(Grab::Any),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Grab {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Grab {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -12669,7 +12669,7 @@ impl GrabKeyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GRAB_KEY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (owner_events, remaining) = bool::try_parse(remaining)?;
@@ -12844,7 +12844,7 @@ impl UngrabKeyRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != UNGRAB_KEY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (key, remaining) = Keycode::try_parse(remaining)?;
@@ -13028,20 +13028,20 @@ impl TryFrom<u8> for Allow {
             5 => Ok(Allow::ReplayKeyboard),
             6 => Ok(Allow::AsyncBoth),
             7 => Ok(Allow::SyncBoth),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Allow {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Allow {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -13099,7 +13099,7 @@ impl AllowEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != ALLOW_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -13176,7 +13176,7 @@ impl GrabServerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GRAB_SERVER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -13226,7 +13226,7 @@ impl UngrabServerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != UNGRAB_SERVER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -13296,7 +13296,7 @@ impl QueryPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != QUERY_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -13384,7 +13384,7 @@ impl TryParse for QueryPointerReply {
         let (mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryPointerReply { same_screen, sequence, length, root, child, root_x, root_y, win_x, win_y, mask };
         let _ = remaining;
@@ -13492,7 +13492,7 @@ impl GetMotionEventsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_MOTION_EVENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -13544,9 +13544,9 @@ impl TryParse for GetMotionEventsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (events_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (events, remaining) = crate::x11_utils::parse_list::<Timecoord>(remaining, events_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (events, remaining) = crate::x11_utils::parse_list::<Timecoord>(remaining, events_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetMotionEventsReply { sequence, length, events };
         let _ = remaining;
@@ -13625,7 +13625,7 @@ impl TranslateCoordinatesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != TRANSLATE_COORDINATES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -13681,7 +13681,7 @@ impl TryParse for TranslateCoordinatesReply {
         let (dst_x, remaining) = i16::try_parse(remaining)?;
         let (dst_y, remaining) = i16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = TranslateCoordinatesReply { same_screen, sequence, length, child, dst_x, dst_y };
         let _ = remaining;
@@ -13793,7 +13793,7 @@ impl WarpPointerRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != WARP_POINTER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -13937,20 +13937,20 @@ impl TryFrom<u8> for InputFocus {
             1 => Ok(InputFocus::PointerRoot),
             2 => Ok(InputFocus::Parent),
             3 => Ok(InputFocus::FollowKeyboard),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for InputFocus {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for InputFocus {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -14031,7 +14031,7 @@ impl SetInputFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_INPUT_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (revert_to, remaining) = u8::try_parse(remaining)?;
@@ -14130,7 +14130,7 @@ impl GetInputFocusRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_INPUT_FOCUS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -14169,7 +14169,7 @@ impl TryParse for GetInputFocusReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (focus, remaining) = Window::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let revert_to = revert_to.try_into()?;
         let result = GetInputFocusReply { revert_to, sequence, length, focus };
@@ -14213,7 +14213,7 @@ impl QueryKeymapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != QUERY_KEYMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -14252,7 +14252,7 @@ impl TryParse for QueryKeymapReply {
         let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let keys = <[u8; 32]>::try_from(keys).unwrap();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryKeymapReply { sequence, length, keys };
         let _ = remaining;
@@ -14332,7 +14332,7 @@ impl<'input> OpenFontRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != OPEN_FONT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -14340,7 +14340,7 @@ impl<'input> OpenFontRequest<'input> {
         let (fid, remaining) = Font::try_parse(value)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(OpenFontRequest {
             fid,
@@ -14425,7 +14425,7 @@ impl CloseFontRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CLOSE_FONT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -14505,20 +14505,20 @@ impl TryFrom<u8> for FontDraw {
         match value {
             0 => Ok(FontDraw::LeftToRight),
             1 => Ok(FontDraw::RightToLeft),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for FontDraw {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for FontDraw {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -14667,7 +14667,7 @@ impl QueryFontRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != QUERY_FONT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -14753,10 +14753,10 @@ impl TryParse for QueryFontReply {
         let (font_ascent, remaining) = i16::try_parse(remaining)?;
         let (font_descent, remaining) = i16::try_parse(remaining)?;
         let (char_infos_len, remaining) = u32::try_parse(remaining)?;
-        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (char_infos, remaining) = crate::x11_utils::parse_list::<Charinfo>(remaining, char_infos_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (char_infos, remaining) = crate::x11_utils::parse_list::<Charinfo>(remaining, char_infos_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let draw_direction = draw_direction.try_into()?;
         let result = QueryFontReply { sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, properties, char_infos };
@@ -14877,7 +14877,7 @@ impl<'input> QueryTextExtentsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != QUERY_TEXT_EXTENTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (odd_length, remaining) = bool::try_parse(remaining)?;
@@ -14894,7 +14894,7 @@ impl<'input> QueryTextExtentsRequest<'input> {
         let _ = remaining;
         if odd_length {
             if string.is_empty() {
-                return Err(ParseError::ParseError);
+                return Err(ParseError::InvalidValue);
             }
             string.truncate(string.len() - 1);
         }
@@ -14989,7 +14989,7 @@ impl TryParse for QueryTextExtentsReply {
         let (overall_left, remaining) = i32::try_parse(remaining)?;
         let (overall_right, remaining) = i32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let draw_direction = draw_direction.try_into()?;
         let result = QueryTextExtentsReply { draw_direction, sequence, length, font_ascent, font_descent, overall_ascent, overall_descent, overall_width, overall_left, overall_right };
@@ -15013,7 +15013,7 @@ pub struct Str {
 impl TryParse for Str {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (name_len, remaining) = u8::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         let result = Str { name };
         Ok((result, remaining))
@@ -15107,14 +15107,14 @@ impl<'input> ListFontsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != LIST_FONTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         let (max_names, remaining) = u16::try_parse(value)?;
         let (pattern_len, remaining) = u16::try_parse(remaining)?;
-        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ListFontsRequest {
             max_names,
@@ -15176,9 +15176,9 @@ impl TryParse for ListFontsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (names_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListFontsReply { sequence, length, names };
         let _ = remaining;
@@ -15262,14 +15262,14 @@ impl<'input> ListFontsWithInfoRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != LIST_FONTS_WITH_INFO_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         let (max_names, remaining) = u16::try_parse(value)?;
         let (pattern_len, remaining) = u16::try_parse(remaining)?;
-        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ListFontsWithInfoRequest {
             max_names,
@@ -15370,11 +15370,11 @@ impl TryParse for ListFontsWithInfoReply {
         let (font_ascent, remaining) = i16::try_parse(remaining)?;
         let (font_descent, remaining) = i16::try_parse(remaining)?;
         let (replies_hint, remaining) = u32::try_parse(remaining)?;
-        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let name = name.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let draw_direction = draw_direction.try_into()?;
         let result = ListFontsWithInfoReply { sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, replies_hint, properties, name };
@@ -15458,14 +15458,14 @@ impl<'input> SetFontPathRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_FONT_PATH_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         let (font_qty, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (font, remaining) = crate::x11_utils::parse_list::<Str>(remaining, font_qty.try_into().or(Err(ParseError::ParseError))?)?;
+        let (font, remaining) = crate::x11_utils::parse_list::<Str>(remaining, font_qty.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetFontPathRequest {
             font: Cow::Owned(font),
@@ -15520,7 +15520,7 @@ impl GetFontPathRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_FONT_PATH_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -15558,9 +15558,9 @@ impl TryParse for GetFontPathReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (path_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (path, remaining) = crate::x11_utils::parse_list::<Str>(remaining, path_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (path, remaining) = crate::x11_utils::parse_list::<Str>(remaining, path_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetFontPathReply { sequence, length, path };
         let _ = remaining;
@@ -15664,7 +15664,7 @@ impl CreatePixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CREATE_PIXMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (depth, remaining) = u8::try_parse(remaining)?;
@@ -15771,7 +15771,7 @@ impl FreePixmapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != FREE_PIXMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -16000,7 +16000,7 @@ impl TryFrom<u32> for GC {
             1_048_576 => Ok(GC::DashOffset),
             2_097_152 => Ok(GC::DashList),
             4_194_304 => Ok(GC::ArcMode),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
@@ -16093,20 +16093,20 @@ impl TryFrom<u8> for GX {
             13 => Ok(GX::OrInverted),
             14 => Ok(GX::Nand),
             15 => Ok(GX::Set),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for GX {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for GX {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16158,20 +16158,20 @@ impl TryFrom<u8> for LineStyle {
             0 => Ok(LineStyle::Solid),
             1 => Ok(LineStyle::OnOffDash),
             2 => Ok(LineStyle::DoubleDash),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for LineStyle {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for LineStyle {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16226,20 +16226,20 @@ impl TryFrom<u8> for CapStyle {
             1 => Ok(CapStyle::Butt),
             2 => Ok(CapStyle::Round),
             3 => Ok(CapStyle::Projecting),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for CapStyle {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for CapStyle {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16291,20 +16291,20 @@ impl TryFrom<u8> for JoinStyle {
             0 => Ok(JoinStyle::Miter),
             1 => Ok(JoinStyle::Round),
             2 => Ok(JoinStyle::Bevel),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for JoinStyle {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for JoinStyle {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16359,20 +16359,20 @@ impl TryFrom<u8> for FillStyle {
             1 => Ok(FillStyle::Tiled),
             2 => Ok(FillStyle::Stippled),
             3 => Ok(FillStyle::OpaqueStippled),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for FillStyle {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for FillStyle {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16429,20 +16429,20 @@ impl TryFrom<u8> for FillRule {
         match value {
             0 => Ok(FillRule::EvenOdd),
             1 => Ok(FillRule::Winding),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for FillRule {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for FillRule {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16499,20 +16499,20 @@ impl TryFrom<u8> for SubwindowMode {
         match value {
             0 => Ok(SubwindowMode::ClipByChildren),
             1 => Ok(SubwindowMode::IncludeInferiors),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for SubwindowMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for SubwindowMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -16569,20 +16569,20 @@ impl TryFrom<u8> for ArcMode {
         match value {
             0 => Ok(ArcMode::Chord),
             1 => Ok(ArcMode::PieSlice),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ArcMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ArcMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -17164,7 +17164,7 @@ impl<'input> CreateGCRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CREATE_GC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -17823,7 +17823,7 @@ impl<'input> ChangeGCRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CHANGE_GC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -17952,7 +17952,7 @@ impl CopyGCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != COPY_GC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -18033,7 +18033,7 @@ impl<'input> SetDashesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_DASHES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -18041,7 +18041,7 @@ impl<'input> SetDashesRequest<'input> {
         let (gc, remaining) = Gcontext::try_parse(value)?;
         let (dash_offset, remaining) = u16::try_parse(remaining)?;
         let (dashes_len, remaining) = u16::try_parse(remaining)?;
-        let (dashes, remaining) = crate::x11_utils::parse_u8_list(remaining, dashes_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (dashes, remaining) = crate::x11_utils::parse_u8_list(remaining, dashes_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetDashesRequest {
             gc,
@@ -18126,20 +18126,20 @@ impl TryFrom<u8> for ClipOrdering {
             1 => Ok(ClipOrdering::YSorted),
             2 => Ok(ClipOrdering::YXSorted),
             3 => Ok(ClipOrdering::YXBanded),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ClipOrdering {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ClipOrdering {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -18192,7 +18192,7 @@ impl<'input> SetClipRectanglesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_CLIP_RECTANGLES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (ordering, remaining) = u8::try_parse(remaining)?;
@@ -18293,7 +18293,7 @@ impl FreeGCRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != FREE_GC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -18383,7 +18383,7 @@ impl ClearAreaRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CLEAR_AREA_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (exposures, remaining) = bool::try_parse(remaining)?;
@@ -18515,7 +18515,7 @@ impl CopyAreaRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != COPY_AREA_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -18663,7 +18663,7 @@ impl CopyPlaneRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != COPY_PLANE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -18774,20 +18774,20 @@ impl TryFrom<u8> for CoordMode {
         match value {
             0 => Ok(CoordMode::Origin),
             1 => Ok(CoordMode::Previous),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for CoordMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for CoordMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -18838,7 +18838,7 @@ impl<'input> PolyPointRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != POLY_POINT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
@@ -18976,7 +18976,7 @@ impl<'input> PolyLineRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != POLY_LINE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
@@ -19188,7 +19188,7 @@ impl<'input> PolySegmentRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != POLY_SEGMENT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -19307,7 +19307,7 @@ impl<'input> PolyRectangleRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != POLY_RECTANGLE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -19400,7 +19400,7 @@ impl<'input> PolyArcRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != POLY_ARC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -19496,20 +19496,20 @@ impl TryFrom<u8> for PolyShape {
             0 => Ok(PolyShape::Complex),
             1 => Ok(PolyShape::Nonconvex),
             2 => Ok(PolyShape::Convex),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for PolyShape {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for PolyShape {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -19566,7 +19566,7 @@ impl<'input> FillPolyRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != FILL_POLY_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -19695,7 +19695,7 @@ impl<'input> PolyFillRectangleRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != POLY_FILL_RECTANGLE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -19813,7 +19813,7 @@ impl<'input> PolyFillArcRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != POLY_FILL_ARC_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -19909,20 +19909,20 @@ impl TryFrom<u8> for ImageFormat {
             0 => Ok(ImageFormat::XYBitmap),
             1 => Ok(ImageFormat::XYPixmap),
             2 => Ok(ImageFormat::ZPixmap),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ImageFormat {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ImageFormat {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -19996,7 +19996,7 @@ impl<'input> PutImageRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != PUT_IMAGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (format, remaining) = u8::try_parse(remaining)?;
@@ -20124,7 +20124,7 @@ impl GetImageRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_IMAGE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (format, remaining) = u8::try_parse(remaining)?;
@@ -20185,10 +20185,10 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let data = data.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetImageReply { depth, sequence, visual, data };
         let _ = remaining;
@@ -20272,7 +20272,7 @@ impl<'input> PolyText8Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != POLY_TEXT8_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -20373,7 +20373,7 @@ impl<'input> PolyText16Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != POLY_TEXT16_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -20510,7 +20510,7 @@ impl<'input> ImageText8Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != IMAGE_TEXT8_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (string_len, remaining) = u8::try_parse(remaining)?;
@@ -20519,7 +20519,7 @@ impl<'input> ImageText8Request<'input> {
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ImageText8Request {
             drawable,
@@ -20683,7 +20683,7 @@ impl<'input> ImageText16Request<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != IMAGE_TEXT16_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (string_len, remaining) = u8::try_parse(remaining)?;
@@ -20692,7 +20692,7 @@ impl<'input> ImageText16Request<'input> {
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_list::<Char2b>(remaining, string_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (string, remaining) = crate::x11_utils::parse_list::<Char2b>(remaining, string_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ImageText16Request {
             drawable,
@@ -20820,20 +20820,20 @@ impl TryFrom<u8> for ColormapAlloc {
         match value {
             0 => Ok(ColormapAlloc::None),
             1 => Ok(ColormapAlloc::All),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ColormapAlloc {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ColormapAlloc {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -20885,7 +20885,7 @@ impl CreateColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CREATE_COLORMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (alloc, remaining) = u8::try_parse(remaining)?;
@@ -20955,7 +20955,7 @@ impl FreeColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != FREE_COLORMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -21022,7 +21022,7 @@ impl CopyColormapAndFreeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != COPY_COLORMAP_AND_FREE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -21086,7 +21086,7 @@ impl InstallColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != INSTALL_COLORMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -21147,7 +21147,7 @@ impl UninstallColormapRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != UNINSTALL_COLORMAP_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -21208,7 +21208,7 @@ impl ListInstalledColormapsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != LIST_INSTALLED_COLORMAPS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -21250,9 +21250,9 @@ impl TryParse for ListInstalledColormapsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (cmaps_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (cmaps, remaining) = crate::x11_utils::parse_list::<Colormap>(remaining, cmaps_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (cmaps, remaining) = crate::x11_utils::parse_list::<Colormap>(remaining, cmaps_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListInstalledColormapsReply { sequence, length, cmaps };
         let _ = remaining;
@@ -21349,7 +21349,7 @@ impl AllocColorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != ALLOC_COLOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -21426,7 +21426,7 @@ impl TryParse for AllocColorReply {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (pixel, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = AllocColorReply { sequence, length, red, green, blue, pixel };
         let _ = remaining;
@@ -21486,7 +21486,7 @@ impl<'input> AllocNamedColorRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != ALLOC_NAMED_COLOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -21494,7 +21494,7 @@ impl<'input> AllocNamedColorRequest<'input> {
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(AllocNamedColorRequest {
             cmap,
@@ -21552,7 +21552,7 @@ impl TryParse for AllocNamedColorReply {
         let (visual_green, remaining) = u16::try_parse(remaining)?;
         let (visual_blue, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = AllocNamedColorReply { sequence, length, pixel, exact_red, exact_green, exact_blue, visual_red, visual_green, visual_blue };
         let _ = remaining;
@@ -21612,7 +21612,7 @@ impl AllocColorCellsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != ALLOC_COLOR_CELLS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (contiguous, remaining) = bool::try_parse(remaining)?;
@@ -21664,10 +21664,10 @@ impl TryParse for AllocColorCellsReply {
         let (pixels_len, remaining) = u16::try_parse(remaining)?;
         let (masks_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ParseError))?)?;
-        let (masks, remaining) = crate::x11_utils::parse_list::<u32>(remaining, masks_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (masks, remaining) = crate::x11_utils::parse_list::<u32>(remaining, masks_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = AllocColorCellsReply { sequence, length, pixels, masks };
         let _ = remaining;
@@ -21763,7 +21763,7 @@ impl AllocColorPlanesRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != ALLOC_COLOR_PLANES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (contiguous, remaining) = bool::try_parse(remaining)?;
@@ -21826,9 +21826,9 @@ impl TryParse for AllocColorPlanesReply {
         let (green_mask, remaining) = u32::try_parse(remaining)?;
         let (blue_mask, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = AllocColorPlanesReply { sequence, length, red_mask, green_mask, blue_mask, pixels };
         let _ = remaining;
@@ -21904,7 +21904,7 @@ impl<'input> FreeColorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != FREE_COLORS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -22000,20 +22000,20 @@ impl TryFrom<u8> for ColorFlag {
             1 => Ok(ColorFlag::Red),
             2 => Ok(ColorFlag::Green),
             4 => Ok(ColorFlag::Blue),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ColorFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ColorFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(ColorFlag, u8);
@@ -22117,7 +22117,7 @@ impl<'input> StoreColorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != STORE_COLORS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -22213,7 +22213,7 @@ impl<'input> StoreNamedColorRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != STORE_NAMED_COLOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (flags, remaining) = u8::try_parse(remaining)?;
@@ -22222,7 +22222,7 @@ impl<'input> StoreNamedColorRequest<'input> {
         let (pixel, remaining) = u32::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(StoreNamedColorRequest {
             flags,
@@ -22348,7 +22348,7 @@ impl<'input> QueryColorsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != QUERY_COLORS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -22407,9 +22407,9 @@ impl TryParse for QueryColorsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (colors_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (colors, remaining) = crate::x11_utils::parse_list::<Rgb>(remaining, colors_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (colors, remaining) = crate::x11_utils::parse_list::<Rgb>(remaining, colors_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryColorsReply { sequence, length, colors };
         let _ = remaining;
@@ -22484,7 +22484,7 @@ impl<'input> LookupColorRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != LOOKUP_COLOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -22492,7 +22492,7 @@ impl<'input> LookupColorRequest<'input> {
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(LookupColorRequest {
             cmap,
@@ -22548,7 +22548,7 @@ impl TryParse for LookupColorReply {
         let (visual_green, remaining) = u16::try_parse(remaining)?;
         let (visual_blue, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = LookupColorReply { sequence, length, exact_red, exact_green, exact_blue, visual_red, visual_green, visual_blue };
         let _ = remaining;
@@ -22606,20 +22606,20 @@ impl TryFrom<u8> for PixmapEnum {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(PixmapEnum::None),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for PixmapEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for PixmapEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -22701,7 +22701,7 @@ impl CreateCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CREATE_CURSOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -22802,20 +22802,20 @@ impl TryFrom<u8> for FontEnum {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(FontEnum::None),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for FontEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for FontEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -22930,7 +22930,7 @@ impl CreateGlyphCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CREATE_GLYPH_CURSOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -23068,7 +23068,7 @@ impl FreeCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != FREE_CURSOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -23165,7 +23165,7 @@ impl RecolorCursorRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != RECOLOR_CURSOR_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -23258,20 +23258,20 @@ impl TryFrom<u8> for QueryShapeOf {
             0 => Ok(QueryShapeOf::LargestCursor),
             1 => Ok(QueryShapeOf::FastestTile),
             2 => Ok(QueryShapeOf::FastestStipple),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for QueryShapeOf {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for QueryShapeOf {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -23319,7 +23319,7 @@ impl QueryBestSizeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != QUERY_BEST_SIZE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (class, remaining) = u8::try_parse(remaining)?;
@@ -23372,7 +23372,7 @@ impl TryParse for QueryBestSizeReply {
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryBestSizeReply { sequence, length, width, height };
         let _ = remaining;
@@ -23448,14 +23448,14 @@ impl<'input> QueryExtensionRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != QUERY_EXTENSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(QueryExtensionRequest {
             name: Cow::Borrowed(name),
@@ -23532,7 +23532,7 @@ impl TryParse for QueryExtensionReply {
         let (first_event, remaining) = u8::try_parse(remaining)?;
         let (first_error, remaining) = u8::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryExtensionReply { sequence, length, present, major_opcode, first_event, first_error };
         let _ = remaining;
@@ -23575,7 +23575,7 @@ impl ListExtensionsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != LIST_EXTENSIONS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -23612,9 +23612,9 @@ impl TryParse for ListExtensionsReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = ListExtensionsReply { sequence, length, names };
         let _ = remaining;
@@ -23689,7 +23689,7 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CHANGE_KEYBOARD_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (keycode_count, remaining) = u8::try_parse(remaining)?;
@@ -23697,7 +23697,7 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         let (first_keycode, remaining) = Keycode::try_parse(value)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangeKeyboardMappingRequest {
             keycode_count,
@@ -23770,7 +23770,7 @@ impl GetKeyboardMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_KEYBOARD_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -23814,9 +23814,9 @@ impl TryParse for GetKeyboardMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetKeyboardMappingReply { keysyms_per_keycode, sequence, keysyms };
         let _ = remaining;
@@ -23910,20 +23910,20 @@ impl TryFrom<u8> for KB {
             32 => Ok(KB::LedMode),
             64 => Ok(KB::Key),
             128 => Ok(KB::AutoRepeatMode),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for KB {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for KB {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 bitmask_binop!(KB, u8);
@@ -23981,20 +23981,20 @@ impl TryFrom<u8> for LedMode {
         match value {
             0 => Ok(LedMode::Off),
             1 => Ok(LedMode::On),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for LedMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for LedMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -24046,20 +24046,20 @@ impl TryFrom<u8> for AutoRepeatMode {
             0 => Ok(AutoRepeatMode::Off),
             1 => Ok(AutoRepeatMode::On),
             2 => Ok(AutoRepeatMode::Default),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for AutoRepeatMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for AutoRepeatMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -24300,7 +24300,7 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CHANGE_KEYBOARD_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -24361,7 +24361,7 @@ impl GetKeyboardControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_KEYBOARD_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -24412,7 +24412,7 @@ impl TryParse for GetKeyboardControlReply {
         let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let global_auto_repeat = global_auto_repeat.try_into()?;
         let result = GetKeyboardControlReply { global_auto_repeat, sequence, length, led_mask, key_click_percent, bell_percent, bell_pitch, bell_duration, auto_repeats };
@@ -24459,7 +24459,7 @@ impl BellRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != BELL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (percent, remaining) = i8::try_parse(remaining)?;
@@ -24531,7 +24531,7 @@ impl ChangePointerControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CHANGE_POINTER_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -24597,7 +24597,7 @@ impl GetPointerControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_POINTER_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -24640,7 +24640,7 @@ impl TryParse for GetPointerControlReply {
         let (threshold, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetPointerControlReply { sequence, length, acceleration_numerator, acceleration_denominator, threshold };
         let _ = remaining;
@@ -24704,20 +24704,20 @@ impl TryFrom<u8> for Blanking {
             0 => Ok(Blanking::NotPreferred),
             1 => Ok(Blanking::Preferred),
             2 => Ok(Blanking::Default),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Blanking {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Blanking {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -24769,20 +24769,20 @@ impl TryFrom<u8> for Exposures {
             0 => Ok(Exposures::NotAllowed),
             1 => Ok(Exposures::Allowed),
             2 => Ok(Exposures::Default),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Exposures {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Exposures {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -24830,7 +24830,7 @@ impl SetScreenSaverRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_SCREEN_SAVER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -24895,7 +24895,7 @@ impl GetScreenSaverRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_SCREEN_SAVER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -24940,7 +24940,7 @@ impl TryParse for GetScreenSaverReply {
         let (allow_exposures, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let prefer_blanking = prefer_blanking.try_into()?;
         let allow_exposures = allow_exposures.try_into()?;
@@ -25011,20 +25011,20 @@ impl TryFrom<u8> for HostMode {
         match value {
             0 => Ok(HostMode::Insert),
             1 => Ok(HostMode::Delete),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for HostMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for HostMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -25082,20 +25082,20 @@ impl TryFrom<u8> for Family {
             2 => Ok(Family::Chaos),
             5 => Ok(Family::ServerInterpreted),
             6 => Ok(Family::Internet6),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Family {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Family {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -25141,7 +25141,7 @@ impl<'input> ChangeHostsRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CHANGE_HOSTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -25151,7 +25151,7 @@ impl<'input> ChangeHostsRequest<'input> {
         let family = family.try_into()?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (address_len, remaining) = u16::try_parse(remaining)?;
-        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(ChangeHostsRequest {
             mode,
@@ -25196,7 +25196,7 @@ impl TryParse for Host {
         let (family, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (address_len, remaining) = u16::try_parse(remaining)?;
-        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let address = address.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -25273,7 +25273,7 @@ impl ListHostsRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != LIST_HOSTS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -25312,9 +25312,9 @@ impl TryParse for ListHostsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (hosts_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (hosts, remaining) = crate::x11_utils::parse_list::<Host>(remaining, hosts_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (hosts, remaining) = crate::x11_utils::parse_list::<Host>(remaining, hosts_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let mode = mode.try_into()?;
         let result = ListHostsReply { mode, sequence, length, hosts };
@@ -25399,20 +25399,20 @@ impl TryFrom<u8> for AccessControl {
         match value {
             0 => Ok(AccessControl::Disable),
             1 => Ok(AccessControl::Enable),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for AccessControl {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for AccessControl {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -25446,7 +25446,7 @@ impl SetAccessControlRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_ACCESS_CONTROL_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -25521,20 +25521,20 @@ impl TryFrom<u8> for CloseDown {
             0 => Ok(CloseDown::DestroyAll),
             1 => Ok(CloseDown::RetainPermanent),
             2 => Ok(CloseDown::RetainTemporary),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for CloseDown {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for CloseDown {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -25568,7 +25568,7 @@ impl SetCloseDownModeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_CLOSE_DOWN_MODE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -25637,20 +25637,20 @@ impl TryFrom<u8> for Kill {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(Kill::AllTemporary),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for Kill {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for Kill {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -25707,7 +25707,7 @@ impl KillClientRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != KILL_CLIENT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -25802,7 +25802,7 @@ impl<'input> RotatePropertiesRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != ROTATE_PROPERTIES_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -25810,7 +25810,7 @@ impl<'input> RotatePropertiesRequest<'input> {
         let (window, remaining) = Window::try_parse(value)?;
         let (atoms_len, remaining) = u16::try_parse(remaining)?;
         let (delta, remaining) = i16::try_parse(remaining)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(RotatePropertiesRequest {
             window,
@@ -25897,20 +25897,20 @@ impl TryFrom<u8> for ScreenSaver {
         match value {
             0 => Ok(ScreenSaver::Reset),
             1 => Ok(ScreenSaver::Active),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for ScreenSaver {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for ScreenSaver {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -25944,7 +25944,7 @@ impl ForceScreenSaverRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != FORCE_SCREEN_SAVER_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -26019,20 +26019,20 @@ impl TryFrom<u8> for MappingStatus {
             0 => Ok(MappingStatus::Success),
             1 => Ok(MappingStatus::Busy),
             2 => Ok(MappingStatus::Failure),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for MappingStatus {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for MappingStatus {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -26070,12 +26070,12 @@ impl<'input> SetPointerMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_POINTER_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (map_len, remaining) = u8::try_parse(remaining)?;
         let _ = remaining;
-        let (map, remaining) = crate::x11_utils::parse_u8_list(value, map_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(value, map_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetPointerMappingRequest {
             map: Cow::Borrowed(map),
@@ -26117,7 +26117,7 @@ impl TryParse for SetPointerMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetPointerMappingReply { status, sequence, length };
@@ -26161,7 +26161,7 @@ impl GetPointerMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_POINTER_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -26198,10 +26198,10 @@ impl TryParse for GetPointerMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let map = map.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetPointerMappingReply { sequence, length, map };
         let _ = remaining;
@@ -26295,20 +26295,20 @@ impl TryFrom<u8> for MapIndex {
             5 => Ok(MapIndex::M3),
             6 => Ok(MapIndex::M4),
             7 => Ok(MapIndex::M5),
-            _ => Err(ParseError::ParseError),
+            _ => Err(ParseError::InvalidValue),
         }
     }
 }
 impl TryFrom<u16> for MapIndex {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 impl TryFrom<u32> for MapIndex {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
     }
 }
 
@@ -26347,12 +26347,12 @@ impl<'input> SetModifierMappingRequest<'input> {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != SET_MODIFIER_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let _ = remaining;
-        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
         Ok(SetModifierMappingRequest {
             keycodes: Cow::Borrowed(keycodes),
@@ -26394,7 +26394,7 @@ impl TryParse for SetModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let status = status.try_into()?;
         let result = SetModifierMappingReply { status, sequence, length };
@@ -26438,7 +26438,7 @@ impl GetModifierMappingRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_MODIFIER_MAPPING_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -26475,10 +26475,10 @@ impl TryParse for GetModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let keycodes = keycodes.to_vec();
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetModifierMappingReply { sequence, length, keycodes };
         let _ = remaining;
@@ -26537,7 +26537,7 @@ impl NoOperationRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != NO_OPERATION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;

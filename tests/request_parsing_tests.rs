@@ -20,7 +20,7 @@ fn test_bad_request_header_opcode() {
     let body = &[];
     assert_eq!(
         GetInputFocusRequest::try_parse_request(header, body),
-        Err(ParseError::ParseError)
+        Err(ParseError::InvalidValue)
     );
 }
 

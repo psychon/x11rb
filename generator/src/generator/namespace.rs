@@ -1238,7 +1238,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         "if header.minor_opcode != {}_REQUEST {{",
                         super::camel_case_to_upper_snake(&name),
                     );
-                    outln!(out.indent(), "return Err(ParseError::ParseError);");
+                    outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                     outln!(out, "}}");
                 } else {
                     // The minor opcode could be repurposed to store data for this request, so there's
@@ -1248,7 +1248,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         "if header.major_opcode != {}_REQUEST {{",
                         super::camel_case_to_upper_snake(&name),
                     );
-                    outln!(out.indent(), "return Err(ParseError::ParseError);");
+                    outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                     outln!(out, "}}");
                 };
 
@@ -1309,7 +1309,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(out, "if odd_length {{");
                     out.indented(|out| {
                         outln!(out, "if string.is_empty() {{");
-                        outln!(out.indent(), "return Err(ParseError::ParseError);");
+                        outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                         outln!(out, "}}");
                         outln!(out, "string.truncate(string.len() - 1);");
                     });
@@ -2350,7 +2350,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             }
                         }
                     }
-                    outln!(out.indent(), "_ => Err(ParseError::ParseError),");
+                    outln!(out.indent(), "_ => Err(ParseError::InvalidValue),");
                     outln!(out, "}}");
                 });
                 outln!(out, "}}");
@@ -2369,7 +2369,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         );
                         outln!(
                             out.indent(),
-                            "Self::try_from({}::try_from(value).or(Err(ParseError::ParseError))?)",
+                            "Self::try_from({}::try_from(value).or(Err(ParseError::InvalidValue))?)",
                             to_type,
                         );
                         outln!(out, "}}");
@@ -3465,7 +3465,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(out, "}}");
                     }
                     outln!(out, "match parse_result {{");
-                    outln!(out.indent(), "None => Err(ParseError::ParseError),");
+                    outln!(out.indent(), "None => Err(ParseError::InvalidValue),");
                     outln!(
                         out.indent(),
                         "Some(result) => Ok((result, outer_remaining)),",
@@ -3909,7 +3909,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(
                             out,
                             "let ({}, remaining) = crate::x11_utils::parse_u8_list({}, \
-                             {}.try_into().or(Err(ParseError::ParseError))?)?;",
+                             {}.try_into().or(Err(ParseError::ConversionFailed))?)?;",
                             rust_field_name,
                             from,
                             self.expr_to_str(
@@ -3951,7 +3951,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(
                         out,
                         "let ({}, remaining) = crate::x11_utils::parse_list::<{}>(remaining, \
-                         {}.try_into().or(Err(ParseError::ParseError))?)?;",
+                         {}.try_into().or(Err(ParseError::ConversionFailed))?)?;",
                         rust_field_name,
                         rust_element_type,
                         self.expr_to_str(
@@ -3985,7 +3985,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(
                             out,
                             "let list_length = \
-                             usize::try_from({}).or(Err(ParseError::ParseError))?;",
+                             usize::try_from({}).or(Err(ParseError::ConversionFailed))?;",
                             self.expr_to_str(
                                 length_expr,
                                 to_rust_variable_name,
@@ -4042,7 +4042,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let rust_field_name = to_rust_variable_name(&fd_field.name);
                 outln!(
                     out,
-                    "if fds.is_empty() {{ return Err(ParseError::ParseError) }}"
+                    "if fds.is_empty() {{ return Err(ParseError::MissingFileDescriptors) }}"
                 );
                 outln!(out, "let {} = fds.remove(0);", rust_field_name);
             }
@@ -4051,7 +4051,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
                 outln!(
                     out,
-                    "let fds_len = usize::try_from({}).or(Err(ParseError::ParseError))?;",
+                    "let fds_len = usize::try_from({}).or(Err(ParseError::ConversionFailed))?;",
                     self.expr_to_str(
                         &fd_list_field.length_expr,
                         to_rust_variable_name,
@@ -4062,7 +4062,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 );
                 outln!(
                     out,
-                    "if fds.len() < fds_len {{ return Err(ParseError::ParseError) }}",
+                    "if fds.len() < fds_len {{ return Err(ParseError::MissingFileDescriptors) }}",
                 );
                 outln!(out, "let mut {} = fds.split_off(fds_len);", rust_field_name);
                 outln!(out, "std::mem::swap(fds, &mut {});", rust_field_name);
@@ -4111,7 +4111,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 assert!(u8::try_from(*v).is_ok());
                 let rust_field_name = to_rust_variable_name(name);
                 outln!(out, "if {} != {} {{", rust_field_name, v);
-                outln!(out.indent(), "return Err(ParseError::ParseError);");
+                outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                 outln!(out, "}}");
             }
             _ => (),
@@ -4835,7 +4835,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let err_handler = if panic_on_overflow {
                     ".unwrap()"
                 } else {
-                    ".ok_or(ParseError::ParseError)?"
+                    ".ok_or(ParseError::InvalidExpression)?"
                 };
                 match bin_op_expr.operator {
                     xcbdefs::BinaryOperator::Add => format!(
@@ -5048,7 +5048,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 } else {
                     format!(
                         "{}.iter().try_fold(0u32, |acc, x| \
-                         acc.checked_add({}).ok_or(ParseError::ParseError))?",
+                         acc.checked_add({}).ok_or(ParseError::InvalidExpression))?",
                         field_value,
                         self.expr_to_str_impl(
                             &sum_of_expr.operand,

@@ -314,7 +314,9 @@ impl XCBConnection {
         if (*event & 0x7f) == super::protocol::xproto::GE_GENERIC_EVENT {
             // Read the length field of the event to get its length
             let length_field = u32::from_ne_bytes([header[4], header[5], header[6], header[7]]);
-            let length_field: usize = length_field.try_into().or(Err(ParseError::ParseError))?;
+            let length_field: usize = length_field
+                .try_into()
+                .or(Err(ParseError::ConversionFailed))?;
             length += length_field * 4;
             // Discard the `full_sequence` field inserted by xcb at
             // the 32-byte boundary.

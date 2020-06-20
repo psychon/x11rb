@@ -122,7 +122,7 @@ impl QueryVersionRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (major, remaining) = u8::try_parse(value)?;
         let (minor, remaining) = u8::try_parse(remaining)?;
@@ -166,7 +166,7 @@ impl TryParse for QueryVersionReply {
         let (major, remaining) = u16::try_parse(remaining)?;
         let (minor, remaining) = u16::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryVersionReply { sequence, length, major, minor };
         let _ = remaining;
@@ -217,7 +217,7 @@ impl GetStateRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_STATE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -257,7 +257,7 @@ impl TryParse for GetStateReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetStateReply { state, sequence, length, window };
         let _ = remaining;
@@ -308,7 +308,7 @@ impl GetScreenCountRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_COUNT_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let _ = remaining;
@@ -348,7 +348,7 @@ impl TryParse for GetScreenCountReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetScreenCountReply { screen_count, sequence, length, window };
         let _ = remaining;
@@ -405,7 +405,7 @@ impl GetScreenSizeRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_SIZE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (screen, remaining) = u32::try_parse(remaining)?;
@@ -453,7 +453,7 @@ impl TryParse for GetScreenSizeReply {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (screen, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = GetScreenSizeReply { sequence, length, width, height, window, screen };
         let _ = remaining;
@@ -497,7 +497,7 @@ impl IsActiveRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != IS_ACTIVE_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(IsActiveRequest
@@ -532,7 +532,7 @@ impl TryParse for IsActiveReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = IsActiveReply { sequence, length, state };
         let _ = remaining;
@@ -576,7 +576,7 @@ impl QueryScreensRequest {
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_SCREENS_REQUEST {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let _ = value;
         Ok(QueryScreensRequest
@@ -611,9 +611,9 @@ impl TryParse for QueryScreensReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (number, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (screen_info, remaining) = crate::x11_utils::parse_list::<ScreenInfo>(remaining, number.try_into().or(Err(ParseError::ParseError))?)?;
+        let (screen_info, remaining) = crate::x11_utils::parse_list::<ScreenInfo>(remaining, number.try_into().or(Err(ParseError::ConversionFailed))?)?;
         if response_type != 1 {
-            return Err(ParseError::ParseError);
+            return Err(ParseError::InvalidValue);
         }
         let result = QueryScreensReply { sequence, length, screen_info };
         let _ = remaining;
