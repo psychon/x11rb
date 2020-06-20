@@ -29,7 +29,7 @@ pub enum ConnectError {
     UnknownError,
 
     /// Error while parsing some data, see `ParseError`.
-    ParseError,
+    ParseError(ParseError),
 
     /// Out of memory.
     ///
@@ -80,7 +80,7 @@ impl std::fmt::Display for ConnectError {
             ConnectError::InsufficientMemory => write!(f, "Insufficient memory"),
             ConnectError::DisplayParsingError => write!(f, "Display parsing error"),
             ConnectError::InvalidScreen => write!(f, "Invalid screen"),
-            ConnectError::ParseError => write!(f, "Parsing error"),
+            ConnectError::ParseError(err) => err.fmt(f),
             ConnectError::IOError(err) => err.fmt(f),
             ConnectError::ZeroIDMask => write!(f, "XID mask was zero"),
             ConnectError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
@@ -93,10 +93,7 @@ impl std::fmt::Display for ConnectError {
 
 impl From<ParseError> for ConnectError {
     fn from(err: ParseError) -> Self {
-        match err {
-            ParseError::InsufficientData => ConnectError::ParseError,
-            ParseError::ParseError => ConnectError::ParseError,
-        }
+        ConnectError::ParseError(err)
     }
 }
 
@@ -127,7 +124,7 @@ pub enum ConnectionError {
     FDPassingFailed,
 
     /// Error while parsing some data, see `ParseError`.
-    ParseError,
+    ParseError(ParseError),
 
     /// Out of memory.
     ///
@@ -150,7 +147,7 @@ impl std::fmt::Display for ConnectionError {
                 write!(f, "Maximum request length exceeded")
             }
             ConnectionError::FDPassingFailed => write!(f, "FD passing failed"),
-            ConnectionError::ParseError => write!(f, "Parsing error"),
+            ConnectionError::ParseError(err) => err.fmt(f),
             ConnectionError::IOError(err) => err.fmt(f),
         }
     }
@@ -158,10 +155,7 @@ impl std::fmt::Display for ConnectionError {
 
 impl From<ParseError> for ConnectionError {
     fn from(err: ParseError) -> Self {
-        match err {
-            ParseError::InsufficientData => ConnectionError::ParseError,
-            ParseError::ParseError => ConnectionError::ParseError,
-        }
+        ConnectionError::ParseError(err)
     }
 }
 
