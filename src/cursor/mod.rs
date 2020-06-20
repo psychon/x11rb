@@ -1,13 +1,12 @@
 //! Utility functions for working with X11 cursors
 //!
-//! For full cursor support, the `render` feature of the library must be enabled.
+//! The code in this module is only available when the `cursor` feature of the library is enabled.
 
 #![allow(unused_results)]
 
 use crate::connection::Connection;
 use crate::cookie::Cookie as X11Cookie;
 use crate::errors::{ConnectionError, ReplyOrIdError};
-#[cfg(feature = "render")]
 use crate::protocol::render::{self, Pictformat};
 use crate::protocol::xproto::{self, Font, Window};
 use crate::NONE;
@@ -15,7 +14,6 @@ use crate::NONE;
 use std::fs::File;
 
 mod find_cursor;
-#[cfg(feature = "render")]
 mod parse_cursor;
 
 /// The level of cursor support of the X11 server
@@ -37,7 +35,6 @@ pub struct Cookie<'a, C: Connection> {
     conn: &'a C,
     screen: &'a xproto::Screen,
     resource_manager: X11Cookie<'a, C, xproto::GetPropertyReply>,
-    #[cfg(feature = "render")]
     render_info: Option<(
         X11Cookie<'a, C, render::QueryVersionReply>,
         X11Cookie<'a, C, render::QueryPictFormatsReply>,
@@ -48,17 +45,12 @@ impl<C: Connection> Cookie<'_, C> {
     /// Get the handle from the replies from the X11 server
     pub fn reply(self) -> Result<Handle, ReplyOrIdError> {
         let resource_manager = self.resource_manager.reply()?;
-        #[allow(unused_mut)]
         let mut render_version = (0, 0);
-        #[allow(unused_mut)]
         let mut picture_format = NONE;
-        #[cfg(feature = "render")]
-        {
-            if let Some((version, formats)) = self.render_info {
-                let version = version.reply()?;
-                render_version = (version.major_version, version.minor_version);
-                picture_format = find_format(&formats.reply()?);
-            }
+        if let Some((version, formats)) = self.render_info {
+            let version = version.reply()?;
+            render_version = (version.major_version, version.minor_version);
+            picture_format = find_format(&formats.reply()?);
         }
         Ok(Self::from_replies(
             self.conn,
@@ -72,20 +64,15 @@ impl<C: Connection> Cookie<'_, C> {
     /// Get the handle from the replies from the X11 server
     pub fn reply_unchecked(self) -> Result<Option<Handle>, ReplyOrIdError> {
         let resource_manager = self.resource_manager.reply_unchecked()?;
-        #[allow(unused_mut)]
         let mut render_version = (0, 0);
-        #[allow(unused_mut)]
         let mut picture_format = NONE;
-        #[cfg(feature = "render")]
-        {
-            if let Some((version, formats)) = self.render_info {
-                match (version.reply_unchecked()?, formats.reply_unchecked()?) {
-                    (Some(version), Some(formats)) => {
-                        render_version = (version.major_version, version.minor_version);
-                        picture_format = find_format(&formats);
-                    }
-                    _ => return Ok(None),
+        if let Some((version, formats)) = self.render_info {
+            match (version.reply_unchecked()?, formats.reply_unchecked()?) {
+                (Some(version), Some(formats)) => {
+                    render_version = (version.major_version, version.minor_version);
+                    picture_format = find_format(&formats);
                 }
+                _ => return Ok(None),
             }
         }
         let resource_manager = match resource_manager {
@@ -106,7 +93,7 @@ impl<C: Connection> Cookie<'_, C> {
         screen: &xproto::Screen,
         resource_manager: &xproto::GetPropertyReply,
         render_version: (u32, u32),
-        _picture_format: u32,
+        picture_format: Pictformat,
     ) -> Result<Handle, ReplyOrIdError> {
         let render_support = if render_version.0 >= 1 || render_version.1 >= 8 {
             RenderSupport::AnimatedCursor
@@ -122,8 +109,7 @@ impl<C: Connection> Cookie<'_, C> {
         Ok(Handle {
             root: screen.root,
             cursor_font,
-            #[cfg(feature = "render")]
-            picture_format: _picture_format,
+            picture_format,
             render_support,
             theme,
             cursor_size,
@@ -136,7 +122,6 @@ impl<C: Connection> Cookie<'_, C> {
 pub struct Handle {
     root: Window,
     cursor_font: Font,
-    #[cfg(feature = "render")]
     picture_format: Pictformat,
     render_support: RenderSupport,
     theme: Option<String>,
@@ -147,8 +132,6 @@ impl Handle {
     /// Create a new cursor handle for creating cursors on the given screen.
     ///
     /// This function returns a cookie that can be used to later get the actual handle.
-    ///
-    /// For full cursor support, the `render` feature of the library must be enabled.
     ///
     /// If you want this function not to block, you should prefetch the RENDER extension's data on
     /// the connection.
@@ -165,29 +148,19 @@ impl Handle {
             0,
             1 << 20,
         )?;
-        #[allow(unused_mut)]
         let mut render_info = None;
-        #[cfg(feature = "render")]
+        if conn
+            .extension_information(render::X11_EXTENSION_NAME)?
+            .is_some()
         {
-            if conn
-                .extension_information(render::X11_EXTENSION_NAME)?
-                .is_some()
-            {
-                let render_version = render::query_version(conn, 0, 8)?;
-                let render_pict_format = render::query_pict_formats(conn)?;
-                render_info = Some((render_version, render_pict_format));
-            }
-        }
-        #[cfg(not(feature = "render"))]
-        {
-            // Needed to make type inference happy
-            let _: Option<()> = render_info;
+            let render_version = render::query_version(conn, 0, 8)?;
+            let render_pict_format = render::query_pict_formats(conn)?;
+            render_info = Some((render_version, render_pict_format));
         }
         Ok(Cookie {
             conn,
             screen,
             resource_manager,
-            #[cfg(feature = "render")]
             render_info,
         })
     }
@@ -240,7 +213,6 @@ fn create_core_cursor<C: Connection>(
     Ok(result)
 }
 
-#[cfg(feature = "render")]
 fn create_render_cursor<C: Connection>(
     conn: &C,
     handle: &Handle,
@@ -318,51 +290,41 @@ fn load_cursor<C: Connection>(
         return Ok(NONE);
     }
 
-    #[cfg(not(feature = "render"))]
-    {
-        // No render support, no render cursors
-        drop(cursor_file);
-        Ok(NONE)
+    // Load the cursor from the file
+    use std::io::BufReader;
+    let images =
+        parse_cursor::parse_cursor(&mut BufReader::new(cursor_file), handle.cursor_size)
+            .or(Err(crate::errors::ParseError::ParseError))?;
+    let mut images = &images[..];
+
+    // No animated cursor support? Only use the first image
+    if handle.render_support == RenderSupport::StaticCursor {
+        images = &images[0..1];
     }
-    #[cfg(feature = "render")]
-    {
-        // Load the cursor from the file
-        use std::io::BufReader;
-        let images =
-            parse_cursor::parse_cursor(&mut BufReader::new(cursor_file), handle.cursor_size)
-                .or(Err(crate::errors::ParseError::ParseError))?;
-        let mut images = &images[..];
 
-        // No animated cursor support? Only use the first image
-        if handle.render_support == RenderSupport::StaticCursor {
-            images = &images[0..1];
-        }
+    // Now transfer the cursors to the X11 server
+    let mut storage = None;
+    let cursors = images
+        .iter()
+        .map(|image| create_render_cursor(conn, handle, image, &mut storage))
+        .collect::<Result<Vec<_>, _>>()?;
+    if let Some((pixmap, gc, _, _)) = storage {
+        xproto::free_gc(conn, gc)?;
+        xproto::free_pixmap(conn, pixmap)?;
+    }
 
-        // Now transfer the cursors to the X11 server
-        let mut storage = None;
-        let cursors = images
-            .iter()
-            .map(|image| create_render_cursor(conn, handle, image, &mut storage))
-            .collect::<Result<Vec<_>, _>>()?;
-        if let Some((pixmap, gc, _, _)) = storage {
-            xproto::free_gc(conn, gc)?;
-            xproto::free_pixmap(conn, pixmap)?;
+    if cursors.len() == 1 {
+        Ok(cursors[0].cursor)
+    } else {
+        let result = conn.generate_id()?;
+        render::create_anim_cursor(conn, result, &cursors)?;
+        for elem in cursors {
+            xproto::free_cursor(conn, elem.cursor)?;
         }
-
-        if cursors.len() == 1 {
-            Ok(cursors[0].cursor)
-        } else {
-            let result = conn.generate_id()?;
-            render::create_anim_cursor(conn, result, &cursors)?;
-            for elem in cursors {
-                xproto::free_cursor(conn, elem.cursor)?;
-            }
-            Ok(result)
-        }
+        Ok(result)
     }
 }
 
-#[cfg(feature = "render")]
 fn find_format(reply: &render::QueryPictFormatsReply) -> Pictformat {
     reply
         .formats
