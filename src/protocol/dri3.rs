@@ -218,7 +218,7 @@ impl TryParseFd for OpenReply {
         let (nfd, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let device_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
@@ -315,7 +315,7 @@ impl PixmapFromBufferRequest {
         let (stride, remaining) = u16::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (bpp, remaining) = u8::try_parse(remaining)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let pixmap_fd = fds.remove(0);
         let _ = remaining;
         Ok(PixmapFromBufferRequest {
@@ -441,7 +441,7 @@ impl TryParseFd for BufferFromPixmapReply {
         let (stride, remaining) = u16::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (bpp, remaining) = u8::try_parse(remaining)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let pixmap_fd = fds.remove(0);
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
@@ -516,7 +516,7 @@ impl FenceFromFDRequest {
         let (fence, remaining) = u32::try_parse(remaining)?;
         let (initially_triggered, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let fence_fd = fds.remove(0);
         let _ = remaining;
         Ok(FenceFromFDRequest {
@@ -629,7 +629,7 @@ impl TryParseFd for FDFromFenceReply {
         let (nfd, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let fence_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
@@ -931,7 +931,7 @@ impl PixmapFromBuffersRequest {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (modifier, remaining) = u64::try_parse(remaining)?;
         let fds_len = usize::try_from(num_buffers).or(Err(ParseError::ConversionFailed))?;
-        if fds.len() < fds_len { return Err(ParseError::ParseError) }
+        if fds.len() < fds_len { return Err(ParseError::MissingFileDescriptors) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
         let _ = remaining;
@@ -1074,7 +1074,7 @@ impl TryParseFd for BuffersFromPixmapReply {
         let (strides, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let fds_len = usize::try_from(nfd).or(Err(ParseError::ConversionFailed))?;
-        if fds.len() < fds_len { return Err(ParseError::ParseError) }
+        if fds.len() < fds_len { return Err(ParseError::MissingFileDescriptors) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
         if response_type != 1 {

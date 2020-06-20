@@ -831,7 +831,7 @@ impl AttachFdRequest {
             return Err(ParseError::InvalidValue);
         }
         let (shmseg, remaining) = Seg::try_parse(value)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let shm_fd = fds.remove(0);
         let (read_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -954,7 +954,7 @@ impl TryParseFd for CreateSegmentReply {
         let (nfd, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let shm_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {

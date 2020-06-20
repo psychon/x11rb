@@ -4042,7 +4042,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let rust_field_name = to_rust_variable_name(&fd_field.name);
                 outln!(
                     out,
-                    "if fds.is_empty() {{ return Err(ParseError::ParseError) }}"
+                    "if fds.is_empty() {{ return Err(ParseError::MissingFileDescriptors) }}"
                 );
                 outln!(out, "let {} = fds.remove(0);", rust_field_name);
             }
@@ -4062,7 +4062,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 );
                 outln!(
                     out,
-                    "if fds.len() < fds_len {{ return Err(ParseError::ParseError) }}",
+                    "if fds.len() < fds_len {{ return Err(ParseError::MissingFileDescriptors) }}",
                 );
                 outln!(out, "let mut {} = fds.split_off(fds_len);", rust_field_name);
                 outln!(out, "std::mem::swap(fds, &mut {});", rust_field_name);

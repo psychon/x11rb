@@ -31,6 +31,9 @@ pub enum ParseError {
     /// `OnBottom` (1). Any value other than 0 or 1 generates an `InvalidValue` when parsing.
     InvalidValue,
 
+    /// Some file descriptors were expected, but none were received.
+    MissingFileDescriptors,
+
     /// Another error while parsing some data.
     ParseError,
 }
@@ -44,6 +47,7 @@ impl std::fmt::Display for ParseError {
             ParseError::ConversionFailed => write!(f, "A value conversion failed due to out of range data"),
             ParseError::InvalidExpression => write!(f, "An expression could not be computed, e.g. due to overflow"),
             ParseError::InvalidValue => write!(f, "A value could not be parsed into an enumeration"),
+            ParseError::MissingFileDescriptors => write!(f, "Missing file descriptors"),
             ParseError::ParseError => write!(f, "Error while parsing"),
         }
     }

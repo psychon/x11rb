@@ -6820,7 +6820,7 @@ impl TryParseFd for CreateLeaseReply {
         let (nfd, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        if fds.is_empty() { return Err(ParseError::ParseError) }
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
         let master_fd = fds.remove(0);
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
         if response_type != 1 {
