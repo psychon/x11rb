@@ -176,9 +176,14 @@ mod raw_fd_container {
     ///
     /// On non-unix systems, this type is empty and does not provide
     /// any method.
-    #[allow(missing_copy_implementations)]
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct RawFdContainer(());
+
+    impl Drop for RawFdContainer {
+        fn drop(&mut self) {
+            // This function exists for symmetry with cfg(unix)
+        }
+    }
 }
 
 pub use raw_fd_container::RawFdContainer;
