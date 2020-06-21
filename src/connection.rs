@@ -61,9 +61,13 @@ use crate::x11_utils::ExtensionInformation;
 pub type SequenceNumber = u64;
 
 // Used to avoid too-complex types.
+/// A combination of a buffer and a list of file descriptors.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
+/// An event and its sequence number.
 pub type EventAndSeqNumber = (Event, SequenceNumber);
+/// The raw bytes of an event and its sequence number.
 pub type RawEventAndSeqNumber<B> = (B, SequenceNumber);
+/// A buffer that is logically continuous, but presented in a number of pieces.
 pub type PiecewiseBuf<'a> = Vec<Cow<'a, [u8]>>;
 
 /// Either a raw reply or a raw error response to an X11 request.
@@ -73,7 +77,10 @@ where
     R: std::fmt::Debug,
     E: AsRef<[u8]> + std::fmt::Debug,
 {
+    /// The reply to an X11 request.
     Reply(R),
+
+    /// An error caused by an X11 request.
     Error(E),
 }
 

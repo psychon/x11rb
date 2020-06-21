@@ -30,7 +30,9 @@ pub use stream::{DefaultStream, PollMode, Stream};
 use write_buffer::WriteBuffer;
 
 type Buffer = <RustConnection as RequestConnection>::Buf;
+/// The raw bytes of an event received by [`RustConnection`] and its sequence number.
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
+/// A combination of a buffer and a list of file descriptors for use by [`RustConnection`].
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 
 #[derive(Debug)]

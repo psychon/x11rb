@@ -1,3 +1,9 @@
+//! Utility functions for X11 things.
+//!
+//! The most important definitions in this module are the [`TryParse`], [`TryParseFd`] and
+//! [`Serialize`] traits. These traits are used internally for parsing incoming data and producing
+//! outgoing data when talking with the X11 server.
+
 use std::convert::TryInto;
 
 use crate::errors::ParseError;
@@ -123,8 +129,13 @@ pub fn parse_request_header(
 
 /// A type implementing this trait is an X11 request.
 pub trait Request {
+    /// The kind of reply that this request generates.
     type Reply: Into<crate::protocol::Reply> + TryParseFd;
 
+    /// Parse a reply to this request.
+    ///
+    /// The default implementation of this function uses `Self::Reply::try_parse_fd`. There should
+    /// not be a reason why you need different behaviour.
     fn parse_reply<'a>(
         bytes: &'a [u8],
         fds: &mut Vec<RawFdContainer>,
