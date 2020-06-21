@@ -7877,7 +7877,7 @@ impl<'input> SetControlsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), crate::x11_utils::cow_strip_length(&self.per_key_repeat)], vec![]))
+        Ok((vec![request0.into(), Cow::Owned(self.per_key_repeat.to_vec())], vec![]))
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where

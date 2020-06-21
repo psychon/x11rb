@@ -1110,10 +1110,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 IovecConversion::Into => {
                                     request_slices.push(format!("{}.into()", next_slice))
                                 }
-                                IovecConversion::CowStripLength => request_slices.push(format!(
-                                    "crate::x11_utils::cow_strip_length(&{})",
-                                    next_slice
-                                )),
+                                IovecConversion::CowStripLength => request_slices
+                                    .push(format!("Cow::Owned({}.to_vec())", next_slice)),
                             }
                         }
                     }
