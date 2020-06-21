@@ -31,7 +31,9 @@ mod pending_errors;
 mod raw_ffi;
 
 type Buffer = <XCBConnection as RequestConnection>::Buf;
+/// The raw bytes of an event received by [`XCBConnection`] and its sequence number.
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
+/// A combination of a buffer and a list of file descriptors for use by [`XCBConnection`].
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 
 /// A connection to an X11 server.

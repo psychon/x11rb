@@ -1,3 +1,24 @@
+//! Utility functions that are not specific to X11.
+//!
+//!
+//! # CSlice
+//!
+//! [`CSlice`] is a wrapper around some bytes in memory. It is unsafe to construct, but takes
+//! ownership of the bytes and allows accessing them as a `[u8]`. When dropped, the underlying
+//! memory is freed via [`libc::free`].
+//!
+//! `CSlice` is only available when the `allow-unsafe-code` feature is enabled.
+//!
+//!
+//! # RawFdContainer
+//!
+//! [`RawFdContainer`] is a variant of [`std::os::unix::io::RawFd`] with ownership semantics. This
+//! means that the `RawFd` will be closed when the `RawFdContainer` is dropped.
+//!
+//! On non-`cfg(unix)`-systems, this is an empty type without methods. It still exists as a type so
+//! that it can appear in interfaces, but it is not actually possible to construct an instance of
+//! `RawFdContainer`.
+
 #[cfg(feature = "allow-unsafe-code")]
 mod unsafe_code {
     use std::mem::forget;

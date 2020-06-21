@@ -59,6 +59,11 @@ impl std::fmt::Display for ParseError {
 /// An error that occurred while connecting to an X11 server
 #[derive(Debug)]
 pub enum ConnectError {
+    /// An unknown error occurred.
+    ///
+    /// One situation were this error is used when libxcb indicates an error that does not match
+    /// any of the defined error conditions. Thus, libxcb is violating its own API (or new error
+    /// cases were defined, but are not yet handled by x11rb)
     UnknownError,
 
     /// Error while parsing some data, see `ParseError`.
@@ -139,6 +144,11 @@ impl From<std::io::Error> for ConnectError {
 /// An error that occurred on an already established X11 connection
 #[derive(Debug)]
 pub enum ConnectionError {
+    /// An unknown error occurred.
+    ///
+    /// One situation were this error is used when libxcb indicates an error that does not match
+    /// any of the defined error conditions. Thus, libxcb is violating its own API (or new error
+    /// cases were defined, but are not yet handled by x11rb)
     UnknownError,
 
     /// An X11 extension was not supported by the server.
