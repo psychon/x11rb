@@ -1208,6 +1208,54 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             });
             outln!(out, "}}");
 
+            // Sending method
+            let is_list_fonts_with_info =
+                request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
+            let ret_type = if is_list_fonts_with_info {
+                assert!(request_def.reply.is_some());
+                "ListFontsWithInfoCookie<'_, Conn>".to_string()
+            } else {
+                match (request_def.reply.is_some(), gathered.reply_has_fds) {
+                    (false, _) => "VoidCookie<'_, Conn>".to_string(),
+                    (true, false) => format!("Cookie<'_, Conn, {}Reply>", name),
+                    (true, true) => format!("CookieWithFds<'_, Conn, {}Reply>", name),
+                }
+            };
+            outln!(
+                out,
+                "pub fn send<Conn>(self, conn: &Conn) -> Result<{}, ConnectionError>",
+                ret_type,
+            );
+            outln!(out, "where");
+            outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
+            outln!(out, "{{");
+            out.indented(|out| {
+                outln!(out, "let (bytes, fds) = self.serialize(conn)?;");
+                outln!(
+                    out,
+                    "let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();"
+                );
+
+                if is_list_fonts_with_info {
+                    outln!(
+                        out,
+                        "Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&slices, fds)?))",
+                    )
+                } else if request_def.reply.is_some() {
+                    if gathered.reply_has_fds {
+                        outln!(
+                            out,
+                            "Ok(conn.send_request_with_reply_with_fds(&slices, fds)?)",
+                        );
+                    } else {
+                        outln!(out, "Ok(conn.send_request_with_reply(&slices, fds)?)",);
+                    }
+                } else {
+                    outln!(out, "Ok(conn.send_request_without_reply(&slices, fds)?)",);
+                }
+            });
+            outln!(out, "}}");
+
             // Parsing implementation.
             outln!(
                 out,
@@ -1476,29 +1524,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "}};");
             }
 
-            outln!(out, "let (bytes, fds) = request0.serialize(conn)?;");
-            outln!(
-                out,
-                "let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();"
-            );
-
-            if is_list_fonts_with_info {
-                outln!(
-                    out,
-                    "Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&slices, fds)?))",
-                )
-            } else if request_def.reply.is_some() {
-                if gathered.reply_has_fds {
-                    outln!(
-                        out,
-                        "Ok(conn.send_request_with_reply_with_fds(&slices, fds)?)",
-                    );
-                } else {
-                    outln!(out, "Ok(conn.send_request_with_reply(&slices, fds)?)",);
-                }
-            } else {
-                outln!(out, "Ok(conn.send_request_without_reply(&slices, fds)?)",);
-            }
+            outln!(out, "request0.send(conn)")
         });
         outln!(out, "}}");
     }
