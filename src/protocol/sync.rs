@@ -754,6 +754,14 @@ impl InitializeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, InitializeReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != INITIALIZE_REQUEST {
@@ -779,9 +787,7 @@ where
         desired_major_version,
         desired_minor_version,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -843,6 +849,14 @@ impl ListSystemCountersRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, ListSystemCountersReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_SYSTEM_COUNTERS_REQUEST {
@@ -861,9 +875,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ListSystemCountersRequest;
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -956,6 +968,14 @@ impl CreateCounterRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_COUNTER_REQUEST {
@@ -981,9 +1001,7 @@ where
         id,
         initial_value,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the DestroyCounter request
@@ -1018,6 +1036,14 @@ impl DestroyCounterRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_COUNTER_REQUEST {
@@ -1040,9 +1066,7 @@ where
     let request0 = DestroyCounterRequest {
         counter,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the QueryCounter request
@@ -1077,6 +1101,14 @@ impl QueryCounterRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryCounterReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_COUNTER_REQUEST {
@@ -1099,9 +1131,7 @@ where
     let request0 = QueryCounterRequest {
         counter,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1166,6 +1196,14 @@ impl<'input> AwaitRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), wait_list_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != AWAIT_REQUEST {
@@ -1201,9 +1239,7 @@ where
     let request0 = AwaitRequest {
         wait_list: Cow::Borrowed(wait_list),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the ChangeCounter request
@@ -1248,6 +1284,14 @@ impl ChangeCounterRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_COUNTER_REQUEST {
@@ -1273,9 +1317,7 @@ where
         counter,
         amount,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the SetCounter request
@@ -1320,6 +1362,14 @@ impl SetCounterRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_COUNTER_REQUEST {
@@ -1345,9 +1395,7 @@ where
         counter,
         value,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Auxiliary and optional information for the `create_alarm` function
@@ -1551,6 +1599,14 @@ impl<'input> CreateAlarmRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_ALARM_REQUEST {
@@ -1584,9 +1640,7 @@ where
         id,
         value_list: Cow::Borrowed(value_list),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Auxiliary and optional information for the `change_alarm` function
@@ -1790,6 +1844,14 @@ impl<'input> ChangeAlarmRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_ALARM_REQUEST {
@@ -1823,9 +1885,7 @@ where
         id,
         value_list: Cow::Borrowed(value_list),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the DestroyAlarm request
@@ -1860,6 +1920,14 @@ impl DestroyAlarmRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_ALARM_REQUEST {
@@ -1882,9 +1950,7 @@ where
     let request0 = DestroyAlarmRequest {
         alarm,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the QueryAlarm request
@@ -1919,6 +1985,14 @@ impl QueryAlarmRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryAlarmReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_ALARM_REQUEST {
@@ -1941,9 +2015,7 @@ where
     let request0 = QueryAlarmRequest {
         alarm,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2023,6 +2095,14 @@ impl SetPriorityRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PRIORITY_REQUEST {
@@ -2048,9 +2128,7 @@ where
         id,
         priority,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the GetPriority request
@@ -2085,6 +2163,14 @@ impl GetPriorityRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetPriorityReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PRIORITY_REQUEST {
@@ -2107,9 +2193,7 @@ where
     let request0 = GetPriorityRequest {
         id,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2187,6 +2271,14 @@ impl CreateFenceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_FENCE_REQUEST {
@@ -2215,9 +2307,7 @@ where
         fence,
         initially_triggered,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the TriggerFence request
@@ -2252,6 +2342,14 @@ impl TriggerFenceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRIGGER_FENCE_REQUEST {
@@ -2274,9 +2372,7 @@ where
     let request0 = TriggerFenceRequest {
         fence,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the ResetFence request
@@ -2311,6 +2407,14 @@ impl ResetFenceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != RESET_FENCE_REQUEST {
@@ -2333,9 +2437,7 @@ where
     let request0 = ResetFenceRequest {
         fence,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the DestroyFence request
@@ -2370,6 +2472,14 @@ impl DestroyFenceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_FENCE_REQUEST {
@@ -2392,9 +2502,7 @@ where
     let request0 = DestroyFenceRequest {
         fence,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the QueryFence request
@@ -2429,6 +2537,14 @@ impl QueryFenceRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryFenceReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_FENCE_REQUEST {
@@ -2451,9 +2567,7 @@ where
     let request0 = QueryFenceRequest {
         fence,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2519,6 +2633,14 @@ impl<'input> AwaitFenceRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), fence_list_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != AWAIT_FENCE_REQUEST {
@@ -2554,9 +2676,7 @@ where
     let request0 = AwaitFenceRequest {
         fence_list: Cow::Borrowed(fence_list),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CounterNotify event

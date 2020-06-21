@@ -1879,6 +1879,14 @@ impl QueryVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
@@ -1904,9 +1912,7 @@ where
         client_major_version,
         client_minor_version,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1968,6 +1974,14 @@ impl QueryPictFormatsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryPictFormatsReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_PICT_FORMATS_REQUEST {
@@ -1986,9 +2000,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryPictFormatsRequest;
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2115,6 +2127,14 @@ impl QueryPictIndexValuesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryPictIndexValuesReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_PICT_INDEX_VALUES_REQUEST {
@@ -2137,9 +2157,7 @@ where
     let request0 = QueryPictIndexValuesRequest {
         format,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2545,6 +2563,14 @@ impl<'input> CreatePictureRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_PICTURE_REQUEST {
@@ -2586,9 +2612,7 @@ where
         format,
         value_list: Cow::Borrowed(value_list),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Auxiliary and optional information for the `change_picture` function
@@ -2934,6 +2958,14 @@ impl<'input> ChangePictureRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_PICTURE_REQUEST {
@@ -2967,9 +2999,7 @@ where
         picture,
         value_list: Cow::Borrowed(value_list),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the SetPictureClipRectangles request
@@ -3016,6 +3046,14 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
+    }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3064,9 +3102,7 @@ where
         clip_y_origin,
         rectangles: Cow::Borrowed(rectangles),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the FreePicture request
@@ -3101,6 +3137,14 @@ impl FreePictureRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FREE_PICTURE_REQUEST {
@@ -3123,9 +3167,7 @@ where
     let request0 = FreePictureRequest {
         picture,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the Composite request
@@ -3210,6 +3252,14 @@ impl CompositeRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPOSITE_REQUEST {
@@ -3269,9 +3319,7 @@ where
         width,
         height,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the Trapezoids request
@@ -3337,6 +3385,14 @@ impl<'input> TrapezoidsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), traps_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRAPEZOIDS_REQUEST {
@@ -3398,9 +3454,7 @@ where
         src_y,
         traps: Cow::Borrowed(traps),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the Triangles request
@@ -3466,6 +3520,14 @@ impl<'input> TrianglesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), triangles_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRIANGLES_REQUEST {
@@ -3527,9 +3589,7 @@ where
         src_y,
         triangles: Cow::Borrowed(triangles),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the TriStrip request
@@ -3595,6 +3655,14 @@ impl<'input> TriStripRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRI_STRIP_REQUEST {
@@ -3656,9 +3724,7 @@ where
         src_y,
         points: Cow::Borrowed(points),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the TriFan request
@@ -3724,6 +3790,14 @@ impl<'input> TriFanRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRI_FAN_REQUEST {
@@ -3785,9 +3859,7 @@ where
         src_y,
         points: Cow::Borrowed(points),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CreateGlyphSet request
@@ -3828,6 +3900,14 @@ impl CreateGlyphSetRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_GLYPH_SET_REQUEST {
@@ -3853,9 +3933,7 @@ where
         gsid,
         format,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the ReferenceGlyphSet request
@@ -3896,6 +3974,14 @@ impl ReferenceGlyphSetRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != REFERENCE_GLYPH_SET_REQUEST {
@@ -3921,9 +4007,7 @@ where
         gsid,
         existing,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the FreeGlyphSet request
@@ -3958,6 +4042,14 @@ impl FreeGlyphSetRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FREE_GLYPH_SET_REQUEST {
@@ -3980,9 +4072,7 @@ where
     let request0 = FreeGlyphSetRequest {
         glyphset,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the AddGlyphs request
@@ -4034,6 +4124,14 @@ impl<'input> AddGlyphsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), glyphids_bytes.into(), glyphs_bytes.into(), self.data, padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ADD_GLYPHS_REQUEST {
@@ -4075,9 +4173,7 @@ where
         glyphs: Cow::Borrowed(glyphs),
         data: Cow::Borrowed(data),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the FreeGlyphs request
@@ -4116,6 +4212,14 @@ impl<'input> FreeGlyphsRequest<'input> {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), glyphs_bytes.into(), padding0.into()], vec![]))
+    }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -4156,9 +4260,7 @@ where
         glyphset,
         glyphs: Cow::Borrowed(glyphs),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CompositeGlyphs8 request
@@ -4229,6 +4331,14 @@ impl<'input> CompositeGlyphs8Request<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.glyphcmds, padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPOSITE_GLYPHS8_REQUEST {
@@ -4287,9 +4397,7 @@ where
         src_y,
         glyphcmds: Cow::Borrowed(glyphcmds),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CompositeGlyphs16 request
@@ -4360,6 +4468,14 @@ impl<'input> CompositeGlyphs16Request<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.glyphcmds, padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPOSITE_GLYPHS16_REQUEST {
@@ -4418,9 +4534,7 @@ where
         src_y,
         glyphcmds: Cow::Borrowed(glyphcmds),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CompositeGlyphs32 request
@@ -4491,6 +4605,14 @@ impl<'input> CompositeGlyphs32Request<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.glyphcmds, padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPOSITE_GLYPHS32_REQUEST {
@@ -4549,9 +4671,7 @@ where
         src_y,
         glyphcmds: Cow::Borrowed(glyphcmds),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the FillRectangles request
@@ -4607,6 +4727,14 @@ impl<'input> FillRectanglesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), rects_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FILL_RECTANGLES_REQUEST {
@@ -4656,9 +4784,7 @@ where
         color,
         rects: Cow::Borrowed(rects),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CreateCursor request
@@ -4707,6 +4833,14 @@ impl CreateCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CURSOR_REQUEST {
@@ -4738,9 +4872,7 @@ where
         x,
         y,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -4911,6 +5043,14 @@ impl SetPictureTransformRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PICTURE_TRANSFORM_REQUEST {
@@ -4936,9 +5076,7 @@ where
         picture,
         transform,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the QueryFilters request
@@ -4973,6 +5111,14 @@ impl QueryFiltersRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryFiltersReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_FILTERS_REQUEST {
@@ -4995,9 +5141,7 @@ where
     let request0 = QueryFiltersRequest {
         drawable,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -5111,6 +5255,14 @@ impl<'input> SetPictureFilterRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.filter, padding0.into(), values_bytes.into(), padding1.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PICTURE_FILTER_REQUEST {
@@ -5160,9 +5312,7 @@ where
         filter: Cow::Borrowed(filter),
         values: Cow::Borrowed(values),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -5244,6 +5394,14 @@ impl<'input> CreateAnimCursorRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), cursors_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_ANIM_CURSOR_REQUEST {
@@ -5283,9 +5441,7 @@ where
         cid,
         cursors: Cow::Borrowed(cursors),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -5441,6 +5597,14 @@ impl<'input> AddTrapsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), traps_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ADD_TRAPS_REQUEST {
@@ -5488,9 +5652,7 @@ where
         y_off,
         traps: Cow::Borrowed(traps),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CreateSolidFill request
@@ -5535,6 +5697,14 @@ impl CreateSolidFillRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_SOLID_FILL_REQUEST {
@@ -5560,9 +5730,7 @@ where
         picture,
         color,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CreateLinearGradient request
@@ -5632,6 +5800,14 @@ impl<'input> CreateLinearGradientRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), stops_bytes.into(), colors_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_LINEAR_GRADIENT_REQUEST {
@@ -5677,9 +5853,7 @@ where
         stops: Cow::Borrowed(stops),
         colors: Cow::Borrowed(colors),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CreateRadialGradient request
@@ -5761,6 +5935,14 @@ impl<'input> CreateRadialGradientRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), stops_bytes.into(), colors_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_RADIAL_GRADIENT_REQUEST {
@@ -5814,9 +5996,7 @@ where
         stops: Cow::Borrowed(stops),
         colors: Cow::Borrowed(colors),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the CreateConicalGradient request
@@ -5882,6 +6062,14 @@ impl<'input> CreateConicalGradientRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), stops_bytes.into(), colors_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONICAL_GRADIENT_REQUEST {
@@ -5927,9 +6115,7 @@ where
         stops: Cow::Borrowed(stops),
         colors: Cow::Borrowed(colors),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Extension trait defining the requests of this extension.

@@ -59,6 +59,14 @@ impl EnableRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, EnableReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ENABLE_REQUEST {
@@ -77,9 +85,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = EnableRequest;
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

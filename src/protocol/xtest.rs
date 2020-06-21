@@ -69,6 +69,14 @@ impl GetVersionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VERSION_REQUEST {
@@ -95,9 +103,7 @@ where
         major_version,
         minor_version,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -240,6 +246,14 @@ impl CompareCursorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, CompareCursorReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPARE_CURSOR_REQUEST {
@@ -265,9 +279,7 @@ where
         window,
         cursor,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -372,6 +384,14 @@ impl FakeInputRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FAKE_INPUT_REQUEST {
@@ -415,9 +435,7 @@ where
         root_y,
         deviceid,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the GrabControl request
@@ -452,6 +470,14 @@ impl GrabControlRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_CONTROL_REQUEST {
@@ -475,9 +501,7 @@ where
     let request0 = GrabControlRequest {
         impervious,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Extension trait defining the requests of this extension.

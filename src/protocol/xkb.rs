@@ -6349,6 +6349,14 @@ impl UseExtensionRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, UseExtensionReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != USE_EXTENSION_REQUEST {
@@ -6374,9 +6382,7 @@ where
         wanted_major,
         wanted_minor,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7127,6 +7133,14 @@ impl<'input> SelectEventsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), details_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_EVENTS_REQUEST {
@@ -7184,9 +7198,7 @@ where
         map,
         details: Cow::Borrowed(details),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the Bell request
@@ -7259,6 +7271,14 @@ impl BellRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != BELL_REQUEST {
@@ -7310,9 +7330,7 @@ where
         name,
         window,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the GetState request
@@ -7347,6 +7365,14 @@ impl GetStateRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_STATE_REQUEST {
@@ -7370,9 +7396,7 @@ where
     let request0 = GetStateRequest {
         device_spec,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7491,6 +7515,14 @@ impl LatchLockStateRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LATCH_LOCK_STATE_REQUEST {
@@ -7543,9 +7575,7 @@ where
         latch_group,
         group_latch,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the GetControls request
@@ -7580,6 +7610,14 @@ impl GetControlsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetControlsReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CONTROLS_REQUEST {
@@ -7603,9 +7641,7 @@ where
     let request0 = GetControlsRequest {
         device_spec,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7843,6 +7879,14 @@ impl<'input> SetControlsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), crate::x11_utils::cow_strip_length(&self.per_key_repeat)], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CONTROLS_REQUEST {
@@ -8021,9 +8065,7 @@ where
         access_x_timeout_options_values,
         per_key_repeat: Cow::Borrowed(per_key_repeat),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the GetMap request
@@ -8112,6 +8154,14 @@ impl GetMapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetMapReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MAP_REQUEST {
@@ -8192,9 +8242,7 @@ where
         first_v_mod_map_key,
         n_v_mod_map_keys,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone)]
@@ -8758,6 +8806,14 @@ impl<'input> SetMapRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_MAP_REQUEST {
@@ -8891,9 +8947,7 @@ where
         virtual_mods,
         values: Cow::Borrowed(values),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the GetCompatMap request
@@ -8940,6 +8994,14 @@ impl GetCompatMapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetCompatMapReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_COMPAT_MAP_REQUEST {
@@ -8976,9 +9038,7 @@ where
         first_si,
         n_si,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -9098,6 +9158,14 @@ impl<'input> SetCompatMapRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), si_bytes.into(), group_maps_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_COMPAT_MAP_REQUEST {
@@ -9155,9 +9223,7 @@ where
         si: Cow::Borrowed(si),
         group_maps: Cow::Borrowed(group_maps),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the GetIndicatorState request
@@ -9192,6 +9258,14 @@ impl GetIndicatorStateRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetIndicatorStateReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_INDICATOR_STATE_REQUEST {
@@ -9215,9 +9289,7 @@ where
     let request0 = GetIndicatorStateRequest {
         device_spec,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -9291,6 +9363,14 @@ impl GetIndicatorMapRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetIndicatorMapReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_INDICATOR_MAP_REQUEST {
@@ -9317,9 +9397,7 @@ where
         device_spec,
         which,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -9405,6 +9483,14 @@ impl<'input> SetIndicatorMapRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), maps_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_INDICATOR_MAP_REQUEST {
@@ -9442,9 +9528,7 @@ where
         which,
         maps: Cow::Borrowed(maps),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the GetNamedIndicator request
@@ -9493,6 +9577,14 @@ impl GetNamedIndicatorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_NAMED_INDICATOR_REQUEST {
@@ -9528,9 +9620,7 @@ where
         led_id,
         indicator,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -9676,6 +9766,14 @@ impl SetNamedIndicatorRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_NAMED_INDICATOR_REQUEST {
@@ -9759,9 +9857,7 @@ where
         map_vmods,
         map_ctrls,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the GetNames request
@@ -9802,6 +9898,14 @@ impl GetNamesRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetNamesReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_NAMES_REQUEST {
@@ -9830,9 +9934,7 @@ where
         device_spec,
         which,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -10488,6 +10590,14 @@ impl<'input> SetNamesRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), values_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_NAMES_REQUEST {
@@ -10574,9 +10684,7 @@ where
         total_kt_level_names,
         values: Cow::Borrowed(values),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the PerClientFlags request
@@ -10641,6 +10749,14 @@ impl PerClientFlagsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, PerClientFlagsReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PER_CLIENT_FLAGS_REQUEST {
@@ -10689,9 +10805,7 @@ where
         auto_ctrls,
         auto_ctrls_values,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -10767,6 +10881,14 @@ impl ListComponentsRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, ListComponentsReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_COMPONENTS_REQUEST {
@@ -10792,9 +10914,7 @@ where
         device_spec,
         max_names,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -10970,6 +11090,14 @@ impl GetKbdByNameRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetKbdByNameReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_KBD_BY_NAME_REQUEST {
@@ -11006,9 +11134,7 @@ where
         want,
         load,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone)]
@@ -11708,6 +11834,14 @@ impl GetDeviceInfoRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_INFO_REQUEST {
@@ -11754,9 +11888,7 @@ where
         led_class,
         led_id,
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone)]
@@ -11920,6 +12052,14 @@ impl<'input> SetDeviceInfoRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), btn_actions_bytes.into(), leds_bytes.into(), padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_without_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_INFO_REQUEST {
@@ -11968,9 +12108,7 @@ where
         btn_actions: Cow::Borrowed(btn_actions),
         leds: Cow::Borrowed(leds),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_without_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 /// Opcode for the SetDebuggingFlags request
@@ -12033,6 +12171,14 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into(), self.message, padding0.into()], vec![]))
     }
+    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, SetDebuggingFlagsReply>, ConnectionError>
+    where
+        Conn: RequestConnection + ?Sized,
+    {
+        let (bytes, fds) = self.serialize(conn)?;
+        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+        Ok(conn.send_request_with_reply(&slices, fds)?)
+    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEBUGGING_FLAGS_REQUEST {
@@ -12079,9 +12225,7 @@ where
         ctrls,
         message: Cow::Borrowed(message),
     };
-    let (bytes, fds) = request0.serialize(conn)?;
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(conn.send_request_with_reply(&slices, fds)?)
+    request0.send(conn)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
