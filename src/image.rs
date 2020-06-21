@@ -32,6 +32,51 @@ fn compute_stride(width: u16, bits_per_pixel: BitsPerPixel, scanline_pad: Scanli
     scanline_pad.round_to_multiple(value) / 8
 }
 
+#[cfg(test)]
+mod test_stride {
+    use std::convert::TryInto;
+    use super::compute_stride;
+
+    #[test]
+    fn test_stride() {
+        for &(width, bpp, pad, stride) in &[
+            // bpp=pad=8
+            (0, 8, 8, 0),
+            (1, 8, 8, 1),
+            (2, 8, 8, 2),
+            (3, 8, 8, 3),
+            (41, 8, 8, 41),
+            // bpp=8, pad=16
+            (0, 8, 16, 0),
+            (1, 8, 16, 2),
+            (2, 8, 16, 2),
+            (3, 8, 16, 4),
+            (41, 8, 16, 42),
+            // bpp=16, pad=16
+            (0, 16, 16, 0),
+            (1, 16, 16, 2),
+            (2, 16, 16, 4),
+            (3, 16, 16, 6),
+            (41, 16, 16, 82),
+            // bpp=16, pad=32
+            (0, 16, 32, 0),
+            (1, 16, 32, 4),
+            (2, 16, 32, 4),
+            (3, 16, 32, 8),
+            (41, 16, 32, 84),
+            // bpp=32, pad=32
+            (0, 32, 32, 0),
+            (1, 32, 32, 4),
+            (2, 32, 32, 8),
+            (3, 32, 32, 12),
+            (41, 32, 32, 164),
+        ] {
+            let actual = compute_stride(width, bpp.try_into().unwrap(), pad.try_into().unwrap());
+            assert_eq!(stride, actual, "width={}, bpp={}, pad={}", width, bpp, pad);
+        }
+    }
+}
+
 // Find the format with the given depth in `setup.pixmap_formats`.
 fn find_format(setup: &Setup, depth: u8) -> Result<&Format, ParseError>
 {
@@ -105,6 +150,54 @@ impl ScanlinePad {
     fn round_to_multiple(self, value: usize) -> usize {
         let value = value + usize::from(self) - 1;
         value - value % usize::from(self)
+    }
+}
+
+#[cfg(test)]
+mod test_scanline_pad {
+    use std::convert::TryInto;
+    use super::ScanlinePad;
+
+    #[test]
+    fn number_conversions() {
+        assert_eq!(8_u8, ScanlinePad::Pad8.into());
+        assert_eq!(16_u8, ScanlinePad::Pad16.into());
+        assert_eq!(32_u8, ScanlinePad::Pad32.into());
+        assert_eq!(8.try_into(), Ok(ScanlinePad::Pad8));
+        assert_eq!(16.try_into(), Ok(ScanlinePad::Pad16));
+        assert_eq!(32.try_into(), Ok(ScanlinePad::Pad32));
+    }
+
+    #[test]
+    fn test_round_to_multiple() {
+        for &(value, pad8, pad16, pad32) in [
+            (0, 0, 0, 0),
+            (1, 8, 16, 32),
+            (2, 8, 16, 32),
+            (3, 8, 16, 32),
+            (4, 8, 16, 32),
+            (5, 8, 16, 32),
+            (6, 8, 16, 32),
+            (7, 8, 16, 32),
+            (8, 8, 16, 32),
+            (9, 16, 16, 32),
+            (10, 16, 16, 32),
+            (11, 16, 16, 32),
+            (12, 16, 16, 32),
+            (13, 16, 16, 32),
+            (14, 16, 16, 32),
+            (15, 16, 16, 32),
+            (16, 16, 16, 32),
+            (17, 24, 32, 32),
+            (33, 40, 48, 64),
+            (47, 48, 48, 64),
+            (48, 48, 48, 64),
+            (49, 56, 64, 64),
+        ].iter() {
+            assert_eq!(pad8, ScanlinePad::Pad8.round_to_multiple(value), "value={} for pad8", value);
+            assert_eq!(pad16, ScanlinePad::Pad16.round_to_multiple(value), "value={} for pad16", value);
+            assert_eq!(pad32, ScanlinePad::Pad32.round_to_multiple(value), "value={} for pad32", value);
+        }
     }
 }
 
@@ -542,5 +635,42 @@ impl<'a> Image<'a> {
                 }
             },
         }
+    }
+}
+
+#[cfg(test)]
+mod test_image {
+    use std::borrow::Cow;
+    use super::{Image, ScanlinePad, BitsPerPixel, ImageOrder, ParseError};
+
+    #[test]
+    fn test_new_too_short() {
+        let depth = 16;
+        // Due to Pad16, this image needs two bytes
+        let result = Image::new(1, 1, ScanlinePad::Pad16, depth, BitsPerPixel::B8, ImageOrder::MSBFirst, Cow::Owned(vec![0]));
+        assert_eq!(result.unwrap_err(), ParseError::InsufficientData);
+    }
+
+    #[test]
+    fn test_new() {
+        let depth = 16;
+        let image = Image::new(2, 1, ScanlinePad::Pad16, depth, BitsPerPixel::B8, ImageOrder::MSBFirst, Cow::Owned(vec![42, 125])).unwrap();
+        assert_eq!(image.width(), 2);
+        assert_eq!(image.height(), 1);
+        assert_eq!(image.scanline_pad(), ScanlinePad::Pad16);
+        assert_eq!(image.depth(), depth);
+        assert_eq!(image.bits_per_pixel(), BitsPerPixel::B8);
+        assert_eq!(image.byte_order(), ImageOrder::MSBFirst);
+        assert_eq!(image.data(), [42, 125]);
+    }
+
+    #[test]
+    fn get_pixel() {
+        todo!()
+    }
+
+    #[test]
+    fn put_pixel() {
+        todo!()
     }
 }
