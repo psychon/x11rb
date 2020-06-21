@@ -130,7 +130,9 @@ impl WmClass {
 /// Representation of whether some part of `WM_SIZE_HINTS` was user/program specified.
 #[derive(Debug, Copy, Clone)]
 pub enum WmSizeHintsSpecification {
+    /// The user specified the values.
     UserSpecified,
+    /// The program specified the values.
     ProgramSpecified,
 }
 
@@ -190,14 +192,17 @@ const P_ASPECT: u32 = 1 << 7;
 const P_BASE_SIZE: u32 = 1 << 8;
 const P_WIN_GRAVITY: u32 = 1 << 9;
 
-/// An aspect ratio
+/// An aspect ratio `numerator` / `denominator`.
 #[derive(Debug, Copy, Clone)]
 pub struct AspectRatio {
+    /// The numerator of the aspect ratio.
     pub numerator: i32,
+    /// The denominator of the aspect ratio.
     pub denominator: i32,
 }
 
 impl AspectRatio {
+    /// Create a new aspect ratio with the given values.
     pub fn new(numerator: i32, denominator: i32) -> Self {
         Self {
             numerator,
@@ -230,14 +235,29 @@ impl Serialize for AspectRatio {
 /// A structure representing a `WM_SIZE_HINTS` property.
 #[derive(Debug, Default, Copy, Clone)]
 pub struct WmSizeHints {
+    /// The position that the window should be assigned.
+    ///
+    /// Note that current versions of ICCCM only make use of the `WmSizeHintsSpecification` field.
+    /// The later two fields exist only for backwards compatibility.
     pub position: Option<(WmSizeHintsSpecification, i32, i32)>,
+    /// The size that the window should be assigned.
+    ///
+    /// Note that current versions of ICCCM only make use of the `WmSizeHintsSpecification` field.
+    /// The later two fields exist only for backwards compatibility.
     pub size: Option<(WmSizeHintsSpecification, i32, i32)>,
+    /// The minimum size that the window may be assigned.
     pub min_size: Option<(i32, i32)>,
+    /// The maximum size that the window may be assigned.
     pub max_size: Option<(i32, i32)>,
+    /// The increment to be used for sizing the window together with `base_size`.
     pub size_increment: Option<(i32, i32)>,
-    /// The minimum and maximum aspect ratio
+    /// The minimum and maximum aspect ratio.
     pub aspect: Option<(AspectRatio, AspectRatio)>,
+    /// The base size of the window.
+    ///
+    /// This is used together with `size_increment`.
     pub base_size: Option<(i32, i32)>,
+    /// The gravity that is used to make room for window decorations.
     pub win_gravity: Option<xproto::Gravity>,
 }
 
@@ -477,7 +497,9 @@ where
 /// The possible values for a `WM_STATE`'s state field.
 #[derive(Debug, Copy, Clone)]
 pub enum WmHintsState {
+    /// The window should be in Normal state.
     Normal,
+    /// The window should be in Iconic state.
     Iconic,
 }
 
@@ -496,13 +518,38 @@ const HINT_URGENCY: u32 = 1 << 8;
 /// A structure representing a `WM_HINTS` property.
 #[derive(Debug, Default, Copy, Clone)]
 pub struct WmHints {
+    /// Whether the window manager may set the input focus to this window.
+    ///
+    /// See ICCCM §4.1.7 for details.
     pub input: Option<bool>,
+
+    /// The state that the window should be when it leaves the Withdrawn state.
     pub initial_state: Option<WmHintsState>,
+
+    /// A pixmap that represents the icon of this window.
     pub icon_pixmap: Option<xproto::Pixmap>,
+
+    /// A window that should be used as icon.
     pub icon_window: Option<Window>,
+
+    /// The position where the icon should be shown.
     pub icon_position: Option<(i32, i32)>,
+
+    /// A mask for `icon_pixmap`.
+    ///
+    /// This allows nonrectangular icons.
     pub icon_mask: Option<xproto::Pixmap>,
+
+    /// A window that represents a group of windows.
+    ///
+    /// The specified window is called the "group leader". All windows with the same group leader
+    /// are part of the same group.
     pub window_group: Option<Window>,
+
+    /// Indication that the window contents are urgent.
+    ///
+    /// Urgency means that a timely response of the user is required. The window manager must make
+    /// some effort to draw the user's attention to this window while this flag is set.
     pub urgent: bool,
 }
 
