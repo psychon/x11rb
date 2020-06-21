@@ -2,8 +2,6 @@
 //!
 //! The code in this module is only available when the `cursor` feature of the library is enabled.
 
-#![allow(unused_results)]
-
 use crate::connection::Connection;
 use crate::cookie::Cookie as X11Cookie;
 use crate::errors::{ConnectionError, ReplyOrIdError};
@@ -105,7 +103,7 @@ impl<C: Connection> Cookie<'_, C> {
         let (theme, cursor_size, xft_dpi) = parse_resource_manager(&resource_manager.value);
         let cursor_size = get_cursor_size(cursor_size, xft_dpi, screen);
         let cursor_font = conn.generate_id()?;
-        xproto::open_font(conn, cursor_font, b"cursor")?;
+        let _ = xproto::open_font(conn, cursor_font, b"cursor")?;
         Ok(Handle {
             root: screen.root,
             cursor_font,
@@ -195,7 +193,7 @@ fn create_core_cursor<C: Connection>(
     cursor: u16,
 ) -> Result<xproto::Cursor, ReplyOrIdError> {
     let result = conn.generate_id()?;
-    xproto::create_glyph_cursor(
+    let _ = xproto::create_glyph_cursor(
         conn,
         result,
         cursor_font,
@@ -227,14 +225,14 @@ fn create_render_cursor<C: Connection>(
         storage.map(|(pixmap, gc, _, _)| (pixmap, gc)).unwrap()
     } else {
         let (pixmap, gc) = if let Some((pixmap, gc, _, _)) = storage {
-            xproto::free_gc(conn, *gc)?;
-            xproto::free_pixmap(conn, *pixmap)?;
+            let _ = xproto::free_gc(conn, *gc)?;
+            let _ = xproto::free_pixmap(conn, *pixmap)?;
             (*pixmap, *gc)
         } else {
             (conn.generate_id()?, conn.generate_id()?)
         };
-        xproto::create_pixmap(conn, 32, pixmap, handle.root, image.width, image.height)?;
-        xproto::create_gc(conn, gc, pixmap, &Default::default())?;
+        let _ = xproto::create_pixmap(conn, 32, pixmap, handle.root, image.width, image.height)?;
+        let _ = xproto::create_gc(conn, gc, pixmap, &Default::default())?;
 
         *storage = Some((pixmap, gc, image.width, image.height));
         (pixmap, gc)
@@ -242,7 +240,7 @@ fn create_render_cursor<C: Connection>(
 
     // Sigh. We need the pixel data as a bunch of bytes.
     let pixels = crate::x11_utils::Serialize::serialize(&image.pixels[..]);
-    xproto::put_image(
+    let _ = xproto::put_image(
         conn,
         xproto::ImageFormat::ZPixmap,
         pixmap,
@@ -256,15 +254,15 @@ fn create_render_cursor<C: Connection>(
         &pixels,
     )?;
 
-    render::create_picture(
+    let _ = render::create_picture(
         conn,
         picture,
         pixmap,
         handle.picture_format,
         &Default::default(),
     )?;
-    render::create_cursor(conn, cursor, picture, image.x_hot, image.y_hot)?;
-    render::free_picture(conn, picture)?;
+    let _ = render::create_cursor(conn, cursor, picture, image.x_hot, image.y_hot)?;
+    let _ = render::free_picture(conn, picture)?;
 
     Ok(render::Animcursorelt {
         cursor,
@@ -309,17 +307,17 @@ fn load_cursor<C: Connection>(
         .map(|image| create_render_cursor(conn, handle, image, &mut storage))
         .collect::<Result<Vec<_>, _>>()?;
     if let Some((pixmap, gc, _, _)) = storage {
-        xproto::free_gc(conn, gc)?;
-        xproto::free_pixmap(conn, pixmap)?;
+        let _ = xproto::free_gc(conn, gc)?;
+        let _ = xproto::free_pixmap(conn, pixmap)?;
     }
 
     if cursors.len() == 1 {
         Ok(cursors[0].cursor)
     } else {
         let result = conn.generate_id()?;
-        render::create_anim_cursor(conn, result, &cursors)?;
+        let _ = render::create_anim_cursor(conn, result, &cursors)?;
         for elem in cursors {
-            xproto::free_cursor(conn, elem.cursor)?;
+            let _ = xproto::free_cursor(conn, elem.cursor)?;
         }
         Ok(result)
     }

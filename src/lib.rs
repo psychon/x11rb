@@ -95,7 +95,7 @@
 // This lint suggests a function that was added in Rust 1.40.0. Since our minimum supported version
 // is Rust 1.37.0, just disable the lint.
 #![allow(clippy::option_as_ref_deref)]
-#![deny(
+#![forbid(
     missing_copy_implementations,
     missing_debug_implementations,
     //missing_docs,
@@ -106,10 +106,13 @@
     trivial_numeric_casts,
     unreachable_pub,
     unused_import_braces,
-    unused_qualifications,
     unused_results,
     clippy::cast_lossless,
     clippy::needless_pass_by_value,
+)]
+#![deny(
+    // #[derive] generates an #[allow] for this
+    unused_qualifications,
 )]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 
