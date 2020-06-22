@@ -773,7 +773,60 @@ mod test_image {
     }
 
     #[test]
-    fn get_pixel() {
-        todo!()
+    fn get_pixel_depth1() {
+        let image = Image::new(16, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B1, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        assert_eq!(1, image.get_pixel(0, 0));
+        assert_eq!(1, image.get_pixel(10, 0));
+        assert_eq!(0, image.get_pixel(15, 0));
+        assert_eq!(0, image.get_pixel(0, 1));
+        assert_eq!(1, image.get_pixel(10, 1));
+        assert_eq!(0, image.get_pixel(15, 1));
     }
+
+    #[test]
+    fn get_pixel_depth4() {
+        let image = Image::new(16, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B4, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        assert_eq!(0xB, image.get_pixel(0, 0));
+        assert_eq!(0x4, image.get_pixel(10, 0));
+        assert_eq!(0x7, image.get_pixel(15, 0));
+        assert_eq!(0x0, image.get_pixel(0, 1));
+        assert_eq!(0xC, image.get_pixel(10, 1));
+        assert_eq!(0x9, image.get_pixel(15, 1));
+    }
+
+    #[test]
+    fn get_pixel_depth8() {
+        let image = Image::new(3, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B8, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        assert_eq!(0xAB, image.get_pixel(0, 0));
+        assert_eq!(0x36, image.get_pixel(1, 0));
+        assert_eq!(0x18, image.get_pixel(2, 0));
+        assert_eq!(0x12, image.get_pixel(0, 1));
+        assert_eq!(0x34, image.get_pixel(1, 1));
+        assert_eq!(0x56, image.get_pixel(2, 1));
+    }
+
+    #[test]
+    fn get_pixel_depth16() {
+        let image = Image::new(3, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B16, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        assert_eq!(0xAB36, image.get_pixel(0, 0));
+        assert_eq!(0x18F8, image.get_pixel(1, 0));
+        assert_eq!(0x1234, image.get_pixel(2, 0));
+        assert_eq!(0x0000, image.get_pixel(0, 1));
+        assert_eq!(0x0000, image.get_pixel(1, 1));
+        assert_eq!(0xFEDC, image.get_pixel(2, 1));
+    }
+
+    #[test]
+    fn get_pixel_depth32() {
+        let image = Image::new(2, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B32, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        assert_eq!(0xAB36_18F8, image.get_pixel(0, 0));
+        assert_eq!(0x1234_5678, image.get_pixel(1, 0));
+        assert_eq!(0x0000_0000, image.get_pixel(0, 1));
+        assert_eq!(0xFEDC_BA98, image.get_pixel(1, 1));
+    }
+
+    static DATA: [u8; 16] = [
+        0xAB, 0x36, 0x18, 0xF8, 0x12, 0x34, 0x56, 0x78,
+        0x00, 0x00, 0x00, 0x00, 0xFE, 0xDC, 0xBA, 0x98,
+    ];
 }
