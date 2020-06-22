@@ -541,7 +541,13 @@ impl<'a> Image<'a> {
         let x = usize::from(x);
         let data = self.data.to_mut();
         match self.bits_per_pixel {
-            BitsPerPixel::B1 => todo!(), // FIXME
+            BitsPerPixel::B1 => {
+                let (byte, bit) = compute_depth_1_address(x, self.byte_order);
+                let pixel = ((pixel & 0x01) << bit) as u8;
+                let old = data[row_start + byte];
+                let bit_cleared = old & !(1 << bit);
+                data[row_start + byte] = bit_cleared | pixel;
+            },
             BitsPerPixel::B4 => {
                 let mut pixel = pixel & 0x0f;
                 let odd_x = x % 2 == 1;
@@ -551,7 +557,7 @@ impl<'a> Image<'a> {
                 } else {
                     0x0f
                 };
-                data[x / 2] = (data[x / 2] & !mask) | (pixel as u8);
+                data[row_start + x / 2] = (data[row_start + x / 2] & !mask) | (pixel as u8);
             },
             BitsPerPixel::B8 => data[row_start + x] = pixel as u8,
             BitsPerPixel::B16 => {
@@ -596,9 +602,12 @@ impl<'a> Image<'a> {
         // TODO Can this code (and the one in put_pixel) be simplified? E.g. handle B4 as a special
         // case and copy bits_per_pixel.into() / 8 bytes in other cases?
         match self.bits_per_pixel {
-            BitsPerPixel::B1 => todo!(), // FIXME
+            BitsPerPixel::B1 => {
+                let (byte, bit) = compute_depth_1_address(x, self.byte_order);
+                ((self.data[row_start + byte] >> bit) & 1).into()
+            },
             BitsPerPixel::B4 => {
-                let byte = u32::from(self.data[x / 2]);
+                let byte = u32::from(self.data[row_start + x / 2]);
                 let odd_x = x % 2 == 1;
                 if odd_x == (self.byte_order == ImageOrder::MSBFirst) {
                     byte >> 4
@@ -638,6 +647,15 @@ impl<'a> Image<'a> {
     }
 }
 
+fn compute_depth_1_address(x: usize, order: ImageOrder) -> (usize, usize)
+{
+    let bit = match order {
+        ImageOrder::MSBFirst => 7 - x % 8,
+        ImageOrder::LSBFirst => x % 8,
+    };
+    (x / 8, bit)
+}
+
 #[cfg(test)]
 mod test_image {
     use std::borrow::Cow;
@@ -665,12 +683,97 @@ mod test_image {
     }
 
     #[test]
-    fn get_pixel() {
-        todo!()
+    fn put_pixel_depth1() {
+        let mut image = Image::allocate(16, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B1, ImageOrder::MSBFirst);
+        for x in 0..8 {
+            image.put_pixel(x, 0, 1);
+        }
+        assert_eq!(0b_1111_1111, image.data()[0]);
+
+        image.put_pixel(0, 0, 0);
+        assert_eq!(0b_0111_1111, image.data()[0]);
+
+        image.put_pixel(2, 0, 0);
+        assert_eq!(0b_0101_1111, image.data()[0]);
+
+        image.put_pixel(4, 0, 0);
+        assert_eq!(0b_0101_0111, image.data()[0]);
+
+        image.put_pixel(6, 0, 0);
+        assert_eq!(0b_0101_0101, image.data()[0]);
+
+        image.data_mut()[1] = 0;
+
+        image.put_pixel(8, 0, 1);
+        assert_eq!(0b_1000_0000, image.data()[1]);
+
+        image.put_pixel(15, 0, 1);
+        assert_eq!(0b_1000_0001, image.data()[1]);
+
+        assert_eq!(0b_0000_0000, image.data()[5]);
+        image.put_pixel(15, 1, 1);
+        assert_eq!(0b_0000_0001, image.data()[5]);
     }
 
     #[test]
-    fn put_pixel() {
+    fn put_pixel_depth4() {
+        let mut image = Image::allocate(8, 2, ScanlinePad::Pad16, 1, BitsPerPixel::B4, ImageOrder::MSBFirst);
+        for pos in 0..=0xf {
+            image.put_pixel(pos % 8, pos / 8, pos.into());
+        }
+        assert_eq!(image.data(), [0x10, 0x32, 0x54, 0x76, 0x98, 0xBA, 0xDC, 0xFE]);
+    }
+
+    #[test]
+    fn put_pixel_depth8() {
+        let mut image = Image::allocate(256, 2, ScanlinePad::Pad8, 1, BitsPerPixel::B8, ImageOrder::MSBFirst);
+        for x in 0..=0xff {
+            image.put_pixel(x, 0, x.into());
+        }
+        image.put_pixel(255, 1, 0x1245_89AB);
+        let expected = (0..=0xff)
+            .chain((0..0xff).map(|_| 0))
+            .chain(std::iter::once(0xAB))
+            .collect::<Vec<_>>();
+        assert_eq!(image.data(), &expected[..]);
+    }
+
+    #[test]
+    fn put_pixel_depth16() {
+        let mut image = Image::allocate(5, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B16, ImageOrder::MSBFirst);
+        image.put_pixel(0, 0, 0xAB_36_18_F8);
+        image.put_pixel(4, 0, 0x12_34_56_78);
+        image.put_pixel(4, 1, 0xFE_DC_BA_98);
+        let expected = [
+            // First row
+            0x18, 0xF8, 0, 0, 0, 0, 0, 0, 0x56, 0x78,
+            // Padding Pad32
+            0, 0,
+            // Second row
+            0, 0, 0, 0, 0, 0, 0, 0, 0xBA, 0x98,
+            // Padding Pad32
+            0, 0,
+        ];
+        assert_eq!(image.data(), expected);
+    }
+
+    #[test]
+    fn put_pixel_depth32() {
+        let mut image = Image::allocate(2, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B32, ImageOrder::MSBFirst);
+        image.put_pixel(0, 0, 0xAB_36_18_F8);
+        image.put_pixel(1, 0, 0x12_34_56_78);
+        image.put_pixel(1, 1, 0xFE_DC_BA_98);
+        let expected = [
+            // First row
+            0xAB, 0x36, 0x18, 0xF8, 0x12, 0x34, 0x56, 0x78,
+            // Second row
+            0x00, 0x00, 0x00, 0x00, 0xFE, 0xDC, 0xBA, 0x98,
+        ];
+        assert_eq!(image.data(), expected);
+    }
+
+    #[test]
+    fn get_pixel() {
         todo!()
     }
 }
