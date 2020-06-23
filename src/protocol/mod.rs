@@ -9085,6 +9085,76 @@ impl Event {
         }
     }
 
+    /// Get the additional length if any (in 4 byte units) of this X11 event.
+    pub fn length(&self) -> Option<u32> {
+        match self {
+            Event::GeGeneric(value) => Some(value.length),
+            #[cfg(feature = "present")]
+            Event::PresentCompleteNotify(value) => Some(value.length),
+            #[cfg(feature = "present")]
+            Event::PresentConfigureNotify(value) => Some(value.length),
+            #[cfg(feature = "present")]
+            Event::PresentGeneric(value) => Some(value.length),
+            #[cfg(feature = "present")]
+            Event::PresentIdleNotify(value) => Some(value.length),
+            #[cfg(feature = "present")]
+            Event::PresentRedirectNotify(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputBarrierHit(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputBarrierLeave(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputButtonPress(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputButtonRelease(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceChanged(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputEnter(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputFocusIn(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputFocusOut(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputHierarchy(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputKeyPress(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputKeyRelease(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputLeave(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputMotion(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputProperty(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputRawButtonPress(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputRawButtonRelease(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputRawKeyPress(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputRawKeyRelease(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputRawMotion(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputRawTouchBegin(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputRawTouchEnd(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputRawTouchUpdate(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputTouchBegin(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputTouchEnd(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputTouchOwnership(value) => Some(value.length),
+            #[cfg(feature = "xinput")]
+            Event::XinputTouchUpdate(value) => Some(value.length),
+            _ => None,
+        }
+    }
+
     /// Get the raw response type of this X11 event
     ///
     /// Response types have seven bits in X11. The eight bit indicates whether

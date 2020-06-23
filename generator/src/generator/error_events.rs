@@ -382,6 +382,42 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
         outln!(out, "}}");
         outln!(out, "");
 
+        outln!(
+            out,
+            "/// Get the additional length if any (in 4 byte units) of this X11 event.",
+        );
+        outln!(out, "pub fn length(&self) -> Option<u32> {{");
+        out.indented(|out| {
+            outln!(out, "match self {{");
+            for ns in namespaces.iter() {
+                let event_defs = sorted_events(ns);
+                let has_feature = super::ext_has_feature(&ns.header);
+                for event_def in event_defs.iter() {
+                    if event_def
+                        .get_original_full_def()
+                        .fields
+                        .borrow()
+                        .iter()
+                        .any(|field| field.name() == Some("length"))
+                    {
+                        if has_feature {
+                            outln!(out.indent(), "#[cfg(feature = \"{}\")]", ns.header);
+                        }
+                        outln!(
+                            out.indent(),
+                            "Event::{}{}(value) => Some(value.length),",
+                            get_ns_name_prefix(ns),
+                            event_def.name(),
+                        );
+                    }
+                }
+            }
+            outln!(out.indent(), "_ => None,");
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+        outln!(out, "");
+
         outln!(out, "/// Get the raw response type of this X11 event");
         outln!(out, "///");
         outln!(
