@@ -133,3 +133,10 @@ fn parse_setup() -> Result<(), ParseError> {
 
     Ok(())
 }
+
+#[test]
+fn parse_xi_get_property_reply() {
+    use x11rb::protocol::xinput::XIGetPropertyReply;
+    let bytes: &[u8] = &[0x1, 0x3b, 0x6b, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    XIGetPropertyReply::try_parse(bytes).unwrap();
+}
