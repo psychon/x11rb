@@ -496,34 +496,41 @@ impl<'a> Image<'a> {
         }.send(conn)
     }
 
-    /// Convert this image into the native format of the X11 server.
+    /// Convert this image into the format specified by the other parameters.
     ///
     /// This function may need to copy the image, hence returns a `Cow`.
-    pub fn native(&self, setup: &Setup) -> Result<Cow<'_, Self>, ParseError> {
-        let format = find_format(setup, self.depth.into())?;
-        let is_native =
-            format.scanline_pad == self.scanline_pad.into() &&
-            format.bits_per_pixel == self.bits_per_pixel.into() &&
-            setup.image_byte_order == self.byte_order;
-        if is_native {
-            Ok(Cow::Borrowed(self))
+    pub fn convert(&self, scanline_pad: ScanlinePad, bits_per_pixel: BitsPerPixel, byte_order: ImageOrder) -> Cow<'_, Self> {
+        let already_converted =
+            scanline_pad == self.scanline_pad &&
+            bits_per_pixel == self.bits_per_pixel &&
+            byte_order == self.byte_order;
+        if already_converted {
+            Cow::Borrowed(self)
         } else {
             let mut copy = Image::allocate(
                 self.width,
                 self.height,
-                format.scanline_pad.try_into()?,
+                scanline_pad,
                 self.depth,
-                format.bits_per_pixel.try_into()?,
-                ImageOrder::MSBFirst
+                bits_per_pixel,
+                byte_order,
             );
-            // This is the slowest possible way to do this. But also the easiest one to implment.
+            // This is the slowest possible way to do this. But also the easiest one to implement.
             for y in 0..self.height {
                 for x in 0..self.width {
                     copy.put_pixel(x, y, self.get_pixel(x, y))
                 }
             }
-            Ok(Cow::Owned(copy))
+            Cow::Owned(copy)
         }
+    }
+
+    /// Convert this image into the native format of the X11 server.
+    ///
+    /// This function may need to copy the image, hence returns a `Cow`.
+    pub fn native(&self, setup: &Setup) -> Result<Cow<'_, Self>, ParseError> {
+        let format = find_format(setup, self.depth.into())?;
+        Ok(self.convert(format.scanline_pad.try_into()?, format.bits_per_pixel.try_into()?, setup.image_byte_order))
     }
 
     /// Set a single pixel in this image.
