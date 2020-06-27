@@ -48,24 +48,17 @@ pub struct ColorComponent {
 
 impl ColorComponent {
     /// Create a new color component with the given information.
-    pub fn new(width: u8, shift: u8) -> Self {
-        assert!(
-            width < 16,
-            "At most 16 bits for a single color component supported, got {}",
-            width,
-        );
-        assert!(
-            shift < 32,
-            "Too large shift for color component, got {}, but pixels are 32 bit",
-            shift,
-        );
-        assert!(
-            shift + width <= 32,
-            "Would overflow a 32 bit value when putting {} bits at offset {}",
-            width,
-            shift,
-        );
-        Self { width, shift }
+    ///
+    /// The following conditions must be satisfied:
+    /// - `width < 16`: color components have at most 16 bits.
+    /// - `shift < 32`: pixel values have at most 32 bits.
+    /// - `shift + width <= 32`: pixel values have at most 32 bits.
+    pub fn new(width: u8, shift: u8) -> Result<Self, ParseError> {
+        if width >= 16 || shift >= 32 || shift + width > 32 {
+            Err(ParseError::InvalidValue)
+        } else {
+            Ok(Self { width, shift })
+        }
     }
 
     /// Get the pixel mask representing this color component.
@@ -74,8 +67,9 @@ impl ColorComponent {
     /// correspond to this color component are set.
     /// ```
     /// # use x11rb::image::ColorComponent;
-    /// let red = ColorComponent::new(8, 16);
+    /// let red = ColorComponent::new(8, 16)?;
     /// assert_eq!(red.to_mask(), 0xff0000);
+    /// # Ok::<(), x11rb::errors::ParseError>(())
     /// ```
     pub fn to_mask(self) -> u32 {
         // Get a mask with 'width' set bits.
@@ -92,13 +86,21 @@ impl ColorComponent {
     /// let red1 = ColorComponent::new(8, 16);
     /// let red2 = ColorComponent::from_mask(0xff0000);
     /// ```
-    pub fn from_mask(mask: u32) -> Self {
+    ///
+    /// # Errors
+    ///
+    /// This function fails if the given value is not a well-formed mask. This means that at least
+    /// one bit must be set and the set bits must be consecutive.
+    pub fn from_mask(mask: u32) -> Result<Self, ParseError> {
         let width = mask.count_ones();
         let shift = mask.trailing_zeros();
         // Both width and shift can be at most 32, which should fit into u8.
-        let result = Self::new(width.try_into().unwrap(), shift.try_into().unwrap());
-        assert_eq!(mask, result.to_mask(), "Malformed mask {}", mask);
-        result
+        let result = Self::new(width.try_into().unwrap(), shift.try_into().unwrap())?;
+        if mask != result.to_mask() {
+            Err(ParseError::InvalidValue)
+        } else {
+            Ok(result)
+        }
     }
 
     /// Get this color component out of a pixel value.
@@ -107,8 +109,9 @@ impl ColorComponent {
     /// pixel value, expanded to width 16.
     /// ```
     /// # use x11rb::image::ColorComponent;
-    /// let red = ColorComponent::new(8, 16);
+    /// let red = ColorComponent::new(8, 16)?;
     /// assert_eq!(0xABAB, red.decode(0x78AB_4321));
+    /// # Ok::<(), x11rb::errors::ParseError>(())
     /// ```
     pub fn decode(self, pixel: u32) -> u16 {
         // Get the color component out
@@ -129,8 +132,9 @@ impl ColorComponent {
     ///
     /// ```
     /// # use x11rb::image::ColorComponent;
-    /// let red = ColorComponent::new(8, 16);
+    /// let red = ColorComponent::new(8, 16)?;
     /// assert_eq!(0xAB0000, red.encode(0xABCD));
+    /// # Ok::<(), x11rb::errors::ParseError>(())
     /// ```
     pub fn encode(self, intensity: u16) -> u32 {
         // First truncate to width `self.width`, then place at the correct offset.
@@ -157,15 +161,20 @@ impl PixelLayout {
     }
 
     /// Create a new pixel layout
-    pub fn from_visual_type(visual: Visualtype) -> Self {
+    ///
+    /// This function errors if the visual has a different class than `TrueColor` or `DirectColor`,
+    /// because color pallets and grayscales are not supported. This function also errors if the
+    /// mask components of the visual are malformed.
+    pub fn from_visual_type(visual: Visualtype) -> Result<Self, ParseError> {
         if visual.class != VisualClass::TrueColor && visual.class != VisualClass::DirectColor {
-            panic!("Visual does not use decomposed colors: {:x?}", visual);
+            Err(ParseError::InvalidValue)
+        } else {
+            Ok(Self::new(
+                ColorComponent::from_mask(visual.red_mask)?,
+                ColorComponent::from_mask(visual.green_mask)?,
+                ColorComponent::from_mask(visual.blue_mask)?,
+            ))
         }
-        Self::new(
-            ColorComponent::from_mask(visual.red_mask),
-            ColorComponent::from_mask(visual.green_mask),
-            ColorComponent::from_mask(visual.blue_mask),
-        )
     }
 
     /// Get the depth of this pixel layout.
@@ -183,11 +192,12 @@ impl PixelLayout {
     /// ```
     /// # use x11rb::image::{ColorComponent, PixelLayout};
     /// let layout = PixelLayout::new(
-    ///     ColorComponent::new(8, 16),
-    ///     ColorComponent::new(8, 8),
-    ///     ColorComponent::new(8, 0),
+    ///     ColorComponent::new(8, 16)?,
+    ///     ColorComponent::new(8, 8)?,
+    ///     ColorComponent::new(8, 0)?,
     /// );
     /// assert_eq!((0xABAB, 0x4343, 0x2121), layout.decode(0x78AB_4321));
+    /// # Ok::<(), x11rb::errors::ParseError>(())
     /// ```
     pub fn decode(self, pixel: u32) -> (u16, u16, u16) {
         let red = self.red.decode(pixel);
@@ -201,11 +211,12 @@ impl PixelLayout {
     /// ```
     /// # use x11rb::image::{ColorComponent, PixelLayout};
     /// let layout = PixelLayout::new(
-    ///     ColorComponent::new(8, 16),
-    ///     ColorComponent::new(8, 8),
-    ///     ColorComponent::new(8, 0),
+    ///     ColorComponent::new(8, 16)?,
+    ///     ColorComponent::new(8, 8)?,
+    ///     ColorComponent::new(8, 0)?,
     /// );
     /// assert_eq!(0x00AB_4321, layout.encode((0xABAB, 0x4343, 0x2121)));
+    /// # Ok::<(), x11rb::errors::ParseError>(())
     /// ```
     pub fn encode(self, (red, green, blue): (u16, u16, u16)) -> u32 {
         let red = self.red.encode(red);

@@ -97,7 +97,8 @@ fn check_visual(screen: &Screen, id: Visualid) -> PixelLayout {
             std::process::exit(1);
         }
     }
-    let result = PixelLayout::from_visual_type(*visual_type);
+    let result = PixelLayout::from_visual_type(*visual_type)
+        .expect("The server sent a malformed visual type");
     assert_eq!(result.depth(), depth);
     result
 }
@@ -125,9 +126,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Convert the image from the PPM format into the server's native format.
     let ppm_layout = PixelLayout::new(
-        ColorComponent::new(8, 16),
-        ColorComponent::new(8, 8),
-        ColorComponent::new(8, 0),
+        ColorComponent::new(8, 16)?,
+        ColorComponent::new(8, 8)?,
+        ColorComponent::new(8, 0)?,
     );
     let image = image.reencode(ppm_layout, pixel_layout, conn.setup())?;
 
