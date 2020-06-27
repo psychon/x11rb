@@ -434,7 +434,7 @@ impl<'a> Image<'a> {
             format.scanline_pad.try_into()?,
             depth,
             format.bits_per_pixel.try_into()?,
-            ImageOrder::MSBFirst,
+            setup.image_byte_order,
         ))
     }
 
