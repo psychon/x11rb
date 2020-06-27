@@ -122,5 +122,9 @@ required-features = ["shape"]
 name = "simple_window"
 required-features = ["cursor"]
 
+[[example]]
+name = "display_ppm"
+required-features = ["image"]
+
 [workspace]
 members = ["generator", "xcbgen-rs", "cairo-example"]
