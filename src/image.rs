@@ -404,7 +404,7 @@ impl<'a> Image<'a> {
         depth: u8,
         setup: &Setup,
     ) -> Result<Self, ParseError> {
-        let format = find_format(setup, depth.into())?;
+        let format = find_format(setup, depth)?;
         Ok(Self::allocate(
             width,
             height,
@@ -491,7 +491,7 @@ impl<'a> Image<'a> {
             dst_x,
             dst_y,
             left_pad: 0, // Must always be 0 for ZPixmap
-            depth: self.depth.into(),
+            depth: self.depth,
             data: Cow::Borrowed(&self.data),
         }.send(conn)
     }
@@ -529,7 +529,7 @@ impl<'a> Image<'a> {
     ///
     /// This function may need to copy the image, hence returns a `Cow`.
     pub fn native(&self, setup: &Setup) -> Result<Cow<'_, Self>, ParseError> {
-        let format = find_format(setup, self.depth.into())?;
+        let format = find_format(setup, self.depth)?;
         Ok(self.convert(format.scanline_pad.try_into()?, format.bits_per_pixel.try_into()?, setup.image_byte_order))
     }
 

@@ -97,7 +97,7 @@ fn check_visual(screen: &Screen, id: Visualid) {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Load the image
-    let image = match std::env::args_os().skip(1).next() {
+    let image = match std::env::args_os().nth(1) {
         None => {
             eprintln!("Expected a file name of a PPM as argument, using a built-in default image instead");
             ppm_parser::parse_ppm_bytes(&BUILTIN_IMAGE)?
@@ -188,7 +188,7 @@ mod ppm_parser {
             let value = u16::from(byte[0] - b'0');
             result = result.checked_mul(10)
                 .map(|result| result + value)
-                .ok_or(make_io_error("Overflow while parsing number"))?;
+                .ok_or_else(|| make_io_error("Overflow while parsing number"))?;
 
             input.read_exact(&mut byte)?;
         }
