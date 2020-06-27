@@ -50,15 +50,25 @@ impl ColorComponent {
     /// Create a new color component with the given information.
     ///
     /// The following conditions must be satisfied:
-    /// - `width < 16`: color components have at most 16 bits.
+    /// - `width <= 16`: color components have at most 16 bits.
     /// - `shift < 32`: pixel values have at most 32 bits.
     /// - `shift + width <= 32`: pixel values have at most 32 bits.
     pub fn new(width: u8, shift: u8) -> Result<Self, ParseError> {
-        if width >= 16 || shift >= 32 || shift + width > 32 {
+        if width > 16 || shift >= 32 || shift + width > 32 {
             Err(ParseError::InvalidValue)
         } else {
             Ok(Self { width, shift })
         }
+    }
+
+    /// Get the bit width of the color component.
+    pub fn width(self) -> u8 {
+        self.width
+    }
+
+    /// Get the bit shift of the color component.
+    pub fn shift(self) -> u8 {
+        self.shift
     }
 
     /// Get the pixel mask representing this color component.
@@ -68,10 +78,10 @@ impl ColorComponent {
     /// ```
     /// # use x11rb::image::ColorComponent;
     /// let red = ColorComponent::new(8, 16)?;
-    /// assert_eq!(red.to_mask(), 0xff0000);
+    /// assert_eq!(red.mask(), 0xff0000);
     /// # Ok::<(), x11rb::errors::ParseError>(())
     /// ```
-    pub fn to_mask(self) -> u32 {
+    pub fn mask(self) -> u32 {
         // Get a mask with 'width' set bits.
         let mask = (1u32 << self.width) - 1;
         // Shift the mask into the right position
@@ -96,7 +106,7 @@ impl ColorComponent {
         let shift = mask.trailing_zeros();
         // Both width and shift can be at most 32, which should fit into u8.
         let result = Self::new(width.try_into().unwrap(), shift.try_into().unwrap())?;
-        if mask != result.to_mask() {
+        if mask != result.mask() {
             Err(ParseError::InvalidValue)
         } else {
             Ok(result)
@@ -115,7 +125,7 @@ impl ColorComponent {
     /// ```
     pub fn decode(self, pixel: u32) -> u16 {
         // Get the color component out
-        let value = (pixel & self.to_mask()) >> self.shift;
+        let value = (pixel & self.mask()) >> self.shift;
 
         // Now expand from with `self.width` to width 16.
         let mut width = self.width;
