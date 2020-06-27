@@ -73,10 +73,11 @@ impl ColorComponent {
     /// The mask can be used to mask off other colors in a pixel value. Only the bits that
     /// correspond to this color component are set.
     /// ```
+    /// # use x11rb::image::ColorComponent;
     /// let red = ColorComponent::new(8, 16);
-    /// assert_eq(red.to_mask(), 0xff0000);
+    /// assert_eq!(red.to_mask(), 0xff0000);
     /// ```
-    fn to_mask(self) -> u32 {
+    pub fn to_mask(self) -> u32 {
         // Get a mask with 'width' set bits.
         let mask = (1u32 << self.width) - 1;
         // Shift the mask into the right position
@@ -87,6 +88,7 @@ impl ColorComponent {
     ///
     /// This turns a color mask into its individual components.
     /// ```
+    /// # use x11rb::image::ColorComponent;
     /// let red1 = ColorComponent::new(8, 16);
     /// let red2 = ColorComponent::from_mask(0xff0000);
     /// ```
@@ -104,9 +106,9 @@ impl ColorComponent {
     /// This function gets a single pixel value and returns this color component's value in that
     /// pixel value, expanded to width 16.
     /// ```
+    /// # use x11rb::image::ColorComponent;
     /// let red = ColorComponent::new(8, 16);
     /// assert_eq!(0xABAB, red.decode(0x78AB_4321));
-    /// panic!("are these even run?");
     /// ```
     pub fn decode(self, pixel: u32) -> u16 {
         // Get the color component out
@@ -126,6 +128,7 @@ impl ColorComponent {
     /// Encode a color value according to this pixel format.
     ///
     /// ```
+    /// # use x11rb::image::ColorComponent;
     /// let red = ColorComponent::new(8, 16);
     /// assert_eq!(0xAB0000, red.encode(0xABCD));
     /// ```
@@ -178,6 +181,7 @@ impl PixelLayout {
     ///
     /// This function returns each component expanded to width 16.
     /// ```
+    /// # use x11rb::image::{ColorComponent, PixelLayout};
     /// let layout = PixelLayout::new(
     ///     ColorComponent::new(8, 16),
     ///     ColorComponent::new(8, 8),
@@ -195,12 +199,13 @@ impl PixelLayout {
     /// Encode a color value according to this layout.
     ///
     /// ```
+    /// # use x11rb::image::{ColorComponent, PixelLayout};
     /// let layout = PixelLayout::new(
     ///     ColorComponent::new(8, 16),
     ///     ColorComponent::new(8, 8),
     ///     ColorComponent::new(8, 0),
     /// );
-    /// assert_eq!(0x78AB_4321, layout.encode((0xABAB, 0x4343, 0x2121)));
+    /// assert_eq!(0x00AB_4321, layout.encode((0xABAB, 0x4343, 0x2121)));
     /// ```
     pub fn encode(self, (red, green, blue): (u16, u16, u16)) -> u32 {
         let red = self.red.encode(red);
