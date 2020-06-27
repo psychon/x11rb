@@ -67,18 +67,27 @@ fn create_window(
 /// colors). Otherwise, this exits the process.
 fn check_visual(screen: &Screen, id: Visualid) {
     // Find the information about the visual and at the same time check its depth.
-    let visual_type = screen
+    let visual_info = screen
         .allowed_depths
         .iter()
-        .find(|depth| depth.depth == DEPTH)
-        .and_then(|depth| depth.visuals.iter().find(|depth| depth.visual_id == id));
-    let visual_type = match visual_type {
-        Some(visual_type) => visual_type,
+        .filter_map(|depth| {
+            let info = depth.visuals.iter().find(|depth| depth.visual_id == id);
+            info.map(|info| (depth.depth, info))
+        })
+        .next();
+    let (depth, visual_type) = match visual_info {
+        Some(info) => info,
         None => {
-            eprintln!("The root visual does not have depth {}", DEPTH);
+            eprintln!("Did not find the root visual's description?!");
             std::process::exit(1);
         }
     };
+    // Does the visual have the expected depth?
+    if depth != DEPTH {
+        eprintln!("Root visual should have depth {}, but has {}.", DEPTH, depth);
+        eprintln!("Visual type: {:?}", visual_type);
+        std::process::exit(1);
+    }
     // Now check that the pixels have red/green/blue components that we can set directly.
     match visual_type.class {
         VisualClass::TrueColor | VisualClass::DirectColor => {}
