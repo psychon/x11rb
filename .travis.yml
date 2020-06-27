@@ -100,4 +100,4 @@ script:
   - cargo build --verbose --all-targets --features all-extensions
 
   # Run the examples as 'integration tests'. This time using RustConnection.
-  - run_examples --features "all-extensions libc cursor"
+  - run_examples --features "all-extensions libc cursor image"

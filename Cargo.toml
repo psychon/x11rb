@@ -37,8 +37,11 @@ features = ["winsock2"]
 # #![deny(unsafe_code)]. This has the effect of disabling the XCB FFI bindings.
 allow-unsafe-code = ["libc"]
 
-# Enable utility functions for loading mouse cursors.
+# Enable utility functions in `x11rb::cursor` for loading mouse cursors.
 cursor = ["render"]
+
+# Enable utility functions in `x11rb::image` for working with image data.
+image = []
 
 # Enable this feature to enable all the X11 extensions
 all-extensions = [
@@ -118,6 +121,10 @@ required-features = ["shape"]
 [[example]]
 name = "simple_window"
 required-features = ["cursor"]
+
+[[example]]
+name = "display_ppm"
+required-features = ["image"]
 
 [workspace]
 members = ["generator", "xcbgen-rs", "cairo-example"]

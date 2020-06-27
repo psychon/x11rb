@@ -127,6 +127,8 @@ pub mod cookie;
 pub mod cursor;
 pub mod errors;
 pub mod extension_manager;
+#[cfg(feature = "image")]
+pub mod image;
 pub mod properties;
 pub mod rust_connection;
 pub mod wrapper;

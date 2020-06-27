@@ -15,15 +15,15 @@ test_script:
   # Build once with the 'allow-unsafe-code' feature to
   # check that this works fine. Use 'check' instead of 'build' because
   # a full build requires the libxcb library
-  - cargo check --verbose --all-targets --features all-extensions,cursor
+  - cargo check --verbose --all-targets --features all-extensions,cursor,image
 
   # Also build once without any feature
   - cargo check --verbose --all-targets
 
   # We do not have libxcb and thus cannot build XCBConnection
-  - cargo build --verbose --all-targets --features all-extensions,cursor
-  - cargo test --verbose --features all-extensions,cursor
-  - cargo doc --verbose --features all-extensions,cursor
+  - cargo build --verbose --all-targets --features all-extensions,cursor,image
+  - cargo test --verbose --features all-extensions,cursor,image
+  - cargo doc --verbose --features all-extensions,cursor,image
 
   # Start an X11 server in the background
   - ps: $Server = Start-Process -PassThru -FilePath C:\cygwin\bin\Xvfb.exe -ArgumentList "-listen tcp :0"
@@ -36,7 +36,7 @@ test_script:
   # time soon. Requirements include "must fail if the command fails".
   - ps: >-
       Get-ChildItem examples | Where {$_.extension -eq ".rs"} | Where {$_.BaseName -ne "tutorial"} | Where {$_.BaseName -ne "shared_memory"} | Foreach-Object {
-        $cmd = "cargo run --verbose --features all-extensions,cursor --example $($_.BaseName) 2>&1"
+        $cmd = "cargo run --verbose --features all-extensions,cursor,image --example $($_.BaseName) 2>&1"
         Write-Host -ForegroundColor Yellow $cmd
         $backupErrorActionPreference = $script:ErrorActionPreference
         $script:ErrorActionPreference = "Continue"
