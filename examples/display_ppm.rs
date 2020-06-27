@@ -1,6 +1,6 @@
 use x11rb::connection::Connection;
 use x11rb::errors::ReplyOrIdError;
-use x11rb::image::{ColorComponent, Image, PixelLayout, convert_image};
+use x11rb::image::{ColorComponent, Image, PixelLayout};
 use x11rb::protocol::xproto::{
     AtomEnum, ConnectionExt, CreateGCAux, CreateWindowAux, PropMode, Screen, VisualClass, Visualid,
     Window, WindowClass,
@@ -129,7 +129,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ColorComponent::new(8, 8),
         ColorComponent::new(8, 0),
     );
-    let image = convert_image(&image, conn.setup(), ppm_layout, pixel_layout)?;
+    let image = image.reencode(ppm_layout, pixel_layout, conn.setup())?;
 
     let atoms = Atoms::new(conn)?.reply()?;
     let win_id = create_window(conn, screen, &atoms, &image)?;

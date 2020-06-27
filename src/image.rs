@@ -215,34 +215,6 @@ impl PixelLayout {
     }
 }
 
-/// Convert the given `image` to another layout and storage.
-///
-/// This function gets an `image` with pixel values that can be interpreted according to
-/// `input_layout`. It produces an image with pixel values according to `output_layout`. The
-/// resulting image is stored in the native format of the X11 server described by `setup`.
-pub fn convert_image<'image, 'data>(
-    image: &'image Image<'data>,
-    setup: &Setup,
-    input_layout: PixelLayout,
-    output_layout: PixelLayout,
-) -> Result<Cow<'image, Image<'data>>, ParseError> {
-    if input_layout == output_layout {
-        image.native(setup)
-    } else {
-        // Yay, we get to convert the image :-(
-        let (width, height) = (image.width(), image.height());
-        let mut result = Image::allocate_native(width, height, output_layout.depth(), setup)?;
-        for y in 0..height {
-            for x in 0..width {
-                let pixel = image.get_pixel(x, y);
-                let pixel = output_layout.encode(input_layout.decode(pixel));
-                result.put_pixel(x, y, pixel);
-            }
-        }
-        Ok(Cow::Owned(result))
-    }
-}
-
 // Compute the stride based on some information of the image
 fn compute_stride(width: u16, bits_per_pixel: BitsPerPixel, scanline_pad: ScanlinePad) -> usize {
     let value = usize::from(width) * usize::from(bits_per_pixel);
@@ -776,6 +748,35 @@ impl<'a> Image<'a> {
             format.bits_per_pixel.try_into()?,
             setup.image_byte_order,
         ))
+    }
+
+    /// Reencode this image to a different pixel layout / depth.
+    ///
+    /// Each pixel of this image is interpreted according to `own` and written to the resulting
+    /// image in the format described by `output`.
+    ///
+    /// The resulting image is always in the native format as described by `setup`.
+    pub fn reencode<'b>(
+        &'b self,
+        own: PixelLayout,
+        output: PixelLayout,
+        setup: &Setup,
+    ) -> Result<Cow<'b, Self>, ParseError> {
+        if own == output {
+            self.native(setup)
+        } else {
+            // Yay, we get to convert the image :-(
+            let (width, height) = (self.width(), self.height());
+            let mut result = Image::allocate_native(width, height, output.depth(), setup)?;
+            for y in 0..height {
+                for x in 0..width {
+                    let pixel = self.get_pixel(x, y);
+                    let pixel = output.encode(own.decode(pixel));
+                    result.put_pixel(x, y, pixel);
+                }
+            }
+            Ok(Cow::Owned(result))
+        }
     }
 
     /// Set a single pixel in this image.
