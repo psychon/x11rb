@@ -703,6 +703,10 @@ impl<'a> Image<'a> {
     ///
     /// This function sends a [`PutImage`](crate::protocol::xproto::PutImage) request. This will
     /// upload this image to the given `drawable` to position `(dst_x, dst_y)`.
+    ///
+    /// The server's maximum request size is honored. This means that a too large `PutImage`
+    /// request is automatically split up into smaller pieces. Thus, if this function returns an
+    /// error, the image could already be partially sent.
     pub fn put<'c, Conn: Connection>(
         &self,
         conn: &'c Conn,
@@ -710,20 +714,41 @@ impl<'a> Image<'a> {
         gc: Gcontext,
         dst_x: i16,
         dst_y: i16,
-    ) -> Result<VoidCookie<'c, Conn>, ConnectionError> {
-        PutImageRequest {
-            format: ImageFormat::ZPixmap,
-            drawable,
-            gc,
-            width: self.width,
-            height: self.height,
-            dst_x,
-            dst_y,
-            left_pad: 0, // Must always be 0 for ZPixmap
-            depth: self.depth,
-            data: Cow::Borrowed(&self.data),
+    ) -> Result<Vec<VoidCookie<'c, Conn>>, ConnectionError> {
+        // Upload the image without exceeding the server's maximum request size
+        let max_bytes = conn.maximum_request_bytes();
+        let put_image_header = 24;
+        let stride = self.stride();
+        let lines_per_request = (max_bytes - put_image_header) / stride;
+        let mut result = Vec::with_capacity(
+            (usize::from(self.height()) + lines_per_request - 1) / lines_per_request,
+        );
+        let lines_per_request = lines_per_request.try_into().unwrap_or(u16::max_value());
+        assert!(lines_per_request > 0);
+
+        let (mut y_offset, mut byte_offset) = (0, 0);
+        while y_offset < self.height {
+            let next_lines = lines_per_request.min(self.height - y_offset);
+            let next_byte_offset = byte_offset + usize::from(next_lines) * stride;
+            let data = &self.data[byte_offset..next_byte_offset];
+            let request = PutImageRequest {
+                format: ImageFormat::ZPixmap,
+                drawable,
+                gc,
+                width: self.width,
+                height: next_lines,
+                dst_x,
+                dst_y: dst_y + i16::try_from(y_offset).unwrap(),
+                left_pad: 0, // Must always be 0 for ZPixmap
+                depth: self.depth,
+                data: Cow::Borrowed(&data),
+            };
+            result.push(request.send(conn)?);
+
+            y_offset += next_lines;
+            byte_offset = next_byte_offset;
         }
-        .send(conn)
+        Ok(result)
     }
 
     /// Convert this image into the format specified by the other parameters.
