@@ -5,7 +5,10 @@
 //! not want to know the details. It suffices to know that the values of the individual pixels are
 //! saved one after another in memory.
 //!
-//! An [`Image`] can 
+//! An [`Image`] can be converted to a different internal representation. [`Image::native`]
+//! converts it to the native format of the X11 server. These conversions do not change the actual
+//! content of the image, but only the way that it is laid out in memory (e.g. byte order and
+//! padding). Specifically, there is no support for converting an image to another `depth`.
 
 // For future readers:
 //
@@ -24,7 +27,10 @@ use std::convert::{TryFrom, TryInto};
 use crate::connection::Connection;
 use crate::cookie::VoidCookie;
 use crate::errors::{ConnectionError, ParseError, ReplyError};
-use crate::protocol::xproto::{Drawable, Format, Gcontext, ImageFormat, ImageOrder, Setup, GetImageRequest, GetImageReply, PutImageRequest};
+use crate::protocol::xproto::{
+    Drawable, Format, Gcontext, GetImageReply, GetImageRequest, ImageFormat, ImageOrder,
+    PutImageRequest, Setup,
+};
 
 // Compute the stride based on some information of the image
 fn compute_stride(width: u16, bits_per_pixel: BitsPerPixel, scanline_pad: ScanlinePad) -> usize {
@@ -34,8 +40,8 @@ fn compute_stride(width: u16, bits_per_pixel: BitsPerPixel, scanline_pad: Scanli
 
 #[cfg(test)]
 mod test_stride {
-    use std::convert::TryInto;
     use super::compute_stride;
+    use std::convert::TryInto;
 
     #[test]
     fn test_stride() {
@@ -78,9 +84,9 @@ mod test_stride {
 }
 
 // Find the format with the given depth in `setup.pixmap_formats`.
-fn find_format(setup: &Setup, depth: u8) -> Result<&Format, ParseError>
-{
-    setup.pixmap_formats
+fn find_format(setup: &Setup, depth: u8) -> Result<&Format, ParseError> {
+    setup
+        .pixmap_formats
         .iter()
         .find(|f| f.depth == depth)
         .ok_or(ParseError::InvalidValue)
@@ -155,8 +161,8 @@ impl ScanlinePad {
 
 #[cfg(test)]
 mod test_scanline_pad {
-    use std::convert::TryInto;
     use super::ScanlinePad;
+    use std::convert::TryInto;
 
     #[test]
     fn number_conversions() {
@@ -193,10 +199,27 @@ mod test_scanline_pad {
             (47, 48, 48, 64),
             (48, 48, 48, 64),
             (49, 56, 64, 64),
-        ].iter() {
-            assert_eq!(pad8, ScanlinePad::Pad8.round_to_multiple(value), "value={} for pad8", value);
-            assert_eq!(pad16, ScanlinePad::Pad16.round_to_multiple(value), "value={} for pad16", value);
-            assert_eq!(pad32, ScanlinePad::Pad32.round_to_multiple(value), "value={} for pad32", value);
+        ]
+        .iter()
+        {
+            assert_eq!(
+                pad8,
+                ScanlinePad::Pad8.round_to_multiple(value),
+                "value={} for pad8",
+                value,
+            );
+            assert_eq!(
+                pad16,
+                ScanlinePad::Pad16.round_to_multiple(value),
+                "value={} for pad16",
+                value,
+            );
+            assert_eq!(
+                pad32,
+                ScanlinePad::Pad32.round_to_multiple(value),
+                "value={} for pad32",
+                value,
+            );
         }
     }
 }
@@ -356,7 +379,7 @@ impl<'a> Image<'a> {
                 depth,
                 bits_per_pixel,
                 byte_order,
-                data
+                data,
             })
         }
     }
@@ -443,7 +466,9 @@ impl<'a> Image<'a> {
             height,
             format: ImageFormat::ZPixmap,
             plane_mask: !0,
-        }.send(conn)?.reply()?;
+        }
+        .send(conn)?
+        .reply()?;
         Ok(Self::get_from_reply(&conn.setup(), width, height, reply)?)
     }
 
@@ -493,17 +518,22 @@ impl<'a> Image<'a> {
             left_pad: 0, // Must always be 0 for ZPixmap
             depth: self.depth,
             data: Cow::Borrowed(&self.data),
-        }.send(conn)
+        }
+        .send(conn)
     }
 
     /// Convert this image into the format specified by the other parameters.
     ///
     /// This function may need to copy the image, hence returns a `Cow`.
-    pub fn convert(&self, scanline_pad: ScanlinePad, bits_per_pixel: BitsPerPixel, byte_order: ImageOrder) -> Cow<'_, Self> {
-        let already_converted =
-            scanline_pad == self.scanline_pad &&
-            bits_per_pixel == self.bits_per_pixel &&
-            byte_order == self.byte_order;
+    pub fn convert(
+        &self,
+        scanline_pad: ScanlinePad,
+        bits_per_pixel: BitsPerPixel,
+        byte_order: ImageOrder,
+    ) -> Cow<'_, Self> {
+        let already_converted = scanline_pad == self.scanline_pad
+            && bits_per_pixel == self.bits_per_pixel
+            && byte_order == self.byte_order;
         if already_converted {
             Cow::Borrowed(self)
         } else {
@@ -530,7 +560,11 @@ impl<'a> Image<'a> {
     /// This function may need to copy the image, hence returns a `Cow`.
     pub fn native(&self, setup: &Setup) -> Result<Cow<'_, Self>, ParseError> {
         let format = find_format(setup, self.depth)?;
-        Ok(self.convert(format.scanline_pad.try_into()?, format.bits_per_pixel.try_into()?, setup.image_byte_order))
+        Ok(self.convert(
+            format.scanline_pad.try_into()?,
+            format.bits_per_pixel.try_into()?,
+            setup.image_byte_order,
+        ))
     }
 
     /// Set a single pixel in this image.
@@ -554,7 +588,7 @@ impl<'a> Image<'a> {
                 let old = data[row_start + byte];
                 let bit_cleared = old & !(1 << bit);
                 data[row_start + byte] = bit_cleared | pixel;
-            },
+            }
             BitsPerPixel::B4 => {
                 let mut pixel = pixel & 0x0f;
                 let odd_x = x % 2 == 1;
@@ -565,35 +599,35 @@ impl<'a> Image<'a> {
                     0x0f
                 };
                 data[row_start + x / 2] = (data[row_start + x / 2] & !mask) | (pixel as u8);
-            },
+            }
             BitsPerPixel::B8 => data[row_start + x] = pixel as u8,
             BitsPerPixel::B16 => {
                 let (p0, p1) = match self.byte_order {
                     ImageOrder::LSBFirst => (pixel, pixel >> 8),
-                    ImageOrder::MSBFirst => (pixel >> 8, pixel)
+                    ImageOrder::MSBFirst => (pixel >> 8, pixel),
                 };
-                data[row_start + 2*x + 1] = p1 as u8;
-                data[row_start + 2*x] = p0 as u8;
-            },
+                data[row_start + 2 * x + 1] = p1 as u8;
+                data[row_start + 2 * x] = p0 as u8;
+            }
             BitsPerPixel::B24 => {
                 let (p0, p1, p2) = match self.byte_order {
                     ImageOrder::LSBFirst => (pixel, pixel >> 8, pixel >> 16),
-                    ImageOrder::MSBFirst => (pixel >> 16, pixel >> 8, pixel)
+                    ImageOrder::MSBFirst => (pixel >> 16, pixel >> 8, pixel),
                 };
-                data[row_start + 3*x + 2] = p2 as u8;
-                data[row_start + 3*x + 1] = p1 as u8;
-                data[row_start + 3*x] = p0 as u8;
-            },
+                data[row_start + 3 * x + 2] = p2 as u8;
+                data[row_start + 3 * x + 1] = p1 as u8;
+                data[row_start + 3 * x] = p0 as u8;
+            }
             BitsPerPixel::B32 => {
                 let (p0, p1, p2, p3) = match self.byte_order {
                     ImageOrder::LSBFirst => (pixel, pixel >> 8, pixel >> 16, pixel >> 24),
-                    ImageOrder::MSBFirst => (pixel >> 24, pixel >> 16, pixel >> 8, pixel)
+                    ImageOrder::MSBFirst => (pixel >> 24, pixel >> 16, pixel >> 8, pixel),
                 };
-                data[row_start + 4*x + 3] = p3 as u8;
-                data[row_start + 4*x + 2] = p2 as u8;
-                data[row_start + 4*x + 1] = p1 as u8;
-                data[row_start + 4*x] = p0 as u8;
-            },
+                data[row_start + 4 * x + 3] = p3 as u8;
+                data[row_start + 4 * x + 2] = p2 as u8;
+                data[row_start + 4 * x + 1] = p1 as u8;
+                data[row_start + 4 * x] = p0 as u8;
+            }
         }
     }
 
@@ -612,7 +646,7 @@ impl<'a> Image<'a> {
             BitsPerPixel::B1 => {
                 let (byte, bit) = compute_depth_1_address(x, self.byte_order);
                 ((self.data[row_start + byte] >> bit) & 1).into()
-            },
+            }
             BitsPerPixel::B4 => {
                 let byte = u32::from(self.data[row_start + x / 2]);
                 let odd_x = x % 2 == 1;
@@ -621,41 +655,40 @@ impl<'a> Image<'a> {
                 } else {
                     byte & 0x0f
                 }
-            },
+            }
             BitsPerPixel::B8 => self.data[row_start + x].into(),
             BitsPerPixel::B16 => {
-                let p1 = u32::from(self.data[row_start + 2*x + 1]);
-                let p0 = u32::from(self.data[row_start + 2*x]);
+                let p1 = u32::from(self.data[row_start + 2 * x + 1]);
+                let p0 = u32::from(self.data[row_start + 2 * x]);
                 match self.byte_order {
                     ImageOrder::LSBFirst => p0 | (p1 << 8),
                     ImageOrder::MSBFirst => p1 | (p0 << 8),
                 }
-            },
+            }
             BitsPerPixel::B24 => {
-                let p2 = u32::from(self.data[row_start + 3*x + 2]);
-                let p1 = u32::from(self.data[row_start + 3*x + 1]);
-                let p0 = u32::from(self.data[row_start + 3*x]);
+                let p2 = u32::from(self.data[row_start + 3 * x + 2]);
+                let p1 = u32::from(self.data[row_start + 3 * x + 1]);
+                let p0 = u32::from(self.data[row_start + 3 * x]);
                 match self.byte_order {
                     ImageOrder::LSBFirst => p0 | (p1 << 8) | (p2 << 16),
                     ImageOrder::MSBFirst => p2 | (p1 << 8) | (p0 << 16),
                 }
-            },
+            }
             BitsPerPixel::B32 => {
-                let p3 = u32::from(self.data[row_start + 4*x + 3]);
-                let p2 = u32::from(self.data[row_start + 4*x + 2]);
-                let p1 = u32::from(self.data[row_start + 4*x + 1]);
-                let p0 = u32::from(self.data[row_start + 4*x]);
+                let p3 = u32::from(self.data[row_start + 4 * x + 3]);
+                let p2 = u32::from(self.data[row_start + 4 * x + 2]);
+                let p1 = u32::from(self.data[row_start + 4 * x + 1]);
+                let p0 = u32::from(self.data[row_start + 4 * x]);
                 match self.byte_order {
                     ImageOrder::LSBFirst => p0 | (p1 << 8) | (p2 << 16) | (p3 << 24),
                     ImageOrder::MSBFirst => p3 | (p2 << 8) | (p1 << 16) | (p0 << 24),
                 }
-            },
+            }
         }
     }
 }
 
-fn compute_depth_1_address(x: usize, order: ImageOrder) -> (usize, usize)
-{
+fn compute_depth_1_address(x: usize, order: ImageOrder) -> (usize, usize) {
     let bit = match order {
         ImageOrder::MSBFirst => 7 - x % 8,
         ImageOrder::LSBFirst => x % 8,
@@ -665,21 +698,38 @@ fn compute_depth_1_address(x: usize, order: ImageOrder) -> (usize, usize)
 
 #[cfg(test)]
 mod test_image {
+    use super::{BitsPerPixel, Image, ImageOrder, ParseError, ScanlinePad};
     use std::borrow::Cow;
-    use super::{Image, ScanlinePad, BitsPerPixel, ImageOrder, ParseError};
 
     #[test]
     fn test_new_too_short() {
         let depth = 16;
         // Due to Pad16, this image needs two bytes
-        let result = Image::new(1, 1, ScanlinePad::Pad16, depth, BitsPerPixel::B8, ImageOrder::MSBFirst, Cow::Owned(vec![0]));
+        let result = Image::new(
+            1,
+            1,
+            ScanlinePad::Pad16,
+            depth,
+            BitsPerPixel::B8,
+            ImageOrder::MSBFirst,
+            Cow::Owned(vec![0]),
+        );
         assert_eq!(result.unwrap_err(), ParseError::InsufficientData);
     }
 
     #[test]
     fn test_new() {
         let depth = 16;
-        let image = Image::new(2, 1, ScanlinePad::Pad16, depth, BitsPerPixel::B8, ImageOrder::MSBFirst, Cow::Owned(vec![42, 125])).unwrap();
+        let image = Image::new(
+            2,
+            1,
+            ScanlinePad::Pad16,
+            depth,
+            BitsPerPixel::B8,
+            ImageOrder::MSBFirst,
+            Cow::Owned(vec![42, 125]),
+        )
+        .unwrap();
         assert_eq!(image.width(), 2);
         assert_eq!(image.height(), 1);
         assert_eq!(image.scanline_pad(), ScanlinePad::Pad16);
@@ -691,7 +741,14 @@ mod test_image {
 
     #[test]
     fn put_pixel_depth1() {
-        let mut image = Image::allocate(16, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B1, ImageOrder::MSBFirst);
+        let mut image = Image::allocate(
+            16,
+            2,
+            ScanlinePad::Pad32,
+            1,
+            BitsPerPixel::B1,
+            ImageOrder::MSBFirst,
+        );
         for x in 0..8 {
             image.put_pixel(x, 0, 1);
         }
@@ -724,16 +781,33 @@ mod test_image {
 
     #[test]
     fn put_pixel_depth4() {
-        let mut image = Image::allocate(8, 2, ScanlinePad::Pad16, 1, BitsPerPixel::B4, ImageOrder::MSBFirst);
+        let mut image = Image::allocate(
+            8,
+            2,
+            ScanlinePad::Pad16,
+            1,
+            BitsPerPixel::B4,
+            ImageOrder::MSBFirst,
+        );
         for pos in 0..=0xf {
             image.put_pixel(pos % 8, pos / 8, pos.into());
         }
-        assert_eq!(image.data(), [0x10, 0x32, 0x54, 0x76, 0x98, 0xBA, 0xDC, 0xFE]);
+        assert_eq!(
+            image.data(),
+            [0x10, 0x32, 0x54, 0x76, 0x98, 0xBA, 0xDC, 0xFE]
+        );
     }
 
     #[test]
     fn put_pixel_depth8() {
-        let mut image = Image::allocate(256, 2, ScanlinePad::Pad8, 1, BitsPerPixel::B8, ImageOrder::MSBFirst);
+        let mut image = Image::allocate(
+            256,
+            2,
+            ScanlinePad::Pad8,
+            1,
+            BitsPerPixel::B8,
+            ImageOrder::MSBFirst,
+        );
         for x in 0..=0xff {
             image.put_pixel(x, 0, x.into());
         }
@@ -747,10 +821,18 @@ mod test_image {
 
     #[test]
     fn put_pixel_depth16() {
-        let mut image = Image::allocate(5, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B16, ImageOrder::MSBFirst);
+        let mut image = Image::allocate(
+            5,
+            2,
+            ScanlinePad::Pad32,
+            1,
+            BitsPerPixel::B16,
+            ImageOrder::MSBFirst,
+        );
         image.put_pixel(0, 0, 0xAB_36_18_F8);
         image.put_pixel(4, 0, 0x12_34_56_78);
         image.put_pixel(4, 1, 0xFE_DC_BA_98);
+        #[rustfmt::skip]
         let expected = [
             // First row
             0x18, 0xF8, 0, 0, 0, 0, 0, 0, 0x56, 0x78,
@@ -766,10 +848,18 @@ mod test_image {
 
     #[test]
     fn put_pixel_depth32() {
-        let mut image = Image::allocate(2, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B32, ImageOrder::MSBFirst);
+        let mut image = Image::allocate(
+            2,
+            2,
+            ScanlinePad::Pad32,
+            1,
+            BitsPerPixel::B32,
+            ImageOrder::MSBFirst,
+        );
         image.put_pixel(0, 0, 0xAB_36_18_F8);
         image.put_pixel(1, 0, 0x12_34_56_78);
         image.put_pixel(1, 1, 0xFE_DC_BA_98);
+        #[rustfmt::skip]
         let expected = [
             // First row
             0xAB, 0x36, 0x18, 0xF8, 0x12, 0x34, 0x56, 0x78,
@@ -781,7 +871,16 @@ mod test_image {
 
     #[test]
     fn get_pixel_depth1() {
-        let image = Image::new(16, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B1, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        let image = Image::new(
+            16,
+            2,
+            ScanlinePad::Pad32,
+            1,
+            BitsPerPixel::B1,
+            ImageOrder::MSBFirst,
+            Cow::Borrowed(&DATA),
+        )
+        .unwrap();
         assert_eq!(1, image.get_pixel(0, 0));
         assert_eq!(1, image.get_pixel(10, 0));
         assert_eq!(0, image.get_pixel(15, 0));
@@ -792,7 +891,16 @@ mod test_image {
 
     #[test]
     fn get_pixel_depth4() {
-        let image = Image::new(16, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B4, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        let image = Image::new(
+            16,
+            2,
+            ScanlinePad::Pad32,
+            1,
+            BitsPerPixel::B4,
+            ImageOrder::MSBFirst,
+            Cow::Borrowed(&DATA),
+        )
+        .unwrap();
         assert_eq!(0xB, image.get_pixel(0, 0));
         assert_eq!(0x4, image.get_pixel(10, 0));
         assert_eq!(0x7, image.get_pixel(15, 0));
@@ -803,7 +911,16 @@ mod test_image {
 
     #[test]
     fn get_pixel_depth8() {
-        let image = Image::new(3, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B8, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        let image = Image::new(
+            3,
+            2,
+            ScanlinePad::Pad32,
+            1,
+            BitsPerPixel::B8,
+            ImageOrder::MSBFirst,
+            Cow::Borrowed(&DATA),
+        )
+        .unwrap();
         assert_eq!(0xAB, image.get_pixel(0, 0));
         assert_eq!(0x36, image.get_pixel(1, 0));
         assert_eq!(0x18, image.get_pixel(2, 0));
@@ -814,7 +931,16 @@ mod test_image {
 
     #[test]
     fn get_pixel_depth16() {
-        let image = Image::new(3, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B16, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        let image = Image::new(
+            3,
+            2,
+            ScanlinePad::Pad32,
+            1,
+            BitsPerPixel::B16,
+            ImageOrder::MSBFirst,
+            Cow::Borrowed(&DATA),
+        )
+        .unwrap();
         assert_eq!(0xAB36, image.get_pixel(0, 0));
         assert_eq!(0x18F8, image.get_pixel(1, 0));
         assert_eq!(0x1234, image.get_pixel(2, 0));
@@ -825,7 +951,16 @@ mod test_image {
 
     #[test]
     fn get_pixel_depth32() {
-        let image = Image::new(2, 2, ScanlinePad::Pad32, 1, BitsPerPixel::B32, ImageOrder::MSBFirst, Cow::Borrowed(&DATA)).unwrap();
+        let image = Image::new(
+            2,
+            2,
+            ScanlinePad::Pad32,
+            1,
+            BitsPerPixel::B32,
+            ImageOrder::MSBFirst,
+            Cow::Borrowed(&DATA),
+        )
+        .unwrap();
         assert_eq!(0xAB36_18F8, image.get_pixel(0, 0));
         assert_eq!(0x1234_5678, image.get_pixel(1, 0));
         assert_eq!(0x0000_0000, image.get_pixel(0, 1));
@@ -833,7 +968,7 @@ mod test_image {
     }
 
     static DATA: [u8; 16] = [
-        0xAB, 0x36, 0x18, 0xF8, 0x12, 0x34, 0x56, 0x78,
-        0x00, 0x00, 0x00, 0x00, 0xFE, 0xDC, 0xBA, 0x98,
+        0xAB, 0x36, 0x18, 0xF8, 0x12, 0x34, 0x56, 0x78, 0x00, 0x00, 0x00, 0x00, 0xFE, 0xDC, 0xBA,
+        0x98,
     ];
 }

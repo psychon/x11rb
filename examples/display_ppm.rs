@@ -1,8 +1,11 @@
 use x11rb::connection::Connection;
 use x11rb::errors::ReplyOrIdError;
 use x11rb::image::Image;
+use x11rb::protocol::xproto::{
+    AtomEnum, ConnectionExt, CreateGCAux, CreateWindowAux, PropMode, Screen, VisualClass, Visualid,
+    Visualtype, Window, WindowClass,
+};
 use x11rb::protocol::Event;
-use x11rb::protocol::xproto::{AtomEnum, CreateWindowAux, ConnectionExt, CreateGCAux, PropMode, Screen, VisualClass, Visualid, Visualtype, Window, WindowClass};
 use x11rb::wrapper::ConnectionExt as _;
 
 const DEPTH: u8 = 24;
@@ -15,12 +18,21 @@ x11rb::atom_manager! {
 }
 
 /// Create a window with the given image as background.
-fn create_window(conn: &impl Connection, screen: &Screen, atoms: &Atoms, image: &Image) -> Result<Window, ReplyOrIdError> {
+fn create_window(
+    conn: &impl Connection,
+    screen: &Screen,
+    atoms: &Atoms,
+    image: &Image,
+) -> Result<Window, ReplyOrIdError> {
     let win_id = conn.generate_id()?;
     let pixmap_id = conn.generate_id()?;
     let gc_id = conn.generate_id()?;
 
-    conn.create_gc(gc_id, screen.root, &CreateGCAux::default().graphics_exposures(0))?;
+    conn.create_gc(
+        gc_id,
+        screen.root,
+        &CreateGCAux::default().graphics_exposures(0),
+    )?;
     conn.create_pixmap(DEPTH, pixmap_id, screen.root, image.width(), image.height())?;
     image.put(conn, pixmap_id, gc_id, 0, 0)?;
     conn.free_gc(gc_id)?;
@@ -36,8 +48,7 @@ fn create_window(conn: &impl Connection, screen: &Screen, atoms: &Atoms, image: 
         0,
         WindowClass::InputOutput,
         0,
-        &CreateWindowAux::default()
-            .background_pixmap(pixmap_id)
+        &CreateWindowAux::default().background_pixmap(pixmap_id),
     )?;
     conn.free_pixmap(pixmap_id)?;
 
@@ -60,10 +71,7 @@ fn check_visual(screen: &Screen, id: Visualid) {
         .allowed_depths
         .iter()
         .find(|depth| depth.depth == DEPTH)
-        .and_then(|depth| depth.visuals
-             .iter()
-             .find(|depth| depth.visual_id == id)
-         );
+        .and_then(|depth| depth.visuals.iter().find(|depth| depth.visual_id == id));
     let visual_type = match visual_type {
         Some(visual_type) => visual_type,
         None => {
@@ -73,9 +81,12 @@ fn check_visual(screen: &Screen, id: Visualid) {
     };
     // Now check that the pixels have red/green/blue components that we can set directly.
     match visual_type.class {
-        VisualClass::TrueColor | VisualClass::DirectColor => {},
+        VisualClass::TrueColor | VisualClass::DirectColor => {}
         _ => {
-            eprintln!("The root visual is not true / direct color, but {:?}", visual_type);
+            eprintln!(
+                "The root visual is not true / direct color, but {:?}",
+                visual_type,
+            );
             std::process::exit(1);
         }
     }
@@ -87,7 +98,7 @@ fn check_visual(screen: &Screen, id: Visualid) {
             green_mask: 0x00ff00,
             blue_mask: 0x0000ff,
             ..
-        } => {},
+        } => {}
         _ => {
             eprintln!("Unsupported visual type {:?}", visual_type);
             std::process::exit(1);
@@ -99,7 +110,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Load the image
     let image = match std::env::args_os().nth(1) {
         None => {
-            eprintln!("Expected a file name of a PPM as argument, using a built-in default image instead");
+            eprintln!(
+                "Expected a file name of a PPM as argument, using a built-in default image instead"
+            );
             ppm_parser::parse_ppm_bytes(&BUILTIN_IMAGE)?
         }
         Some(arg) => ppm_parser::parse_ppm_file(&arg)?,
@@ -130,7 +143,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         match event {
             Event::ClientMessage(event) => {
                 let data = event.data.as_data32();
-                if event.format == 32 && event.window == win_id && data[0] == atoms.WM_DELETE_WINDOW {
+                if event.format == 32 && event.window == win_id && data[0] == atoms.WM_DELETE_WINDOW
+                {
                     println!("Window was asked to close");
                     return Ok(());
                 }
@@ -142,8 +156,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 mod ppm_parser {
-    use std::io::{Error as IOError, ErrorKind, Read, Result as IOResult};
     use std::ffi::OsStr;
+    use std::io::{Error as IOError, ErrorKind, Read, Result as IOResult};
 
     use x11rb::image::{BitsPerPixel, Image, ScanlinePad};
     use x11rb::protocol::xproto::ImageOrder;
@@ -158,7 +172,7 @@ mod ppm_parser {
         loop {
             input.read_exact(&mut byte)?;
             if byte[0] == b'\n' {
-                return Ok(())
+                return Ok(());
             }
         }
     }
@@ -171,7 +185,7 @@ mod ppm_parser {
         loop {
             input.read_exact(&mut byte)?;
             match byte[0] {
-                b' ' | b'\t' | b'\r' => {},
+                b' ' | b'\t' | b'\r' => {}
                 // Comment, skip a whole line
                 b'#' => read_to_end_of_line(input)?,
                 _ => break,
@@ -186,7 +200,8 @@ mod ppm_parser {
         let mut result: u16 = 0;
         while byte[0].is_ascii_digit() {
             let value = u16::from(byte[0] - b'0');
-            result = result.checked_mul(10)
+            result = result
+                .checked_mul(10)
                 .map(|result| result + value)
                 .ok_or_else(|| make_io_error("Overflow while parsing number"))?;
 
@@ -213,11 +228,21 @@ mod ppm_parser {
         let max = read_decimal(input)?;
 
         if max != 255 {
-            eprintln!("Image declares a max pixel value of {}, but I expected 255.", max);
+            eprintln!(
+                "Image declares a max pixel value of {}, but I expected 255.",
+                max,
+            );
             eprintln!("Something will happen...?");
         }
 
-        let mut image = Image::allocate(width, height, ScanlinePad::Pad8, 24, BitsPerPixel::B24, ImageOrder::MSBFirst);
+        let mut image = Image::allocate(
+            width,
+            height,
+            ScanlinePad::Pad8,
+            24,
+            BitsPerPixel::B24,
+            ImageOrder::MSBFirst,
+        );
         input.read_exact(image.data_mut())?;
 
         Ok(image)
@@ -238,6 +263,7 @@ mod ppm_parser {
 }
 
 // Simple builtin PPM that is used if none is provided on the command line
+#[rustfmt::skip]
 const BUILTIN_IMAGE: [u8; 35] = [
     b'P', b'6', b'\n',
     // width and height
