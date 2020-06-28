@@ -131,7 +131,7 @@ fn main() -> IOResult<()> {
         spawn_command_line(":4");
         loop {
             let (socket, _addr) = listener.accept().await?;
-            Task::spawn(handle_client(socket)).detach();
+            Task::local(handle_client(socket)).detach();
         }
     })
 }

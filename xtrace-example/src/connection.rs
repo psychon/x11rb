@@ -1,8 +1,8 @@
 use futures_io::{AsyncRead, AsyncWrite};
+use std::cell::RefCell;
 use std::convert::{TryFrom, TryInto};
 use std::io::Result as IOResult;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Mutex;
 
 use x11rb::protocol::xproto::GE_GENERIC_EVENT;
 
@@ -14,7 +14,7 @@ use crate::forwarder::forward_with_callback;
 pub struct Connection {
     read_client_setup: AtomicBool,
     read_server_setup: AtomicBool,
-    connection_inner: Mutex<ConnectionInner>,
+    connection_inner: RefCell<ConnectionInner>,
 }
 
 impl Connection {
@@ -60,7 +60,7 @@ impl Connection {
                 // Need more data
                 Some(length_field - packet.len())
             } else {
-                self.connection_inner.lock().unwrap().client_request(packet);
+                self.connection_inner.borrow_mut().client_request(packet);
                 None
             }
         } else {
@@ -80,7 +80,7 @@ impl Connection {
             if packet.len() < packet_length {
                 Some(packet_length - packet.len())
             } else {
-                self.connection_inner.lock().unwrap().client_setup(packet);
+                self.connection_inner.borrow_mut().client_setup(packet);
                 // Got complete setup request
                 self.read_client_setup.store(true, Ordering::Relaxed);
                 None
@@ -122,7 +122,7 @@ impl Connection {
                 Some(packet_length - packet.len())
             } else {
                 // Got a full packet
-                let mut inner = self.connection_inner.lock().unwrap();
+                let mut inner = self.connection_inner.borrow_mut();
                 match packet[0] {
                     ERROR => inner.server_error(packet),
                     REPLY => inner.server_reply(packet),
@@ -144,7 +144,7 @@ impl Connection {
                 Some(length - packet.len())
             } else {
                 // Got the complete setup
-                self.connection_inner.lock().unwrap().server_setup(packet);
+                self.connection_inner.borrow_mut().server_setup(packet);
                 self.read_server_setup.store(true, Ordering::Relaxed);
                 None
             }
