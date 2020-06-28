@@ -9,6 +9,7 @@ use x11rb::protocol::xproto::GE_GENERIC_EVENT;
 use crate::forwarder::forward_with_callback;
 use crate::connection_inner::ConnectionInner;
 
+/// A forwarded connection between an X11 client and X11 server.
 #[derive(Debug, Default)]
 pub struct Connection {
     read_client_setup: AtomicBool,
@@ -17,11 +18,6 @@ pub struct Connection {
 }
 
 impl Connection {
-    /// Create a new instance of this struct.
-    pub fn new() -> Self {
-        Default::default()
-    }
-
     /// Handle forwarding the client's data to the server.
     pub async fn forward_client(
         &self,

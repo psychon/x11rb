@@ -132,7 +132,7 @@ impl ConnectionInner {
 
             // Remove a pending request if it failed
             if inner.pending_replies.front().map(|r| r.seqno) == Some(err.wire_sequence_number()) {
-                inner.pending_replies.pop_front();
+                let _ = inner.pending_replies.pop_front();
             }
 
             Ok(())
