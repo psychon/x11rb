@@ -190,6 +190,12 @@ impl ConnectionInner {
                         inner.ext_info.add_extension(extension, info);
                     }
                 }
+            } else if let Reply::ListFontsWithInfo(reply) = reply {
+                // There is one request that can generate multiple replies: ListFontsWithInfo. Mark it
+                // as pending again if it is not the last reply. This makes 'xlsfonts -l' work.
+                if !reply.name.is_empty() {
+                    inner.pending_replies.push_front(request);
+                }
             }
 
             Ok(())
