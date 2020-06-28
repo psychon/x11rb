@@ -1,5 +1,5 @@
 use x11rb::errors::ParseError;
-use x11rb::protocol::{Error, Request, xproto};
+use x11rb::protocol::{Error, Event, Request, xproto};
 use x11rb::x11_utils::{BigRequests, ExtInfoProvider, ExtensionInformation, TryParse, parse_request_header};
 
 fn print_obj_remaining(obj: &impl std::fmt::Debug, data: &[u8], remaining: &[u8]) {
@@ -106,7 +106,14 @@ impl ConnectionInner {
 
     /// Handle an X11 event sent by the server
     pub fn server_event(&mut self, packet: &[u8]) {
-        let _ = packet;
+        fn do_parse(inner: &mut ConnectionInner, packet: &[u8]) -> Result<(), ParseError> {
+            let err = Event::parse(packet, &inner.ext_info)?;
+            println!("server: {:?}", err);
+            Ok(())
+        }
+        if let Err(e) = do_parse(self, packet) {
+            eprintln!("Error while parsing an X11 event: {:?}", e);
+        }
     }
 
     /// Handle a reply sent by the server
