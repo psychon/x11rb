@@ -84,7 +84,6 @@ impl Connection {
             if packet.len() < packet_length {
                 Some(packet_length - packet.len())
             } else {
-                println!("TODO: Check that the byte order is correct: {:?}", packet[0]);
                 self.connection_inner.lock().unwrap().client_setup(packet);
                 // Got complete setup request
                 self.read_client_setup.store(true, Ordering::Relaxed);
