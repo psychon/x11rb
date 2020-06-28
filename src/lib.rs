@@ -98,7 +98,6 @@
 #![forbid(
     missing_copy_implementations,
     missing_debug_implementations,
-    //missing_docs,
     private_doc_tests,
     rust_2018_idioms,
     //single_use_lifetimes,
@@ -110,9 +109,13 @@
     clippy::cast_lossless,
     clippy::needless_pass_by_value,
 )]
+// A list of lints that are only #![deny] and not the stronger #![forbid]. Each one has a comment
+// explaining why it gets the weaker treatment.
 #![deny(
     // #[derive] generates an #[allow] for this
     unused_qualifications,
+    // Not everything in x11rb::protocol has doc comments
+    missing_docs,
 )]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 
@@ -133,6 +136,7 @@ pub mod properties;
 pub mod rust_connection;
 pub mod wrapper;
 #[rustfmt::skip]
+#[allow(missing_docs)]
 pub mod protocol;
 
 use connection::Connection;
