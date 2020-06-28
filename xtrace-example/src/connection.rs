@@ -47,7 +47,7 @@ impl Connection {
     fn parse_client_packet(&self, packet: &[u8]) -> Option<usize> {
         if self.read_client_setup.load(Ordering::Relaxed) {
             let length_field = match packet.get(2..4) {
-                None => return Some(packet.len() - 4),
+                None => return Some(4 - packet.len()),
                 Some(length_field) => u16::from_ne_bytes(length_field.try_into().unwrap()),
             };
             let length_field = if length_field != 0 {
@@ -72,15 +72,24 @@ impl Connection {
             if packet.len() < minimum_length {
                 return Some(minimum_length - packet.len());
             }
-            println!("TODO: Check that the byte order is correct: {:?}", packet[0]);
-            // There is no simple length field to use, so we let the inner handle this.
-            self.connection_inner.lock().unwrap().client_setup(packet);
-            todo!("Figure out request length");
-            if false {
+            // This one is not so trivial to parse. There is no "summary" length field, but two
+            // individual ones plus padding.
+            let length_field1 = usize::from(u16::from_ne_bytes(packet[6..8].try_into().unwrap()));
+            let length_field2 = usize::from(u16::from_ne_bytes(packet[8..10].try_into().unwrap()));
+            // Round up to multiple of 4;
+            let length_field1 = (length_field1 + 3) / 4 * 4;
+            let length_field2 = (length_field2 + 3) / 4 * 4;
+
+            let packet_length = minimum_length + length_field1 + length_field2;
+            if packet.len() < packet_length {
+                Some(packet_length - packet.len())
+            } else {
+                println!("TODO: Check that the byte order is correct: {:?}", packet[0]);
+                self.connection_inner.lock().unwrap().client_setup(packet);
                 // Got complete setup request
                 self.read_client_setup.store(true, Ordering::Relaxed);
+                None
             }
-            None
         }
     }
 
@@ -128,13 +137,13 @@ impl Connection {
             }
         } else {
             // Get the length field of the server setup
-            let length_field = match packet.get(7..8) {
+            let length_field = match packet.get(6..8) {
                 // Need more data
                 None => return Some(8 - packet.len()),
                 Some(field) => u16::from_ne_bytes(field.try_into().unwrap()),
             };
             let length_field = usize::from(length_field);
-            let length = 40 + length_field * 4;
+            let length = 8 + length_field * 4;
             if packet.len() < length {
                 // Need more data
                 Some(length - packet.len())
