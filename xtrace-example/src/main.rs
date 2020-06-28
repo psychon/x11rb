@@ -4,6 +4,7 @@ use std::os::unix::net::UnixStream;
 use smol::{Async, Task};
 
 pub(crate) mod connection;
+pub(crate) mod connection_inner;
 pub(crate) mod forwarder;
 
 async fn handle_client_impl(client: Async<TcpStream>) -> IOResult<()> {
