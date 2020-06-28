@@ -5,23 +5,14 @@ use x11rb::x11_utils::{BigRequests, ExtInfoProvider, ExtensionInformation, TryPa
 use std::collections::VecDeque;
 use std::convert::TryInto;
 
-fn print_obj_remaining(obj: &impl std::fmt::Debug, data: &[u8], remaining: &[u8]) {
-    println!("{:?}", obj);
-    if !remaining.is_empty() {
-        println!("Left-over data while parsing:");
-        println!("Input:    {:x?}", data);
-        println!("Remaining {:x?}", remaining);
-    }
-}
-
 fn print_parse_return<T: TryParse + std::fmt::Debug>(data: &[u8]) -> Result<T, ParseError> {
     match T::try_parse(data) {
         Err(e) => {
             println!("Error while parsing: {:?}", e);
             Err(e)
         }
-        Ok((obj, remaining)) => {
-            print_obj_remaining(&obj, data, remaining);
+        Ok((obj, _remaining)) => {
+            println!("{:?}", obj);
             Ok(obj)
         }
     }
@@ -92,8 +83,6 @@ impl ConnectionInner {
 
             let (header, remaining) = parse_request_header(packet, BigRequests::Enabled)?;
             let request = Request::parse(header, remaining, &mut Vec::new(), &inner.ext_info)?;
-            // TODO: Can we get some "remaining" data somehow?
-            //print_obj_remaining(&request, packet, remaining);
             println!("client ({}): {:?}", seqno, request);
 
             // Is this a QueryExtension?
@@ -170,9 +159,8 @@ impl ConnectionInner {
                 println!("Expected reply with seqno={}, but got seqno={}", request.seqno, seqno);
             }
 
-            let (reply, remaining) = (request.parser)(packet, &mut Vec::new())?;
-            print!("server ({}): ", seqno);
-            print_obj_remaining(&reply, packet, remaining);
+            let (reply, _remaining) = (request.parser)(packet, &mut Vec::new())?;
+            println!("server ({}): {:?}", seqno, &reply);
 
             if let Some(extension) = request.queried_extension {
                 if let Reply::QueryExtension(reply) = reply {
