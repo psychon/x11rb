@@ -1,6 +1,6 @@
-use std::io::Result as IOResult;
 use futures_io::{AsyncRead, AsyncWrite};
 use futures_util::{AsyncReadExt, AsyncWriteExt};
+use std::io::Result as IOResult;
 
 /// Forward data between a reader and a writer, calling a callback on the data.
 ///
@@ -11,10 +11,10 @@ use futures_util::{AsyncReadExt, AsyncWriteExt};
 pub async fn forward_with_callback<F>(
     mut read: impl AsyncRead + Unpin,
     mut write: impl AsyncWrite + Unpin,
-    callback: F
+    callback: F,
 ) -> IOResult<()>
 where
-    F: Fn(&[u8]) -> Option<usize>
+    F: Fn(&[u8]) -> Option<usize>,
 {
     let mut buffer = Vec::new();
     loop {

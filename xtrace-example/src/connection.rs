@@ -1,13 +1,13 @@
-use std::convert::{TryInto, TryFrom};
-use std::io::Result as IOResult;
-use std::sync::Mutex;
-use std::sync::atomic::{AtomicBool, Ordering};
 use futures_io::{AsyncRead, AsyncWrite};
+use std::convert::{TryFrom, TryInto};
+use std::io::Result as IOResult;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
 
 use x11rb::protocol::xproto::GE_GENERIC_EVENT;
 
-use crate::forwarder::forward_with_callback;
 use crate::connection_inner::ConnectionInner;
+use crate::forwarder::forward_with_callback;
 
 /// A forwarded connection between an X11 client and X11 server.
 #[derive(Debug, Default)]

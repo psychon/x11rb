@@ -1,6 +1,9 @@
 use x11rb::errors::ParseError;
-use x11rb::protocol::{Error, Event, Reply, Request, xproto};
-use x11rb::x11_utils::{BigRequests, ExtInfoProvider, ExtensionInformation, TryParse, ReplyParsingFunction, parse_request_header};
+use x11rb::protocol::{xproto, Error, Event, Reply, Request};
+use x11rb::x11_utils::{
+    parse_request_header, BigRequests, ExtInfoProvider, ExtensionInformation, ReplyParsingFunction,
+    TryParse,
+};
 
 use std::collections::VecDeque;
 use std::convert::TryInto;
@@ -73,11 +76,8 @@ impl ConnectionInner {
                     if expected != actual {
                         println!(
                             "Unexpected protocol version: {}.{} != {}.{}",
-                             expected.0,
-                             expected.1,
-                             actual.0,
-                             actual.1,
-                         );
+                            expected.0, expected.1, actual.0, actual.1,
+                        );
                     }
                 }
             }
@@ -102,7 +102,7 @@ impl ConnectionInner {
                     Ok(name) => {
                         println!("Extension name: {}", name);
                         Some(name)
-                    },
+                    }
                     Err(e) => {
                         println!("Extension name is not utf8: {:?}", e);
                         None
@@ -114,7 +114,11 @@ impl ConnectionInner {
 
             // Does the request have a reply? If so, remember it.
             if let Some(parser) = request.reply_parser() {
-                inner.pending_replies.push_back(PendingReply { seqno, parser, queried_extension });
+                inner.pending_replies.push_back(PendingReply {
+                    seqno,
+                    parser,
+                    queried_extension,
+                });
             }
 
             Ok(())
@@ -147,7 +151,11 @@ impl ConnectionInner {
     pub fn server_event(&mut self, packet: &[u8]) {
         fn do_parse(inner: &mut ConnectionInner, packet: &[u8]) -> Result<(), ParseError> {
             let event = Event::parse(packet, &inner.ext_info)?;
-            println!("server ({}): {:?}", event.wire_sequence_number().unwrap_or(0), event);
+            println!(
+                "server ({}): {:?}",
+                event.wire_sequence_number().unwrap_or(0),
+                event,
+            );
             Ok(())
         }
         if let Err(e) = do_parse(self, packet) {
@@ -162,15 +170,18 @@ impl ConnectionInner {
             let request = match inner.pending_replies.pop_front() {
                 None => {
                     println!("server: Got unexpected reply {:?}", packet);
-                    return Ok(())
-                },
+                    return Ok(());
+                }
                 Some(request) => request,
             };
 
             // Sanity check: The sequence number must match the expected one.
             let seqno = u16::from_ne_bytes(packet[2..4].try_into().unwrap());
             if request.seqno != seqno {
-                println!("Expected reply with seqno={}, but got seqno={}", request.seqno, seqno);
+                println!(
+                    "Expected reply with seqno={}, but got seqno={}",
+                    request.seqno, seqno,
+                );
             }
 
             // Actually parse the reply

@@ -42,17 +42,17 @@
     trivial_casts,
     trivial_numeric_casts,
     unused_import_braces,
-    unused_results,
+    unused_results
 )]
 #![deny(
     // #[derive] generates an #[allow] for this
     unused_qualifications,
 )]
 
+use smol::{Async, Task};
 use std::io::Result as IOResult;
 use std::net::{TcpListener, TcpStream};
 use std::os::unix::net::UnixStream;
-use smol::{Async, Task};
 
 pub(crate) mod connection;
 pub(crate) mod connection_inner;
@@ -110,16 +110,17 @@ fn spawn_command_line(display: &str) {
     std::env::set_var("DISPLAY", display);
     let mut args = std::env::args_os().skip(1);
     if let Some(command) = args.next() {
-        let command = std::process::Command::new(command)
-            .args(args)
-            .spawn();
+        let command = std::process::Command::new(command).args(args).spawn();
         match command {
             Ok(child) => println!("Started child process with ID {}", child.id()),
             Err(e) => eprintln!("Error while starting child process: {}", e),
         }
     } else {
         println!("You can now start programs with DISPLAY=\"{}\"", display);
-        println!("Hint: Alternatively, you could run {} [your-command]", std::env::args().next().unwrap());
+        println!(
+            "Hint: Alternatively, you could run {} [your-command]",
+            std::env::args().next().unwrap(),
+        );
     }
 }
 
