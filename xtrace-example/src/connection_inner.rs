@@ -5,6 +5,9 @@ use x11rb::x11_utils::{BigRequests, ExtInfoProvider, ExtensionInformation, TryPa
 use std::collections::VecDeque;
 use std::convert::TryInto;
 
+/// Parse some data and print the resulting object.
+///
+/// The result of parsing is returned, but output is already generated on both success and error.
 fn print_parse_return<T: TryParse + std::fmt::Debug>(data: &[u8]) -> Result<T, ParseError> {
     match T::try_parse(data) {
         Err(e) => {
@@ -18,14 +21,22 @@ fn print_parse_return<T: TryParse + std::fmt::Debug>(data: &[u8]) -> Result<T, P
     }
 }
 
+/// Parse some data and print the resulting object.
 fn print_parse<T: TryParse + std::fmt::Debug>(data: &[u8]) {
     let _ = print_parse_return::<T>(data);
 }
 
+/// Common state of an X11 connection
 #[derive(Debug, Default)]
 pub struct ConnectionInner {
+    /// Information about present extensions. Entries are added when a reply to a `QueryExtension`
+    /// request comes in.
     ext_info: ExtInfo,
+
+    /// The number of requests that the client already sent.
     next_client_request: u16,
+
+    /// Requests which were not yet answered by the X11 server.
     pending_replies: VecDeque<PendingReply>,
 }
 
@@ -103,7 +114,7 @@ impl ConnectionInner {
 
             // Does the request have a reply? If so, remember it.
             if let Some(parser) = request.reply_parser() {
-                inner.pending_replies.push_back(PendingReply::new(seqno, parser, queried_extension));
+                inner.pending_replies.push_back(PendingReply { seqno, parser, queried_extension });
             }
 
             Ok(())
@@ -120,7 +131,8 @@ impl ConnectionInner {
             println!("server ({}): {:?}", err.wire_sequence_number(), err);
 
             // Remove a pending request if it failed
-            if inner.pending_replies.front().map(|r| r.seqno) == Some(err.wire_sequence_number()) {
+            let next_pending = inner.pending_replies.front().map(|r| r.seqno);
+            if next_pending == Some(err.wire_sequence_number()) {
                 let _ = inner.pending_replies.pop_front();
             }
 
@@ -146,6 +158,7 @@ impl ConnectionInner {
     /// Handle a reply sent by the server
     pub fn server_reply(&mut self, packet: &[u8]) {
         fn do_parse(inner: &mut ConnectionInner, packet: &[u8]) -> Result<(), ParseError> {
+            // Figure out information about the request that is being answered.
             let request = match inner.pending_replies.pop_front() {
                 None => {
                     println!("server: Got unexpected reply {:?}", packet);
@@ -154,14 +167,18 @@ impl ConnectionInner {
                 Some(request) => request,
             };
 
+            // Sanity check: The sequence number must match the expected one.
             let seqno = u16::from_ne_bytes(packet[2..4].try_into().unwrap());
             if request.seqno != seqno {
                 println!("Expected reply with seqno={}, but got seqno={}", request.seqno, seqno);
             }
 
+            // Actually parse the reply
             let (reply, _remaining) = (request.parser)(packet, &mut Vec::new())?;
             println!("server ({}): {:?}", seqno, &reply);
 
+            // If it is a reply to a QueryExtension request and the extension is present, update
+            // our state (add the extension to our ext_info).
             if let Some(extension) = request.queried_extension {
                 if let Reply::QueryExtension(reply) = reply {
                     if reply.present {
@@ -183,9 +200,15 @@ impl ConnectionInner {
     }
 }
 
+/// Representation of a request that was not yet answered.
 struct PendingReply {
+    /// The sequence number of the request.
     seqno: u16,
+
+    /// A function that can parse the reply.
     parser: ReplyParsingFunction,
+
+    /// For QueryExtension requests: The extension that was queried
     queried_extension: Option<String>,
 }
 
@@ -199,15 +222,10 @@ impl std::fmt::Debug for PendingReply {
     }
 }
 
-impl PendingReply {
-    fn new(seqno: u16, parser: ReplyParsingFunction, queried_extension: Option<String>) -> Self {
-        Self { seqno, parser, queried_extension }
-    }
-}
-
-/// Information about known extensions
+/// Information about known extensions.
 #[derive(Debug, Default)]
 struct ExtInfo {
+    /// A list of extension names and their information
     exts: Vec<(String, ExtensionInformation)>,
 }
 
