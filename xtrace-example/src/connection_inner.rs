@@ -1,6 +1,15 @@
 use x11rb::errors::ParseError;
-use x11rb::protocol::xproto;
-use x11rb::x11_utils::TryParse;
+use x11rb::protocol::{Request, xproto};
+use x11rb::x11_utils::{BigRequests, ExtInfoProvider, ExtensionInformation, TryParse, parse_request_header};
+
+fn print_obj_remaining(obj: &impl std::fmt::Debug, data: &[u8], remaining: &[u8]) {
+    println!("{:?}", obj);
+    if !remaining.is_empty() {
+        println!("Left-over data while parsing:");
+        println!("Input:    {:x?}", data);
+        println!("Remaining {:x?}", remaining);
+    }
+}
 
 fn print_parse_return<T: TryParse + std::fmt::Debug>(data: &[u8]) -> Result<T, ParseError> {
     match T::try_parse(data) {
@@ -9,12 +18,7 @@ fn print_parse_return<T: TryParse + std::fmt::Debug>(data: &[u8]) -> Result<T, P
             Err(e)
         }
         Ok((obj, remaining)) => {
-            println!("{:?}", obj);
-            if !remaining.is_empty() {
-                println!("Left-over data while parsing:");
-                println!("Input:    {:x?}", data);
-                println!("Remaining {:x?}", remaining);
-            }
+            print_obj_remaining(&obj, data, remaining);
             Ok(obj)
         }
     }
@@ -26,6 +30,7 @@ fn print_parse<T: TryParse + std::fmt::Debug>(data: &[u8]) {
 
 #[derive(Debug, Default)]
 pub struct ConnectionInner {
+    ext_info: ExtInfo,
 }
 
 impl ConnectionInner {
@@ -73,7 +78,17 @@ impl ConnectionInner {
 
     /// Handle a request sent by the client
     pub fn client_request(&mut self, packet: &[u8]) {
-        let _ = packet;
+        fn do_parse(inner: &mut ConnectionInner, packet: &[u8]) -> Result<(), ParseError> {
+            let (header, remaining) = parse_request_header(packet, BigRequests::Enabled)?;
+            let request = Request::parse(header, remaining, &mut Vec::new(), &inner.ext_info)?;
+            // TODO: Can we get some "remaining" data somehow?
+            //print_obj_remaining(&request, packet, remaining);
+            println!("{:?}", request);
+            Ok(())
+        }
+        if let Err(e) = do_parse(self, packet) {
+            eprintln!("Error while parsing a client request: {:?}", e);
+        }
     }
 
     /// Handle an X11 error sent by the server
@@ -89,5 +104,41 @@ impl ConnectionInner {
     /// Handle a reply sent by the server
     pub fn server_reply(&mut self, packet: &[u8]) {
         let _ = packet;
+    }
+}
+
+#[derive(Clone, Default, Debug)]
+struct ExtInfo {
+    exts: Vec<(String, ExtensionInformation)>,
+}
+
+impl ExtInfo {
+    fn add_extension(&mut self, name: String, info: ExtensionInformation) {
+        self.exts.push((name, info))
+    }
+}
+
+impl ExtInfoProvider for ExtInfo {
+    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&str, ExtensionInformation)> {
+        self.exts
+            .iter()
+            .find(|(_, ext)| ext.major_opcode == major_opcode)
+            .map(|(s, ext)| (s.as_ref(), *ext))
+    }
+
+    fn get_from_event_code(&self, event_code: u8) -> Option<(&str, ExtensionInformation)> {
+        self.exts
+            .iter()
+            .filter(|(_, ext)| ext.first_event <= event_code)
+            .max_by_key(|(_, ext)| ext.first_event)
+            .map(|(s, ext)| (s.as_ref(), *ext))
+    }
+
+    fn get_from_error_code(&self, error_code: u8) -> Option<(&str, ExtensionInformation)> {
+        self.exts
+            .iter()
+            .filter(|(_, ext)| ext.first_error <= error_code)
+            .max_by_key(|(_, ext)| ext.first_event)
+            .map(|(s, ext)| (s.as_ref(), *ext))
     }
 }
