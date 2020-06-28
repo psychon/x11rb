@@ -3,7 +3,8 @@ use std::net::{TcpListener, TcpStream};
 use std::os::unix::net::UnixStream;
 use smol::{Async, Task};
 
-mod connection;
+pub(crate) mod connection;
+pub(crate) mod forwarder;
 
 async fn handle_client_impl(client: Async<TcpStream>) -> IOResult<()> {
     let server = UnixStream::connect("/tmp/.X11-unix/X0")?;
@@ -35,7 +36,13 @@ async fn handle_client_impl(client: Async<TcpStream>) -> IOResult<()> {
 }
 
 async fn handle_client(client: Async<TcpStream>) {
-    handle_client_impl(client).await.expect("Error in client handling")
+    use std::io::ErrorKind;
+
+    match handle_client_impl(client).await {
+        Ok(()) => {}
+        Err(e) if e.kind() == ErrorKind::UnexpectedEof => println!("Something disconnected"),
+        Err(e) => eprintln!("Error in client forwarding: {:?}", e),
+    }
 }
 
 fn spawn_command_line(display: &str) {

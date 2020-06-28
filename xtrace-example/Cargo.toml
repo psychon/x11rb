@@ -16,7 +16,7 @@ features = ["all-extensions"]
 [dependencies.futures-util]
 version = "0.3"
 default-features = false
-features = ["async-await", "async-await-macro"]
+features = ["async-await", "async-await-macro", "io", "std"]
 
 [dependencies.futures-io]
 version = "0.3"
