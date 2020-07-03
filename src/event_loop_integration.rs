@@ -58,10 +58,14 @@
 //! internal buffer. Thus, it can happen that there is an event available, but the stream is not
 //! readable.
 //!
-//! If this race occurs, the effect would be that an event is processed only some time after it was
-//! received. The main loop would sit in `poll_for_readable` and wait, while the already buffered
-//! event is available. When something else wakes up the main loop and `conn.poll_for_event()` is
-//! called the next time, the event is finally processed.
+//! An example for such an other function is `conn.get_input_focus()?.reply()?`: The
+//! `GetInputFocus` request is sent to the server and then `reply()` waits for the reply. It does
+//! so by reading X11 packets from the X11 server until the right reply arrives. Any events that
+//! are read during this are buffered internally in the `Connection`.
+//!
+//! If this race occurs, the main loop would sit in `poll_for_readable` and wait, while the already
+//! buffered event is available. When something else wakes up the main loop and
+//! `conn.poll_for_event()` is called the next time, the event is finally processed.
 //!
 //! There are two ways around this:
 //!
