@@ -59,12 +59,9 @@ pub(crate) enum BlockingMode {
 
 /// A connection to an X11 server implemented in pure rust
 ///
-/// This type is generic over `R` and `W`, which allows to use a generic stream to
-/// comunicate to the server. This stream is splitted into a reader (`R`) and writer (`W`).
-/// Note that both the reader and the writer must be able to poll for both reading and
-/// writing. If the stream is buffered, polling is allowed to be incosistent across the
-/// reader and the writer: polling from the reader can ignore the writer buffer and polling
-/// from the writer is allowed to ignore the reader buffer.
+/// This type is generic over `S`, which allows to use a generic stream to communicate with the
+/// server. This stream can written to and read from, but it can also be polled, meaning that one
+/// checks if new data can be read or written.
 ///
 /// `RustConnection` always used an internal buffer for reading, so `R` does not need
 /// to be buffered.
