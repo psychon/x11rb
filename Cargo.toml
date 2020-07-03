@@ -127,4 +127,4 @@ name = "display_ppm"
 required-features = ["image"]
 
 [workspace]
-members = ["generator", "xcbgen-rs", "cairo-example"]
+members = ["generator", "xcbgen-rs", "cairo-example", "xtrace-example"]
