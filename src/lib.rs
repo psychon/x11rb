@@ -91,6 +91,12 @@
 //! Additionally, the following flags exist:
 //! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
 //!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
+//!
+//!
+//! # Integrating x11rb with an Event Loop
+//!
+//! The [event_loop_integration](event_loop_integration/index.html) module contains some hints for
+//! integrating x11rb with an event loop as doc comments.
 
 // This lint suggests a function that was added in Rust 1.40.0. Since our minimum supported version
 // is Rust 1.37.0, just disable the lint.
@@ -118,6 +124,9 @@
     missing_docs,
 )]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
+
+// Only contains documentation, but no "actual rust"
+pub mod event_loop_integration;
 
 pub mod utils;
 #[cfg(feature = "allow-unsafe-code")]
