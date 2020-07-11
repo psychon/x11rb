@@ -29,20 +29,17 @@ pub struct X11Error {
 
 impl X11Error {
     /// Parse an X11 error.
-    ///
-    /// This function parses the given `data` as an X11 error packet. The packet's error code
-    /// should contain the value in `expected_error_code`. Otherwise an error is returned.
-    /// The `error_kind` field of the returned instance will be set to `error_kind`.
-    pub fn try_parse(data: &[u8], expected_error_code: u8, error_kind: ErrorKind) -> Result<Self, ParseError> {
+    pub fn try_parse(data: &[u8], ext_info_provider: &dyn ExtInfoProvider) -> Result<Self, ParseError> {
         let (response_type, remaining) = u8::try_parse(data)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (bad_value, remaining) = u32::try_parse(remaining)?;
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, _) = u8::try_parse(remaining)?;
-        if response_type != 0 || expected_error_code != error_code {
+        if response_type != 0 {
             Err(ParseError::InvalidValue)
         } else {
+            let error_kind = ErrorKind::from_wire_error_code(error_code, ext_info_provider);
             Ok(X11Error {
                 error_kind,
                 error_code,

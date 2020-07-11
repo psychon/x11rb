@@ -74,6 +74,81 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
     });
     outln!(out, "}}");
     outln!(out, "");
+    outln!(out, "impl ErrorKind {{");
+    out.indented(|out| {
+        outln!(out, "pub fn from_wire_error_code(");
+        outln!(out.indent(), "error_code: u8,");
+        outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
+        outln!(out, ") -> Self {{");
+        out.indented(|out| {
+            outln!(out, "// Check if this is a core protocol error");
+            outln!(out, "match error_code {{");
+            out.indented(|out| {
+                let xproto_ns = module.namespace("xproto").unwrap();
+                let error_defs = sorted_errors(&xproto_ns);
+                for err_name in error_defs.iter().map(|def| def.name()) {
+                    outln!(
+                        out,
+                        "xproto::{}_ERROR => return Self::{},",
+                        super::camel_case_to_upper_snake(err_name),
+                        err_name,
+                    );
+                }
+                outln!(out, "_ => {{}}");
+            });
+            outln!(out, "}}");
+            outln!(out, "");
+            outln!(out, "// Find the extension that this error could belong to");
+            outln!(
+                out,
+                "let ext_info = ext_info_provider.get_from_error_code(error_code);",
+            );
+            outln!(out, "match ext_info {{");
+            out.indented(|out| {
+                for ns in namespaces.iter() {
+                    // skip xproto
+                    if ns.ext_info.is_none() {
+                        continue;
+                    }
+
+                    let error_defs = sorted_errors(ns);
+                    if error_defs.is_empty() {
+                        continue;
+                    }
+                    let has_feature = super::ext_has_feature(&ns.header);
+                    if has_feature {
+                        outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                    }
+                    outln!(
+                        out,
+                        "Some(({}::X11_EXTENSION_NAME, ext_info)) => {{",
+                        ns.header
+                    );
+                    out.indented(|out| {
+                        outln!(out, "match error_code - ext_info.first_error {{");
+                        for err_name in error_defs.iter().map(|def| def.name()) {
+                            outln!(
+                                out.indent(),
+                                "{}::{}_ERROR => Self::{}{},",
+                                ns.header,
+                                super::camel_case_to_upper_snake(err_name),
+                                get_ns_name_prefix(ns),
+                                err_name,
+                            );
+                        }
+                        outln!(out.indent(), "_ => Self::Unknown(error_code),");
+                        outln!(out, "}}");
+                    });
+                    outln!(out, "}}");
+                }
+                outln!(out, "_ => Self::Unknown(error_code),");
+            });
+            outln!(out, "}}")
+        });
+        outln!(out, "}}");
+    });
+    outln!(out, "}}");
+    outln!(out, "");
 
     outln!(out, "/// Enumeration of all possible X11 errors.");
     outln!(out, "#[derive(Debug, Clone)]");

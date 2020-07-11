@@ -7083,6 +7083,166 @@ pub enum ErrorKind {
     XvBadPort,
 }
 
+impl ErrorKind {
+    pub fn from_wire_error_code(
+        error_code: u8,
+        ext_info_provider: &dyn ExtInfoProvider,
+    ) -> Self {
+        // Check if this is a core protocol error
+        match error_code {
+            xproto::ACCESS_ERROR => return Self::Access,
+            xproto::ALLOC_ERROR => return Self::Alloc,
+            xproto::ATOM_ERROR => return Self::Atom,
+            xproto::COLORMAP_ERROR => return Self::Colormap,
+            xproto::CURSOR_ERROR => return Self::Cursor,
+            xproto::DRAWABLE_ERROR => return Self::Drawable,
+            xproto::FONT_ERROR => return Self::Font,
+            xproto::G_CONTEXT_ERROR => return Self::GContext,
+            xproto::ID_CHOICE_ERROR => return Self::IDChoice,
+            xproto::IMPLEMENTATION_ERROR => return Self::Implementation,
+            xproto::LENGTH_ERROR => return Self::Length,
+            xproto::MATCH_ERROR => return Self::Match,
+            xproto::NAME_ERROR => return Self::Name,
+            xproto::PIXMAP_ERROR => return Self::Pixmap,
+            xproto::REQUEST_ERROR => return Self::Request,
+            xproto::VALUE_ERROR => return Self::Value,
+            xproto::WINDOW_ERROR => return Self::Window,
+            _ => {}
+        }
+
+        // Find the extension that this error could belong to
+        let ext_info = ext_info_provider.get_from_error_code(error_code);
+        match ext_info {
+            #[cfg(feature = "damage")]
+            Some((damage::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    damage::BAD_DAMAGE_ERROR => Self::DamageBadDamage,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "glx")]
+            Some((glx::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    glx::BAD_CONTEXT_ERROR => Self::GlxBadContext,
+                    glx::BAD_CONTEXT_STATE_ERROR => Self::GlxBadContextState,
+                    glx::BAD_CONTEXT_TAG_ERROR => Self::GlxBadContextTag,
+                    glx::BAD_CURRENT_DRAWABLE_ERROR => Self::GlxBadCurrentDrawable,
+                    glx::BAD_CURRENT_WINDOW_ERROR => Self::GlxBadCurrentWindow,
+                    glx::BAD_DRAWABLE_ERROR => Self::GlxBadDrawable,
+                    glx::BAD_FB_CONFIG_ERROR => Self::GlxBadFBConfig,
+                    glx::BAD_LARGE_REQUEST_ERROR => Self::GlxBadLargeRequest,
+                    glx::BAD_PBUFFER_ERROR => Self::GlxBadPbuffer,
+                    glx::BAD_PIXMAP_ERROR => Self::GlxBadPixmap,
+                    glx::BAD_RENDER_REQUEST_ERROR => Self::GlxBadRenderRequest,
+                    glx::BAD_WINDOW_ERROR => Self::GlxBadWindow,
+                    glx::GLX_BAD_PROFILE_ARB_ERROR => Self::GlxGLXBadProfileARB,
+                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Self::GlxUnsupportedPrivateRequest,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "randr")]
+            Some((randr::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    randr::BAD_CRTC_ERROR => Self::RandrBadCrtc,
+                    randr::BAD_MODE_ERROR => Self::RandrBadMode,
+                    randr::BAD_OUTPUT_ERROR => Self::RandrBadOutput,
+                    randr::BAD_PROVIDER_ERROR => Self::RandrBadProvider,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "record")]
+            Some((record::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    record::BAD_CONTEXT_ERROR => Self::RecordBadContext,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "render")]
+            Some((render::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    render::GLYPH_ERROR => Self::RenderGlyph,
+                    render::GLYPH_SET_ERROR => Self::RenderGlyphSet,
+                    render::PICT_FORMAT_ERROR => Self::RenderPictFormat,
+                    render::PICT_OP_ERROR => Self::RenderPictOp,
+                    render::PICTURE_ERROR => Self::RenderPicture,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "shm")]
+            Some((shm::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    shm::BAD_SEG_ERROR => Self::ShmBadSeg,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "sync")]
+            Some((sync::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    sync::ALARM_ERROR => Self::SyncAlarm,
+                    sync::COUNTER_ERROR => Self::SyncCounter,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "xf86vidmode")]
+            Some((xf86vidmode::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    xf86vidmode::BAD_CLOCK_ERROR => Self::Xf86vidmodeBadClock,
+                    xf86vidmode::BAD_H_TIMINGS_ERROR => Self::Xf86vidmodeBadHTimings,
+                    xf86vidmode::BAD_V_TIMINGS_ERROR => Self::Xf86vidmodeBadVTimings,
+                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Self::Xf86vidmodeClientNotLocal,
+                    xf86vidmode::EXTENSION_DISABLED_ERROR => Self::Xf86vidmodeExtensionDisabled,
+                    xf86vidmode::MODE_UNSUITABLE_ERROR => Self::Xf86vidmodeModeUnsuitable,
+                    xf86vidmode::ZOOM_LOCKED_ERROR => Self::Xf86vidmodeZoomLocked,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "xfixes")]
+            Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    xfixes::BAD_REGION_ERROR => Self::XfixesBadRegion,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "xinput")]
+            Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    xinput::CLASS_ERROR => Self::XinputClass,
+                    xinput::DEVICE_ERROR => Self::XinputDevice,
+                    xinput::DEVICE_BUSY_ERROR => Self::XinputDeviceBusy,
+                    xinput::EVENT_ERROR => Self::XinputEvent,
+                    xinput::MODE_ERROR => Self::XinputMode,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "xkb")]
+            Some((xkb::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    xkb::KEYBOARD_ERROR => Self::XkbKeyboard,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "xprint")]
+            Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    xprint::BAD_CONTEXT_ERROR => Self::XprintBadContext,
+                    xprint::BAD_SEQUENCE_ERROR => Self::XprintBadSequence,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "xv")]
+            Some((xv::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    xv::BAD_CONTROL_ERROR => Self::XvBadControl,
+                    xv::BAD_ENCODING_ERROR => Self::XvBadEncoding,
+                    xv::BAD_PORT_ERROR => Self::XvBadPort,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            _ => Self::Unknown(error_code),
+        }
+    }
+}
+
 /// Enumeration of all possible X11 errors.
 #[derive(Debug, Clone)]
 pub enum Error {
