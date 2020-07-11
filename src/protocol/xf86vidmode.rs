@@ -3128,6 +3128,9 @@ pub const BAD_CLOCK_ERROR: u8 = 0;
 pub struct BadClockError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for BadClockError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3135,10 +3138,13 @@ impl TryParse for BadClockError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = BadClockError { error_code, sequence };
+        let result = BadClockError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -3156,19 +3162,22 @@ impl From<&BadClockError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -3205,6 +3214,9 @@ pub const BAD_H_TIMINGS_ERROR: u8 = 1;
 pub struct BadHTimingsError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for BadHTimingsError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3212,10 +3224,13 @@ impl TryParse for BadHTimingsError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = BadHTimingsError { error_code, sequence };
+        let result = BadHTimingsError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -3233,19 +3248,22 @@ impl From<&BadHTimingsError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -3282,6 +3300,9 @@ pub const BAD_V_TIMINGS_ERROR: u8 = 2;
 pub struct BadVTimingsError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for BadVTimingsError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3289,10 +3310,13 @@ impl TryParse for BadVTimingsError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = BadVTimingsError { error_code, sequence };
+        let result = BadVTimingsError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -3310,19 +3334,22 @@ impl From<&BadVTimingsError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -3359,6 +3386,9 @@ pub const MODE_UNSUITABLE_ERROR: u8 = 3;
 pub struct ModeUnsuitableError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for ModeUnsuitableError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3366,10 +3396,13 @@ impl TryParse for ModeUnsuitableError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = ModeUnsuitableError { error_code, sequence };
+        let result = ModeUnsuitableError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -3387,19 +3420,22 @@ impl From<&ModeUnsuitableError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -3436,6 +3472,9 @@ pub const EXTENSION_DISABLED_ERROR: u8 = 4;
 pub struct ExtensionDisabledError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for ExtensionDisabledError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3443,10 +3482,13 @@ impl TryParse for ExtensionDisabledError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = ExtensionDisabledError { error_code, sequence };
+        let result = ExtensionDisabledError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -3464,19 +3506,22 @@ impl From<&ExtensionDisabledError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -3513,6 +3558,9 @@ pub const CLIENT_NOT_LOCAL_ERROR: u8 = 5;
 pub struct ClientNotLocalError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for ClientNotLocalError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3520,10 +3568,13 @@ impl TryParse for ClientNotLocalError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = ClientNotLocalError { error_code, sequence };
+        let result = ClientNotLocalError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -3541,19 +3592,22 @@ impl From<&ClientNotLocalError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -3590,6 +3644,9 @@ pub const ZOOM_LOCKED_ERROR: u8 = 6;
 pub struct ZoomLockedError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for ZoomLockedError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3597,10 +3654,13 @@ impl TryParse for ZoomLockedError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = ZoomLockedError { error_code, sequence };
+        let result = ZoomLockedError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -3618,19 +3678,22 @@ impl From<&ZoomLockedError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,

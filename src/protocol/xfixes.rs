@@ -1141,6 +1141,9 @@ pub const BAD_REGION_ERROR: u8 = 0;
 pub struct BadRegionError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for BadRegionError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1148,10 +1151,13 @@ impl TryParse for BadRegionError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = BadRegionError { error_code, sequence };
+        let result = BadRegionError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -1169,19 +1175,22 @@ impl From<&BadRegionError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,

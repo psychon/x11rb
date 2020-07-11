@@ -170,6 +170,28 @@ fn run_in_error(error_def: &defs::ErrorFullDef, module: &defs::Module) {
     fields.insert(0, response_type_field);
     fields.insert(1, error_code_field);
     fields.insert(2, sequence_field);
+    // Add some more always-present fields that are only sometimes described in XML
+    if fields.len() < 4 {
+        let bad_value = defs::FieldDef::Normal(defs::NormalField {
+            name: "bad_value".into(),
+            type_: make_builtin_field_value_type(defs::BuiltInType::Card32),
+        });
+        fields.push(bad_value);
+    }
+    if fields.len() < 5 {
+        let minor_opcode = defs::FieldDef::Normal(defs::NormalField {
+            name: "minor_opcode".into(),
+            type_: make_builtin_field_value_type(defs::BuiltInType::Card16),
+        });
+        fields.push(minor_opcode);
+    }
+    if fields.len() < 6 {
+        let major_opcode = defs::FieldDef::Normal(defs::NormalField {
+            name: "major_opcode".into(),
+            type_: make_builtin_field_value_type(defs::BuiltInType::Card8),
+        });
+        fields.push(major_opcode);
+    }
     run_in_field_list(&mut fields, module);
 }
 

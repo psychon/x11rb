@@ -18046,6 +18046,9 @@ pub const DEVICE_ERROR: u8 = 0;
 pub struct DeviceError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for DeviceError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -18053,10 +18056,13 @@ impl TryParse for DeviceError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = DeviceError { error_code, sequence };
+        let result = DeviceError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -18074,19 +18080,22 @@ impl From<&DeviceError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -18123,6 +18132,9 @@ pub const EVENT_ERROR: u8 = 1;
 pub struct EventError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for EventError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -18130,10 +18142,13 @@ impl TryParse for EventError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = EventError { error_code, sequence };
+        let result = EventError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -18151,19 +18166,22 @@ impl From<&EventError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -18200,6 +18218,9 @@ pub const MODE_ERROR: u8 = 2;
 pub struct ModeError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for ModeError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -18207,10 +18228,13 @@ impl TryParse for ModeError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = ModeError { error_code, sequence };
+        let result = ModeError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -18228,19 +18252,22 @@ impl From<&ModeError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -18277,6 +18304,9 @@ pub const DEVICE_BUSY_ERROR: u8 = 3;
 pub struct DeviceBusyError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for DeviceBusyError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -18284,10 +18314,13 @@ impl TryParse for DeviceBusyError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = DeviceBusyError { error_code, sequence };
+        let result = DeviceBusyError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -18305,19 +18338,22 @@ impl From<&DeviceBusyError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -18354,6 +18390,9 @@ pub const CLASS_ERROR: u8 = 4;
 pub struct ClassError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for ClassError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -18361,10 +18400,13 @@ impl TryParse for ClassError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = ClassError { error_code, sequence };
+        let result = ClassError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -18382,19 +18424,22 @@ impl From<&ClassError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,

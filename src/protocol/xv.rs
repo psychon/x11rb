@@ -1178,6 +1178,9 @@ pub const BAD_PORT_ERROR: u8 = 0;
 pub struct BadPortError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for BadPortError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1185,10 +1188,13 @@ impl TryParse for BadPortError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = BadPortError { error_code, sequence };
+        let result = BadPortError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -1206,19 +1212,22 @@ impl From<&BadPortError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -1255,6 +1264,9 @@ pub const BAD_ENCODING_ERROR: u8 = 1;
 pub struct BadEncodingError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for BadEncodingError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1262,10 +1274,13 @@ impl TryParse for BadEncodingError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = BadEncodingError { error_code, sequence };
+        let result = BadEncodingError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -1283,19 +1298,22 @@ impl From<&BadEncodingError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -1332,6 +1350,9 @@ pub const BAD_CONTROL_ERROR: u8 = 2;
 pub struct BadControlError {
     pub error_code: u8,
     pub sequence: u16,
+    pub bad_value: u32,
+    pub minor_opcode: u16,
+    pub major_opcode: u8,
 }
 impl TryParse for BadControlError {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1339,10 +1360,13 @@ impl TryParse for BadControlError {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         if response_type != 0 {
             return Err(ParseError::InvalidValue);
         }
-        let result = BadControlError { error_code, sequence };
+        let result = BadControlError { error_code, sequence, bad_value, minor_opcode, major_opcode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
@@ -1360,19 +1384,22 @@ impl From<&BadControlError> for [u8; 32] {
         let response_type_bytes = &[0];
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
             response_type_bytes[0],
             error_code_bytes[0],
             sequence_bytes[0],
             sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
             // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
