@@ -1717,18 +1717,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn generate_error_full_def(&self, error_full_def: &xcbdefs::ErrorFullDef, out: &mut Output) {
         let name = to_rust_type_name(&error_full_def.name);
-        self.emit_error(&name, error_full_def.number, error_full_def, out);
+        self.emit_error(&name, error_full_def.number, out);
     }
 
     fn generate_error_copy_def(&self, error_copy_def: &xcbdefs::ErrorCopyDef, out: &mut Output) {
         let name = to_rust_type_name(&error_copy_def.name);
         self.emit_error_opcode(&name, error_copy_def.number, out);
-        outln!(
-            out,
-            "pub type {}Error = {};",
-            name,
-            self.error_to_rust_type(error_copy_def.ref_.get_resolved()),
-        );
         outln!(out, "");
     }
 
@@ -1736,35 +1730,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name: &str,
         number: i16,
-        error_full_def: &xcbdefs::ErrorFullDef,
         out: &mut Output,
     ) {
         self.emit_error_opcode(name, number, out);
-
-        let full_name = format!("{}Error", name);
-
-        let fields = error_full_def.fields.borrow();
-        let mut derives = Derives::all();
-        self.filter_derives_for_fields(&mut derives, &*fields, false);
-
-        self.emit_struct_type(
-            &full_name,
-            name,
-            derives,
-            &*fields,
-            &[],
-            false,
-            true,
-            StructSizeConstraint::Fixed(32),
-            false,
-            true,
-            None,
-            out,
-        );
-
-        let deducible_fields = gather_deducible_fields(&*fields);
-        self.emit_event_or_error_serialize(&full_name, &*fields, &deducible_fields, out);
-
         outln!(out, "");
     }
 
@@ -5542,14 +5510,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let name = event.name();
         let namespace = event.namespace();
         let rust_name = format!("{}Event", to_rust_type_name(name));
-        self.type_name_to_rust_type(&rust_name, &namespace)
-    }
-
-    fn error_to_rust_type(&self, error: &xcbdefs::ErrorRef) -> String {
-        let error = error.as_error_def();
-        let name = error.name();
-        let namespace = error.namespace();
-        let rust_name = format!("{}Error", to_rust_type_name(name));
         self.type_name_to_rust_type(&rust_name, &namespace)
     }
 

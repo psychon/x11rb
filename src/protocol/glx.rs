@@ -55,145 +55,48 @@ pub type Bool32 = u32;
 
 pub type ContextTag = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GenericError {
-    pub error_code: u8,
-    pub sequence: u16,
-    pub bad_value: u32,
-    pub minor_opcode: u16,
-    pub major_opcode: u8,
-}
-impl TryParse for GenericError {
-    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let remaining = initial_value;
-        let (response_type, remaining) = u8::try_parse(remaining)?;
-        let (error_code, remaining) = u8::try_parse(remaining)?;
-        let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (bad_value, remaining) = u32::try_parse(remaining)?;
-        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
-        let (major_opcode, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(21..).ok_or(ParseError::InsufficientData)?;
-        if response_type != 0 {
-            return Err(ParseError::InvalidValue);
-        }
-        let result = GenericError { error_code, sequence, bad_value, minor_opcode, major_opcode };
-        let _ = remaining;
-        let remaining = initial_value.get(32..)
-            .ok_or(ParseError::InsufficientData)?;
-        Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GenericError {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
-impl From<&GenericError> for [u8; 32] {
-    fn from(input: &GenericError) -> Self {
-        let response_type_bytes = &[0];
-        let error_code_bytes = input.error_code.serialize();
-        let sequence_bytes = input.sequence.serialize();
-        let bad_value_bytes = input.bad_value.serialize();
-        let minor_opcode_bytes = input.minor_opcode.serialize();
-        let major_opcode_bytes = input.major_opcode.serialize();
-        [
-            response_type_bytes[0],
-            error_code_bytes[0],
-            sequence_bytes[0],
-            sequence_bytes[1],
-            bad_value_bytes[0],
-            bad_value_bytes[1],
-            bad_value_bytes[2],
-            bad_value_bytes[3],
-            minor_opcode_bytes[0],
-            minor_opcode_bytes[1],
-            major_opcode_bytes[0],
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]
-    }
-}
-impl From<GenericError> for [u8; 32] {
-    fn from(input: GenericError) -> Self {
-        Self::from(&input)
-    }
-}
 
 /// Opcode for the BadContext error
 pub const BAD_CONTEXT_ERROR: u8 = 0;
-pub type BadContextError = GenericError;
 
 /// Opcode for the BadContextState error
 pub const BAD_CONTEXT_STATE_ERROR: u8 = 1;
-pub type BadContextStateError = GenericError;
 
 /// Opcode for the BadDrawable error
 pub const BAD_DRAWABLE_ERROR: u8 = 2;
-pub type BadDrawableError = GenericError;
 
 /// Opcode for the BadPixmap error
 pub const BAD_PIXMAP_ERROR: u8 = 3;
-pub type BadPixmapError = GenericError;
 
 /// Opcode for the BadContextTag error
 pub const BAD_CONTEXT_TAG_ERROR: u8 = 4;
-pub type BadContextTagError = GenericError;
 
 /// Opcode for the BadCurrentWindow error
 pub const BAD_CURRENT_WINDOW_ERROR: u8 = 5;
-pub type BadCurrentWindowError = GenericError;
 
 /// Opcode for the BadRenderRequest error
 pub const BAD_RENDER_REQUEST_ERROR: u8 = 6;
-pub type BadRenderRequestError = GenericError;
 
 /// Opcode for the BadLargeRequest error
 pub const BAD_LARGE_REQUEST_ERROR: u8 = 7;
-pub type BadLargeRequestError = GenericError;
 
 /// Opcode for the UnsupportedPrivateRequest error
 pub const UNSUPPORTED_PRIVATE_REQUEST_ERROR: u8 = 8;
-pub type UnsupportedPrivateRequestError = GenericError;
 
 /// Opcode for the BadFBConfig error
 pub const BAD_FB_CONFIG_ERROR: u8 = 9;
-pub type BadFBConfigError = GenericError;
 
 /// Opcode for the BadPbuffer error
 pub const BAD_PBUFFER_ERROR: u8 = 10;
-pub type BadPbufferError = GenericError;
 
 /// Opcode for the BadCurrentDrawable error
 pub const BAD_CURRENT_DRAWABLE_ERROR: u8 = 11;
-pub type BadCurrentDrawableError = GenericError;
 
 /// Opcode for the BadWindow error
 pub const BAD_WINDOW_ERROR: u8 = 12;
-pub type BadWindowError = GenericError;
 
 /// Opcode for the GLXBadProfileARB error
 pub const GLX_BAD_PROFILE_ARB_ERROR: u8 = 13;
-pub type GLXBadProfileARBError = GenericError;
 
 /// Opcode for the PbufferClobber event
 pub const PBUFFER_CLOBBER_EVENT: u8 = 0;
