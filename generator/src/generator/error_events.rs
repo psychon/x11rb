@@ -240,6 +240,92 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
             outln!(out, "}}");
         });
         outln!(out, "}}");
+        outln!(out, "");
+        outln!(out, "/// Get the `bad_value` field of this X11 error.");
+        outln!(out, "///");
+        outln!(out, "/// Not all X11 errors have a `bad_value` field. For example, record's");
+        outln!(out, "/// `BadContextError` has a `invalid_record` field. This function returns");
+        outln!(out, "/// that field regardless of its actual name.");
+        outln!(out, "pub fn bad_value(&self) -> u32 {{");
+        out.indented(|out| {
+            outln!(out, "match self {{");
+            outln!(
+                out.indent(),
+                "Error::Unknown(value) => value.get(4..8).map(|v| u32::from_ne_bytes(v.try_into().unwrap())).unwrap_or(0),"
+            );
+            for ns in namespaces.iter() {
+                let has_feature = super::ext_has_feature(&ns.header);
+                let error_defs = sorted_errors(ns);
+                for err_def in error_defs.iter() {
+                    if has_feature {
+                        outln!(out.indent(), "#[cfg(feature = \"{}\")]", ns.header);
+                    }
+                    outln!(
+                        out.indent(),
+                        "Error::{}{}(value) => value.{},",
+                        get_ns_name_prefix(ns),
+                        err_def.name(),
+                        err_def.get_original_full_def().fields.borrow()[3].name().unwrap(),
+                    );
+                }
+            }
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+        outln!(out, "");
+        outln!(out, "/// Get the `minor_opcode` field of this X11 error.");
+        outln!(out, "pub fn minor_opcode(&self) -> u16 {{");
+        out.indented(|out| {
+            outln!(out, "match self {{");
+            outln!(
+                out.indent(),
+                "Error::Unknown(value) => value.get(8..10).map(|v| u16::from_ne_bytes(v.try_into().unwrap())).unwrap_or(0),"
+            );
+            for ns in namespaces.iter() {
+                let has_feature = super::ext_has_feature(&ns.header);
+                let error_defs = sorted_errors(ns);
+                for err_def in error_defs.iter() {
+                    if has_feature {
+                        outln!(out.indent(), "#[cfg(feature = \"{}\")]", ns.header);
+                    }
+                    outln!(
+                        out.indent(),
+                        "Error::{}{}(value) => value.minor_opcode,",
+                        get_ns_name_prefix(ns),
+                        err_def.name(),
+                    );
+                }
+            }
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+        outln!(out, "");
+        outln!(out, "/// Get the `major_opcode` field of this X11 error.");
+        outln!(out, "pub fn major_opcode(&self) -> u8 {{");
+        out.indented(|out| {
+            outln!(out, "match self {{");
+            outln!(
+                out.indent(),
+                "Error::Unknown(value) => *value.get(10).unwrap_or(&0),"
+            );
+            for ns in namespaces.iter() {
+                let has_feature = super::ext_has_feature(&ns.header);
+                let error_defs = sorted_errors(ns);
+                for err_def in error_defs.iter() {
+                    if has_feature {
+                        outln!(out.indent(), "#[cfg(feature = \"{}\")]", ns.header);
+                    }
+                    outln!(
+                        out.indent(),
+                        "Error::{}{}(value) => value.major_opcode,",
+                        get_ns_name_prefix(ns),
+                        err_def.name(),
+                    );
+                }
+            }
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
     });
     outln!(out, "}}");
 }
