@@ -262,7 +262,7 @@ mod test {
             unimplemented!()
         }
 
-        fn parse_error(&self, _error: &[u8]) -> Result<crate::protocol::Error, ParseError> {
+        fn parse_error(&self, _error: &[u8]) -> Result<crate::x11_utils::X11Error, ParseError> {
             unimplemented!()
         }
 

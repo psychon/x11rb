@@ -1,7 +1,7 @@
 //! This module contains the current mess that is error handling.
 
 use crate::protocol::xproto::{SetupAuthenticate, SetupFailed};
-use crate::protocol::Error;
+use crate::x11_utils::X11Error;
 
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -214,7 +214,7 @@ pub enum ReplyError {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
     /// The X11 server sent an error in response to the request.
-    X11Error(Error),
+    X11Error(X11Error),
 }
 
 impl std::error::Error for ReplyError {}
@@ -246,8 +246,8 @@ impl From<ConnectionError> for ReplyError {
     }
 }
 
-impl From<Error> for ReplyError {
-    fn from(err: Error) -> Self {
+impl From<X11Error> for ReplyError {
+    fn from(err: X11Error) -> Self {
         Self::X11Error(err)
     }
 }
@@ -260,7 +260,7 @@ pub enum ReplyOrIdError {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
     /// The X11 server sent an error in response to a XC-MISC request.
-    X11Error(Error),
+    X11Error(X11Error),
 }
 
 impl std::fmt::Display for ReplyOrIdError {
@@ -287,8 +287,8 @@ impl From<ConnectionError> for ReplyOrIdError {
     }
 }
 
-impl From<Error> for ReplyOrIdError {
-    fn from(err: Error) -> Self {
+impl From<X11Error> for ReplyOrIdError {
+    fn from(err: X11Error) -> Self {
         ReplyOrIdError::X11Error(err)
     }
 }

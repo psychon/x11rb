@@ -151,7 +151,7 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn parse_error(&self, _error: &[u8]) -> Result<x11rb::protocol::Error, ParseError> {
+    fn parse_error(&self, _error: &[u8]) -> Result<x11rb::x11_utils::X11Error, ParseError> {
         unimplemented!()
     }
 
