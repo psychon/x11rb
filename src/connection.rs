@@ -487,7 +487,7 @@ pub enum DiscardMode {
 ///     # fn prefetch_maximum_request_bytes(&self) {
 ///     #    unimplemented!()
 ///     # }
-///     # fn parse_error(&self, _error: &[u8]) -> Result<x11rb::protocol::Error, ParseError> {
+///     # fn parse_error(&self, _error: &[u8]) -> Result<x11rb::x11_utils::X11Error, ParseError> {
 ///     #     unimplemented!()
 ///     # }
 ///     # fn parse_event(&self, _event: &[u8]) -> Result<x11rb::protocol::Event, ParseError> {
