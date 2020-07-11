@@ -6966,6 +6966,123 @@ impl From<xvmc::ListSubpictureTypesReply> for Reply {
   }
 }
 
+/// Enumeration of all possible X11 error kinds.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ErrorKind {
+    Unknown(u8),
+    Access,
+    Alloc,
+    Atom,
+    Colormap,
+    Cursor,
+    Drawable,
+    Font,
+    GContext,
+    IDChoice,
+    Implementation,
+    Length,
+    Match,
+    Name,
+    Pixmap,
+    Request,
+    Value,
+    Window,
+    #[cfg(feature = "damage")]
+    DamageBadDamage,
+    #[cfg(feature = "glx")]
+    GlxBadContext,
+    #[cfg(feature = "glx")]
+    GlxBadContextState,
+    #[cfg(feature = "glx")]
+    GlxBadContextTag,
+    #[cfg(feature = "glx")]
+    GlxBadCurrentDrawable,
+    #[cfg(feature = "glx")]
+    GlxBadCurrentWindow,
+    #[cfg(feature = "glx")]
+    GlxBadDrawable,
+    #[cfg(feature = "glx")]
+    GlxBadFBConfig,
+    #[cfg(feature = "glx")]
+    GlxBadLargeRequest,
+    #[cfg(feature = "glx")]
+    GlxBadPbuffer,
+    #[cfg(feature = "glx")]
+    GlxBadPixmap,
+    #[cfg(feature = "glx")]
+    GlxBadRenderRequest,
+    #[cfg(feature = "glx")]
+    GlxBadWindow,
+    #[cfg(feature = "glx")]
+    GlxGLXBadProfileARB,
+    #[cfg(feature = "glx")]
+    GlxUnsupportedPrivateRequest,
+    #[cfg(feature = "randr")]
+    RandrBadCrtc,
+    #[cfg(feature = "randr")]
+    RandrBadMode,
+    #[cfg(feature = "randr")]
+    RandrBadOutput,
+    #[cfg(feature = "randr")]
+    RandrBadProvider,
+    #[cfg(feature = "record")]
+    RecordBadContext,
+    #[cfg(feature = "render")]
+    RenderGlyph,
+    #[cfg(feature = "render")]
+    RenderGlyphSet,
+    #[cfg(feature = "render")]
+    RenderPictFormat,
+    #[cfg(feature = "render")]
+    RenderPictOp,
+    #[cfg(feature = "render")]
+    RenderPicture,
+    #[cfg(feature = "shm")]
+    ShmBadSeg,
+    #[cfg(feature = "sync")]
+    SyncAlarm,
+    #[cfg(feature = "sync")]
+    SyncCounter,
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeBadClock,
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeBadHTimings,
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeBadVTimings,
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeClientNotLocal,
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeExtensionDisabled,
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeModeUnsuitable,
+    #[cfg(feature = "xf86vidmode")]
+    Xf86vidmodeZoomLocked,
+    #[cfg(feature = "xfixes")]
+    XfixesBadRegion,
+    #[cfg(feature = "xinput")]
+    XinputClass,
+    #[cfg(feature = "xinput")]
+    XinputDevice,
+    #[cfg(feature = "xinput")]
+    XinputDeviceBusy,
+    #[cfg(feature = "xinput")]
+    XinputEvent,
+    #[cfg(feature = "xinput")]
+    XinputMode,
+    #[cfg(feature = "xkb")]
+    XkbKeyboard,
+    #[cfg(feature = "xprint")]
+    XprintBadContext,
+    #[cfg(feature = "xprint")]
+    XprintBadSequence,
+    #[cfg(feature = "xv")]
+    XvBadControl,
+    #[cfg(feature = "xv")]
+    XvBadEncoding,
+    #[cfg(feature = "xv")]
+    XvBadPort,
+}
+
 /// Enumeration of all possible X11 errors.
 #[derive(Debug, Clone)]
 pub enum Error {

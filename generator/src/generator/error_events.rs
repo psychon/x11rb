@@ -55,6 +55,26 @@ pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
 fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
     let namespaces = module.sorted_namespaces();
 
+    outln!(out, "/// Enumeration of all possible X11 error kinds.");
+    outln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
+    outln!(out, "pub enum ErrorKind {{");
+    out.indented(|out| {
+        outln!(out, "Unknown(u8),");
+        for ns in namespaces.iter() {
+            let has_feature = super::ext_has_feature(&ns.header);
+            let error_defs = sorted_errors(ns);
+
+            for err_name in error_defs.iter().map(|def| def.name()) {
+                if has_feature {
+                    outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                }
+                outln!(out, "{}{},", get_ns_name_prefix(ns), err_name);
+            }
+        }
+    });
+    outln!(out, "}}");
+    outln!(out, "");
+
     outln!(out, "/// Enumeration of all possible X11 errors.");
     outln!(out, "#[derive(Debug, Clone)]");
     outln!(out, "pub enum Error {{");
