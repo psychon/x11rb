@@ -1,8 +1,8 @@
 use x11rb::errors::ParseError;
-use x11rb::protocol::{xproto, Error, Event, Reply, Request};
+use x11rb::protocol::{xproto, Event, Reply, Request};
 use x11rb::x11_utils::{
     parse_request_header, BigRequests, ExtInfoProvider, ExtensionInformation, ReplyParsingFunction,
-    TryParse,
+    TryParse, X11Error,
 };
 
 use std::collections::VecDeque;
@@ -131,12 +131,12 @@ impl ConnectionInner {
     /// Handle an X11 error sent by the server
     pub fn server_error(&mut self, packet: &[u8]) {
         fn do_parse(inner: &mut ConnectionInner, packet: &[u8]) -> Result<(), ParseError> {
-            let err = Error::parse(packet, &inner.ext_info)?;
-            println!("server ({}): {:?}", err.wire_sequence_number(), err);
+            let err = X11Error::try_parse(packet, &inner.ext_info)?;
+            println!("server ({}): {:?}", err.sequence, err);
 
             // Remove a pending request if it failed
             let next_pending = inner.pending_replies.front().map(|r| r.seqno);
-            if next_pending == Some(err.wire_sequence_number()) {
+            if next_pending == Some(err.sequence) {
                 let _ = inner.pending_replies.pop_front();
             }
 
