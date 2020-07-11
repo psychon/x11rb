@@ -317,24 +317,6 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
             outln!(out, "}}");
         });
         outln!(out, "}}");
-        outln!(out, "");
-        outln!(out, "/// Get the response type of this X11 error");
-        outln!(out, "///");
-        outln!(
-            out,
-            "/// This is not `pub` because it should always be `0` for errors.",
-        );
-        outln!(out, "fn raw_response_type(&self) -> u8 {{");
-        out.indented(|out| {
-            outln!(out, "match self {{");
-            outln!(
-                out.indent(),
-                "Error::Unknown(value) => response_type(value).unwrap(),"
-            );
-            outln!(out.indent(), "_ => 0",);
-            outln!(out, "}}");
-        });
-        outln!(out, "}}");
     });
     outln!(out, "}}");
 }
@@ -347,7 +329,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
     outln!(out, "pub enum Event {{");
     out.indented(|out| {
         outln!(out, "Unknown(Vec<u8>),");
-        outln!(out, "Error(Error),");
+        outln!(out, "Error(X11Error),");
 
         for ns in namespaces.iter() {
             let has_feature = super::ext_has_feature(&ns.header);
@@ -396,7 +378,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                 outln!(
                     out,
                     "0 => return Ok({}),",
-                    "Self::Error(Error::parse(event, ext_info_provider)?)",
+                    "Self::Error(X11Error::try_parse(event, ext_info_provider)?)",
                 );
                 let xproto_ns = module.namespace("xproto").unwrap();
                 let event_defs = sorted_events(&xproto_ns);
@@ -554,7 +536,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
             );
             outln!(
                 out.indent(),
-                "Event::Error(value) => Some(value.wire_sequence_number()),",
+                "Event::Error(value) => Some(value.sequence),",
             );
             for ns in namespaces.iter() {
                 let event_defs = sorted_events(ns);
@@ -610,7 +592,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
             );
             outln!(
                 out.indent(),
-                "Event::Error(value) => value.raw_response_type(),",
+                "Event::Error(_) => 0,",
             );
             for ns in namespaces.iter() {
                 let event_defs = sorted_events(ns);

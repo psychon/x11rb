@@ -10,6 +10,7 @@ use std::borrow::Cow;
 use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
 use crate::utils::RawFdContainer;
+use crate::x11_utils::X11Error;
 use crate::x11_utils::{ExtInfoProvider, ReplyParsingFunction, Request as RequestTrait, RequestHeader};
 
 pub mod xproto;
@@ -7758,23 +7759,13 @@ impl Error {
             Error::XvBadPort(value) => value.error_code,
         }
     }
-
-    /// Get the response type of this X11 error
-    ///
-    /// This is not `pub` because it should always be `0` for errors.
-    fn raw_response_type(&self) -> u8 {
-        match self {
-            Error::Unknown(value) => response_type(value).unwrap(),
-            _ => 0
-        }
-    }
 }
 
 /// Enumeration of all possible X11 events.
 #[derive(Debug, Clone)]
 pub enum Event {
     Unknown(Vec<u8>),
-    Error(Error),
+    Error(X11Error),
     ButtonPress(xproto::ButtonPressEvent),
     ButtonRelease(xproto::ButtonReleaseEvent),
     CirculateNotify(xproto::CirculateNotifyEvent),
@@ -7978,7 +7969,7 @@ impl Event {
 
         // Check if this is a core protocol event or error, or from the generic event extension
         match event_code {
-            0 => return Ok(Self::Error(Error::parse(event, ext_info_provider)?)),
+            0 => return Ok(Self::Error(X11Error::try_parse(event, ext_info_provider)?)),
             xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(event.try_into()?)),
             xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(event.try_into()?)),
             xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(event.try_into()?)),
@@ -8217,7 +8208,7 @@ impl Event {
     pub fn wire_sequence_number(&self) -> Option<u16> {
         match self {
             Event::Unknown(value) => sequence_number(value).ok(),
-            Event::Error(value) => Some(value.wire_sequence_number()),
+            Event::Error(value) => Some(value.sequence),
             Event::ButtonPress(value) => Some(value.sequence),
             Event::ButtonRelease(value) => Some(value.sequence),
             Event::CirculateNotify(value) => Some(value.sequence),
@@ -8421,7 +8412,7 @@ impl Event {
     pub fn raw_response_type(&self) -> u8 {
         match self {
             Event::Unknown(value) => response_type(value).unwrap(),
-            Event::Error(value) => value.raw_response_type(),
+            Event::Error(_) => 0,
             Event::ButtonPress(value) => value.response_type,
             Event::ButtonRelease(value) => value.response_type,
             Event::CirculateNotify(value) => value.response_type,
