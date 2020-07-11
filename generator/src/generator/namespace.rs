@@ -1726,12 +1726,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "");
     }
 
-    fn emit_error(
-        &self,
-        name: &str,
-        number: i16,
-        out: &mut Output,
-    ) {
+    fn emit_error(&self, name: &str, number: i16, out: &mut Output) {
         self.emit_error_opcode(name, number, out);
         outln!(out, "");
     }

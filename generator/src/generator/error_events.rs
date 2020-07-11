@@ -349,10 +349,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                 out.indent(),
                 "Event::Unknown(value) => sequence_number(value).ok(),",
             );
-            outln!(
-                out.indent(),
-                "Event::Error(value) => Some(value.sequence),",
-            );
+            outln!(out.indent(), "Event::Error(value) => Some(value.sequence),");
             for ns in namespaces.iter() {
                 let event_defs = sorted_events(ns);
                 let has_feature = super::ext_has_feature(&ns.header);
@@ -405,10 +402,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                 out.indent(),
                 "Event::Unknown(value) => response_type(value).unwrap(),",
             );
-            outln!(
-                out.indent(),
-                "Event::Error(_) => 0,",
-            );
+            outln!(out.indent(), "Event::Error(_) => 0,");
             for ns in namespaces.iter() {
                 let event_defs = sorted_events(ns);
                 let has_feature = super::ext_has_feature(&ns.header);

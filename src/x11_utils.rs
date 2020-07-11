@@ -7,8 +7,8 @@
 use std::convert::TryInto;
 
 use crate::errors::ParseError;
-use crate::utils::RawFdContainer;
 use crate::protocol::ErrorKind;
+use crate::utils::RawFdContainer;
 
 /// Representation of an X11 error packet that was sent by the server.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -29,7 +29,10 @@ pub struct X11Error {
 
 impl X11Error {
     /// Parse an X11 error.
-    pub fn try_parse(data: &[u8], ext_info_provider: &dyn ExtInfoProvider) -> Result<Self, ParseError> {
+    pub fn try_parse(
+        data: &[u8],
+        ext_info_provider: &dyn ExtInfoProvider,
+    ) -> Result<Self, ParseError> {
         let (response_type, remaining) = u8::try_parse(data)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
