@@ -605,9 +605,9 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
     }
 
-    fn parse_error(&self, error: &[u8]) -> Result<crate::protocol::Error, ParseError> {
+    fn parse_error(&self, error: &[u8]) -> Result<crate::x11_utils::X11Error, ParseError> {
         let ext_mgr = self.extension_manager.lock().unwrap();
-        crate::protocol::Error::parse(error, &*ext_mgr)
+        crate::x11_utils::X11Error::try_parse(error, &*ext_mgr)
     }
 
     fn parse_event(&self, event: &[u8]) -> Result<crate::protocol::Event, ParseError> {

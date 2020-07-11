@@ -5279,237 +5279,54 @@ impl TryFrom<&[u8]> for GeGenericEvent {
 
 /// Opcode for the Request error
 pub const REQUEST_ERROR: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct RequestError {
-    pub error_code: u8,
-    pub sequence: u16,
-    pub bad_value: u32,
-    pub minor_opcode: u16,
-    pub major_opcode: u8,
-}
-impl TryParse for RequestError {
-    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let remaining = initial_value;
-        let (response_type, remaining) = u8::try_parse(remaining)?;
-        let (error_code, remaining) = u8::try_parse(remaining)?;
-        let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (bad_value, remaining) = u32::try_parse(remaining)?;
-        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
-        let (major_opcode, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        if response_type != 0 {
-            return Err(ParseError::InvalidValue);
-        }
-        let result = RequestError { error_code, sequence, bad_value, minor_opcode, major_opcode };
-        let _ = remaining;
-        let remaining = initial_value.get(32..)
-            .ok_or(ParseError::InsufficientData)?;
-        Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for RequestError {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
-impl From<&RequestError> for [u8; 32] {
-    fn from(input: &RequestError) -> Self {
-        let response_type_bytes = &[0];
-        let error_code_bytes = input.error_code.serialize();
-        let sequence_bytes = input.sequence.serialize();
-        let bad_value_bytes = input.bad_value.serialize();
-        let minor_opcode_bytes = input.minor_opcode.serialize();
-        let major_opcode_bytes = input.major_opcode.serialize();
-        [
-            response_type_bytes[0],
-            error_code_bytes[0],
-            sequence_bytes[0],
-            sequence_bytes[1],
-            bad_value_bytes[0],
-            bad_value_bytes[1],
-            bad_value_bytes[2],
-            bad_value_bytes[3],
-            minor_opcode_bytes[0],
-            minor_opcode_bytes[1],
-            major_opcode_bytes[0],
-            0,
-            // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]
-    }
-}
-impl From<RequestError> for [u8; 32] {
-    fn from(input: RequestError) -> Self {
-        Self::from(&input)
-    }
-}
 
 /// Opcode for the Value error
 pub const VALUE_ERROR: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ValueError {
-    pub error_code: u8,
-    pub sequence: u16,
-    pub bad_value: u32,
-    pub minor_opcode: u16,
-    pub major_opcode: u8,
-}
-impl TryParse for ValueError {
-    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let remaining = initial_value;
-        let (response_type, remaining) = u8::try_parse(remaining)?;
-        let (error_code, remaining) = u8::try_parse(remaining)?;
-        let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (bad_value, remaining) = u32::try_parse(remaining)?;
-        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
-        let (major_opcode, remaining) = u8::try_parse(remaining)?;
-        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        if response_type != 0 {
-            return Err(ParseError::InvalidValue);
-        }
-        let result = ValueError { error_code, sequence, bad_value, minor_opcode, major_opcode };
-        let _ = remaining;
-        let remaining = initial_value.get(32..)
-            .ok_or(ParseError::InsufficientData)?;
-        Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ValueError {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
-impl From<&ValueError> for [u8; 32] {
-    fn from(input: &ValueError) -> Self {
-        let response_type_bytes = &[0];
-        let error_code_bytes = input.error_code.serialize();
-        let sequence_bytes = input.sequence.serialize();
-        let bad_value_bytes = input.bad_value.serialize();
-        let minor_opcode_bytes = input.minor_opcode.serialize();
-        let major_opcode_bytes = input.major_opcode.serialize();
-        [
-            response_type_bytes[0],
-            error_code_bytes[0],
-            sequence_bytes[0],
-            sequence_bytes[1],
-            bad_value_bytes[0],
-            bad_value_bytes[1],
-            bad_value_bytes[2],
-            bad_value_bytes[3],
-            minor_opcode_bytes[0],
-            minor_opcode_bytes[1],
-            major_opcode_bytes[0],
-            0,
-            // trailing padding
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]
-    }
-}
-impl From<ValueError> for [u8; 32] {
-    fn from(input: ValueError) -> Self {
-        Self::from(&input)
-    }
-}
 
 /// Opcode for the Window error
 pub const WINDOW_ERROR: u8 = 3;
-pub type WindowError = ValueError;
 
 /// Opcode for the Pixmap error
 pub const PIXMAP_ERROR: u8 = 4;
-pub type PixmapError = ValueError;
 
 /// Opcode for the Atom error
 pub const ATOM_ERROR: u8 = 5;
-pub type AtomError = ValueError;
 
 /// Opcode for the Cursor error
 pub const CURSOR_ERROR: u8 = 6;
-pub type CursorError = ValueError;
 
 /// Opcode for the Font error
 pub const FONT_ERROR: u8 = 7;
-pub type FontError = ValueError;
 
 /// Opcode for the Match error
 pub const MATCH_ERROR: u8 = 8;
-pub type MatchError = RequestError;
 
 /// Opcode for the Drawable error
 pub const DRAWABLE_ERROR: u8 = 9;
-pub type DrawableError = ValueError;
 
 /// Opcode for the Access error
 pub const ACCESS_ERROR: u8 = 10;
-pub type AccessError = RequestError;
 
 /// Opcode for the Alloc error
 pub const ALLOC_ERROR: u8 = 11;
-pub type AllocError = RequestError;
 
 /// Opcode for the Colormap error
 pub const COLORMAP_ERROR: u8 = 12;
-pub type ColormapError = ValueError;
 
 /// Opcode for the GContext error
 pub const G_CONTEXT_ERROR: u8 = 13;
-pub type GContextError = ValueError;
 
 /// Opcode for the IDChoice error
 pub const ID_CHOICE_ERROR: u8 = 14;
-pub type IDChoiceError = ValueError;
 
 /// Opcode for the Name error
 pub const NAME_ERROR: u8 = 15;
-pub type NameError = RequestError;
 
 /// Opcode for the Length error
 pub const LENGTH_ERROR: u8 = 16;
-pub type LengthError = RequestError;
 
 /// Opcode for the Implementation error
 pub const IMPLEMENTATION_ERROR: u8 = 17;
-pub type ImplementationError = RequestError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]

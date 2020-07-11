@@ -7,7 +7,100 @@
 use std::convert::TryInto;
 
 use crate::errors::ParseError;
+use crate::protocol::ErrorKind;
 use crate::utils::RawFdContainer;
+
+/// Representation of an X11 error packet that was sent by the server.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct X11Error {
+    /// The kind of error that occurred.
+    pub error_kind: ErrorKind,
+    /// The kind of error that occurred as it appears "on the wire".
+    pub error_code: u8,
+    /// The sequence number of the request that caused this error.
+    pub sequence: u16,
+    /// The value in the request that caused the error.
+    pub bad_value: u32,
+    /// The minor opcode of the request that caused this error.
+    pub minor_opcode: u16,
+    /// The major opcode of the request that caused this error.
+    pub major_opcode: u8,
+}
+
+impl X11Error {
+    /// Parse an X11 error.
+    pub fn try_parse(
+        data: &[u8],
+        ext_info_provider: &dyn ExtInfoProvider,
+    ) -> Result<Self, ParseError> {
+        let (response_type, remaining) = u8::try_parse(data)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, _) = u8::try_parse(remaining)?;
+        if response_type != 0 {
+            Err(ParseError::InvalidValue)
+        } else {
+            let error_kind = ErrorKind::from_wire_error_code(error_code, ext_info_provider);
+            Ok(X11Error {
+                error_kind,
+                error_code,
+                sequence,
+                bad_value,
+                minor_opcode,
+                major_opcode,
+            })
+        }
+    }
+}
+
+impl From<&X11Error> for [u8; 32] {
+    fn from(input: &X11Error) -> Self {
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        [
+            0,
+            input.error_code,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            input.major_opcode,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+}
+impl From<X11Error> for [u8; 32] {
+    fn from(input: X11Error) -> Self {
+        Self::from(&input)
+    }
+}
 
 /// Information about a X11 extension.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

@@ -10,6 +10,7 @@ use std::borrow::Cow;
 use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
 use crate::utils::RawFdContainer;
+use crate::x11_utils::X11Error;
 use crate::x11_utils::{ExtInfoProvider, ReplyParsingFunction, Request as RequestTrait, RequestHeader};
 
 pub mod xproto;
@@ -6966,151 +6967,147 @@ impl From<xvmc::ListSubpictureTypesReply> for Reply {
   }
 }
 
-/// Enumeration of all possible X11 errors.
-#[derive(Debug, Clone)]
-pub enum Error {
-    Unknown(Vec<u8>),
-    Access(xproto::AccessError),
-    Alloc(xproto::AllocError),
-    Atom(xproto::AtomError),
-    Colormap(xproto::ColormapError),
-    Cursor(xproto::CursorError),
-    Drawable(xproto::DrawableError),
-    Font(xproto::FontError),
-    GContext(xproto::GContextError),
-    IDChoice(xproto::IDChoiceError),
-    Implementation(xproto::ImplementationError),
-    Length(xproto::LengthError),
-    Match(xproto::MatchError),
-    Name(xproto::NameError),
-    Pixmap(xproto::PixmapError),
-    Request(xproto::RequestError),
-    Value(xproto::ValueError),
-    Window(xproto::WindowError),
+/// Enumeration of all possible X11 error kinds.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ErrorKind {
+    Unknown(u8),
+    Access,
+    Alloc,
+    Atom,
+    Colormap,
+    Cursor,
+    Drawable,
+    Font,
+    GContext,
+    IDChoice,
+    Implementation,
+    Length,
+    Match,
+    Name,
+    Pixmap,
+    Request,
+    Value,
+    Window,
     #[cfg(feature = "damage")]
-    DamageBadDamage(damage::BadDamageError),
+    DamageBadDamage,
     #[cfg(feature = "glx")]
-    GlxBadContext(glx::BadContextError),
+    GlxBadContext,
     #[cfg(feature = "glx")]
-    GlxBadContextState(glx::BadContextStateError),
+    GlxBadContextState,
     #[cfg(feature = "glx")]
-    GlxBadContextTag(glx::BadContextTagError),
+    GlxBadContextTag,
     #[cfg(feature = "glx")]
-    GlxBadCurrentDrawable(glx::BadCurrentDrawableError),
+    GlxBadCurrentDrawable,
     #[cfg(feature = "glx")]
-    GlxBadCurrentWindow(glx::BadCurrentWindowError),
+    GlxBadCurrentWindow,
     #[cfg(feature = "glx")]
-    GlxBadDrawable(glx::BadDrawableError),
+    GlxBadDrawable,
     #[cfg(feature = "glx")]
-    GlxBadFBConfig(glx::BadFBConfigError),
+    GlxBadFBConfig,
     #[cfg(feature = "glx")]
-    GlxBadLargeRequest(glx::BadLargeRequestError),
+    GlxBadLargeRequest,
     #[cfg(feature = "glx")]
-    GlxBadPbuffer(glx::BadPbufferError),
+    GlxBadPbuffer,
     #[cfg(feature = "glx")]
-    GlxBadPixmap(glx::BadPixmapError),
+    GlxBadPixmap,
     #[cfg(feature = "glx")]
-    GlxBadRenderRequest(glx::BadRenderRequestError),
+    GlxBadRenderRequest,
     #[cfg(feature = "glx")]
-    GlxBadWindow(glx::BadWindowError),
+    GlxBadWindow,
     #[cfg(feature = "glx")]
-    GlxGLXBadProfileARB(glx::GLXBadProfileARBError),
+    GlxGLXBadProfileARB,
     #[cfg(feature = "glx")]
-    GlxUnsupportedPrivateRequest(glx::UnsupportedPrivateRequestError),
+    GlxUnsupportedPrivateRequest,
     #[cfg(feature = "randr")]
-    RandrBadCrtc(randr::BadCrtcError),
+    RandrBadCrtc,
     #[cfg(feature = "randr")]
-    RandrBadMode(randr::BadModeError),
+    RandrBadMode,
     #[cfg(feature = "randr")]
-    RandrBadOutput(randr::BadOutputError),
+    RandrBadOutput,
     #[cfg(feature = "randr")]
-    RandrBadProvider(randr::BadProviderError),
+    RandrBadProvider,
     #[cfg(feature = "record")]
-    RecordBadContext(record::BadContextError),
+    RecordBadContext,
     #[cfg(feature = "render")]
-    RenderGlyph(render::GlyphError),
+    RenderGlyph,
     #[cfg(feature = "render")]
-    RenderGlyphSet(render::GlyphSetError),
+    RenderGlyphSet,
     #[cfg(feature = "render")]
-    RenderPictFormat(render::PictFormatError),
+    RenderPictFormat,
     #[cfg(feature = "render")]
-    RenderPictOp(render::PictOpError),
+    RenderPictOp,
     #[cfg(feature = "render")]
-    RenderPicture(render::PictureError),
+    RenderPicture,
     #[cfg(feature = "shm")]
-    ShmBadSeg(shm::BadSegError),
+    ShmBadSeg,
     #[cfg(feature = "sync")]
-    SyncAlarm(sync::AlarmError),
+    SyncAlarm,
     #[cfg(feature = "sync")]
-    SyncCounter(sync::CounterError),
+    SyncCounter,
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeBadClock(xf86vidmode::BadClockError),
+    Xf86vidmodeBadClock,
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeBadHTimings(xf86vidmode::BadHTimingsError),
+    Xf86vidmodeBadHTimings,
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeBadVTimings(xf86vidmode::BadVTimingsError),
+    Xf86vidmodeBadVTimings,
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeClientNotLocal(xf86vidmode::ClientNotLocalError),
+    Xf86vidmodeClientNotLocal,
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeExtensionDisabled(xf86vidmode::ExtensionDisabledError),
+    Xf86vidmodeExtensionDisabled,
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeModeUnsuitable(xf86vidmode::ModeUnsuitableError),
+    Xf86vidmodeModeUnsuitable,
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeZoomLocked(xf86vidmode::ZoomLockedError),
+    Xf86vidmodeZoomLocked,
     #[cfg(feature = "xfixes")]
-    XfixesBadRegion(xfixes::BadRegionError),
+    XfixesBadRegion,
     #[cfg(feature = "xinput")]
-    XinputClass(xinput::ClassError),
+    XinputClass,
     #[cfg(feature = "xinput")]
-    XinputDevice(xinput::DeviceError),
+    XinputDevice,
     #[cfg(feature = "xinput")]
-    XinputDeviceBusy(xinput::DeviceBusyError),
+    XinputDeviceBusy,
     #[cfg(feature = "xinput")]
-    XinputEvent(xinput::EventError),
+    XinputEvent,
     #[cfg(feature = "xinput")]
-    XinputMode(xinput::ModeError),
+    XinputMode,
     #[cfg(feature = "xkb")]
-    XkbKeyboard(xkb::KeyboardError),
+    XkbKeyboard,
     #[cfg(feature = "xprint")]
-    XprintBadContext(xprint::BadContextError),
+    XprintBadContext,
     #[cfg(feature = "xprint")]
-    XprintBadSequence(xprint::BadSequenceError),
+    XprintBadSequence,
     #[cfg(feature = "xv")]
-    XvBadControl(xv::BadControlError),
+    XvBadControl,
     #[cfg(feature = "xv")]
-    XvBadEncoding(xv::BadEncodingError),
+    XvBadEncoding,
     #[cfg(feature = "xv")]
-    XvBadPort(xv::BadPortError),
+    XvBadPort,
 }
 
-impl Error {
-    /// Parse a generic X11 error into a concrete error type.
-    #[allow(clippy::cognitive_complexity, clippy::match_single_binding)]
-    pub fn parse(
-        error: &[u8],
+impl ErrorKind {
+    pub fn from_wire_error_code(
+        error_code: u8,
         ext_info_provider: &dyn ExtInfoProvider,
-    ) -> Result<Self, ParseError> {
-        let error_code = error_code(error)?;
-
+    ) -> Self {
         // Check if this is a core protocol error
         match error_code {
-            xproto::ACCESS_ERROR => return Ok(Self::Access(error.try_into()?)),
-            xproto::ALLOC_ERROR => return Ok(Self::Alloc(error.try_into()?)),
-            xproto::ATOM_ERROR => return Ok(Self::Atom(error.try_into()?)),
-            xproto::COLORMAP_ERROR => return Ok(Self::Colormap(error.try_into()?)),
-            xproto::CURSOR_ERROR => return Ok(Self::Cursor(error.try_into()?)),
-            xproto::DRAWABLE_ERROR => return Ok(Self::Drawable(error.try_into()?)),
-            xproto::FONT_ERROR => return Ok(Self::Font(error.try_into()?)),
-            xproto::G_CONTEXT_ERROR => return Ok(Self::GContext(error.try_into()?)),
-            xproto::ID_CHOICE_ERROR => return Ok(Self::IDChoice(error.try_into()?)),
-            xproto::IMPLEMENTATION_ERROR => return Ok(Self::Implementation(error.try_into()?)),
-            xproto::LENGTH_ERROR => return Ok(Self::Length(error.try_into()?)),
-            xproto::MATCH_ERROR => return Ok(Self::Match(error.try_into()?)),
-            xproto::NAME_ERROR => return Ok(Self::Name(error.try_into()?)),
-            xproto::PIXMAP_ERROR => return Ok(Self::Pixmap(error.try_into()?)),
-            xproto::REQUEST_ERROR => return Ok(Self::Request(error.try_into()?)),
-            xproto::VALUE_ERROR => return Ok(Self::Value(error.try_into()?)),
-            xproto::WINDOW_ERROR => return Ok(Self::Window(error.try_into()?)),
+            xproto::ACCESS_ERROR => return Self::Access,
+            xproto::ALLOC_ERROR => return Self::Alloc,
+            xproto::ATOM_ERROR => return Self::Atom,
+            xproto::COLORMAP_ERROR => return Self::Colormap,
+            xproto::CURSOR_ERROR => return Self::Cursor,
+            xproto::DRAWABLE_ERROR => return Self::Drawable,
+            xproto::FONT_ERROR => return Self::Font,
+            xproto::G_CONTEXT_ERROR => return Self::GContext,
+            xproto::ID_CHOICE_ERROR => return Self::IDChoice,
+            xproto::IMPLEMENTATION_ERROR => return Self::Implementation,
+            xproto::LENGTH_ERROR => return Self::Length,
+            xproto::MATCH_ERROR => return Self::Match,
+            xproto::NAME_ERROR => return Self::Name,
+            xproto::PIXMAP_ERROR => return Self::Pixmap,
+            xproto::REQUEST_ERROR => return Self::Request,
+            xproto::VALUE_ERROR => return Self::Value,
+            xproto::WINDOW_ERROR => return Self::Window,
             _ => {}
         }
 
@@ -7120,384 +7117,139 @@ impl Error {
             #[cfg(feature = "damage")]
             Some((damage::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamage(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    damage::BAD_DAMAGE_ERROR => Self::DamageBadDamage,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "glx")]
             Some((glx::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContext(error.try_into()?)),
-                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextState(error.try_into()?)),
-                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTag(error.try_into()?)),
-                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawable(error.try_into()?)),
-                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindow(error.try_into()?)),
-                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawable(error.try_into()?)),
-                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfig(error.try_into()?)),
-                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequest(error.try_into()?)),
-                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbuffer(error.try_into()?)),
-                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmap(error.try_into()?)),
-                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequest(error.try_into()?)),
-                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindow(error.try_into()?)),
-                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARB(error.try_into()?)),
-                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequest(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    glx::BAD_CONTEXT_ERROR => Self::GlxBadContext,
+                    glx::BAD_CONTEXT_STATE_ERROR => Self::GlxBadContextState,
+                    glx::BAD_CONTEXT_TAG_ERROR => Self::GlxBadContextTag,
+                    glx::BAD_CURRENT_DRAWABLE_ERROR => Self::GlxBadCurrentDrawable,
+                    glx::BAD_CURRENT_WINDOW_ERROR => Self::GlxBadCurrentWindow,
+                    glx::BAD_DRAWABLE_ERROR => Self::GlxBadDrawable,
+                    glx::BAD_FB_CONFIG_ERROR => Self::GlxBadFBConfig,
+                    glx::BAD_LARGE_REQUEST_ERROR => Self::GlxBadLargeRequest,
+                    glx::BAD_PBUFFER_ERROR => Self::GlxBadPbuffer,
+                    glx::BAD_PIXMAP_ERROR => Self::GlxBadPixmap,
+                    glx::BAD_RENDER_REQUEST_ERROR => Self::GlxBadRenderRequest,
+                    glx::BAD_WINDOW_ERROR => Self::GlxBadWindow,
+                    glx::GLX_BAD_PROFILE_ARB_ERROR => Self::GlxGLXBadProfileARB,
+                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Self::GlxUnsupportedPrivateRequest,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "randr")]
             Some((randr::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtc(error.try_into()?)),
-                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadMode(error.try_into()?)),
-                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutput(error.try_into()?)),
-                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProvider(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    randr::BAD_CRTC_ERROR => Self::RandrBadCrtc,
+                    randr::BAD_MODE_ERROR => Self::RandrBadMode,
+                    randr::BAD_OUTPUT_ERROR => Self::RandrBadOutput,
+                    randr::BAD_PROVIDER_ERROR => Self::RandrBadProvider,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "record")]
             Some((record::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContext(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    record::BAD_CONTEXT_ERROR => Self::RecordBadContext,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "render")]
             Some((render::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    render::GLYPH_ERROR => Ok(Self::RenderGlyph(error.try_into()?)),
-                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSet(error.try_into()?)),
-                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormat(error.try_into()?)),
-                    render::PICT_OP_ERROR => Ok(Self::RenderPictOp(error.try_into()?)),
-                    render::PICTURE_ERROR => Ok(Self::RenderPicture(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    render::GLYPH_ERROR => Self::RenderGlyph,
+                    render::GLYPH_SET_ERROR => Self::RenderGlyphSet,
+                    render::PICT_FORMAT_ERROR => Self::RenderPictFormat,
+                    render::PICT_OP_ERROR => Self::RenderPictOp,
+                    render::PICTURE_ERROR => Self::RenderPicture,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "shm")]
             Some((shm::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSeg(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    shm::BAD_SEG_ERROR => Self::ShmBadSeg,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "sync")]
             Some((sync::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    sync::ALARM_ERROR => Ok(Self::SyncAlarm(error.try_into()?)),
-                    sync::COUNTER_ERROR => Ok(Self::SyncCounter(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    sync::ALARM_ERROR => Self::SyncAlarm,
+                    sync::COUNTER_ERROR => Self::SyncCounter,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "xf86vidmode")]
             Some((xf86vidmode::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClock(error.try_into()?)),
-                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimings(error.try_into()?)),
-                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimings(error.try_into()?)),
-                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocal(error.try_into()?)),
-                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabled(error.try_into()?)),
-                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitable(error.try_into()?)),
-                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLocked(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    xf86vidmode::BAD_CLOCK_ERROR => Self::Xf86vidmodeBadClock,
+                    xf86vidmode::BAD_H_TIMINGS_ERROR => Self::Xf86vidmodeBadHTimings,
+                    xf86vidmode::BAD_V_TIMINGS_ERROR => Self::Xf86vidmodeBadVTimings,
+                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Self::Xf86vidmodeClientNotLocal,
+                    xf86vidmode::EXTENSION_DISABLED_ERROR => Self::Xf86vidmodeExtensionDisabled,
+                    xf86vidmode::MODE_UNSUITABLE_ERROR => Self::Xf86vidmodeModeUnsuitable,
+                    xf86vidmode::ZOOM_LOCKED_ERROR => Self::Xf86vidmodeZoomLocked,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "xfixes")]
             Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegion(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    xfixes::BAD_REGION_ERROR => Self::XfixesBadRegion,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "xinput")]
             Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xinput::CLASS_ERROR => Ok(Self::XinputClass(error.try_into()?)),
-                    xinput::DEVICE_ERROR => Ok(Self::XinputDevice(error.try_into()?)),
-                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusy(error.try_into()?)),
-                    xinput::EVENT_ERROR => Ok(Self::XinputEvent(error.try_into()?)),
-                    xinput::MODE_ERROR => Ok(Self::XinputMode(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    xinput::CLASS_ERROR => Self::XinputClass,
+                    xinput::DEVICE_ERROR => Self::XinputDevice,
+                    xinput::DEVICE_BUSY_ERROR => Self::XinputDeviceBusy,
+                    xinput::EVENT_ERROR => Self::XinputEvent,
+                    xinput::MODE_ERROR => Self::XinputMode,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "xkb")]
             Some((xkb::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboard(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    xkb::KEYBOARD_ERROR => Self::XkbKeyboard,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "xprint")]
             Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContext(error.try_into()?)),
-                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequence(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    xprint::BAD_CONTEXT_ERROR => Self::XprintBadContext,
+                    xprint::BAD_SEQUENCE_ERROR => Self::XprintBadSequence,
+                    _ => Self::Unknown(error_code),
                 }
             }
             #[cfg(feature = "xv")]
             Some((xv::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControl(error.try_into()?)),
-                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncoding(error.try_into()?)),
-                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPort(error.try_into()?)),
-                    _ => Ok(Self::Unknown(error.to_vec())),
+                    xv::BAD_CONTROL_ERROR => Self::XvBadControl,
+                    xv::BAD_ENCODING_ERROR => Self::XvBadEncoding,
+                    xv::BAD_PORT_ERROR => Self::XvBadPort,
+                    _ => Self::Unknown(error_code),
                 }
             }
-            _ => Ok(Self::Unknown(error.to_vec())),
-        }
-    }
-
-    /// Get the sequence number contained in this X11 error
-    pub fn wire_sequence_number(&self) -> u16 {
-        match self {
-            Error::Unknown(value) => sequence_number(value).unwrap(),
-            Error::Access(value) => value.sequence,
-            Error::Alloc(value) => value.sequence,
-            Error::Atom(value) => value.sequence,
-            Error::Colormap(value) => value.sequence,
-            Error::Cursor(value) => value.sequence,
-            Error::Drawable(value) => value.sequence,
-            Error::Font(value) => value.sequence,
-            Error::GContext(value) => value.sequence,
-            Error::IDChoice(value) => value.sequence,
-            Error::Implementation(value) => value.sequence,
-            Error::Length(value) => value.sequence,
-            Error::Match(value) => value.sequence,
-            Error::Name(value) => value.sequence,
-            Error::Pixmap(value) => value.sequence,
-            Error::Request(value) => value.sequence,
-            Error::Value(value) => value.sequence,
-            Error::Window(value) => value.sequence,
-            #[cfg(feature = "damage")]
-            Error::DamageBadDamage(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadContext(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadContextState(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadContextTag(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadCurrentDrawable(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadCurrentWindow(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadDrawable(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadFBConfig(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadLargeRequest(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadPbuffer(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadPixmap(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadRenderRequest(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxBadWindow(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxGLXBadProfileARB(value) => value.sequence,
-            #[cfg(feature = "glx")]
-            Error::GlxUnsupportedPrivateRequest(value) => value.sequence,
-            #[cfg(feature = "randr")]
-            Error::RandrBadCrtc(value) => value.sequence,
-            #[cfg(feature = "randr")]
-            Error::RandrBadMode(value) => value.sequence,
-            #[cfg(feature = "randr")]
-            Error::RandrBadOutput(value) => value.sequence,
-            #[cfg(feature = "randr")]
-            Error::RandrBadProvider(value) => value.sequence,
-            #[cfg(feature = "record")]
-            Error::RecordBadContext(value) => value.sequence,
-            #[cfg(feature = "render")]
-            Error::RenderGlyph(value) => value.sequence,
-            #[cfg(feature = "render")]
-            Error::RenderGlyphSet(value) => value.sequence,
-            #[cfg(feature = "render")]
-            Error::RenderPictFormat(value) => value.sequence,
-            #[cfg(feature = "render")]
-            Error::RenderPictOp(value) => value.sequence,
-            #[cfg(feature = "render")]
-            Error::RenderPicture(value) => value.sequence,
-            #[cfg(feature = "shm")]
-            Error::ShmBadSeg(value) => value.sequence,
-            #[cfg(feature = "sync")]
-            Error::SyncAlarm(value) => value.sequence,
-            #[cfg(feature = "sync")]
-            Error::SyncCounter(value) => value.sequence,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeBadClock(value) => value.sequence,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeBadHTimings(value) => value.sequence,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeBadVTimings(value) => value.sequence,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeClientNotLocal(value) => value.sequence,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeExtensionDisabled(value) => value.sequence,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeModeUnsuitable(value) => value.sequence,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeZoomLocked(value) => value.sequence,
-            #[cfg(feature = "xfixes")]
-            Error::XfixesBadRegion(value) => value.sequence,
-            #[cfg(feature = "xinput")]
-            Error::XinputClass(value) => value.sequence,
-            #[cfg(feature = "xinput")]
-            Error::XinputDevice(value) => value.sequence,
-            #[cfg(feature = "xinput")]
-            Error::XinputDeviceBusy(value) => value.sequence,
-            #[cfg(feature = "xinput")]
-            Error::XinputEvent(value) => value.sequence,
-            #[cfg(feature = "xinput")]
-            Error::XinputMode(value) => value.sequence,
-            #[cfg(feature = "xkb")]
-            Error::XkbKeyboard(value) => value.sequence,
-            #[cfg(feature = "xprint")]
-            Error::XprintBadContext(value) => value.sequence,
-            #[cfg(feature = "xprint")]
-            Error::XprintBadSequence(value) => value.sequence,
-            #[cfg(feature = "xv")]
-            Error::XvBadControl(value) => value.sequence,
-            #[cfg(feature = "xv")]
-            Error::XvBadEncoding(value) => value.sequence,
-            #[cfg(feature = "xv")]
-            Error::XvBadPort(value) => value.sequence,
-        }
-    }
-
-    /// Get the error code of this X11 error
-    pub fn error_code(&self) -> u8 {
-        match self {
-            Error::Unknown(value) => error_code(value).unwrap(),
-            Error::Access(value) => value.error_code,
-            Error::Alloc(value) => value.error_code,
-            Error::Atom(value) => value.error_code,
-            Error::Colormap(value) => value.error_code,
-            Error::Cursor(value) => value.error_code,
-            Error::Drawable(value) => value.error_code,
-            Error::Font(value) => value.error_code,
-            Error::GContext(value) => value.error_code,
-            Error::IDChoice(value) => value.error_code,
-            Error::Implementation(value) => value.error_code,
-            Error::Length(value) => value.error_code,
-            Error::Match(value) => value.error_code,
-            Error::Name(value) => value.error_code,
-            Error::Pixmap(value) => value.error_code,
-            Error::Request(value) => value.error_code,
-            Error::Value(value) => value.error_code,
-            Error::Window(value) => value.error_code,
-            #[cfg(feature = "damage")]
-            Error::DamageBadDamage(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadContext(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadContextState(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadContextTag(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadCurrentDrawable(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadCurrentWindow(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadDrawable(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadFBConfig(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadLargeRequest(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadPbuffer(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadPixmap(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadRenderRequest(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxBadWindow(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxGLXBadProfileARB(value) => value.error_code,
-            #[cfg(feature = "glx")]
-            Error::GlxUnsupportedPrivateRequest(value) => value.error_code,
-            #[cfg(feature = "randr")]
-            Error::RandrBadCrtc(value) => value.error_code,
-            #[cfg(feature = "randr")]
-            Error::RandrBadMode(value) => value.error_code,
-            #[cfg(feature = "randr")]
-            Error::RandrBadOutput(value) => value.error_code,
-            #[cfg(feature = "randr")]
-            Error::RandrBadProvider(value) => value.error_code,
-            #[cfg(feature = "record")]
-            Error::RecordBadContext(value) => value.error_code,
-            #[cfg(feature = "render")]
-            Error::RenderGlyph(value) => value.error_code,
-            #[cfg(feature = "render")]
-            Error::RenderGlyphSet(value) => value.error_code,
-            #[cfg(feature = "render")]
-            Error::RenderPictFormat(value) => value.error_code,
-            #[cfg(feature = "render")]
-            Error::RenderPictOp(value) => value.error_code,
-            #[cfg(feature = "render")]
-            Error::RenderPicture(value) => value.error_code,
-            #[cfg(feature = "shm")]
-            Error::ShmBadSeg(value) => value.error_code,
-            #[cfg(feature = "sync")]
-            Error::SyncAlarm(value) => value.error_code,
-            #[cfg(feature = "sync")]
-            Error::SyncCounter(value) => value.error_code,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeBadClock(value) => value.error_code,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeBadHTimings(value) => value.error_code,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeBadVTimings(value) => value.error_code,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeClientNotLocal(value) => value.error_code,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeExtensionDisabled(value) => value.error_code,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeModeUnsuitable(value) => value.error_code,
-            #[cfg(feature = "xf86vidmode")]
-            Error::Xf86vidmodeZoomLocked(value) => value.error_code,
-            #[cfg(feature = "xfixes")]
-            Error::XfixesBadRegion(value) => value.error_code,
-            #[cfg(feature = "xinput")]
-            Error::XinputClass(value) => value.error_code,
-            #[cfg(feature = "xinput")]
-            Error::XinputDevice(value) => value.error_code,
-            #[cfg(feature = "xinput")]
-            Error::XinputDeviceBusy(value) => value.error_code,
-            #[cfg(feature = "xinput")]
-            Error::XinputEvent(value) => value.error_code,
-            #[cfg(feature = "xinput")]
-            Error::XinputMode(value) => value.error_code,
-            #[cfg(feature = "xkb")]
-            Error::XkbKeyboard(value) => value.error_code,
-            #[cfg(feature = "xprint")]
-            Error::XprintBadContext(value) => value.error_code,
-            #[cfg(feature = "xprint")]
-            Error::XprintBadSequence(value) => value.error_code,
-            #[cfg(feature = "xv")]
-            Error::XvBadControl(value) => value.error_code,
-            #[cfg(feature = "xv")]
-            Error::XvBadEncoding(value) => value.error_code,
-            #[cfg(feature = "xv")]
-            Error::XvBadPort(value) => value.error_code,
-        }
-    }
-
-    /// Get the response type of this X11 error
-    ///
-    /// This is not `pub` because it should always be `0` for errors.
-    fn raw_response_type(&self) -> u8 {
-        match self {
-            Error::Unknown(value) => response_type(value).unwrap(),
-            _ => 0
+            _ => Self::Unknown(error_code),
         }
     }
 }
+
 
 /// Enumeration of all possible X11 events.
 #[derive(Debug, Clone)]
 pub enum Event {
     Unknown(Vec<u8>),
-    Error(Error),
+    Error(X11Error),
     ButtonPress(xproto::ButtonPressEvent),
     ButtonRelease(xproto::ButtonReleaseEvent),
     CirculateNotify(xproto::CirculateNotifyEvent),
@@ -7701,7 +7453,7 @@ impl Event {
 
         // Check if this is a core protocol event or error, or from the generic event extension
         match event_code {
-            0 => return Ok(Self::Error(Error::parse(event, ext_info_provider)?)),
+            0 => return Ok(Self::Error(X11Error::try_parse(event, ext_info_provider)?)),
             xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(event.try_into()?)),
             xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(event.try_into()?)),
             xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(event.try_into()?)),
@@ -7940,7 +7692,7 @@ impl Event {
     pub fn wire_sequence_number(&self) -> Option<u16> {
         match self {
             Event::Unknown(value) => sequence_number(value).ok(),
-            Event::Error(value) => Some(value.wire_sequence_number()),
+            Event::Error(value) => Some(value.sequence),
             Event::ButtonPress(value) => Some(value.sequence),
             Event::ButtonRelease(value) => Some(value.sequence),
             Event::CirculateNotify(value) => Some(value.sequence),
@@ -8144,7 +7896,7 @@ impl Event {
     pub fn raw_response_type(&self) -> u8 {
         match self {
             Event::Unknown(value) => response_type(value).unwrap(),
-            Event::Error(value) => value.raw_response_type(),
+            Event::Error(_) => 0,
             Event::ButtonPress(value) => value.response_type,
             Event::ButtonRelease(value) => value.response_type,
             Event::CirculateNotify(value) => value.response_type,
@@ -8364,13 +8116,6 @@ impl Event {
 fn response_type(raw_bytes: &[u8]) -> Result<u8, ParseError> {
     raw_bytes.get(0)
         .map(|x| x & 0x7f)
-        .ok_or(ParseError::InsufficientData)
-}
-
-/// Get the error code out of the raw bytes of an X11 error.
-fn error_code(raw_bytes: &[u8]) -> Result<u8, ParseError> {
-    raw_bytes.get(1)
-        .copied()
         .ok_or(ParseError::InsufficientData)
 }
 

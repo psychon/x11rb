@@ -47,9 +47,9 @@ use std::io::IoSlice;
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::protocol::xproto::Setup;
-use crate::protocol::{Error, Event};
+use crate::protocol::Event;
 use crate::utils::RawFdContainer;
-use crate::x11_utils::ExtensionInformation;
+use crate::x11_utils::{ExtensionInformation, X11Error};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -326,7 +326,7 @@ pub trait RequestConnection {
     fn maximum_request_bytes(&self) -> usize;
 
     /// Parse a generic error.
-    fn parse_error(&self, error: &[u8]) -> Result<Error, ParseError>;
+    fn parse_error(&self, error: &[u8]) -> Result<X11Error, ParseError>;
 
     /// Parse a generic event.
     fn parse_event(&self, event: &[u8]) -> Result<Event, ParseError>;
@@ -487,7 +487,7 @@ pub enum DiscardMode {
 ///     # fn prefetch_maximum_request_bytes(&self) {
 ///     #    unimplemented!()
 ///     # }
-///     # fn parse_error(&self, _error: &[u8]) -> Result<x11rb::protocol::Error, ParseError> {
+///     # fn parse_error(&self, _error: &[u8]) -> Result<x11rb::x11_utils::X11Error, ParseError> {
 ///     #     unimplemented!()
 ///     # }
 ///     # fn parse_event(&self, _event: &[u8]) -> Result<x11rb::protocol::Event, ParseError> {

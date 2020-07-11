@@ -128,7 +128,6 @@ impl From<CompletionEvent> for [u8; 32] {
 
 /// Opcode for the BadSeg error
 pub const BAD_SEG_ERROR: u8 = 0;
-pub type BadSegError = xproto::ValueError;
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;

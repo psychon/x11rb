@@ -9,7 +9,7 @@ use std::process::exit;
 use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::protocol::xproto::*;
-use x11rb::protocol::{Error, Event};
+use x11rb::protocol::{ErrorKind, Event};
 use x11rb::{COPY_DEPTH_FROM_PARENT, CURRENT_TIME};
 
 const TITLEBAR_HEIGHT: u16 = 20;
@@ -322,9 +322,13 @@ fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError>
         EventMask::SubstructureRedirect | EventMask::SubstructureNotify | EventMask::EnterWindow,
     );
     let res = conn.change_window_attributes(screen.root, &change)?.check();
-    if let Err(ReplyError::X11Error(Error::Access(_))) = res {
-        eprintln!("Another WM is already running.");
-        exit(1);
+    if let Err(ReplyError::X11Error(error)) = res {
+        if error.error_kind == ErrorKind::Access {
+            eprintln!("Another WM is already running.");
+            exit(1);
+        } else {
+            res
+        }
     } else {
         res
     }

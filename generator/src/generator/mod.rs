@@ -31,6 +31,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     outln!(main_out, "use std::convert::{{TryFrom, TryInto}};");
     outln!(main_out, "use crate::errors::ParseError;");
     outln!(main_out, "use crate::utils::RawFdContainer;");
+    outln!(main_out, "use crate::x11_utils::X11Error;");
     outln!(
         main_out,
         "use crate::x11_utils::{{ExtInfoProvider, ReplyParsingFunction, Request as RequestTrait, RequestHeader}};"
