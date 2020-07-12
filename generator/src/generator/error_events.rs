@@ -1,6 +1,6 @@
 use super::get_ns_name_prefix;
-use super::output::Output;
 use super::namespace::NON_EXHAUSTIVE;
+use super::output::Output;
 
 pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
     generate_errors(out, module);

@@ -37,7 +37,10 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Const {
     MaxLegalKeyCode = 255,
     PerKeyBitArraySize = 32,
@@ -103,7 +106,10 @@ impl TryFrom<u32> for Const {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum EventType {
     NewKeyboardNotify = 1 << 0,
     MapNotify = 1 << 1,
@@ -181,7 +187,10 @@ bitmask_binop!(EventType, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum NKNDetail {
     Keycodes = 1 << 0,
     Geometry = 1 << 1,
@@ -248,7 +257,10 @@ bitmask_binop!(NKNDetail, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum AXNDetail {
     SKPress = 1 << 0,
     SKAccept = 1 << 1,
@@ -327,7 +339,10 @@ bitmask_binop!(AXNDetail, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum MapPart {
     KeyTypes = 1 << 0,
     KeySyms = 1 << 1,
@@ -409,7 +424,10 @@ bitmask_binop!(MapPart, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SetMapFlags {
     ResizeTypes = 1 << 0,
     RecomputeActions = 1 << 1,
@@ -473,7 +491,10 @@ bitmask_binop!(SetMapFlags, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum StatePart {
     ModifierState = 1 << 0,
     ModifierBase = 1 << 1,
@@ -557,7 +578,10 @@ bitmask_binop!(StatePart, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum BoolCtrl {
     RepeatKeys = 1 << 0,
     SlowKeys = 1 << 1,
@@ -638,7 +662,10 @@ bitmask_binop!(BoolCtrl, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Control {
     GroupsWrap = 1 << 27,
     InternalMods = 1 << 28,
@@ -679,7 +706,10 @@ bitmask_binop!(Control, u32);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum AXOption {
     SKPressFB = 1 << 0,
     SKAcceptFB = 1 << 1,
@@ -759,7 +789,10 @@ pub type DeviceSpec = u16;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum LedClassResult {
     KbdFeedbackClass = 0,
     LedFeedbackClass = 4,
@@ -822,7 +855,10 @@ impl TryFrom<u32> for LedClassResult {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum LedClass {
     KbdFeedbackClass = 0,
     LedFeedbackClass = 4,
@@ -877,7 +913,10 @@ pub type LedClassSpec = u16;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum BellClassResult {
     KbdFeedbackClass = 0,
     BellFeedbackClass = 5,
@@ -940,7 +979,10 @@ impl TryFrom<u32> for BellClassResult {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum BellClass {
     KbdFeedbackClass = 0,
     BellFeedbackClass = 5,
@@ -992,7 +1034,10 @@ pub type BellClassSpec = u16;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum ID {
     UseCoreKbd = 256,
     UseCorePtr = 512,
@@ -1056,7 +1101,10 @@ pub type IDSpec = u16;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Group {
     M1 = 0,
     M2 = 1,
@@ -1125,7 +1173,10 @@ impl TryFrom<u32> for Group {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Groups {
     Any = 254,
     All = 255,
@@ -1188,7 +1239,10 @@ impl TryFrom<u32> for Groups {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SetOfGroup {
     Group1 = 1 << 0,
     Group2 = 1 << 1,
@@ -1258,7 +1312,10 @@ bitmask_binop!(SetOfGroup, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SetOfGroups {
     Any = 1 << 7,
 }
@@ -1319,7 +1376,10 @@ bitmask_binop!(SetOfGroups, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum GroupsWrap {
     WrapIntoRange = 0,
     ClampIntoRange = 1 << 6,
@@ -1386,7 +1446,10 @@ bitmask_binop!(GroupsWrap, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum VModsHigh {
     M15 = 1 << 7,
     M14 = 1 << 6,
@@ -1468,7 +1531,10 @@ bitmask_binop!(VModsHigh, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum VModsLow {
     M7 = 1 << 7,
     M6 = 1 << 6,
@@ -1550,7 +1616,10 @@ bitmask_binop!(VModsLow, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum VMod {
     M15 = 1 << 15,
     M14 = 1 << 14,
@@ -1640,7 +1709,10 @@ bitmask_binop!(VMod, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Explicit {
     VModMap = 1 << 7,
     Behavior = 1 << 6,
@@ -1722,7 +1794,10 @@ bitmask_binop!(Explicit, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SymInterpretMatch {
     NoneOf = 0,
     AnyOfOrNone = 1,
@@ -1794,7 +1869,10 @@ impl TryFrom<u32> for SymInterpretMatch {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SymInterpMatch {
     LevelOneOnly = 1 << 7,
     OpMask = 127,
@@ -1857,7 +1935,10 @@ impl TryFrom<u32> for SymInterpMatch {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum IMFlag {
     NoExplicit = 1 << 7,
     NoAutomatic = 1 << 6,
@@ -1924,7 +2005,10 @@ bitmask_binop!(IMFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum IMModsWhich {
     UseCompat = 1 << 4,
     UseEffective = 1 << 3,
@@ -1997,7 +2081,10 @@ bitmask_binop!(IMModsWhich, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum IMGroupsWhich {
     UseCompat = 1 << 4,
     UseEffective = 1 << 3,
@@ -2144,7 +2231,10 @@ impl Serialize for IndicatorMap {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum CMDetail {
     SymInterp = 1 << 0,
     GroupCompat = 1 << 1,
@@ -2208,7 +2298,10 @@ bitmask_binop!(CMDetail, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum NameDetail {
     Keycodes = 1 << 0,
     Geometry = 1 << 1,
@@ -2292,7 +2385,10 @@ bitmask_binop!(NameDetail, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum GBNDetail {
     Types = 1 << 0,
     CompatMap = 1 << 1,
@@ -2374,7 +2470,10 @@ bitmask_binop!(GBNDetail, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum XIFeature {
     Keyboards = 1 << 0,
     ButtonActions = 1 << 1,
@@ -2447,7 +2546,10 @@ bitmask_binop!(XIFeature, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum PerClientFlag {
     DetectableAutoRepeat = 1 << 0,
     GrabsUseXKBState = 1 << 1,
@@ -3170,7 +3272,10 @@ impl From<u8> for Behavior {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum BehaviorType {
     Default = 0,
     Lock = 1,
@@ -3888,7 +3993,10 @@ impl Row {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum DoodadType {
     Outline = 1,
     Solid = 2,
@@ -4072,7 +4180,10 @@ impl Serialize for DeviceLedInfo {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Error {
     BadDevice = 255,
     BadClass = 254,
@@ -4140,7 +4251,10 @@ impl TryFrom<u32> for Error {
 pub const KEYBOARD_ERROR: u8 = 0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SA {
     ClearLocks,
     LatchToLock,
@@ -4186,7 +4300,10 @@ bitmask_binop!(SA, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SAType {
     NoAction = 0,
     SetMods = 1,
@@ -4465,7 +4582,10 @@ pub type SALockGroup = SASetGroup;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SAMovePtrFlag {
     NoAcceleration = 1 << 0,
     MoveAbsoluteX = 1 << 1,
@@ -4697,7 +4817,10 @@ impl Serialize for SALockPtrBtn {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SASetPtrDfltFlag {
     DfltBtnAbsolute = 1 << 2,
     AffectDfltButton = 1 << 0,
@@ -4813,7 +4936,10 @@ impl Serialize for SASetPtrDflt {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SAIsoLockFlag {
     NoLock,
     NoUnlock,
@@ -4861,7 +4987,10 @@ bitmask_binop!(SAIsoLockFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SAIsoLockNoAffect {
     Ctrls = 1 << 3,
     Ptr = 1 << 4,
@@ -5039,7 +5168,10 @@ impl Serialize for SATerminate {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SwitchScreenFlag {
     Application = 1 << 0,
     Absolute = 1 << 2,
@@ -5152,7 +5284,10 @@ impl Serialize for SASwitchScreen {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum BoolCtrlsHigh {
     AccessXFeedback = 1 << 0,
     AudibleBell = 1 << 1,
@@ -5225,7 +5360,10 @@ bitmask_binop!(BoolCtrlsHigh, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum BoolCtrlsLow {
     RepeatKeys = 1 << 0,
     SlowKeys = 1 << 1,
@@ -5360,7 +5498,10 @@ pub type SALockControls = SASetControls;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum ActionMessageFlag {
     OnPress = 1 << 0,
     OnRelease = 1 << 1,
@@ -5598,7 +5739,10 @@ impl Serialize for SADeviceBtn {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum LockDeviceFlags {
     NoLock = 1 << 0,
     NoUnlock = 1 << 1,
@@ -5717,7 +5861,10 @@ impl Serialize for SALockDeviceBtn {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SAValWhat {
     IgnoreVal = 0,
     SetValMin = 1,

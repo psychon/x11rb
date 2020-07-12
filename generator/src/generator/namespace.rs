@@ -12,7 +12,7 @@ use xcbgen::defs as xcbdefs;
 use super::output::Output;
 use super::{get_ns_name_prefix, special_cases};
 
-pub(crate) static NON_EXHAUSTIVE: &str = "#[cfg_attr(not(feature = \"I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive\"), non_exhaustive)]";
+pub(crate) static NON_EXHAUSTIVE: &str = "#[cfg_attr(\n    not(feature = \"I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive\"),\n    non_exhaustive\n)]";
 
 #[derive(Debug, Default)]
 pub(super) struct PerModuleEnumCases {

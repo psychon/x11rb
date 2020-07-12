@@ -297,7 +297,10 @@ impl From<BufferSwapCompleteEvent> for [u8; 32] {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum PBCET {
     Damaged = 32791,
     Saved = 32792,
@@ -344,7 +347,10 @@ impl TryFrom<u32> for PBCET {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum PBCDT {
     Window = 32793,
     Pbuffer = 32794,
@@ -1282,7 +1288,10 @@ where
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 #[repr(u32)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum GC {
     GL_CURRENT_BIT = 1 << 0,
     GL_POINT_BIT = 1 << 1,
@@ -4567,7 +4576,10 @@ impl RenderModeReply {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 #[repr(u16)]
-#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum RM {
     GL_RENDER = 7168,
     GL_FEEDBACK = 7169,
