@@ -39,6 +39,7 @@ pub type Alarm = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum ALARMSTATE {
     Active = 0,
     Inactive = 1,
@@ -108,6 +109,7 @@ pub type Fence = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum TESTTYPE {
     PositiveTransition = 0,
     NegativeTransition = 1,
@@ -176,6 +178,7 @@ impl TryFrom<u32> for TESTTYPE {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum VALUETYPE {
     Absolute = 0,
     Relative = 1,
@@ -246,6 +249,7 @@ impl TryFrom<u32> for VALUETYPE {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum CA {
     Counter = 1 << 0,
     ValueType = 1 << 1,

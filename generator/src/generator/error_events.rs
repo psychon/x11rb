@@ -1,5 +1,6 @@
 use super::get_ns_name_prefix;
 use super::output::Output;
+use super::namespace::NON_EXHAUSTIVE;
 
 pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
     generate_errors(out, module);
@@ -42,6 +43,7 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
 
     outln!(out, "/// Enumeration of all possible X11 error kinds.");
     outln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
+    outln!(out, "{}", NON_EXHAUSTIVE);
     outln!(out, "pub enum ErrorKind {{");
     out.indented(|out| {
         outln!(out, "Unknown(u8),");
@@ -141,6 +143,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
 
     outln!(out, "/// Enumeration of all possible X11 events.");
     outln!(out, "#[derive(Debug, Clone)]");
+    outln!(out, "{}", NON_EXHAUSTIVE);
     outln!(out, "pub enum Event {{");
     out.indented(|out| {
         outln!(out, "Unknown(Vec<u8>),");

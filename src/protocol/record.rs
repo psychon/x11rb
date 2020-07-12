@@ -240,6 +240,7 @@ pub type ElementHeader = u8;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum HType {
     FromServerTime = 1 << 0,
     FromClientTime = 1 << 1,
@@ -308,6 +309,7 @@ pub type ClientSpec = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum CS {
     CurrentClients = 1,
     FutureClients = 2,

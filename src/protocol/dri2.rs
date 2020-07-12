@@ -37,6 +37,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 4);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum Attachment {
     BufferFrontLeft = 0,
     BufferBackLeft = 1,
@@ -127,6 +128,7 @@ impl TryFrom<u32> for Attachment {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 #[repr(u8)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum DriverType {
     DRI = 0,
     VDPAU = 1,
@@ -197,6 +199,7 @@ impl TryFrom<u32> for DriverType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum EventType {
     ExchangeComplete = 1,
     BlitComplete = 2,
