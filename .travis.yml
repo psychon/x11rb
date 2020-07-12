@@ -6,7 +6,7 @@ jobs:
     # std::io::IoSlice was stabilised in 1.36.0, but 1.36.0 fails with a weird
     # error enabled by deny(single_use_lifetimes).
     - rust: 1.37.0
-      env: CLIPPY_RUSTFMT=no
+      env: CLIPPY_RUSTFMT=no EXTRA_FEATURES=I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive
     - rust: stable
       env: CLIPPY_RUSTFMT=yes
     - rust: beta
@@ -86,7 +86,7 @@ script:
 
   # Build once with just the default features, i.e. without all the extensions
   # to check that this works fine.
-  - cargo check --verbose --all-targets
+  - cargo check --verbose --all-targets --features "$EXTRA_FEATURES"
 
   - cargo build --verbose --all-targets --all-features
   - cargo test --verbose --all-features
@@ -97,7 +97,7 @@ script:
   # Enable the 'allow-unsafe-code' feature so XCBConnection is used.
   - run_examples --all-features
 
-  - cargo build --verbose --all-targets --features all-extensions
+  - cargo build --verbose --all-targets --features "all-extensions,$EXTRA_FEATURES"
 
   # Run the examples as 'integration tests'. This time using RustConnection.
-  - run_examples --features "all-extensions libc cursor image"
+  - run_examples --features "all-extensions libc cursor image $EXTRA_FEATURES"
