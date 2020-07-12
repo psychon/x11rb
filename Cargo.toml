@@ -43,6 +43,12 @@ cursor = ["render"]
 # Enable utility functions in `x11rb::image` for working with image data.
 image = []
 
+# Some enums are marked as #[non_exhaustive]. This breaks compatibility with
+# Rust 1.37, because non-exhaustive was only stabilised in Rust 1.40. This
+# feature disables the use of #[non_exhaustive] for compatibility with Rust
+# 1.37. However, you still must treat the affected enums as #[non_exhaustive]!
+I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive = []
+
 # Enable this feature to enable all the X11 extensions
 all-extensions = [
     "composite",

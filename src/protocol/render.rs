@@ -37,6 +37,10 @@ pub const X11_XML_VERSION: (u32, u32) = (0, 11);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum PictType {
     Indexed = 0,
     Direct = 1,
@@ -107,6 +111,10 @@ impl TryFrom<u32> for PictType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum PictureEnum {
     None = 0,
 }
@@ -166,6 +174,10 @@ impl TryFrom<u32> for PictureEnum {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum PictOp {
     Clear = 0,
     Src = 1,
@@ -381,6 +393,10 @@ impl TryFrom<u32> for PictOp {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum PolyEdge {
     Sharp = 0,
     Smooth = 1,
@@ -451,6 +467,10 @@ impl TryFrom<u32> for PolyEdge {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum PolyMode {
     Precise = 0,
     Imprecise = 1,
@@ -521,6 +541,10 @@ impl TryFrom<u32> for PolyMode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum CP {
     Repeat = 1 << 0,
     AlphaMap = 1 << 1,
@@ -601,6 +625,10 @@ bitmask_binop!(CP, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SubPixel {
     Unknown = 0,
     HorizontalRGB = 1,
@@ -675,6 +703,10 @@ impl TryFrom<u32> for SubPixel {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Repeat {
     None = 0,
     Normal = 1,

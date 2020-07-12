@@ -41,6 +41,10 @@ pub type Kind = u8;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SO {
     Set = 0,
     Union = 1,
@@ -112,6 +116,10 @@ impl TryFrom<u32> for SO {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum SK {
     Bounding = 0,
     Clip = 1,

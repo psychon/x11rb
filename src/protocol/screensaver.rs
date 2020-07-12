@@ -37,6 +37,10 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Kind {
     Blanked = 0,
     Internal = 1,
@@ -102,6 +106,10 @@ impl TryFrom<u32> for Kind {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Event {
     NotifyMask = 1 << 0,
     CycleMask = 1 << 1,
@@ -165,6 +173,10 @@ bitmask_binop!(Event, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum State {
     Off = 0,
     On = 1,

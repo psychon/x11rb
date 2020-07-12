@@ -42,6 +42,10 @@ pub type Encoding = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum Type {
     InputMask = 1 << 0,
     OutputMask = 1 << 1,
@@ -115,6 +119,10 @@ bitmask_binop!(Type, u8);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum ImageFormatInfoType {
     RGB = 0,
     YUV = 1,
@@ -185,6 +193,10 @@ impl TryFrom<u32> for ImageFormatInfoType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum ImageFormatInfoFormat {
     Packed = 0,
     Planar = 1,
@@ -255,6 +267,10 @@ impl TryFrom<u32> for ImageFormatInfoFormat {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum AttributeFlag {
     Gettable = 1 << 0,
     Settable = 1 << 1,
@@ -318,6 +334,10 @@ bitmask_binop!(AttributeFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum VideoNotifyReason {
     Started = 0,
     Stopped = 1,
@@ -389,6 +409,10 @@ impl TryFrom<u32> for VideoNotifyReason {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum ScanlineOrder {
     TopToBottom = 0,
     BottomToTop = 1,
@@ -459,6 +483,10 @@ impl TryFrom<u32> for ScanlineOrder {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+#[cfg_attr(
+    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
+    non_exhaustive
+)]
 pub enum GrabPortStatus {
     Success = 0,
     BadExtension = 1,

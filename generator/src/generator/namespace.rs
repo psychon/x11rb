@@ -12,6 +12,8 @@ use xcbgen::defs as xcbdefs;
 use super::output::Output;
 use super::{get_ns_name_prefix, special_cases};
 
+pub(crate) static NON_EXHAUSTIVE: &str = "#[cfg_attr(\n    not(feature = \"I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive\"),\n    non_exhaustive\n)]";
+
 #[derive(Debug, Default)]
 pub(super) struct PerModuleEnumCases {
     /// Lines that belong in the Request enum definition.
@@ -52,6 +54,7 @@ pub(super) fn generate_request_reply_enum(
     outln!(out, "#[derive(Debug)]");
     // clippy::large_enum_variant for XkbSetNamesRequest.
     outln!(out, "#[allow(clippy::large_enum_variant)]");
+    outln!(out, "{}", NON_EXHAUSTIVE);
     outln!(out, "pub enum Request<'input> {{");
     out.indented(|out| {
         outln!(out, "Unknown(RequestHeader, Cow<'input, [u8]>),");
@@ -223,6 +226,7 @@ pub(super) fn generate_request_reply_enum(
     outln!(out, "#[derive(Debug)]");
     // clippy::large_enum_variant for XkbGetKbdByNameReply.
     outln!(out, "#[allow(clippy::large_enum_variant)]");
+    outln!(out, "{}", NON_EXHAUSTIVE);
     outln!(out, "pub enum Reply {{");
     out.indented(|out| {
         outln!(out, "Void,");
@@ -2161,6 +2165,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             // all the values fit. This prevents the 'enum_clike_unportable_variant' clippy warning.
             outln!(out, "#[repr({})]", to_type);
         }
+        outln!(out, "{}", NON_EXHAUSTIVE);
         outln!(out, "pub enum {} {{", rust_name);
         for enum_item in enum_def.items.iter() {
             let rust_item_name = ename_to_rust(&enum_item.name);
