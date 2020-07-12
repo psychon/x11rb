@@ -5,6 +5,7 @@ use crate::x11_utils::X11Error;
 
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum ParseError {
     /// Not enough data was provided.
     InsufficientData,
@@ -58,6 +59,7 @@ impl std::fmt::Display for ParseError {
 
 /// An error that occurred while connecting to an X11 server
 #[derive(Debug)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum ConnectError {
     /// An unknown error occurred.
     ///
@@ -143,6 +145,7 @@ impl From<std::io::Error> for ConnectError {
 
 /// An error that occurred on an already established X11 connection
 #[derive(Debug)]
+#[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
 pub enum ConnectionError {
     /// An unknown error occurred.
     ///
