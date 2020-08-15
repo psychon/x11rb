@@ -3,7 +3,7 @@
 
 extern crate x11rb;
 
-use std::collections::HashSet;
+use std::collections::{BinaryHeap, HashSet};
 use std::process::exit;
 
 use x11rb::connection::Connection;
@@ -52,6 +52,7 @@ struct WMState<'a, C: Connection> {
     pending_expose: HashSet<Window>,
     wm_protocols: Atom,
     wm_delete_window: Atom,
+    sequences_to_ignore: BinaryHeap<u16>,
 }
 
 impl<'a, C: Connection> WMState<'a, C> {
@@ -80,6 +81,7 @@ impl<'a, C: Connection> WMState<'a, C> {
             pending_expose: HashSet::default(),
             wm_protocols: wm_protocols.reply()?.atom,
             wm_delete_window: wm_delete_window.reply()?.atom,
+            sequences_to_ignore: BinaryHeap::new(),
         })
     }
 
@@ -227,7 +229,28 @@ impl<'a, C: Connection> WMState<'a, C> {
 
     /// Handle the given event
     fn handle_event(&mut self, event: Event) -> Result<(), ReplyOrIdError> {
+        let mut should_ignore = false;
+        if let Some(seqno) = event.wire_sequence_number() {
+            // Check sequences_to_ignore and remove entries with old (=smaller) numbers.
+            while let Some(&to_ignore) = self.sequences_to_ignore.peek() {
+                // Sequence numbers can wrap around, so we cannot simply check for
+                // "to_ignore <= seqno". This is equivalent to "to_ignore - seqno <= 0", which is what we
+                // check instead. Since sequence numbers are unsigned, we need a trick: We decide
+                // that values from [MAX/2, MAX] count as "<= 0" and the rest doesn't.
+                if to_ignore.wrapping_sub(seqno) <= u16::max_value() / 2 {
+                    // If the two sequence numbers are equal, this event should be ignored.
+                    should_ignore = to_ignore == seqno;
+                    break;
+                }
+                self.sequences_to_ignore.pop();
+            }
+        }
+
         println!("Got event {:?}", event);
+        if should_ignore {
+            println!("  [ignored]");
+            return Ok(());
+        }
         match event {
             Event::UnmapNotify(event) => self.handle_unmap_notify(event)?,
             Event::ConfigureRequest(event) => self.handle_configure_request(event)?,
