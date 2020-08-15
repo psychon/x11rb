@@ -144,12 +144,21 @@ impl<'a, C: Connection> WMState<'a, C> {
             &win_aux,
         )?;
 
-        self.conn
+        self.conn.grab_server()?;
+        self.conn.change_save_set(SetMode::Insert, win)?;
+        let cookie = self.conn
             .reparent_window(win, frame_win, 0, TITLEBAR_HEIGHT as _)?;
         self.conn.map_window(win)?;
         self.conn.map_window(frame_win)?;
+        self.conn.ungrab_server()?;
 
         self.windows.push(WindowState::new(win, frame_win, geom));
+
+        // Ignore all events caused by reparent_window(). All those events have the sequence number
+        // of the reparent_window() request, thus remember its sequence number. The
+        // grab_server()/ungrab_server() is done so that the server does not handle other clients
+        // in-between, which could cause other events to get the same sequence number.
+        self.sequences_to_ignore.push(cookie.sequence_number() as u16);
         Ok(())
     }
 
@@ -264,11 +273,14 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     fn handle_unmap_notify(&mut self, event: UnmapNotifyEvent) -> Result<(), ReplyError> {
+        let root = self.conn.setup().roots[self.screen_num].root;
         let conn = self.conn;
         self.windows.retain(|state| {
             if state.window != event.window {
                 return true;
             }
+            conn.change_save_set(SetMode::Delete, state.window).unwrap();
+            conn.reparent_window(state.window, root, state.x, state.y).unwrap();
             conn.destroy_window(state.frame_window).unwrap();
             false
         });
