@@ -300,17 +300,19 @@ impl<'a, C: Connection> WMState<'a, C> {
 
     fn handle_button_release(&mut self, event: ButtonReleaseEvent) -> Result<(), ReplyError> {
         if let Some(state) = self.find_window_by_id(event.event) {
-            let data = [self.wm_delete_window, 0, 0, 0, 0];
-            let event = ClientMessageEvent {
-                response_type: CLIENT_MESSAGE_EVENT,
-                format: 32,
-                sequence: 0,
-                window: state.window,
-                type_: self.wm_protocols,
-                data: data.into(),
-            };
-            self.conn
-                .send_event(false, state.window, EventMask::NoEvent, &event)?;
+            if event.event_x >= state.close_x_position() {
+                let data = [self.wm_delete_window, 0, 0, 0, 0];
+                let event = ClientMessageEvent {
+                    response_type: CLIENT_MESSAGE_EVENT,
+                    format: 32,
+                    sequence: 0,
+                    window: state.window,
+                    type_: self.wm_protocols,
+                    data: data.into(),
+                };
+                self.conn
+                    .send_event(false, state.window, EventMask::NoEvent, &event)?;
+            }
         }
         Ok(())
     }
