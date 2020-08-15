@@ -133,7 +133,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         let frame_win = self.conn.generate_id()?;
         let win_aux = CreateWindowAux::new()
             .event_mask(
-                EventMask::Exposure | EventMask::SubstructureNotify | EventMask::ButtonPress | EventMask::ButtonRelease | EventMask::PointerMotion,
+                EventMask::Exposure | EventMask::SubstructureNotify | EventMask::ButtonPress | EventMask::ButtonRelease | EventMask::PointerMotion | EventMask::EnterWindow,
             )
             .background_pixel(screen.white_pixel);
         self.conn.create_window(
@@ -331,13 +331,14 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     fn handle_enter(&mut self, event: EnterNotifyEvent) -> Result<(), ReplyError> {
-        let window = if let Some(state) = self.find_window_by_id(event.child) {
-            state.window
-        } else {
-            event.event
-        };
-        self.conn
-            .set_input_focus(InputFocus::Parent, window, CURRENT_TIME)?;
+        if let Some(state) = self.find_window_by_id(event.event) {
+            // Set the input focus (ignoring ICCCM's WM_PROTOCOLS / WM_TAKE_FOCUS)
+            self.conn
+                .set_input_focus(InputFocus::Parent, state.window, CURRENT_TIME)?;
+            // Also raise the window to the top of the stacking order
+            self.conn.configure_window(state.frame_window,
+                    &ConfigureWindowAux::new().stack_mode(StackMode::Above))?;
+        }
         Ok(())
     }
 
@@ -392,7 +393,7 @@ impl<'a, C: Connection> WMState<'a, C> {
 fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError> {
     // Try to become the window manager. This causes an error if there is already another WM.
     let change = ChangeWindowAttributesAux::default().event_mask(
-        EventMask::SubstructureRedirect | EventMask::SubstructureNotify | EventMask::EnterWindow,
+        EventMask::SubstructureRedirect | EventMask::SubstructureNotify,
     );
     let res = conn.change_window_attributes(screen.root, &change)?.check();
     if let Err(ReplyError::X11Error(error)) = res {
