@@ -4,6 +4,7 @@
 extern crate x11rb;
 
 use std::collections::{BinaryHeap, HashSet};
+use std::cmp::Reverse;
 use std::process::exit;
 
 use x11rb::connection::Connection;
@@ -53,7 +54,7 @@ struct WMState<'a, C: Connection> {
     pending_expose: HashSet<Window>,
     wm_protocols: Atom,
     wm_delete_window: Atom,
-    sequences_to_ignore: BinaryHeap<u16>,
+    sequences_to_ignore: BinaryHeap<Reverse<u16>>,
     // If this is Some, we are currently dragging the given window with the given offset relative
     // to the mouse.
     drag_window: Option<(Window, (i16, i16))>,
@@ -163,7 +164,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         // of the reparent_window() request, thus remember its sequence number. The
         // grab_server()/ungrab_server() is done so that the server does not handle other clients
         // in-between, which could cause other events to get the same sequence number.
-        self.sequences_to_ignore.push(cookie.sequence_number() as u16);
+        self.sequences_to_ignore.push(Reverse(cookie.sequence_number() as u16));
         Ok(())
     }
 
@@ -246,7 +247,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         let mut should_ignore = false;
         if let Some(seqno) = event.wire_sequence_number() {
             // Check sequences_to_ignore and remove entries with old (=smaller) numbers.
-            while let Some(&to_ignore) = self.sequences_to_ignore.peek() {
+            while let Some(&Reverse(to_ignore)) = self.sequences_to_ignore.peek() {
                 // Sequence numbers can wrap around, so we cannot simply check for
                 // "to_ignore <= seqno". This is equivalent to "to_ignore - seqno <= 0", which is what we
                 // check instead. Since sequence numbers are unsigned, we need a trick: We decide
