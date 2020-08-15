@@ -3,8 +3,8 @@
 
 extern crate x11rb;
 
-use std::collections::{BinaryHeap, HashSet};
 use std::cmp::Reverse;
+use std::collections::{BinaryHeap, HashSet};
 use std::process::exit;
 
 use x11rb::connection::Connection;
@@ -133,7 +133,12 @@ impl<'a, C: Connection> WMState<'a, C> {
         let frame_win = self.conn.generate_id()?;
         let win_aux = CreateWindowAux::new()
             .event_mask(
-                EventMask::Exposure | EventMask::SubstructureNotify | EventMask::ButtonPress | EventMask::ButtonRelease | EventMask::PointerMotion | EventMask::EnterWindow,
+                EventMask::Exposure
+                    | EventMask::SubstructureNotify
+                    | EventMask::ButtonPress
+                    | EventMask::ButtonRelease
+                    | EventMask::PointerMotion
+                    | EventMask::EnterWindow,
             )
             .background_pixel(screen.white_pixel);
         self.conn.create_window(
@@ -152,7 +157,8 @@ impl<'a, C: Connection> WMState<'a, C> {
 
         self.conn.grab_server()?;
         self.conn.change_save_set(SetMode::Insert, win)?;
-        let cookie = self.conn
+        let cookie = self
+            .conn
             .reparent_window(win, frame_win, 0, TITLEBAR_HEIGHT as _)?;
         self.conn.map_window(win)?;
         self.conn.map_window(frame_win)?;
@@ -164,7 +170,8 @@ impl<'a, C: Connection> WMState<'a, C> {
         // of the reparent_window() request, thus remember its sequence number. The
         // grab_server()/ungrab_server() is done so that the server does not handle other clients
         // in-between, which could cause other events to get the same sequence number.
-        self.sequences_to_ignore.push(Reverse(cookie.sequence_number() as u16));
+        self.sequences_to_ignore
+            .push(Reverse(cookie.sequence_number() as u16));
         Ok(())
     }
 
@@ -288,7 +295,8 @@ impl<'a, C: Connection> WMState<'a, C> {
                 return true;
             }
             conn.change_save_set(SetMode::Delete, state.window).unwrap();
-            conn.reparent_window(state.window, root, state.x, state.y).unwrap();
+            conn.reparent_window(state.window, root, state.x, state.y)
+                .unwrap();
             conn.destroy_window(state.frame_window).unwrap();
             false
         });
@@ -336,15 +344,17 @@ impl<'a, C: Connection> WMState<'a, C> {
             self.conn
                 .set_input_focus(InputFocus::Parent, state.window, CURRENT_TIME)?;
             // Also raise the window to the top of the stacking order
-            self.conn.configure_window(state.frame_window,
-                    &ConfigureWindowAux::new().stack_mode(StackMode::Above))?;
+            self.conn.configure_window(
+                state.frame_window,
+                &ConfigureWindowAux::new().stack_mode(StackMode::Above),
+            )?;
         }
         Ok(())
     }
 
     fn handle_button_press(&mut self, event: ButtonPressEvent) -> Result<(), ReplyError> {
         if event.detail != DRAG_BUTTON || event.state != 0 {
-            return Ok(())
+            return Ok(());
         }
         if let Some(state) = self.find_window_by_id(event.event) {
             if self.drag_window.is_none() && event.event_x < state.close_x_position() {
@@ -382,9 +392,8 @@ impl<'a, C: Connection> WMState<'a, C> {
             let (x, y) = (x + event.root_x, y + event.root_y);
             // Sigh, X11 and its mixing up i16 and i32
             let (x, y) = (x as i32, y as i32);
-            self.conn.configure_window(win, &ConfigureWindowAux::new()
-                .x(x)
-                .y(y))?;
+            self.conn
+                .configure_window(win, &ConfigureWindowAux::new().x(x).y(y))?;
         }
         Ok(())
     }
@@ -392,9 +401,8 @@ impl<'a, C: Connection> WMState<'a, C> {
 
 fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError> {
     // Try to become the window manager. This causes an error if there is already another WM.
-    let change = ChangeWindowAttributesAux::default().event_mask(
-        EventMask::SubstructureRedirect | EventMask::SubstructureNotify,
-    );
+    let change = ChangeWindowAttributesAux::default()
+        .event_mask(EventMask::SubstructureRedirect | EventMask::SubstructureNotify);
     let res = conn.change_window_attributes(screen.root, &change)?.check();
     if let Err(ReplyError::X11Error(error)) = res {
         if error.error_kind == ErrorKind::Access {
