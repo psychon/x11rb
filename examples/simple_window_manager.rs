@@ -13,6 +13,7 @@ use x11rb::protocol::{ErrorKind, Event};
 use x11rb::{COPY_DEPTH_FROM_PARENT, CURRENT_TIME};
 
 const TITLEBAR_HEIGHT: u16 = 20;
+const DRAG_BUTTON: Button = 1;
 
 /// The state of a single window that we manage
 #[derive(Debug)]
@@ -53,6 +54,9 @@ struct WMState<'a, C: Connection> {
     wm_protocols: Atom,
     wm_delete_window: Atom,
     sequences_to_ignore: BinaryHeap<u16>,
+    // If this is Some, we are currently dragging the given window with the given offset relative
+    // to the mouse.
+    drag_window: Option<(Window, (i16, i16))>,
 }
 
 impl<'a, C: Connection> WMState<'a, C> {
@@ -81,7 +85,8 @@ impl<'a, C: Connection> WMState<'a, C> {
             pending_expose: HashSet::default(),
             wm_protocols: wm_protocols.reply()?.atom,
             wm_delete_window: wm_delete_window.reply()?.atom,
-            sequences_to_ignore: BinaryHeap::new(),
+            sequences_to_ignore: Default::default(),
+            drag_window: None,
         })
     }
 
@@ -127,7 +132,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         let frame_win = self.conn.generate_id()?;
         let win_aux = CreateWindowAux::new()
             .event_mask(
-                EventMask::Exposure | EventMask::SubstructureNotify | EventMask::ButtonRelease,
+                EventMask::Exposure | EventMask::SubstructureNotify | EventMask::ButtonPress | EventMask::ButtonRelease | EventMask::PointerMotion,
             )
             .background_pixel(screen.white_pixel);
         self.conn.create_window(
@@ -266,7 +271,9 @@ impl<'a, C: Connection> WMState<'a, C> {
             Event::MapRequest(event) => self.handle_map_request(event)?,
             Event::Expose(event) => self.handle_expose(event)?,
             Event::EnterNotify(event) => self.handle_enter(event)?,
+            Event::ButtonPress(event) => self.handle_button_press(event)?,
             Event::ButtonRelease(event) => self.handle_button_release(event)?,
+            Event::MotionNotify(event) => self.handle_motion_notify(event)?,
             _ => {}
         }
         Ok(())
@@ -333,7 +340,23 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
+    fn handle_button_press(&mut self, event: ButtonPressEvent) -> Result<(), ReplyError> {
+        if event.detail != DRAG_BUTTON || event.state != 0 {
+            return Ok(())
+        }
+        if let Some(state) = self.find_window_by_id(event.event) {
+            if self.drag_window.is_none() && event.event_x < state.close_x_position() {
+                let (x, y) = (-event.event_x, -event.event_y);
+                self.drag_window = Some((state.frame_window, (x, y)));
+            }
+        }
+        Ok(())
+    }
+
     fn handle_button_release(&mut self, event: ButtonReleaseEvent) -> Result<(), ReplyError> {
+        if event.detail == DRAG_BUTTON {
+            self.drag_window = None;
+        }
         if let Some(state) = self.find_window_by_id(event.event) {
             if event.event_x >= state.close_x_position() {
                 let data = [self.wm_delete_window, 0, 0, 0, 0];
@@ -348,6 +371,18 @@ impl<'a, C: Connection> WMState<'a, C> {
                 self.conn
                     .send_event(false, state.window, EventMask::NoEvent, &event)?;
             }
+        }
+        Ok(())
+    }
+
+    fn handle_motion_notify(&mut self, event: MotionNotifyEvent) -> Result<(), ReplyError> {
+        if let Some((win, (x, y))) = self.drag_window {
+            let (x, y) = (x + event.root_x, y + event.root_y);
+            // Sigh, X11 and its mixing up i16 and i32
+            let (x, y) = (x as i32, y as i32);
+            self.conn.configure_window(win, &ConfigureWindowAux::new()
+                .x(x)
+                .y(y))?;
         }
         Ok(())
     }
