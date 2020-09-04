@@ -643,7 +643,7 @@ impl Parser {
             }
         }
 
-        let value = value.ok_or_else(|| ParseError::InvalidXml)?;
+        let value = value.ok_or(ParseError::InvalidXml)?;
 
         Ok(defs::EnumItem {
             name: name.into(),
@@ -725,7 +725,7 @@ impl Parser {
                 if element_type.type_.name() == "fd" {
                     Ok(Some(defs::FieldDef::FdList(defs::FdListField {
                         name: name.into(),
-                        length_expr: length_expr.ok_or_else(|| ParseError::InvalidXml)?,
+                        length_expr: length_expr.ok_or(ParseError::InvalidXml)?,
                     })))
                 } else {
                     Ok(Some(defs::FieldDef::List(defs::ListField {
@@ -779,8 +779,8 @@ impl Parser {
                     }
                 }
 
-                let expr = expr.ok_or_else(|| ParseError::InvalidXml)?;
-                let kind = kind.ok_or_else(|| ParseError::InvalidXml)?;
+                let expr = expr.ok_or(ParseError::InvalidXml)?;
+                let kind = kind.ok_or(ParseError::InvalidXml)?;
 
                 Ok(Some(defs::FieldDef::Switch(defs::SwitchField {
                     name: name.into(),
@@ -803,7 +803,7 @@ impl Parser {
                 let type_ = self.parse_field_value_type(node)?;
                 let expr = self.parse_expression(
                     node.first_element_child()
-                        .ok_or_else(|| ParseError::InvalidXml)?,
+                        .ok_or(ParseError::InvalidXml)?,
                 )?;
 
                 Ok(Some(defs::FieldDef::Expr(defs::ExprField {
@@ -913,7 +913,7 @@ impl Parser {
     ) -> Result<defs::Expression, ParseError> {
         self.try_parse_expression(node)
             .transpose()
-            .ok_or_else(|| ParseError::InvalidXml)?
+            .ok_or(ParseError::InvalidXml)?
     }
 
     fn try_parse_expression(
