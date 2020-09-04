@@ -160,6 +160,10 @@ impl XCBConnection {
         Ok(result)
     }
 
+    // Slince the warning about ioslice.len().try_into().unwrap(). The target type is sometimes
+    // usize (where this warning is correct) and sometimes c_int (where we need the conversion). We
+    // need this here due to https://github.com/rust-lang/rust/issues/60681.
+    #[allow(clippy::useless_conversion)]
     fn send_request(
         &self,
         bufs: &[IoSlice<'_>],
