@@ -110,7 +110,7 @@ xv = ["shm"]
 xvmc = ["xv"]
 
 [package.metadata.docs.rs]
-features = [ "all-extensions", "cursor" ]
+features = [ "all-extensions", "allow-unsafe-code", "cursor", "image" ]
 
 [[example]]
 name = "generic_events"
