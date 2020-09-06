@@ -5,6 +5,8 @@ use std::marker::PhantomData;
 
 use crate::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::errors::{ConnectionError, ParseError, ReplyError};
+#[cfg(feature = "record")]
+use crate::protocol::record::EnableContextReply;
 use crate::protocol::xproto::ListFontsWithInfoReply;
 use crate::utils::RawFdContainer;
 
@@ -298,6 +300,65 @@ where
         match reply {
             // Is this an indicator that no more replies follow?
             Ok(ref reply) if reply.name.is_empty() => None,
+            Ok(reply) => {
+                self.0 = Some(cookie);
+                Some(Ok(reply))
+            }
+            Err(e) => Some(Err(e)),
+        }
+    }
+}
+
+/// A handle to the replies to a `record::EnableContext` request.
+///
+/// `EnableContext` generated more than one reply, but `Cookie` only allows getting one reply.
+/// This structure implements `Iterator` and allows to get all the replies.
+#[cfg(feature = "record")]
+#[derive(Debug)]
+pub struct RecordEnableContextCookie<'a, C: RequestConnection + ?Sized>(Option<RawCookie<'a, C>>);
+
+#[cfg(feature = "record")]
+impl<C> RecordEnableContextCookie<'_, C>
+where
+    C: RequestConnection + ?Sized,
+{
+    pub(crate) fn new(
+        cookie: Cookie<'_, C, EnableContextReply>,
+    ) -> RecordEnableContextCookie<'_, C> {
+        RecordEnableContextCookie(Some(cookie.raw_cookie))
+    }
+
+    /// Get the sequence number of the request that generated this cookie.
+    pub fn sequence_number(&self) -> Option<SequenceNumber> {
+        self.0.as_ref().map(|x| x.sequence_number)
+    }
+}
+
+#[cfg(feature = "record")]
+impl<C> Iterator for RecordEnableContextCookie<'_, C>
+where
+    C: RequestConnection + ?Sized,
+{
+    type Item = Result<EnableContextReply, ReplyError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let cookie = match self.0.take() {
+            None => return None,
+            Some(cookie) => cookie,
+        };
+        let reply = cookie
+            .connection
+            .wait_for_reply_or_error(cookie.sequence_number);
+        let reply = match reply {
+            Err(e) => return Some(Err(e)),
+            Ok(v) => v,
+        };
+        let reply = EnableContextReply::try_from(reply.as_ref()).map_err(ReplyError::from);
+        match reply {
+            // Is this an indicator that no more replies follow?
+            // FIXME: There does not seem to be an enumeration of the category values, (value 5 is
+            // EndOfData)
+            Ok(ref reply) if reply.category == 5 => None,
             Ok(reply) => {
                 self.0 = Some(cookie);
                 Some(Ok(reply))

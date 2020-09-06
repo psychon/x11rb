@@ -21,6 +21,7 @@ use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+use crate::cookie::RecordEnableContextCookie;
 use crate::errors::{ConnectionError, ParseError};
 
 /// The X11 name of the extension for QueryExtension
@@ -996,13 +997,13 @@ impl EnableContextRequest {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         Ok((vec![request0.into()], vec![]))
     }
-    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, EnableContextReply>, ConnectionError>
+    pub fn send<Conn>(self, conn: &Conn) -> Result<RecordEnableContextCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        Ok(RecordEnableContextCookie::new(conn.send_request_with_reply(&slices, fds)?))
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1019,7 +1020,7 @@ impl EnableContextRequest {
 impl Request for EnableContextRequest {
     type Reply = EnableContextReply;
 }
-pub fn enable_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, EnableContextReply>, ConnectionError>
+pub fn enable_context<Conn>(conn: &Conn, context: Context) -> Result<RecordEnableContextCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1241,7 +1242,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_context(self, context)
     }
-    fn record_enable_context(&self, context: Context) -> Result<Cookie<'_, Self, EnableContextReply>, ConnectionError>
+    fn record_enable_context(&self, context: Context) -> Result<RecordEnableContextCookie<'_, Self>, ConnectionError>
     {
         enable_context(self, context)
     }
