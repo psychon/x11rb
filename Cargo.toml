@@ -132,5 +132,9 @@ required-features = ["cursor"]
 name = "display_ppm"
 required-features = ["image"]
 
+[[example]]
+name = "record"
+required-features = ["record"]
+
 [workspace]
 members = ["generator", "xcbgen-rs", "cairo-example", "xtrace-example"]
