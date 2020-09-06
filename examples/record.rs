@@ -19,6 +19,7 @@ use x11rb::connection::RequestConnection;
 use x11rb::errors::ParseError;
 use x11rb::protocol::record::{self, ConnectionExt as _};
 use x11rb::protocol::xproto;
+use x11rb::wrapper::ConnectionExt;
 use x11rb::x11_utils::TryParse;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -68,6 +69,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         client_died: false,
     };
     ctrl_conn.record_create_context(rc, 0, &[record::CS::AllClients.into()], &[range])?.check()?;
+
+    // Apply a timeout if we are requested to do so.
+    match std::env::var("X11RB_EXAMPLE_TIMEOUT").ok().and_then(|str| str.parse().ok())
+    {
+        None => {},
+        Some(timeout) => {
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_secs(timeout));
+                ctrl_conn.record_disable_context(rc).unwrap();
+                ctrl_conn.sync().unwrap();
+            });
+        }
+    }
 
     // The above check() makes sure that the server already handled the CreateContext request.
     // Alternatively, we could do ctrl_conn.sync() here for the same effect.
