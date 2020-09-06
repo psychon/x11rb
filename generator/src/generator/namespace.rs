@@ -365,6 +365,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if self.ns.header == "xproto" {
             outln!(out, "use crate::cookie::ListFontsWithInfoCookie;");
         }
+        if self.ns.header == "record" {
+            outln!(out, "use crate::cookie::RecordEnableContextCookie;");
+        }
         outln!(out, "use crate::errors::{{ConnectionError, ParseError}};");
 
         let mut imports = self
@@ -1213,9 +1216,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             // Sending method
             let is_list_fonts_with_info =
                 request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
-            let ret_type = if is_list_fonts_with_info {
+            let is_record_enable_context =
+                request_def.name == "EnableContext" && ns.header == "record";
+            let ret_type = if is_list_fonts_with_info || is_record_enable_context {
                 assert!(request_def.reply.is_some());
-                "ListFontsWithInfoCookie<'_, Conn>".to_string()
+                match (is_list_fonts_with_info, is_record_enable_context) {
+                    (true, _) => "ListFontsWithInfoCookie<'_, Conn>".to_string(),
+                    (_, true) => "RecordEnableContextCookie<'_, Conn>".to_string(),
+                    _ => unreachable!(),
+                }
             } else {
                 match (request_def.reply.is_some(), gathered.reply_has_fds) {
                     (false, _) => "VoidCookie<'_, Conn>".to_string(),
@@ -1238,10 +1247,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     "let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();"
                 );
 
-                if is_list_fonts_with_info {
+                if is_list_fonts_with_info || is_record_enable_context {
+                    let cookie = match (is_list_fonts_with_info, is_record_enable_context) {
+                        (true, _) => "ListFontsWithInfoCookie",
+                        (_, true) => "RecordEnableContextCookie",
+                        _ => unreachable!(),
+                    };
                     outln!(
                         out,
-                        "Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&slices, fds)?))",
+                        "Ok({}::new(conn.send_request_with_reply(&slices, fds)?))",
+                        cookie,
                     )
                 } else if request_def.reply.is_some() {
                     if gathered.reply_has_fds {
@@ -1445,6 +1460,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let is_list_fonts_with_info =
             request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
         let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
+        let is_record_enable_context = request_def.name == "EnableContext" && ns.header == "record";
 
         let needs_lifetime = gathered.needs_lifetime && !is_send_event;
 
@@ -1460,10 +1476,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
 
         let ret_lifetime = if needs_lifetime { "'c" } else { "'_" };
-        let ret_type = if is_list_fonts_with_info {
+        let ret_type = if is_list_fonts_with_info || is_record_enable_context {
             assert!(request_def.reply.is_some());
             assert!(!gathered.reply_has_fds);
-            format!("ListFontsWithInfoCookie<{}, Conn>", ret_lifetime)
+            if is_list_fonts_with_info {
+                format!("ListFontsWithInfoCookie<{}, Conn>", ret_lifetime)
+            } else {
+                format!("RecordEnableContextCookie<{}, Conn>", ret_lifetime)
+            }
         } else {
             match (request_def.reply.is_some(), gathered.reply_has_fds) {
                 (false, _) => format!("VoidCookie<{}, Conn>", ret_lifetime),
@@ -1543,6 +1563,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let is_list_fonts_with_info =
             request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
         let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
+        let is_record_enable_context = request_def.name == "EnableContext" && ns.header == "record";
         let needs_lifetime = gathered.needs_lifetime && !is_send_event;
 
         let mut generic_params = String::new();
@@ -1561,10 +1582,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
 
         let ret_lifetime = if needs_lifetime { "'c" } else { "'_" };
-        let ret_type = if is_list_fonts_with_info {
+        let ret_type = if is_list_fonts_with_info || is_record_enable_context {
             assert!(request_def.reply.is_some());
             assert!(!gathered.reply_has_fds);
-            format!("ListFontsWithInfoCookie<{}, Self>", ret_lifetime)
+            if is_list_fonts_with_info {
+                format!("ListFontsWithInfoCookie<{}, Self>", ret_lifetime)
+            } else {
+                format!("RecordEnableContextCookie<{}, Self>", ret_lifetime)
+            }
         } else {
             match (request_def.reply.is_some(), gathered.reply_has_fds) {
                 (false, _) => format!("VoidCookie<{}, Self>", ret_lifetime),

@@ -1,3 +1,6 @@
+// This example reads a .ppm file and displays the image on screen. It shows how to work
+// with images.
+
 use x11rb::connection::Connection;
 use x11rb::errors::ReplyOrIdError;
 use x11rb::image::{ColorComponent, Image, PixelLayout};
