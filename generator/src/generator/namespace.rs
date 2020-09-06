@@ -1251,7 +1251,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let cookie = match (is_list_fonts_with_info, is_record_enable_context) {
                         (true, _) => "ListFontsWithInfoCookie",
                         (_, true) => "RecordEnableContextCookie",
-                        _ => unreachable!()
+                        _ => unreachable!(),
                     };
                     outln!(
                         out,
@@ -1460,8 +1460,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let is_list_fonts_with_info =
             request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
         let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
-        let is_record_enable_context =
-            request_def.name == "EnableContext" && ns.header == "record";
+        let is_record_enable_context = request_def.name == "EnableContext" && ns.header == "record";
 
         let needs_lifetime = gathered.needs_lifetime && !is_send_event;
 
@@ -1564,8 +1563,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let is_list_fonts_with_info =
             request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
         let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
-        let is_record_enable_context =
-            request_def.name == "EnableContext" && ns.header == "record";
+        let is_record_enable_context = request_def.name == "EnableContext" && ns.header == "record";
         let needs_lifetime = gathered.needs_lifetime && !is_send_event;
 
         let mut generic_params = String::new();

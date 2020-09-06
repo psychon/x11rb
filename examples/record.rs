@@ -32,26 +32,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Check if the record extension is supported.
     if ctrl_conn
         .extension_information(record::X11_EXTENSION_NAME)?
-        .is_none() {
+        .is_none()
+    {
         eprintln!("The X11 server does not support the RECORD extension");
         return Ok(());
     }
-    let ver = ctrl_conn.record_query_version(record::X11_XML_VERSION.0 as _, record::X11_XML_VERSION.1 as _)?.reply()?;
-    println!("requested RECORD extension version {:?}, server supports {:?}",
-             record::X11_XML_VERSION, (ver.major_version, ver.minor_version));
+    let ver = ctrl_conn
+        .record_query_version(
+            record::X11_XML_VERSION.0 as _,
+            record::X11_XML_VERSION.1 as _,
+        )?
+        .reply()?;
+    println!(
+        "requested RECORD extension version {:?}, server supports {:?}",
+        record::X11_XML_VERSION,
+        (ver.major_version, ver.minor_version)
+    );
 
     // Set up a recording context
     let rc = ctrl_conn.generate_id()?;
-    let empty = record::Range8 {
-        first: 0,
-        last: 0,
-    };
+    let empty = record::Range8 { first: 0, last: 0 };
     let empty_ext = record::ExtRange {
         major: empty,
-        minor: record::Range16 {
-            first: 0,
-            last: 0,
-        },
+        minor: record::Range16 { first: 0, last: 0 },
     };
     let range = record::Range {
         core_requests: empty,
@@ -68,12 +71,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         client_started: false,
         client_died: false,
     };
-    ctrl_conn.record_create_context(rc, 0, &[record::CS::AllClients.into()], &[range])?.check()?;
+    ctrl_conn
+        .record_create_context(rc, 0, &[record::CS::AllClients.into()], &[range])?
+        .check()?;
 
     // Apply a timeout if we are requested to do so.
-    match std::env::var("X11RB_EXAMPLE_TIMEOUT").ok().and_then(|str| str.parse().ok())
+    match std::env::var("X11RB_EXAMPLE_TIMEOUT")
+        .ok()
+        .and_then(|str| str.parse().ok())
     {
-        None => {},
+        None => {}
         Some(timeout) => {
             std::thread::spawn(move || {
                 std::thread::sleep(std::time::Duration::from_secs(timeout));
