@@ -801,10 +801,8 @@ impl Parser {
             "exprfield" => {
                 let name = get_attr(node, "name")?;
                 let type_ = self.parse_field_value_type(node)?;
-                let expr = self.parse_expression(
-                    node.first_element_child()
-                        .ok_or(ParseError::InvalidXml)?,
-                )?;
+                let expr = self
+                    .parse_expression(node.first_element_child().ok_or(ParseError::InvalidXml)?)?;
 
                 Ok(Some(defs::FieldDef::Expr(defs::ExprField {
                     name: name.into(),
