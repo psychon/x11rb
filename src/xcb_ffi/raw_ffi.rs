@@ -144,18 +144,12 @@ impl LibxcbLibrary {
     fn open_lib() -> Result<libloading::Library, LibxcbLoadError> {
         // TODO: Names for non-unix platforms
         #[cfg(unix)]
-        const LIB_NAMES: &[&str] = &["libxcb.so.1", "libxcb.so"];
+        const LIB_NAME: &str = "libxcb.so.1";
         #[cfg(not(unix))]
         compile_error!("dl-libxcb feature is not supported on non-unix");
 
-        let mut errors = Vec::new();
-        for lib_name in LIB_NAMES.iter() {
-            match libloading::Library::new(lib_name) {
-                Ok(library) => return Ok(library),
-                Err(e) => errors.push((lib_name.into(), e.to_string())),
-            }
-        }
-        Err(LibxcbLoadError::OpenLibError(errors))
+        libloading::Library::new(LIB_NAME)
+            .map_err(|e| LibxcbLoadError::OpenLibError(LIB_NAME.into(), e.to_string()))
     }
 
     /// # Safety

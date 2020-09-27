@@ -7,13 +7,9 @@ use crate::x11_utils::X11Error;
 #[cfg(feature = "dl-libxcb")]
 #[derive(Debug, Clone)]
 pub enum LibxcbLoadError {
-    /// Could not open the library. `load_libxcb` might try to load
-    /// different library file names, so the vector contains the reason
-    /// that caused each one to fail.
-    ///
-    /// The `OsString` is the library file name and the string is the
-    /// reason.
-    OpenLibError(Vec<(std::ffi::OsString, String)>),
+    /// Could not open the library. The `OsString` is the library
+    /// file name and the string is the reason.
+    OpenLibError(std::ffi::OsString, String),
     /// Could not get a symbol from the library. The byte vector is the
     /// symbol name and the string is the reason.
     GetSymbolError(Vec<u8>, String),
@@ -23,15 +19,8 @@ pub enum LibxcbLoadError {
 impl std::fmt::Display for LibxcbLoadError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            LibxcbLoadError::OpenLibError(libs_errors) => {
-                f.write_str("failed to open libraries: ")?;
-                for (i, (lib_name, e)) in libs_errors.iter().enumerate() {
-                    if i != 0 {
-                        f.write_str(", ")?;
-                    }
-                    write!(f, "{:?} ({})", lib_name, e)?;
-                }
-                Ok(())
+            LibxcbLoadError::OpenLibError(lib_name, e) => {
+                write!(f, "failed to open library {:?}: {}", lib_name, e)
             }
             LibxcbLoadError::GetSymbolError(symbol, e) => write!(
                 f,
