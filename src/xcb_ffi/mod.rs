@@ -31,7 +31,7 @@ mod pending_errors;
 mod raw_ffi;
 
 #[cfg(all(not(test), feature = "dl-libxcb"))]
-pub use raw_ffi::load_libxcb;
+pub use raw_ffi::libxcb_library::load_libxcb;
 
 type Buffer = <XCBConnection as RequestConnection>::Buf;
 /// The raw bytes of an event received by [`XCBConnection`] and its sequence number.

@@ -6,9 +6,6 @@ use libc::c_void;
 pub(crate) use libc::iovec;
 use libc::{c_char, c_int, c_uint};
 
-#[cfg(all(not(test), feature = "dl-libxcb"))]
-use crate::errors::LibxcbLoadError;
-
 // As defined in xcb_windefs.h
 #[cfg(not(unix))]
 #[derive(Copy, Clone, Debug)]
@@ -133,76 +130,77 @@ pub(crate) mod send_request_flags {
 }
 
 #[cfg(all(not(test), feature = "dl-libxcb"))]
-struct LibxcbLibrary {
-    // Needed to keep the library loaded
-    _library: libloading::Library,
-    funcs: LibxcbFuncs,
-}
+pub(super) mod libxcb_library {
+    use super::LibxcbFuncs;
+    use crate::errors::LibxcbLoadError;
 
-#[cfg(all(not(test), feature = "dl-libxcb"))]
-impl LibxcbLibrary {
-    fn open_lib() -> Result<libloading::Library, LibxcbLoadError> {
-        // TODO: Names for non-unix platforms
-        #[cfg(unix)]
-        const LIB_NAME: &str = "libxcb.so.1";
-        #[cfg(not(unix))]
-        compile_error!("dl-libxcb feature is not supported on non-unix");
-
-        libloading::Library::new(LIB_NAME)
-            .map_err(|e| LibxcbLoadError::OpenLibError(LIB_NAME.into(), e.to_string()))
+    pub(super) struct LibxcbLibrary {
+        // Needed to keep the library loaded
+        _library: libloading::Library,
+        pub(super) funcs: LibxcbFuncs,
     }
 
-    /// # Safety
+    impl LibxcbLibrary {
+        fn open_lib() -> Result<libloading::Library, LibxcbLoadError> {
+            // TODO: Names for non-unix platforms
+            #[cfg(unix)]
+            const LIB_NAME: &str = "libxcb.so.1";
+            #[cfg(not(unix))]
+            compile_error!("dl-libxcb feature is not supported on non-unix");
+
+            libloading::Library::new(LIB_NAME)
+                .map_err(|e| LibxcbLoadError::OpenLibError(LIB_NAME.into(), e.to_string()))
+        }
+
+        /// # Safety
+        ///
+        /// The functions pointers in `funcs` do not have lifetime,
+        /// but they must not outlive the returned result.
+        #[cold]
+        #[inline(never)]
+        unsafe fn load() -> Result<Self, LibxcbLoadError> {
+            let library = Self::open_lib()?;
+            let funcs = LibxcbFuncs::new(&library).map_err(|(symbol, e)| {
+                LibxcbLoadError::GetSymbolError(symbol.into(), e.to_string())
+            })?;
+            Ok(Self {
+                _library: library,
+                funcs,
+            })
+        }
+    }
+
+    use once_cell::sync::Lazy;
+
+    static LIBXCB_LIBRARY: Lazy<Result<LibxcbLibrary, LibxcbLoadError>> =
+        Lazy::new(|| unsafe { LibxcbLibrary::load() });
+
+    pub(super) fn get_libxcb() -> &'static LibxcbLibrary {
+        #[cold]
+        #[inline(never)]
+        fn failed(e: &LibxcbLoadError) -> ! {
+            panic!("failed to load libxcb: {}", e);
+        }
+        match *LIBXCB_LIBRARY {
+            Ok(ref library) => library,
+            Err(ref e) => failed(e),
+        }
+    }
+
+    /// Tries to dynamically load libxcb, returning an error on failure.
     ///
-    /// The functions pointers in `funcs` do not have lifetime,
-    /// but they must not outlive the returned result.
-    #[cold]
-    #[inline(never)]
-    unsafe fn load() -> Result<Self, LibxcbLoadError> {
-        let library = Self::open_lib()?;
-        let funcs = LibxcbFuncs::new(&library)
-            .map_err(|(symbol, e)| LibxcbLoadError::GetSymbolError(symbol.into(), e.to_string()))?;
-        Ok(Self {
-            _library: library,
-            funcs,
-        })
-    }
-}
-
-#[cfg(all(not(test), feature = "dl-libxcb"))]
-use once_cell::sync::Lazy;
-
-#[cfg(all(not(test), feature = "dl-libxcb"))]
-static LIBXCB_LIBRARY: Lazy<Result<LibxcbLibrary, LibxcbLoadError>> =
-    Lazy::new(|| unsafe { LibxcbLibrary::load() });
-
-#[cfg(all(not(test), feature = "dl-libxcb"))]
-fn get_libxcb() -> &'static LibxcbLibrary {
-    #[cold]
-    #[inline(never)]
-    fn failed(e: &LibxcbLoadError) -> ! {
-        panic!("failed to load libxcb: {}", e);
-    }
-    match *LIBXCB_LIBRARY {
-        Ok(ref library) => library,
-        Err(ref e) => failed(e),
-    }
-}
-
-/// Tries to dynamically load libxcb, returning an error on failure.
-///
-/// It is not required to call this function, as libxcb will be lazily loaded.
-/// However, if a lazy load fails, a panic will be raised, missing the chance
-/// to (nicely) handle the error.
-///
-/// It is safe to call this function more than once from the same or different
-/// threads. Only the first call will try to load libxcb, subsequent calls will
-/// always return the same result.
-#[cfg(all(not(test), feature = "dl-libxcb"))]
-pub fn load_libxcb() -> Result<(), LibxcbLoadError> {
-    match Lazy::force(&LIBXCB_LIBRARY) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(e.clone()),
+    /// It is not required to call this function, as libxcb will be lazily loaded.
+    /// However, if a lazy load fails, a panic will be raised, missing the chance
+    /// to (nicely) handle the error.
+    ///
+    /// It is safe to call this function more than once from the same or different
+    /// threads. Only the first call will try to load libxcb, subsequent calls will
+    /// always return the same result.
+    pub fn load_libxcb() -> Result<(), LibxcbLoadError> {
+        match Lazy::force(&LIBXCB_LIBRARY) {
+            Ok(_) => Ok(()),
+            Err(e) => Err(e.clone()),
+        }
     }
 }
 
@@ -231,6 +229,7 @@ macro_rules! make_ffi_fn_defs {
             )*
         }
 
+        #[cfg(feature = "dl-libxcb")]
         impl LibxcbFuncs {
             unsafe fn new(library: &libloading::Library) -> Result<Self, (&'static [u8], libloading::Error)> {
                 Ok(Self {
@@ -246,7 +245,7 @@ macro_rules! make_ffi_fn_defs {
             #[cfg(feature = "dl-libxcb")]
             $(#[$fn_attr])*
             pub(crate) unsafe fn $fn_name($($fn_arg_name: $fn_arg_type),*) $(-> $fn_ret_ty)? {
-                (get_libxcb().funcs.$fn_name)($($fn_arg_name),*)
+                (libxcb_library::get_libxcb().funcs.$fn_name)($($fn_arg_name),*)
             }
         )*
     };
