@@ -63,6 +63,7 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
     outln!(out, "");
     outln!(out, "impl ErrorKind {{");
     out.indented(|out| {
+        outln!(out, "#[allow(clippy::match_single_binding)]");
         outln!(out, "pub fn from_wire_error_code(");
         outln!(out.indent(), "error_code: u8,");
         outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");

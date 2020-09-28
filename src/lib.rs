@@ -91,7 +91,10 @@
 //! Additionally, the following flags exist:
 //! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
 //!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
-//!
+//! * `dl-libxcb`: Enabling this feature will prevent from libxcb being linked to the
+//!   resulting executable. Instead libxcb will be dynamically loaded at runtime.
+//!   This feature adds the `x11rb::xcb_ffi::load_libxcb` function, that allows load
+//!   libxcb and check for success or failure.
 //!
 //! # Integrating x11rb with an Event Loop
 //!

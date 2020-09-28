@@ -20,6 +20,8 @@ exclude = [
 
 [dependencies]
 libc = { version = "0.2", optional = true }
+libloading = { version = "0.6.3", optional = true }
+once_cell = { version = "1.4.1", optional = true }
 gethostname = "0.2.1"
 
 [target.'cfg(unix)'.dependencies]
@@ -42,6 +44,8 @@ cursor = ["render"]
 
 # Enable utility functions in `x11rb::image` for working with image data.
 image = []
+
+dl-libxcb = ["allow-unsafe-code", "libloading", "once_cell"]
 
 # Some enums are marked as #[non_exhaustive]. This breaks compatibility with
 # Rust 1.37, because non-exhaustive was only stabilised in Rust 1.40. This

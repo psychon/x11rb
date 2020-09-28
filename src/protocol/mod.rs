@@ -7097,6 +7097,7 @@ pub enum ErrorKind {
 }
 
 impl ErrorKind {
+    #[allow(clippy::match_single_binding)]
     pub fn from_wire_error_code(
         error_code: u8,
         ext_info_provider: &dyn ExtInfoProvider,

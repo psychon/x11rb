@@ -3,6 +3,43 @@
 use crate::protocol::xproto::{SetupAuthenticate, SetupFailed};
 use crate::x11_utils::X11Error;
 
+/// An error occurred  while dynamically loading libxcb.
+#[cfg(feature = "dl-libxcb")]
+#[derive(Debug, Clone)]
+pub enum LibxcbLoadError {
+    /// Could not open the library. The `OsString` is the library
+    /// file name and the string is the reason.
+    OpenLibError(std::ffi::OsString, String),
+    /// Could not get a symbol from the library. The byte vector is the
+    /// symbol name and the string is the reason.
+    GetSymbolError(Vec<u8>, String),
+}
+
+#[cfg(feature = "dl-libxcb")]
+impl std::fmt::Display for LibxcbLoadError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LibxcbLoadError::OpenLibError(lib_name, e) => {
+                write!(f, "failed to open library {:?}: {}", lib_name, e)
+            }
+            LibxcbLoadError::GetSymbolError(symbol, e) => write!(
+                f,
+                "failed to get symbol \"{}\": {}",
+                symbol
+                    .iter()
+                    .map(|&c| std::ascii::escape_default(c))
+                    .flatten()
+                    .map(char::from)
+                    .collect::<String>(),
+                e,
+            ),
+        }
+    }
+}
+
+#[cfg(feature = "dl-libxcb")]
+impl std::error::Error for LibxcbLoadError {}
+
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[cfg_attr(

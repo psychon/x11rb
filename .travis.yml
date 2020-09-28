@@ -32,6 +32,14 @@ addons:
       - xvfb
 
 before_script:
+  - |
+    if [ "$TRAVIS_RUST_VERSION" = "1.37.0" ]; then
+        # libloading needs 1.40
+        export ALL_FEATURES="all-extensions allow-unsafe-code cursor image "
+    else
+        export ALL_FEATURES="all-extensions allow-unsafe-code dl-libxcb cursor image"        
+    fi
+
   # Run the examples as 'integration tests'. For this, there is a special
   # timeout mode where the examples close automatically after some time.
   - |
@@ -88,16 +96,16 @@ script:
   # to check that this works fine.
   - cargo check --verbose --all-targets --features "$EXTRA_FEATURES"
 
-  - cargo build --verbose --all-targets --all-features
-  - cargo test --verbose --all-features
-  - cargo doc --verbose --all-features
+  - cargo build --verbose --all-targets --features "$ALL_FEATURES $EXTRA_FEATURES"
+  - cargo test --verbose --features "$ALL_FEATURES $EXTRA_FEATURES"
+  - cargo doc --verbose --features "$ALL_FEATURES $EXTRA_FEATURES"
 
   # Run the examples as 'integration tests'.
   # Enable the 'all-extensions' feature or Cargo will complain.
   # Enable the 'allow-unsafe-code' feature so XCBConnection is used.
-  - run_examples --all-features
+  - run_examples --features "$ALL_FEATURES $EXTRA_FEATURES"
 
-  - cargo build --verbose --all-targets --features "all-extensions,$EXTRA_FEATURES"
+  - cargo build --verbose --all-targets --features "all-extensions $EXTRA_FEATURES"
 
   # Run the examples as 'integration tests'. This time using RustConnection.
   - run_examples --features "all-extensions libc cursor image $EXTRA_FEATURES"
