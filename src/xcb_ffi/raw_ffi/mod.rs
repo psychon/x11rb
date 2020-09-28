@@ -235,7 +235,7 @@ macro_rules! make_ffi_fn_defs {
                 Ok(Self {
                     $($fn_name: {
                         let symbol_name = concat!(stringify!($fn_name), "\0").as_bytes();
-                        *library.get(symbol_name).map_err(|e| (symbol_name, e))?
+                        *library.get(symbol_name).map_err(|e| (stringify!($fn_name).as_bytes(), e))?
                     },)*
                 })
             }
