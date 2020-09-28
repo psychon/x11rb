@@ -1,3 +1,12 @@
+//! The code in this module allows to call libxcb's C functions.
+//!
+//! At its heart, this module only contains an `extern "C"` block that defines the C functions so
+//! that they can be called from Rust.
+//!
+//! However, this module also contains the implementation of the `dl-libxcb` features. When this
+//! future is enabled, we do not link against libxcb, but instead use `libloading` to load
+//! `libxcb.so` at runtime. Most of the code is actually responsible for this later feature.
+
 use super::{
     c_char, c_int, c_uint, c_void, iovec, xcb_connection_t, xcb_generic_error_t,
     xcb_generic_event_t, xcb_protocol_request_t, xcb_setup_t, xcb_void_cookie_t,

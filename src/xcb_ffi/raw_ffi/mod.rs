@@ -1,3 +1,9 @@
+//! The low-level foreign function interface to interact with libxcb.
+//!
+//! This module contains some `#[repr(C)]` type definitions that match libxcb's definitions. The
+//! actual functions are defined in the `ffi` submodule. There is also a `test` submodule that
+//! contains a mock of the interface that is used for unit tests.
+
 use std::ptr::NonNull;
 
 #[cfg(not(all(test, unix)))]

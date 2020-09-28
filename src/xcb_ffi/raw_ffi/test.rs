@@ -1,3 +1,5 @@
+//! A mock of libxcb that is used by the unit tests in [`x11rb::xcb_ffi`].
+
 use std::ffi::CStr;
 
 use libc::{c_char, c_int, c_uint, c_void};
