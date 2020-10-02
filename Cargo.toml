@@ -25,10 +25,10 @@ once_cell = { version = "1.4.1", optional = true }
 gethostname = "0.2.1"
 
 [target.'cfg(unix)'.dependencies]
-nix = "0.17"
+nix = "0.18.0"
 
 [target.'cfg(windows)'.dependencies]
-winapi-wsapoll = "0.1.0"
+winapi-wsapoll = "0.1.1"
 
 [target.'cfg(windows)'.dependencies.winapi]
 version = "0.3"
