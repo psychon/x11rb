@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Midnight on the 1st of a month
+    - cron: '0 0 1 * *'
+
+env:
+  CARGO_TERM_COLOR: always
+  ALL_FEATURES: all-extensions cursor image
+
+jobs:
+  code_gen:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+    - name: Run code generator
+      run: make
+    - name: Check for changes
+      run: if ! git diff --exit-code; then exit 1; fi
+
+  clippy-rustfmt:
+     runs-on: ubuntu-latest
+     strategy:
+       matrix:
+         include:
+           - rust: stable
+           - rust: beta
+             #fixme: remove this hack
+             clippy_args: -A clippy::match-like-matches-macro
+     steps:
+       - uses: actions/checkout@v2
+       - uses: actions-rs/toolchain@v1
+         with:
+           profile: minimal
+           toolchain: ${{ matrix.rust }}
+           override: true
+           components: rustfmt, clippy
+       - uses: actions-rs/cargo@v1
+         with:
+           command: fmt
+           args: --all -- --check
+       - uses: actions-rs/cargo@v1
+         with:
+           command: clippy
+           #fixme: Remove unnecessary-sort-by
+           args: --all --all-targets --all-features -- -D warnings -A clippy::unnecessary-sort-by ${{ matrix.clippy_args }}
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - rust: 1.37.0
+            extra_features: I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive
+          - rust: stable
+            all_extra_features: dl-libxcb
+          - rust: beta
+            all_extra_features: dl-libxcb
+          - rust: nightly
+            all_extra_features: dl-libxcb
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        override: true
+    - name: Set all features
+      run: echo "ALL_FEATURES=$ALL_FEATURES allow-unsafe-code ${{ matrix.all_extra_features }} ${{ matrix.extra_features }}" >> $GITHUB_ENV
+    - name: cargo check with default features
+      run: cargo check --verbose --all-targets --features "${{ matrix.extra_features }}"
+    - name: cargo build with all features
+      run: cargo build --verbose --all-targets --features "$ALL_FEATURES"
+    - name: cargo test
+      run: cargo test --verbose --all --features "$ALL_FEATURES"
+    - name: cargo doc with all features
+      run: cargo doc --verbose --features "$ALL_FEATURES"
+    - name: Prepare run examples
+      run: |
+          echo '#!/bin/bash
+              for example in examples/*.rs; do
+                  example=${example/examples\//}
+                  example=${example/.rs/}
+                  if [ "$example" != tutorial ] ; then
+                      X11RB_EXAMPLE_TIMEOUT=1 xvfb-run -a cargo run --example "$example" "$@" || exit 1
+                  fi
+              done
+          ' > run_examples && chmod a+x run_examples
+    - name: run examples with XCBConnection
+      run: ./run_examples --features "$ALL_FEATURES"
+    - name: cargo build with RustConnection and all extensions
+      run: cargo build --verbose --all-targets --features "all-extensions  ${{ matrix.extra_features }}"
+    - name: run examples with RustConnection
+      run: ./run_examples --features "all-extensions libc cursor image ${{ matrix.extra_features }}"
+
+
+  big-endian-test:
+    runs-on: ubuntu-latest
+    env:
+      CROSS_TARGET: mips64-unknown-linux-gnuabi64
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    - name: Install cross rust
+      run: rustup target add "$CROSS_TARGET"
+    - name: Install cross
+      run: cargo install cross --force
+    - name: cargo test
+      run: cross test --target "$CROSS_TARGET" --verbose --features "$ALL_FEATURES"
