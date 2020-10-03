@@ -1,4 +1,8 @@
-#![allow(clippy::cognitive_complexity, clippy::option_as_ref_deref, clippy::too_many_arguments)]
+#![allow(
+    clippy::cognitive_complexity,
+    clippy::option_as_ref_deref,
+    clippy::too_many_arguments
+)]
 
 use std::borrow::Cow;
 use std::cell::RefCell;
