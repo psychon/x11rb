@@ -199,6 +199,7 @@ use x11rb::COPY_DEPTH_FROM_PARENT;
 // Here is a program that computes the time to create 500 atoms with Xlib and XCB. It shows the Xlib way, the bad XCB way (which is similar to Xlib) and the good XCB way. On my computer, XCB is 25 times faster than Xlib.
 //
 
+#[allow(clippy::needless_collect)]
 fn example1() -> Result<(), Box<dyn Error>> {
     use std::time::Instant;
 
@@ -219,6 +220,8 @@ fn example1() -> Result<(), Box<dyn Error>> {
 
     // Good use
     let start = Instant::now();
+    // The `collect` is needed to make sure that the closure passed to
+    // `map` is called for every iteration before executing the for loop.
     let cookies = names
         .iter()
         .map(|name| conn.intern_atom(false, name.as_bytes()))
