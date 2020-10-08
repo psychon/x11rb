@@ -346,7 +346,7 @@ number_enum! {
     ///
     /// Each line of an image is padded to a multiple of some value. This value is the scanline
     /// padding, which this enum represents.
-    #[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+    #[non_exhaustive]
     pub enum ScanlinePad {
         /// Padding to multiples of 8 bits, i.e. no padding.
         Pad8 = 8,
@@ -435,7 +435,7 @@ number_enum! {
     /// This value is only about the size of one pixel in memory. Other names for it include
     /// `bits_per_pixel` or `bpp`. It may be larger than the number of meaningful bits for a pixel
     /// value, which is its `depth`.
-    #[cfg_attr(not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"), non_exhaustive)]
+    #[non_exhaustive]
     pub enum BitsPerPixel {
         /// Each pixel takes one bit of memory.
         B1 = 1,

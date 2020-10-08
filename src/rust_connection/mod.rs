@@ -117,7 +117,7 @@ impl RustConnection<DefaultStream> {
             parse_display::parse_display(dpy_name).ok_or(ConnectError::DisplayParsingError)?;
 
         // Establish connection
-        let protocol = parsed_display.protocol.as_ref().map(|s| &**s);
+        let protocol = parsed_display.protocol.as_deref();
         let stream =
             DefaultStream::connect(&*parsed_display.host, protocol, parsed_display.display)?;
         let screen = parsed_display.screen.into();

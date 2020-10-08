@@ -502,10 +502,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum DPMSMode {
     On = 0,
     Standby = 1,

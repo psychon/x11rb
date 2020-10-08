@@ -101,9 +101,6 @@
 //! The [event_loop_integration](event_loop_integration/index.html) module contains some hints for
 //! integrating x11rb with an event loop as doc comments.
 
-// This lint suggests a function that was added in Rust 1.40.0. Since our minimum supported version
-// is Rust 1.37.0, just disable the lint.
-#![allow(clippy::option_as_ref_deref)]
 #![forbid(
     missing_copy_implementations,
     missing_debug_implementations,
@@ -169,7 +166,7 @@ pub fn connect(
             .map(std::ffi::CString::new)
             .transpose()
             .map_err(|_| ConnectError::DisplayParsingError)?;
-        let dpy_name = dpy_name.as_ref().map(|d| &**d);
+        let dpy_name = dpy_name.as_deref();
         xcb_ffi::XCBConnection::connect(dpy_name)
     }
     #[cfg(not(feature = "allow-unsafe-code"))]

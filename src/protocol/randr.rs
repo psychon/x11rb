@@ -60,10 +60,7 @@ pub const BAD_PROVIDER_ERROR: u8 = 3;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum Rotation {
     Rotate0 = 1 << 0,
     Rotate90 = 1 << 1,
@@ -344,10 +341,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum SetConfig {
     Success = 0,
     InvalidConfigTime = 1,
@@ -566,10 +560,7 @@ impl TryFrom<&[u8]> for SetScreenConfigReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum NotifyMask {
     ScreenChange = 1 << 0,
     CrtcChange = 1 << 1,
@@ -1058,10 +1049,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ModeFlag {
     HsyncPositive = 1 << 0,
     HsyncNegative = 1 << 1,
@@ -1421,10 +1409,7 @@ impl GetScreenResourcesReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum Connection {
     Connected = 0,
     Disconnected = 1,
@@ -3572,10 +3557,7 @@ impl GetScreenResourcesCurrentReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum Transform {
     Unit = 1 << 0,
     ScaleUp = 1 << 1,
@@ -4571,10 +4553,7 @@ impl GetProvidersReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ProviderCapability {
     SourceOutput = 1 << 0,
     SinkOutput = 1 << 1,
@@ -5803,10 +5782,7 @@ impl From<ScreenChangeNotifyEvent> for [u8; 32] {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum Notify {
     CrtcChange = 0,
     OutputChange = 1,

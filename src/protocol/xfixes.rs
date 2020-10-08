@@ -147,10 +147,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum SaveSetMode {
     Insert = 0,
     Delete = 1,
@@ -221,10 +218,7 @@ impl TryFrom<u32> for SaveSetMode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum SaveSetTarget {
     Nearest = 0,
     Root = 1,
@@ -295,10 +289,7 @@ impl TryFrom<u32> for SaveSetTarget {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum SaveSetMapping {
     Map = 0,
     Unmap = 1,
@@ -457,10 +448,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum SelectionEvent {
     SetSelectionOwner = 0,
     SelectionWindowDestroy = 1,
@@ -526,10 +514,7 @@ impl TryFrom<u32> for SelectionEvent {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum SelectionEventMask {
     SetSelectionOwner = 1 << 0,
     SelectionWindowDestroy = 1 << 1,
@@ -772,10 +757,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum CursorNotify {
     DisplayCursor = 0,
 }
@@ -835,10 +817,7 @@ impl TryFrom<u32> for CursorNotify {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum CursorNotifyMask {
     DisplayCursor = 1 << 0,
 }
@@ -1168,10 +1147,7 @@ pub const BAD_REGION_ERROR: u8 = 0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum RegionEnum {
     None = 0,
 }
@@ -3454,10 +3430,7 @@ pub type Barrier = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum BarrierDirections {
     PositiveX = 1 << 0,
     PositiveY = 1 << 1,
