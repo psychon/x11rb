@@ -40,10 +40,7 @@ pub type Dotclock = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ModeFlag {
     PositiveHSync = 1 << 0,
     NegativeHSync = 1 << 1,
@@ -124,10 +121,7 @@ bitmask_binop!(ModeFlag, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ClockFlag {
     Programable = 1 << 0,
 }
@@ -188,10 +182,7 @@ bitmask_binop!(ClockFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum Permission {
     Read = 1 << 0,
     Write = 1 << 1,

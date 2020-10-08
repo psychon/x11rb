@@ -75,10 +75,7 @@ pub mod xvmc;
 /// Enumeration of all possible X11 requests.
 #[derive(Debug)]
 #[allow(clippy::large_enum_variant)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum Request<'input> {
     Unknown(RequestHeader, Cow<'input, [u8]>),
     CreateWindow(xproto::CreateWindowRequest<'input>),
@@ -1268,13 +1265,11 @@ impl<'input> Request<'input> {
     pub fn parse(
         header: RequestHeader,
         body: &'input [u8],
+        // Might not be used if none of the extensions that use FD passing is enabled
+        #[allow(unused_variables)]
         fds: &mut Vec<RawFdContainer>,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        // Might not be used if none of the extensions that use FD passing is enabled
-        // The `allow` is not in the function argument because it is not stable in Rust 1.37
-        #[allow(unused_variables)]
-        let fds = fds;
         let remaining = body;
         // Check if this is a core protocol request.
         match header.major_opcode {
@@ -4492,10 +4487,7 @@ impl<'input> Request<'input> {
 /// Enumeration of all possible X11 replies.
 #[derive(Debug)]
 #[allow(clippy::large_enum_variant)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum Reply {
     Void,
     GetWindowAttributes(xproto::GetWindowAttributesReply),
@@ -6977,10 +6969,7 @@ impl From<xvmc::ListSubpictureTypesReply> for Reply {
 
 /// Enumeration of all possible X11 error kinds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ErrorKind {
     Unknown(u8),
     Access,
@@ -7260,10 +7249,7 @@ impl ErrorKind {
 
 /// Enumeration of all possible X11 events.
 #[derive(Debug, Clone)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum Event {
     Unknown(Vec<u8>),
     Error(X11Error),

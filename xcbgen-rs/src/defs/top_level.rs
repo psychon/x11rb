@@ -846,13 +846,13 @@ impl TypeRef {
     pub fn same_as(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::BuiltIn(builtin1), Self::BuiltIn(builtin2)) => builtin1 == builtin2,
-            (Self::Struct(def1), Self::Struct(def2)) => weak_ptr_eq(def1, def2),
-            (Self::Union(def1), Self::Union(def2)) => weak_ptr_eq(def1, def2),
-            (Self::EventStruct(def1), Self::EventStruct(def2)) => weak_ptr_eq(def1, def2),
-            (Self::Xid(def1), Self::Xid(def2)) => weak_ptr_eq(def1, def2),
-            (Self::XidUnion(def1), Self::XidUnion(def2)) => weak_ptr_eq(def1, def2),
-            (Self::Enum(def1), Self::Enum(def2)) => weak_ptr_eq(def1, def2),
-            (Self::Alias(def1), Self::Alias(def2)) => weak_ptr_eq(def1, def2),
+            (Self::Struct(def1), Self::Struct(def2)) => def1.ptr_eq(def2),
+            (Self::Union(def1), Self::Union(def2)) => def1.ptr_eq(def2),
+            (Self::EventStruct(def1), Self::EventStruct(def2)) => def1.ptr_eq(def2),
+            (Self::Xid(def1), Self::Xid(def2)) => def1.ptr_eq(def2),
+            (Self::XidUnion(def1), Self::XidUnion(def2)) => def1.ptr_eq(def2),
+            (Self::Enum(def1), Self::Enum(def2)) => def1.ptr_eq(def2),
+            (Self::Alias(def1), Self::Alias(def2)) => def1.ptr_eq(def2),
             _ => false,
         }
     }
@@ -907,10 +907,4 @@ impl TypeRef {
             _ => self.clone(),
         }
     }
-}
-
-// Replacement for `Weak::ptr_eq`, which requires
-// Rust 1.39.
-fn weak_ptr_eq<T>(weak1: &Weak<T>, weak2: &Weak<T>) -> bool {
-    Rc::ptr_eq(&weak1.upgrade().unwrap(), &weak2.upgrade().unwrap())
 }

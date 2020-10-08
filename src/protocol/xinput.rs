@@ -202,10 +202,7 @@ impl TryFrom<&[u8]> for GetExtensionVersionReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum DeviceUse {
     IsXPointer = 0,
     IsXKeyboard = 1,
@@ -277,10 +274,7 @@ impl TryFrom<u32> for DeviceUse {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum InputClass {
     Key = 0,
     Button = 1,
@@ -358,10 +352,7 @@ impl TryFrom<u32> for InputClass {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ValuatorMode {
     Relative = 0,
     Absolute = 1,
@@ -1654,10 +1645,7 @@ impl GetSelectedExtensionEventsReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum PropagateMode {
     AddToList = 0,
     DeleteFromList = 1,
@@ -2563,10 +2551,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ModifierDevice {
     UseXKeyboard = 255,
 }
@@ -3117,10 +3102,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum DeviceInputMode {
     AsyncThisDevice = 0,
     SyncThisDevice = 1,
@@ -3476,10 +3458,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum FeedbackClass {
     Keyboard = 0,
     Pointer = 1,
@@ -5462,10 +5441,7 @@ impl Serialize for FeedbackCtl {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ChangeFeedbackControlMask {
     KeyClickPercent,
     Percent,
@@ -6478,10 +6454,7 @@ impl Serialize for ButtonState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ValuatorStateModeMask {
     DeviceModeAbsolute = 1 << 0,
     OutOfProximity = 1 << 1,
@@ -7227,10 +7200,7 @@ impl TryFrom<&[u8]> for SetDeviceValuatorsReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum DeviceControl {
     Resolution = 1,
     Abscalib = 2,
@@ -9150,10 +9120,7 @@ impl ListDevicePropertiesReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum PropertyFormat {
     M8Bits = 8,
     M16Bits = 16,
@@ -9740,10 +9707,7 @@ impl TryFrom<&[u8]> for GetDevicePropertyReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum Device {
     All = 0,
     AllMaster = 1,
@@ -10283,10 +10247,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum HierarchyChangeType {
     AddMaster = 1,
     RemoveMaster = 2,
@@ -10355,10 +10316,7 @@ impl TryFrom<u32> for HierarchyChangeType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ChangeMode {
     Attach = 1,
     Float = 2,
@@ -11226,10 +11184,7 @@ impl TryFrom<&[u8]> for XIGetClientPointerReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum XIEventMask {
     DeviceChanged = 1 << 1,
     KeyPress = 1 << 2,
@@ -11576,10 +11531,7 @@ impl TryFrom<&[u8]> for XIQueryVersionReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum DeviceClassType {
     Key = 0,
     Button = 1,
@@ -11651,10 +11603,7 @@ impl TryFrom<u32> for DeviceClassType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum DeviceType {
     MasterPointer = 1,
     MasterKeyboard = 2,
@@ -11726,10 +11675,7 @@ impl TryFrom<u32> for DeviceType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ScrollFlags {
     NoEmulation = 1 << 0,
     Preferred = 1 << 1,
@@ -11793,10 +11739,7 @@ bitmask_binop!(ScrollFlags, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ScrollType {
     Vertical = 1,
     Horizontal = 2,
@@ -11859,10 +11802,7 @@ impl TryFrom<u32> for ScrollType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum TouchMode {
     Direct = 1,
     Dependent = 2,
@@ -13128,10 +13068,7 @@ impl TryFrom<&[u8]> for XIGetFocusReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum GrabOwner {
     NoOwner = 0,
     Owner = 1,
@@ -13457,10 +13394,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum EventMode {
     AsyncDevice = 0,
     SyncDevice = 1,
@@ -13644,10 +13578,7 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum GrabMode22 {
     Sync = 0,
     Async = 1,
@@ -13713,10 +13644,7 @@ impl TryFrom<u32> for GrabMode22 {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum GrabType {
     Button = 0,
     Keycode = 1,
@@ -13788,10 +13716,7 @@ impl TryFrom<u32> for GrabType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ModifierMask {
     Any = 1 << 31,
 }
@@ -15189,10 +15114,7 @@ impl From<DeviceValuatorEvent> for [u8; 32] {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum MoreEventsMask {
     MoreEvents = 1 << 7,
 }
@@ -15477,10 +15399,7 @@ pub type ProximityOutEvent = DeviceKeyPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ClassesReportedMask {
     OutOfProximity = 1 << 7,
     DeviceModeAbsolute = 1 << 6,
@@ -15749,10 +15668,7 @@ impl From<DeviceMappingNotifyEvent> for [u8; 32] {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ChangeDevice {
     NewPointer = 0,
     NewKeyboard = 1,
@@ -16059,10 +15975,7 @@ impl From<DeviceButtonStateNotifyEvent> for [u8; 32] {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum DeviceChange {
     Added = 0,
     Removed = 1,
@@ -16308,10 +16221,7 @@ impl From<DevicePropertyNotifyEvent> for [u8; 32] {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum ChangeReason {
     SlaveSwitch = 1,
     DeviceChange = 2,
@@ -16434,10 +16344,7 @@ impl DeviceChangedEvent {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum KeyEventFlags {
     KeyRepeat = 1 << 16,
 }
@@ -16567,10 +16474,7 @@ pub type KeyReleaseEvent = KeyPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum PointerEventFlags {
     PointerEmulated = 1 << 16,
 }
@@ -16704,10 +16608,7 @@ pub type MotionEvent = ButtonPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum NotifyMode {
     Normal = 0,
     Grab = 1,
@@ -16782,10 +16683,7 @@ impl TryFrom<u32> for NotifyMode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum NotifyDetail {
     Ancestor = 0,
     Virtual = 1,
@@ -16962,10 +16860,7 @@ pub type FocusOutEvent = EnterEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum HierarchyMask {
     MasterAdded = 1 << 0,
     MasterRemoved = 1 << 1,
@@ -17165,10 +17060,7 @@ impl HierarchyEvent {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum PropertyFlag {
     Deleted = 0,
     Created = 1,
@@ -17418,10 +17310,7 @@ pub type RawMotionEvent = RawButtonPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum TouchEventFlags {
     TouchPendingEnd = 1 << 16,
     TouchEmulatingPointer = 1 << 17,
@@ -17558,10 +17447,7 @@ pub type TouchEndEvent = TouchBeginEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum TouchOwnershipFlags {
     None = 0,
 }
@@ -17745,10 +17631,7 @@ pub type RawTouchEndEvent = RawTouchBeginEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-#[cfg_attr(
-    not(feature = "I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive"),
-    non_exhaustive
-)]
+#[non_exhaustive]
 pub enum BarrierFlags {
     PointerReleased = 1 << 0,
     DeviceIsGrabbed = 1 << 1,

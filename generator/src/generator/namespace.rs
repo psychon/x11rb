@@ -1,8 +1,4 @@
-#![allow(
-    clippy::cognitive_complexity,
-    clippy::option_as_ref_deref,
-    clippy::too_many_arguments
-)]
+#![allow(clippy::cognitive_complexity, clippy::too_many_arguments)]
 
 use std::borrow::Cow;
 use std::cell::RefCell;
@@ -15,8 +11,6 @@ use xcbgen::defs as xcbdefs;
 
 use super::output::Output;
 use super::{get_ns_name_prefix, special_cases};
-
-pub(crate) static NON_EXHAUSTIVE: &str = "#[cfg_attr(\n    not(feature = \"I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive\"),\n    non_exhaustive\n)]";
 
 #[derive(Debug, Default)]
 pub(super) struct PerModuleEnumCases {
@@ -58,7 +52,7 @@ pub(super) fn generate_request_reply_enum(
     outln!(out, "#[derive(Debug)]");
     // clippy::large_enum_variant for XkbSetNamesRequest.
     outln!(out, "#[allow(clippy::large_enum_variant)]");
-    outln!(out, "{}", NON_EXHAUSTIVE);
+    outln!(out, "#[non_exhaustive]");
     outln!(out, "pub enum Request<'input> {{");
     out.indented(|out| {
         outln!(out, "Unknown(RequestHeader, Cow<'input, [u8]>),");
@@ -91,22 +85,16 @@ pub(super) fn generate_request_reply_enum(
         out.indented(|out| {
             outln!(out, "header: RequestHeader,");
             outln!(out, "body: &'input [u8],");
+            outln!(
+                out,
+                "// Might not be used if none of the extensions that use FD passing is enabled",
+            );
+            outln!(out, "#[allow(unused_variables)]");
             outln!(out, "fds: &mut Vec<RawFdContainer>,");
             outln!(out, "ext_info_provider: &dyn ExtInfoProvider,");
         });
         outln!(out, ") -> Result<Self, ParseError> {{");
         out.indented(|out| {
-            outln!(
-                out,
-                "// Might not be used if none of the extensions that use FD passing is enabled",
-            );
-            outln!(
-                out,
-                "// The `allow` is not in the function argument because it is not stable in Rust \
-                 1.37",
-            );
-            outln!(out, "#[allow(unused_variables)]");
-            outln!(out, "let fds = fds;");
             outln!(out, "let remaining = body;");
             outln!(out, "// Check if this is a core protocol request.");
             outln!(out, "match header.major_opcode {{");
@@ -230,7 +218,7 @@ pub(super) fn generate_request_reply_enum(
     outln!(out, "#[derive(Debug)]");
     // clippy::large_enum_variant for XkbGetKbdByNameReply.
     outln!(out, "#[allow(clippy::large_enum_variant)]");
-    outln!(out, "{}", NON_EXHAUSTIVE);
+    outln!(out, "#[non_exhaustive]");
     outln!(out, "pub enum Reply {{");
     out.indented(|out| {
         outln!(out, "Void,");
@@ -2194,7 +2182,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             // all the values fit. This prevents the 'enum_clike_unportable_variant' clippy warning.
             outln!(out, "#[repr({})]", to_type);
         }
-        outln!(out, "{}", NON_EXHAUSTIVE);
+        outln!(out, "#[non_exhaustive]");
         outln!(out, "pub enum {} {{", rust_name);
         for enum_item in enum_def.items.iter() {
             let rust_item_name = ename_to_rust(&enum_item.name);
@@ -4762,7 +4750,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let text = format!(
                     " * `{}` - {}",
                     field.name,
-                    field.doc.as_ref().map(String::as_str).unwrap_or("").trim(),
+                    field.doc.as_deref().unwrap_or("").trim(),
                 );
                 // Prevent rustdoc interpreting many leading spaces as code examples (?)
                 for line in text.trim().split('\n') {
@@ -4786,7 +4774,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 let text = format!(
                     "* `{}` - {}",
                     error.type_,
-                    error.doc.as_ref().map(String::as_str).unwrap_or("").trim(),
+                    error.doc.as_deref().unwrap_or("").trim(),
                 );
                 for line in text.split('\n') {
                     outln!(out, "/// {}", line.trim_end());

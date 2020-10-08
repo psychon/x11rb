@@ -3,10 +3,9 @@ dist: bionic # x11rb needs at least libxcb 1.12
 jobs:
   fast_finish: true
   include:
-    # std::io::IoSlice was stabilised in 1.36.0, but 1.36.0 fails with a weird
-    # error enabled by deny(single_use_lifetimes).
-    - rust: 1.37.0
-      env: CLIPPY_RUSTFMT=no EXTRA_FEATURES=I_need_rust_1_37_compatibility_but_know_that_enums_are_still_non_exhaustive
+    # 1.40 is required to use non_exhaustive.
+    - rust: 1.40.0
+      env: CLIPPY_RUSTFMT=no
     - rust: stable
       env: CLIPPY_RUSTFMT=yes
     - rust: beta
@@ -32,13 +31,7 @@ addons:
       - xvfb
 
 before_script:
-  - |
-    if [ "$TRAVIS_RUST_VERSION" = "1.37.0" ]; then
-        # libloading needs 1.40
-        export ALL_FEATURES="all-extensions allow-unsafe-code cursor image "
-    else
-        export ALL_FEATURES="all-extensions allow-unsafe-code dl-libxcb cursor image"        
-    fi
+  - export ALL_FEATURES="all-extensions allow-unsafe-code dl-libxcb cursor image"
 
   # Run the examples as 'integration tests'. For this, there is a special
   # timeout mode where the examples close automatically after some time.
