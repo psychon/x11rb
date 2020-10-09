@@ -3,7 +3,7 @@ pull_request_rules:
     conditions:
       - label!=no-mergify
       - "#approved-reviews-by>=1"
-      - status-success=continuous-integration/travis-ci/pr
+      - status-success~=^CI / .* (pull_request)$
       - status-success=continuous-integration/appveyor/pr
     actions:
       merge:

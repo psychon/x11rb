@@ -1,0 +1,148 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Midnight on the 1st of a month
+    - cron: '0 0 1 * *'
+
+env:
+  CARGO_TERM_COLOR: always
+  MOST_FEATURES: all-extensions cursor image
+
+jobs:
+  code_gen:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+    - name: Run code generator
+      run: make
+    - name: Check for changes
+      run: if ! git diff --exit-code; then exit 1; fi
+
+  clippy-rustfmt:
+     runs-on: ubuntu-latest
+     strategy:
+       matrix:
+         include:
+           - rust: stable
+           - rust: beta
+             #fixme: remove this hack
+             clippy_args: -A clippy::manual_strip
+     steps:
+       - uses: actions/checkout@v2
+       - name: Install rustfmt and clippy
+         uses: actions-rs/toolchain@v1
+         with:
+           profile: minimal
+           toolchain: ${{ matrix.rust }}
+           override: true
+           components: rustfmt, clippy
+
+       # rustfmt
+       - name: rustfmt
+         uses: actions-rs/cargo@v1
+         with:
+           command: fmt
+           args: --all -- --check
+
+       # clippy
+       - name: clippy x11rb without features
+         uses: actions-rs/cargo@v1
+         with:
+           command: clippy
+           args: -p x11rb --all-targets -- -D warnings         
+
+       - name: clippy x11rb with allow-unsafe-code but without dl-libxcb
+         uses: actions-rs/cargo@v1
+         with:
+           command: clippy
+           args: -p x11rb --all-targets --features "allow-unsafe-code" -- -D warnings ${{ matrix.clippy_args }}
+
+       - name: clippy x11rb with allow-unsafe-code and dl-libxcb
+         uses: actions-rs/cargo@v1
+         with:
+           command: clippy
+           args: -p x11rb --all-targets --features "allow-unsafe-code dl-libxcb" -- -D warnings ${{ matrix.clippy_args }}
+
+       - name: clippy workspace with all features
+         uses: actions-rs/cargo@v1
+         with:
+           command: clippy
+           args: --workspace --all-targets --all-features -- -D warnings ${{ matrix.clippy_args }}
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - rust: 1.40.0
+          - rust: stable
+          - rust: beta
+          - rust: nightly
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        override: true
+
+    - name: Set ALL_FEATURES
+      run: echo "ALL_FEATURES=$ALL_FEATURES allow-unsafe-code dl-libxcb" >> $GITHUB_ENV
+
+    # build
+    - name: cargo build with all features
+      run: cargo build --verbose --all-targets --features "$ALL_FEATURES"
+
+    # test
+    - name: cargo test with all features
+      run: cargo test --verbose --workspace --features "$ALL_FEATURES"
+
+    # doc
+    - name: cargo doc with all features
+      run: cargo doc --verbose --features "$ALL_FEATURES"
+
+    # run examples
+    - name: Prepare run examples
+      run: |
+          echo '#!/bin/bash
+              for example in examples/*.rs; do
+                  example=${example/examples\//}
+                  example=${example/.rs/}
+                  if [ "$example" != tutorial ] ; then
+                      X11RB_EXAMPLE_TIMEOUT=1 xvfb-run -a cargo run --example "$example" "$@" || exit 1
+                  fi
+              done
+          ' > run_examples && chmod a+x run_examples
+    - name: run examples with RustConnection
+      run: ./run_examples --features "$MOST_FEATURES libc"
+    - name: run examples with XCBConnection
+      run: ./run_examples --features "$MOST_FEATURES libc allow-unsafe-code"
+    - name: run examples with XCBConnection and dl-libxcb
+      run: ./run_examples --features "$MOST_FEATURES libc allow-unsafe-code dl-libxcb"
+
+
+  big-endian-test:
+    runs-on: ubuntu-latest
+    env:
+      CROSS_TARGET: mips64-unknown-linux-gnuabi64
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    - name: Install cross rust
+      run: rustup target add "$CROSS_TARGET"
+    - name: Install cross
+      run: cargo install cross --force
+    - name: cargo test
+      run: cross test --target "$CROSS_TARGET" --verbose --features "$MOST_FEATURES"
