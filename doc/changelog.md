@@ -1,3 +1,78 @@
+# Version 0.7.0 (2020-XX-XX)
+
+New features:
+* An image utility was added under `x11rb::image`. This allows to do similar
+  things as xcb's image library, e.g. endian conversion. A new `display_ppm`
+  example showcases this new library a bit.
+* Add a `dl-libxcb` feature. With this feature, we do not link against
+  `libxcb.so` for `XCBConnection`, but instead load the library at runtime via
+  `libloading`.
+* Request structs now have a `send()` method. This allows for more readable
+  request sending, without having to wonder "what was the fifth argument to
+  `create_window` again?":
+```
+conn.create_window(
+    screen.root_depth,
+    win_id,
+    screen.root,
+    0,
+    0,
+    width,
+    height,
+    0,
+    WindowClass::InputOutput,
+    0,
+    &win_aux,
+)?;
+CreateWindowRequest {
+    depth: screen.root_depth,
+    wid: win_id,
+    parent: screen.root,
+    x: 0,
+    y: 0,
+    width,
+    height,
+    border_width: 0,
+    class: WindowClass::InputOutput,
+    visual: 0,
+    value_list: std::borrow::Cow::Borrowed(&win_aux),
+}.send(conn)?;
+```
+
+Fixes:
+* X11 errors are now represented by a single struct
+  `x11rb::x11_utils::X11Error`, because all errors are structurally equivalent.
+  Only the error code differs.
+* More features are enabled for `docs.rs`, hopefully making the docs complete.
+* Improve support for the record extension and add an example that shows how to
+  use it.
+
+Breaking changes:
+* The minimum supported Rust version is now Rust 1.40 due to
+  `#[non_exhaustive]`.
+* The enumeration `x11rb::errors::ParseError` was split up into multiple values
+  that now provide more information about which kind of error occurred.
+* Hide `x11rb::cursor` behind a feature gate.
+* `x11rb::protocol::Error` and all individual error structs were removed and
+  replaced with `x11rb::x11_utils::X11Error`. This removes about 2.5k LOC of
+  generated code.
+* Some enums are now marked as `#[non_exhaustive]`. This includes all enums in
+  the generated protocol code.
+
+Minor changes:
+* `x11rb::utils::RawFdContainer` now always implements `Drop`, even on
+  non-`cfg(unix)` systems.
+* More items received doc comments. Only the generated code is not fully
+  documented.
+* Added a new `xtrace-example` that runs a program and prints all of its X11
+  traffic to the console.
+* The `simple_window_manager` example was improved. It now has better support
+  for titlebars: Only clicks inside the close button close the window and the
+  remaining area allows to move a window. Also, the example now uses the X11
+  save set.
+* Update dependencies to `nix` 0.18 and `winapi-wsapoll` 0.1.1.
+* Minor internal changes to please newer clippy versions.
+
 # Version 0.6.0 (2020-06-19)
 
 New features:
