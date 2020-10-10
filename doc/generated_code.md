@@ -9,7 +9,6 @@ from `xcb-proto`. This document will show some examples of the XML description
 followed by the Rust code that is generated for it.
 
 The following code is generated at the beginning of a module:
-
 ```rust
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
@@ -132,7 +131,9 @@ contain lists of other structs. This example demonstrates this.
   </list>
 </struct>
 ```
-
+The field `visuals_len` is not part of the generated struct since it is
+represented implicitly as the length of the `visuals` `Vec`. To make this less
+confusing, a function `visuals_len` is generated.
 ```rust
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Depth {
@@ -709,9 +710,11 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 
 ```xml
 <request name="NoOperation" opcode="127" />
+The request is represented by a structure that contains all of the request's
+fields. This `struct` can be constructed explicitly and then `.send()` to an X11
+server.
 ```
 This code is generated in the module:
-
 ```rust
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
@@ -758,9 +761,16 @@ impl NoOperationRequest {
         )
     }
 }
+```
+A trait is used to map between requests and their corresponding reply. For
+requests without a reply, this maps to the unit type:
+```rust
 impl Request for NoOperationRequest {
     type Reply = ();
 }
+```
+There is also a helper function for sending the request with a function call.
+```rust
 pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -769,9 +779,7 @@ where
     request0.send(conn)
 }
 ```
-
-And this code is in the extension trait:
-
+The request sending function is also available on the extension trait:
 ```rust
     fn no_operation(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
@@ -789,8 +797,7 @@ And this code is in the extension trait:
   </reply>
 </request>
 ```
-This code is generated in the module:
-
+There is again a structure generated in the code that represents the request:
 ```rust
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
@@ -837,9 +844,16 @@ impl GetInputFocusRequest {
         )
     }
 }
+```
+Since this request has a reply, the implementation of the `Request` trait maps
+to that reply:
+```rust
 impl Request for GetInputFocusRequest {
     type Reply = GetInputFocusReply;
 }
+```
+Of course, there is a function to send the request:
+```rust
 pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -847,7 +861,9 @@ where
     let request0 = GetInputFocusRequest;
     request0.send(conn)
 }
-
+```
+The reply is handled similar to a `struct`:
+```rust
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetInputFocusReply {
     pub revert_to: InputFocus,
@@ -881,9 +897,7 @@ impl TryFrom<&[u8]> for GetInputFocusReply {
     }
 }
 ```
-
-And this code is in the extension trait:
-
+There is also a function for sending the request in the extension trait:
 ```rust
     fn get_input_focus(&self) -> Result<Cookie<'_, Self, GetInputFocusReply>, ConnectionError>
     {
@@ -937,7 +951,6 @@ generated.
 </request>
 ```
 The switch is represented via a helper struct:
-
 ```rust
 /// Auxiliary and optional information for the `configure_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -970,47 +983,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let width = if switch_expr & u32::from(ConfigWindow::Width) != 0 {
-            let remaining = outer_remaining;
-            let (width, remaining) = u32::try_parse(remaining)?;
-            outer_remaining = remaining;
-            Some(width)
-        } else {
-            None
-        };
-        let height = if switch_expr & u32::from(ConfigWindow::Height) != 0 {
-            let remaining = outer_remaining;
-            let (height, remaining) = u32::try_parse(remaining)?;
-            outer_remaining = remaining;
-            Some(height)
-        } else {
-            None
-        };
-        let border_width = if switch_expr & u32::from(ConfigWindow::BorderWidth) != 0 {
-            let remaining = outer_remaining;
-            let (border_width, remaining) = u32::try_parse(remaining)?;
-            outer_remaining = remaining;
-            Some(border_width)
-        } else {
-            None
-        };
-        let sibling = if switch_expr & u32::from(ConfigWindow::Sibling) != 0 {
-            let remaining = outer_remaining;
-            let (sibling, remaining) = Window::try_parse(remaining)?;
-            outer_remaining = remaining;
-            Some(sibling)
-        } else {
-            None
-        };
-        let stack_mode = if switch_expr & u32::from(ConfigWindow::StackMode) != 0 {
-            let remaining = outer_remaining;
-            let (stack_mode, remaining) = u32::try_parse(remaining)?;
-            let stack_mode = stack_mode.try_into()?;
-            outer_remaining = remaining;
-            Some(stack_mode)
-        } else {
-            None
-        };
+        [SNIP - you get the idea]
         let result = ConfigureWindowAux { x, y, width, height, border_width, sibling, stack_mode };
         Ok((result, outer_remaining))
     }
@@ -1030,21 +1003,7 @@ impl ConfigureWindowAux {
         if let Some(y) = self.y {
             y.serialize_into(bytes);
         }
-        if let Some(width) = self.width {
-            width.serialize_into(bytes);
-        }
-        if let Some(height) = self.height {
-            height.serialize_into(bytes);
-        }
-        if let Some(border_width) = self.border_width {
-            border_width.serialize_into(bytes);
-        }
-        if let Some(sibling) = self.sibling {
-            sibling.serialize_into(bytes);
-        }
-        if let Some(stack_mode) = self.stack_mode {
-            u32::from(stack_mode).serialize_into(bytes);
-        }
+        [SNIP - you get the idea]
     }
 }
 impl ConfigureWindowAux {
@@ -1056,21 +1015,7 @@ impl ConfigureWindowAux {
         if self.y.is_some() {
             expr_value |= u32::from(ConfigWindow::Y);
         }
-        if self.width.is_some() {
-            expr_value |= u32::from(ConfigWindow::Width);
-        }
-        if self.height.is_some() {
-            expr_value |= u32::from(ConfigWindow::Height);
-        }
-        if self.border_width.is_some() {
-            expr_value |= u32::from(ConfigWindow::BorderWidth);
-        }
-        if self.sibling.is_some() {
-            expr_value |= u32::from(ConfigWindow::Sibling);
-        }
-        if self.stack_mode.is_some() {
-            expr_value |= u32::from(ConfigWindow::StackMode);
-        }
+        [SNIP - you get the idea]
         expr_value
     }
 }
@@ -1089,36 +1034,10 @@ impl ConfigureWindowAux {
         self.y = value.into();
         self
     }
-    /// Set the `width` field of this structure.
-    pub fn width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
-        self.width = value.into();
-        self
-    }
-    /// Set the `height` field of this structure.
-    pub fn height<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
-        self.height = value.into();
-        self
-    }
-    /// Set the `border_width` field of this structure.
-    pub fn border_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
-        self.border_width = value.into();
-        self
-    }
-    /// Set the `sibling` field of this structure.
-    pub fn sibling<I>(mut self, value: I) -> Self where I: Into<Option<Window>> {
-        self.sibling = value.into();
-        self
-    }
-    /// Set the `stack_mode` field of this structure.
-    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<StackMode>> {
-        self.stack_mode = value.into();
-        self
-    }
+    [SNIP - you get the idea]
 }
 ```
-
 This code is generated for the actual request:
-
 ```rust
 /// Opcode for the ConfigureWindow request
 pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
@@ -1212,9 +1131,7 @@ where
     request0.send(conn)
 }
 ```
-
 And this code is in the extension trait:
-
 ```rust
     /// [SNIP]
     fn configure_window<'c, 'input>(&'c self, window: Window, value_list: &'input ConfigureWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
@@ -1222,3 +1139,11 @@ And this code is in the extension trait:
         configure_window(self, window, value_list)
     }
 ```
+
+## Common code
+
+The above showed examples for the code that is generated in a single module.
+There is also some common code in [`x11rb::protocol`](../src/protocol/mod.rs).
+This contains `enum`s over all possible requests, replies, errors, and events.
+Via these, you can e.g. get the `sequence_number` contained in an event without
+having to write a big `match` over all possible events.
