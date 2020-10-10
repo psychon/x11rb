@@ -95,7 +95,7 @@ jobs:
         override: true
 
     - name: Set ALL_FEATURES
-      run: echo "ALL_FEATURES=$ALL_FEATURES allow-unsafe-code dl-libxcb" >> $GITHUB_ENV
+      run: echo "ALL_FEATURES=$MOST_FEATURES allow-unsafe-code dl-libxcb" >> $GITHUB_ENV
 
     # build
     - name: cargo build with all features
