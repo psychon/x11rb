@@ -3,8 +3,12 @@ pull_request_rules:
     conditions:
       - label!=no-mergify
       - "#approved-reviews-by>=1"
-      - status-success~=^CI / .* (pull_request)$
       - status-success=continuous-integration/appveyor/pr
+      - status-success=big-endian-test
+      - status-success=build (1.40.0)
+      - status-success=build (stable)
+      - status-success=clippy-rustfmt (stable)
+      - status-success=code_gen
     actions:
       merge:
         method: merge
