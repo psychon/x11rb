@@ -1,4 +1,4 @@
-# Version 0.7.0 (2020-XX-XX)
+# Version 0.7.0 (2020-10-11)
 
 New features:
 * An image utility was added under `x11rb::image`. This allows to do similar
