@@ -1906,8 +1906,13 @@ fn example_get_geometry<C: Connection>(conn: &C, win: Window) -> Result<(), Repl
 fn example_get_and_query<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     let geom = conn.get_geometry(win)?;
     let tree = conn.query_tree(win)?;
+
     let geom = geom.reply()?;
-    let tree = tree.reply();
+    let tree = tree.reply()?;
+
+    let trans = conn
+        .translate_coordinates(win, tree.parent, geom.x, geom.y)?
+        .reply()?;
 
     // the translated coordinates are in trans.dst_x and trans.dst_y
 
