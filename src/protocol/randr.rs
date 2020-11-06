@@ -59,77 +59,83 @@ pub const BAD_MODE_ERROR: u8 = 2;
 pub const BAD_PROVIDER_ERROR: u8 = 3;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Rotation {
-    Rotate0 = 1 << 0,
-    Rotate90 = 1 << 1,
-    Rotate180 = 1 << 2,
-    Rotate270 = 1 << 3,
-    ReflectX = 1 << 4,
-    ReflectY = 1 << 5,
+pub struct Rotation(u8);
+impl Rotation {
+    pub const ROTATE0: Self = Self(1 << 0);
+    pub const ROTATE90: Self = Self(1 << 1);
+    pub const ROTATE180: Self = Self(1 << 2);
+    pub const ROTATE270: Self = Self(1 << 3);
+    pub const REFLECT_X: Self = Self(1 << 4);
+    pub const REFLECT_Y: Self = Self(1 << 5);
+}
+impl From<Rotation> for Option<bool> {
+    #[inline]
+    fn from(input: Rotation) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Rotation> for u8 {
+    #[inline]
     fn from(input: Rotation) -> Self {
-        match input {
-            Rotation::Rotate0 => 1 << 0,
-            Rotation::Rotate90 => 1 << 1,
-            Rotation::Rotate180 => 1 << 2,
-            Rotation::Rotate270 => 1 << 3,
-            Rotation::ReflectX => 1 << 4,
-            Rotation::ReflectY => 1 << 5,
-        }
+        input.0
     }
 }
 impl From<Rotation> for Option<u8> {
+    #[inline]
     fn from(input: Rotation) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Rotation> for u16 {
+    #[inline]
     fn from(input: Rotation) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Rotation> for Option<u16> {
+    #[inline]
     fn from(input: Rotation) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Rotation> for u32 {
+    #[inline]
     fn from(input: Rotation) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Rotation> for Option<u32> {
+    #[inline]
     fn from(input: Rotation) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Rotation {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(Rotation::Rotate0),
-            2 => Ok(Rotation::Rotate90),
-            4 => Ok(Rotation::Rotate180),
-            8 => Ok(Rotation::Rotate270),
-            16 => Ok(Rotation::ReflectX),
-            32 => Ok(Rotation::ReflectY),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Rotation {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Rotation {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Rotation {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Rotation {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(Rotation, u8);
@@ -340,71 +346,81 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SetConfig {
-    Success = 0,
-    InvalidConfigTime = 1,
-    InvalidTime = 2,
-    Failed = 3,
+pub struct SetConfig(u8);
+impl SetConfig {
+    pub const SUCCESS: Self = Self(0);
+    pub const INVALID_CONFIG_TIME: Self = Self(1);
+    pub const INVALID_TIME: Self = Self(2);
+    pub const FAILED: Self = Self(3);
+}
+impl From<SetConfig> for Option<bool> {
+    #[inline]
+    fn from(input: SetConfig) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SetConfig> for u8 {
+    #[inline]
     fn from(input: SetConfig) -> Self {
-        match input {
-            SetConfig::Success => 0,
-            SetConfig::InvalidConfigTime => 1,
-            SetConfig::InvalidTime => 2,
-            SetConfig::Failed => 3,
-        }
+        input.0
     }
 }
 impl From<SetConfig> for Option<u8> {
+    #[inline]
     fn from(input: SetConfig) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SetConfig> for u16 {
+    #[inline]
     fn from(input: SetConfig) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SetConfig> for Option<u16> {
+    #[inline]
     fn from(input: SetConfig) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SetConfig> for u32 {
+    #[inline]
     fn from(input: SetConfig) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SetConfig> for Option<u32> {
+    #[inline]
     fn from(input: SetConfig) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SetConfig {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SetConfig::Success),
-            1 => Ok(SetConfig::InvalidConfigTime),
-            2 => Ok(SetConfig::InvalidTime),
-            3 => Ok(SetConfig::Failed),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SetConfig {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SetConfig {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SetConfig {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SetConfig {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -542,8 +558,8 @@ impl TryParse for SetScreenConfigReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
-        let subpixel_order = subpixel_order.try_into()?;
+        let status = status.into();
+        let subpixel_order = subpixel_order.into();
         let result = SetScreenConfigReply { status, sequence, length, new_timestamp, config_timestamp, root, subpixel_order };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -559,83 +575,85 @@ impl TryFrom<&[u8]> for SetScreenConfigReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum NotifyMask {
-    ScreenChange = 1 << 0,
-    CrtcChange = 1 << 1,
-    OutputChange = 1 << 2,
-    OutputProperty = 1 << 3,
-    ProviderChange = 1 << 4,
-    ProviderProperty = 1 << 5,
-    ResourceChange = 1 << 6,
-    Lease = 1 << 7,
+pub struct NotifyMask(u8);
+impl NotifyMask {
+    pub const SCREEN_CHANGE: Self = Self(1 << 0);
+    pub const CRTC_CHANGE: Self = Self(1 << 1);
+    pub const OUTPUT_CHANGE: Self = Self(1 << 2);
+    pub const OUTPUT_PROPERTY: Self = Self(1 << 3);
+    pub const PROVIDER_CHANGE: Self = Self(1 << 4);
+    pub const PROVIDER_PROPERTY: Self = Self(1 << 5);
+    pub const RESOURCE_CHANGE: Self = Self(1 << 6);
+    pub const LEASE: Self = Self(1 << 7);
+}
+impl From<NotifyMask> for Option<bool> {
+    #[inline]
+    fn from(input: NotifyMask) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<NotifyMask> for u8 {
+    #[inline]
     fn from(input: NotifyMask) -> Self {
-        match input {
-            NotifyMask::ScreenChange => 1 << 0,
-            NotifyMask::CrtcChange => 1 << 1,
-            NotifyMask::OutputChange => 1 << 2,
-            NotifyMask::OutputProperty => 1 << 3,
-            NotifyMask::ProviderChange => 1 << 4,
-            NotifyMask::ProviderProperty => 1 << 5,
-            NotifyMask::ResourceChange => 1 << 6,
-            NotifyMask::Lease => 1 << 7,
-        }
+        input.0
     }
 }
 impl From<NotifyMask> for Option<u8> {
+    #[inline]
     fn from(input: NotifyMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<NotifyMask> for u16 {
+    #[inline]
     fn from(input: NotifyMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<NotifyMask> for Option<u16> {
+    #[inline]
     fn from(input: NotifyMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<NotifyMask> for u32 {
+    #[inline]
     fn from(input: NotifyMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<NotifyMask> for Option<u32> {
+    #[inline]
     fn from(input: NotifyMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for NotifyMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(NotifyMask::ScreenChange),
-            2 => Ok(NotifyMask::CrtcChange),
-            4 => Ok(NotifyMask::OutputChange),
-            8 => Ok(NotifyMask::OutputProperty),
-            16 => Ok(NotifyMask::ProviderChange),
-            32 => Ok(NotifyMask::ProviderProperty),
-            64 => Ok(NotifyMask::ResourceChange),
-            128 => Ok(NotifyMask::Lease),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for NotifyMask {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for NotifyMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for NotifyMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for NotifyMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(NotifyMask, u8);
@@ -1048,85 +1066,85 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum ModeFlag {
-    HsyncPositive = 1 << 0,
-    HsyncNegative = 1 << 1,
-    VsyncPositive = 1 << 2,
-    VsyncNegative = 1 << 3,
-    Interlace = 1 << 4,
-    DoubleScan = 1 << 5,
-    Csync = 1 << 6,
-    CsyncPositive = 1 << 7,
-    CsyncNegative = 1 << 8,
-    HskewPresent = 1 << 9,
-    Bcast = 1 << 10,
-    PixelMultiplex = 1 << 11,
-    DoubleClock = 1 << 12,
-    HalveClock = 1 << 13,
+pub struct ModeFlag(u16);
+impl ModeFlag {
+    pub const HSYNC_POSITIVE: Self = Self(1 << 0);
+    pub const HSYNC_NEGATIVE: Self = Self(1 << 1);
+    pub const VSYNC_POSITIVE: Self = Self(1 << 2);
+    pub const VSYNC_NEGATIVE: Self = Self(1 << 3);
+    pub const INTERLACE: Self = Self(1 << 4);
+    pub const DOUBLE_SCAN: Self = Self(1 << 5);
+    pub const CSYNC: Self = Self(1 << 6);
+    pub const CSYNC_POSITIVE: Self = Self(1 << 7);
+    pub const CSYNC_NEGATIVE: Self = Self(1 << 8);
+    pub const HSKEW_PRESENT: Self = Self(1 << 9);
+    pub const BCAST: Self = Self(1 << 10);
+    pub const PIXEL_MULTIPLEX: Self = Self(1 << 11);
+    pub const DOUBLE_CLOCK: Self = Self(1 << 12);
+    pub const HALVE_CLOCK: Self = Self(1 << 13);
+}
+impl From<ModeFlag> for Option<bool> {
+    #[inline]
+    fn from(input: ModeFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<ModeFlag> for Option<u8> {
+    #[inline]
+    fn from(input: ModeFlag) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<ModeFlag> for u16 {
+    #[inline]
     fn from(input: ModeFlag) -> Self {
-        match input {
-            ModeFlag::HsyncPositive => 1 << 0,
-            ModeFlag::HsyncNegative => 1 << 1,
-            ModeFlag::VsyncPositive => 1 << 2,
-            ModeFlag::VsyncNegative => 1 << 3,
-            ModeFlag::Interlace => 1 << 4,
-            ModeFlag::DoubleScan => 1 << 5,
-            ModeFlag::Csync => 1 << 6,
-            ModeFlag::CsyncPositive => 1 << 7,
-            ModeFlag::CsyncNegative => 1 << 8,
-            ModeFlag::HskewPresent => 1 << 9,
-            ModeFlag::Bcast => 1 << 10,
-            ModeFlag::PixelMultiplex => 1 << 11,
-            ModeFlag::DoubleClock => 1 << 12,
-            ModeFlag::HalveClock => 1 << 13,
-        }
+        input.0
     }
 }
 impl From<ModeFlag> for Option<u16> {
+    #[inline]
     fn from(input: ModeFlag) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<ModeFlag> for u32 {
+    #[inline]
     fn from(input: ModeFlag) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ModeFlag> for Option<u32> {
+    #[inline]
     fn from(input: ModeFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for ModeFlag {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ModeFlag::HsyncPositive),
-            2 => Ok(ModeFlag::HsyncNegative),
-            4 => Ok(ModeFlag::VsyncPositive),
-            8 => Ok(ModeFlag::VsyncNegative),
-            16 => Ok(ModeFlag::Interlace),
-            32 => Ok(ModeFlag::DoubleScan),
-            64 => Ok(ModeFlag::Csync),
-            128 => Ok(ModeFlag::CsyncPositive),
-            256 => Ok(ModeFlag::CsyncNegative),
-            512 => Ok(ModeFlag::HskewPresent),
-            1024 => Ok(ModeFlag::Bcast),
-            2048 => Ok(ModeFlag::PixelMultiplex),
-            4096 => Ok(ModeFlag::DoubleClock),
-            8192 => Ok(ModeFlag::HalveClock),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ModeFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ModeFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ModeFlag {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for ModeFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ModeFlag, u16);
@@ -1408,68 +1426,80 @@ impl GetScreenResourcesReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Connection {
-    Connected = 0,
-    Disconnected = 1,
-    Unknown = 2,
+pub struct Connection(u8);
+impl Connection {
+    pub const CONNECTED: Self = Self(0);
+    pub const DISCONNECTED: Self = Self(1);
+    pub const UNKNOWN: Self = Self(2);
+}
+impl From<Connection> for Option<bool> {
+    #[inline]
+    fn from(input: Connection) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Connection> for u8 {
+    #[inline]
     fn from(input: Connection) -> Self {
-        match input {
-            Connection::Connected => 0,
-            Connection::Disconnected => 1,
-            Connection::Unknown => 2,
-        }
+        input.0
     }
 }
 impl From<Connection> for Option<u8> {
+    #[inline]
     fn from(input: Connection) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Connection> for u16 {
+    #[inline]
     fn from(input: Connection) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Connection> for Option<u16> {
+    #[inline]
     fn from(input: Connection) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Connection> for u32 {
+    #[inline]
     fn from(input: Connection) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Connection> for Option<u32> {
+    #[inline]
     fn from(input: Connection) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Connection {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Connection::Connected),
-            1 => Ok(Connection::Disconnected),
-            2 => Ok(Connection::Unknown),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Connection {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Connection {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Connection {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Connection {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -1590,9 +1620,9 @@ impl TryParse for GetOutputInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
-        let connection = connection.try_into()?;
-        let subpixel_order = subpixel_order.try_into()?;
+        let status = status.into();
+        let connection = connection.into();
+        let subpixel_order = subpixel_order.into();
         let result = GetOutputInfoReply { status, sequence, length, timestamp, crtc, mm_width, mm_height, connection, subpixel_order, num_preferred, crtcs, modes, clones, name };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -2039,7 +2069,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         let property_bytes = self.property.serialize();
         let type_bytes = self.type_.serialize();
         let format_bytes = self.format.serialize();
-        let mode_bytes = u8::from(self.mode).serialize();
+        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
         let num_units_bytes = self.num_units.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -2095,7 +2125,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_units, remaining) = u32::try_parse(remaining)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_units.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -2848,7 +2878,7 @@ impl TryParse for GetCrtcInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = GetCrtcInfoReply { status, sequence, length, timestamp, x, y, width, height, mode, rotation, rotations, outputs, possible };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -3056,7 +3086,7 @@ impl TryParse for SetCrtcConfigReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = SetCrtcConfigReply { status, sequence, length, timestamp };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -3556,71 +3586,81 @@ impl GetScreenResourcesCurrentReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Transform {
-    Unit = 1 << 0,
-    ScaleUp = 1 << 1,
-    ScaleDown = 1 << 2,
-    Projective = 1 << 3,
+pub struct Transform(u8);
+impl Transform {
+    pub const UNIT: Self = Self(1 << 0);
+    pub const SCALE_UP: Self = Self(1 << 1);
+    pub const SCALE_DOWN: Self = Self(1 << 2);
+    pub const PROJECTIVE: Self = Self(1 << 3);
+}
+impl From<Transform> for Option<bool> {
+    #[inline]
+    fn from(input: Transform) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Transform> for u8 {
+    #[inline]
     fn from(input: Transform) -> Self {
-        match input {
-            Transform::Unit => 1 << 0,
-            Transform::ScaleUp => 1 << 1,
-            Transform::ScaleDown => 1 << 2,
-            Transform::Projective => 1 << 3,
-        }
+        input.0
     }
 }
 impl From<Transform> for Option<u8> {
+    #[inline]
     fn from(input: Transform) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Transform> for u16 {
+    #[inline]
     fn from(input: Transform) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Transform> for Option<u16> {
+    #[inline]
     fn from(input: Transform) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Transform> for u32 {
+    #[inline]
     fn from(input: Transform) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Transform> for Option<u32> {
+    #[inline]
     fn from(input: Transform) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Transform {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(Transform::Unit),
-            2 => Ok(Transform::ScaleUp),
-            4 => Ok(Transform::ScaleDown),
-            8 => Ok(Transform::Projective),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Transform {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Transform {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Transform {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Transform {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(Transform, u8);
@@ -4060,7 +4100,7 @@ impl TryParse for GetPanningReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = GetPanningReply { status, sequence, length, timestamp, left, top, width, height, track_left, track_top, track_width, track_height, border_left, border_top, border_right, border_bottom };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -4251,7 +4291,7 @@ impl TryParse for SetPanningReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = SetPanningReply { status, sequence, length, timestamp };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -4552,71 +4592,81 @@ impl GetProvidersReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ProviderCapability {
-    SourceOutput = 1 << 0,
-    SinkOutput = 1 << 1,
-    SourceOffload = 1 << 2,
-    SinkOffload = 1 << 3,
+pub struct ProviderCapability(u8);
+impl ProviderCapability {
+    pub const SOURCE_OUTPUT: Self = Self(1 << 0);
+    pub const SINK_OUTPUT: Self = Self(1 << 1);
+    pub const SOURCE_OFFLOAD: Self = Self(1 << 2);
+    pub const SINK_OFFLOAD: Self = Self(1 << 3);
+}
+impl From<ProviderCapability> for Option<bool> {
+    #[inline]
+    fn from(input: ProviderCapability) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ProviderCapability> for u8 {
+    #[inline]
     fn from(input: ProviderCapability) -> Self {
-        match input {
-            ProviderCapability::SourceOutput => 1 << 0,
-            ProviderCapability::SinkOutput => 1 << 1,
-            ProviderCapability::SourceOffload => 1 << 2,
-            ProviderCapability::SinkOffload => 1 << 3,
-        }
+        input.0
     }
 }
 impl From<ProviderCapability> for Option<u8> {
+    #[inline]
     fn from(input: ProviderCapability) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ProviderCapability> for u16 {
+    #[inline]
     fn from(input: ProviderCapability) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ProviderCapability> for Option<u16> {
+    #[inline]
     fn from(input: ProviderCapability) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ProviderCapability> for u32 {
+    #[inline]
     fn from(input: ProviderCapability) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ProviderCapability> for Option<u32> {
+    #[inline]
     fn from(input: ProviderCapability) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ProviderCapability {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ProviderCapability::SourceOutput),
-            2 => Ok(ProviderCapability::SinkOutput),
-            4 => Ok(ProviderCapability::SourceOffload),
-            8 => Ok(ProviderCapability::SinkOffload),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ProviderCapability {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ProviderCapability {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ProviderCapability {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ProviderCapability {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ProviderCapability, u8);
@@ -5709,7 +5759,7 @@ impl TryParse for ScreenChangeNotifyEvent {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (mwidth, remaining) = u16::try_parse(remaining)?;
         let (mheight, remaining) = u16::try_parse(remaining)?;
-        let subpixel_order = subpixel_order.try_into()?;
+        let subpixel_order = subpixel_order.into();
         let result = ScreenChangeNotifyEvent { response_type, rotation, sequence, timestamp, config_timestamp, root, request_window, size_id, subpixel_order, width, height, mwidth, mheight };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -5733,7 +5783,7 @@ impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
         let root_bytes = input.root.serialize();
         let request_window_bytes = input.request_window.serialize();
         let size_id_bytes = input.size_id.serialize();
-        let subpixel_order_bytes = u16::from(input.subpixel_order).serialize();
+        let subpixel_order_bytes = Option::<u16>::from(input.subpixel_order).unwrap().serialize();
         let width_bytes = input.width.serialize();
         let height_bytes = input.height.serialize();
         let mwidth_bytes = input.mwidth.serialize();
@@ -5781,80 +5831,84 @@ impl From<ScreenChangeNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Notify {
-    CrtcChange = 0,
-    OutputChange = 1,
-    OutputProperty = 2,
-    ProviderChange = 3,
-    ProviderProperty = 4,
-    ResourceChange = 5,
-    Lease = 6,
+pub struct Notify(u8);
+impl Notify {
+    pub const CRTC_CHANGE: Self = Self(0);
+    pub const OUTPUT_CHANGE: Self = Self(1);
+    pub const OUTPUT_PROPERTY: Self = Self(2);
+    pub const PROVIDER_CHANGE: Self = Self(3);
+    pub const PROVIDER_PROPERTY: Self = Self(4);
+    pub const RESOURCE_CHANGE: Self = Self(5);
+    pub const LEASE: Self = Self(6);
+}
+impl From<Notify> for Option<bool> {
+    #[inline]
+    fn from(input: Notify) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Notify> for u8 {
+    #[inline]
     fn from(input: Notify) -> Self {
-        match input {
-            Notify::CrtcChange => 0,
-            Notify::OutputChange => 1,
-            Notify::OutputProperty => 2,
-            Notify::ProviderChange => 3,
-            Notify::ProviderProperty => 4,
-            Notify::ResourceChange => 5,
-            Notify::Lease => 6,
-        }
+        input.0
     }
 }
 impl From<Notify> for Option<u8> {
+    #[inline]
     fn from(input: Notify) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Notify> for u16 {
+    #[inline]
     fn from(input: Notify) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Notify> for Option<u16> {
+    #[inline]
     fn from(input: Notify) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Notify> for u32 {
+    #[inline]
     fn from(input: Notify) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Notify> for Option<u32> {
+    #[inline]
     fn from(input: Notify) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Notify {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Notify::CrtcChange),
-            1 => Ok(Notify::OutputChange),
-            2 => Ok(Notify::OutputProperty),
-            3 => Ok(Notify::ProviderChange),
-            4 => Ok(Notify::ProviderProperty),
-            5 => Ok(Notify::ResourceChange),
-            6 => Ok(Notify::Lease),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Notify {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Notify {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Notify {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Notify {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -5973,8 +6027,8 @@ impl TryParse for OutputChange {
         let (rotation, remaining) = u16::try_parse(remaining)?;
         let (connection, remaining) = u8::try_parse(remaining)?;
         let (subpixel_order, remaining) = u8::try_parse(remaining)?;
-        let connection = connection.try_into()?;
-        let subpixel_order = subpixel_order.try_into()?;
+        let connection = connection.into();
+        let subpixel_order = subpixel_order.into();
         let result = OutputChange { timestamp, config_timestamp, window, output, crtc, mode, rotation, connection, subpixel_order };
         Ok((result, remaining))
     }
@@ -5995,8 +6049,8 @@ impl Serialize for OutputChange {
         let crtc_bytes = self.crtc.serialize();
         let mode_bytes = self.mode.serialize();
         let rotation_bytes = self.rotation.serialize();
-        let connection_bytes = u8::from(self.connection).serialize();
-        let subpixel_order_bytes = u8::from(self.subpixel_order).serialize();
+        let connection_bytes = Option::<u8>::from(self.connection).unwrap().serialize();
+        let subpixel_order_bytes = Option::<u8>::from(self.subpixel_order).unwrap().serialize();
         [
             timestamp_bytes[0],
             timestamp_bytes[1],
@@ -6037,8 +6091,8 @@ impl Serialize for OutputChange {
         self.crtc.serialize_into(bytes);
         self.mode.serialize_into(bytes);
         self.rotation.serialize_into(bytes);
-        u8::from(self.connection).serialize_into(bytes);
-        u8::from(self.subpixel_order).serialize_into(bytes);
+        Option::<u8>::from(self.connection).unwrap().serialize_into(bytes);
+        Option::<u8>::from(self.subpixel_order).unwrap().serialize_into(bytes);
     }
 }
 
@@ -6058,7 +6112,7 @@ impl TryParse for OutputProperty {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
-        let status = status.try_into()?;
+        let status = status.into();
         let result = OutputProperty { window, output, atom, timestamp, status };
         Ok((result, remaining))
     }
@@ -6076,7 +6130,7 @@ impl Serialize for OutputProperty {
         let output_bytes = self.output.serialize();
         let atom_bytes = self.atom.serialize();
         let timestamp_bytes = self.timestamp.serialize();
-        let status_bytes = u8::from(self.status).serialize();
+        let status_bytes = Option::<u8>::from(self.status).unwrap().serialize();
         [
             window_bytes[0],
             window_bytes[1],
@@ -6114,7 +6168,7 @@ impl Serialize for OutputProperty {
         self.output.serialize_into(bytes);
         self.atom.serialize_into(bytes);
         self.timestamp.serialize_into(bytes);
-        u8::from(self.status).serialize_into(bytes);
+        Option::<u8>::from(self.status).unwrap().serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
     }
 }
@@ -7101,7 +7155,7 @@ impl TryParse for NotifyEvent {
         let (sub_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (u, remaining) = NotifyData::try_parse(remaining)?;
-        let sub_code = sub_code.try_into()?;
+        let sub_code = sub_code.into();
         let result = NotifyEvent { response_type, sub_code, sequence, u };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -7118,7 +7172,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let sub_code_bytes = u8::from(input.sub_code).serialize();
+        let sub_code_bytes = Option::<u8>::from(input.sub_code).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let u_bytes = input.u.serialize();
         [

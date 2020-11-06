@@ -38,68 +38,80 @@ pub const X11_XML_VERSION: (u32, u32) = (3, 1);
 pub type Alarm = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ALARMSTATE {
-    Active = 0,
-    Inactive = 1,
-    Destroyed = 2,
+pub struct ALARMSTATE(u8);
+impl ALARMSTATE {
+    pub const ACTIVE: Self = Self(0);
+    pub const INACTIVE: Self = Self(1);
+    pub const DESTROYED: Self = Self(2);
+}
+impl From<ALARMSTATE> for Option<bool> {
+    #[inline]
+    fn from(input: ALARMSTATE) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ALARMSTATE> for u8 {
+    #[inline]
     fn from(input: ALARMSTATE) -> Self {
-        match input {
-            ALARMSTATE::Active => 0,
-            ALARMSTATE::Inactive => 1,
-            ALARMSTATE::Destroyed => 2,
-        }
+        input.0
     }
 }
 impl From<ALARMSTATE> for Option<u8> {
+    #[inline]
     fn from(input: ALARMSTATE) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ALARMSTATE> for u16 {
+    #[inline]
     fn from(input: ALARMSTATE) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ALARMSTATE> for Option<u16> {
+    #[inline]
     fn from(input: ALARMSTATE) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ALARMSTATE> for u32 {
+    #[inline]
     fn from(input: ALARMSTATE) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ALARMSTATE> for Option<u32> {
+    #[inline]
     fn from(input: ALARMSTATE) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ALARMSTATE {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ALARMSTATE::Active),
-            1 => Ok(ALARMSTATE::Inactive),
-            2 => Ok(ALARMSTATE::Destroyed),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ALARMSTATE {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ALARMSTATE {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ALARMSTATE {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ALARMSTATE {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -108,217 +120,215 @@ pub type Counter = u32;
 pub type Fence = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum TESTTYPE {
-    PositiveTransition = 0,
-    NegativeTransition = 1,
-    PositiveComparison = 2,
-    NegativeComparison = 3,
+pub struct TESTTYPE(u32);
+impl TESTTYPE {
+    pub const POSITIVE_TRANSITION: Self = Self(0);
+    pub const NEGATIVE_TRANSITION: Self = Self(1);
+    pub const POSITIVE_COMPARISON: Self = Self(2);
+    pub const NEGATIVE_COMPARISON: Self = Self(3);
 }
-impl From<TESTTYPE> for u8 {
+impl From<TESTTYPE> for Option<bool> {
+    #[inline]
     fn from(input: TESTTYPE) -> Self {
-        match input {
-            TESTTYPE::PositiveTransition => 0,
-            TESTTYPE::NegativeTransition => 1,
-            TESTTYPE::PositiveComparison => 2,
-            TESTTYPE::NegativeComparison => 3,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<TESTTYPE> for Option<u8> {
+    #[inline]
     fn from(input: TESTTYPE) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<TESTTYPE> for u16 {
-    fn from(input: TESTTYPE) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<TESTTYPE> for Option<u16> {
+    #[inline]
     fn from(input: TESTTYPE) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<TESTTYPE> for u32 {
+    #[inline]
     fn from(input: TESTTYPE) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<TESTTYPE> for Option<u32> {
+    #[inline]
     fn from(input: TESTTYPE) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for TESTTYPE {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(TESTTYPE::PositiveTransition),
-            1 => Ok(TESTTYPE::NegativeTransition),
-            2 => Ok(TESTTYPE::PositiveComparison),
-            3 => Ok(TESTTYPE::NegativeComparison),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for TESTTYPE {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for TESTTYPE {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for TESTTYPE {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for TESTTYPE {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for TESTTYPE {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for TESTTYPE {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum VALUETYPE {
-    Absolute = 0,
-    Relative = 1,
+pub struct VALUETYPE(u32);
+impl VALUETYPE {
+    pub const ABSOLUTE: Self = Self(0);
+    pub const RELATIVE: Self = Self(1);
 }
-impl From<VALUETYPE> for bool {
+impl From<VALUETYPE> for Option<bool> {
+    #[inline]
     fn from(input: VALUETYPE) -> Self {
-        match input {
-            VALUETYPE::Absolute => false,
-            VALUETYPE::Relative => true,
-        }
-    }
-}
-impl From<VALUETYPE> for u8 {
-    fn from(input: VALUETYPE) -> Self {
-        match input {
-            VALUETYPE::Absolute => 0,
-            VALUETYPE::Relative => 1,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<VALUETYPE> for Option<u8> {
+    #[inline]
     fn from(input: VALUETYPE) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<VALUETYPE> for u16 {
-    fn from(input: VALUETYPE) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<VALUETYPE> for Option<u16> {
+    #[inline]
     fn from(input: VALUETYPE) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<VALUETYPE> for u32 {
+    #[inline]
     fn from(input: VALUETYPE) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<VALUETYPE> for Option<u32> {
+    #[inline]
     fn from(input: VALUETYPE) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for VALUETYPE {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(VALUETYPE::Absolute),
-            1 => Ok(VALUETYPE::Relative),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for VALUETYPE {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for VALUETYPE {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for VALUETYPE {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for VALUETYPE {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for VALUETYPE {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for VALUETYPE {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CA {
-    Counter = 1 << 0,
-    ValueType = 1 << 1,
-    Value = 1 << 2,
-    TestType = 1 << 3,
-    Delta = 1 << 4,
-    Events = 1 << 5,
+pub struct CA(u8);
+impl CA {
+    pub const COUNTER: Self = Self(1 << 0);
+    pub const VALUE_TYPE: Self = Self(1 << 1);
+    pub const VALUE: Self = Self(1 << 2);
+    pub const TEST_TYPE: Self = Self(1 << 3);
+    pub const DELTA: Self = Self(1 << 4);
+    pub const EVENTS: Self = Self(1 << 5);
+}
+impl From<CA> for Option<bool> {
+    #[inline]
+    fn from(input: CA) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<CA> for u8 {
+    #[inline]
     fn from(input: CA) -> Self {
-        match input {
-            CA::Counter => 1 << 0,
-            CA::ValueType => 1 << 1,
-            CA::Value => 1 << 2,
-            CA::TestType => 1 << 3,
-            CA::Delta => 1 << 4,
-            CA::Events => 1 << 5,
-        }
+        input.0
     }
 }
 impl From<CA> for Option<u8> {
+    #[inline]
     fn from(input: CA) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CA> for u16 {
+    #[inline]
     fn from(input: CA) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CA> for Option<u16> {
+    #[inline]
     fn from(input: CA) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CA> for u32 {
+    #[inline]
     fn from(input: CA) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CA> for Option<u32> {
+    #[inline]
     fn from(input: CA) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CA {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(CA::Counter),
-            2 => Ok(CA::ValueType),
-            4 => Ok(CA::Value),
-            8 => Ok(CA::TestType),
-            16 => Ok(CA::Delta),
-            32 => Ok(CA::Events),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CA {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for CA {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CA {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CA {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(CA, u8);
@@ -439,8 +449,8 @@ impl TryParse for Trigger {
         let (wait_type, remaining) = u32::try_parse(remaining)?;
         let (wait_value, remaining) = Int64::try_parse(remaining)?;
         let (test_type, remaining) = u32::try_parse(remaining)?;
-        let wait_type = wait_type.try_into()?;
-        let test_type = test_type.try_into()?;
+        let wait_type = wait_type.into();
+        let test_type = test_type.into();
         let result = Trigger { counter, wait_type, wait_value, test_type };
         Ok((result, remaining))
     }
@@ -455,9 +465,9 @@ impl Serialize for Trigger {
     type Bytes = [u8; 20];
     fn serialize(&self) -> [u8; 20] {
         let counter_bytes = self.counter.serialize();
-        let wait_type_bytes = u32::from(self.wait_type).serialize();
+        let wait_type_bytes = Option::<u32>::from(self.wait_type).unwrap().serialize();
         let wait_value_bytes = self.wait_value.serialize();
-        let test_type_bytes = u32::from(self.test_type).serialize();
+        let test_type_bytes = Option::<u32>::from(self.test_type).unwrap().serialize();
         [
             counter_bytes[0],
             counter_bytes[1],
@@ -484,9 +494,9 @@ impl Serialize for Trigger {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
         self.counter.serialize_into(bytes);
-        u32::from(self.wait_type).serialize_into(bytes);
+        Option::<u32>::from(self.wait_type).unwrap().serialize_into(bytes);
         self.wait_value.serialize_into(bytes);
-        u32::from(self.test_type).serialize_into(bytes);
+        Option::<u32>::from(self.test_type).unwrap().serialize_into(bytes);
     }
 }
 
@@ -1250,7 +1260,7 @@ impl CreateAlarmAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let counter = if switch_expr & u32::from(CA::Counter) != 0 {
+        let counter = if switch_expr & u32::from(CA::COUNTER) != 0 {
             let remaining = outer_remaining;
             let (counter, remaining) = Counter::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1258,16 +1268,16 @@ impl CreateAlarmAux {
         } else {
             None
         };
-        let value_type = if switch_expr & u32::from(CA::ValueType) != 0 {
+        let value_type = if switch_expr & u32::from(CA::VALUE_TYPE) != 0 {
             let remaining = outer_remaining;
             let (value_type, remaining) = u32::try_parse(remaining)?;
-            let value_type = value_type.try_into()?;
+            let value_type = value_type.into();
             outer_remaining = remaining;
             Some(value_type)
         } else {
             None
         };
-        let value = if switch_expr & u32::from(CA::Value) != 0 {
+        let value = if switch_expr & u32::from(CA::VALUE) != 0 {
             let remaining = outer_remaining;
             let (value, remaining) = Int64::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1275,16 +1285,16 @@ impl CreateAlarmAux {
         } else {
             None
         };
-        let test_type = if switch_expr & u32::from(CA::TestType) != 0 {
+        let test_type = if switch_expr & u32::from(CA::TEST_TYPE) != 0 {
             let remaining = outer_remaining;
             let (test_type, remaining) = u32::try_parse(remaining)?;
-            let test_type = test_type.try_into()?;
+            let test_type = test_type.into();
             outer_remaining = remaining;
             Some(test_type)
         } else {
             None
         };
-        let delta = if switch_expr & u32::from(CA::Delta) != 0 {
+        let delta = if switch_expr & u32::from(CA::DELTA) != 0 {
             let remaining = outer_remaining;
             let (delta, remaining) = Int64::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1292,7 +1302,7 @@ impl CreateAlarmAux {
         } else {
             None
         };
-        let events = if switch_expr & u32::from(CA::Events) != 0 {
+        let events = if switch_expr & u32::from(CA::EVENTS) != 0 {
             let remaining = outer_remaining;
             let (events, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1317,13 +1327,13 @@ impl CreateAlarmAux {
             counter.serialize_into(bytes);
         }
         if let Some(value_type) = self.value_type {
-            u32::from(value_type).serialize_into(bytes);
+            Option::<u32>::from(value_type).unwrap().serialize_into(bytes);
         }
         if let Some(ref value) = self.value {
             value.serialize_into(bytes);
         }
         if let Some(test_type) = self.test_type {
-            u32::from(test_type).serialize_into(bytes);
+            Option::<u32>::from(test_type).unwrap().serialize_into(bytes);
         }
         if let Some(ref delta) = self.delta {
             delta.serialize_into(bytes);
@@ -1337,22 +1347,22 @@ impl CreateAlarmAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.counter.is_some() {
-            expr_value |= u32::from(CA::Counter);
+            expr_value |= u32::from(CA::COUNTER);
         }
         if self.value_type.is_some() {
-            expr_value |= u32::from(CA::ValueType);
+            expr_value |= u32::from(CA::VALUE_TYPE);
         }
         if self.value.is_some() {
-            expr_value |= u32::from(CA::Value);
+            expr_value |= u32::from(CA::VALUE);
         }
         if self.test_type.is_some() {
-            expr_value |= u32::from(CA::TestType);
+            expr_value |= u32::from(CA::TEST_TYPE);
         }
         if self.delta.is_some() {
-            expr_value |= u32::from(CA::Delta);
+            expr_value |= u32::from(CA::DELTA);
         }
         if self.events.is_some() {
-            expr_value |= u32::from(CA::Events);
+            expr_value |= u32::from(CA::EVENTS);
         }
         expr_value
     }
@@ -1495,7 +1505,7 @@ impl ChangeAlarmAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let counter = if switch_expr & u32::from(CA::Counter) != 0 {
+        let counter = if switch_expr & u32::from(CA::COUNTER) != 0 {
             let remaining = outer_remaining;
             let (counter, remaining) = Counter::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1503,16 +1513,16 @@ impl ChangeAlarmAux {
         } else {
             None
         };
-        let value_type = if switch_expr & u32::from(CA::ValueType) != 0 {
+        let value_type = if switch_expr & u32::from(CA::VALUE_TYPE) != 0 {
             let remaining = outer_remaining;
             let (value_type, remaining) = u32::try_parse(remaining)?;
-            let value_type = value_type.try_into()?;
+            let value_type = value_type.into();
             outer_remaining = remaining;
             Some(value_type)
         } else {
             None
         };
-        let value = if switch_expr & u32::from(CA::Value) != 0 {
+        let value = if switch_expr & u32::from(CA::VALUE) != 0 {
             let remaining = outer_remaining;
             let (value, remaining) = Int64::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1520,16 +1530,16 @@ impl ChangeAlarmAux {
         } else {
             None
         };
-        let test_type = if switch_expr & u32::from(CA::TestType) != 0 {
+        let test_type = if switch_expr & u32::from(CA::TEST_TYPE) != 0 {
             let remaining = outer_remaining;
             let (test_type, remaining) = u32::try_parse(remaining)?;
-            let test_type = test_type.try_into()?;
+            let test_type = test_type.into();
             outer_remaining = remaining;
             Some(test_type)
         } else {
             None
         };
-        let delta = if switch_expr & u32::from(CA::Delta) != 0 {
+        let delta = if switch_expr & u32::from(CA::DELTA) != 0 {
             let remaining = outer_remaining;
             let (delta, remaining) = Int64::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1537,7 +1547,7 @@ impl ChangeAlarmAux {
         } else {
             None
         };
-        let events = if switch_expr & u32::from(CA::Events) != 0 {
+        let events = if switch_expr & u32::from(CA::EVENTS) != 0 {
             let remaining = outer_remaining;
             let (events, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1562,13 +1572,13 @@ impl ChangeAlarmAux {
             counter.serialize_into(bytes);
         }
         if let Some(value_type) = self.value_type {
-            u32::from(value_type).serialize_into(bytes);
+            Option::<u32>::from(value_type).unwrap().serialize_into(bytes);
         }
         if let Some(ref value) = self.value {
             value.serialize_into(bytes);
         }
         if let Some(test_type) = self.test_type {
-            u32::from(test_type).serialize_into(bytes);
+            Option::<u32>::from(test_type).unwrap().serialize_into(bytes);
         }
         if let Some(ref delta) = self.delta {
             delta.serialize_into(bytes);
@@ -1582,22 +1592,22 @@ impl ChangeAlarmAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.counter.is_some() {
-            expr_value |= u32::from(CA::Counter);
+            expr_value |= u32::from(CA::COUNTER);
         }
         if self.value_type.is_some() {
-            expr_value |= u32::from(CA::ValueType);
+            expr_value |= u32::from(CA::VALUE_TYPE);
         }
         if self.value.is_some() {
-            expr_value |= u32::from(CA::Value);
+            expr_value |= u32::from(CA::VALUE);
         }
         if self.test_type.is_some() {
-            expr_value |= u32::from(CA::TestType);
+            expr_value |= u32::from(CA::TEST_TYPE);
         }
         if self.delta.is_some() {
-            expr_value |= u32::from(CA::Delta);
+            expr_value |= u32::from(CA::DELTA);
         }
         if self.events.is_some() {
-            expr_value |= u32::from(CA::Events);
+            expr_value |= u32::from(CA::EVENTS);
         }
         expr_value
     }
@@ -1880,7 +1890,7 @@ impl TryParse for QueryAlarmReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let state = state.try_into()?;
+        let state = state.into();
         let result = QueryAlarmReply { sequence, length, trigger, delta, events, state };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -2635,7 +2645,7 @@ impl TryParse for AlarmNotifyEvent {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let state = state.try_into()?;
+        let state = state.into();
         let result = AlarmNotifyEvent { response_type, kind, sequence, alarm, counter_value, alarm_value, timestamp, state };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -2658,7 +2668,7 @@ impl From<&AlarmNotifyEvent> for [u8; 32] {
         let counter_value_bytes = input.counter_value.serialize();
         let alarm_value_bytes = input.alarm_value.serialize();
         let timestamp_bytes = input.timestamp.serialize();
-        let state_bytes = u8::from(input.state).serialize();
+        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
         [
             response_type_bytes[0],
             kind_bytes[0],

@@ -25,11 +25,12 @@ pub(crate) enum Family {
 impl From<X11Family> for Family {
     fn from(value: X11Family) -> Self {
         match value {
-            X11Family::Internet => Family::Internet,
-            X11Family::DECnet => Family::DECnet,
-            X11Family::Chaos => Family::Chaos,
-            X11Family::ServerInterpreted => Family::ServerInterpreted,
-            X11Family::Internet6 => Family::Internet6,
+            X11Family::INTERNET => Family::Internet,
+            X11Family::DEC_NET => Family::DECnet,
+            X11Family::CHAOS => Family::Chaos,
+            X11Family::SERVER_INTERPRETED => Family::ServerInterpreted,
+            X11Family::INTERNET6 => Family::Internet6,
+            _ => Family::Unknown(value.into()),
         }
     }
 }
@@ -38,11 +39,11 @@ impl From<u16> for Family {
     fn from(value: u16) -> Self {
         let x11family = {
             match value {
-                0 => Some(X11Family::Internet),
-                1 => Some(X11Family::DECnet),
-                2 => Some(X11Family::Chaos),
-                5 => Some(X11Family::ServerInterpreted),
-                6 => Some(X11Family::Internet6),
+                0 => Some(X11Family::INTERNET),
+                1 => Some(X11Family::DEC_NET),
+                2 => Some(X11Family::CHAOS),
+                5 => Some(X11Family::SERVER_INTERPRETED),
+                6 => Some(X11Family::INTERNET6),
                 _ => None,
             }
         };

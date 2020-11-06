@@ -85,7 +85,7 @@ fn choose_visual(conn: &impl Connection, screen_num: usize) -> Result<(u8, Visua
         let format = formats
             .formats
             .iter()
-            .filter(|info| (info.type_, info.depth) == (PictType::Direct, depth))
+            .filter(|info| (info.type_, info.depth) == (PictType::DIRECT, depth))
             .filter(|info| {
                 let d = info.direct;
                 (d.red_mask, d.green_mask, d.blue_mask, d.alpha_mask) == (0xff, 0xff, 0xff, 0xff)
@@ -134,9 +134,9 @@ where
 {
     let window = conn.generate_id()?;
     let colormap = conn.generate_id()?;
-    conn.create_colormap(ColormapAlloc::None, colormap, screen.root, visual_id)?;
+    conn.create_colormap(ColormapAlloc::NONE, colormap, screen.root, visual_id)?;
     let win_aux = CreateWindowAux::new()
-        .event_mask(EventMask::Exposure | EventMask::StructureNotify)
+        .event_mask(EventMask::EXPOSURE | EventMask::STRUCTURE_NOTIFY)
         .background_pixel(x11rb::NONE)
         .border_pixel(screen.black_pixel)
         .colormap(colormap);
@@ -149,7 +149,7 @@ where
         width,
         height,
         0,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         visual_id,
         &win_aux,
     )?;
@@ -157,28 +157,28 @@ where
 
     let title = "Simple Window";
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         window,
         AtomEnum::WM_NAME,
         AtomEnum::STRING,
         title.as_bytes(),
     )?;
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         window,
         atoms._NET_WM_NAME,
         atoms.UTF8_STRING,
         title.as_bytes(),
     )?;
     conn.change_property32(
-        PropMode::Replace,
+        PropMode::REPLACE,
         window,
         atoms.WM_PROTOCOLS,
         AtomEnum::ATOM,
         &[atoms.WM_DELETE_WINDOW],
     )?;
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         window,
         AtomEnum::WM_CLASS,
         AtomEnum::STRING,

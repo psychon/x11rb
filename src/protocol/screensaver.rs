@@ -36,201 +36,237 @@ pub const X11_EXTENSION_NAME: &str = "MIT-SCREEN-SAVER";
 pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Kind {
-    Blanked = 0,
-    Internal = 1,
-    External = 2,
+pub struct Kind(u8);
+impl Kind {
+    pub const BLANKED: Self = Self(0);
+    pub const INTERNAL: Self = Self(1);
+    pub const EXTERNAL: Self = Self(2);
+}
+impl From<Kind> for Option<bool> {
+    #[inline]
+    fn from(input: Kind) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Kind> for u8 {
+    #[inline]
     fn from(input: Kind) -> Self {
-        match input {
-            Kind::Blanked => 0,
-            Kind::Internal => 1,
-            Kind::External => 2,
-        }
+        input.0
     }
 }
 impl From<Kind> for Option<u8> {
+    #[inline]
     fn from(input: Kind) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Kind> for u16 {
+    #[inline]
     fn from(input: Kind) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Kind> for Option<u16> {
+    #[inline]
     fn from(input: Kind) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Kind> for u32 {
+    #[inline]
     fn from(input: Kind) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Kind> for Option<u32> {
+    #[inline]
     fn from(input: Kind) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Kind {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Kind::Blanked),
-            1 => Ok(Kind::Internal),
-            2 => Ok(Kind::External),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Kind {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Kind {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Kind {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Kind {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Event {
-    NotifyMask = 1 << 0,
-    CycleMask = 1 << 1,
+pub struct Event(u8);
+impl Event {
+    pub const NOTIFY_MASK: Self = Self(1 << 0);
+    pub const CYCLE_MASK: Self = Self(1 << 1);
+}
+impl From<Event> for Option<bool> {
+    #[inline]
+    fn from(input: Event) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Event> for u8 {
+    #[inline]
     fn from(input: Event) -> Self {
-        match input {
-            Event::NotifyMask => 1 << 0,
-            Event::CycleMask => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<Event> for Option<u8> {
+    #[inline]
     fn from(input: Event) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Event> for u16 {
+    #[inline]
     fn from(input: Event) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Event> for Option<u16> {
+    #[inline]
     fn from(input: Event) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Event> for u32 {
+    #[inline]
     fn from(input: Event) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Event> for Option<u32> {
+    #[inline]
     fn from(input: Event) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Event {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(Event::NotifyMask),
-            2 => Ok(Event::CycleMask),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Event {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Event {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Event {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Event {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(Event, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum State {
-    Off = 0,
-    On = 1,
-    Cycle = 2,
-    Disabled = 3,
+pub struct State(u8);
+impl State {
+    pub const OFF: Self = Self(0);
+    pub const ON: Self = Self(1);
+    pub const CYCLE: Self = Self(2);
+    pub const DISABLED: Self = Self(3);
+}
+impl From<State> for Option<bool> {
+    #[inline]
+    fn from(input: State) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<State> for u8 {
+    #[inline]
     fn from(input: State) -> Self {
-        match input {
-            State::Off => 0,
-            State::On => 1,
-            State::Cycle => 2,
-            State::Disabled => 3,
-        }
+        input.0
     }
 }
 impl From<State> for Option<u8> {
+    #[inline]
     fn from(input: State) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<State> for u16 {
+    #[inline]
     fn from(input: State) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<State> for Option<u16> {
+    #[inline]
     fn from(input: State) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<State> for u32 {
+    #[inline]
     fn from(input: State) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<State> for Option<u32> {
+    #[inline]
     fn from(input: State) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for State {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(State::Off),
-            1 => Ok(State::On),
-            2 => Ok(State::Cycle),
-            3 => Ok(State::Disabled),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for State {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for State {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for State {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for State {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -431,7 +467,7 @@ impl TryParse for QueryInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let kind = kind.try_into()?;
+        let kind = kind.into();
         let result = QueryInfoReply { state, sequence, length, saver_window, ms_until_server, ms_since_user_input, event_mask, kind };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -545,7 +581,7 @@ impl SetAttributesAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let background_pixmap = if switch_expr & u32::from(xproto::CW::BackPixmap) != 0 {
+        let background_pixmap = if switch_expr & u32::from(xproto::CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
             let (background_pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -553,7 +589,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let background_pixel = if switch_expr & u32::from(xproto::CW::BackPixel) != 0 {
+        let background_pixel = if switch_expr & u32::from(xproto::CW::BACK_PIXEL) != 0 {
             let remaining = outer_remaining;
             let (background_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -561,7 +597,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let border_pixmap = if switch_expr & u32::from(xproto::CW::BorderPixmap) != 0 {
+        let border_pixmap = if switch_expr & u32::from(xproto::CW::BORDER_PIXMAP) != 0 {
             let remaining = outer_remaining;
             let (border_pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -569,7 +605,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let border_pixel = if switch_expr & u32::from(xproto::CW::BorderPixel) != 0 {
+        let border_pixel = if switch_expr & u32::from(xproto::CW::BORDER_PIXEL) != 0 {
             let remaining = outer_remaining;
             let (border_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -577,34 +613,34 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let bit_gravity = if switch_expr & u32::from(xproto::CW::BitGravity) != 0 {
+        let bit_gravity = if switch_expr & u32::from(xproto::CW::BIT_GRAVITY) != 0 {
             let remaining = outer_remaining;
             let (bit_gravity, remaining) = u32::try_parse(remaining)?;
-            let bit_gravity = xproto::Gravity::try_from(bit_gravity, xproto::Gravity::BitForget)?;
+            let bit_gravity = bit_gravity.into();
             outer_remaining = remaining;
             Some(bit_gravity)
         } else {
             None
         };
-        let win_gravity = if switch_expr & u32::from(xproto::CW::WinGravity) != 0 {
+        let win_gravity = if switch_expr & u32::from(xproto::CW::WIN_GRAVITY) != 0 {
             let remaining = outer_remaining;
             let (win_gravity, remaining) = u32::try_parse(remaining)?;
-            let win_gravity = xproto::Gravity::try_from(win_gravity, xproto::Gravity::WinUnmap)?;
+            let win_gravity = win_gravity.into();
             outer_remaining = remaining;
             Some(win_gravity)
         } else {
             None
         };
-        let backing_store = if switch_expr & u32::from(xproto::CW::BackingStore) != 0 {
+        let backing_store = if switch_expr & u32::from(xproto::CW::BACKING_STORE) != 0 {
             let remaining = outer_remaining;
             let (backing_store, remaining) = u32::try_parse(remaining)?;
-            let backing_store = backing_store.try_into()?;
+            let backing_store = backing_store.into();
             outer_remaining = remaining;
             Some(backing_store)
         } else {
             None
         };
-        let backing_planes = if switch_expr & u32::from(xproto::CW::BackingPlanes) != 0 {
+        let backing_planes = if switch_expr & u32::from(xproto::CW::BACKING_PLANES) != 0 {
             let remaining = outer_remaining;
             let (backing_planes, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -612,7 +648,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let backing_pixel = if switch_expr & u32::from(xproto::CW::BackingPixel) != 0 {
+        let backing_pixel = if switch_expr & u32::from(xproto::CW::BACKING_PIXEL) != 0 {
             let remaining = outer_remaining;
             let (backing_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -620,7 +656,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let override_redirect = if switch_expr & u32::from(xproto::CW::OverrideRedirect) != 0 {
+        let override_redirect = if switch_expr & u32::from(xproto::CW::OVERRIDE_REDIRECT) != 0 {
             let remaining = outer_remaining;
             let (override_redirect, remaining) = xproto::Bool32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -628,7 +664,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let save_under = if switch_expr & u32::from(xproto::CW::SaveUnder) != 0 {
+        let save_under = if switch_expr & u32::from(xproto::CW::SAVE_UNDER) != 0 {
             let remaining = outer_remaining;
             let (save_under, remaining) = xproto::Bool32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -636,7 +672,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let event_mask = if switch_expr & u32::from(xproto::CW::EventMask) != 0 {
+        let event_mask = if switch_expr & u32::from(xproto::CW::EVENT_MASK) != 0 {
             let remaining = outer_remaining;
             let (event_mask, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -644,7 +680,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let do_not_propogate_mask = if switch_expr & u32::from(xproto::CW::DontPropagate) != 0 {
+        let do_not_propogate_mask = if switch_expr & u32::from(xproto::CW::DONT_PROPAGATE) != 0 {
             let remaining = outer_remaining;
             let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -652,7 +688,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let colormap = if switch_expr & u32::from(xproto::CW::Colormap) != 0 {
+        let colormap = if switch_expr & u32::from(xproto::CW::COLORMAP) != 0 {
             let remaining = outer_remaining;
             let (colormap, remaining) = xproto::Colormap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -660,7 +696,7 @@ impl SetAttributesAux {
         } else {
             None
         };
-        let cursor = if switch_expr & u32::from(xproto::CW::Cursor) != 0 {
+        let cursor = if switch_expr & u32::from(xproto::CW::CURSOR) != 0 {
             let remaining = outer_remaining;
             let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -694,13 +730,13 @@ impl SetAttributesAux {
             border_pixel.serialize_into(bytes);
         }
         if let Some(bit_gravity) = self.bit_gravity {
-            u32::from(bit_gravity).serialize_into(bytes);
+            Option::<u32>::from(bit_gravity).unwrap().serialize_into(bytes);
         }
         if let Some(win_gravity) = self.win_gravity {
-            u32::from(win_gravity).serialize_into(bytes);
+            Option::<u32>::from(win_gravity).unwrap().serialize_into(bytes);
         }
         if let Some(backing_store) = self.backing_store {
-            u32::from(backing_store).serialize_into(bytes);
+            Option::<u32>::from(backing_store).unwrap().serialize_into(bytes);
         }
         if let Some(backing_planes) = self.backing_planes {
             backing_planes.serialize_into(bytes);
@@ -732,49 +768,49 @@ impl SetAttributesAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.background_pixmap.is_some() {
-            expr_value |= u32::from(xproto::CW::BackPixmap);
+            expr_value |= u32::from(xproto::CW::BACK_PIXMAP);
         }
         if self.background_pixel.is_some() {
-            expr_value |= u32::from(xproto::CW::BackPixel);
+            expr_value |= u32::from(xproto::CW::BACK_PIXEL);
         }
         if self.border_pixmap.is_some() {
-            expr_value |= u32::from(xproto::CW::BorderPixmap);
+            expr_value |= u32::from(xproto::CW::BORDER_PIXMAP);
         }
         if self.border_pixel.is_some() {
-            expr_value |= u32::from(xproto::CW::BorderPixel);
+            expr_value |= u32::from(xproto::CW::BORDER_PIXEL);
         }
         if self.bit_gravity.is_some() {
-            expr_value |= u32::from(xproto::CW::BitGravity);
+            expr_value |= u32::from(xproto::CW::BIT_GRAVITY);
         }
         if self.win_gravity.is_some() {
-            expr_value |= u32::from(xproto::CW::WinGravity);
+            expr_value |= u32::from(xproto::CW::WIN_GRAVITY);
         }
         if self.backing_store.is_some() {
-            expr_value |= u32::from(xproto::CW::BackingStore);
+            expr_value |= u32::from(xproto::CW::BACKING_STORE);
         }
         if self.backing_planes.is_some() {
-            expr_value |= u32::from(xproto::CW::BackingPlanes);
+            expr_value |= u32::from(xproto::CW::BACKING_PLANES);
         }
         if self.backing_pixel.is_some() {
-            expr_value |= u32::from(xproto::CW::BackingPixel);
+            expr_value |= u32::from(xproto::CW::BACKING_PIXEL);
         }
         if self.override_redirect.is_some() {
-            expr_value |= u32::from(xproto::CW::OverrideRedirect);
+            expr_value |= u32::from(xproto::CW::OVERRIDE_REDIRECT);
         }
         if self.save_under.is_some() {
-            expr_value |= u32::from(xproto::CW::SaveUnder);
+            expr_value |= u32::from(xproto::CW::SAVE_UNDER);
         }
         if self.event_mask.is_some() {
-            expr_value |= u32::from(xproto::CW::EventMask);
+            expr_value |= u32::from(xproto::CW::EVENT_MASK);
         }
         if self.do_not_propogate_mask.is_some() {
-            expr_value |= u32::from(xproto::CW::DontPropagate);
+            expr_value |= u32::from(xproto::CW::DONT_PROPAGATE);
         }
         if self.colormap.is_some() {
-            expr_value |= u32::from(xproto::CW::Colormap);
+            expr_value |= u32::from(xproto::CW::COLORMAP);
         }
         if self.cursor.is_some() {
-            expr_value |= u32::from(xproto::CW::Cursor);
+            expr_value |= u32::from(xproto::CW::CURSOR);
         }
         expr_value
     }
@@ -891,7 +927,7 @@ impl<'input> SetAttributesRequest<'input> {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let border_width_bytes = self.border_width.serialize();
-        let class_bytes = u8::from(self.class).serialize();
+        let class_bytes = Option::<u8>::from(self.class).unwrap().serialize();
         let depth_bytes = self.depth.serialize();
         let visual_bytes = self.visual.serialize();
         let value_mask = self.value_list.switch_expr();
@@ -956,7 +992,7 @@ impl<'input> SetAttributesRequest<'input> {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (border_width, remaining) = u16::try_parse(remaining)?;
         let (class, remaining) = u8::try_parse(remaining)?;
-        let class = class.try_into()?;
+        let class = class.into();
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
@@ -1168,8 +1204,8 @@ impl TryParse for NotifyEvent {
         let (kind, remaining) = u8::try_parse(remaining)?;
         let (forced, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::InsufficientData)?;
-        let state = state.try_into()?;
-        let kind = kind.try_into()?;
+        let state = state.into();
+        let kind = kind.into();
         let result = NotifyEvent { response_type, state, sequence, time, root, window, kind, forced };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -1186,12 +1222,12 @@ impl TryFrom<&[u8]> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let state_bytes = u8::from(input.state).serialize();
+        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let root_bytes = input.root.serialize();
         let window_bytes = input.window.serialize();
-        let kind_bytes = u8::from(input.kind).serialize();
+        let kind_bytes = Option::<u8>::from(input.kind).unwrap().serialize();
         let forced_bytes = input.forced.serialize();
         [
             response_type_bytes[0],

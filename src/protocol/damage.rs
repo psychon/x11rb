@@ -39,71 +39,81 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 pub type Damage = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ReportLevel {
-    RawRectangles = 0,
-    DeltaRectangles = 1,
-    BoundingBox = 2,
-    NonEmpty = 3,
+pub struct ReportLevel(u8);
+impl ReportLevel {
+    pub const RAW_RECTANGLES: Self = Self(0);
+    pub const DELTA_RECTANGLES: Self = Self(1);
+    pub const BOUNDING_BOX: Self = Self(2);
+    pub const NON_EMPTY: Self = Self(3);
+}
+impl From<ReportLevel> for Option<bool> {
+    #[inline]
+    fn from(input: ReportLevel) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ReportLevel> for u8 {
+    #[inline]
     fn from(input: ReportLevel) -> Self {
-        match input {
-            ReportLevel::RawRectangles => 0,
-            ReportLevel::DeltaRectangles => 1,
-            ReportLevel::BoundingBox => 2,
-            ReportLevel::NonEmpty => 3,
-        }
+        input.0
     }
 }
 impl From<ReportLevel> for Option<u8> {
+    #[inline]
     fn from(input: ReportLevel) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ReportLevel> for u16 {
+    #[inline]
     fn from(input: ReportLevel) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ReportLevel> for Option<u16> {
+    #[inline]
     fn from(input: ReportLevel) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ReportLevel> for u32 {
+    #[inline]
     fn from(input: ReportLevel) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ReportLevel> for Option<u32> {
+    #[inline]
     fn from(input: ReportLevel) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ReportLevel {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ReportLevel::RawRectangles),
-            1 => Ok(ReportLevel::DeltaRectangles),
-            2 => Ok(ReportLevel::BoundingBox),
-            3 => Ok(ReportLevel::NonEmpty),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ReportLevel {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ReportLevel {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ReportLevel {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ReportLevel {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -237,7 +247,7 @@ impl CreateRequest {
         let length_so_far = 0;
         let damage_bytes = self.damage.serialize();
         let drawable_bytes = self.drawable.serialize();
-        let level_bytes = u8::from(self.level).serialize();
+        let level_bytes = Option::<u8>::from(self.level).unwrap().serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             CREATE_REQUEST,
@@ -278,7 +288,7 @@ impl CreateRequest {
         let (damage, remaining) = Damage::try_parse(value)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (level, remaining) = u8::try_parse(remaining)?;
-        let level = level.try_into()?;
+        let level = level.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(CreateRequest {
@@ -553,7 +563,7 @@ impl TryParse for NotifyEvent {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (area, remaining) = xproto::Rectangle::try_parse(remaining)?;
         let (geometry, remaining) = xproto::Rectangle::try_parse(remaining)?;
-        let level = level.try_into()?;
+        let level = level.into();
         let result = NotifyEvent { response_type, level, sequence, drawable, damage, timestamp, area, geometry };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -570,7 +580,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let level_bytes = u8::from(input.level).serialize();
+        let level_bytes = Option::<u8>::from(input.level).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let drawable_bytes = input.drawable.serialize();
         let damage_bytes = input.damage.serialize();

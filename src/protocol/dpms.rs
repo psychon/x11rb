@@ -501,71 +501,75 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum DPMSMode {
-    On = 0,
-    Standby = 1,
-    Suspend = 2,
-    Off = 3,
+pub struct DPMSMode(u16);
+impl DPMSMode {
+    pub const ON: Self = Self(0);
+    pub const STANDBY: Self = Self(1);
+    pub const SUSPEND: Self = Self(2);
+    pub const OFF: Self = Self(3);
 }
-impl From<DPMSMode> for u8 {
+impl From<DPMSMode> for Option<bool> {
+    #[inline]
     fn from(input: DPMSMode) -> Self {
-        match input {
-            DPMSMode::On => 0,
-            DPMSMode::Standby => 1,
-            DPMSMode::Suspend => 2,
-            DPMSMode::Off => 3,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<DPMSMode> for Option<u8> {
+    #[inline]
     fn from(input: DPMSMode) -> Self {
-        Some(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<DPMSMode> for u16 {
+    #[inline]
     fn from(input: DPMSMode) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<DPMSMode> for Option<u16> {
+    #[inline]
     fn from(input: DPMSMode) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<DPMSMode> for u32 {
+    #[inline]
     fn from(input: DPMSMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<DPMSMode> for Option<u32> {
+    #[inline]
     fn from(input: DPMSMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for DPMSMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(DPMSMode::On),
-            1 => Ok(DPMSMode::Standby),
-            2 => Ok(DPMSMode::Suspend),
-            3 => Ok(DPMSMode::Off),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for DPMSMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for DPMSMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for DPMSMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for DPMSMode {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for DPMSMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -584,7 +588,7 @@ impl ForceLevelRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let power_level_bytes = u16::from(self.power_level).serialize();
+        let power_level_bytes = Option::<u16>::from(self.power_level).unwrap().serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             FORCE_LEVEL_REQUEST,
@@ -615,7 +619,7 @@ impl ForceLevelRequest {
             return Err(ParseError::InvalidValue);
         }
         let (power_level, remaining) = u16::try_parse(value)?;
-        let power_level = power_level.try_into()?;
+        let power_level = power_level.into();
         let _ = remaining;
         Ok(ForceLevelRequest {
             power_level,
@@ -709,7 +713,7 @@ impl TryParse for InfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let power_level = power_level.try_into()?;
+        let power_level = power_level.into();
         let result = InfoReply { sequence, length, power_level, state };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)

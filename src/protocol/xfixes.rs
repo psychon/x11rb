@@ -146,215 +146,233 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SaveSetMode {
-    Insert = 0,
-    Delete = 1,
+pub struct SaveSetMode(u8);
+impl SaveSetMode {
+    pub const INSERT: Self = Self(0);
+    pub const DELETE: Self = Self(1);
 }
-impl From<SaveSetMode> for bool {
+impl From<SaveSetMode> for Option<bool> {
+    #[inline]
     fn from(input: SaveSetMode) -> Self {
-        match input {
-            SaveSetMode::Insert => false,
-            SaveSetMode::Delete => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<SaveSetMode> for u8 {
+    #[inline]
     fn from(input: SaveSetMode) -> Self {
-        match input {
-            SaveSetMode::Insert => 0,
-            SaveSetMode::Delete => 1,
-        }
+        input.0
     }
 }
 impl From<SaveSetMode> for Option<u8> {
+    #[inline]
     fn from(input: SaveSetMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SaveSetMode> for u16 {
+    #[inline]
     fn from(input: SaveSetMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SaveSetMode> for Option<u16> {
+    #[inline]
     fn from(input: SaveSetMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SaveSetMode> for u32 {
+    #[inline]
     fn from(input: SaveSetMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SaveSetMode> for Option<u32> {
+    #[inline]
     fn from(input: SaveSetMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SaveSetMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SaveSetMode::Insert),
-            1 => Ok(SaveSetMode::Delete),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SaveSetMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SaveSetMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SaveSetMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SaveSetMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SaveSetTarget {
-    Nearest = 0,
-    Root = 1,
+pub struct SaveSetTarget(u8);
+impl SaveSetTarget {
+    pub const NEAREST: Self = Self(0);
+    pub const ROOT: Self = Self(1);
 }
-impl From<SaveSetTarget> for bool {
+impl From<SaveSetTarget> for Option<bool> {
+    #[inline]
     fn from(input: SaveSetTarget) -> Self {
-        match input {
-            SaveSetTarget::Nearest => false,
-            SaveSetTarget::Root => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<SaveSetTarget> for u8 {
+    #[inline]
     fn from(input: SaveSetTarget) -> Self {
-        match input {
-            SaveSetTarget::Nearest => 0,
-            SaveSetTarget::Root => 1,
-        }
+        input.0
     }
 }
 impl From<SaveSetTarget> for Option<u8> {
+    #[inline]
     fn from(input: SaveSetTarget) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SaveSetTarget> for u16 {
+    #[inline]
     fn from(input: SaveSetTarget) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SaveSetTarget> for Option<u16> {
+    #[inline]
     fn from(input: SaveSetTarget) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SaveSetTarget> for u32 {
+    #[inline]
     fn from(input: SaveSetTarget) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SaveSetTarget> for Option<u32> {
+    #[inline]
     fn from(input: SaveSetTarget) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SaveSetTarget {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SaveSetTarget::Nearest),
-            1 => Ok(SaveSetTarget::Root),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SaveSetTarget {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SaveSetTarget {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SaveSetTarget {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SaveSetTarget {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SaveSetMapping {
-    Map = 0,
-    Unmap = 1,
+pub struct SaveSetMapping(u8);
+impl SaveSetMapping {
+    pub const MAP: Self = Self(0);
+    pub const UNMAP: Self = Self(1);
 }
-impl From<SaveSetMapping> for bool {
+impl From<SaveSetMapping> for Option<bool> {
+    #[inline]
     fn from(input: SaveSetMapping) -> Self {
-        match input {
-            SaveSetMapping::Map => false,
-            SaveSetMapping::Unmap => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<SaveSetMapping> for u8 {
+    #[inline]
     fn from(input: SaveSetMapping) -> Self {
-        match input {
-            SaveSetMapping::Map => 0,
-            SaveSetMapping::Unmap => 1,
-        }
+        input.0
     }
 }
 impl From<SaveSetMapping> for Option<u8> {
+    #[inline]
     fn from(input: SaveSetMapping) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SaveSetMapping> for u16 {
+    #[inline]
     fn from(input: SaveSetMapping) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SaveSetMapping> for Option<u16> {
+    #[inline]
     fn from(input: SaveSetMapping) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SaveSetMapping> for u32 {
+    #[inline]
     fn from(input: SaveSetMapping) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SaveSetMapping> for Option<u32> {
+    #[inline]
     fn from(input: SaveSetMapping) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SaveSetMapping {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SaveSetMapping::Map),
-            1 => Ok(SaveSetMapping::Unmap),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SaveSetMapping {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SaveSetMapping {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SaveSetMapping {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SaveSetMapping {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -376,9 +394,9 @@ impl ChangeSaveSetRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let mode_bytes = u8::from(self.mode).serialize();
-        let target_bytes = u8::from(self.target).serialize();
-        let map_bytes = u8::from(self.map).serialize();
+        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let target_bytes = Option::<u8>::from(self.target).unwrap().serialize();
+        let map_bytes = Option::<u8>::from(self.map).unwrap().serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -414,11 +432,11 @@ impl ChangeSaveSetRequest {
             return Err(ParseError::InvalidValue);
         }
         let (mode, remaining) = u8::try_parse(value)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let (target, remaining) = u8::try_parse(remaining)?;
-        let target = target.try_into()?;
+        let target = target.into();
         let (map, remaining) = u8::try_parse(remaining)?;
-        let map = map.try_into()?;
+        let map = map.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let _ = remaining;
@@ -447,134 +465,158 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SelectionEvent {
-    SetSelectionOwner = 0,
-    SelectionWindowDestroy = 1,
-    SelectionClientClose = 2,
+pub struct SelectionEvent(u8);
+impl SelectionEvent {
+    pub const SET_SELECTION_OWNER: Self = Self(0);
+    pub const SELECTION_WINDOW_DESTROY: Self = Self(1);
+    pub const SELECTION_CLIENT_CLOSE: Self = Self(2);
+}
+impl From<SelectionEvent> for Option<bool> {
+    #[inline]
+    fn from(input: SelectionEvent) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SelectionEvent> for u8 {
+    #[inline]
     fn from(input: SelectionEvent) -> Self {
-        match input {
-            SelectionEvent::SetSelectionOwner => 0,
-            SelectionEvent::SelectionWindowDestroy => 1,
-            SelectionEvent::SelectionClientClose => 2,
-        }
+        input.0
     }
 }
 impl From<SelectionEvent> for Option<u8> {
+    #[inline]
     fn from(input: SelectionEvent) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SelectionEvent> for u16 {
+    #[inline]
     fn from(input: SelectionEvent) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SelectionEvent> for Option<u16> {
+    #[inline]
     fn from(input: SelectionEvent) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SelectionEvent> for u32 {
+    #[inline]
     fn from(input: SelectionEvent) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SelectionEvent> for Option<u32> {
+    #[inline]
     fn from(input: SelectionEvent) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SelectionEvent {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SelectionEvent::SetSelectionOwner),
-            1 => Ok(SelectionEvent::SelectionWindowDestroy),
-            2 => Ok(SelectionEvent::SelectionClientClose),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SelectionEvent {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SelectionEvent {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SelectionEvent {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SelectionEvent {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SelectionEventMask {
-    SetSelectionOwner = 1 << 0,
-    SelectionWindowDestroy = 1 << 1,
-    SelectionClientClose = 1 << 2,
+pub struct SelectionEventMask(u8);
+impl SelectionEventMask {
+    pub const SET_SELECTION_OWNER: Self = Self(1 << 0);
+    pub const SELECTION_WINDOW_DESTROY: Self = Self(1 << 1);
+    pub const SELECTION_CLIENT_CLOSE: Self = Self(1 << 2);
+}
+impl From<SelectionEventMask> for Option<bool> {
+    #[inline]
+    fn from(input: SelectionEventMask) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SelectionEventMask> for u8 {
+    #[inline]
     fn from(input: SelectionEventMask) -> Self {
-        match input {
-            SelectionEventMask::SetSelectionOwner => 1 << 0,
-            SelectionEventMask::SelectionWindowDestroy => 1 << 1,
-            SelectionEventMask::SelectionClientClose => 1 << 2,
-        }
+        input.0
     }
 }
 impl From<SelectionEventMask> for Option<u8> {
+    #[inline]
     fn from(input: SelectionEventMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SelectionEventMask> for u16 {
+    #[inline]
     fn from(input: SelectionEventMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SelectionEventMask> for Option<u16> {
+    #[inline]
     fn from(input: SelectionEventMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SelectionEventMask> for u32 {
+    #[inline]
     fn from(input: SelectionEventMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SelectionEventMask> for Option<u32> {
+    #[inline]
     fn from(input: SelectionEventMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SelectionEventMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(SelectionEventMask::SetSelectionOwner),
-            2 => Ok(SelectionEventMask::SelectionWindowDestroy),
-            4 => Ok(SelectionEventMask::SelectionClientClose),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SelectionEventMask {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SelectionEventMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SelectionEventMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SelectionEventMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SelectionEventMask, u8);
@@ -604,7 +646,7 @@ impl TryParse for SelectionNotifyEvent {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (selection_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let subtype = subtype.try_into()?;
+        let subtype = subtype.into();
         let result = SelectionNotifyEvent { response_type, subtype, sequence, window, owner, selection, timestamp, selection_timestamp };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -621,7 +663,7 @@ impl TryFrom<&[u8]> for SelectionNotifyEvent {
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let subtype_bytes = u8::from(input.subtype).serialize();
+        let subtype_bytes = Option::<u8>::from(input.subtype).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let window_bytes = input.window.serialize();
         let owner_bytes = input.owner.serialize();
@@ -756,122 +798,154 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CursorNotify {
-    DisplayCursor = 0,
+pub struct CursorNotify(u8);
+impl CursorNotify {
+    pub const DISPLAY_CURSOR: Self = Self(0);
+}
+impl From<CursorNotify> for Option<bool> {
+    #[inline]
+    fn from(input: CursorNotify) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<CursorNotify> for u8 {
+    #[inline]
     fn from(input: CursorNotify) -> Self {
-        match input {
-            CursorNotify::DisplayCursor => 0,
-        }
+        input.0
     }
 }
 impl From<CursorNotify> for Option<u8> {
+    #[inline]
     fn from(input: CursorNotify) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CursorNotify> for u16 {
+    #[inline]
     fn from(input: CursorNotify) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CursorNotify> for Option<u16> {
+    #[inline]
     fn from(input: CursorNotify) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CursorNotify> for u32 {
+    #[inline]
     fn from(input: CursorNotify) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CursorNotify> for Option<u32> {
+    #[inline]
     fn from(input: CursorNotify) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CursorNotify {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(CursorNotify::DisplayCursor),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CursorNotify {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for CursorNotify {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CursorNotify {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CursorNotify {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CursorNotifyMask {
-    DisplayCursor = 1 << 0,
+pub struct CursorNotifyMask(u8);
+impl CursorNotifyMask {
+    pub const DISPLAY_CURSOR: Self = Self(1 << 0);
+}
+impl From<CursorNotifyMask> for Option<bool> {
+    #[inline]
+    fn from(input: CursorNotifyMask) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<CursorNotifyMask> for u8 {
+    #[inline]
     fn from(input: CursorNotifyMask) -> Self {
-        match input {
-            CursorNotifyMask::DisplayCursor => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<CursorNotifyMask> for Option<u8> {
+    #[inline]
     fn from(input: CursorNotifyMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CursorNotifyMask> for u16 {
+    #[inline]
     fn from(input: CursorNotifyMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CursorNotifyMask> for Option<u16> {
+    #[inline]
     fn from(input: CursorNotifyMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CursorNotifyMask> for u32 {
+    #[inline]
     fn from(input: CursorNotifyMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CursorNotifyMask> for Option<u32> {
+    #[inline]
     fn from(input: CursorNotifyMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CursorNotifyMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(CursorNotifyMask::DisplayCursor),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CursorNotifyMask {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for CursorNotifyMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CursorNotifyMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CursorNotifyMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(CursorNotifyMask, u8);
@@ -899,7 +973,7 @@ impl TryParse for CursorNotifyEvent {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let subtype = subtype.try_into()?;
+        let subtype = subtype.into();
         let result = CursorNotifyEvent { response_type, subtype, sequence, window, cursor_serial, timestamp, name };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -916,7 +990,7 @@ impl TryFrom<&[u8]> for CursorNotifyEvent {
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let subtype_bytes = u8::from(input.subtype).serialize();
+        let subtype_bytes = Option::<u8>::from(input.subtype).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let window_bytes = input.window.serialize();
         let cursor_serial_bytes = input.cursor_serial.serialize();
@@ -1146,62 +1220,78 @@ pub type Region = u32;
 pub const BAD_REGION_ERROR: u8 = 0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum RegionEnum {
-    None = 0,
+pub struct RegionEnum(u8);
+impl RegionEnum {
+    pub const NONE: Self = Self(0);
+}
+impl From<RegionEnum> for Option<bool> {
+    #[inline]
+    fn from(input: RegionEnum) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<RegionEnum> for u8 {
+    #[inline]
     fn from(input: RegionEnum) -> Self {
-        match input {
-            RegionEnum::None => 0,
-        }
+        input.0
     }
 }
 impl From<RegionEnum> for Option<u8> {
+    #[inline]
     fn from(input: RegionEnum) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<RegionEnum> for u16 {
+    #[inline]
     fn from(input: RegionEnum) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<RegionEnum> for Option<u16> {
+    #[inline]
     fn from(input: RegionEnum) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<RegionEnum> for u32 {
+    #[inline]
     fn from(input: RegionEnum) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<RegionEnum> for Option<u32> {
+    #[inline]
     fn from(input: RegionEnum) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for RegionEnum {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(RegionEnum::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for RegionEnum {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for RegionEnum {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for RegionEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for RegionEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -1385,7 +1475,7 @@ impl CreateRegionFromWindowRequest {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let window_bytes = self.window.serialize();
-        let kind_bytes = shape::Kind::from(self.kind).serialize();
+        let kind_bytes = Option::<shape::Kind>::from(self.kind).unwrap().serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             CREATE_REGION_FROM_WINDOW_REQUEST,
@@ -1426,7 +1516,7 @@ impl CreateRegionFromWindowRequest {
         let (region, remaining) = Region::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (kind, remaining) = shape::Kind::try_parse(remaining)?;
-        let kind = kind.try_into()?;
+        let kind = kind.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(CreateRegionFromWindowRequest {
@@ -2538,7 +2628,7 @@ impl SetWindowShapeRegionRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let dest_bytes = self.dest.serialize();
-        let dest_kind_bytes = shape::Kind::from(self.dest_kind).serialize();
+        let dest_kind_bytes = Option::<shape::Kind>::from(self.dest_kind).unwrap().serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
         let region_bytes = self.region.serialize();
@@ -2585,7 +2675,7 @@ impl SetWindowShapeRegionRequest {
         }
         let (dest, remaining) = xproto::Window::try_parse(value)?;
         let (dest_kind, remaining) = shape::Kind::try_parse(remaining)?;
-        let dest_kind = dest_kind.try_into()?;
+        let dest_kind = dest_kind.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
         let (y_offset, remaining) = i16::try_parse(remaining)?;
@@ -3429,71 +3519,81 @@ where
 pub type Barrier = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum BarrierDirections {
-    PositiveX = 1 << 0,
-    PositiveY = 1 << 1,
-    NegativeX = 1 << 2,
-    NegativeY = 1 << 3,
+pub struct BarrierDirections(u8);
+impl BarrierDirections {
+    pub const POSITIVE_X: Self = Self(1 << 0);
+    pub const POSITIVE_Y: Self = Self(1 << 1);
+    pub const NEGATIVE_X: Self = Self(1 << 2);
+    pub const NEGATIVE_Y: Self = Self(1 << 3);
+}
+impl From<BarrierDirections> for Option<bool> {
+    #[inline]
+    fn from(input: BarrierDirections) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<BarrierDirections> for u8 {
+    #[inline]
     fn from(input: BarrierDirections) -> Self {
-        match input {
-            BarrierDirections::PositiveX => 1 << 0,
-            BarrierDirections::PositiveY => 1 << 1,
-            BarrierDirections::NegativeX => 1 << 2,
-            BarrierDirections::NegativeY => 1 << 3,
-        }
+        input.0
     }
 }
 impl From<BarrierDirections> for Option<u8> {
+    #[inline]
     fn from(input: BarrierDirections) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<BarrierDirections> for u16 {
+    #[inline]
     fn from(input: BarrierDirections) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<BarrierDirections> for Option<u16> {
+    #[inline]
     fn from(input: BarrierDirections) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<BarrierDirections> for u32 {
+    #[inline]
     fn from(input: BarrierDirections) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<BarrierDirections> for Option<u32> {
+    #[inline]
     fn from(input: BarrierDirections) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for BarrierDirections {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(BarrierDirections::PositiveX),
-            2 => Ok(BarrierDirections::PositiveY),
-            4 => Ok(BarrierDirections::NegativeX),
-            8 => Ok(BarrierDirections::NegativeY),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for BarrierDirections {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for BarrierDirections {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for BarrierDirections {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for BarrierDirections {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(BarrierDirections, u8);

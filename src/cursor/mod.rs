@@ -242,7 +242,7 @@ fn create_render_cursor<C: Connection>(
     let pixels = crate::x11_utils::Serialize::serialize(&image.pixels[..]);
     let _ = xproto::put_image(
         conn,
-        xproto::ImageFormat::ZPixmap,
+        xproto::ImageFormat::Z_PIXMAP,
         pixmap,
         gc,
         image.width,
@@ -328,7 +328,7 @@ fn find_format(reply: &render::QueryPictFormatsReply) -> Pictformat {
         .formats
         .iter()
         .filter(|format| {
-            format.type_ == render::PictType::Direct
+            format.type_ == render::PictType::DIRECT
                 && format.depth == 32
                 && format.direct.red_shift == 16
                 && format.direct.red_mask == 0xff

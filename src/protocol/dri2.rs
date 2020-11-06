@@ -36,230 +36,213 @@ pub const X11_EXTENSION_NAME: &str = "DRI2";
 pub const X11_XML_VERSION: (u32, u32) = (1, 4);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Attachment {
-    BufferFrontLeft = 0,
-    BufferBackLeft = 1,
-    BufferFrontRight = 2,
-    BufferBackRight = 3,
-    BufferDepth = 4,
-    BufferStencil = 5,
-    BufferAccum = 6,
-    BufferFakeFrontLeft = 7,
-    BufferFakeFrontRight = 8,
-    BufferDepthStencil = 9,
-    BufferHiz = 10,
+pub struct Attachment(u32);
+impl Attachment {
+    pub const BUFFER_FRONT_LEFT: Self = Self(0);
+    pub const BUFFER_BACK_LEFT: Self = Self(1);
+    pub const BUFFER_FRONT_RIGHT: Self = Self(2);
+    pub const BUFFER_BACK_RIGHT: Self = Self(3);
+    pub const BUFFER_DEPTH: Self = Self(4);
+    pub const BUFFER_STENCIL: Self = Self(5);
+    pub const BUFFER_ACCUM: Self = Self(6);
+    pub const BUFFER_FAKE_FRONT_LEFT: Self = Self(7);
+    pub const BUFFER_FAKE_FRONT_RIGHT: Self = Self(8);
+    pub const BUFFER_DEPTH_STENCIL: Self = Self(9);
+    pub const BUFFER_HIZ: Self = Self(10);
 }
-impl From<Attachment> for u8 {
+impl From<Attachment> for Option<bool> {
+    #[inline]
     fn from(input: Attachment) -> Self {
-        match input {
-            Attachment::BufferFrontLeft => 0,
-            Attachment::BufferBackLeft => 1,
-            Attachment::BufferFrontRight => 2,
-            Attachment::BufferBackRight => 3,
-            Attachment::BufferDepth => 4,
-            Attachment::BufferStencil => 5,
-            Attachment::BufferAccum => 6,
-            Attachment::BufferFakeFrontLeft => 7,
-            Attachment::BufferFakeFrontRight => 8,
-            Attachment::BufferDepthStencil => 9,
-            Attachment::BufferHiz => 10,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<Attachment> for Option<u8> {
+    #[inline]
     fn from(input: Attachment) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<Attachment> for u16 {
-    fn from(input: Attachment) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<Attachment> for Option<u16> {
+    #[inline]
     fn from(input: Attachment) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<Attachment> for u32 {
+    #[inline]
     fn from(input: Attachment) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<Attachment> for Option<u32> {
+    #[inline]
     fn from(input: Attachment) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for Attachment {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Attachment::BufferFrontLeft),
-            1 => Ok(Attachment::BufferBackLeft),
-            2 => Ok(Attachment::BufferFrontRight),
-            3 => Ok(Attachment::BufferBackRight),
-            4 => Ok(Attachment::BufferDepth),
-            5 => Ok(Attachment::BufferStencil),
-            6 => Ok(Attachment::BufferAccum),
-            7 => Ok(Attachment::BufferFakeFrontLeft),
-            8 => Ok(Attachment::BufferFakeFrontRight),
-            9 => Ok(Attachment::BufferDepthStencil),
-            10 => Ok(Attachment::BufferHiz),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Attachment {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for Attachment {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for Attachment {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for Attachment {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for Attachment {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for Attachment {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum DriverType {
-    DRI = 0,
-    VDPAU = 1,
+pub struct DriverType(u32);
+impl DriverType {
+    pub const DRI: Self = Self(0);
+    pub const VDPAU: Self = Self(1);
 }
-impl From<DriverType> for bool {
+impl From<DriverType> for Option<bool> {
+    #[inline]
     fn from(input: DriverType) -> Self {
-        match input {
-            DriverType::DRI => false,
-            DriverType::VDPAU => true,
-        }
-    }
-}
-impl From<DriverType> for u8 {
-    fn from(input: DriverType) -> Self {
-        match input {
-            DriverType::DRI => 0,
-            DriverType::VDPAU => 1,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<DriverType> for Option<u8> {
+    #[inline]
     fn from(input: DriverType) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<DriverType> for u16 {
-    fn from(input: DriverType) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<DriverType> for Option<u16> {
+    #[inline]
     fn from(input: DriverType) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<DriverType> for u32 {
+    #[inline]
     fn from(input: DriverType) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<DriverType> for Option<u32> {
+    #[inline]
     fn from(input: DriverType) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for DriverType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(DriverType::DRI),
-            1 => Ok(DriverType::VDPAU),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for DriverType {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for DriverType {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for DriverType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for DriverType {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for DriverType {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for DriverType {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum EventType {
-    ExchangeComplete = 1,
-    BlitComplete = 2,
-    FlipComplete = 3,
+pub struct EventType(u16);
+impl EventType {
+    pub const EXCHANGE_COMPLETE: Self = Self(1);
+    pub const BLIT_COMPLETE: Self = Self(2);
+    pub const FLIP_COMPLETE: Self = Self(3);
 }
-impl From<EventType> for u8 {
+impl From<EventType> for Option<bool> {
+    #[inline]
     fn from(input: EventType) -> Self {
-        match input {
-            EventType::ExchangeComplete => 1,
-            EventType::BlitComplete => 2,
-            EventType::FlipComplete => 3,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<EventType> for Option<u8> {
+    #[inline]
     fn from(input: EventType) -> Self {
-        Some(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<EventType> for u16 {
+    #[inline]
     fn from(input: EventType) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<EventType> for Option<u16> {
+    #[inline]
     fn from(input: EventType) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<EventType> for u32 {
+    #[inline]
     fn from(input: EventType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<EventType> for Option<u32> {
+    #[inline]
     fn from(input: EventType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for EventType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(EventType::ExchangeComplete),
-            2 => Ok(EventType::BlitComplete),
-            3 => Ok(EventType::FlipComplete),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for EventType {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for EventType {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for EventType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for EventType {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for EventType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -278,7 +261,7 @@ impl TryParse for DRI2Buffer {
         let (pitch, remaining) = u32::try_parse(remaining)?;
         let (cpp, remaining) = u32::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
-        let attachment = attachment.try_into()?;
+        let attachment = attachment.into();
         let result = DRI2Buffer { attachment, name, pitch, cpp, flags };
         Ok((result, remaining))
     }
@@ -292,7 +275,7 @@ impl TryFrom<&[u8]> for DRI2Buffer {
 impl Serialize for DRI2Buffer {
     type Bytes = [u8; 20];
     fn serialize(&self) -> [u8; 20] {
-        let attachment_bytes = u32::from(self.attachment).serialize();
+        let attachment_bytes = Option::<u32>::from(self.attachment).unwrap().serialize();
         let name_bytes = self.name.serialize();
         let pitch_bytes = self.pitch.serialize();
         let cpp_bytes = self.cpp.serialize();
@@ -322,7 +305,7 @@ impl Serialize for DRI2Buffer {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        u32::from(self.attachment).serialize_into(bytes);
+        Option::<u32>::from(self.attachment).unwrap().serialize_into(bytes);
         self.name.serialize_into(bytes);
         self.pitch.serialize_into(bytes);
         self.cpp.serialize_into(bytes);
@@ -339,7 +322,7 @@ impl TryParse for AttachFormat {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (attachment, remaining) = u32::try_parse(remaining)?;
         let (format, remaining) = u32::try_parse(remaining)?;
-        let attachment = attachment.try_into()?;
+        let attachment = attachment.into();
         let result = AttachFormat { attachment, format };
         Ok((result, remaining))
     }
@@ -353,7 +336,7 @@ impl TryFrom<&[u8]> for AttachFormat {
 impl Serialize for AttachFormat {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let attachment_bytes = u32::from(self.attachment).serialize();
+        let attachment_bytes = Option::<u32>::from(self.attachment).unwrap().serialize();
         let format_bytes = self.format.serialize();
         [
             attachment_bytes[0],
@@ -368,7 +351,7 @@ impl Serialize for AttachFormat {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u32::from(self.attachment).serialize_into(bytes);
+        Option::<u32>::from(self.attachment).unwrap().serialize_into(bytes);
         self.format.serialize_into(bytes);
     }
 }
@@ -497,7 +480,7 @@ impl ConnectRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let driver_type_bytes = u32::from(self.driver_type).serialize();
+        let driver_type_bytes = Option::<u32>::from(self.driver_type).unwrap().serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             CONNECT_REQUEST,
@@ -533,7 +516,7 @@ impl ConnectRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (driver_type, remaining) = u32::try_parse(remaining)?;
-        let driver_type = driver_type.try_into()?;
+        let driver_type = driver_type.into();
         let _ = remaining;
         Ok(ConnectRequest {
             window,
@@ -2030,7 +2013,7 @@ impl TryParse for BufferSwapCompleteEvent {
         let (msc_hi, remaining) = u32::try_parse(remaining)?;
         let (msc_lo, remaining) = u32::try_parse(remaining)?;
         let (sbc, remaining) = u32::try_parse(remaining)?;
-        let event_type = event_type.try_into()?;
+        let event_type = event_type.into();
         let result = BufferSwapCompleteEvent { response_type, sequence, event_type, drawable, ust_hi, ust_lo, msc_hi, msc_lo, sbc };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -2048,7 +2031,7 @@ impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
         let sequence_bytes = input.sequence.serialize();
-        let event_type_bytes = u16::from(input.event_type).serialize();
+        let event_type_bytes = Option::<u16>::from(input.event_type).unwrap().serialize();
         let drawable_bytes = input.drawable.serialize();
         let ust_hi_bytes = input.ust_hi.serialize();
         let ust_lo_bytes = input.ust_lo.serialize();

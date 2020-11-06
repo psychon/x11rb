@@ -36,716 +36,632 @@ pub const X11_EXTENSION_NAME: &str = "RENDER";
 pub const X11_XML_VERSION: (u32, u32) = (0, 11);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PictType {
-    Indexed = 0,
-    Direct = 1,
+pub struct PictType(u8);
+impl PictType {
+    pub const INDEXED: Self = Self(0);
+    pub const DIRECT: Self = Self(1);
 }
-impl From<PictType> for bool {
+impl From<PictType> for Option<bool> {
+    #[inline]
     fn from(input: PictType) -> Self {
-        match input {
-            PictType::Indexed => false,
-            PictType::Direct => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<PictType> for u8 {
+    #[inline]
     fn from(input: PictType) -> Self {
-        match input {
-            PictType::Indexed => 0,
-            PictType::Direct => 1,
-        }
+        input.0
     }
 }
 impl From<PictType> for Option<u8> {
+    #[inline]
     fn from(input: PictType) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PictType> for u16 {
+    #[inline]
     fn from(input: PictType) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PictType> for Option<u16> {
+    #[inline]
     fn from(input: PictType) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PictType> for u32 {
+    #[inline]
     fn from(input: PictType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PictType> for Option<u32> {
+    #[inline]
     fn from(input: PictType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PictType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PictType::Indexed),
-            1 => Ok(PictType::Direct),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for PictType {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for PictType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PictType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PictType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PictureEnum {
-    None = 0,
+pub struct PictureEnum(u8);
+impl PictureEnum {
+    pub const NONE: Self = Self(0);
+}
+impl From<PictureEnum> for Option<bool> {
+    #[inline]
+    fn from(input: PictureEnum) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<PictureEnum> for u8 {
+    #[inline]
     fn from(input: PictureEnum) -> Self {
-        match input {
-            PictureEnum::None => 0,
-        }
+        input.0
     }
 }
 impl From<PictureEnum> for Option<u8> {
+    #[inline]
     fn from(input: PictureEnum) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PictureEnum> for u16 {
+    #[inline]
     fn from(input: PictureEnum) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PictureEnum> for Option<u16> {
+    #[inline]
     fn from(input: PictureEnum) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PictureEnum> for u32 {
+    #[inline]
     fn from(input: PictureEnum) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PictureEnum> for Option<u32> {
+    #[inline]
     fn from(input: PictureEnum) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PictureEnum {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PictureEnum::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for PictureEnum {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for PictureEnum {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PictureEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PictureEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PictOp {
-    Clear = 0,
-    Src = 1,
-    Dst = 2,
-    Over = 3,
-    OverReverse = 4,
-    In = 5,
-    InReverse = 6,
-    Out = 7,
-    OutReverse = 8,
-    Atop = 9,
-    AtopReverse = 10,
-    Xor = 11,
-    Add = 12,
-    Saturate = 13,
-    DisjointClear = 16,
-    DisjointSrc = 17,
-    DisjointDst = 18,
-    DisjointOver = 19,
-    DisjointOverReverse = 20,
-    DisjointIn = 21,
-    DisjointInReverse = 22,
-    DisjointOut = 23,
-    DisjointOutReverse = 24,
-    DisjointAtop = 25,
-    DisjointAtopReverse = 26,
-    DisjointXor = 27,
-    ConjointClear = 32,
-    ConjointSrc = 33,
-    ConjointDst = 34,
-    ConjointOver = 35,
-    ConjointOverReverse = 36,
-    ConjointIn = 37,
-    ConjointInReverse = 38,
-    ConjointOut = 39,
-    ConjointOutReverse = 40,
-    ConjointAtop = 41,
-    ConjointAtopReverse = 42,
-    ConjointXor = 43,
-    Multiply = 48,
-    Screen = 49,
-    Overlay = 50,
-    Darken = 51,
-    Lighten = 52,
-    ColorDodge = 53,
-    ColorBurn = 54,
-    HardLight = 55,
-    SoftLight = 56,
-    Difference = 57,
-    Exclusion = 58,
-    HSLHue = 59,
-    HSLSaturation = 60,
-    HSLColor = 61,
-    HSLLuminosity = 62,
+pub struct PictOp(u8);
+impl PictOp {
+    pub const CLEAR: Self = Self(0);
+    pub const SRC: Self = Self(1);
+    pub const DST: Self = Self(2);
+    pub const OVER: Self = Self(3);
+    pub const OVER_REVERSE: Self = Self(4);
+    pub const IN: Self = Self(5);
+    pub const IN_REVERSE: Self = Self(6);
+    pub const OUT: Self = Self(7);
+    pub const OUT_REVERSE: Self = Self(8);
+    pub const ATOP: Self = Self(9);
+    pub const ATOP_REVERSE: Self = Self(10);
+    pub const XOR: Self = Self(11);
+    pub const ADD: Self = Self(12);
+    pub const SATURATE: Self = Self(13);
+    pub const DISJOINT_CLEAR: Self = Self(16);
+    pub const DISJOINT_SRC: Self = Self(17);
+    pub const DISJOINT_DST: Self = Self(18);
+    pub const DISJOINT_OVER: Self = Self(19);
+    pub const DISJOINT_OVER_REVERSE: Self = Self(20);
+    pub const DISJOINT_IN: Self = Self(21);
+    pub const DISJOINT_IN_REVERSE: Self = Self(22);
+    pub const DISJOINT_OUT: Self = Self(23);
+    pub const DISJOINT_OUT_REVERSE: Self = Self(24);
+    pub const DISJOINT_ATOP: Self = Self(25);
+    pub const DISJOINT_ATOP_REVERSE: Self = Self(26);
+    pub const DISJOINT_XOR: Self = Self(27);
+    pub const CONJOINT_CLEAR: Self = Self(32);
+    pub const CONJOINT_SRC: Self = Self(33);
+    pub const CONJOINT_DST: Self = Self(34);
+    pub const CONJOINT_OVER: Self = Self(35);
+    pub const CONJOINT_OVER_REVERSE: Self = Self(36);
+    pub const CONJOINT_IN: Self = Self(37);
+    pub const CONJOINT_IN_REVERSE: Self = Self(38);
+    pub const CONJOINT_OUT: Self = Self(39);
+    pub const CONJOINT_OUT_REVERSE: Self = Self(40);
+    pub const CONJOINT_ATOP: Self = Self(41);
+    pub const CONJOINT_ATOP_REVERSE: Self = Self(42);
+    pub const CONJOINT_XOR: Self = Self(43);
+    pub const MULTIPLY: Self = Self(48);
+    pub const SCREEN: Self = Self(49);
+    pub const OVERLAY: Self = Self(50);
+    pub const DARKEN: Self = Self(51);
+    pub const LIGHTEN: Self = Self(52);
+    pub const COLOR_DODGE: Self = Self(53);
+    pub const COLOR_BURN: Self = Self(54);
+    pub const HARD_LIGHT: Self = Self(55);
+    pub const SOFT_LIGHT: Self = Self(56);
+    pub const DIFFERENCE: Self = Self(57);
+    pub const EXCLUSION: Self = Self(58);
+    pub const HSL_HUE: Self = Self(59);
+    pub const HSL_SATURATION: Self = Self(60);
+    pub const HSL_COLOR: Self = Self(61);
+    pub const HSL_LUMINOSITY: Self = Self(62);
+}
+impl From<PictOp> for Option<bool> {
+    #[inline]
+    fn from(input: PictOp) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<PictOp> for u8 {
+    #[inline]
     fn from(input: PictOp) -> Self {
-        match input {
-            PictOp::Clear => 0,
-            PictOp::Src => 1,
-            PictOp::Dst => 2,
-            PictOp::Over => 3,
-            PictOp::OverReverse => 4,
-            PictOp::In => 5,
-            PictOp::InReverse => 6,
-            PictOp::Out => 7,
-            PictOp::OutReverse => 8,
-            PictOp::Atop => 9,
-            PictOp::AtopReverse => 10,
-            PictOp::Xor => 11,
-            PictOp::Add => 12,
-            PictOp::Saturate => 13,
-            PictOp::DisjointClear => 16,
-            PictOp::DisjointSrc => 17,
-            PictOp::DisjointDst => 18,
-            PictOp::DisjointOver => 19,
-            PictOp::DisjointOverReverse => 20,
-            PictOp::DisjointIn => 21,
-            PictOp::DisjointInReverse => 22,
-            PictOp::DisjointOut => 23,
-            PictOp::DisjointOutReverse => 24,
-            PictOp::DisjointAtop => 25,
-            PictOp::DisjointAtopReverse => 26,
-            PictOp::DisjointXor => 27,
-            PictOp::ConjointClear => 32,
-            PictOp::ConjointSrc => 33,
-            PictOp::ConjointDst => 34,
-            PictOp::ConjointOver => 35,
-            PictOp::ConjointOverReverse => 36,
-            PictOp::ConjointIn => 37,
-            PictOp::ConjointInReverse => 38,
-            PictOp::ConjointOut => 39,
-            PictOp::ConjointOutReverse => 40,
-            PictOp::ConjointAtop => 41,
-            PictOp::ConjointAtopReverse => 42,
-            PictOp::ConjointXor => 43,
-            PictOp::Multiply => 48,
-            PictOp::Screen => 49,
-            PictOp::Overlay => 50,
-            PictOp::Darken => 51,
-            PictOp::Lighten => 52,
-            PictOp::ColorDodge => 53,
-            PictOp::ColorBurn => 54,
-            PictOp::HardLight => 55,
-            PictOp::SoftLight => 56,
-            PictOp::Difference => 57,
-            PictOp::Exclusion => 58,
-            PictOp::HSLHue => 59,
-            PictOp::HSLSaturation => 60,
-            PictOp::HSLColor => 61,
-            PictOp::HSLLuminosity => 62,
-        }
+        input.0
     }
 }
 impl From<PictOp> for Option<u8> {
+    #[inline]
     fn from(input: PictOp) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PictOp> for u16 {
+    #[inline]
     fn from(input: PictOp) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PictOp> for Option<u16> {
+    #[inline]
     fn from(input: PictOp) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PictOp> for u32 {
+    #[inline]
     fn from(input: PictOp) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PictOp> for Option<u32> {
+    #[inline]
     fn from(input: PictOp) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PictOp {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PictOp::Clear),
-            1 => Ok(PictOp::Src),
-            2 => Ok(PictOp::Dst),
-            3 => Ok(PictOp::Over),
-            4 => Ok(PictOp::OverReverse),
-            5 => Ok(PictOp::In),
-            6 => Ok(PictOp::InReverse),
-            7 => Ok(PictOp::Out),
-            8 => Ok(PictOp::OutReverse),
-            9 => Ok(PictOp::Atop),
-            10 => Ok(PictOp::AtopReverse),
-            11 => Ok(PictOp::Xor),
-            12 => Ok(PictOp::Add),
-            13 => Ok(PictOp::Saturate),
-            16 => Ok(PictOp::DisjointClear),
-            17 => Ok(PictOp::DisjointSrc),
-            18 => Ok(PictOp::DisjointDst),
-            19 => Ok(PictOp::DisjointOver),
-            20 => Ok(PictOp::DisjointOverReverse),
-            21 => Ok(PictOp::DisjointIn),
-            22 => Ok(PictOp::DisjointInReverse),
-            23 => Ok(PictOp::DisjointOut),
-            24 => Ok(PictOp::DisjointOutReverse),
-            25 => Ok(PictOp::DisjointAtop),
-            26 => Ok(PictOp::DisjointAtopReverse),
-            27 => Ok(PictOp::DisjointXor),
-            32 => Ok(PictOp::ConjointClear),
-            33 => Ok(PictOp::ConjointSrc),
-            34 => Ok(PictOp::ConjointDst),
-            35 => Ok(PictOp::ConjointOver),
-            36 => Ok(PictOp::ConjointOverReverse),
-            37 => Ok(PictOp::ConjointIn),
-            38 => Ok(PictOp::ConjointInReverse),
-            39 => Ok(PictOp::ConjointOut),
-            40 => Ok(PictOp::ConjointOutReverse),
-            41 => Ok(PictOp::ConjointAtop),
-            42 => Ok(PictOp::ConjointAtopReverse),
-            43 => Ok(PictOp::ConjointXor),
-            48 => Ok(PictOp::Multiply),
-            49 => Ok(PictOp::Screen),
-            50 => Ok(PictOp::Overlay),
-            51 => Ok(PictOp::Darken),
-            52 => Ok(PictOp::Lighten),
-            53 => Ok(PictOp::ColorDodge),
-            54 => Ok(PictOp::ColorBurn),
-            55 => Ok(PictOp::HardLight),
-            56 => Ok(PictOp::SoftLight),
-            57 => Ok(PictOp::Difference),
-            58 => Ok(PictOp::Exclusion),
-            59 => Ok(PictOp::HSLHue),
-            60 => Ok(PictOp::HSLSaturation),
-            61 => Ok(PictOp::HSLColor),
-            62 => Ok(PictOp::HSLLuminosity),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for PictOp {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for PictOp {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PictOp {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PictOp {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PolyEdge {
-    Sharp = 0,
-    Smooth = 1,
+pub struct PolyEdge(u32);
+impl PolyEdge {
+    pub const SHARP: Self = Self(0);
+    pub const SMOOTH: Self = Self(1);
 }
-impl From<PolyEdge> for bool {
+impl From<PolyEdge> for Option<bool> {
+    #[inline]
     fn from(input: PolyEdge) -> Self {
-        match input {
-            PolyEdge::Sharp => false,
-            PolyEdge::Smooth => true,
-        }
-    }
-}
-impl From<PolyEdge> for u8 {
-    fn from(input: PolyEdge) -> Self {
-        match input {
-            PolyEdge::Sharp => 0,
-            PolyEdge::Smooth => 1,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<PolyEdge> for Option<u8> {
+    #[inline]
     fn from(input: PolyEdge) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<PolyEdge> for u16 {
-    fn from(input: PolyEdge) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<PolyEdge> for Option<u16> {
+    #[inline]
     fn from(input: PolyEdge) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<PolyEdge> for u32 {
+    #[inline]
     fn from(input: PolyEdge) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<PolyEdge> for Option<u32> {
+    #[inline]
     fn from(input: PolyEdge) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for PolyEdge {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PolyEdge::Sharp),
-            1 => Ok(PolyEdge::Smooth),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for PolyEdge {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for PolyEdge {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for PolyEdge {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for PolyEdge {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for PolyEdge {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for PolyEdge {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PolyMode {
-    Precise = 0,
-    Imprecise = 1,
+pub struct PolyMode(u32);
+impl PolyMode {
+    pub const PRECISE: Self = Self(0);
+    pub const IMPRECISE: Self = Self(1);
 }
-impl From<PolyMode> for bool {
+impl From<PolyMode> for Option<bool> {
+    #[inline]
     fn from(input: PolyMode) -> Self {
-        match input {
-            PolyMode::Precise => false,
-            PolyMode::Imprecise => true,
-        }
-    }
-}
-impl From<PolyMode> for u8 {
-    fn from(input: PolyMode) -> Self {
-        match input {
-            PolyMode::Precise => 0,
-            PolyMode::Imprecise => 1,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<PolyMode> for Option<u8> {
+    #[inline]
     fn from(input: PolyMode) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<PolyMode> for u16 {
-    fn from(input: PolyMode) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<PolyMode> for Option<u16> {
+    #[inline]
     fn from(input: PolyMode) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<PolyMode> for u32 {
+    #[inline]
     fn from(input: PolyMode) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<PolyMode> for Option<u32> {
+    #[inline]
     fn from(input: PolyMode) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for PolyMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PolyMode::Precise),
-            1 => Ok(PolyMode::Imprecise),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for PolyMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for PolyMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for PolyMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for PolyMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for PolyMode {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for PolyMode {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum CP {
-    Repeat = 1 << 0,
-    AlphaMap = 1 << 1,
-    AlphaXOrigin = 1 << 2,
-    AlphaYOrigin = 1 << 3,
-    ClipXOrigin = 1 << 4,
-    ClipYOrigin = 1 << 5,
-    ClipMask = 1 << 6,
-    GraphicsExposure = 1 << 7,
-    SubwindowMode = 1 << 8,
-    PolyEdge = 1 << 9,
-    PolyMode = 1 << 10,
-    Dither = 1 << 11,
-    ComponentAlpha = 1 << 12,
+pub struct CP(u16);
+impl CP {
+    pub const REPEAT: Self = Self(1 << 0);
+    pub const ALPHA_MAP: Self = Self(1 << 1);
+    pub const ALPHA_X_ORIGIN: Self = Self(1 << 2);
+    pub const ALPHA_Y_ORIGIN: Self = Self(1 << 3);
+    pub const CLIP_X_ORIGIN: Self = Self(1 << 4);
+    pub const CLIP_Y_ORIGIN: Self = Self(1 << 5);
+    pub const CLIP_MASK: Self = Self(1 << 6);
+    pub const GRAPHICS_EXPOSURE: Self = Self(1 << 7);
+    pub const SUBWINDOW_MODE: Self = Self(1 << 8);
+    pub const POLY_EDGE: Self = Self(1 << 9);
+    pub const POLY_MODE: Self = Self(1 << 10);
+    pub const DITHER: Self = Self(1 << 11);
+    pub const COMPONENT_ALPHA: Self = Self(1 << 12);
+}
+impl From<CP> for Option<bool> {
+    #[inline]
+    fn from(input: CP) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<CP> for Option<u8> {
+    #[inline]
+    fn from(input: CP) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<CP> for u16 {
+    #[inline]
     fn from(input: CP) -> Self {
-        match input {
-            CP::Repeat => 1 << 0,
-            CP::AlphaMap => 1 << 1,
-            CP::AlphaXOrigin => 1 << 2,
-            CP::AlphaYOrigin => 1 << 3,
-            CP::ClipXOrigin => 1 << 4,
-            CP::ClipYOrigin => 1 << 5,
-            CP::ClipMask => 1 << 6,
-            CP::GraphicsExposure => 1 << 7,
-            CP::SubwindowMode => 1 << 8,
-            CP::PolyEdge => 1 << 9,
-            CP::PolyMode => 1 << 10,
-            CP::Dither => 1 << 11,
-            CP::ComponentAlpha => 1 << 12,
-        }
+        input.0
     }
 }
 impl From<CP> for Option<u16> {
+    #[inline]
     fn from(input: CP) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<CP> for u32 {
+    #[inline]
     fn from(input: CP) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CP> for Option<u32> {
+    #[inline]
     fn from(input: CP) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for CP {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(CP::Repeat),
-            2 => Ok(CP::AlphaMap),
-            4 => Ok(CP::AlphaXOrigin),
-            8 => Ok(CP::AlphaYOrigin),
-            16 => Ok(CP::ClipXOrigin),
-            32 => Ok(CP::ClipYOrigin),
-            64 => Ok(CP::ClipMask),
-            128 => Ok(CP::GraphicsExposure),
-            256 => Ok(CP::SubwindowMode),
-            512 => Ok(CP::PolyEdge),
-            1024 => Ok(CP::PolyMode),
-            2048 => Ok(CP::Dither),
-            4096 => Ok(CP::ComponentAlpha),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CP {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for CP {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for CP {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for CP {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(CP, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SubPixel {
-    Unknown = 0,
-    HorizontalRGB = 1,
-    HorizontalBGR = 2,
-    VerticalRGB = 3,
-    VerticalBGR = 4,
-    None = 5,
+pub struct SubPixel(u32);
+impl SubPixel {
+    pub const UNKNOWN: Self = Self(0);
+    pub const HORIZONTAL_RGB: Self = Self(1);
+    pub const HORIZONTAL_BGR: Self = Self(2);
+    pub const VERTICAL_RGB: Self = Self(3);
+    pub const VERTICAL_BGR: Self = Self(4);
+    pub const NONE: Self = Self(5);
 }
-impl From<SubPixel> for u8 {
+impl From<SubPixel> for Option<bool> {
+    #[inline]
     fn from(input: SubPixel) -> Self {
-        match input {
-            SubPixel::Unknown => 0,
-            SubPixel::HorizontalRGB => 1,
-            SubPixel::HorizontalBGR => 2,
-            SubPixel::VerticalRGB => 3,
-            SubPixel::VerticalBGR => 4,
-            SubPixel::None => 5,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<SubPixel> for Option<u8> {
+    #[inline]
     fn from(input: SubPixel) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<SubPixel> for u16 {
-    fn from(input: SubPixel) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<SubPixel> for Option<u16> {
+    #[inline]
     fn from(input: SubPixel) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<SubPixel> for u32 {
+    #[inline]
     fn from(input: SubPixel) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<SubPixel> for Option<u32> {
+    #[inline]
     fn from(input: SubPixel) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for SubPixel {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SubPixel::Unknown),
-            1 => Ok(SubPixel::HorizontalRGB),
-            2 => Ok(SubPixel::HorizontalBGR),
-            3 => Ok(SubPixel::VerticalRGB),
-            4 => Ok(SubPixel::VerticalBGR),
-            5 => Ok(SubPixel::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SubPixel {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for SubPixel {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for SubPixel {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for SubPixel {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for SubPixel {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for SubPixel {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Repeat {
-    None = 0,
-    Normal = 1,
-    Pad = 2,
-    Reflect = 3,
+pub struct Repeat(u32);
+impl Repeat {
+    pub const NONE: Self = Self(0);
+    pub const NORMAL: Self = Self(1);
+    pub const PAD: Self = Self(2);
+    pub const REFLECT: Self = Self(3);
 }
-impl From<Repeat> for u8 {
+impl From<Repeat> for Option<bool> {
+    #[inline]
     fn from(input: Repeat) -> Self {
-        match input {
-            Repeat::None => 0,
-            Repeat::Normal => 1,
-            Repeat::Pad => 2,
-            Repeat::Reflect => 3,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<Repeat> for Option<u8> {
+    #[inline]
     fn from(input: Repeat) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<Repeat> for u16 {
-    fn from(input: Repeat) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<Repeat> for Option<u16> {
+    #[inline]
     fn from(input: Repeat) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<Repeat> for u32 {
+    #[inline]
     fn from(input: Repeat) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<Repeat> for Option<u32> {
+    #[inline]
     fn from(input: Repeat) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for Repeat {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Repeat::None),
-            1 => Ok(Repeat::Normal),
-            2 => Ok(Repeat::Pad),
-            3 => Ok(Repeat::Reflect),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Repeat {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for Repeat {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for Repeat {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for Repeat {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for Repeat {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for Repeat {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
@@ -864,7 +780,7 @@ impl TryParse for Pictforminfo {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (direct, remaining) = Directformat::try_parse(remaining)?;
         let (colormap, remaining) = xproto::Colormap::try_parse(remaining)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = Pictforminfo { id, type_, depth, direct, colormap };
         Ok((result, remaining))
     }
@@ -879,7 +795,7 @@ impl Serialize for Pictforminfo {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
         let id_bytes = self.id.serialize();
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let depth_bytes = self.depth.serialize();
         let direct_bytes = self.direct.serialize();
         let colormap_bytes = self.colormap.serialize();
@@ -917,7 +833,7 @@ impl Serialize for Pictforminfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
         self.id.serialize_into(bytes);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.depth.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.direct.serialize_into(bytes);
@@ -1671,7 +1587,7 @@ impl TryParse for QueryPictFormatsReply {
         let mut subpixels = Vec::with_capacity(list_length);
         for _ in 0..list_length {
             let (v, new_remaining) = u32::try_parse(remaining)?;
-            let v = v.try_into()?;
+            let v = v.into();
             remaining = new_remaining;
             subpixels.push(v);
         }
@@ -1867,16 +1783,16 @@ impl CreatePictureAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let repeat = if switch_expr & u32::from(CP::Repeat) != 0 {
+        let repeat = if switch_expr & u32::from(CP::REPEAT) != 0 {
             let remaining = outer_remaining;
             let (repeat, remaining) = u32::try_parse(remaining)?;
-            let repeat = repeat.try_into()?;
+            let repeat = repeat.into();
             outer_remaining = remaining;
             Some(repeat)
         } else {
             None
         };
-        let alphamap = if switch_expr & u32::from(CP::AlphaMap) != 0 {
+        let alphamap = if switch_expr & u32::from(CP::ALPHA_MAP) != 0 {
             let remaining = outer_remaining;
             let (alphamap, remaining) = Picture::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1884,7 +1800,7 @@ impl CreatePictureAux {
         } else {
             None
         };
-        let alphaxorigin = if switch_expr & u32::from(CP::AlphaXOrigin) != 0 {
+        let alphaxorigin = if switch_expr & u32::from(CP::ALPHA_X_ORIGIN) != 0 {
             let remaining = outer_remaining;
             let (alphaxorigin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1892,7 +1808,7 @@ impl CreatePictureAux {
         } else {
             None
         };
-        let alphayorigin = if switch_expr & u32::from(CP::AlphaYOrigin) != 0 {
+        let alphayorigin = if switch_expr & u32::from(CP::ALPHA_Y_ORIGIN) != 0 {
             let remaining = outer_remaining;
             let (alphayorigin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1900,7 +1816,7 @@ impl CreatePictureAux {
         } else {
             None
         };
-        let clipxorigin = if switch_expr & u32::from(CP::ClipXOrigin) != 0 {
+        let clipxorigin = if switch_expr & u32::from(CP::CLIP_X_ORIGIN) != 0 {
             let remaining = outer_remaining;
             let (clipxorigin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1908,7 +1824,7 @@ impl CreatePictureAux {
         } else {
             None
         };
-        let clipyorigin = if switch_expr & u32::from(CP::ClipYOrigin) != 0 {
+        let clipyorigin = if switch_expr & u32::from(CP::CLIP_Y_ORIGIN) != 0 {
             let remaining = outer_remaining;
             let (clipyorigin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1916,7 +1832,7 @@ impl CreatePictureAux {
         } else {
             None
         };
-        let clipmask = if switch_expr & u32::from(CP::ClipMask) != 0 {
+        let clipmask = if switch_expr & u32::from(CP::CLIP_MASK) != 0 {
             let remaining = outer_remaining;
             let (clipmask, remaining) = xproto::Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1924,7 +1840,7 @@ impl CreatePictureAux {
         } else {
             None
         };
-        let graphicsexposure = if switch_expr & u32::from(CP::GraphicsExposure) != 0 {
+        let graphicsexposure = if switch_expr & u32::from(CP::GRAPHICS_EXPOSURE) != 0 {
             let remaining = outer_remaining;
             let (graphicsexposure, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1932,34 +1848,34 @@ impl CreatePictureAux {
         } else {
             None
         };
-        let subwindowmode = if switch_expr & u32::from(CP::SubwindowMode) != 0 {
+        let subwindowmode = if switch_expr & u32::from(CP::SUBWINDOW_MODE) != 0 {
             let remaining = outer_remaining;
             let (subwindowmode, remaining) = u32::try_parse(remaining)?;
-            let subwindowmode = subwindowmode.try_into()?;
+            let subwindowmode = subwindowmode.into();
             outer_remaining = remaining;
             Some(subwindowmode)
         } else {
             None
         };
-        let polyedge = if switch_expr & u32::from(CP::PolyEdge) != 0 {
+        let polyedge = if switch_expr & u32::from(CP::POLY_EDGE) != 0 {
             let remaining = outer_remaining;
             let (polyedge, remaining) = u32::try_parse(remaining)?;
-            let polyedge = polyedge.try_into()?;
+            let polyedge = polyedge.into();
             outer_remaining = remaining;
             Some(polyedge)
         } else {
             None
         };
-        let polymode = if switch_expr & u32::from(CP::PolyMode) != 0 {
+        let polymode = if switch_expr & u32::from(CP::POLY_MODE) != 0 {
             let remaining = outer_remaining;
             let (polymode, remaining) = u32::try_parse(remaining)?;
-            let polymode = polymode.try_into()?;
+            let polymode = polymode.into();
             outer_remaining = remaining;
             Some(polymode)
         } else {
             None
         };
-        let dither = if switch_expr & u32::from(CP::Dither) != 0 {
+        let dither = if switch_expr & u32::from(CP::DITHER) != 0 {
             let remaining = outer_remaining;
             let (dither, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1967,7 +1883,7 @@ impl CreatePictureAux {
         } else {
             None
         };
-        let componentalpha = if switch_expr & u32::from(CP::ComponentAlpha) != 0 {
+        let componentalpha = if switch_expr & u32::from(CP::COMPONENT_ALPHA) != 0 {
             let remaining = outer_remaining;
             let (componentalpha, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -1989,7 +1905,7 @@ impl CreatePictureAux {
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(repeat) = self.repeat {
-            u32::from(repeat).serialize_into(bytes);
+            Option::<u32>::from(repeat).unwrap().serialize_into(bytes);
         }
         if let Some(alphamap) = self.alphamap {
             alphamap.serialize_into(bytes);
@@ -2013,13 +1929,13 @@ impl CreatePictureAux {
             graphicsexposure.serialize_into(bytes);
         }
         if let Some(subwindowmode) = self.subwindowmode {
-            u32::from(subwindowmode).serialize_into(bytes);
+            Option::<u32>::from(subwindowmode).unwrap().serialize_into(bytes);
         }
         if let Some(polyedge) = self.polyedge {
-            u32::from(polyedge).serialize_into(bytes);
+            Option::<u32>::from(polyedge).unwrap().serialize_into(bytes);
         }
         if let Some(polymode) = self.polymode {
-            u32::from(polymode).serialize_into(bytes);
+            Option::<u32>::from(polymode).unwrap().serialize_into(bytes);
         }
         if let Some(dither) = self.dither {
             dither.serialize_into(bytes);
@@ -2033,43 +1949,43 @@ impl CreatePictureAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.repeat.is_some() {
-            expr_value |= u32::from(CP::Repeat);
+            expr_value |= u32::from(CP::REPEAT);
         }
         if self.alphamap.is_some() {
-            expr_value |= u32::from(CP::AlphaMap);
+            expr_value |= u32::from(CP::ALPHA_MAP);
         }
         if self.alphaxorigin.is_some() {
-            expr_value |= u32::from(CP::AlphaXOrigin);
+            expr_value |= u32::from(CP::ALPHA_X_ORIGIN);
         }
         if self.alphayorigin.is_some() {
-            expr_value |= u32::from(CP::AlphaYOrigin);
+            expr_value |= u32::from(CP::ALPHA_Y_ORIGIN);
         }
         if self.clipxorigin.is_some() {
-            expr_value |= u32::from(CP::ClipXOrigin);
+            expr_value |= u32::from(CP::CLIP_X_ORIGIN);
         }
         if self.clipyorigin.is_some() {
-            expr_value |= u32::from(CP::ClipYOrigin);
+            expr_value |= u32::from(CP::CLIP_Y_ORIGIN);
         }
         if self.clipmask.is_some() {
-            expr_value |= u32::from(CP::ClipMask);
+            expr_value |= u32::from(CP::CLIP_MASK);
         }
         if self.graphicsexposure.is_some() {
-            expr_value |= u32::from(CP::GraphicsExposure);
+            expr_value |= u32::from(CP::GRAPHICS_EXPOSURE);
         }
         if self.subwindowmode.is_some() {
-            expr_value |= u32::from(CP::SubwindowMode);
+            expr_value |= u32::from(CP::SUBWINDOW_MODE);
         }
         if self.polyedge.is_some() {
-            expr_value |= u32::from(CP::PolyEdge);
+            expr_value |= u32::from(CP::POLY_EDGE);
         }
         if self.polymode.is_some() {
-            expr_value |= u32::from(CP::PolyMode);
+            expr_value |= u32::from(CP::POLY_MODE);
         }
         if self.dither.is_some() {
-            expr_value |= u32::from(CP::Dither);
+            expr_value |= u32::from(CP::DITHER);
         }
         if self.componentalpha.is_some() {
-            expr_value |= u32::from(CP::ComponentAlpha);
+            expr_value |= u32::from(CP::COMPONENT_ALPHA);
         }
         expr_value
     }
@@ -2274,16 +2190,16 @@ impl ChangePictureAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let repeat = if switch_expr & u32::from(CP::Repeat) != 0 {
+        let repeat = if switch_expr & u32::from(CP::REPEAT) != 0 {
             let remaining = outer_remaining;
             let (repeat, remaining) = u32::try_parse(remaining)?;
-            let repeat = repeat.try_into()?;
+            let repeat = repeat.into();
             outer_remaining = remaining;
             Some(repeat)
         } else {
             None
         };
-        let alphamap = if switch_expr & u32::from(CP::AlphaMap) != 0 {
+        let alphamap = if switch_expr & u32::from(CP::ALPHA_MAP) != 0 {
             let remaining = outer_remaining;
             let (alphamap, remaining) = Picture::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -2291,7 +2207,7 @@ impl ChangePictureAux {
         } else {
             None
         };
-        let alphaxorigin = if switch_expr & u32::from(CP::AlphaXOrigin) != 0 {
+        let alphaxorigin = if switch_expr & u32::from(CP::ALPHA_X_ORIGIN) != 0 {
             let remaining = outer_remaining;
             let (alphaxorigin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -2299,7 +2215,7 @@ impl ChangePictureAux {
         } else {
             None
         };
-        let alphayorigin = if switch_expr & u32::from(CP::AlphaYOrigin) != 0 {
+        let alphayorigin = if switch_expr & u32::from(CP::ALPHA_Y_ORIGIN) != 0 {
             let remaining = outer_remaining;
             let (alphayorigin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -2307,7 +2223,7 @@ impl ChangePictureAux {
         } else {
             None
         };
-        let clipxorigin = if switch_expr & u32::from(CP::ClipXOrigin) != 0 {
+        let clipxorigin = if switch_expr & u32::from(CP::CLIP_X_ORIGIN) != 0 {
             let remaining = outer_remaining;
             let (clipxorigin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -2315,7 +2231,7 @@ impl ChangePictureAux {
         } else {
             None
         };
-        let clipyorigin = if switch_expr & u32::from(CP::ClipYOrigin) != 0 {
+        let clipyorigin = if switch_expr & u32::from(CP::CLIP_Y_ORIGIN) != 0 {
             let remaining = outer_remaining;
             let (clipyorigin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -2323,7 +2239,7 @@ impl ChangePictureAux {
         } else {
             None
         };
-        let clipmask = if switch_expr & u32::from(CP::ClipMask) != 0 {
+        let clipmask = if switch_expr & u32::from(CP::CLIP_MASK) != 0 {
             let remaining = outer_remaining;
             let (clipmask, remaining) = xproto::Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -2331,7 +2247,7 @@ impl ChangePictureAux {
         } else {
             None
         };
-        let graphicsexposure = if switch_expr & u32::from(CP::GraphicsExposure) != 0 {
+        let graphicsexposure = if switch_expr & u32::from(CP::GRAPHICS_EXPOSURE) != 0 {
             let remaining = outer_remaining;
             let (graphicsexposure, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -2339,34 +2255,34 @@ impl ChangePictureAux {
         } else {
             None
         };
-        let subwindowmode = if switch_expr & u32::from(CP::SubwindowMode) != 0 {
+        let subwindowmode = if switch_expr & u32::from(CP::SUBWINDOW_MODE) != 0 {
             let remaining = outer_remaining;
             let (subwindowmode, remaining) = u32::try_parse(remaining)?;
-            let subwindowmode = subwindowmode.try_into()?;
+            let subwindowmode = subwindowmode.into();
             outer_remaining = remaining;
             Some(subwindowmode)
         } else {
             None
         };
-        let polyedge = if switch_expr & u32::from(CP::PolyEdge) != 0 {
+        let polyedge = if switch_expr & u32::from(CP::POLY_EDGE) != 0 {
             let remaining = outer_remaining;
             let (polyedge, remaining) = u32::try_parse(remaining)?;
-            let polyedge = polyedge.try_into()?;
+            let polyedge = polyedge.into();
             outer_remaining = remaining;
             Some(polyedge)
         } else {
             None
         };
-        let polymode = if switch_expr & u32::from(CP::PolyMode) != 0 {
+        let polymode = if switch_expr & u32::from(CP::POLY_MODE) != 0 {
             let remaining = outer_remaining;
             let (polymode, remaining) = u32::try_parse(remaining)?;
-            let polymode = polymode.try_into()?;
+            let polymode = polymode.into();
             outer_remaining = remaining;
             Some(polymode)
         } else {
             None
         };
-        let dither = if switch_expr & u32::from(CP::Dither) != 0 {
+        let dither = if switch_expr & u32::from(CP::DITHER) != 0 {
             let remaining = outer_remaining;
             let (dither, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -2374,7 +2290,7 @@ impl ChangePictureAux {
         } else {
             None
         };
-        let componentalpha = if switch_expr & u32::from(CP::ComponentAlpha) != 0 {
+        let componentalpha = if switch_expr & u32::from(CP::COMPONENT_ALPHA) != 0 {
             let remaining = outer_remaining;
             let (componentalpha, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -2396,7 +2312,7 @@ impl ChangePictureAux {
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(repeat) = self.repeat {
-            u32::from(repeat).serialize_into(bytes);
+            Option::<u32>::from(repeat).unwrap().serialize_into(bytes);
         }
         if let Some(alphamap) = self.alphamap {
             alphamap.serialize_into(bytes);
@@ -2420,13 +2336,13 @@ impl ChangePictureAux {
             graphicsexposure.serialize_into(bytes);
         }
         if let Some(subwindowmode) = self.subwindowmode {
-            u32::from(subwindowmode).serialize_into(bytes);
+            Option::<u32>::from(subwindowmode).unwrap().serialize_into(bytes);
         }
         if let Some(polyedge) = self.polyedge {
-            u32::from(polyedge).serialize_into(bytes);
+            Option::<u32>::from(polyedge).unwrap().serialize_into(bytes);
         }
         if let Some(polymode) = self.polymode {
-            u32::from(polymode).serialize_into(bytes);
+            Option::<u32>::from(polymode).unwrap().serialize_into(bytes);
         }
         if let Some(dither) = self.dither {
             dither.serialize_into(bytes);
@@ -2440,43 +2356,43 @@ impl ChangePictureAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.repeat.is_some() {
-            expr_value |= u32::from(CP::Repeat);
+            expr_value |= u32::from(CP::REPEAT);
         }
         if self.alphamap.is_some() {
-            expr_value |= u32::from(CP::AlphaMap);
+            expr_value |= u32::from(CP::ALPHA_MAP);
         }
         if self.alphaxorigin.is_some() {
-            expr_value |= u32::from(CP::AlphaXOrigin);
+            expr_value |= u32::from(CP::ALPHA_X_ORIGIN);
         }
         if self.alphayorigin.is_some() {
-            expr_value |= u32::from(CP::AlphaYOrigin);
+            expr_value |= u32::from(CP::ALPHA_Y_ORIGIN);
         }
         if self.clipxorigin.is_some() {
-            expr_value |= u32::from(CP::ClipXOrigin);
+            expr_value |= u32::from(CP::CLIP_X_ORIGIN);
         }
         if self.clipyorigin.is_some() {
-            expr_value |= u32::from(CP::ClipYOrigin);
+            expr_value |= u32::from(CP::CLIP_Y_ORIGIN);
         }
         if self.clipmask.is_some() {
-            expr_value |= u32::from(CP::ClipMask);
+            expr_value |= u32::from(CP::CLIP_MASK);
         }
         if self.graphicsexposure.is_some() {
-            expr_value |= u32::from(CP::GraphicsExposure);
+            expr_value |= u32::from(CP::GRAPHICS_EXPOSURE);
         }
         if self.subwindowmode.is_some() {
-            expr_value |= u32::from(CP::SubwindowMode);
+            expr_value |= u32::from(CP::SUBWINDOW_MODE);
         }
         if self.polyedge.is_some() {
-            expr_value |= u32::from(CP::PolyEdge);
+            expr_value |= u32::from(CP::POLY_EDGE);
         }
         if self.polymode.is_some() {
-            expr_value |= u32::from(CP::PolyMode);
+            expr_value |= u32::from(CP::POLY_MODE);
         }
         if self.dither.is_some() {
-            expr_value |= u32::from(CP::Dither);
+            expr_value |= u32::from(CP::DITHER);
         }
         if self.componentalpha.is_some() {
-            expr_value |= u32::from(CP::ComponentAlpha);
+            expr_value |= u32::from(CP::COMPONENT_ALPHA);
         }
         expr_value
     }
@@ -2834,7 +2750,7 @@ impl CompositeRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = u8::from(self.op).serialize();
+        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
         let src_bytes = self.src.serialize();
         let mask_bytes = self.mask.serialize();
         let dst_bytes = self.dst.serialize();
@@ -2904,7 +2820,7 @@ impl CompositeRequest {
             return Err(ParseError::InvalidValue);
         }
         let (op, remaining) = u8::try_parse(value)?;
-        let op = op.try_into()?;
+        let op = op.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (mask, remaining) = Picture::try_parse(remaining)?;
@@ -2981,7 +2897,7 @@ impl<'input> TrapezoidsRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = u8::from(self.op).serialize();
+        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3037,7 +2953,7 @@ impl<'input> TrapezoidsRequest<'input> {
             return Err(ParseError::InvalidValue);
         }
         let (op, remaining) = u8::try_parse(value)?;
-        let op = op.try_into()?;
+        let op = op.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
@@ -3116,7 +3032,7 @@ impl<'input> TrianglesRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = u8::from(self.op).serialize();
+        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3172,7 +3088,7 @@ impl<'input> TrianglesRequest<'input> {
             return Err(ParseError::InvalidValue);
         }
         let (op, remaining) = u8::try_parse(value)?;
-        let op = op.try_into()?;
+        let op = op.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
@@ -3251,7 +3167,7 @@ impl<'input> TriStripRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = u8::from(self.op).serialize();
+        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3307,7 +3223,7 @@ impl<'input> TriStripRequest<'input> {
             return Err(ParseError::InvalidValue);
         }
         let (op, remaining) = u8::try_parse(value)?;
-        let op = op.try_into()?;
+        let op = op.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
@@ -3386,7 +3302,7 @@ impl<'input> TriFanRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = u8::from(self.op).serialize();
+        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3442,7 +3358,7 @@ impl<'input> TriFanRequest<'input> {
             return Err(ParseError::InvalidValue);
         }
         let (op, remaining) = u8::try_parse(value)?;
-        let op = op.try_into()?;
+        let op = op.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
@@ -3923,7 +3839,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = u8::from(self.op).serialize();
+        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3983,7 +3899,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
             return Err(ParseError::InvalidValue);
         }
         let (op, remaining) = u8::try_parse(value)?;
-        let op = op.try_into()?;
+        let op = op.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
@@ -4060,7 +3976,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = u8::from(self.op).serialize();
+        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -4120,7 +4036,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
             return Err(ParseError::InvalidValue);
         }
         let (op, remaining) = u8::try_parse(value)?;
-        let op = op.try_into()?;
+        let op = op.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
@@ -4197,7 +4113,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = u8::from(self.op).serialize();
+        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -4257,7 +4173,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
             return Err(ParseError::InvalidValue);
         }
         let (op, remaining) = u8::try_parse(value)?;
-        let op = op.try_into()?;
+        let op = op.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (src, remaining) = Picture::try_parse(remaining)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
@@ -4330,7 +4246,7 @@ impl<'input> FillRectanglesRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = u8::from(self.op).serialize();
+        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
         let dst_bytes = self.dst.serialize();
         let color_bytes = self.color.serialize();
         let mut request0 = vec![
@@ -4379,7 +4295,7 @@ impl<'input> FillRectanglesRequest<'input> {
             return Err(ParseError::InvalidValue);
         }
         let (op, remaining) = u8::try_parse(value)?;
-        let op = op.try_into()?;
+        let op = op.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (dst, remaining) = Picture::try_parse(remaining)?;
         let (color, remaining) = Color::try_parse(remaining)?;

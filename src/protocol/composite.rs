@@ -37,73 +37,79 @@ pub const X11_EXTENSION_NAME: &str = "Composite";
 pub const X11_XML_VERSION: (u32, u32) = (0, 4);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Redirect {
-    Automatic = 0,
-    Manual = 1,
+pub struct Redirect(u8);
+impl Redirect {
+    pub const AUTOMATIC: Self = Self(0);
+    pub const MANUAL: Self = Self(1);
 }
-impl From<Redirect> for bool {
+impl From<Redirect> for Option<bool> {
+    #[inline]
     fn from(input: Redirect) -> Self {
-        match input {
-            Redirect::Automatic => false,
-            Redirect::Manual => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<Redirect> for u8 {
+    #[inline]
     fn from(input: Redirect) -> Self {
-        match input {
-            Redirect::Automatic => 0,
-            Redirect::Manual => 1,
-        }
+        input.0
     }
 }
 impl From<Redirect> for Option<u8> {
+    #[inline]
     fn from(input: Redirect) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Redirect> for u16 {
+    #[inline]
     fn from(input: Redirect) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Redirect> for Option<u16> {
+    #[inline]
     fn from(input: Redirect) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Redirect> for u32 {
+    #[inline]
     fn from(input: Redirect) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Redirect> for Option<u32> {
+    #[inline]
     fn from(input: Redirect) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Redirect {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Redirect::Automatic),
-            1 => Ok(Redirect::Manual),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Redirect {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Redirect {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Redirect {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Redirect {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -232,7 +238,7 @@ impl RedirectWindowRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let update_bytes = u8::from(self.update).serialize();
+        let update_bytes = Option::<u8>::from(self.update).unwrap().serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             REDIRECT_WINDOW_REQUEST,
@@ -268,7 +274,7 @@ impl RedirectWindowRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (update, remaining) = u8::try_parse(remaining)?;
-        let update = update.try_into()?;
+        let update = update.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(RedirectWindowRequest {
@@ -308,7 +314,7 @@ impl RedirectSubwindowsRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let update_bytes = u8::from(self.update).serialize();
+        let update_bytes = Option::<u8>::from(self.update).unwrap().serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             REDIRECT_SUBWINDOWS_REQUEST,
@@ -344,7 +350,7 @@ impl RedirectSubwindowsRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (update, remaining) = u8::try_parse(remaining)?;
-        let update = update.try_into()?;
+        let update = update.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(RedirectSubwindowsRequest {
@@ -384,7 +390,7 @@ impl UnredirectWindowRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let update_bytes = u8::from(self.update).serialize();
+        let update_bytes = Option::<u8>::from(self.update).unwrap().serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             UNREDIRECT_WINDOW_REQUEST,
@@ -420,7 +426,7 @@ impl UnredirectWindowRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (update, remaining) = u8::try_parse(remaining)?;
-        let update = update.try_into()?;
+        let update = update.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(UnredirectWindowRequest {
@@ -460,7 +466,7 @@ impl UnredirectSubwindowsRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let update_bytes = u8::from(self.update).serialize();
+        let update_bytes = Option::<u8>::from(self.update).unwrap().serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             UNREDIRECT_SUBWINDOWS_REQUEST,
@@ -496,7 +502,7 @@ impl UnredirectSubwindowsRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (update, remaining) = u8::try_parse(remaining)?;
-        let update = update.try_into()?;
+        let update = update.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(UnredirectSubwindowsRequest {

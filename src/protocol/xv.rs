@@ -41,500 +41,553 @@ pub type Port = u32;
 pub type Encoding = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Type {
-    InputMask = 1 << 0,
-    OutputMask = 1 << 1,
-    VideoMask = 1 << 2,
-    StillMask = 1 << 3,
-    ImageMask = 1 << 4,
+pub struct Type(u8);
+impl Type {
+    pub const INPUT_MASK: Self = Self(1 << 0);
+    pub const OUTPUT_MASK: Self = Self(1 << 1);
+    pub const VIDEO_MASK: Self = Self(1 << 2);
+    pub const STILL_MASK: Self = Self(1 << 3);
+    pub const IMAGE_MASK: Self = Self(1 << 4);
+}
+impl From<Type> for Option<bool> {
+    #[inline]
+    fn from(input: Type) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Type> for u8 {
+    #[inline]
     fn from(input: Type) -> Self {
-        match input {
-            Type::InputMask => 1 << 0,
-            Type::OutputMask => 1 << 1,
-            Type::VideoMask => 1 << 2,
-            Type::StillMask => 1 << 3,
-            Type::ImageMask => 1 << 4,
-        }
+        input.0
     }
 }
 impl From<Type> for Option<u8> {
+    #[inline]
     fn from(input: Type) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Type> for u16 {
+    #[inline]
     fn from(input: Type) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Type> for Option<u16> {
+    #[inline]
     fn from(input: Type) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Type> for u32 {
+    #[inline]
     fn from(input: Type) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Type> for Option<u32> {
+    #[inline]
     fn from(input: Type) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Type {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(Type::InputMask),
-            2 => Ok(Type::OutputMask),
-            4 => Ok(Type::VideoMask),
-            8 => Ok(Type::StillMask),
-            16 => Ok(Type::ImageMask),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Type {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Type {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Type {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Type {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(Type, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ImageFormatInfoType {
-    RGB = 0,
-    YUV = 1,
+pub struct ImageFormatInfoType(u8);
+impl ImageFormatInfoType {
+    pub const RGB: Self = Self(0);
+    pub const YUV: Self = Self(1);
 }
-impl From<ImageFormatInfoType> for bool {
+impl From<ImageFormatInfoType> for Option<bool> {
+    #[inline]
     fn from(input: ImageFormatInfoType) -> Self {
-        match input {
-            ImageFormatInfoType::RGB => false,
-            ImageFormatInfoType::YUV => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<ImageFormatInfoType> for u8 {
+    #[inline]
     fn from(input: ImageFormatInfoType) -> Self {
-        match input {
-            ImageFormatInfoType::RGB => 0,
-            ImageFormatInfoType::YUV => 1,
-        }
+        input.0
     }
 }
 impl From<ImageFormatInfoType> for Option<u8> {
+    #[inline]
     fn from(input: ImageFormatInfoType) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ImageFormatInfoType> for u16 {
+    #[inline]
     fn from(input: ImageFormatInfoType) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ImageFormatInfoType> for Option<u16> {
+    #[inline]
     fn from(input: ImageFormatInfoType) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ImageFormatInfoType> for u32 {
+    #[inline]
     fn from(input: ImageFormatInfoType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ImageFormatInfoType> for Option<u32> {
+    #[inline]
     fn from(input: ImageFormatInfoType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ImageFormatInfoType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ImageFormatInfoType::RGB),
-            1 => Ok(ImageFormatInfoType::YUV),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ImageFormatInfoType {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ImageFormatInfoType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ImageFormatInfoType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ImageFormatInfoType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ImageFormatInfoFormat {
-    Packed = 0,
-    Planar = 1,
+pub struct ImageFormatInfoFormat(u8);
+impl ImageFormatInfoFormat {
+    pub const PACKED: Self = Self(0);
+    pub const PLANAR: Self = Self(1);
 }
-impl From<ImageFormatInfoFormat> for bool {
+impl From<ImageFormatInfoFormat> for Option<bool> {
+    #[inline]
     fn from(input: ImageFormatInfoFormat) -> Self {
-        match input {
-            ImageFormatInfoFormat::Packed => false,
-            ImageFormatInfoFormat::Planar => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<ImageFormatInfoFormat> for u8 {
+    #[inline]
     fn from(input: ImageFormatInfoFormat) -> Self {
-        match input {
-            ImageFormatInfoFormat::Packed => 0,
-            ImageFormatInfoFormat::Planar => 1,
-        }
+        input.0
     }
 }
 impl From<ImageFormatInfoFormat> for Option<u8> {
+    #[inline]
     fn from(input: ImageFormatInfoFormat) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ImageFormatInfoFormat> for u16 {
+    #[inline]
     fn from(input: ImageFormatInfoFormat) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ImageFormatInfoFormat> for Option<u16> {
+    #[inline]
     fn from(input: ImageFormatInfoFormat) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ImageFormatInfoFormat> for u32 {
+    #[inline]
     fn from(input: ImageFormatInfoFormat) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ImageFormatInfoFormat> for Option<u32> {
+    #[inline]
     fn from(input: ImageFormatInfoFormat) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ImageFormatInfoFormat {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ImageFormatInfoFormat::Packed),
-            1 => Ok(ImageFormatInfoFormat::Planar),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ImageFormatInfoFormat {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ImageFormatInfoFormat {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ImageFormatInfoFormat {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ImageFormatInfoFormat {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum AttributeFlag {
-    Gettable = 1 << 0,
-    Settable = 1 << 1,
+pub struct AttributeFlag(u8);
+impl AttributeFlag {
+    pub const GETTABLE: Self = Self(1 << 0);
+    pub const SETTABLE: Self = Self(1 << 1);
+}
+impl From<AttributeFlag> for Option<bool> {
+    #[inline]
+    fn from(input: AttributeFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<AttributeFlag> for u8 {
+    #[inline]
     fn from(input: AttributeFlag) -> Self {
-        match input {
-            AttributeFlag::Gettable => 1 << 0,
-            AttributeFlag::Settable => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<AttributeFlag> for Option<u8> {
+    #[inline]
     fn from(input: AttributeFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<AttributeFlag> for u16 {
+    #[inline]
     fn from(input: AttributeFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<AttributeFlag> for Option<u16> {
+    #[inline]
     fn from(input: AttributeFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<AttributeFlag> for u32 {
+    #[inline]
     fn from(input: AttributeFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<AttributeFlag> for Option<u32> {
+    #[inline]
     fn from(input: AttributeFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for AttributeFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(AttributeFlag::Gettable),
-            2 => Ok(AttributeFlag::Settable),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for AttributeFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for AttributeFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for AttributeFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for AttributeFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(AttributeFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum VideoNotifyReason {
-    Started = 0,
-    Stopped = 1,
-    Busy = 2,
-    Preempted = 3,
-    HardError = 4,
+pub struct VideoNotifyReason(u8);
+impl VideoNotifyReason {
+    pub const STARTED: Self = Self(0);
+    pub const STOPPED: Self = Self(1);
+    pub const BUSY: Self = Self(2);
+    pub const PREEMPTED: Self = Self(3);
+    pub const HARD_ERROR: Self = Self(4);
+}
+impl From<VideoNotifyReason> for Option<bool> {
+    #[inline]
+    fn from(input: VideoNotifyReason) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<VideoNotifyReason> for u8 {
+    #[inline]
     fn from(input: VideoNotifyReason) -> Self {
-        match input {
-            VideoNotifyReason::Started => 0,
-            VideoNotifyReason::Stopped => 1,
-            VideoNotifyReason::Busy => 2,
-            VideoNotifyReason::Preempted => 3,
-            VideoNotifyReason::HardError => 4,
-        }
+        input.0
     }
 }
 impl From<VideoNotifyReason> for Option<u8> {
+    #[inline]
     fn from(input: VideoNotifyReason) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<VideoNotifyReason> for u16 {
+    #[inline]
     fn from(input: VideoNotifyReason) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<VideoNotifyReason> for Option<u16> {
+    #[inline]
     fn from(input: VideoNotifyReason) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<VideoNotifyReason> for u32 {
+    #[inline]
     fn from(input: VideoNotifyReason) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<VideoNotifyReason> for Option<u32> {
+    #[inline]
     fn from(input: VideoNotifyReason) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for VideoNotifyReason {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(VideoNotifyReason::Started),
-            1 => Ok(VideoNotifyReason::Stopped),
-            2 => Ok(VideoNotifyReason::Busy),
-            3 => Ok(VideoNotifyReason::Preempted),
-            4 => Ok(VideoNotifyReason::HardError),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for VideoNotifyReason {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for VideoNotifyReason {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for VideoNotifyReason {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for VideoNotifyReason {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ScanlineOrder {
-    TopToBottom = 0,
-    BottomToTop = 1,
+pub struct ScanlineOrder(u8);
+impl ScanlineOrder {
+    pub const TOP_TO_BOTTOM: Self = Self(0);
+    pub const BOTTOM_TO_TOP: Self = Self(1);
 }
-impl From<ScanlineOrder> for bool {
+impl From<ScanlineOrder> for Option<bool> {
+    #[inline]
     fn from(input: ScanlineOrder) -> Self {
-        match input {
-            ScanlineOrder::TopToBottom => false,
-            ScanlineOrder::BottomToTop => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<ScanlineOrder> for u8 {
+    #[inline]
     fn from(input: ScanlineOrder) -> Self {
-        match input {
-            ScanlineOrder::TopToBottom => 0,
-            ScanlineOrder::BottomToTop => 1,
-        }
+        input.0
     }
 }
 impl From<ScanlineOrder> for Option<u8> {
+    #[inline]
     fn from(input: ScanlineOrder) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ScanlineOrder> for u16 {
+    #[inline]
     fn from(input: ScanlineOrder) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ScanlineOrder> for Option<u16> {
+    #[inline]
     fn from(input: ScanlineOrder) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ScanlineOrder> for u32 {
+    #[inline]
     fn from(input: ScanlineOrder) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ScanlineOrder> for Option<u32> {
+    #[inline]
     fn from(input: ScanlineOrder) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ScanlineOrder {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ScanlineOrder::TopToBottom),
-            1 => Ok(ScanlineOrder::BottomToTop),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ScanlineOrder {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ScanlineOrder {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ScanlineOrder {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ScanlineOrder {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GrabPortStatus {
-    Success = 0,
-    BadExtension = 1,
-    AlreadyGrabbed = 2,
-    InvalidTime = 3,
-    BadReply = 4,
-    BadAlloc = 5,
+pub struct GrabPortStatus(u8);
+impl GrabPortStatus {
+    pub const SUCCESS: Self = Self(0);
+    pub const BAD_EXTENSION: Self = Self(1);
+    pub const ALREADY_GRABBED: Self = Self(2);
+    pub const INVALID_TIME: Self = Self(3);
+    pub const BAD_REPLY: Self = Self(4);
+    pub const BAD_ALLOC: Self = Self(5);
+}
+impl From<GrabPortStatus> for Option<bool> {
+    #[inline]
+    fn from(input: GrabPortStatus) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<GrabPortStatus> for u8 {
+    #[inline]
     fn from(input: GrabPortStatus) -> Self {
-        match input {
-            GrabPortStatus::Success => 0,
-            GrabPortStatus::BadExtension => 1,
-            GrabPortStatus::AlreadyGrabbed => 2,
-            GrabPortStatus::InvalidTime => 3,
-            GrabPortStatus::BadReply => 4,
-            GrabPortStatus::BadAlloc => 5,
-        }
+        input.0
     }
 }
 impl From<GrabPortStatus> for Option<u8> {
+    #[inline]
     fn from(input: GrabPortStatus) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<GrabPortStatus> for u16 {
+    #[inline]
     fn from(input: GrabPortStatus) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<GrabPortStatus> for Option<u16> {
+    #[inline]
     fn from(input: GrabPortStatus) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<GrabPortStatus> for u32 {
+    #[inline]
     fn from(input: GrabPortStatus) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<GrabPortStatus> for Option<u32> {
+    #[inline]
     fn from(input: GrabPortStatus) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for GrabPortStatus {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GrabPortStatus::Success),
-            1 => Ok(GrabPortStatus::BadExtension),
-            2 => Ok(GrabPortStatus::AlreadyGrabbed),
-            3 => Ok(GrabPortStatus::InvalidTime),
-            4 => Ok(GrabPortStatus::BadReply),
-            5 => Ok(GrabPortStatus::BadAlloc),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for GrabPortStatus {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for GrabPortStatus {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for GrabPortStatus {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for GrabPortStatus {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -979,10 +1032,10 @@ impl TryParse for ImageFormatInfo {
         let vcomp_order = <[u8; 32]>::try_from(vcomp_order).unwrap();
         let (vscanline_order, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
-        let byte_order = byte_order.try_into()?;
-        let format = format.try_into()?;
-        let vscanline_order = vscanline_order.try_into()?;
+        let type_ = type_.into();
+        let byte_order = byte_order.into();
+        let format = format.into();
+        let vscanline_order = vscanline_order.into();
         let result = ImageFormatInfo { id, type_, byte_order, guid, bpp, num_planes, depth, red_mask, green_mask, blue_mask, format, y_sample_bits, u_sample_bits, v_sample_bits, vhorz_y_period, vhorz_u_period, vhorz_v_period, vvert_y_period, vvert_u_period, vvert_v_period, vcomp_order, vscanline_order };
         Ok((result, remaining))
     }
@@ -997,15 +1050,15 @@ impl Serialize for ImageFormatInfo {
     type Bytes = [u8; 128];
     fn serialize(&self) -> [u8; 128] {
         let id_bytes = self.id.serialize();
-        let type_bytes = u8::from(self.type_).serialize();
-        let byte_order_bytes = u8::from(self.byte_order).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let byte_order_bytes = Option::<u8>::from(self.byte_order).unwrap().serialize();
         let bpp_bytes = self.bpp.serialize();
         let num_planes_bytes = self.num_planes.serialize();
         let depth_bytes = self.depth.serialize();
         let red_mask_bytes = self.red_mask.serialize();
         let green_mask_bytes = self.green_mask.serialize();
         let blue_mask_bytes = self.blue_mask.serialize();
-        let format_bytes = u8::from(self.format).serialize();
+        let format_bytes = Option::<u8>::from(self.format).unwrap().serialize();
         let y_sample_bits_bytes = self.y_sample_bits.serialize();
         let u_sample_bits_bytes = self.u_sample_bits.serialize();
         let v_sample_bits_bytes = self.v_sample_bits.serialize();
@@ -1015,7 +1068,7 @@ impl Serialize for ImageFormatInfo {
         let vvert_y_period_bytes = self.vvert_y_period.serialize();
         let vvert_u_period_bytes = self.vvert_u_period.serialize();
         let vvert_v_period_bytes = self.vvert_v_period.serialize();
-        let vscanline_order_bytes = u8::from(self.vscanline_order).serialize();
+        let vscanline_order_bytes = Option::<u8>::from(self.vscanline_order).unwrap().serialize();
         [
             id_bytes[0],
             id_bytes[1],
@@ -1150,8 +1203,8 @@ impl Serialize for ImageFormatInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(128);
         self.id.serialize_into(bytes);
-        u8::from(self.type_).serialize_into(bytes);
-        u8::from(self.byte_order).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        Option::<u8>::from(self.byte_order).unwrap().serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         bytes.extend_from_slice(&self.guid);
         self.bpp.serialize_into(bytes);
@@ -1162,7 +1215,7 @@ impl Serialize for ImageFormatInfo {
         self.red_mask.serialize_into(bytes);
         self.green_mask.serialize_into(bytes);
         self.blue_mask.serialize_into(bytes);
-        u8::from(self.format).serialize_into(bytes);
+        Option::<u8>::from(self.format).unwrap().serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.y_sample_bits.serialize_into(bytes);
         self.u_sample_bits.serialize_into(bytes);
@@ -1174,7 +1227,7 @@ impl Serialize for ImageFormatInfo {
         self.vvert_u_period.serialize_into(bytes);
         self.vvert_v_period.serialize_into(bytes);
         bytes.extend_from_slice(&self.vcomp_order);
-        u8::from(self.vscanline_order).serialize_into(bytes);
+        Option::<u8>::from(self.vscanline_order).unwrap().serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
     }
 }
@@ -1208,7 +1261,7 @@ impl TryParse for VideoNotifyEvent {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (port, remaining) = Port::try_parse(remaining)?;
-        let reason = reason.try_into()?;
+        let reason = reason.into();
         let result = VideoNotifyEvent { response_type, reason, sequence, time, drawable, port };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -1225,7 +1278,7 @@ impl TryFrom<&[u8]> for VideoNotifyEvent {
 impl From<&VideoNotifyEvent> for [u8; 32] {
     fn from(input: &VideoNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let reason_bytes = u8::from(input.reason).serialize();
+        let reason_bytes = Option::<u8>::from(input.reason).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let drawable_bytes = input.drawable.serialize();
@@ -1763,7 +1816,7 @@ impl TryParse for GrabPortReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let result = result.try_into()?;
+        let result = result.into();
         let result = GrabPortReply { result, sequence, length };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)

@@ -39,207 +39,239 @@ pub type Syncrange = u32;
 pub type Dotclock = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum ModeFlag {
-    PositiveHSync = 1 << 0,
-    NegativeHSync = 1 << 1,
-    PositiveVSync = 1 << 2,
-    NegativeVSync = 1 << 3,
-    Interlace = 1 << 4,
-    CompositeSync = 1 << 5,
-    PositiveCSync = 1 << 6,
-    NegativeCSync = 1 << 7,
-    HSkew = 1 << 8,
-    Broadcast = 1 << 9,
-    Pixmux = 1 << 10,
-    DoubleClock = 1 << 11,
-    HalfClock = 1 << 12,
+pub struct ModeFlag(u16);
+impl ModeFlag {
+    pub const POSITIVE_H_SYNC: Self = Self(1 << 0);
+    pub const NEGATIVE_H_SYNC: Self = Self(1 << 1);
+    pub const POSITIVE_V_SYNC: Self = Self(1 << 2);
+    pub const NEGATIVE_V_SYNC: Self = Self(1 << 3);
+    pub const INTERLACE: Self = Self(1 << 4);
+    pub const COMPOSITE_SYNC: Self = Self(1 << 5);
+    pub const POSITIVE_C_SYNC: Self = Self(1 << 6);
+    pub const NEGATIVE_C_SYNC: Self = Self(1 << 7);
+    pub const H_SKEW: Self = Self(1 << 8);
+    pub const BROADCAST: Self = Self(1 << 9);
+    pub const PIXMUX: Self = Self(1 << 10);
+    pub const DOUBLE_CLOCK: Self = Self(1 << 11);
+    pub const HALF_CLOCK: Self = Self(1 << 12);
+}
+impl From<ModeFlag> for Option<bool> {
+    #[inline]
+    fn from(input: ModeFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<ModeFlag> for Option<u8> {
+    #[inline]
+    fn from(input: ModeFlag) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<ModeFlag> for u16 {
+    #[inline]
     fn from(input: ModeFlag) -> Self {
-        match input {
-            ModeFlag::PositiveHSync => 1 << 0,
-            ModeFlag::NegativeHSync => 1 << 1,
-            ModeFlag::PositiveVSync => 1 << 2,
-            ModeFlag::NegativeVSync => 1 << 3,
-            ModeFlag::Interlace => 1 << 4,
-            ModeFlag::CompositeSync => 1 << 5,
-            ModeFlag::PositiveCSync => 1 << 6,
-            ModeFlag::NegativeCSync => 1 << 7,
-            ModeFlag::HSkew => 1 << 8,
-            ModeFlag::Broadcast => 1 << 9,
-            ModeFlag::Pixmux => 1 << 10,
-            ModeFlag::DoubleClock => 1 << 11,
-            ModeFlag::HalfClock => 1 << 12,
-        }
+        input.0
     }
 }
 impl From<ModeFlag> for Option<u16> {
+    #[inline]
     fn from(input: ModeFlag) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<ModeFlag> for u32 {
+    #[inline]
     fn from(input: ModeFlag) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ModeFlag> for Option<u32> {
+    #[inline]
     fn from(input: ModeFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for ModeFlag {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ModeFlag::PositiveHSync),
-            2 => Ok(ModeFlag::NegativeHSync),
-            4 => Ok(ModeFlag::PositiveVSync),
-            8 => Ok(ModeFlag::NegativeVSync),
-            16 => Ok(ModeFlag::Interlace),
-            32 => Ok(ModeFlag::CompositeSync),
-            64 => Ok(ModeFlag::PositiveCSync),
-            128 => Ok(ModeFlag::NegativeCSync),
-            256 => Ok(ModeFlag::HSkew),
-            512 => Ok(ModeFlag::Broadcast),
-            1024 => Ok(ModeFlag::Pixmux),
-            2048 => Ok(ModeFlag::DoubleClock),
-            4096 => Ok(ModeFlag::HalfClock),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ModeFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ModeFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ModeFlag {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for ModeFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ModeFlag, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ClockFlag {
-    Programable = 1 << 0,
+pub struct ClockFlag(u8);
+impl ClockFlag {
+    pub const PROGRAMABLE: Self = Self(1 << 0);
+}
+impl From<ClockFlag> for Option<bool> {
+    #[inline]
+    fn from(input: ClockFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ClockFlag> for u8 {
+    #[inline]
     fn from(input: ClockFlag) -> Self {
-        match input {
-            ClockFlag::Programable => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<ClockFlag> for Option<u8> {
+    #[inline]
     fn from(input: ClockFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ClockFlag> for u16 {
+    #[inline]
     fn from(input: ClockFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ClockFlag> for Option<u16> {
+    #[inline]
     fn from(input: ClockFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ClockFlag> for u32 {
+    #[inline]
     fn from(input: ClockFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ClockFlag> for Option<u32> {
+    #[inline]
     fn from(input: ClockFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ClockFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ClockFlag::Programable),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ClockFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ClockFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ClockFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ClockFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ClockFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Permission {
-    Read = 1 << 0,
-    Write = 1 << 1,
+pub struct Permission(u8);
+impl Permission {
+    pub const READ: Self = Self(1 << 0);
+    pub const WRITE: Self = Self(1 << 1);
+}
+impl From<Permission> for Option<bool> {
+    #[inline]
+    fn from(input: Permission) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Permission> for u8 {
+    #[inline]
     fn from(input: Permission) -> Self {
-        match input {
-            Permission::Read => 1 << 0,
-            Permission::Write => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<Permission> for Option<u8> {
+    #[inline]
     fn from(input: Permission) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Permission> for u16 {
+    #[inline]
     fn from(input: Permission) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Permission> for Option<u16> {
+    #[inline]
     fn from(input: Permission) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Permission> for u32 {
+    #[inline]
     fn from(input: Permission) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Permission> for Option<u32> {
+    #[inline]
     fn from(input: Permission) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Permission {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(Permission::Read),
-            2 => Ok(Permission::Write),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Permission {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Permission {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Permission {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Permission {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(Permission, u8);

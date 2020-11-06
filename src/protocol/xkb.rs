@@ -36,721 +36,803 @@ pub const X11_EXTENSION_NAME: &str = "XKEYBOARD";
 pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Const {
-    MaxLegalKeyCode = 255,
-    PerKeyBitArraySize = 32,
-    KeyNameLength = 4,
+pub struct Const(u8);
+impl Const {
+    pub const MAX_LEGAL_KEY_CODE: Self = Self(255);
+    pub const PER_KEY_BIT_ARRAY_SIZE: Self = Self(32);
+    pub const KEY_NAME_LENGTH: Self = Self(4);
+}
+impl From<Const> for Option<bool> {
+    #[inline]
+    fn from(input: Const) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Const> for u8 {
+    #[inline]
     fn from(input: Const) -> Self {
-        match input {
-            Const::MaxLegalKeyCode => 255,
-            Const::PerKeyBitArraySize => 32,
-            Const::KeyNameLength => 4,
-        }
+        input.0
     }
 }
 impl From<Const> for Option<u8> {
+    #[inline]
     fn from(input: Const) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Const> for u16 {
+    #[inline]
     fn from(input: Const) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Const> for Option<u16> {
+    #[inline]
     fn from(input: Const) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Const> for u32 {
+    #[inline]
     fn from(input: Const) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Const> for Option<u32> {
+    #[inline]
     fn from(input: Const) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Const {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            255 => Ok(Const::MaxLegalKeyCode),
-            32 => Ok(Const::PerKeyBitArraySize),
-            4 => Ok(Const::KeyNameLength),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Const {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Const {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Const {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Const {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum EventType {
-    NewKeyboardNotify = 1 << 0,
-    MapNotify = 1 << 1,
-    StateNotify = 1 << 2,
-    ControlsNotify = 1 << 3,
-    IndicatorStateNotify = 1 << 4,
-    IndicatorMapNotify = 1 << 5,
-    NamesNotify = 1 << 6,
-    CompatMapNotify = 1 << 7,
-    BellNotify = 1 << 8,
-    ActionMessage = 1 << 9,
-    AccessXNotify = 1 << 10,
-    ExtensionDeviceNotify = 1 << 11,
+pub struct EventType(u16);
+impl EventType {
+    pub const NEW_KEYBOARD_NOTIFY: Self = Self(1 << 0);
+    pub const MAP_NOTIFY: Self = Self(1 << 1);
+    pub const STATE_NOTIFY: Self = Self(1 << 2);
+    pub const CONTROLS_NOTIFY: Self = Self(1 << 3);
+    pub const INDICATOR_STATE_NOTIFY: Self = Self(1 << 4);
+    pub const INDICATOR_MAP_NOTIFY: Self = Self(1 << 5);
+    pub const NAMES_NOTIFY: Self = Self(1 << 6);
+    pub const COMPAT_MAP_NOTIFY: Self = Self(1 << 7);
+    pub const BELL_NOTIFY: Self = Self(1 << 8);
+    pub const ACTION_MESSAGE: Self = Self(1 << 9);
+    pub const ACCESS_X_NOTIFY: Self = Self(1 << 10);
+    pub const EXTENSION_DEVICE_NOTIFY: Self = Self(1 << 11);
+}
+impl From<EventType> for Option<bool> {
+    #[inline]
+    fn from(input: EventType) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<EventType> for Option<u8> {
+    #[inline]
+    fn from(input: EventType) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<EventType> for u16 {
+    #[inline]
     fn from(input: EventType) -> Self {
-        match input {
-            EventType::NewKeyboardNotify => 1 << 0,
-            EventType::MapNotify => 1 << 1,
-            EventType::StateNotify => 1 << 2,
-            EventType::ControlsNotify => 1 << 3,
-            EventType::IndicatorStateNotify => 1 << 4,
-            EventType::IndicatorMapNotify => 1 << 5,
-            EventType::NamesNotify => 1 << 6,
-            EventType::CompatMapNotify => 1 << 7,
-            EventType::BellNotify => 1 << 8,
-            EventType::ActionMessage => 1 << 9,
-            EventType::AccessXNotify => 1 << 10,
-            EventType::ExtensionDeviceNotify => 1 << 11,
-        }
+        input.0
     }
 }
 impl From<EventType> for Option<u16> {
+    #[inline]
     fn from(input: EventType) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<EventType> for u32 {
+    #[inline]
     fn from(input: EventType) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<EventType> for Option<u32> {
+    #[inline]
     fn from(input: EventType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for EventType {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(EventType::NewKeyboardNotify),
-            2 => Ok(EventType::MapNotify),
-            4 => Ok(EventType::StateNotify),
-            8 => Ok(EventType::ControlsNotify),
-            16 => Ok(EventType::IndicatorStateNotify),
-            32 => Ok(EventType::IndicatorMapNotify),
-            64 => Ok(EventType::NamesNotify),
-            128 => Ok(EventType::CompatMapNotify),
-            256 => Ok(EventType::BellNotify),
-            512 => Ok(EventType::ActionMessage),
-            1024 => Ok(EventType::AccessXNotify),
-            2048 => Ok(EventType::ExtensionDeviceNotify),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for EventType {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for EventType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for EventType {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for EventType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(EventType, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum NKNDetail {
-    Keycodes = 1 << 0,
-    Geometry = 1 << 1,
-    DeviceID = 1 << 2,
+pub struct NKNDetail(u8);
+impl NKNDetail {
+    pub const KEYCODES: Self = Self(1 << 0);
+    pub const GEOMETRY: Self = Self(1 << 1);
+    pub const DEVICE_ID: Self = Self(1 << 2);
+}
+impl From<NKNDetail> for Option<bool> {
+    #[inline]
+    fn from(input: NKNDetail) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<NKNDetail> for u8 {
+    #[inline]
     fn from(input: NKNDetail) -> Self {
-        match input {
-            NKNDetail::Keycodes => 1 << 0,
-            NKNDetail::Geometry => 1 << 1,
-            NKNDetail::DeviceID => 1 << 2,
-        }
+        input.0
     }
 }
 impl From<NKNDetail> for Option<u8> {
+    #[inline]
     fn from(input: NKNDetail) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<NKNDetail> for u16 {
+    #[inline]
     fn from(input: NKNDetail) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<NKNDetail> for Option<u16> {
+    #[inline]
     fn from(input: NKNDetail) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<NKNDetail> for u32 {
+    #[inline]
     fn from(input: NKNDetail) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<NKNDetail> for Option<u32> {
+    #[inline]
     fn from(input: NKNDetail) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for NKNDetail {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(NKNDetail::Keycodes),
-            2 => Ok(NKNDetail::Geometry),
-            4 => Ok(NKNDetail::DeviceID),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for NKNDetail {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for NKNDetail {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for NKNDetail {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for NKNDetail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(NKNDetail, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum AXNDetail {
-    SKPress = 1 << 0,
-    SKAccept = 1 << 1,
-    SKReject = 1 << 2,
-    SKRelease = 1 << 3,
-    BKAccept = 1 << 4,
-    BKReject = 1 << 5,
-    AXKWarning = 1 << 6,
+pub struct AXNDetail(u8);
+impl AXNDetail {
+    pub const SK_PRESS: Self = Self(1 << 0);
+    pub const SK_ACCEPT: Self = Self(1 << 1);
+    pub const SK_REJECT: Self = Self(1 << 2);
+    pub const SK_RELEASE: Self = Self(1 << 3);
+    pub const BK_ACCEPT: Self = Self(1 << 4);
+    pub const BK_REJECT: Self = Self(1 << 5);
+    pub const AXK_WARNING: Self = Self(1 << 6);
+}
+impl From<AXNDetail> for Option<bool> {
+    #[inline]
+    fn from(input: AXNDetail) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<AXNDetail> for u8 {
+    #[inline]
     fn from(input: AXNDetail) -> Self {
-        match input {
-            AXNDetail::SKPress => 1 << 0,
-            AXNDetail::SKAccept => 1 << 1,
-            AXNDetail::SKReject => 1 << 2,
-            AXNDetail::SKRelease => 1 << 3,
-            AXNDetail::BKAccept => 1 << 4,
-            AXNDetail::BKReject => 1 << 5,
-            AXNDetail::AXKWarning => 1 << 6,
-        }
+        input.0
     }
 }
 impl From<AXNDetail> for Option<u8> {
+    #[inline]
     fn from(input: AXNDetail) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<AXNDetail> for u16 {
+    #[inline]
     fn from(input: AXNDetail) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<AXNDetail> for Option<u16> {
+    #[inline]
     fn from(input: AXNDetail) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<AXNDetail> for u32 {
+    #[inline]
     fn from(input: AXNDetail) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<AXNDetail> for Option<u32> {
+    #[inline]
     fn from(input: AXNDetail) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for AXNDetail {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(AXNDetail::SKPress),
-            2 => Ok(AXNDetail::SKAccept),
-            4 => Ok(AXNDetail::SKReject),
-            8 => Ok(AXNDetail::SKRelease),
-            16 => Ok(AXNDetail::BKAccept),
-            32 => Ok(AXNDetail::BKReject),
-            64 => Ok(AXNDetail::AXKWarning),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for AXNDetail {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for AXNDetail {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for AXNDetail {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for AXNDetail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(AXNDetail, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum MapPart {
-    KeyTypes = 1 << 0,
-    KeySyms = 1 << 1,
-    ModifierMap = 1 << 2,
-    ExplicitComponents = 1 << 3,
-    KeyActions = 1 << 4,
-    KeyBehaviors = 1 << 5,
-    VirtualMods = 1 << 6,
-    VirtualModMap = 1 << 7,
+pub struct MapPart(u8);
+impl MapPart {
+    pub const KEY_TYPES: Self = Self(1 << 0);
+    pub const KEY_SYMS: Self = Self(1 << 1);
+    pub const MODIFIER_MAP: Self = Self(1 << 2);
+    pub const EXPLICIT_COMPONENTS: Self = Self(1 << 3);
+    pub const KEY_ACTIONS: Self = Self(1 << 4);
+    pub const KEY_BEHAVIORS: Self = Self(1 << 5);
+    pub const VIRTUAL_MODS: Self = Self(1 << 6);
+    pub const VIRTUAL_MOD_MAP: Self = Self(1 << 7);
+}
+impl From<MapPart> for Option<bool> {
+    #[inline]
+    fn from(input: MapPart) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<MapPart> for u8 {
+    #[inline]
     fn from(input: MapPart) -> Self {
-        match input {
-            MapPart::KeyTypes => 1 << 0,
-            MapPart::KeySyms => 1 << 1,
-            MapPart::ModifierMap => 1 << 2,
-            MapPart::ExplicitComponents => 1 << 3,
-            MapPart::KeyActions => 1 << 4,
-            MapPart::KeyBehaviors => 1 << 5,
-            MapPart::VirtualMods => 1 << 6,
-            MapPart::VirtualModMap => 1 << 7,
-        }
+        input.0
     }
 }
 impl From<MapPart> for Option<u8> {
+    #[inline]
     fn from(input: MapPart) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<MapPart> for u16 {
+    #[inline]
     fn from(input: MapPart) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<MapPart> for Option<u16> {
+    #[inline]
     fn from(input: MapPart) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<MapPart> for u32 {
+    #[inline]
     fn from(input: MapPart) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<MapPart> for Option<u32> {
+    #[inline]
     fn from(input: MapPart) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for MapPart {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(MapPart::KeyTypes),
-            2 => Ok(MapPart::KeySyms),
-            4 => Ok(MapPart::ModifierMap),
-            8 => Ok(MapPart::ExplicitComponents),
-            16 => Ok(MapPart::KeyActions),
-            32 => Ok(MapPart::KeyBehaviors),
-            64 => Ok(MapPart::VirtualMods),
-            128 => Ok(MapPart::VirtualModMap),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for MapPart {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for MapPart {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for MapPart {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for MapPart {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(MapPart, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SetMapFlags {
-    ResizeTypes = 1 << 0,
-    RecomputeActions = 1 << 1,
+pub struct SetMapFlags(u8);
+impl SetMapFlags {
+    pub const RESIZE_TYPES: Self = Self(1 << 0);
+    pub const RECOMPUTE_ACTIONS: Self = Self(1 << 1);
+}
+impl From<SetMapFlags> for Option<bool> {
+    #[inline]
+    fn from(input: SetMapFlags) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SetMapFlags> for u8 {
+    #[inline]
     fn from(input: SetMapFlags) -> Self {
-        match input {
-            SetMapFlags::ResizeTypes => 1 << 0,
-            SetMapFlags::RecomputeActions => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<SetMapFlags> for Option<u8> {
+    #[inline]
     fn from(input: SetMapFlags) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SetMapFlags> for u16 {
+    #[inline]
     fn from(input: SetMapFlags) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SetMapFlags> for Option<u16> {
+    #[inline]
     fn from(input: SetMapFlags) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SetMapFlags> for u32 {
+    #[inline]
     fn from(input: SetMapFlags) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SetMapFlags> for Option<u32> {
+    #[inline]
     fn from(input: SetMapFlags) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SetMapFlags {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(SetMapFlags::ResizeTypes),
-            2 => Ok(SetMapFlags::RecomputeActions),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SetMapFlags {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SetMapFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SetMapFlags {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SetMapFlags {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SetMapFlags, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum StatePart {
-    ModifierState = 1 << 0,
-    ModifierBase = 1 << 1,
-    ModifierLatch = 1 << 2,
-    ModifierLock = 1 << 3,
-    GroupState = 1 << 4,
-    GroupBase = 1 << 5,
-    GroupLatch = 1 << 6,
-    GroupLock = 1 << 7,
-    CompatState = 1 << 8,
-    GrabMods = 1 << 9,
-    CompatGrabMods = 1 << 10,
-    LookupMods = 1 << 11,
-    CompatLookupMods = 1 << 12,
-    PointerButtons = 1 << 13,
+pub struct StatePart(u16);
+impl StatePart {
+    pub const MODIFIER_STATE: Self = Self(1 << 0);
+    pub const MODIFIER_BASE: Self = Self(1 << 1);
+    pub const MODIFIER_LATCH: Self = Self(1 << 2);
+    pub const MODIFIER_LOCK: Self = Self(1 << 3);
+    pub const GROUP_STATE: Self = Self(1 << 4);
+    pub const GROUP_BASE: Self = Self(1 << 5);
+    pub const GROUP_LATCH: Self = Self(1 << 6);
+    pub const GROUP_LOCK: Self = Self(1 << 7);
+    pub const COMPAT_STATE: Self = Self(1 << 8);
+    pub const GRAB_MODS: Self = Self(1 << 9);
+    pub const COMPAT_GRAB_MODS: Self = Self(1 << 10);
+    pub const LOOKUP_MODS: Self = Self(1 << 11);
+    pub const COMPAT_LOOKUP_MODS: Self = Self(1 << 12);
+    pub const POINTER_BUTTONS: Self = Self(1 << 13);
+}
+impl From<StatePart> for Option<bool> {
+    #[inline]
+    fn from(input: StatePart) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<StatePart> for Option<u8> {
+    #[inline]
+    fn from(input: StatePart) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<StatePart> for u16 {
+    #[inline]
     fn from(input: StatePart) -> Self {
-        match input {
-            StatePart::ModifierState => 1 << 0,
-            StatePart::ModifierBase => 1 << 1,
-            StatePart::ModifierLatch => 1 << 2,
-            StatePart::ModifierLock => 1 << 3,
-            StatePart::GroupState => 1 << 4,
-            StatePart::GroupBase => 1 << 5,
-            StatePart::GroupLatch => 1 << 6,
-            StatePart::GroupLock => 1 << 7,
-            StatePart::CompatState => 1 << 8,
-            StatePart::GrabMods => 1 << 9,
-            StatePart::CompatGrabMods => 1 << 10,
-            StatePart::LookupMods => 1 << 11,
-            StatePart::CompatLookupMods => 1 << 12,
-            StatePart::PointerButtons => 1 << 13,
-        }
+        input.0
     }
 }
 impl From<StatePart> for Option<u16> {
+    #[inline]
     fn from(input: StatePart) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<StatePart> for u32 {
+    #[inline]
     fn from(input: StatePart) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<StatePart> for Option<u32> {
+    #[inline]
     fn from(input: StatePart) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for StatePart {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(StatePart::ModifierState),
-            2 => Ok(StatePart::ModifierBase),
-            4 => Ok(StatePart::ModifierLatch),
-            8 => Ok(StatePart::ModifierLock),
-            16 => Ok(StatePart::GroupState),
-            32 => Ok(StatePart::GroupBase),
-            64 => Ok(StatePart::GroupLatch),
-            128 => Ok(StatePart::GroupLock),
-            256 => Ok(StatePart::CompatState),
-            512 => Ok(StatePart::GrabMods),
-            1024 => Ok(StatePart::CompatGrabMods),
-            2048 => Ok(StatePart::LookupMods),
-            4096 => Ok(StatePart::CompatLookupMods),
-            8192 => Ok(StatePart::PointerButtons),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for StatePart {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for StatePart {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for StatePart {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for StatePart {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(StatePart, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum BoolCtrl {
-    RepeatKeys = 1 << 0,
-    SlowKeys = 1 << 1,
-    BounceKeys = 1 << 2,
-    StickyKeys = 1 << 3,
-    MouseKeys = 1 << 4,
-    MouseKeysAccel = 1 << 5,
-    AccessXKeys = 1 << 6,
-    AccessXTimeoutMask = 1 << 7,
-    AccessXFeedbackMask = 1 << 8,
-    AudibleBellMask = 1 << 9,
-    Overlay1Mask = 1 << 10,
-    Overlay2Mask = 1 << 11,
-    IgnoreGroupLockMask = 1 << 12,
+pub struct BoolCtrl(u16);
+impl BoolCtrl {
+    pub const REPEAT_KEYS: Self = Self(1 << 0);
+    pub const SLOW_KEYS: Self = Self(1 << 1);
+    pub const BOUNCE_KEYS: Self = Self(1 << 2);
+    pub const STICKY_KEYS: Self = Self(1 << 3);
+    pub const MOUSE_KEYS: Self = Self(1 << 4);
+    pub const MOUSE_KEYS_ACCEL: Self = Self(1 << 5);
+    pub const ACCESS_X_KEYS: Self = Self(1 << 6);
+    pub const ACCESS_X_TIMEOUT_MASK: Self = Self(1 << 7);
+    pub const ACCESS_X_FEEDBACK_MASK: Self = Self(1 << 8);
+    pub const AUDIBLE_BELL_MASK: Self = Self(1 << 9);
+    pub const OVERLAY1_MASK: Self = Self(1 << 10);
+    pub const OVERLAY2_MASK: Self = Self(1 << 11);
+    pub const IGNORE_GROUP_LOCK_MASK: Self = Self(1 << 12);
+}
+impl From<BoolCtrl> for Option<bool> {
+    #[inline]
+    fn from(input: BoolCtrl) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<BoolCtrl> for Option<u8> {
+    #[inline]
+    fn from(input: BoolCtrl) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<BoolCtrl> for u16 {
+    #[inline]
     fn from(input: BoolCtrl) -> Self {
-        match input {
-            BoolCtrl::RepeatKeys => 1 << 0,
-            BoolCtrl::SlowKeys => 1 << 1,
-            BoolCtrl::BounceKeys => 1 << 2,
-            BoolCtrl::StickyKeys => 1 << 3,
-            BoolCtrl::MouseKeys => 1 << 4,
-            BoolCtrl::MouseKeysAccel => 1 << 5,
-            BoolCtrl::AccessXKeys => 1 << 6,
-            BoolCtrl::AccessXTimeoutMask => 1 << 7,
-            BoolCtrl::AccessXFeedbackMask => 1 << 8,
-            BoolCtrl::AudibleBellMask => 1 << 9,
-            BoolCtrl::Overlay1Mask => 1 << 10,
-            BoolCtrl::Overlay2Mask => 1 << 11,
-            BoolCtrl::IgnoreGroupLockMask => 1 << 12,
-        }
+        input.0
     }
 }
 impl From<BoolCtrl> for Option<u16> {
+    #[inline]
     fn from(input: BoolCtrl) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<BoolCtrl> for u32 {
+    #[inline]
     fn from(input: BoolCtrl) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<BoolCtrl> for Option<u32> {
+    #[inline]
     fn from(input: BoolCtrl) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for BoolCtrl {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(BoolCtrl::RepeatKeys),
-            2 => Ok(BoolCtrl::SlowKeys),
-            4 => Ok(BoolCtrl::BounceKeys),
-            8 => Ok(BoolCtrl::StickyKeys),
-            16 => Ok(BoolCtrl::MouseKeys),
-            32 => Ok(BoolCtrl::MouseKeysAccel),
-            64 => Ok(BoolCtrl::AccessXKeys),
-            128 => Ok(BoolCtrl::AccessXTimeoutMask),
-            256 => Ok(BoolCtrl::AccessXFeedbackMask),
-            512 => Ok(BoolCtrl::AudibleBellMask),
-            1024 => Ok(BoolCtrl::Overlay1Mask),
-            2048 => Ok(BoolCtrl::Overlay2Mask),
-            4096 => Ok(BoolCtrl::IgnoreGroupLockMask),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for BoolCtrl {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for BoolCtrl {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for BoolCtrl {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for BoolCtrl {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(BoolCtrl, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum Control {
-    GroupsWrap = 1 << 27,
-    InternalMods = 1 << 28,
-    IgnoreLockMods = 1 << 29,
-    PerKeyRepeat = 1 << 30,
-    ControlsEnabled = 1 << 31,
+pub struct Control(u32);
+impl Control {
+    pub const GROUPS_WRAP: Self = Self(1 << 27);
+    pub const INTERNAL_MODS: Self = Self(1 << 28);
+    pub const IGNORE_LOCK_MODS: Self = Self(1 << 29);
+    pub const PER_KEY_REPEAT: Self = Self(1 << 30);
+    pub const CONTROLS_ENABLED: Self = Self(1 << 31);
+}
+impl From<Control> for Option<bool> {
+    #[inline]
+    fn from(input: Control) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<Control> for Option<u8> {
+    #[inline]
+    fn from(input: Control) -> Self {
+        u8::try_from(input.0).ok()
+    }
+}
+impl From<Control> for Option<u16> {
+    #[inline]
+    fn from(input: Control) -> Self {
+        u16::try_from(input.0).ok()
+    }
 }
 impl From<Control> for u32 {
+    #[inline]
     fn from(input: Control) -> Self {
-        match input {
-            Control::GroupsWrap => 1 << 27,
-            Control::InternalMods => 1 << 28,
-            Control::IgnoreLockMods => 1 << 29,
-            Control::PerKeyRepeat => 1 << 30,
-            Control::ControlsEnabled => 1 << 31,
-        }
+        input.0
     }
 }
 impl From<Control> for Option<u32> {
+    #[inline]
     fn from(input: Control) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u32> for Control {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            134_217_728 => Ok(Control::GroupsWrap),
-            268_435_456 => Ok(Control::InternalMods),
-            536_870_912 => Ok(Control::IgnoreLockMods),
-            1_073_741_824 => Ok(Control::PerKeyRepeat),
-            2_147_483_648 => Ok(Control::ControlsEnabled),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Control {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Control {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for Control {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for Control {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 bitmask_binop!(Control, u32);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum AXOption {
-    SKPressFB = 1 << 0,
-    SKAcceptFB = 1 << 1,
-    FeatureFB = 1 << 2,
-    SlowWarnFB = 1 << 3,
-    IndicatorFB = 1 << 4,
-    StickyKeysFB = 1 << 5,
-    TwoKeys = 1 << 6,
-    LatchToLock = 1 << 7,
-    SKReleaseFB = 1 << 8,
-    SKRejectFB = 1 << 9,
-    BKRejectFB = 1 << 10,
-    DumbBell = 1 << 11,
+pub struct AXOption(u16);
+impl AXOption {
+    pub const SK_PRESS_FB: Self = Self(1 << 0);
+    pub const SK_ACCEPT_FB: Self = Self(1 << 1);
+    pub const FEATURE_FB: Self = Self(1 << 2);
+    pub const SLOW_WARN_FB: Self = Self(1 << 3);
+    pub const INDICATOR_FB: Self = Self(1 << 4);
+    pub const STICKY_KEYS_FB: Self = Self(1 << 5);
+    pub const TWO_KEYS: Self = Self(1 << 6);
+    pub const LATCH_TO_LOCK: Self = Self(1 << 7);
+    pub const SK_RELEASE_FB: Self = Self(1 << 8);
+    pub const SK_REJECT_FB: Self = Self(1 << 9);
+    pub const BK_REJECT_FB: Self = Self(1 << 10);
+    pub const DUMB_BELL: Self = Self(1 << 11);
+}
+impl From<AXOption> for Option<bool> {
+    #[inline]
+    fn from(input: AXOption) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<AXOption> for Option<u8> {
+    #[inline]
+    fn from(input: AXOption) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<AXOption> for u16 {
+    #[inline]
     fn from(input: AXOption) -> Self {
-        match input {
-            AXOption::SKPressFB => 1 << 0,
-            AXOption::SKAcceptFB => 1 << 1,
-            AXOption::FeatureFB => 1 << 2,
-            AXOption::SlowWarnFB => 1 << 3,
-            AXOption::IndicatorFB => 1 << 4,
-            AXOption::StickyKeysFB => 1 << 5,
-            AXOption::TwoKeys => 1 << 6,
-            AXOption::LatchToLock => 1 << 7,
-            AXOption::SKReleaseFB => 1 << 8,
-            AXOption::SKRejectFB => 1 << 9,
-            AXOption::BKRejectFB => 1 << 10,
-            AXOption::DumbBell => 1 << 11,
-        }
+        input.0
     }
 }
 impl From<AXOption> for Option<u16> {
+    #[inline]
     fn from(input: AXOption) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<AXOption> for u32 {
+    #[inline]
     fn from(input: AXOption) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<AXOption> for Option<u32> {
+    #[inline]
     fn from(input: AXOption) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for AXOption {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(AXOption::SKPressFB),
-            2 => Ok(AXOption::SKAcceptFB),
-            4 => Ok(AXOption::FeatureFB),
-            8 => Ok(AXOption::SlowWarnFB),
-            16 => Ok(AXOption::IndicatorFB),
-            32 => Ok(AXOption::StickyKeysFB),
-            64 => Ok(AXOption::TwoKeys),
-            128 => Ok(AXOption::LatchToLock),
-            256 => Ok(AXOption::SKReleaseFB),
-            512 => Ok(AXOption::SKRejectFB),
-            1024 => Ok(AXOption::BKRejectFB),
-            2048 => Ok(AXOption::DumbBell),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for AXOption {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for AXOption {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for AXOption {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for AXOption {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(AXOption, u16);
@@ -758,1312 +840,1504 @@ bitmask_binop!(AXOption, u16);
 pub type DeviceSpec = u16;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum LedClassResult {
-    KbdFeedbackClass = 0,
-    LedFeedbackClass = 4,
+pub struct LedClassResult(u16);
+impl LedClassResult {
+    pub const KBD_FEEDBACK_CLASS: Self = Self(0);
+    pub const LED_FEEDBACK_CLASS: Self = Self(4);
 }
-impl From<LedClassResult> for u8 {
+impl From<LedClassResult> for Option<bool> {
+    #[inline]
     fn from(input: LedClassResult) -> Self {
-        match input {
-            LedClassResult::KbdFeedbackClass => 0,
-            LedClassResult::LedFeedbackClass => 4,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<LedClassResult> for Option<u8> {
+    #[inline]
     fn from(input: LedClassResult) -> Self {
-        Some(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<LedClassResult> for u16 {
+    #[inline]
     fn from(input: LedClassResult) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<LedClassResult> for Option<u16> {
+    #[inline]
     fn from(input: LedClassResult) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<LedClassResult> for u32 {
+    #[inline]
     fn from(input: LedClassResult) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<LedClassResult> for Option<u32> {
+    #[inline]
     fn from(input: LedClassResult) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for LedClassResult {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(LedClassResult::KbdFeedbackClass),
-            4 => Ok(LedClassResult::LedFeedbackClass),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for LedClassResult {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for LedClassResult {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for LedClassResult {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for LedClassResult {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for LedClassResult {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum LedClass {
-    KbdFeedbackClass = 0,
-    LedFeedbackClass = 4,
-    DfltXIClass = 768,
-    AllXIClasses = 1280,
+pub struct LedClass(u16);
+impl LedClass {
+    pub const KBD_FEEDBACK_CLASS: Self = Self(0);
+    pub const LED_FEEDBACK_CLASS: Self = Self(4);
+    pub const DFLT_XI_CLASS: Self = Self(768);
+    pub const ALL_XI_CLASSES: Self = Self(1280);
+}
+impl From<LedClass> for Option<bool> {
+    #[inline]
+    fn from(input: LedClass) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<LedClass> for Option<u8> {
+    #[inline]
+    fn from(input: LedClass) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<LedClass> for u16 {
+    #[inline]
     fn from(input: LedClass) -> Self {
-        match input {
-            LedClass::KbdFeedbackClass => 0,
-            LedClass::LedFeedbackClass => 4,
-            LedClass::DfltXIClass => 768,
-            LedClass::AllXIClasses => 1280,
-        }
+        input.0
     }
 }
 impl From<LedClass> for Option<u16> {
+    #[inline]
     fn from(input: LedClass) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<LedClass> for u32 {
+    #[inline]
     fn from(input: LedClass) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<LedClass> for Option<u32> {
+    #[inline]
     fn from(input: LedClass) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for LedClass {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(LedClass::KbdFeedbackClass),
-            4 => Ok(LedClass::LedFeedbackClass),
-            768 => Ok(LedClass::DfltXIClass),
-            1280 => Ok(LedClass::AllXIClasses),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for LedClass {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for LedClass {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for LedClass {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for LedClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 pub type LedClassSpec = u16;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum BellClassResult {
-    KbdFeedbackClass = 0,
-    BellFeedbackClass = 5,
+pub struct BellClassResult(u8);
+impl BellClassResult {
+    pub const KBD_FEEDBACK_CLASS: Self = Self(0);
+    pub const BELL_FEEDBACK_CLASS: Self = Self(5);
+}
+impl From<BellClassResult> for Option<bool> {
+    #[inline]
+    fn from(input: BellClassResult) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<BellClassResult> for u8 {
+    #[inline]
     fn from(input: BellClassResult) -> Self {
-        match input {
-            BellClassResult::KbdFeedbackClass => 0,
-            BellClassResult::BellFeedbackClass => 5,
-        }
+        input.0
     }
 }
 impl From<BellClassResult> for Option<u8> {
+    #[inline]
     fn from(input: BellClassResult) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<BellClassResult> for u16 {
+    #[inline]
     fn from(input: BellClassResult) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<BellClassResult> for Option<u16> {
+    #[inline]
     fn from(input: BellClassResult) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<BellClassResult> for u32 {
+    #[inline]
     fn from(input: BellClassResult) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<BellClassResult> for Option<u32> {
+    #[inline]
     fn from(input: BellClassResult) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for BellClassResult {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(BellClassResult::KbdFeedbackClass),
-            5 => Ok(BellClassResult::BellFeedbackClass),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for BellClassResult {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for BellClassResult {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for BellClassResult {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for BellClassResult {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum BellClass {
-    KbdFeedbackClass = 0,
-    BellFeedbackClass = 5,
-    DfltXIClass = 768,
+pub struct BellClass(u16);
+impl BellClass {
+    pub const KBD_FEEDBACK_CLASS: Self = Self(0);
+    pub const BELL_FEEDBACK_CLASS: Self = Self(5);
+    pub const DFLT_XI_CLASS: Self = Self(768);
+}
+impl From<BellClass> for Option<bool> {
+    #[inline]
+    fn from(input: BellClass) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<BellClass> for Option<u8> {
+    #[inline]
+    fn from(input: BellClass) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<BellClass> for u16 {
+    #[inline]
     fn from(input: BellClass) -> Self {
-        match input {
-            BellClass::KbdFeedbackClass => 0,
-            BellClass::BellFeedbackClass => 5,
-            BellClass::DfltXIClass => 768,
-        }
+        input.0
     }
 }
 impl From<BellClass> for Option<u16> {
+    #[inline]
     fn from(input: BellClass) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<BellClass> for u32 {
+    #[inline]
     fn from(input: BellClass) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<BellClass> for Option<u32> {
+    #[inline]
     fn from(input: BellClass) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for BellClass {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(BellClass::KbdFeedbackClass),
-            5 => Ok(BellClass::BellFeedbackClass),
-            768 => Ok(BellClass::DfltXIClass),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for BellClass {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for BellClass {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for BellClass {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for BellClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 pub type BellClassSpec = u16;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum ID {
-    UseCoreKbd = 256,
-    UseCorePtr = 512,
-    DfltXIClass = 768,
-    DfltXIId = 1024,
-    AllXIClass = 1280,
-    AllXIId = 1536,
-    XINone = 65280,
+pub struct ID(u16);
+impl ID {
+    pub const USE_CORE_KBD: Self = Self(256);
+    pub const USE_CORE_PTR: Self = Self(512);
+    pub const DFLT_XI_CLASS: Self = Self(768);
+    pub const DFLT_XI_ID: Self = Self(1024);
+    pub const ALL_XI_CLASS: Self = Self(1280);
+    pub const ALL_XI_ID: Self = Self(1536);
+    pub const XI_NONE: Self = Self(65280);
+}
+impl From<ID> for Option<bool> {
+    #[inline]
+    fn from(input: ID) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<ID> for Option<u8> {
+    #[inline]
+    fn from(input: ID) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<ID> for u16 {
+    #[inline]
     fn from(input: ID) -> Self {
-        match input {
-            ID::UseCoreKbd => 256,
-            ID::UseCorePtr => 512,
-            ID::DfltXIClass => 768,
-            ID::DfltXIId => 1024,
-            ID::AllXIClass => 1280,
-            ID::AllXIId => 1536,
-            ID::XINone => 65280,
-        }
+        input.0
     }
 }
 impl From<ID> for Option<u16> {
+    #[inline]
     fn from(input: ID) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<ID> for u32 {
+    #[inline]
     fn from(input: ID) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ID> for Option<u32> {
+    #[inline]
     fn from(input: ID) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for ID {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            256 => Ok(ID::UseCoreKbd),
-            512 => Ok(ID::UseCorePtr),
-            768 => Ok(ID::DfltXIClass),
-            1024 => Ok(ID::DfltXIId),
-            1280 => Ok(ID::AllXIClass),
-            1536 => Ok(ID::AllXIId),
-            65280 => Ok(ID::XINone),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ID {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ID {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ID {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for ID {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 pub type IDSpec = u16;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Group {
-    M1 = 0,
-    M2 = 1,
-    M3 = 2,
-    M4 = 3,
+pub struct Group(u8);
+impl Group {
+    pub const M1: Self = Self(0);
+    pub const M2: Self = Self(1);
+    pub const M3: Self = Self(2);
+    pub const M4: Self = Self(3);
+}
+impl From<Group> for Option<bool> {
+    #[inline]
+    fn from(input: Group) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Group> for u8 {
+    #[inline]
     fn from(input: Group) -> Self {
-        match input {
-            Group::M1 => 0,
-            Group::M2 => 1,
-            Group::M3 => 2,
-            Group::M4 => 3,
-        }
+        input.0
     }
 }
 impl From<Group> for Option<u8> {
+    #[inline]
     fn from(input: Group) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Group> for u16 {
+    #[inline]
     fn from(input: Group) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Group> for Option<u16> {
+    #[inline]
     fn from(input: Group) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Group> for u32 {
+    #[inline]
     fn from(input: Group) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Group> for Option<u32> {
+    #[inline]
     fn from(input: Group) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Group {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Group::M1),
-            1 => Ok(Group::M2),
-            2 => Ok(Group::M3),
-            3 => Ok(Group::M4),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Group {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Group {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Group {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Group {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Groups {
-    Any = 254,
-    All = 255,
+pub struct Groups(u8);
+impl Groups {
+    pub const ANY: Self = Self(254);
+    pub const ALL: Self = Self(255);
+}
+impl From<Groups> for Option<bool> {
+    #[inline]
+    fn from(input: Groups) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Groups> for u8 {
+    #[inline]
     fn from(input: Groups) -> Self {
-        match input {
-            Groups::Any => 254,
-            Groups::All => 255,
-        }
+        input.0
     }
 }
 impl From<Groups> for Option<u8> {
+    #[inline]
     fn from(input: Groups) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Groups> for u16 {
+    #[inline]
     fn from(input: Groups) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Groups> for Option<u16> {
+    #[inline]
     fn from(input: Groups) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Groups> for u32 {
+    #[inline]
     fn from(input: Groups) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Groups> for Option<u32> {
+    #[inline]
     fn from(input: Groups) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Groups {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            254 => Ok(Groups::Any),
-            255 => Ok(Groups::All),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Groups {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Groups {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Groups {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Groups {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SetOfGroup {
-    Group1 = 1 << 0,
-    Group2 = 1 << 1,
-    Group3 = 1 << 2,
-    Group4 = 1 << 3,
+pub struct SetOfGroup(u8);
+impl SetOfGroup {
+    pub const GROUP1: Self = Self(1 << 0);
+    pub const GROUP2: Self = Self(1 << 1);
+    pub const GROUP3: Self = Self(1 << 2);
+    pub const GROUP4: Self = Self(1 << 3);
+}
+impl From<SetOfGroup> for Option<bool> {
+    #[inline]
+    fn from(input: SetOfGroup) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SetOfGroup> for u8 {
+    #[inline]
     fn from(input: SetOfGroup) -> Self {
-        match input {
-            SetOfGroup::Group1 => 1 << 0,
-            SetOfGroup::Group2 => 1 << 1,
-            SetOfGroup::Group3 => 1 << 2,
-            SetOfGroup::Group4 => 1 << 3,
-        }
+        input.0
     }
 }
 impl From<SetOfGroup> for Option<u8> {
+    #[inline]
     fn from(input: SetOfGroup) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SetOfGroup> for u16 {
+    #[inline]
     fn from(input: SetOfGroup) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SetOfGroup> for Option<u16> {
+    #[inline]
     fn from(input: SetOfGroup) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SetOfGroup> for u32 {
+    #[inline]
     fn from(input: SetOfGroup) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SetOfGroup> for Option<u32> {
+    #[inline]
     fn from(input: SetOfGroup) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SetOfGroup {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(SetOfGroup::Group1),
-            2 => Ok(SetOfGroup::Group2),
-            4 => Ok(SetOfGroup::Group3),
-            8 => Ok(SetOfGroup::Group4),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SetOfGroup {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SetOfGroup {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SetOfGroup {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SetOfGroup {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SetOfGroup, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SetOfGroups {
-    Any = 1 << 7,
+pub struct SetOfGroups(u8);
+impl SetOfGroups {
+    pub const ANY: Self = Self(1 << 7);
+}
+impl From<SetOfGroups> for Option<bool> {
+    #[inline]
+    fn from(input: SetOfGroups) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SetOfGroups> for u8 {
+    #[inline]
     fn from(input: SetOfGroups) -> Self {
-        match input {
-            SetOfGroups::Any => 1 << 7,
-        }
+        input.0
     }
 }
 impl From<SetOfGroups> for Option<u8> {
+    #[inline]
     fn from(input: SetOfGroups) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SetOfGroups> for u16 {
+    #[inline]
     fn from(input: SetOfGroups) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SetOfGroups> for Option<u16> {
+    #[inline]
     fn from(input: SetOfGroups) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SetOfGroups> for u32 {
+    #[inline]
     fn from(input: SetOfGroups) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SetOfGroups> for Option<u32> {
+    #[inline]
     fn from(input: SetOfGroups) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SetOfGroups {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            128 => Ok(SetOfGroups::Any),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SetOfGroups {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SetOfGroups {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SetOfGroups {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SetOfGroups {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SetOfGroups, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GroupsWrap {
-    WrapIntoRange = 0,
-    ClampIntoRange = 1 << 6,
-    RedirectIntoRange = 1 << 7,
+pub struct GroupsWrap(u8);
+impl GroupsWrap {
+    pub const WRAP_INTO_RANGE: Self = Self(0);
+    pub const CLAMP_INTO_RANGE: Self = Self(1 << 6);
+    pub const REDIRECT_INTO_RANGE: Self = Self(1 << 7);
+}
+impl From<GroupsWrap> for Option<bool> {
+    #[inline]
+    fn from(input: GroupsWrap) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<GroupsWrap> for u8 {
+    #[inline]
     fn from(input: GroupsWrap) -> Self {
-        match input {
-            GroupsWrap::WrapIntoRange => 0,
-            GroupsWrap::ClampIntoRange => 1 << 6,
-            GroupsWrap::RedirectIntoRange => 1 << 7,
-        }
+        input.0
     }
 }
 impl From<GroupsWrap> for Option<u8> {
+    #[inline]
     fn from(input: GroupsWrap) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<GroupsWrap> for u16 {
+    #[inline]
     fn from(input: GroupsWrap) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<GroupsWrap> for Option<u16> {
+    #[inline]
     fn from(input: GroupsWrap) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<GroupsWrap> for u32 {
+    #[inline]
     fn from(input: GroupsWrap) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<GroupsWrap> for Option<u32> {
+    #[inline]
     fn from(input: GroupsWrap) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for GroupsWrap {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GroupsWrap::WrapIntoRange),
-            64 => Ok(GroupsWrap::ClampIntoRange),
-            128 => Ok(GroupsWrap::RedirectIntoRange),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for GroupsWrap {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for GroupsWrap {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for GroupsWrap {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for GroupsWrap {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(GroupsWrap, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum VModsHigh {
-    M15 = 1 << 7,
-    M14 = 1 << 6,
-    M13 = 1 << 5,
-    M12 = 1 << 4,
-    M11 = 1 << 3,
-    M10 = 1 << 2,
-    M9 = 1 << 1,
-    M8 = 1 << 0,
+pub struct VModsHigh(u8);
+impl VModsHigh {
+    pub const M15: Self = Self(1 << 7);
+    pub const M14: Self = Self(1 << 6);
+    pub const M13: Self = Self(1 << 5);
+    pub const M12: Self = Self(1 << 4);
+    pub const M11: Self = Self(1 << 3);
+    pub const M10: Self = Self(1 << 2);
+    pub const M9: Self = Self(1 << 1);
+    pub const M8: Self = Self(1 << 0);
+}
+impl From<VModsHigh> for Option<bool> {
+    #[inline]
+    fn from(input: VModsHigh) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<VModsHigh> for u8 {
+    #[inline]
     fn from(input: VModsHigh) -> Self {
-        match input {
-            VModsHigh::M15 => 1 << 7,
-            VModsHigh::M14 => 1 << 6,
-            VModsHigh::M13 => 1 << 5,
-            VModsHigh::M12 => 1 << 4,
-            VModsHigh::M11 => 1 << 3,
-            VModsHigh::M10 => 1 << 2,
-            VModsHigh::M9 => 1 << 1,
-            VModsHigh::M8 => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<VModsHigh> for Option<u8> {
+    #[inline]
     fn from(input: VModsHigh) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<VModsHigh> for u16 {
+    #[inline]
     fn from(input: VModsHigh) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<VModsHigh> for Option<u16> {
+    #[inline]
     fn from(input: VModsHigh) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<VModsHigh> for u32 {
+    #[inline]
     fn from(input: VModsHigh) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<VModsHigh> for Option<u32> {
+    #[inline]
     fn from(input: VModsHigh) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for VModsHigh {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            128 => Ok(VModsHigh::M15),
-            64 => Ok(VModsHigh::M14),
-            32 => Ok(VModsHigh::M13),
-            16 => Ok(VModsHigh::M12),
-            8 => Ok(VModsHigh::M11),
-            4 => Ok(VModsHigh::M10),
-            2 => Ok(VModsHigh::M9),
-            1 => Ok(VModsHigh::M8),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for VModsHigh {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for VModsHigh {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for VModsHigh {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for VModsHigh {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(VModsHigh, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum VModsLow {
-    M7 = 1 << 7,
-    M6 = 1 << 6,
-    M5 = 1 << 5,
-    M4 = 1 << 4,
-    M3 = 1 << 3,
-    M2 = 1 << 2,
-    M1 = 1 << 1,
-    M0 = 1 << 0,
+pub struct VModsLow(u8);
+impl VModsLow {
+    pub const M7: Self = Self(1 << 7);
+    pub const M6: Self = Self(1 << 6);
+    pub const M5: Self = Self(1 << 5);
+    pub const M4: Self = Self(1 << 4);
+    pub const M3: Self = Self(1 << 3);
+    pub const M2: Self = Self(1 << 2);
+    pub const M1: Self = Self(1 << 1);
+    pub const M0: Self = Self(1 << 0);
+}
+impl From<VModsLow> for Option<bool> {
+    #[inline]
+    fn from(input: VModsLow) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<VModsLow> for u8 {
+    #[inline]
     fn from(input: VModsLow) -> Self {
-        match input {
-            VModsLow::M7 => 1 << 7,
-            VModsLow::M6 => 1 << 6,
-            VModsLow::M5 => 1 << 5,
-            VModsLow::M4 => 1 << 4,
-            VModsLow::M3 => 1 << 3,
-            VModsLow::M2 => 1 << 2,
-            VModsLow::M1 => 1 << 1,
-            VModsLow::M0 => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<VModsLow> for Option<u8> {
+    #[inline]
     fn from(input: VModsLow) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<VModsLow> for u16 {
+    #[inline]
     fn from(input: VModsLow) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<VModsLow> for Option<u16> {
+    #[inline]
     fn from(input: VModsLow) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<VModsLow> for u32 {
+    #[inline]
     fn from(input: VModsLow) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<VModsLow> for Option<u32> {
+    #[inline]
     fn from(input: VModsLow) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for VModsLow {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            128 => Ok(VModsLow::M7),
-            64 => Ok(VModsLow::M6),
-            32 => Ok(VModsLow::M5),
-            16 => Ok(VModsLow::M4),
-            8 => Ok(VModsLow::M3),
-            4 => Ok(VModsLow::M2),
-            2 => Ok(VModsLow::M1),
-            1 => Ok(VModsLow::M0),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for VModsLow {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for VModsLow {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for VModsLow {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for VModsLow {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(VModsLow, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum VMod {
-    M15 = 1 << 15,
-    M14 = 1 << 14,
-    M13 = 1 << 13,
-    M12 = 1 << 12,
-    M11 = 1 << 11,
-    M10 = 1 << 10,
-    M9 = 1 << 9,
-    M8 = 1 << 8,
-    M7 = 1 << 7,
-    M6 = 1 << 6,
-    M5 = 1 << 5,
-    M4 = 1 << 4,
-    M3 = 1 << 3,
-    M2 = 1 << 2,
-    M1 = 1 << 1,
-    M0 = 1 << 0,
+pub struct VMod(u16);
+impl VMod {
+    pub const M15: Self = Self(1 << 15);
+    pub const M14: Self = Self(1 << 14);
+    pub const M13: Self = Self(1 << 13);
+    pub const M12: Self = Self(1 << 12);
+    pub const M11: Self = Self(1 << 11);
+    pub const M10: Self = Self(1 << 10);
+    pub const M9: Self = Self(1 << 9);
+    pub const M8: Self = Self(1 << 8);
+    pub const M7: Self = Self(1 << 7);
+    pub const M6: Self = Self(1 << 6);
+    pub const M5: Self = Self(1 << 5);
+    pub const M4: Self = Self(1 << 4);
+    pub const M3: Self = Self(1 << 3);
+    pub const M2: Self = Self(1 << 2);
+    pub const M1: Self = Self(1 << 1);
+    pub const M0: Self = Self(1 << 0);
+}
+impl From<VMod> for Option<bool> {
+    #[inline]
+    fn from(input: VMod) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<VMod> for Option<u8> {
+    #[inline]
+    fn from(input: VMod) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<VMod> for u16 {
+    #[inline]
     fn from(input: VMod) -> Self {
-        match input {
-            VMod::M15 => 1 << 15,
-            VMod::M14 => 1 << 14,
-            VMod::M13 => 1 << 13,
-            VMod::M12 => 1 << 12,
-            VMod::M11 => 1 << 11,
-            VMod::M10 => 1 << 10,
-            VMod::M9 => 1 << 9,
-            VMod::M8 => 1 << 8,
-            VMod::M7 => 1 << 7,
-            VMod::M6 => 1 << 6,
-            VMod::M5 => 1 << 5,
-            VMod::M4 => 1 << 4,
-            VMod::M3 => 1 << 3,
-            VMod::M2 => 1 << 2,
-            VMod::M1 => 1 << 1,
-            VMod::M0 => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<VMod> for Option<u16> {
+    #[inline]
     fn from(input: VMod) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<VMod> for u32 {
+    #[inline]
     fn from(input: VMod) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<VMod> for Option<u32> {
+    #[inline]
     fn from(input: VMod) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for VMod {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            32768 => Ok(VMod::M15),
-            16384 => Ok(VMod::M14),
-            8192 => Ok(VMod::M13),
-            4096 => Ok(VMod::M12),
-            2048 => Ok(VMod::M11),
-            1024 => Ok(VMod::M10),
-            512 => Ok(VMod::M9),
-            256 => Ok(VMod::M8),
-            128 => Ok(VMod::M7),
-            64 => Ok(VMod::M6),
-            32 => Ok(VMod::M5),
-            16 => Ok(VMod::M4),
-            8 => Ok(VMod::M3),
-            4 => Ok(VMod::M2),
-            2 => Ok(VMod::M1),
-            1 => Ok(VMod::M0),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for VMod {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for VMod {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for VMod {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for VMod {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(VMod, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Explicit {
-    VModMap = 1 << 7,
-    Behavior = 1 << 6,
-    AutoRepeat = 1 << 5,
-    Interpret = 1 << 4,
-    KeyType4 = 1 << 3,
-    KeyType3 = 1 << 2,
-    KeyType2 = 1 << 1,
-    KeyType1 = 1 << 0,
+pub struct Explicit(u8);
+impl Explicit {
+    pub const V_MOD_MAP: Self = Self(1 << 7);
+    pub const BEHAVIOR: Self = Self(1 << 6);
+    pub const AUTO_REPEAT: Self = Self(1 << 5);
+    pub const INTERPRET: Self = Self(1 << 4);
+    pub const KEY_TYPE4: Self = Self(1 << 3);
+    pub const KEY_TYPE3: Self = Self(1 << 2);
+    pub const KEY_TYPE2: Self = Self(1 << 1);
+    pub const KEY_TYPE1: Self = Self(1 << 0);
+}
+impl From<Explicit> for Option<bool> {
+    #[inline]
+    fn from(input: Explicit) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Explicit> for u8 {
+    #[inline]
     fn from(input: Explicit) -> Self {
-        match input {
-            Explicit::VModMap => 1 << 7,
-            Explicit::Behavior => 1 << 6,
-            Explicit::AutoRepeat => 1 << 5,
-            Explicit::Interpret => 1 << 4,
-            Explicit::KeyType4 => 1 << 3,
-            Explicit::KeyType3 => 1 << 2,
-            Explicit::KeyType2 => 1 << 1,
-            Explicit::KeyType1 => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<Explicit> for Option<u8> {
+    #[inline]
     fn from(input: Explicit) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Explicit> for u16 {
+    #[inline]
     fn from(input: Explicit) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Explicit> for Option<u16> {
+    #[inline]
     fn from(input: Explicit) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Explicit> for u32 {
+    #[inline]
     fn from(input: Explicit) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Explicit> for Option<u32> {
+    #[inline]
     fn from(input: Explicit) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Explicit {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            128 => Ok(Explicit::VModMap),
-            64 => Ok(Explicit::Behavior),
-            32 => Ok(Explicit::AutoRepeat),
-            16 => Ok(Explicit::Interpret),
-            8 => Ok(Explicit::KeyType4),
-            4 => Ok(Explicit::KeyType3),
-            2 => Ok(Explicit::KeyType2),
-            1 => Ok(Explicit::KeyType1),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Explicit {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Explicit {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Explicit {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Explicit {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(Explicit, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SymInterpretMatch {
-    NoneOf = 0,
-    AnyOfOrNone = 1,
-    AnyOf = 2,
-    AllOf = 3,
-    Exactly = 4,
+pub struct SymInterpretMatch(u8);
+impl SymInterpretMatch {
+    pub const NONE_OF: Self = Self(0);
+    pub const ANY_OF_OR_NONE: Self = Self(1);
+    pub const ANY_OF: Self = Self(2);
+    pub const ALL_OF: Self = Self(3);
+    pub const EXACTLY: Self = Self(4);
+}
+impl From<SymInterpretMatch> for Option<bool> {
+    #[inline]
+    fn from(input: SymInterpretMatch) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SymInterpretMatch> for u8 {
+    #[inline]
     fn from(input: SymInterpretMatch) -> Self {
-        match input {
-            SymInterpretMatch::NoneOf => 0,
-            SymInterpretMatch::AnyOfOrNone => 1,
-            SymInterpretMatch::AnyOf => 2,
-            SymInterpretMatch::AllOf => 3,
-            SymInterpretMatch::Exactly => 4,
-        }
+        input.0
     }
 }
 impl From<SymInterpretMatch> for Option<u8> {
+    #[inline]
     fn from(input: SymInterpretMatch) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SymInterpretMatch> for u16 {
+    #[inline]
     fn from(input: SymInterpretMatch) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SymInterpretMatch> for Option<u16> {
+    #[inline]
     fn from(input: SymInterpretMatch) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SymInterpretMatch> for u32 {
+    #[inline]
     fn from(input: SymInterpretMatch) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SymInterpretMatch> for Option<u32> {
+    #[inline]
     fn from(input: SymInterpretMatch) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SymInterpretMatch {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SymInterpretMatch::NoneOf),
-            1 => Ok(SymInterpretMatch::AnyOfOrNone),
-            2 => Ok(SymInterpretMatch::AnyOf),
-            3 => Ok(SymInterpretMatch::AllOf),
-            4 => Ok(SymInterpretMatch::Exactly),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SymInterpretMatch {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SymInterpretMatch {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SymInterpretMatch {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SymInterpretMatch {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SymInterpMatch {
-    LevelOneOnly = 1 << 7,
-    OpMask = 127,
+pub struct SymInterpMatch(u8);
+impl SymInterpMatch {
+    pub const LEVEL_ONE_ONLY: Self = Self(1 << 7);
+    pub const OP_MASK: Self = Self(127);
+}
+impl From<SymInterpMatch> for Option<bool> {
+    #[inline]
+    fn from(input: SymInterpMatch) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SymInterpMatch> for u8 {
+    #[inline]
     fn from(input: SymInterpMatch) -> Self {
-        match input {
-            SymInterpMatch::LevelOneOnly => 1 << 7,
-            SymInterpMatch::OpMask => 127,
-        }
+        input.0
     }
 }
 impl From<SymInterpMatch> for Option<u8> {
+    #[inline]
     fn from(input: SymInterpMatch) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SymInterpMatch> for u16 {
+    #[inline]
     fn from(input: SymInterpMatch) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SymInterpMatch> for Option<u16> {
+    #[inline]
     fn from(input: SymInterpMatch) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SymInterpMatch> for u32 {
+    #[inline]
     fn from(input: SymInterpMatch) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SymInterpMatch> for Option<u32> {
+    #[inline]
     fn from(input: SymInterpMatch) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SymInterpMatch {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            128 => Ok(SymInterpMatch::LevelOneOnly),
-            127 => Ok(SymInterpMatch::OpMask),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SymInterpMatch {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SymInterpMatch {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SymInterpMatch {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SymInterpMatch {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum IMFlag {
-    NoExplicit = 1 << 7,
-    NoAutomatic = 1 << 6,
-    LEDDrivesKB = 1 << 5,
+pub struct IMFlag(u8);
+impl IMFlag {
+    pub const NO_EXPLICIT: Self = Self(1 << 7);
+    pub const NO_AUTOMATIC: Self = Self(1 << 6);
+    pub const LED_DRIVES_KB: Self = Self(1 << 5);
+}
+impl From<IMFlag> for Option<bool> {
+    #[inline]
+    fn from(input: IMFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<IMFlag> for u8 {
+    #[inline]
     fn from(input: IMFlag) -> Self {
-        match input {
-            IMFlag::NoExplicit => 1 << 7,
-            IMFlag::NoAutomatic => 1 << 6,
-            IMFlag::LEDDrivesKB => 1 << 5,
-        }
+        input.0
     }
 }
 impl From<IMFlag> for Option<u8> {
+    #[inline]
     fn from(input: IMFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<IMFlag> for u16 {
+    #[inline]
     fn from(input: IMFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<IMFlag> for Option<u16> {
+    #[inline]
     fn from(input: IMFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<IMFlag> for u32 {
+    #[inline]
     fn from(input: IMFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<IMFlag> for Option<u32> {
+    #[inline]
     fn from(input: IMFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for IMFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            128 => Ok(IMFlag::NoExplicit),
-            64 => Ok(IMFlag::NoAutomatic),
-            32 => Ok(IMFlag::LEDDrivesKB),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for IMFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for IMFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for IMFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for IMFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(IMFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum IMModsWhich {
-    UseCompat = 1 << 4,
-    UseEffective = 1 << 3,
-    UseLocked = 1 << 2,
-    UseLatched = 1 << 1,
-    UseBase = 1 << 0,
+pub struct IMModsWhich(u8);
+impl IMModsWhich {
+    pub const USE_COMPAT: Self = Self(1 << 4);
+    pub const USE_EFFECTIVE: Self = Self(1 << 3);
+    pub const USE_LOCKED: Self = Self(1 << 2);
+    pub const USE_LATCHED: Self = Self(1 << 1);
+    pub const USE_BASE: Self = Self(1 << 0);
+}
+impl From<IMModsWhich> for Option<bool> {
+    #[inline]
+    fn from(input: IMModsWhich) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<IMModsWhich> for u8 {
+    #[inline]
     fn from(input: IMModsWhich) -> Self {
-        match input {
-            IMModsWhich::UseCompat => 1 << 4,
-            IMModsWhich::UseEffective => 1 << 3,
-            IMModsWhich::UseLocked => 1 << 2,
-            IMModsWhich::UseLatched => 1 << 1,
-            IMModsWhich::UseBase => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<IMModsWhich> for Option<u8> {
+    #[inline]
     fn from(input: IMModsWhich) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<IMModsWhich> for u16 {
+    #[inline]
     fn from(input: IMModsWhich) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<IMModsWhich> for Option<u16> {
+    #[inline]
     fn from(input: IMModsWhich) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<IMModsWhich> for u32 {
+    #[inline]
     fn from(input: IMModsWhich) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<IMModsWhich> for Option<u32> {
+    #[inline]
     fn from(input: IMModsWhich) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for IMModsWhich {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            16 => Ok(IMModsWhich::UseCompat),
-            8 => Ok(IMModsWhich::UseEffective),
-            4 => Ok(IMModsWhich::UseLocked),
-            2 => Ok(IMModsWhich::UseLatched),
-            1 => Ok(IMModsWhich::UseBase),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for IMModsWhich {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for IMModsWhich {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for IMModsWhich {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for IMModsWhich {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(IMModsWhich, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum IMGroupsWhich {
-    UseCompat = 1 << 4,
-    UseEffective = 1 << 3,
-    UseLocked = 1 << 2,
-    UseLatched = 1 << 1,
-    UseBase = 1 << 0,
+pub struct IMGroupsWhich(u8);
+impl IMGroupsWhich {
+    pub const USE_COMPAT: Self = Self(1 << 4);
+    pub const USE_EFFECTIVE: Self = Self(1 << 3);
+    pub const USE_LOCKED: Self = Self(1 << 2);
+    pub const USE_LATCHED: Self = Self(1 << 1);
+    pub const USE_BASE: Self = Self(1 << 0);
+}
+impl From<IMGroupsWhich> for Option<bool> {
+    #[inline]
+    fn from(input: IMGroupsWhich) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<IMGroupsWhich> for u8 {
+    #[inline]
     fn from(input: IMGroupsWhich) -> Self {
-        match input {
-            IMGroupsWhich::UseCompat => 1 << 4,
-            IMGroupsWhich::UseEffective => 1 << 3,
-            IMGroupsWhich::UseLocked => 1 << 2,
-            IMGroupsWhich::UseLatched => 1 << 1,
-            IMGroupsWhich::UseBase => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<IMGroupsWhich> for Option<u8> {
+    #[inline]
     fn from(input: IMGroupsWhich) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<IMGroupsWhich> for u16 {
+    #[inline]
     fn from(input: IMGroupsWhich) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<IMGroupsWhich> for Option<u16> {
+    #[inline]
     fn from(input: IMGroupsWhich) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<IMGroupsWhich> for u32 {
+    #[inline]
     fn from(input: IMGroupsWhich) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<IMGroupsWhich> for Option<u32> {
+    #[inline]
     fn from(input: IMGroupsWhich) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for IMGroupsWhich {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            16 => Ok(IMGroupsWhich::UseCompat),
-            8 => Ok(IMGroupsWhich::UseEffective),
-            4 => Ok(IMGroupsWhich::UseLocked),
-            2 => Ok(IMGroupsWhich::UseLatched),
-            1 => Ok(IMGroupsWhich::UseBase),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for IMGroupsWhich {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for IMGroupsWhich {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for IMGroupsWhich {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for IMGroupsWhich {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(IMGroupsWhich, u8);
@@ -2089,10 +2363,10 @@ impl TryParse for IndicatorMap {
         let (real_mods, remaining) = u8::try_parse(remaining)?;
         let (vmods, remaining) = u16::try_parse(remaining)?;
         let (ctrls, remaining) = u32::try_parse(remaining)?;
-        let flags = flags.try_into()?;
-        let which_groups = which_groups.try_into()?;
-        let groups = groups.try_into()?;
-        let which_mods = which_mods.try_into()?;
+        let flags = flags.into();
+        let which_groups = which_groups.into();
+        let groups = groups.into();
+        let which_mods = which_mods.into();
         let result = IndicatorMap { flags, which_groups, groups, which_mods, mods, real_mods, vmods, ctrls };
         Ok((result, remaining))
     }
@@ -2106,10 +2380,10 @@ impl TryFrom<&[u8]> for IndicatorMap {
 impl Serialize for IndicatorMap {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
-        let flags_bytes = u8::from(self.flags).serialize();
-        let which_groups_bytes = u8::from(self.which_groups).serialize();
-        let groups_bytes = u8::from(self.groups).serialize();
-        let which_mods_bytes = u8::from(self.which_mods).serialize();
+        let flags_bytes = Option::<u8>::from(self.flags).unwrap().serialize();
+        let which_groups_bytes = Option::<u8>::from(self.which_groups).unwrap().serialize();
+        let groups_bytes = Option::<u8>::from(self.groups).unwrap().serialize();
+        let which_mods_bytes = Option::<u8>::from(self.which_mods).unwrap().serialize();
         let mods_bytes = self.mods.serialize();
         let real_mods_bytes = self.real_mods.serialize();
         let vmods_bytes = self.vmods.serialize();
@@ -2131,10 +2405,10 @@ impl Serialize for IndicatorMap {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        u8::from(self.flags).serialize_into(bytes);
-        u8::from(self.which_groups).serialize_into(bytes);
-        u8::from(self.groups).serialize_into(bytes);
-        u8::from(self.which_mods).serialize_into(bytes);
+        Option::<u8>::from(self.flags).unwrap().serialize_into(bytes);
+        Option::<u8>::from(self.which_groups).unwrap().serialize_into(bytes);
+        Option::<u8>::from(self.groups).unwrap().serialize_into(bytes);
+        Option::<u8>::from(self.which_mods).unwrap().serialize_into(bytes);
         self.mods.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
         self.vmods.serialize_into(bytes);
@@ -2143,377 +2417,409 @@ impl Serialize for IndicatorMap {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CMDetail {
-    SymInterp = 1 << 0,
-    GroupCompat = 1 << 1,
+pub struct CMDetail(u8);
+impl CMDetail {
+    pub const SYM_INTERP: Self = Self(1 << 0);
+    pub const GROUP_COMPAT: Self = Self(1 << 1);
+}
+impl From<CMDetail> for Option<bool> {
+    #[inline]
+    fn from(input: CMDetail) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<CMDetail> for u8 {
+    #[inline]
     fn from(input: CMDetail) -> Self {
-        match input {
-            CMDetail::SymInterp => 1 << 0,
-            CMDetail::GroupCompat => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<CMDetail> for Option<u8> {
+    #[inline]
     fn from(input: CMDetail) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CMDetail> for u16 {
+    #[inline]
     fn from(input: CMDetail) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CMDetail> for Option<u16> {
+    #[inline]
     fn from(input: CMDetail) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CMDetail> for u32 {
+    #[inline]
     fn from(input: CMDetail) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CMDetail> for Option<u32> {
+    #[inline]
     fn from(input: CMDetail) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CMDetail {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(CMDetail::SymInterp),
-            2 => Ok(CMDetail::GroupCompat),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CMDetail {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for CMDetail {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CMDetail {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CMDetail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(CMDetail, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum NameDetail {
-    Keycodes = 1 << 0,
-    Geometry = 1 << 1,
-    Symbols = 1 << 2,
-    PhysSymbols = 1 << 3,
-    Types = 1 << 4,
-    Compat = 1 << 5,
-    KeyTypeNames = 1 << 6,
-    KTLevelNames = 1 << 7,
-    IndicatorNames = 1 << 8,
-    KeyNames = 1 << 9,
-    KeyAliases = 1 << 10,
-    VirtualModNames = 1 << 11,
-    GroupNames = 1 << 12,
-    RGNames = 1 << 13,
+pub struct NameDetail(u16);
+impl NameDetail {
+    pub const KEYCODES: Self = Self(1 << 0);
+    pub const GEOMETRY: Self = Self(1 << 1);
+    pub const SYMBOLS: Self = Self(1 << 2);
+    pub const PHYS_SYMBOLS: Self = Self(1 << 3);
+    pub const TYPES: Self = Self(1 << 4);
+    pub const COMPAT: Self = Self(1 << 5);
+    pub const KEY_TYPE_NAMES: Self = Self(1 << 6);
+    pub const KT_LEVEL_NAMES: Self = Self(1 << 7);
+    pub const INDICATOR_NAMES: Self = Self(1 << 8);
+    pub const KEY_NAMES: Self = Self(1 << 9);
+    pub const KEY_ALIASES: Self = Self(1 << 10);
+    pub const VIRTUAL_MOD_NAMES: Self = Self(1 << 11);
+    pub const GROUP_NAMES: Self = Self(1 << 12);
+    pub const RG_NAMES: Self = Self(1 << 13);
+}
+impl From<NameDetail> for Option<bool> {
+    #[inline]
+    fn from(input: NameDetail) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<NameDetail> for Option<u8> {
+    #[inline]
+    fn from(input: NameDetail) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<NameDetail> for u16 {
+    #[inline]
     fn from(input: NameDetail) -> Self {
-        match input {
-            NameDetail::Keycodes => 1 << 0,
-            NameDetail::Geometry => 1 << 1,
-            NameDetail::Symbols => 1 << 2,
-            NameDetail::PhysSymbols => 1 << 3,
-            NameDetail::Types => 1 << 4,
-            NameDetail::Compat => 1 << 5,
-            NameDetail::KeyTypeNames => 1 << 6,
-            NameDetail::KTLevelNames => 1 << 7,
-            NameDetail::IndicatorNames => 1 << 8,
-            NameDetail::KeyNames => 1 << 9,
-            NameDetail::KeyAliases => 1 << 10,
-            NameDetail::VirtualModNames => 1 << 11,
-            NameDetail::GroupNames => 1 << 12,
-            NameDetail::RGNames => 1 << 13,
-        }
+        input.0
     }
 }
 impl From<NameDetail> for Option<u16> {
+    #[inline]
     fn from(input: NameDetail) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<NameDetail> for u32 {
+    #[inline]
     fn from(input: NameDetail) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<NameDetail> for Option<u32> {
+    #[inline]
     fn from(input: NameDetail) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for NameDetail {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(NameDetail::Keycodes),
-            2 => Ok(NameDetail::Geometry),
-            4 => Ok(NameDetail::Symbols),
-            8 => Ok(NameDetail::PhysSymbols),
-            16 => Ok(NameDetail::Types),
-            32 => Ok(NameDetail::Compat),
-            64 => Ok(NameDetail::KeyTypeNames),
-            128 => Ok(NameDetail::KTLevelNames),
-            256 => Ok(NameDetail::IndicatorNames),
-            512 => Ok(NameDetail::KeyNames),
-            1024 => Ok(NameDetail::KeyAliases),
-            2048 => Ok(NameDetail::VirtualModNames),
-            4096 => Ok(NameDetail::GroupNames),
-            8192 => Ok(NameDetail::RGNames),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for NameDetail {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for NameDetail {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for NameDetail {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for NameDetail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(NameDetail, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GBNDetail {
-    Types = 1 << 0,
-    CompatMap = 1 << 1,
-    ClientSymbols = 1 << 2,
-    ServerSymbols = 1 << 3,
-    IndicatorMaps = 1 << 4,
-    KeyNames = 1 << 5,
-    Geometry = 1 << 6,
-    OtherNames = 1 << 7,
+pub struct GBNDetail(u8);
+impl GBNDetail {
+    pub const TYPES: Self = Self(1 << 0);
+    pub const COMPAT_MAP: Self = Self(1 << 1);
+    pub const CLIENT_SYMBOLS: Self = Self(1 << 2);
+    pub const SERVER_SYMBOLS: Self = Self(1 << 3);
+    pub const INDICATOR_MAPS: Self = Self(1 << 4);
+    pub const KEY_NAMES: Self = Self(1 << 5);
+    pub const GEOMETRY: Self = Self(1 << 6);
+    pub const OTHER_NAMES: Self = Self(1 << 7);
+}
+impl From<GBNDetail> for Option<bool> {
+    #[inline]
+    fn from(input: GBNDetail) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<GBNDetail> for u8 {
+    #[inline]
     fn from(input: GBNDetail) -> Self {
-        match input {
-            GBNDetail::Types => 1 << 0,
-            GBNDetail::CompatMap => 1 << 1,
-            GBNDetail::ClientSymbols => 1 << 2,
-            GBNDetail::ServerSymbols => 1 << 3,
-            GBNDetail::IndicatorMaps => 1 << 4,
-            GBNDetail::KeyNames => 1 << 5,
-            GBNDetail::Geometry => 1 << 6,
-            GBNDetail::OtherNames => 1 << 7,
-        }
+        input.0
     }
 }
 impl From<GBNDetail> for Option<u8> {
+    #[inline]
     fn from(input: GBNDetail) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<GBNDetail> for u16 {
+    #[inline]
     fn from(input: GBNDetail) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<GBNDetail> for Option<u16> {
+    #[inline]
     fn from(input: GBNDetail) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<GBNDetail> for u32 {
+    #[inline]
     fn from(input: GBNDetail) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<GBNDetail> for Option<u32> {
+    #[inline]
     fn from(input: GBNDetail) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for GBNDetail {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(GBNDetail::Types),
-            2 => Ok(GBNDetail::CompatMap),
-            4 => Ok(GBNDetail::ClientSymbols),
-            8 => Ok(GBNDetail::ServerSymbols),
-            16 => Ok(GBNDetail::IndicatorMaps),
-            32 => Ok(GBNDetail::KeyNames),
-            64 => Ok(GBNDetail::Geometry),
-            128 => Ok(GBNDetail::OtherNames),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for GBNDetail {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for GBNDetail {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for GBNDetail {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for GBNDetail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(GBNDetail, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum XIFeature {
-    Keyboards = 1 << 0,
-    ButtonActions = 1 << 1,
-    IndicatorNames = 1 << 2,
-    IndicatorMaps = 1 << 3,
-    IndicatorState = 1 << 4,
+pub struct XIFeature(u8);
+impl XIFeature {
+    pub const KEYBOARDS: Self = Self(1 << 0);
+    pub const BUTTON_ACTIONS: Self = Self(1 << 1);
+    pub const INDICATOR_NAMES: Self = Self(1 << 2);
+    pub const INDICATOR_MAPS: Self = Self(1 << 3);
+    pub const INDICATOR_STATE: Self = Self(1 << 4);
+}
+impl From<XIFeature> for Option<bool> {
+    #[inline]
+    fn from(input: XIFeature) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<XIFeature> for u8 {
+    #[inline]
     fn from(input: XIFeature) -> Self {
-        match input {
-            XIFeature::Keyboards => 1 << 0,
-            XIFeature::ButtonActions => 1 << 1,
-            XIFeature::IndicatorNames => 1 << 2,
-            XIFeature::IndicatorMaps => 1 << 3,
-            XIFeature::IndicatorState => 1 << 4,
-        }
+        input.0
     }
 }
 impl From<XIFeature> for Option<u8> {
+    #[inline]
     fn from(input: XIFeature) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<XIFeature> for u16 {
+    #[inline]
     fn from(input: XIFeature) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<XIFeature> for Option<u16> {
+    #[inline]
     fn from(input: XIFeature) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<XIFeature> for u32 {
+    #[inline]
     fn from(input: XIFeature) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<XIFeature> for Option<u32> {
+    #[inline]
     fn from(input: XIFeature) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for XIFeature {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(XIFeature::Keyboards),
-            2 => Ok(XIFeature::ButtonActions),
-            4 => Ok(XIFeature::IndicatorNames),
-            8 => Ok(XIFeature::IndicatorMaps),
-            16 => Ok(XIFeature::IndicatorState),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for XIFeature {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for XIFeature {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for XIFeature {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for XIFeature {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(XIFeature, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PerClientFlag {
-    DetectableAutoRepeat = 1 << 0,
-    GrabsUseXKBState = 1 << 1,
-    AutoResetControls = 1 << 2,
-    LookupStateWhenGrabbed = 1 << 3,
-    SendEventUsesXKBState = 1 << 4,
+pub struct PerClientFlag(u8);
+impl PerClientFlag {
+    pub const DETECTABLE_AUTO_REPEAT: Self = Self(1 << 0);
+    pub const GRABS_USE_XKB_STATE: Self = Self(1 << 1);
+    pub const AUTO_RESET_CONTROLS: Self = Self(1 << 2);
+    pub const LOOKUP_STATE_WHEN_GRABBED: Self = Self(1 << 3);
+    pub const SEND_EVENT_USES_XKB_STATE: Self = Self(1 << 4);
+}
+impl From<PerClientFlag> for Option<bool> {
+    #[inline]
+    fn from(input: PerClientFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<PerClientFlag> for u8 {
+    #[inline]
     fn from(input: PerClientFlag) -> Self {
-        match input {
-            PerClientFlag::DetectableAutoRepeat => 1 << 0,
-            PerClientFlag::GrabsUseXKBState => 1 << 1,
-            PerClientFlag::AutoResetControls => 1 << 2,
-            PerClientFlag::LookupStateWhenGrabbed => 1 << 3,
-            PerClientFlag::SendEventUsesXKBState => 1 << 4,
-        }
+        input.0
     }
 }
 impl From<PerClientFlag> for Option<u8> {
+    #[inline]
     fn from(input: PerClientFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PerClientFlag> for u16 {
+    #[inline]
     fn from(input: PerClientFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PerClientFlag> for Option<u16> {
+    #[inline]
     fn from(input: PerClientFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PerClientFlag> for u32 {
+    #[inline]
     fn from(input: PerClientFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PerClientFlag> for Option<u32> {
+    #[inline]
     fn from(input: PerClientFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PerClientFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(PerClientFlag::DetectableAutoRepeat),
-            2 => Ok(PerClientFlag::GrabsUseXKBState),
-            4 => Ok(PerClientFlag::AutoResetControls),
-            8 => Ok(PerClientFlag::LookupStateWhenGrabbed),
-            16 => Ok(PerClientFlag::SendEventUsesXKBState),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for PerClientFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for PerClientFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PerClientFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PerClientFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(PerClientFlag, u8);
@@ -3169,86 +3475,86 @@ impl From<u8> for Behavior {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum BehaviorType {
-    Default = 0,
-    Lock = 1,
-    RadioGroup = 2,
-    Overlay1 = 3,
-    Overlay2 = 4,
-    PermamentLock = 129,
-    PermamentRadioGroup = 130,
-    PermamentOverlay1 = 131,
-    PermamentOverlay2 = 132,
+pub struct BehaviorType(u8);
+impl BehaviorType {
+    pub const DEFAULT: Self = Self(0);
+    pub const LOCK: Self = Self(1);
+    pub const RADIO_GROUP: Self = Self(2);
+    pub const OVERLAY1: Self = Self(3);
+    pub const OVERLAY2: Self = Self(4);
+    pub const PERMAMENT_LOCK: Self = Self(129);
+    pub const PERMAMENT_RADIO_GROUP: Self = Self(130);
+    pub const PERMAMENT_OVERLAY1: Self = Self(131);
+    pub const PERMAMENT_OVERLAY2: Self = Self(132);
+}
+impl From<BehaviorType> for Option<bool> {
+    #[inline]
+    fn from(input: BehaviorType) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<BehaviorType> for u8 {
+    #[inline]
     fn from(input: BehaviorType) -> Self {
-        match input {
-            BehaviorType::Default => 0,
-            BehaviorType::Lock => 1,
-            BehaviorType::RadioGroup => 2,
-            BehaviorType::Overlay1 => 3,
-            BehaviorType::Overlay2 => 4,
-            BehaviorType::PermamentLock => 129,
-            BehaviorType::PermamentRadioGroup => 130,
-            BehaviorType::PermamentOverlay1 => 131,
-            BehaviorType::PermamentOverlay2 => 132,
-        }
+        input.0
     }
 }
 impl From<BehaviorType> for Option<u8> {
+    #[inline]
     fn from(input: BehaviorType) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<BehaviorType> for u16 {
+    #[inline]
     fn from(input: BehaviorType) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<BehaviorType> for Option<u16> {
+    #[inline]
     fn from(input: BehaviorType) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<BehaviorType> for u32 {
+    #[inline]
     fn from(input: BehaviorType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<BehaviorType> for Option<u32> {
+    #[inline]
     fn from(input: BehaviorType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for BehaviorType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(BehaviorType::Default),
-            1 => Ok(BehaviorType::Lock),
-            2 => Ok(BehaviorType::RadioGroup),
-            3 => Ok(BehaviorType::Overlay1),
-            4 => Ok(BehaviorType::Overlay2),
-            129 => Ok(BehaviorType::PermamentLock),
-            130 => Ok(BehaviorType::PermamentRadioGroup),
-            131 => Ok(BehaviorType::PermamentOverlay1),
-            132 => Ok(BehaviorType::PermamentOverlay2),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for BehaviorType {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for BehaviorType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for BehaviorType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for BehaviorType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -3887,74 +4193,82 @@ impl Row {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum DoodadType {
-    Outline = 1,
-    Solid = 2,
-    Text = 3,
-    Indicator = 4,
-    Logo = 5,
+pub struct DoodadType(u8);
+impl DoodadType {
+    pub const OUTLINE: Self = Self(1);
+    pub const SOLID: Self = Self(2);
+    pub const TEXT: Self = Self(3);
+    pub const INDICATOR: Self = Self(4);
+    pub const LOGO: Self = Self(5);
+}
+impl From<DoodadType> for Option<bool> {
+    #[inline]
+    fn from(input: DoodadType) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<DoodadType> for u8 {
+    #[inline]
     fn from(input: DoodadType) -> Self {
-        match input {
-            DoodadType::Outline => 1,
-            DoodadType::Solid => 2,
-            DoodadType::Text => 3,
-            DoodadType::Indicator => 4,
-            DoodadType::Logo => 5,
-        }
+        input.0
     }
 }
 impl From<DoodadType> for Option<u8> {
+    #[inline]
     fn from(input: DoodadType) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<DoodadType> for u16 {
+    #[inline]
     fn from(input: DoodadType) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<DoodadType> for Option<u16> {
+    #[inline]
     fn from(input: DoodadType) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<DoodadType> for u32 {
+    #[inline]
     fn from(input: DoodadType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<DoodadType> for Option<u32> {
+    #[inline]
     fn from(input: DoodadType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for DoodadType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(DoodadType::Outline),
-            2 => Ok(DoodadType::Solid),
-            3 => Ok(DoodadType::Text),
-            4 => Ok(DoodadType::Indicator),
-            5 => Ok(DoodadType::Logo),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for DoodadType {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for DoodadType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for DoodadType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for DoodadType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -4037,7 +4351,7 @@ impl TryParse for DeviceLedInfo {
         let (state, remaining) = u32::try_parse(remaining)?;
         let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, names_present.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, maps_present.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let led_class = led_class.try_into()?;
+        let led_class = led_class.into();
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
     }
@@ -4057,7 +4371,7 @@ impl Serialize for DeviceLedInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        LedClassSpec::from(self.led_class).serialize_into(bytes);
+        Option::<LedClassSpec>::from(self.led_class).unwrap().serialize_into(bytes);
         self.led_id.serialize_into(bytes);
         self.names_present.serialize_into(bytes);
         self.maps_present.serialize_into(bytes);
@@ -4071,68 +4385,80 @@ impl Serialize for DeviceLedInfo {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Error {
-    BadDevice = 255,
-    BadClass = 254,
-    BadId = 253,
+pub struct Error(u8);
+impl Error {
+    pub const BAD_DEVICE: Self = Self(255);
+    pub const BAD_CLASS: Self = Self(254);
+    pub const BAD_ID: Self = Self(253);
+}
+impl From<Error> for Option<bool> {
+    #[inline]
+    fn from(input: Error) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Error> for u8 {
+    #[inline]
     fn from(input: Error) -> Self {
-        match input {
-            Error::BadDevice => 255,
-            Error::BadClass => 254,
-            Error::BadId => 253,
-        }
+        input.0
     }
 }
 impl From<Error> for Option<u8> {
+    #[inline]
     fn from(input: Error) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Error> for u16 {
+    #[inline]
     fn from(input: Error) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Error> for Option<u16> {
+    #[inline]
     fn from(input: Error) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Error> for u32 {
+    #[inline]
     fn from(input: Error) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Error> for Option<u32> {
+    #[inline]
     fn from(input: Error) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Error {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            255 => Ok(Error::BadDevice),
-            254 => Ok(Error::BadClass),
-            253 => Ok(Error::BadId),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Error {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Error {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Error {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Error {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -4140,167 +4466,178 @@ impl TryFrom<u32> for Error {
 pub const KEYBOARD_ERROR: u8 = 0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum SA {
-    ClearLocks,
-    LatchToLock,
-    UseModMapMods,
-    GroupAbsolute,
+pub struct SA(u8);
+impl SA {
+    pub const CLEAR_LOCKS: Self = Self(1 << 0);
+    pub const LATCH_TO_LOCK: Self = Self(1 << 1);
+    pub const USE_MOD_MAP_MODS: Self = Self(1 << 2);
+    pub const GROUP_ABSOLUTE: Self = Self(1 << 2);
 }
-impl From<SA> for u8 {
+impl From<SA> for Option<bool> {
+    #[inline]
     fn from(input: SA) -> Self {
-        match input {
-            SA::ClearLocks => 1 << 0,
-            SA::LatchToLock => 1 << 1,
-            SA::UseModMapMods => 1 << 2,
-            SA::GroupAbsolute => 1 << 2,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
-impl From<SA> for Option<u8> {
+impl From<SA> for u8 {
+    #[inline]
     fn from(input: SA) -> Self {
-        Some(u8::from(input))
+        input.0
+    }
+}
+impl From<SA> for Option<u8> {
+    #[inline]
+    fn from(input: SA) -> Self {
+        Some(input.0)
     }
 }
 impl From<SA> for u16 {
+    #[inline]
     fn from(input: SA) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SA> for Option<u16> {
+    #[inline]
     fn from(input: SA) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SA> for u32 {
+    #[inline]
     fn from(input: SA) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SA> for Option<u32> {
+    #[inline]
     fn from(input: SA) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
+    }
+}
+impl From<bool> for SA {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SA {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
+    }
+}
+impl TryFrom<u16> for SA {
+    type Error = ParseError;
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
+    }
+}
+impl TryFrom<u32> for SA {
+    type Error = ParseError;
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SA, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SAType {
-    NoAction = 0,
-    SetMods = 1,
-    LatchMods = 2,
-    LockMods = 3,
-    SetGroup = 4,
-    LatchGroup = 5,
-    LockGroup = 6,
-    MovePtr = 7,
-    PtrBtn = 8,
-    LockPtrBtn = 9,
-    SetPtrDflt = 10,
-    ISOLock = 11,
-    Terminate = 12,
-    SwitchScreen = 13,
-    SetControls = 14,
-    LockControls = 15,
-    ActionMessage = 16,
-    RedirectKey = 17,
-    DeviceBtn = 18,
-    LockDeviceBtn = 19,
-    DeviceValuator = 20,
+pub struct SAType(u8);
+impl SAType {
+    pub const NO_ACTION: Self = Self(0);
+    pub const SET_MODS: Self = Self(1);
+    pub const LATCH_MODS: Self = Self(2);
+    pub const LOCK_MODS: Self = Self(3);
+    pub const SET_GROUP: Self = Self(4);
+    pub const LATCH_GROUP: Self = Self(5);
+    pub const LOCK_GROUP: Self = Self(6);
+    pub const MOVE_PTR: Self = Self(7);
+    pub const PTR_BTN: Self = Self(8);
+    pub const LOCK_PTR_BTN: Self = Self(9);
+    pub const SET_PTR_DFLT: Self = Self(10);
+    pub const ISO_LOCK: Self = Self(11);
+    pub const TERMINATE: Self = Self(12);
+    pub const SWITCH_SCREEN: Self = Self(13);
+    pub const SET_CONTROLS: Self = Self(14);
+    pub const LOCK_CONTROLS: Self = Self(15);
+    pub const ACTION_MESSAGE: Self = Self(16);
+    pub const REDIRECT_KEY: Self = Self(17);
+    pub const DEVICE_BTN: Self = Self(18);
+    pub const LOCK_DEVICE_BTN: Self = Self(19);
+    pub const DEVICE_VALUATOR: Self = Self(20);
+}
+impl From<SAType> for Option<bool> {
+    #[inline]
+    fn from(input: SAType) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SAType> for u8 {
+    #[inline]
     fn from(input: SAType) -> Self {
-        match input {
-            SAType::NoAction => 0,
-            SAType::SetMods => 1,
-            SAType::LatchMods => 2,
-            SAType::LockMods => 3,
-            SAType::SetGroup => 4,
-            SAType::LatchGroup => 5,
-            SAType::LockGroup => 6,
-            SAType::MovePtr => 7,
-            SAType::PtrBtn => 8,
-            SAType::LockPtrBtn => 9,
-            SAType::SetPtrDflt => 10,
-            SAType::ISOLock => 11,
-            SAType::Terminate => 12,
-            SAType::SwitchScreen => 13,
-            SAType::SetControls => 14,
-            SAType::LockControls => 15,
-            SAType::ActionMessage => 16,
-            SAType::RedirectKey => 17,
-            SAType::DeviceBtn => 18,
-            SAType::LockDeviceBtn => 19,
-            SAType::DeviceValuator => 20,
-        }
+        input.0
     }
 }
 impl From<SAType> for Option<u8> {
+    #[inline]
     fn from(input: SAType) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SAType> for u16 {
+    #[inline]
     fn from(input: SAType) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SAType> for Option<u16> {
+    #[inline]
     fn from(input: SAType) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SAType> for u32 {
+    #[inline]
     fn from(input: SAType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SAType> for Option<u32> {
+    #[inline]
     fn from(input: SAType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SAType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SAType::NoAction),
-            1 => Ok(SAType::SetMods),
-            2 => Ok(SAType::LatchMods),
-            3 => Ok(SAType::LockMods),
-            4 => Ok(SAType::SetGroup),
-            5 => Ok(SAType::LatchGroup),
-            6 => Ok(SAType::LockGroup),
-            7 => Ok(SAType::MovePtr),
-            8 => Ok(SAType::PtrBtn),
-            9 => Ok(SAType::LockPtrBtn),
-            10 => Ok(SAType::SetPtrDflt),
-            11 => Ok(SAType::ISOLock),
-            12 => Ok(SAType::Terminate),
-            13 => Ok(SAType::SwitchScreen),
-            14 => Ok(SAType::SetControls),
-            15 => Ok(SAType::LockControls),
-            16 => Ok(SAType::ActionMessage),
-            17 => Ok(SAType::RedirectKey),
-            18 => Ok(SAType::DeviceBtn),
-            19 => Ok(SAType::LockDeviceBtn),
-            20 => Ok(SAType::DeviceValuator),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SAType {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SAType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SAType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SAType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -4312,7 +4649,7 @@ impl TryParse for SANoAction {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SANoAction { type_ };
         Ok((result, remaining))
     }
@@ -4326,7 +4663,7 @@ impl TryFrom<&[u8]> for SANoAction {
 impl Serialize for SANoAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         [
             type_bytes[0],
             0,
@@ -4340,7 +4677,7 @@ impl Serialize for SANoAction {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
     }
 }
@@ -4363,7 +4700,7 @@ impl TryParse for SASetMods {
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SASetMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4377,7 +4714,7 @@ impl TryFrom<&[u8]> for SASetMods {
 impl Serialize for SASetMods {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4396,7 +4733,7 @@ impl Serialize for SASetMods {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -4422,7 +4759,7 @@ impl TryParse for SASetGroup {
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (group, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SASetGroup { type_, flags, group };
         Ok((result, remaining))
     }
@@ -4436,7 +4773,7 @@ impl TryFrom<&[u8]> for SASetGroup {
 impl Serialize for SASetGroup {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let group_bytes = self.group.serialize();
         [
@@ -4452,7 +4789,7 @@ impl Serialize for SASetGroup {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -4464,68 +4801,80 @@ pub type SALatchGroup = SASetGroup;
 pub type SALockGroup = SASetGroup;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SAMovePtrFlag {
-    NoAcceleration = 1 << 0,
-    MoveAbsoluteX = 1 << 1,
-    MoveAbsoluteY = 1 << 2,
+pub struct SAMovePtrFlag(u8);
+impl SAMovePtrFlag {
+    pub const NO_ACCELERATION: Self = Self(1 << 0);
+    pub const MOVE_ABSOLUTE_X: Self = Self(1 << 1);
+    pub const MOVE_ABSOLUTE_Y: Self = Self(1 << 2);
+}
+impl From<SAMovePtrFlag> for Option<bool> {
+    #[inline]
+    fn from(input: SAMovePtrFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SAMovePtrFlag> for u8 {
+    #[inline]
     fn from(input: SAMovePtrFlag) -> Self {
-        match input {
-            SAMovePtrFlag::NoAcceleration => 1 << 0,
-            SAMovePtrFlag::MoveAbsoluteX => 1 << 1,
-            SAMovePtrFlag::MoveAbsoluteY => 1 << 2,
-        }
+        input.0
     }
 }
 impl From<SAMovePtrFlag> for Option<u8> {
+    #[inline]
     fn from(input: SAMovePtrFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SAMovePtrFlag> for u16 {
+    #[inline]
     fn from(input: SAMovePtrFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SAMovePtrFlag> for Option<u16> {
+    #[inline]
     fn from(input: SAMovePtrFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SAMovePtrFlag> for u32 {
+    #[inline]
     fn from(input: SAMovePtrFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SAMovePtrFlag> for Option<u32> {
+    #[inline]
     fn from(input: SAMovePtrFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SAMovePtrFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(SAMovePtrFlag::NoAcceleration),
-            2 => Ok(SAMovePtrFlag::MoveAbsoluteX),
-            4 => Ok(SAMovePtrFlag::MoveAbsoluteY),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SAMovePtrFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SAMovePtrFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SAMovePtrFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SAMovePtrFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SAMovePtrFlag, u8);
@@ -4548,7 +4897,7 @@ impl TryParse for SAMovePtr {
         let (y_high, remaining) = i8::try_parse(remaining)?;
         let (y_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SAMovePtr { type_, flags, x_high, x_low, y_high, y_low };
         Ok((result, remaining))
     }
@@ -4562,7 +4911,7 @@ impl TryFrom<&[u8]> for SAMovePtr {
 impl Serialize for SAMovePtr {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let x_high_bytes = self.x_high.serialize();
         let x_low_bytes = self.x_low.serialize();
@@ -4581,7 +4930,7 @@ impl Serialize for SAMovePtr {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.x_high.serialize_into(bytes);
         self.x_low.serialize_into(bytes);
@@ -4605,7 +4954,7 @@ impl TryParse for SAPtrBtn {
         let (count, remaining) = u8::try_parse(remaining)?;
         let (button, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SAPtrBtn { type_, flags, count, button };
         Ok((result, remaining))
     }
@@ -4619,7 +4968,7 @@ impl TryFrom<&[u8]> for SAPtrBtn {
 impl Serialize for SAPtrBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
         let button_bytes = self.button.serialize();
@@ -4636,7 +4985,7 @@ impl Serialize for SAPtrBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.count.serialize_into(bytes);
         self.button.serialize_into(bytes);
@@ -4657,7 +5006,7 @@ impl TryParse for SALockPtrBtn {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (button, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SALockPtrBtn { type_, flags, button };
         Ok((result, remaining))
     }
@@ -4671,7 +5020,7 @@ impl TryFrom<&[u8]> for SALockPtrBtn {
 impl Serialize for SALockPtrBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
         [
@@ -4687,7 +5036,7 @@ impl Serialize for SALockPtrBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
@@ -4696,65 +5045,79 @@ impl Serialize for SALockPtrBtn {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SASetPtrDfltFlag {
-    DfltBtnAbsolute = 1 << 2,
-    AffectDfltButton = 1 << 0,
+pub struct SASetPtrDfltFlag(u8);
+impl SASetPtrDfltFlag {
+    pub const DFLT_BTN_ABSOLUTE: Self = Self(1 << 2);
+    pub const AFFECT_DFLT_BUTTON: Self = Self(1 << 0);
+}
+impl From<SASetPtrDfltFlag> for Option<bool> {
+    #[inline]
+    fn from(input: SASetPtrDfltFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SASetPtrDfltFlag> for u8 {
+    #[inline]
     fn from(input: SASetPtrDfltFlag) -> Self {
-        match input {
-            SASetPtrDfltFlag::DfltBtnAbsolute => 1 << 2,
-            SASetPtrDfltFlag::AffectDfltButton => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<SASetPtrDfltFlag> for Option<u8> {
+    #[inline]
     fn from(input: SASetPtrDfltFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SASetPtrDfltFlag> for u16 {
+    #[inline]
     fn from(input: SASetPtrDfltFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SASetPtrDfltFlag> for Option<u16> {
+    #[inline]
     fn from(input: SASetPtrDfltFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SASetPtrDfltFlag> for u32 {
+    #[inline]
     fn from(input: SASetPtrDfltFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SASetPtrDfltFlag> for Option<u32> {
+    #[inline]
     fn from(input: SASetPtrDfltFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SASetPtrDfltFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            4 => Ok(SASetPtrDfltFlag::DfltBtnAbsolute),
-            1 => Ok(SASetPtrDfltFlag::AffectDfltButton),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SASetPtrDfltFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SASetPtrDfltFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SASetPtrDfltFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SASetPtrDfltFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SASetPtrDfltFlag, u8);
@@ -4773,7 +5136,7 @@ impl TryParse for SASetPtrDflt {
         let (affect, remaining) = u8::try_parse(remaining)?;
         let (value, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SASetPtrDflt { type_, flags, affect, value };
         Ok((result, remaining))
     }
@@ -4787,7 +5150,7 @@ impl TryFrom<&[u8]> for SASetPtrDflt {
 impl Serialize for SASetPtrDflt {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let affect_bytes = self.affect.serialize();
         let value_bytes = self.value.serialize();
@@ -4804,7 +5167,7 @@ impl Serialize for SASetPtrDflt {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.affect.serialize_into(bytes);
         self.value.serialize_into(bytes);
@@ -4813,118 +5176,162 @@ impl Serialize for SASetPtrDflt {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum SAIsoLockFlag {
-    NoLock,
-    NoUnlock,
-    UseModMapMods,
-    GroupAbsolute,
-    ISODfltIsGroup,
+pub struct SAIsoLockFlag(u8);
+impl SAIsoLockFlag {
+    pub const NO_LOCK: Self = Self(1 << 0);
+    pub const NO_UNLOCK: Self = Self(1 << 1);
+    pub const USE_MOD_MAP_MODS: Self = Self(1 << 2);
+    pub const GROUP_ABSOLUTE: Self = Self(1 << 2);
+    pub const ISO_DFLT_IS_GROUP: Self = Self(1 << 3);
 }
-impl From<SAIsoLockFlag> for u8 {
+impl From<SAIsoLockFlag> for Option<bool> {
+    #[inline]
     fn from(input: SAIsoLockFlag) -> Self {
-        match input {
-            SAIsoLockFlag::NoLock => 1 << 0,
-            SAIsoLockFlag::NoUnlock => 1 << 1,
-            SAIsoLockFlag::UseModMapMods => 1 << 2,
-            SAIsoLockFlag::GroupAbsolute => 1 << 2,
-            SAIsoLockFlag::ISODfltIsGroup => 1 << 3,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
-impl From<SAIsoLockFlag> for Option<u8> {
+impl From<SAIsoLockFlag> for u8 {
+    #[inline]
     fn from(input: SAIsoLockFlag) -> Self {
-        Some(u8::from(input))
+        input.0
+    }
+}
+impl From<SAIsoLockFlag> for Option<u8> {
+    #[inline]
+    fn from(input: SAIsoLockFlag) -> Self {
+        Some(input.0)
     }
 }
 impl From<SAIsoLockFlag> for u16 {
+    #[inline]
     fn from(input: SAIsoLockFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SAIsoLockFlag> for Option<u16> {
+    #[inline]
     fn from(input: SAIsoLockFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SAIsoLockFlag> for u32 {
+    #[inline]
     fn from(input: SAIsoLockFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SAIsoLockFlag> for Option<u32> {
+    #[inline]
     fn from(input: SAIsoLockFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
+    }
+}
+impl From<bool> for SAIsoLockFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SAIsoLockFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
+    }
+}
+impl TryFrom<u16> for SAIsoLockFlag {
+    type Error = ParseError;
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
+    }
+}
+impl TryFrom<u32> for SAIsoLockFlag {
+    type Error = ParseError;
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SAIsoLockFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SAIsoLockNoAffect {
-    Ctrls = 1 << 3,
-    Ptr = 1 << 4,
-    Group = 1 << 5,
-    Mods = 1 << 6,
+pub struct SAIsoLockNoAffect(u8);
+impl SAIsoLockNoAffect {
+    pub const CTRLS: Self = Self(1 << 3);
+    pub const PTR: Self = Self(1 << 4);
+    pub const GROUP: Self = Self(1 << 5);
+    pub const MODS: Self = Self(1 << 6);
+}
+impl From<SAIsoLockNoAffect> for Option<bool> {
+    #[inline]
+    fn from(input: SAIsoLockNoAffect) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SAIsoLockNoAffect> for u8 {
+    #[inline]
     fn from(input: SAIsoLockNoAffect) -> Self {
-        match input {
-            SAIsoLockNoAffect::Ctrls => 1 << 3,
-            SAIsoLockNoAffect::Ptr => 1 << 4,
-            SAIsoLockNoAffect::Group => 1 << 5,
-            SAIsoLockNoAffect::Mods => 1 << 6,
-        }
+        input.0
     }
 }
 impl From<SAIsoLockNoAffect> for Option<u8> {
+    #[inline]
     fn from(input: SAIsoLockNoAffect) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SAIsoLockNoAffect> for u16 {
+    #[inline]
     fn from(input: SAIsoLockNoAffect) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SAIsoLockNoAffect> for Option<u16> {
+    #[inline]
     fn from(input: SAIsoLockNoAffect) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SAIsoLockNoAffect> for u32 {
+    #[inline]
     fn from(input: SAIsoLockNoAffect) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SAIsoLockNoAffect> for Option<u32> {
+    #[inline]
     fn from(input: SAIsoLockNoAffect) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SAIsoLockNoAffect {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            8 => Ok(SAIsoLockNoAffect::Ctrls),
-            16 => Ok(SAIsoLockNoAffect::Ptr),
-            32 => Ok(SAIsoLockNoAffect::Group),
-            64 => Ok(SAIsoLockNoAffect::Mods),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SAIsoLockNoAffect {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SAIsoLockNoAffect {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SAIsoLockNoAffect {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SAIsoLockNoAffect {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SAIsoLockNoAffect, u8);
@@ -4950,7 +5357,7 @@ impl TryParse for SAIsoLock {
         let (affect, remaining) = u8::try_parse(remaining)?;
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SAIsoLock { type_, flags, mask, real_mods, group, affect, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4964,7 +5371,7 @@ impl TryFrom<&[u8]> for SAIsoLock {
 impl Serialize for SAIsoLock {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4985,7 +5392,7 @@ impl Serialize for SAIsoLock {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -5004,7 +5411,7 @@ impl TryParse for SATerminate {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SATerminate { type_ };
         Ok((result, remaining))
     }
@@ -5018,7 +5425,7 @@ impl TryFrom<&[u8]> for SATerminate {
 impl Serialize for SATerminate {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         [
             type_bytes[0],
             0,
@@ -5032,71 +5439,85 @@ impl Serialize for SATerminate {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SwitchScreenFlag {
-    Application = 1 << 0,
-    Absolute = 1 << 2,
+pub struct SwitchScreenFlag(u8);
+impl SwitchScreenFlag {
+    pub const APPLICATION: Self = Self(1 << 0);
+    pub const ABSOLUTE: Self = Self(1 << 2);
+}
+impl From<SwitchScreenFlag> for Option<bool> {
+    #[inline]
+    fn from(input: SwitchScreenFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SwitchScreenFlag> for u8 {
+    #[inline]
     fn from(input: SwitchScreenFlag) -> Self {
-        match input {
-            SwitchScreenFlag::Application => 1 << 0,
-            SwitchScreenFlag::Absolute => 1 << 2,
-        }
+        input.0
     }
 }
 impl From<SwitchScreenFlag> for Option<u8> {
+    #[inline]
     fn from(input: SwitchScreenFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SwitchScreenFlag> for u16 {
+    #[inline]
     fn from(input: SwitchScreenFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SwitchScreenFlag> for Option<u16> {
+    #[inline]
     fn from(input: SwitchScreenFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SwitchScreenFlag> for u32 {
+    #[inline]
     fn from(input: SwitchScreenFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SwitchScreenFlag> for Option<u32> {
+    #[inline]
     fn from(input: SwitchScreenFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SwitchScreenFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(SwitchScreenFlag::Application),
-            4 => Ok(SwitchScreenFlag::Absolute),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SwitchScreenFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SwitchScreenFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SwitchScreenFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SwitchScreenFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SwitchScreenFlag, u8);
@@ -5113,7 +5534,7 @@ impl TryParse for SASwitchScreen {
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (new_screen, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SASwitchScreen { type_, flags, new_screen };
         Ok((result, remaining))
     }
@@ -5127,7 +5548,7 @@ impl TryFrom<&[u8]> for SASwitchScreen {
 impl Serialize for SASwitchScreen {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let new_screen_bytes = self.new_screen.serialize();
         [
@@ -5143,7 +5564,7 @@ impl Serialize for SASwitchScreen {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.new_screen.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -5151,156 +5572,166 @@ impl Serialize for SASwitchScreen {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum BoolCtrlsHigh {
-    AccessXFeedback = 1 << 0,
-    AudibleBell = 1 << 1,
-    Overlay1 = 1 << 2,
-    Overlay2 = 1 << 3,
-    IgnoreGroupLock = 1 << 4,
+pub struct BoolCtrlsHigh(u8);
+impl BoolCtrlsHigh {
+    pub const ACCESS_X_FEEDBACK: Self = Self(1 << 0);
+    pub const AUDIBLE_BELL: Self = Self(1 << 1);
+    pub const OVERLAY1: Self = Self(1 << 2);
+    pub const OVERLAY2: Self = Self(1 << 3);
+    pub const IGNORE_GROUP_LOCK: Self = Self(1 << 4);
+}
+impl From<BoolCtrlsHigh> for Option<bool> {
+    #[inline]
+    fn from(input: BoolCtrlsHigh) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<BoolCtrlsHigh> for u8 {
+    #[inline]
     fn from(input: BoolCtrlsHigh) -> Self {
-        match input {
-            BoolCtrlsHigh::AccessXFeedback => 1 << 0,
-            BoolCtrlsHigh::AudibleBell => 1 << 1,
-            BoolCtrlsHigh::Overlay1 => 1 << 2,
-            BoolCtrlsHigh::Overlay2 => 1 << 3,
-            BoolCtrlsHigh::IgnoreGroupLock => 1 << 4,
-        }
+        input.0
     }
 }
 impl From<BoolCtrlsHigh> for Option<u8> {
+    #[inline]
     fn from(input: BoolCtrlsHigh) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<BoolCtrlsHigh> for u16 {
+    #[inline]
     fn from(input: BoolCtrlsHigh) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<BoolCtrlsHigh> for Option<u16> {
+    #[inline]
     fn from(input: BoolCtrlsHigh) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<BoolCtrlsHigh> for u32 {
+    #[inline]
     fn from(input: BoolCtrlsHigh) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<BoolCtrlsHigh> for Option<u32> {
+    #[inline]
     fn from(input: BoolCtrlsHigh) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for BoolCtrlsHigh {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(BoolCtrlsHigh::AccessXFeedback),
-            2 => Ok(BoolCtrlsHigh::AudibleBell),
-            4 => Ok(BoolCtrlsHigh::Overlay1),
-            8 => Ok(BoolCtrlsHigh::Overlay2),
-            16 => Ok(BoolCtrlsHigh::IgnoreGroupLock),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for BoolCtrlsHigh {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for BoolCtrlsHigh {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for BoolCtrlsHigh {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for BoolCtrlsHigh {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(BoolCtrlsHigh, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum BoolCtrlsLow {
-    RepeatKeys = 1 << 0,
-    SlowKeys = 1 << 1,
-    BounceKeys = 1 << 2,
-    StickyKeys = 1 << 3,
-    MouseKeys = 1 << 4,
-    MouseKeysAccel = 1 << 5,
-    AccessXKeys = 1 << 6,
-    AccessXTimeout = 1 << 7,
+pub struct BoolCtrlsLow(u8);
+impl BoolCtrlsLow {
+    pub const REPEAT_KEYS: Self = Self(1 << 0);
+    pub const SLOW_KEYS: Self = Self(1 << 1);
+    pub const BOUNCE_KEYS: Self = Self(1 << 2);
+    pub const STICKY_KEYS: Self = Self(1 << 3);
+    pub const MOUSE_KEYS: Self = Self(1 << 4);
+    pub const MOUSE_KEYS_ACCEL: Self = Self(1 << 5);
+    pub const ACCESS_X_KEYS: Self = Self(1 << 6);
+    pub const ACCESS_X_TIMEOUT: Self = Self(1 << 7);
+}
+impl From<BoolCtrlsLow> for Option<bool> {
+    #[inline]
+    fn from(input: BoolCtrlsLow) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<BoolCtrlsLow> for u8 {
+    #[inline]
     fn from(input: BoolCtrlsLow) -> Self {
-        match input {
-            BoolCtrlsLow::RepeatKeys => 1 << 0,
-            BoolCtrlsLow::SlowKeys => 1 << 1,
-            BoolCtrlsLow::BounceKeys => 1 << 2,
-            BoolCtrlsLow::StickyKeys => 1 << 3,
-            BoolCtrlsLow::MouseKeys => 1 << 4,
-            BoolCtrlsLow::MouseKeysAccel => 1 << 5,
-            BoolCtrlsLow::AccessXKeys => 1 << 6,
-            BoolCtrlsLow::AccessXTimeout => 1 << 7,
-        }
+        input.0
     }
 }
 impl From<BoolCtrlsLow> for Option<u8> {
+    #[inline]
     fn from(input: BoolCtrlsLow) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<BoolCtrlsLow> for u16 {
+    #[inline]
     fn from(input: BoolCtrlsLow) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<BoolCtrlsLow> for Option<u16> {
+    #[inline]
     fn from(input: BoolCtrlsLow) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<BoolCtrlsLow> for u32 {
+    #[inline]
     fn from(input: BoolCtrlsLow) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<BoolCtrlsLow> for Option<u32> {
+    #[inline]
     fn from(input: BoolCtrlsLow) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for BoolCtrlsLow {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(BoolCtrlsLow::RepeatKeys),
-            2 => Ok(BoolCtrlsLow::SlowKeys),
-            4 => Ok(BoolCtrlsLow::BounceKeys),
-            8 => Ok(BoolCtrlsLow::StickyKeys),
-            16 => Ok(BoolCtrlsLow::MouseKeys),
-            32 => Ok(BoolCtrlsLow::MouseKeysAccel),
-            64 => Ok(BoolCtrlsLow::AccessXKeys),
-            128 => Ok(BoolCtrlsLow::AccessXTimeout),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for BoolCtrlsLow {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for BoolCtrlsLow {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for BoolCtrlsLow {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for BoolCtrlsLow {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(BoolCtrlsLow, u8);
@@ -5318,7 +5749,7 @@ impl TryParse for SASetControls {
         let (bool_ctrls_high, remaining) = u8::try_parse(remaining)?;
         let (bool_ctrls_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SASetControls { type_, bool_ctrls_high, bool_ctrls_low };
         Ok((result, remaining))
     }
@@ -5332,7 +5763,7 @@ impl TryFrom<&[u8]> for SASetControls {
 impl Serialize for SASetControls {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let bool_ctrls_high_bytes = self.bool_ctrls_high.serialize();
         let bool_ctrls_low_bytes = self.bool_ctrls_low.serialize();
         [
@@ -5348,7 +5779,7 @@ impl Serialize for SASetControls {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.bool_ctrls_high.serialize_into(bytes);
         self.bool_ctrls_low.serialize_into(bytes);
@@ -5359,68 +5790,80 @@ impl Serialize for SASetControls {
 pub type SALockControls = SASetControls;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ActionMessageFlag {
-    OnPress = 1 << 0,
-    OnRelease = 1 << 1,
-    GenKeyEvent = 1 << 2,
+pub struct ActionMessageFlag(u8);
+impl ActionMessageFlag {
+    pub const ON_PRESS: Self = Self(1 << 0);
+    pub const ON_RELEASE: Self = Self(1 << 1);
+    pub const GEN_KEY_EVENT: Self = Self(1 << 2);
+}
+impl From<ActionMessageFlag> for Option<bool> {
+    #[inline]
+    fn from(input: ActionMessageFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ActionMessageFlag> for u8 {
+    #[inline]
     fn from(input: ActionMessageFlag) -> Self {
-        match input {
-            ActionMessageFlag::OnPress => 1 << 0,
-            ActionMessageFlag::OnRelease => 1 << 1,
-            ActionMessageFlag::GenKeyEvent => 1 << 2,
-        }
+        input.0
     }
 }
 impl From<ActionMessageFlag> for Option<u8> {
+    #[inline]
     fn from(input: ActionMessageFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ActionMessageFlag> for u16 {
+    #[inline]
     fn from(input: ActionMessageFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ActionMessageFlag> for Option<u16> {
+    #[inline]
     fn from(input: ActionMessageFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ActionMessageFlag> for u32 {
+    #[inline]
     fn from(input: ActionMessageFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ActionMessageFlag> for Option<u32> {
+    #[inline]
     fn from(input: ActionMessageFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ActionMessageFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ActionMessageFlag::OnPress),
-            2 => Ok(ActionMessageFlag::OnRelease),
-            4 => Ok(ActionMessageFlag::GenKeyEvent),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ActionMessageFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ActionMessageFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ActionMessageFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ActionMessageFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ActionMessageFlag, u8);
@@ -5437,7 +5880,7 @@ impl TryParse for SAActionMessage {
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 6)?;
         let message = <[u8; 6]>::try_from(message).unwrap();
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SAActionMessage { type_, flags, message };
         Ok((result, remaining))
     }
@@ -5451,7 +5894,7 @@ impl TryFrom<&[u8]> for SAActionMessage {
 impl Serialize for SAActionMessage {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         [
             type_bytes[0],
@@ -5466,7 +5909,7 @@ impl Serialize for SAActionMessage {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&self.message);
     }
@@ -5493,7 +5936,7 @@ impl TryParse for SARedirectKey {
         let (vmods_mask_low, remaining) = u8::try_parse(remaining)?;
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SARedirectKey { type_, newkey, mask, real_modifiers, vmods_mask_high, vmods_mask_low, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -5507,7 +5950,7 @@ impl TryFrom<&[u8]> for SARedirectKey {
 impl Serialize for SARedirectKey {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let newkey_bytes = self.newkey.serialize();
         let mask_bytes = self.mask.serialize();
         let real_modifiers_bytes = self.real_modifiers.serialize();
@@ -5528,7 +5971,7 @@ impl Serialize for SARedirectKey {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.newkey.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_modifiers.serialize_into(bytes);
@@ -5555,7 +5998,7 @@ impl TryParse for SADeviceBtn {
         let (button, remaining) = u8::try_parse(remaining)?;
         let (device, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SADeviceBtn { type_, flags, count, button, device };
         Ok((result, remaining))
     }
@@ -5569,7 +6012,7 @@ impl TryFrom<&[u8]> for SADeviceBtn {
 impl Serialize for SADeviceBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
         let button_bytes = self.button.serialize();
@@ -5587,7 +6030,7 @@ impl Serialize for SADeviceBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.count.serialize_into(bytes);
         self.button.serialize_into(bytes);
@@ -5597,65 +6040,79 @@ impl Serialize for SADeviceBtn {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum LockDeviceFlags {
-    NoLock = 1 << 0,
-    NoUnlock = 1 << 1,
+pub struct LockDeviceFlags(u8);
+impl LockDeviceFlags {
+    pub const NO_LOCK: Self = Self(1 << 0);
+    pub const NO_UNLOCK: Self = Self(1 << 1);
+}
+impl From<LockDeviceFlags> for Option<bool> {
+    #[inline]
+    fn from(input: LockDeviceFlags) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<LockDeviceFlags> for u8 {
+    #[inline]
     fn from(input: LockDeviceFlags) -> Self {
-        match input {
-            LockDeviceFlags::NoLock => 1 << 0,
-            LockDeviceFlags::NoUnlock => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<LockDeviceFlags> for Option<u8> {
+    #[inline]
     fn from(input: LockDeviceFlags) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<LockDeviceFlags> for u16 {
+    #[inline]
     fn from(input: LockDeviceFlags) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<LockDeviceFlags> for Option<u16> {
+    #[inline]
     fn from(input: LockDeviceFlags) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<LockDeviceFlags> for u32 {
+    #[inline]
     fn from(input: LockDeviceFlags) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<LockDeviceFlags> for Option<u32> {
+    #[inline]
     fn from(input: LockDeviceFlags) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for LockDeviceFlags {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(LockDeviceFlags::NoLock),
-            2 => Ok(LockDeviceFlags::NoUnlock),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for LockDeviceFlags {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for LockDeviceFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for LockDeviceFlags {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for LockDeviceFlags {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(LockDeviceFlags, u8);
@@ -5675,7 +6132,7 @@ impl TryParse for SALockDeviceBtn {
         let (button, remaining) = u8::try_parse(remaining)?;
         let (device, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SALockDeviceBtn { type_, flags, button, device };
         Ok((result, remaining))
     }
@@ -5689,7 +6146,7 @@ impl TryFrom<&[u8]> for SALockDeviceBtn {
 impl Serialize for SALockDeviceBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
         let device_bytes = self.device.serialize();
@@ -5706,7 +6163,7 @@ impl Serialize for SALockDeviceBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
@@ -5716,77 +6173,83 @@ impl Serialize for SALockDeviceBtn {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SAValWhat {
-    IgnoreVal = 0,
-    SetValMin = 1,
-    SetValCenter = 2,
-    SetValMax = 3,
-    SetValRelative = 4,
-    SetValAbsolute = 5,
+pub struct SAValWhat(u8);
+impl SAValWhat {
+    pub const IGNORE_VAL: Self = Self(0);
+    pub const SET_VAL_MIN: Self = Self(1);
+    pub const SET_VAL_CENTER: Self = Self(2);
+    pub const SET_VAL_MAX: Self = Self(3);
+    pub const SET_VAL_RELATIVE: Self = Self(4);
+    pub const SET_VAL_ABSOLUTE: Self = Self(5);
+}
+impl From<SAValWhat> for Option<bool> {
+    #[inline]
+    fn from(input: SAValWhat) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SAValWhat> for u8 {
+    #[inline]
     fn from(input: SAValWhat) -> Self {
-        match input {
-            SAValWhat::IgnoreVal => 0,
-            SAValWhat::SetValMin => 1,
-            SAValWhat::SetValCenter => 2,
-            SAValWhat::SetValMax => 3,
-            SAValWhat::SetValRelative => 4,
-            SAValWhat::SetValAbsolute => 5,
-        }
+        input.0
     }
 }
 impl From<SAValWhat> for Option<u8> {
+    #[inline]
     fn from(input: SAValWhat) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SAValWhat> for u16 {
+    #[inline]
     fn from(input: SAValWhat) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SAValWhat> for Option<u16> {
+    #[inline]
     fn from(input: SAValWhat) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SAValWhat> for u32 {
+    #[inline]
     fn from(input: SAValWhat) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SAValWhat> for Option<u32> {
+    #[inline]
     fn from(input: SAValWhat) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SAValWhat {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SAValWhat::IgnoreVal),
-            1 => Ok(SAValWhat::SetValMin),
-            2 => Ok(SAValWhat::SetValCenter),
-            3 => Ok(SAValWhat::SetValMax),
-            4 => Ok(SAValWhat::SetValRelative),
-            5 => Ok(SAValWhat::SetValAbsolute),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SAValWhat {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SAValWhat {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SAValWhat {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SAValWhat {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -5811,9 +6274,9 @@ impl TryParse for SADeviceValuator {
         let (val2what, remaining) = u8::try_parse(remaining)?;
         let (val2index, remaining) = u8::try_parse(remaining)?;
         let (val2value, remaining) = u8::try_parse(remaining)?;
-        let type_ = type_.try_into()?;
-        let val1what = val1what.try_into()?;
-        let val2what = val2what.try_into()?;
+        let type_ = type_.into();
+        let val1what = val1what.into();
+        let val2what = val2what.into();
         let result = SADeviceValuator { type_, device, val1what, val1index, val1value, val2what, val2index, val2value };
         Ok((result, remaining))
     }
@@ -5827,12 +6290,12 @@ impl TryFrom<&[u8]> for SADeviceValuator {
 impl Serialize for SADeviceValuator {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         let device_bytes = self.device.serialize();
-        let val1what_bytes = u8::from(self.val1what).serialize();
+        let val1what_bytes = Option::<u8>::from(self.val1what).unwrap().serialize();
         let val1index_bytes = self.val1index.serialize();
         let val1value_bytes = self.val1value.serialize();
-        let val2what_bytes = u8::from(self.val2what).serialize();
+        let val2what_bytes = Option::<u8>::from(self.val2what).unwrap().serialize();
         let val2index_bytes = self.val2index.serialize();
         let val2value_bytes = self.val2value.serialize();
         [
@@ -5848,12 +6311,12 @@ impl Serialize for SADeviceValuator {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         self.device.serialize_into(bytes);
-        u8::from(self.val1what).serialize_into(bytes);
+        Option::<u8>::from(self.val1what).unwrap().serialize_into(bytes);
         self.val1index.serialize_into(bytes);
         self.val1value.serialize_into(bytes);
-        u8::from(self.val2what).serialize_into(bytes);
+        Option::<u8>::from(self.val2what).unwrap().serialize_into(bytes);
         self.val2index.serialize_into(bytes);
         self.val2value.serialize_into(bytes);
     }
@@ -5869,7 +6332,7 @@ impl TryParse for SIAction {
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, 7)?;
         let data = <[u8; 7]>::try_from(data).unwrap();
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = SIAction { type_, data };
         Ok((result, remaining))
     }
@@ -5883,7 +6346,7 @@ impl TryFrom<&[u8]> for SIAction {
 impl Serialize for SIAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
         [
             type_bytes[0],
             self.data[0],
@@ -5897,7 +6360,7 @@ impl Serialize for SIAction {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        u8::from(self.type_).serialize_into(bytes);
+        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
         bytes.extend_from_slice(&self.data);
     }
 }
@@ -6142,7 +6605,7 @@ impl Action {
     pub fn as_type(&self) -> SAType {
         fn do_the_parse(remaining: &[u8]) -> Result<SAType, ParseError> {
             let (type_, remaining) = u8::try_parse(remaining)?;
-            let type_ = type_.try_into()?;
+            let type_ = type_.into();
             let _ = remaining;
             Ok(type_)
         }
@@ -6266,7 +6729,7 @@ impl From<SADeviceValuator> for Action {
 }
 impl From<SAType> for Action {
     fn from(type_: SAType) -> Self {
-        let type_bytes = u8::from(type_).serialize();
+        let type_bytes = Option::<u8>::from(type_).unwrap().serialize();
         let value = [
             type_bytes[0],
             0,
@@ -6818,77 +7281,77 @@ impl SelectEventsAux {
     fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all)));
         let mut outer_remaining = value;
-        let bitcase1 = if switch_expr & u32::from(EventType::NewKeyboardNotify) != 0 {
+        let bitcase1 = if switch_expr & u32::from(EventType::NEW_KEYBOARD_NOTIFY) != 0 {
             let (bitcase1, new_remaining) = SelectEventsAuxBitcase1::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase1)
         } else {
             None
         };
-        let bitcase2 = if switch_expr & u32::from(EventType::StateNotify) != 0 {
+        let bitcase2 = if switch_expr & u32::from(EventType::STATE_NOTIFY) != 0 {
             let (bitcase2, new_remaining) = SelectEventsAuxBitcase2::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase2)
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u32::from(EventType::ControlsNotify) != 0 {
+        let bitcase3 = if switch_expr & u32::from(EventType::CONTROLS_NOTIFY) != 0 {
             let (bitcase3, new_remaining) = SelectEventsAuxBitcase3::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let bitcase4 = if switch_expr & u32::from(EventType::IndicatorStateNotify) != 0 {
+        let bitcase4 = if switch_expr & u32::from(EventType::INDICATOR_STATE_NOTIFY) != 0 {
             let (bitcase4, new_remaining) = SelectEventsAuxBitcase4::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase4)
         } else {
             None
         };
-        let bitcase5 = if switch_expr & u32::from(EventType::IndicatorMapNotify) != 0 {
+        let bitcase5 = if switch_expr & u32::from(EventType::INDICATOR_MAP_NOTIFY) != 0 {
             let (bitcase5, new_remaining) = SelectEventsAuxBitcase5::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase5)
         } else {
             None
         };
-        let bitcase6 = if switch_expr & u32::from(EventType::NamesNotify) != 0 {
+        let bitcase6 = if switch_expr & u32::from(EventType::NAMES_NOTIFY) != 0 {
             let (bitcase6, new_remaining) = SelectEventsAuxBitcase6::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase6)
         } else {
             None
         };
-        let bitcase7 = if switch_expr & u32::from(EventType::CompatMapNotify) != 0 {
+        let bitcase7 = if switch_expr & u32::from(EventType::COMPAT_MAP_NOTIFY) != 0 {
             let (bitcase7, new_remaining) = SelectEventsAuxBitcase7::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase7)
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u32::from(EventType::BellNotify) != 0 {
+        let bitcase8 = if switch_expr & u32::from(EventType::BELL_NOTIFY) != 0 {
             let (bitcase8, new_remaining) = SelectEventsAuxBitcase8::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase8)
         } else {
             None
         };
-        let bitcase9 = if switch_expr & u32::from(EventType::ActionMessage) != 0 {
+        let bitcase9 = if switch_expr & u32::from(EventType::ACTION_MESSAGE) != 0 {
             let (bitcase9, new_remaining) = SelectEventsAuxBitcase9::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase9)
         } else {
             None
         };
-        let bitcase10 = if switch_expr & u32::from(EventType::AccessXNotify) != 0 {
+        let bitcase10 = if switch_expr & u32::from(EventType::ACCESS_X_NOTIFY) != 0 {
             let (bitcase10, new_remaining) = SelectEventsAuxBitcase10::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase10)
         } else {
             None
         };
-        let bitcase11 = if switch_expr & u32::from(EventType::ExtensionDeviceNotify) != 0 {
+        let bitcase11 = if switch_expr & u32::from(EventType::EXTENSION_DEVICE_NOTIFY) != 0 {
             let (bitcase11, new_remaining) = SelectEventsAuxBitcase11::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase11)
@@ -6947,37 +7410,37 @@ impl SelectEventsAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.bitcase1.is_some() {
-            expr_value |= u32::from(EventType::NewKeyboardNotify);
+            expr_value |= u32::from(EventType::NEW_KEYBOARD_NOTIFY);
         }
         if self.bitcase2.is_some() {
-            expr_value |= u32::from(EventType::StateNotify);
+            expr_value |= u32::from(EventType::STATE_NOTIFY);
         }
         if self.bitcase3.is_some() {
-            expr_value |= u32::from(EventType::ControlsNotify);
+            expr_value |= u32::from(EventType::CONTROLS_NOTIFY);
         }
         if self.bitcase4.is_some() {
-            expr_value |= u32::from(EventType::IndicatorStateNotify);
+            expr_value |= u32::from(EventType::INDICATOR_STATE_NOTIFY);
         }
         if self.bitcase5.is_some() {
-            expr_value |= u32::from(EventType::IndicatorMapNotify);
+            expr_value |= u32::from(EventType::INDICATOR_MAP_NOTIFY);
         }
         if self.bitcase6.is_some() {
-            expr_value |= u32::from(EventType::NamesNotify);
+            expr_value |= u32::from(EventType::NAMES_NOTIFY);
         }
         if self.bitcase7.is_some() {
-            expr_value |= u32::from(EventType::CompatMapNotify);
+            expr_value |= u32::from(EventType::COMPAT_MAP_NOTIFY);
         }
         if self.bitcase8.is_some() {
-            expr_value |= u32::from(EventType::BellNotify);
+            expr_value |= u32::from(EventType::BELL_NOTIFY);
         }
         if self.bitcase9.is_some() {
-            expr_value |= u32::from(EventType::ActionMessage);
+            expr_value |= u32::from(EventType::ACTION_MESSAGE);
         }
         if self.bitcase10.is_some() {
-            expr_value |= u32::from(EventType::AccessXNotify);
+            expr_value |= u32::from(EventType::ACCESS_X_NOTIFY);
         }
         if self.bitcase11.is_some() {
-            expr_value |= u32::from(EventType::ExtensionDeviceNotify);
+            expr_value |= u32::from(EventType::EXTENSION_DEVICE_NOTIFY);
         }
         expr_value
     }
@@ -7411,8 +7874,8 @@ impl TryParse for GetStateReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let group = group.try_into()?;
-        let locked_group = locked_group.try_into()?;
+        let group = group.into();
+        let locked_group = locked_group.into();
         let result = GetStateReply { device_id, sequence, length, mods, base_mods, latched_mods, locked_mods, group, locked_group, base_group, latched_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_lookup_mods, ptr_btn_state };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -7453,7 +7916,7 @@ impl LatchLockStateRequest {
         let affect_mod_locks_bytes = self.affect_mod_locks.serialize();
         let mod_locks_bytes = self.mod_locks.serialize();
         let lock_group_bytes = self.lock_group.serialize();
-        let group_lock_bytes = u8::from(self.group_lock).serialize();
+        let group_lock_bytes = Option::<u8>::from(self.group_lock).unwrap().serialize();
         let affect_mod_latches_bytes = self.affect_mod_latches.serialize();
         let latch_group_bytes = self.latch_group.serialize();
         let group_latch_bytes = self.group_latch.serialize();
@@ -7499,7 +7962,7 @@ impl LatchLockStateRequest {
         let (mod_locks, remaining) = u8::try_parse(remaining)?;
         let (lock_group, remaining) = bool::try_parse(remaining)?;
         let (group_lock, remaining) = u8::try_parse(remaining)?;
-        let group_lock = group_lock.try_into()?;
+        let group_lock = group_lock.into();
         let (affect_mod_latches, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
@@ -8246,7 +8709,7 @@ impl GetMapMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(present);
         let mut outer_remaining = value;
-        let types_rtrn = if switch_expr & u32::from(MapPart::KeyTypes) != 0 {
+        let types_rtrn = if switch_expr & u32::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
             let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8254,7 +8717,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let syms_rtrn = if switch_expr & u32::from(MapPart::KeySyms) != 0 {
+        let syms_rtrn = if switch_expr & u32::from(MapPart::KEY_SYMS) != 0 {
             let remaining = outer_remaining;
             let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8262,14 +8725,14 @@ impl GetMapMap {
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u32::from(MapPart::KeyActions) != 0 {
+        let bitcase3 = if switch_expr & u32::from(MapPart::KEY_ACTIONS) != 0 {
             let (bitcase3, new_remaining) = GetMapMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors_rtrn = if switch_expr & u32::from(MapPart::KeyBehaviors) != 0 {
+        let behaviors_rtrn = if switch_expr & u32::from(MapPart::KEY_BEHAVIORS) != 0 {
             let remaining = outer_remaining;
             let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8277,7 +8740,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let vmods_rtrn = if switch_expr & u32::from(MapPart::VirtualMods) != 0 {
+        let vmods_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -8291,7 +8754,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let explicit_rtrn = if switch_expr & u32::from(MapPart::ExplicitComponents) != 0 {
+        let explicit_rtrn = if switch_expr & u32::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -8304,7 +8767,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let modmap_rtrn = if switch_expr & u32::from(MapPart::ModifierMap) != 0 {
+        let modmap_rtrn = if switch_expr & u32::from(MapPart::MODIFIER_MAP) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -8317,7 +8780,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VirtualModMap) != 0 {
+        let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
             let remaining = outer_remaining;
             let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8464,7 +8927,7 @@ impl SetMapAux {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(present);
         let mut outer_remaining = value;
-        let types = if switch_expr & u32::from(MapPart::KeyTypes) != 0 {
+        let types = if switch_expr & u32::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
             let (types, remaining) = crate::x11_utils::parse_list::<SetKeyType>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8472,7 +8935,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let syms = if switch_expr & u32::from(MapPart::KeySyms) != 0 {
+        let syms = if switch_expr & u32::from(MapPart::KEY_SYMS) != 0 {
             let remaining = outer_remaining;
             let (syms, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8480,14 +8943,14 @@ impl SetMapAux {
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u32::from(MapPart::KeyActions) != 0 {
+        let bitcase3 = if switch_expr & u32::from(MapPart::KEY_ACTIONS) != 0 {
             let (bitcase3, new_remaining) = SetMapAuxBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors = if switch_expr & u32::from(MapPart::KeyBehaviors) != 0 {
+        let behaviors = if switch_expr & u32::from(MapPart::KEY_BEHAVIORS) != 0 {
             let remaining = outer_remaining;
             let (behaviors, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8495,7 +8958,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let vmods = if switch_expr & u32::from(MapPart::VirtualMods) != 0 {
+        let vmods = if switch_expr & u32::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -8509,7 +8972,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let explicit = if switch_expr & u32::from(MapPart::ExplicitComponents) != 0 {
+        let explicit = if switch_expr & u32::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
             let remaining = outer_remaining;
             let (explicit, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8517,7 +8980,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let modmap = if switch_expr & u32::from(MapPart::ModifierMap) != 0 {
+        let modmap = if switch_expr & u32::from(MapPart::MODIFIER_MAP) != 0 {
             let remaining = outer_remaining;
             let (modmap, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8525,7 +8988,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let vmodmap = if switch_expr & u32::from(MapPart::VirtualModMap) != 0 {
+        let vmodmap = if switch_expr & u32::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
             let remaining = outer_remaining;
             let (vmodmap, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -8584,28 +9047,28 @@ impl SetMapAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.types.is_some() {
-            expr_value |= u32::from(MapPart::KeyTypes);
+            expr_value |= u32::from(MapPart::KEY_TYPES);
         }
         if self.syms.is_some() {
-            expr_value |= u32::from(MapPart::KeySyms);
+            expr_value |= u32::from(MapPart::KEY_SYMS);
         }
         if self.bitcase3.is_some() {
-            expr_value |= u32::from(MapPart::KeyActions);
+            expr_value |= u32::from(MapPart::KEY_ACTIONS);
         }
         if self.behaviors.is_some() {
-            expr_value |= u32::from(MapPart::KeyBehaviors);
+            expr_value |= u32::from(MapPart::KEY_BEHAVIORS);
         }
         if self.vmods.is_some() {
-            expr_value |= u32::from(MapPart::VirtualMods);
+            expr_value |= u32::from(MapPart::VIRTUAL_MODS);
         }
         if self.explicit.is_some() {
-            expr_value |= u32::from(MapPart::ExplicitComponents);
+            expr_value |= u32::from(MapPart::EXPLICIT_COMPONENTS);
         }
         if self.modmap.is_some() {
-            expr_value |= u32::from(MapPart::ModifierMap);
+            expr_value |= u32::from(MapPart::MODIFIER_MAP);
         }
         if self.vmodmap.is_some() {
-            expr_value |= u32::from(MapPart::VirtualModMap);
+            expr_value |= u32::from(MapPart::VIRTUAL_MOD_MAP);
         }
         expr_value
     }
@@ -9516,7 +9979,7 @@ impl GetNamedIndicatorRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let led_class_bytes = LedClassSpec::from(self.led_class).serialize();
+        let led_class_bytes = Option::<LedClassSpec>::from(self.led_class).unwrap().serialize();
         let led_id_bytes = self.led_id.serialize();
         let indicator_bytes = self.indicator.serialize();
         let mut request0 = vec![
@@ -9558,7 +10021,7 @@ impl GetNamedIndicatorRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
-        let led_class = led_class.try_into()?;
+        let led_class = led_class.into();
         let (led_id, remaining) = IDSpec::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (indicator, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -9678,7 +10141,7 @@ impl SetNamedIndicatorRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let led_class_bytes = LedClassSpec::from(self.led_class).serialize();
+        let led_class_bytes = Option::<LedClassSpec>::from(self.led_class).unwrap().serialize();
         let led_id_bytes = self.led_id.serialize();
         let indicator_bytes = self.indicator.serialize();
         let set_state_bytes = self.set_state.serialize();
@@ -9747,7 +10210,7 @@ impl SetNamedIndicatorRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
-        let led_class = led_class.try_into()?;
+        let led_class = led_class.into();
         let (led_id, remaining) = IDSpec::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (indicator, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -9944,7 +10407,7 @@ impl GetNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = which;
         let mut outer_remaining = value;
-        let keycodes_name = if switch_expr & u32::from(NameDetail::Keycodes) != 0 {
+        let keycodes_name = if switch_expr & u32::from(NameDetail::KEYCODES) != 0 {
             let remaining = outer_remaining;
             let (keycodes_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -9952,7 +10415,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let geometry_name = if switch_expr & u32::from(NameDetail::Geometry) != 0 {
+        let geometry_name = if switch_expr & u32::from(NameDetail::GEOMETRY) != 0 {
             let remaining = outer_remaining;
             let (geometry_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -9960,7 +10423,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let symbols_name = if switch_expr & u32::from(NameDetail::Symbols) != 0 {
+        let symbols_name = if switch_expr & u32::from(NameDetail::SYMBOLS) != 0 {
             let remaining = outer_remaining;
             let (symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -9968,7 +10431,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let phys_symbols_name = if switch_expr & u32::from(NameDetail::PhysSymbols) != 0 {
+        let phys_symbols_name = if switch_expr & u32::from(NameDetail::PHYS_SYMBOLS) != 0 {
             let remaining = outer_remaining;
             let (phys_symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -9976,7 +10439,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let types_name = if switch_expr & u32::from(NameDetail::Types) != 0 {
+        let types_name = if switch_expr & u32::from(NameDetail::TYPES) != 0 {
             let remaining = outer_remaining;
             let (types_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -9984,7 +10447,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let compat_name = if switch_expr & u32::from(NameDetail::Compat) != 0 {
+        let compat_name = if switch_expr & u32::from(NameDetail::COMPAT) != 0 {
             let remaining = outer_remaining;
             let (compat_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -9992,7 +10455,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let type_names = if switch_expr & u32::from(NameDetail::KeyTypeNames) != 0 {
+        let type_names = if switch_expr & u32::from(NameDetail::KEY_TYPE_NAMES) != 0 {
             let remaining = outer_remaining;
             let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10000,14 +10463,14 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u32::from(NameDetail::KTLevelNames) != 0 {
+        let bitcase8 = if switch_expr & u32::from(NameDetail::KT_LEVEL_NAMES) != 0 {
             let (bitcase8, new_remaining) = GetNamesValueListBitcase8::try_parse(outer_remaining, n_types)?;
             outer_remaining = new_remaining;
             Some(bitcase8)
         } else {
             None
         };
-        let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
+        let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
             let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10015,7 +10478,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
+        let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
             let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10023,7 +10486,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
+        let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
             let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10031,7 +10494,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let key_names = if switch_expr & u32::from(NameDetail::KeyNames) != 0 {
+        let key_names = if switch_expr & u32::from(NameDetail::KEY_NAMES) != 0 {
             let remaining = outer_remaining;
             let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10039,7 +10502,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let key_aliases = if switch_expr & u32::from(NameDetail::KeyAliases) != 0 {
+        let key_aliases = if switch_expr & u32::from(NameDetail::KEY_ALIASES) != 0 {
             let remaining = outer_remaining;
             let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10047,7 +10510,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let radio_group_names = if switch_expr & u32::from(NameDetail::RGNames) != 0 {
+        let radio_group_names = if switch_expr & u32::from(NameDetail::RG_NAMES) != 0 {
             let remaining = outer_remaining;
             let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10173,7 +10636,7 @@ impl SetNamesAux {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = which;
         let mut outer_remaining = value;
-        let keycodes_name = if switch_expr & u32::from(NameDetail::Keycodes) != 0 {
+        let keycodes_name = if switch_expr & u32::from(NameDetail::KEYCODES) != 0 {
             let remaining = outer_remaining;
             let (keycodes_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -10181,7 +10644,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let geometry_name = if switch_expr & u32::from(NameDetail::Geometry) != 0 {
+        let geometry_name = if switch_expr & u32::from(NameDetail::GEOMETRY) != 0 {
             let remaining = outer_remaining;
             let (geometry_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -10189,7 +10652,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let symbols_name = if switch_expr & u32::from(NameDetail::Symbols) != 0 {
+        let symbols_name = if switch_expr & u32::from(NameDetail::SYMBOLS) != 0 {
             let remaining = outer_remaining;
             let (symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -10197,7 +10660,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let phys_symbols_name = if switch_expr & u32::from(NameDetail::PhysSymbols) != 0 {
+        let phys_symbols_name = if switch_expr & u32::from(NameDetail::PHYS_SYMBOLS) != 0 {
             let remaining = outer_remaining;
             let (phys_symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -10205,7 +10668,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let types_name = if switch_expr & u32::from(NameDetail::Types) != 0 {
+        let types_name = if switch_expr & u32::from(NameDetail::TYPES) != 0 {
             let remaining = outer_remaining;
             let (types_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -10213,7 +10676,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let compat_name = if switch_expr & u32::from(NameDetail::Compat) != 0 {
+        let compat_name = if switch_expr & u32::from(NameDetail::COMPAT) != 0 {
             let remaining = outer_remaining;
             let (compat_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -10221,7 +10684,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let type_names = if switch_expr & u32::from(NameDetail::KeyTypeNames) != 0 {
+        let type_names = if switch_expr & u32::from(NameDetail::KEY_TYPE_NAMES) != 0 {
             let remaining = outer_remaining;
             let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10229,14 +10692,14 @@ impl SetNamesAux {
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u32::from(NameDetail::KTLevelNames) != 0 {
+        let bitcase8 = if switch_expr & u32::from(NameDetail::KT_LEVEL_NAMES) != 0 {
             let (bitcase8, new_remaining) = SetNamesAuxBitcase8::try_parse(outer_remaining, n_types)?;
             outer_remaining = new_remaining;
             Some(bitcase8)
         } else {
             None
         };
-        let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
+        let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
             let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10244,7 +10707,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
+        let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
             let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10252,7 +10715,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
+        let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
             let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10260,7 +10723,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let key_names = if switch_expr & u32::from(NameDetail::KeyNames) != 0 {
+        let key_names = if switch_expr & u32::from(NameDetail::KEY_NAMES) != 0 {
             let remaining = outer_remaining;
             let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10268,7 +10731,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let key_aliases = if switch_expr & u32::from(NameDetail::KeyAliases) != 0 {
+        let key_aliases = if switch_expr & u32::from(NameDetail::KEY_ALIASES) != 0 {
             let remaining = outer_remaining;
             let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10276,7 +10739,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let radio_group_names = if switch_expr & u32::from(NameDetail::RGNames) != 0 {
+        let radio_group_names = if switch_expr & u32::from(NameDetail::RG_NAMES) != 0 {
             let remaining = outer_remaining;
             let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -10352,46 +10815,46 @@ impl SetNamesAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.keycodes_name.is_some() {
-            expr_value |= u32::from(NameDetail::Keycodes);
+            expr_value |= u32::from(NameDetail::KEYCODES);
         }
         if self.geometry_name.is_some() {
-            expr_value |= u32::from(NameDetail::Geometry);
+            expr_value |= u32::from(NameDetail::GEOMETRY);
         }
         if self.symbols_name.is_some() {
-            expr_value |= u32::from(NameDetail::Symbols);
+            expr_value |= u32::from(NameDetail::SYMBOLS);
         }
         if self.phys_symbols_name.is_some() {
-            expr_value |= u32::from(NameDetail::PhysSymbols);
+            expr_value |= u32::from(NameDetail::PHYS_SYMBOLS);
         }
         if self.types_name.is_some() {
-            expr_value |= u32::from(NameDetail::Types);
+            expr_value |= u32::from(NameDetail::TYPES);
         }
         if self.compat_name.is_some() {
-            expr_value |= u32::from(NameDetail::Compat);
+            expr_value |= u32::from(NameDetail::COMPAT);
         }
         if self.type_names.is_some() {
-            expr_value |= u32::from(NameDetail::KeyTypeNames);
+            expr_value |= u32::from(NameDetail::KEY_TYPE_NAMES);
         }
         if self.bitcase8.is_some() {
-            expr_value |= u32::from(NameDetail::KTLevelNames);
+            expr_value |= u32::from(NameDetail::KT_LEVEL_NAMES);
         }
         if self.indicator_names.is_some() {
-            expr_value |= u32::from(NameDetail::IndicatorNames);
+            expr_value |= u32::from(NameDetail::INDICATOR_NAMES);
         }
         if self.virtual_mod_names.is_some() {
-            expr_value |= u32::from(NameDetail::VirtualModNames);
+            expr_value |= u32::from(NameDetail::VIRTUAL_MOD_NAMES);
         }
         if self.groups.is_some() {
-            expr_value |= u32::from(NameDetail::GroupNames);
+            expr_value |= u32::from(NameDetail::GROUP_NAMES);
         }
         if self.key_names.is_some() {
-            expr_value |= u32::from(NameDetail::KeyNames);
+            expr_value |= u32::from(NameDetail::KEY_NAMES);
         }
         if self.key_aliases.is_some() {
-            expr_value |= u32::from(NameDetail::KeyAliases);
+            expr_value |= u32::from(NameDetail::KEY_ALIASES);
         }
         if self.radio_group_names.is_some() {
-            expr_value |= u32::from(NameDetail::RGNames);
+            expr_value |= u32::from(NameDetail::RG_NAMES);
         }
         expr_value
     }
@@ -11138,7 +11601,7 @@ impl GetKbdByNameRepliesTypesMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(present);
         let mut outer_remaining = value;
-        let types_rtrn = if switch_expr & u32::from(MapPart::KeyTypes) != 0 {
+        let types_rtrn = if switch_expr & u32::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
             let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11146,7 +11609,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let syms_rtrn = if switch_expr & u32::from(MapPart::KeySyms) != 0 {
+        let syms_rtrn = if switch_expr & u32::from(MapPart::KEY_SYMS) != 0 {
             let remaining = outer_remaining;
             let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11154,14 +11617,14 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u32::from(MapPart::KeyActions) != 0 {
+        let bitcase3 = if switch_expr & u32::from(MapPart::KEY_ACTIONS) != 0 {
             let (bitcase3, new_remaining) = GetKbdByNameRepliesTypesMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors_rtrn = if switch_expr & u32::from(MapPart::KeyBehaviors) != 0 {
+        let behaviors_rtrn = if switch_expr & u32::from(MapPart::KEY_BEHAVIORS) != 0 {
             let remaining = outer_remaining;
             let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11169,7 +11632,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let vmods_rtrn = if switch_expr & u32::from(MapPart::VirtualMods) != 0 {
+        let vmods_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -11183,7 +11646,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let explicit_rtrn = if switch_expr & u32::from(MapPart::ExplicitComponents) != 0 {
+        let explicit_rtrn = if switch_expr & u32::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -11196,7 +11659,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let modmap_rtrn = if switch_expr & u32::from(MapPart::ModifierMap) != 0 {
+        let modmap_rtrn = if switch_expr & u32::from(MapPart::MODIFIER_MAP) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -11209,7 +11672,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VirtualModMap) != 0 {
+        let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
             let remaining = outer_remaining;
             let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11436,7 +11899,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = which;
         let mut outer_remaining = value;
-        let keycodes_name = if switch_expr & u32::from(NameDetail::Keycodes) != 0 {
+        let keycodes_name = if switch_expr & u32::from(NameDetail::KEYCODES) != 0 {
             let remaining = outer_remaining;
             let (keycodes_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -11444,7 +11907,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let geometry_name = if switch_expr & u32::from(NameDetail::Geometry) != 0 {
+        let geometry_name = if switch_expr & u32::from(NameDetail::GEOMETRY) != 0 {
             let remaining = outer_remaining;
             let (geometry_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -11452,7 +11915,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let symbols_name = if switch_expr & u32::from(NameDetail::Symbols) != 0 {
+        let symbols_name = if switch_expr & u32::from(NameDetail::SYMBOLS) != 0 {
             let remaining = outer_remaining;
             let (symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -11460,7 +11923,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let phys_symbols_name = if switch_expr & u32::from(NameDetail::PhysSymbols) != 0 {
+        let phys_symbols_name = if switch_expr & u32::from(NameDetail::PHYS_SYMBOLS) != 0 {
             let remaining = outer_remaining;
             let (phys_symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -11468,7 +11931,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let types_name = if switch_expr & u32::from(NameDetail::Types) != 0 {
+        let types_name = if switch_expr & u32::from(NameDetail::TYPES) != 0 {
             let remaining = outer_remaining;
             let (types_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -11476,7 +11939,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let compat_name = if switch_expr & u32::from(NameDetail::Compat) != 0 {
+        let compat_name = if switch_expr & u32::from(NameDetail::COMPAT) != 0 {
             let remaining = outer_remaining;
             let (compat_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -11484,7 +11947,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let type_names = if switch_expr & u32::from(NameDetail::KeyTypeNames) != 0 {
+        let type_names = if switch_expr & u32::from(NameDetail::KEY_TYPE_NAMES) != 0 {
             let remaining = outer_remaining;
             let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11492,14 +11955,14 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u32::from(NameDetail::KTLevelNames) != 0 {
+        let bitcase8 = if switch_expr & u32::from(NameDetail::KT_LEVEL_NAMES) != 0 {
             let (bitcase8, new_remaining) = GetKbdByNameRepliesKeyNamesValueListBitcase8::try_parse(outer_remaining, n_types)?;
             outer_remaining = new_remaining;
             Some(bitcase8)
         } else {
             None
         };
-        let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
+        let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
             let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11507,7 +11970,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
+        let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
             let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11515,7 +11978,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
+        let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
             let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11523,7 +11986,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let key_names = if switch_expr & u32::from(NameDetail::KeyNames) != 0 {
+        let key_names = if switch_expr & u32::from(NameDetail::KEY_NAMES) != 0 {
             let remaining = outer_remaining;
             let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11531,7 +11994,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let key_aliases = if switch_expr & u32::from(NameDetail::KeyAliases) != 0 {
+        let key_aliases = if switch_expr & u32::from(NameDetail::KEY_ALIASES) != 0 {
             let remaining = outer_remaining;
             let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11539,7 +12002,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let radio_group_names = if switch_expr & u32::from(NameDetail::RGNames) != 0 {
+        let radio_group_names = if switch_expr & u32::from(NameDetail::RG_NAMES) != 0 {
             let remaining = outer_remaining;
             let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -11663,35 +12126,35 @@ impl GetKbdByNameReplies {
     fn try_parse(value: &[u8], reported: u16) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(reported);
         let mut outer_remaining = value;
-        let types = if switch_expr & u32::from(GBNDetail::Types) != 0 || switch_expr & u32::from(GBNDetail::ClientSymbols) != 0 || switch_expr & u32::from(GBNDetail::ServerSymbols) != 0 {
+        let types = if switch_expr & u32::from(GBNDetail::TYPES) != 0 || switch_expr & u32::from(GBNDetail::CLIENT_SYMBOLS) != 0 || switch_expr & u32::from(GBNDetail::SERVER_SYMBOLS) != 0 {
             let (types, new_remaining) = GetKbdByNameRepliesTypes::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(types)
         } else {
             None
         };
-        let compat_map = if switch_expr & u32::from(GBNDetail::CompatMap) != 0 {
+        let compat_map = if switch_expr & u32::from(GBNDetail::COMPAT_MAP) != 0 {
             let (compat_map, new_remaining) = GetKbdByNameRepliesCompatMap::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(compat_map)
         } else {
             None
         };
-        let indicator_maps = if switch_expr & u32::from(GBNDetail::IndicatorMaps) != 0 {
+        let indicator_maps = if switch_expr & u32::from(GBNDetail::INDICATOR_MAPS) != 0 {
             let (indicator_maps, new_remaining) = GetKbdByNameRepliesIndicatorMaps::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(indicator_maps)
         } else {
             None
         };
-        let key_names = if switch_expr & u32::from(GBNDetail::KeyNames) != 0 || switch_expr & u32::from(GBNDetail::OtherNames) != 0 {
+        let key_names = if switch_expr & u32::from(GBNDetail::KEY_NAMES) != 0 || switch_expr & u32::from(GBNDetail::OTHER_NAMES) != 0 {
             let (key_names, new_remaining) = GetKbdByNameRepliesKeyNames::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(key_names)
         } else {
             None
         };
-        let geometry = if switch_expr & u32::from(GBNDetail::Geometry) != 0 {
+        let geometry = if switch_expr & u32::from(GBNDetail::GEOMETRY) != 0 {
             let (geometry, new_remaining) = GetKbdByNameRepliesGeometry::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(geometry)
@@ -11774,7 +12237,7 @@ impl GetDeviceInfoRequest {
         let all_buttons_bytes = self.all_buttons.serialize();
         let first_button_bytes = self.first_button.serialize();
         let n_buttons_bytes = self.n_buttons.serialize();
-        let led_class_bytes = LedClassSpec::from(self.led_class).serialize();
+        let led_class_bytes = Option::<LedClassSpec>::from(self.led_class).unwrap().serialize();
         let led_id_bytes = self.led_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -11820,7 +12283,7 @@ impl GetDeviceInfoRequest {
         let (n_buttons, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
-        let led_class = led_class.try_into()?;
+        let led_class = led_class.into();
         let (led_id, remaining) = IDSpec::try_parse(remaining)?;
         let _ = remaining;
         Ok(GetDeviceInfoRequest {
@@ -12531,8 +12994,8 @@ impl TryParse for StateNotifyEvent {
         let (event_type, remaining) = u8::try_parse(remaining)?;
         let (request_major, remaining) = u8::try_parse(remaining)?;
         let (request_minor, remaining) = u8::try_parse(remaining)?;
-        let group = group.try_into()?;
-        let locked_group = locked_group.try_into()?;
+        let group = group.into();
+        let locked_group = locked_group.into();
         let result = StateNotifyEvent { response_type, xkb_type, sequence, time, device_id, mods, base_mods, latched_mods, locked_mods, group, base_group, latched_group, locked_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_loockup_mods, ptr_btn_state, changed, keycode, event_type, request_major, request_minor };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -12557,10 +13020,10 @@ impl From<&StateNotifyEvent> for [u8; 32] {
         let base_mods_bytes = input.base_mods.serialize();
         let latched_mods_bytes = input.latched_mods.serialize();
         let locked_mods_bytes = input.locked_mods.serialize();
-        let group_bytes = u8::from(input.group).serialize();
+        let group_bytes = Option::<u8>::from(input.group).unwrap().serialize();
         let base_group_bytes = input.base_group.serialize();
         let latched_group_bytes = input.latched_group.serialize();
-        let locked_group_bytes = u8::from(input.locked_group).serialize();
+        let locked_group_bytes = Option::<u8>::from(input.locked_group).unwrap().serialize();
         let compat_state_bytes = input.compat_state.serialize();
         let grab_mods_bytes = input.grab_mods.serialize();
         let compat_grab_mods_bytes = input.compat_grab_mods.serialize();
@@ -13143,7 +13606,7 @@ impl TryParse for BellNotifyEvent {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (event_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::InsufficientData)?;
-        let bell_class = bell_class.try_into()?;
+        let bell_class = bell_class.into();
         let result = BellNotifyEvent { response_type, xkb_type, sequence, time, device_id, bell_class, bell_id, percent, pitch, duration, name, window, event_only };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13164,7 +13627,7 @@ impl From<&BellNotifyEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
-        let bell_class_bytes = u8::from(input.bell_class).serialize();
+        let bell_class_bytes = Option::<u8>::from(input.bell_class).unwrap().serialize();
         let bell_id_bytes = input.bell_id.serialize();
         let percent_bytes = input.percent.serialize();
         let pitch_bytes = input.pitch.serialize();
@@ -13246,7 +13709,7 @@ impl TryParse for ActionMessageEvent {
         let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 8)?;
         let message = <[u8; 8]>::try_from(message).unwrap();
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
-        let group = group.try_into()?;
+        let group = group.into();
         let result = ActionMessageEvent { response_type, xkb_type, sequence, time, device_id, keycode, press, key_event_follows, mods, group, message };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13271,7 +13734,7 @@ impl From<&ActionMessageEvent> for [u8; 32] {
         let press_bytes = input.press.serialize();
         let key_event_follows_bytes = input.key_event_follows.serialize();
         let mods_bytes = input.mods.serialize();
-        let group_bytes = u8::from(input.group).serialize();
+        let group_bytes = Option::<u8>::from(input.group).unwrap().serialize();
         [
             response_type_bytes[0],
             xkb_type_bytes[0],
@@ -13445,7 +13908,7 @@ impl TryParse for ExtensionDeviceNotifyEvent {
         let (supported, remaining) = u16::try_parse(remaining)?;
         let (unsupported, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let led_class = led_class.try_into()?;
+        let led_class = led_class.into();
         let result = ExtensionDeviceNotifyEvent { response_type, xkb_type, sequence, time, device_id, reason, led_class, led_id, leds_defined, led_state, first_button, n_buttons, supported, unsupported };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13467,7 +13930,7 @@ impl From<&ExtensionDeviceNotifyEvent> for [u8; 32] {
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
         let reason_bytes = input.reason.serialize();
-        let led_class_bytes = u16::from(input.led_class).serialize();
+        let led_class_bytes = Option::<u16>::from(input.led_class).unwrap().serialize();
         let led_id_bytes = input.led_id.serialize();
         let leds_defined_bytes = input.leds_defined.serialize();
         let led_state_bytes = input.led_state.serialize();

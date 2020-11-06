@@ -296,77 +296,83 @@ impl Serialize for Format {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum VisualClass {
-    StaticGray = 0,
-    GrayScale = 1,
-    StaticColor = 2,
-    PseudoColor = 3,
-    TrueColor = 4,
-    DirectColor = 5,
+pub struct VisualClass(u8);
+impl VisualClass {
+    pub const STATIC_GRAY: Self = Self(0);
+    pub const GRAY_SCALE: Self = Self(1);
+    pub const STATIC_COLOR: Self = Self(2);
+    pub const PSEUDO_COLOR: Self = Self(3);
+    pub const TRUE_COLOR: Self = Self(4);
+    pub const DIRECT_COLOR: Self = Self(5);
+}
+impl From<VisualClass> for Option<bool> {
+    #[inline]
+    fn from(input: VisualClass) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<VisualClass> for u8 {
+    #[inline]
     fn from(input: VisualClass) -> Self {
-        match input {
-            VisualClass::StaticGray => 0,
-            VisualClass::GrayScale => 1,
-            VisualClass::StaticColor => 2,
-            VisualClass::PseudoColor => 3,
-            VisualClass::TrueColor => 4,
-            VisualClass::DirectColor => 5,
-        }
+        input.0
     }
 }
 impl From<VisualClass> for Option<u8> {
+    #[inline]
     fn from(input: VisualClass) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<VisualClass> for u16 {
+    #[inline]
     fn from(input: VisualClass) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<VisualClass> for Option<u16> {
+    #[inline]
     fn from(input: VisualClass) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<VisualClass> for u32 {
+    #[inline]
     fn from(input: VisualClass) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<VisualClass> for Option<u32> {
+    #[inline]
     fn from(input: VisualClass) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for VisualClass {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(VisualClass::StaticGray),
-            1 => Ok(VisualClass::GrayScale),
-            2 => Ok(VisualClass::StaticColor),
-            3 => Ok(VisualClass::PseudoColor),
-            4 => Ok(VisualClass::TrueColor),
-            5 => Ok(VisualClass::DirectColor),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for VisualClass {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for VisualClass {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for VisualClass {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for VisualClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -390,7 +396,7 @@ impl TryParse for Visualtype {
         let (green_mask, remaining) = u32::try_parse(remaining)?;
         let (blue_mask, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let class = class.try_into()?;
+        let class = class.into();
         let result = Visualtype { visual_id, class, bits_per_rgb_value, colormap_entries, red_mask, green_mask, blue_mask };
         Ok((result, remaining))
     }
@@ -405,7 +411,7 @@ impl Serialize for Visualtype {
     type Bytes = [u8; 24];
     fn serialize(&self) -> [u8; 24] {
         let visual_id_bytes = self.visual_id.serialize();
-        let class_bytes = u8::from(self.class).serialize();
+        let class_bytes = Option::<u8>::from(self.class).unwrap().serialize();
         let bits_per_rgb_value_bytes = self.bits_per_rgb_value.serialize();
         let colormap_entries_bytes = self.colormap_entries.serialize();
         let red_mask_bytes = self.red_mask.serialize();
@@ -441,7 +447,7 @@ impl Serialize for Visualtype {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
         self.visual_id.serialize_into(bytes);
-        u8::from(self.class).serialize_into(bytes);
+        Option::<u8>::from(self.class).unwrap().serialize_into(bytes);
         self.bits_per_rgb_value.serialize_into(bytes);
         self.colormap_entries.serialize_into(bytes);
         self.red_mask.serialize_into(bytes);
@@ -507,172 +513,158 @@ impl Depth {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum EventMask {
-    NoEvent = 0,
-    KeyPress = 1 << 0,
-    KeyRelease = 1 << 1,
-    ButtonPress = 1 << 2,
-    ButtonRelease = 1 << 3,
-    EnterWindow = 1 << 4,
-    LeaveWindow = 1 << 5,
-    PointerMotion = 1 << 6,
-    PointerMotionHint = 1 << 7,
-    Button1Motion = 1 << 8,
-    Button2Motion = 1 << 9,
-    Button3Motion = 1 << 10,
-    Button4Motion = 1 << 11,
-    Button5Motion = 1 << 12,
-    ButtonMotion = 1 << 13,
-    KeymapState = 1 << 14,
-    Exposure = 1 << 15,
-    VisibilityChange = 1 << 16,
-    StructureNotify = 1 << 17,
-    ResizeRedirect = 1 << 18,
-    SubstructureNotify = 1 << 19,
-    SubstructureRedirect = 1 << 20,
-    FocusChange = 1 << 21,
-    PropertyChange = 1 << 22,
-    ColorMapChange = 1 << 23,
-    OwnerGrabButton = 1 << 24,
+pub struct EventMask(u32);
+impl EventMask {
+    pub const NO_EVENT: Self = Self(0);
+    pub const KEY_PRESS: Self = Self(1 << 0);
+    pub const KEY_RELEASE: Self = Self(1 << 1);
+    pub const BUTTON_PRESS: Self = Self(1 << 2);
+    pub const BUTTON_RELEASE: Self = Self(1 << 3);
+    pub const ENTER_WINDOW: Self = Self(1 << 4);
+    pub const LEAVE_WINDOW: Self = Self(1 << 5);
+    pub const POINTER_MOTION: Self = Self(1 << 6);
+    pub const POINTER_MOTION_HINT: Self = Self(1 << 7);
+    pub const BUTTON1_MOTION: Self = Self(1 << 8);
+    pub const BUTTON2_MOTION: Self = Self(1 << 9);
+    pub const BUTTON3_MOTION: Self = Self(1 << 10);
+    pub const BUTTON4_MOTION: Self = Self(1 << 11);
+    pub const BUTTON5_MOTION: Self = Self(1 << 12);
+    pub const BUTTON_MOTION: Self = Self(1 << 13);
+    pub const KEYMAP_STATE: Self = Self(1 << 14);
+    pub const EXPOSURE: Self = Self(1 << 15);
+    pub const VISIBILITY_CHANGE: Self = Self(1 << 16);
+    pub const STRUCTURE_NOTIFY: Self = Self(1 << 17);
+    pub const RESIZE_REDIRECT: Self = Self(1 << 18);
+    pub const SUBSTRUCTURE_NOTIFY: Self = Self(1 << 19);
+    pub const SUBSTRUCTURE_REDIRECT: Self = Self(1 << 20);
+    pub const FOCUS_CHANGE: Self = Self(1 << 21);
+    pub const PROPERTY_CHANGE: Self = Self(1 << 22);
+    pub const COLOR_MAP_CHANGE: Self = Self(1 << 23);
+    pub const OWNER_GRAB_BUTTON: Self = Self(1 << 24);
+}
+impl From<EventMask> for Option<bool> {
+    #[inline]
+    fn from(input: EventMask) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<EventMask> for Option<u8> {
+    #[inline]
+    fn from(input: EventMask) -> Self {
+        u8::try_from(input.0).ok()
+    }
+}
+impl From<EventMask> for Option<u16> {
+    #[inline]
+    fn from(input: EventMask) -> Self {
+        u16::try_from(input.0).ok()
+    }
 }
 impl From<EventMask> for u32 {
+    #[inline]
     fn from(input: EventMask) -> Self {
-        match input {
-            EventMask::NoEvent => 0,
-            EventMask::KeyPress => 1 << 0,
-            EventMask::KeyRelease => 1 << 1,
-            EventMask::ButtonPress => 1 << 2,
-            EventMask::ButtonRelease => 1 << 3,
-            EventMask::EnterWindow => 1 << 4,
-            EventMask::LeaveWindow => 1 << 5,
-            EventMask::PointerMotion => 1 << 6,
-            EventMask::PointerMotionHint => 1 << 7,
-            EventMask::Button1Motion => 1 << 8,
-            EventMask::Button2Motion => 1 << 9,
-            EventMask::Button3Motion => 1 << 10,
-            EventMask::Button4Motion => 1 << 11,
-            EventMask::Button5Motion => 1 << 12,
-            EventMask::ButtonMotion => 1 << 13,
-            EventMask::KeymapState => 1 << 14,
-            EventMask::Exposure => 1 << 15,
-            EventMask::VisibilityChange => 1 << 16,
-            EventMask::StructureNotify => 1 << 17,
-            EventMask::ResizeRedirect => 1 << 18,
-            EventMask::SubstructureNotify => 1 << 19,
-            EventMask::SubstructureRedirect => 1 << 20,
-            EventMask::FocusChange => 1 << 21,
-            EventMask::PropertyChange => 1 << 22,
-            EventMask::ColorMapChange => 1 << 23,
-            EventMask::OwnerGrabButton => 1 << 24,
-        }
+        input.0
     }
 }
 impl From<EventMask> for Option<u32> {
+    #[inline]
     fn from(input: EventMask) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u32> for EventMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(EventMask::NoEvent),
-            1 => Ok(EventMask::KeyPress),
-            2 => Ok(EventMask::KeyRelease),
-            4 => Ok(EventMask::ButtonPress),
-            8 => Ok(EventMask::ButtonRelease),
-            16 => Ok(EventMask::EnterWindow),
-            32 => Ok(EventMask::LeaveWindow),
-            64 => Ok(EventMask::PointerMotion),
-            128 => Ok(EventMask::PointerMotionHint),
-            256 => Ok(EventMask::Button1Motion),
-            512 => Ok(EventMask::Button2Motion),
-            1024 => Ok(EventMask::Button3Motion),
-            2048 => Ok(EventMask::Button4Motion),
-            4096 => Ok(EventMask::Button5Motion),
-            8192 => Ok(EventMask::ButtonMotion),
-            16384 => Ok(EventMask::KeymapState),
-            32768 => Ok(EventMask::Exposure),
-            65536 => Ok(EventMask::VisibilityChange),
-            131_072 => Ok(EventMask::StructureNotify),
-            262_144 => Ok(EventMask::ResizeRedirect),
-            524_288 => Ok(EventMask::SubstructureNotify),
-            1_048_576 => Ok(EventMask::SubstructureRedirect),
-            2_097_152 => Ok(EventMask::FocusChange),
-            4_194_304 => Ok(EventMask::PropertyChange),
-            8_388_608 => Ok(EventMask::ColorMapChange),
-            16_777_216 => Ok(EventMask::OwnerGrabButton),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for EventMask {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for EventMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for EventMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for EventMask {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 bitmask_binop!(EventMask, u32);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum BackingStore {
-    NotUseful = 0,
-    WhenMapped = 1,
-    Always = 2,
+pub struct BackingStore(u32);
+impl BackingStore {
+    pub const NOT_USEFUL: Self = Self(0);
+    pub const WHEN_MAPPED: Self = Self(1);
+    pub const ALWAYS: Self = Self(2);
 }
-impl From<BackingStore> for u8 {
+impl From<BackingStore> for Option<bool> {
+    #[inline]
     fn from(input: BackingStore) -> Self {
-        match input {
-            BackingStore::NotUseful => 0,
-            BackingStore::WhenMapped => 1,
-            BackingStore::Always => 2,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<BackingStore> for Option<u8> {
+    #[inline]
     fn from(input: BackingStore) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<BackingStore> for u16 {
-    fn from(input: BackingStore) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<BackingStore> for Option<u16> {
+    #[inline]
     fn from(input: BackingStore) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<BackingStore> for u32 {
+    #[inline]
     fn from(input: BackingStore) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<BackingStore> for Option<u32> {
+    #[inline]
     fn from(input: BackingStore) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for BackingStore {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(BackingStore::NotUseful),
-            1 => Ok(BackingStore::WhenMapped),
-            2 => Ok(BackingStore::Always),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for BackingStore {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for BackingStore {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for BackingStore {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for BackingStore {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for BackingStore {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for BackingStore {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
@@ -714,7 +706,7 @@ impl TryParse for Screen {
         let (root_depth, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths_len, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let backing_stores = backing_stores.try_into()?;
+        let backing_stores = backing_stores.into();
         let result = Screen { root, default_colormap, white_pixel, black_pixel, current_input_masks, width_in_pixels, height_in_pixels, width_in_millimeters, height_in_millimeters, min_installed_maps, max_installed_maps, root_visual, backing_stores, save_unders, root_depth, allowed_depths };
         Ok((result, remaining))
     }
@@ -746,7 +738,7 @@ impl Serialize for Screen {
         self.min_installed_maps.serialize_into(bytes);
         self.max_installed_maps.serialize_into(bytes);
         self.root_visual.serialize_into(bytes);
-        u8::from(self.backing_stores).serialize_into(bytes);
+        Option::<u8>::from(self.backing_stores).unwrap().serialize_into(bytes);
         self.save_unders.serialize_into(bytes);
         self.root_depth.serialize_into(bytes);
         let allowed_depths_len = u8::try_from(self.allowed_depths.len()).expect("`allowed_depths` has too many elements");
@@ -981,73 +973,79 @@ impl SetupAuthenticate {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ImageOrder {
-    LSBFirst = 0,
-    MSBFirst = 1,
+pub struct ImageOrder(u8);
+impl ImageOrder {
+    pub const LSB_FIRST: Self = Self(0);
+    pub const MSB_FIRST: Self = Self(1);
 }
-impl From<ImageOrder> for bool {
+impl From<ImageOrder> for Option<bool> {
+    #[inline]
     fn from(input: ImageOrder) -> Self {
-        match input {
-            ImageOrder::LSBFirst => false,
-            ImageOrder::MSBFirst => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<ImageOrder> for u8 {
+    #[inline]
     fn from(input: ImageOrder) -> Self {
-        match input {
-            ImageOrder::LSBFirst => 0,
-            ImageOrder::MSBFirst => 1,
-        }
+        input.0
     }
 }
 impl From<ImageOrder> for Option<u8> {
+    #[inline]
     fn from(input: ImageOrder) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ImageOrder> for u16 {
+    #[inline]
     fn from(input: ImageOrder) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ImageOrder> for Option<u16> {
+    #[inline]
     fn from(input: ImageOrder) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ImageOrder> for u32 {
+    #[inline]
     fn from(input: ImageOrder) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ImageOrder> for Option<u32> {
+    #[inline]
     fn from(input: ImageOrder) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ImageOrder {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ImageOrder::LSBFirst),
-            1 => Ok(ImageOrder::MSBFirst),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ImageOrder {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ImageOrder {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ImageOrder {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ImageOrder {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -1103,8 +1101,8 @@ impl TryParse for Setup {
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (pixmap_formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, pixmap_formats_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (roots, remaining) = crate::x11_utils::parse_list::<Screen>(remaining, roots_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let image_byte_order = image_byte_order.try_into()?;
-        let bitmap_format_bit_order = bitmap_format_bit_order.try_into()?;
+        let image_byte_order = image_byte_order.into();
+        let bitmap_format_bit_order = bitmap_format_bit_order.into();
         let result = Setup { status, protocol_major_version, protocol_minor_version, length, release_number, resource_id_base, resource_id_mask, motion_buffer_size, maximum_request_length, image_byte_order, bitmap_format_bit_order, bitmap_format_scanline_unit, bitmap_format_scanline_pad, min_keycode, max_keycode, vendor, pixmap_formats, roots };
         Ok((result, remaining))
     }
@@ -1140,8 +1138,8 @@ impl Serialize for Setup {
         roots_len.serialize_into(bytes);
         let pixmap_formats_len = u8::try_from(self.pixmap_formats.len()).expect("`pixmap_formats` has too many elements");
         pixmap_formats_len.serialize_into(bytes);
-        u8::from(self.image_byte_order).serialize_into(bytes);
-        u8::from(self.bitmap_format_bit_order).serialize_into(bytes);
+        Option::<u8>::from(self.image_byte_order).unwrap().serialize_into(bytes);
+        Option::<u8>::from(self.bitmap_format_bit_order).unwrap().serialize_into(bytes);
         self.bitmap_format_scanline_unit.serialize_into(bytes);
         self.bitmap_format_scanline_pad.serialize_into(bytes);
         self.min_keycode.serialize_into(bytes);
@@ -1196,212 +1194,240 @@ impl Setup {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum ModMask {
-    Shift = 1 << 0,
-    Lock = 1 << 1,
-    Control = 1 << 2,
-    M1 = 1 << 3,
-    M2 = 1 << 4,
-    M3 = 1 << 5,
-    M4 = 1 << 6,
-    M5 = 1 << 7,
-    Any = 1 << 15,
+pub struct ModMask(u16);
+impl ModMask {
+    pub const SHIFT: Self = Self(1 << 0);
+    pub const LOCK: Self = Self(1 << 1);
+    pub const CONTROL: Self = Self(1 << 2);
+    pub const M1: Self = Self(1 << 3);
+    pub const M2: Self = Self(1 << 4);
+    pub const M3: Self = Self(1 << 5);
+    pub const M4: Self = Self(1 << 6);
+    pub const M5: Self = Self(1 << 7);
+    pub const ANY: Self = Self(1 << 15);
+}
+impl From<ModMask> for Option<bool> {
+    #[inline]
+    fn from(input: ModMask) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<ModMask> for Option<u8> {
+    #[inline]
+    fn from(input: ModMask) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<ModMask> for u16 {
+    #[inline]
     fn from(input: ModMask) -> Self {
-        match input {
-            ModMask::Shift => 1 << 0,
-            ModMask::Lock => 1 << 1,
-            ModMask::Control => 1 << 2,
-            ModMask::M1 => 1 << 3,
-            ModMask::M2 => 1 << 4,
-            ModMask::M3 => 1 << 5,
-            ModMask::M4 => 1 << 6,
-            ModMask::M5 => 1 << 7,
-            ModMask::Any => 1 << 15,
-        }
+        input.0
     }
 }
 impl From<ModMask> for Option<u16> {
+    #[inline]
     fn from(input: ModMask) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<ModMask> for u32 {
+    #[inline]
     fn from(input: ModMask) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ModMask> for Option<u32> {
+    #[inline]
     fn from(input: ModMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for ModMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ModMask::Shift),
-            2 => Ok(ModMask::Lock),
-            4 => Ok(ModMask::Control),
-            8 => Ok(ModMask::M1),
-            16 => Ok(ModMask::M2),
-            32 => Ok(ModMask::M3),
-            64 => Ok(ModMask::M4),
-            128 => Ok(ModMask::M5),
-            32768 => Ok(ModMask::Any),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ModMask {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ModMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ModMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for ModMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ModMask, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum KeyButMask {
-    Shift = 1 << 0,
-    Lock = 1 << 1,
-    Control = 1 << 2,
-    Mod1 = 1 << 3,
-    Mod2 = 1 << 4,
-    Mod3 = 1 << 5,
-    Mod4 = 1 << 6,
-    Mod5 = 1 << 7,
-    Button1 = 1 << 8,
-    Button2 = 1 << 9,
-    Button3 = 1 << 10,
-    Button4 = 1 << 11,
-    Button5 = 1 << 12,
+pub struct KeyButMask(u16);
+impl KeyButMask {
+    pub const SHIFT: Self = Self(1 << 0);
+    pub const LOCK: Self = Self(1 << 1);
+    pub const CONTROL: Self = Self(1 << 2);
+    pub const MOD1: Self = Self(1 << 3);
+    pub const MOD2: Self = Self(1 << 4);
+    pub const MOD3: Self = Self(1 << 5);
+    pub const MOD4: Self = Self(1 << 6);
+    pub const MOD5: Self = Self(1 << 7);
+    pub const BUTTON1: Self = Self(1 << 8);
+    pub const BUTTON2: Self = Self(1 << 9);
+    pub const BUTTON3: Self = Self(1 << 10);
+    pub const BUTTON4: Self = Self(1 << 11);
+    pub const BUTTON5: Self = Self(1 << 12);
+}
+impl From<KeyButMask> for Option<bool> {
+    #[inline]
+    fn from(input: KeyButMask) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<KeyButMask> for Option<u8> {
+    #[inline]
+    fn from(input: KeyButMask) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<KeyButMask> for u16 {
+    #[inline]
     fn from(input: KeyButMask) -> Self {
-        match input {
-            KeyButMask::Shift => 1 << 0,
-            KeyButMask::Lock => 1 << 1,
-            KeyButMask::Control => 1 << 2,
-            KeyButMask::Mod1 => 1 << 3,
-            KeyButMask::Mod2 => 1 << 4,
-            KeyButMask::Mod3 => 1 << 5,
-            KeyButMask::Mod4 => 1 << 6,
-            KeyButMask::Mod5 => 1 << 7,
-            KeyButMask::Button1 => 1 << 8,
-            KeyButMask::Button2 => 1 << 9,
-            KeyButMask::Button3 => 1 << 10,
-            KeyButMask::Button4 => 1 << 11,
-            KeyButMask::Button5 => 1 << 12,
-        }
+        input.0
     }
 }
 impl From<KeyButMask> for Option<u16> {
+    #[inline]
     fn from(input: KeyButMask) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<KeyButMask> for u32 {
+    #[inline]
     fn from(input: KeyButMask) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<KeyButMask> for Option<u32> {
+    #[inline]
     fn from(input: KeyButMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for KeyButMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(KeyButMask::Shift),
-            2 => Ok(KeyButMask::Lock),
-            4 => Ok(KeyButMask::Control),
-            8 => Ok(KeyButMask::Mod1),
-            16 => Ok(KeyButMask::Mod2),
-            32 => Ok(KeyButMask::Mod3),
-            64 => Ok(KeyButMask::Mod4),
-            128 => Ok(KeyButMask::Mod5),
-            256 => Ok(KeyButMask::Button1),
-            512 => Ok(KeyButMask::Button2),
-            1024 => Ok(KeyButMask::Button3),
-            2048 => Ok(KeyButMask::Button4),
-            4096 => Ok(KeyButMask::Button5),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for KeyButMask {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for KeyButMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for KeyButMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for KeyButMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(KeyButMask, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum WindowEnum {
-    None = 0,
+pub struct WindowEnum(u8);
+impl WindowEnum {
+    pub const NONE: Self = Self(0);
+}
+impl From<WindowEnum> for Option<bool> {
+    #[inline]
+    fn from(input: WindowEnum) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<WindowEnum> for u8 {
+    #[inline]
     fn from(input: WindowEnum) -> Self {
-        match input {
-            WindowEnum::None => 0,
-        }
+        input.0
     }
 }
 impl From<WindowEnum> for Option<u8> {
+    #[inline]
     fn from(input: WindowEnum) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<WindowEnum> for u16 {
+    #[inline]
     fn from(input: WindowEnum) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<WindowEnum> for Option<u16> {
+    #[inline]
     fn from(input: WindowEnum) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<WindowEnum> for u32 {
+    #[inline]
     fn from(input: WindowEnum) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<WindowEnum> for Option<u32> {
+    #[inline]
     fn from(input: WindowEnum) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for WindowEnum {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(WindowEnum::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for WindowEnum {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for WindowEnum {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for WindowEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for WindowEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -1539,61 +1565,77 @@ pub const KEY_RELEASE_EVENT: u8 = 3;
 pub type KeyReleaseEvent = KeyPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum ButtonMask {
-    M1 = 1 << 8,
-    M2 = 1 << 9,
-    M3 = 1 << 10,
-    M4 = 1 << 11,
-    M5 = 1 << 12,
-    Any = 1 << 15,
+pub struct ButtonMask(u16);
+impl ButtonMask {
+    pub const M1: Self = Self(1 << 8);
+    pub const M2: Self = Self(1 << 9);
+    pub const M3: Self = Self(1 << 10);
+    pub const M4: Self = Self(1 << 11);
+    pub const M5: Self = Self(1 << 12);
+    pub const ANY: Self = Self(1 << 15);
+}
+impl From<ButtonMask> for Option<bool> {
+    #[inline]
+    fn from(input: ButtonMask) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<ButtonMask> for Option<u8> {
+    #[inline]
+    fn from(input: ButtonMask) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<ButtonMask> for u16 {
+    #[inline]
     fn from(input: ButtonMask) -> Self {
-        match input {
-            ButtonMask::M1 => 1 << 8,
-            ButtonMask::M2 => 1 << 9,
-            ButtonMask::M3 => 1 << 10,
-            ButtonMask::M4 => 1 << 11,
-            ButtonMask::M5 => 1 << 12,
-            ButtonMask::Any => 1 << 15,
-        }
+        input.0
     }
 }
 impl From<ButtonMask> for Option<u16> {
+    #[inline]
     fn from(input: ButtonMask) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<ButtonMask> for u32 {
+    #[inline]
     fn from(input: ButtonMask) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ButtonMask> for Option<u32> {
+    #[inline]
     fn from(input: ButtonMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for ButtonMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            256 => Ok(ButtonMask::M1),
-            512 => Ok(ButtonMask::M2),
-            1024 => Ok(ButtonMask::M3),
-            2048 => Ok(ButtonMask::M4),
-            4096 => Ok(ButtonMask::M5),
-            32768 => Ok(ButtonMask::Any),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ButtonMask {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ButtonMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ButtonMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for ButtonMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ButtonMask, u16);
@@ -1732,73 +1774,79 @@ pub const BUTTON_RELEASE_EVENT: u8 = 5;
 pub type ButtonReleaseEvent = ButtonPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Motion {
-    Normal = 0,
-    Hint = 1,
+pub struct Motion(u8);
+impl Motion {
+    pub const NORMAL: Self = Self(0);
+    pub const HINT: Self = Self(1);
 }
-impl From<Motion> for bool {
+impl From<Motion> for Option<bool> {
+    #[inline]
     fn from(input: Motion) -> Self {
-        match input {
-            Motion::Normal => false,
-            Motion::Hint => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<Motion> for u8 {
+    #[inline]
     fn from(input: Motion) -> Self {
-        match input {
-            Motion::Normal => 0,
-            Motion::Hint => 1,
-        }
+        input.0
     }
 }
 impl From<Motion> for Option<u8> {
+    #[inline]
     fn from(input: Motion) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Motion> for u16 {
+    #[inline]
     fn from(input: Motion) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Motion> for Option<u16> {
+    #[inline]
     fn from(input: Motion) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Motion> for u32 {
+    #[inline]
     fn from(input: Motion) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Motion> for Option<u32> {
+    #[inline]
     fn from(input: Motion) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Motion {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Motion::Normal),
-            1 => Ok(Motion::Hint),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Motion {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Motion {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Motion {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Motion {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -1861,7 +1909,7 @@ impl TryParse for MotionNotifyEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let detail = detail.try_into()?;
+        let detail = detail.into();
         let result = MotionNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -1878,7 +1926,7 @@ impl TryFrom<&[u8]> for MotionNotifyEvent {
 impl From<&MotionNotifyEvent> for [u8; 32] {
     fn from(input: &MotionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let detail_bytes = u8::from(input.detail).serialize();
+        let detail_bytes = Option::<u8>::from(input.detail).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let root_bytes = input.root.serialize();
@@ -1933,152 +1981,164 @@ impl From<MotionNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum NotifyDetail {
-    Ancestor = 0,
-    Virtual = 1,
-    Inferior = 2,
-    Nonlinear = 3,
-    NonlinearVirtual = 4,
-    Pointer = 5,
-    PointerRoot = 6,
-    None = 7,
+pub struct NotifyDetail(u8);
+impl NotifyDetail {
+    pub const ANCESTOR: Self = Self(0);
+    pub const VIRTUAL: Self = Self(1);
+    pub const INFERIOR: Self = Self(2);
+    pub const NONLINEAR: Self = Self(3);
+    pub const NONLINEAR_VIRTUAL: Self = Self(4);
+    pub const POINTER: Self = Self(5);
+    pub const POINTER_ROOT: Self = Self(6);
+    pub const NONE: Self = Self(7);
+}
+impl From<NotifyDetail> for Option<bool> {
+    #[inline]
+    fn from(input: NotifyDetail) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<NotifyDetail> for u8 {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        match input {
-            NotifyDetail::Ancestor => 0,
-            NotifyDetail::Virtual => 1,
-            NotifyDetail::Inferior => 2,
-            NotifyDetail::Nonlinear => 3,
-            NotifyDetail::NonlinearVirtual => 4,
-            NotifyDetail::Pointer => 5,
-            NotifyDetail::PointerRoot => 6,
-            NotifyDetail::None => 7,
-        }
+        input.0
     }
 }
 impl From<NotifyDetail> for Option<u8> {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<NotifyDetail> for u16 {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<NotifyDetail> for Option<u16> {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<NotifyDetail> for u32 {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<NotifyDetail> for Option<u32> {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for NotifyDetail {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(NotifyDetail::Ancestor),
-            1 => Ok(NotifyDetail::Virtual),
-            2 => Ok(NotifyDetail::Inferior),
-            3 => Ok(NotifyDetail::Nonlinear),
-            4 => Ok(NotifyDetail::NonlinearVirtual),
-            5 => Ok(NotifyDetail::Pointer),
-            6 => Ok(NotifyDetail::PointerRoot),
-            7 => Ok(NotifyDetail::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for NotifyDetail {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for NotifyDetail {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for NotifyDetail {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for NotifyDetail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum NotifyMode {
-    Normal = 0,
-    Grab = 1,
-    Ungrab = 2,
-    WhileGrabbed = 3,
+pub struct NotifyMode(u8);
+impl NotifyMode {
+    pub const NORMAL: Self = Self(0);
+    pub const GRAB: Self = Self(1);
+    pub const UNGRAB: Self = Self(2);
+    pub const WHILE_GRABBED: Self = Self(3);
+}
+impl From<NotifyMode> for Option<bool> {
+    #[inline]
+    fn from(input: NotifyMode) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<NotifyMode> for u8 {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        match input {
-            NotifyMode::Normal => 0,
-            NotifyMode::Grab => 1,
-            NotifyMode::Ungrab => 2,
-            NotifyMode::WhileGrabbed => 3,
-        }
+        input.0
     }
 }
 impl From<NotifyMode> for Option<u8> {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<NotifyMode> for u16 {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<NotifyMode> for Option<u16> {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<NotifyMode> for u32 {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<NotifyMode> for Option<u32> {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for NotifyMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(NotifyMode::Normal),
-            1 => Ok(NotifyMode::Grab),
-            2 => Ok(NotifyMode::Ungrab),
-            3 => Ok(NotifyMode::WhileGrabbed),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for NotifyMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for NotifyMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for NotifyMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for NotifyMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -2133,8 +2193,8 @@ impl TryParse for EnterNotifyEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (same_screen_focus, remaining) = u8::try_parse(remaining)?;
-        let detail = detail.try_into()?;
-        let mode = mode.try_into()?;
+        let detail = detail.into();
+        let mode = mode.into();
         let result = EnterNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, mode, same_screen_focus };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -2151,7 +2211,7 @@ impl TryFrom<&[u8]> for EnterNotifyEvent {
 impl From<&EnterNotifyEvent> for [u8; 32] {
     fn from(input: &EnterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let detail_bytes = u8::from(input.detail).serialize();
+        let detail_bytes = Option::<u8>::from(input.detail).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let root_bytes = input.root.serialize();
@@ -2162,7 +2222,7 @@ impl From<&EnterNotifyEvent> for [u8; 32] {
         let event_x_bytes = input.event_x.serialize();
         let event_y_bytes = input.event_y.serialize();
         let state_bytes = input.state.serialize();
-        let mode_bytes = u8::from(input.mode).serialize();
+        let mode_bytes = Option::<u8>::from(input.mode).unwrap().serialize();
         let same_screen_focus_bytes = input.same_screen_focus.serialize();
         [
             response_type_bytes[0],
@@ -2237,8 +2297,8 @@ impl TryParse for FocusInEvent {
         let (event, remaining) = Window::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let detail = detail.try_into()?;
-        let mode = mode.try_into()?;
+        let detail = detail.into();
+        let mode = mode.into();
         let result = FocusInEvent { response_type, detail, sequence, event, mode };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -2255,10 +2315,10 @@ impl TryFrom<&[u8]> for FocusInEvent {
 impl From<&FocusInEvent> for [u8; 32] {
     fn from(input: &FocusInEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let detail_bytes = u8::from(input.detail).serialize();
+        let detail_bytes = Option::<u8>::from(input.detail).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let event_bytes = input.event.serialize();
-        let mode_bytes = u8::from(input.mode).serialize();
+        let mode_bytes = Option::<u8>::from(input.mode).unwrap().serialize();
         [
             response_type_bytes[0],
             detail_bytes[0],
@@ -2666,68 +2726,80 @@ impl From<NoExposureEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Visibility {
-    Unobscured = 0,
-    PartiallyObscured = 1,
-    FullyObscured = 2,
+pub struct Visibility(u8);
+impl Visibility {
+    pub const UNOBSCURED: Self = Self(0);
+    pub const PARTIALLY_OBSCURED: Self = Self(1);
+    pub const FULLY_OBSCURED: Self = Self(2);
+}
+impl From<Visibility> for Option<bool> {
+    #[inline]
+    fn from(input: Visibility) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Visibility> for u8 {
+    #[inline]
     fn from(input: Visibility) -> Self {
-        match input {
-            Visibility::Unobscured => 0,
-            Visibility::PartiallyObscured => 1,
-            Visibility::FullyObscured => 2,
-        }
+        input.0
     }
 }
 impl From<Visibility> for Option<u8> {
+    #[inline]
     fn from(input: Visibility) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Visibility> for u16 {
+    #[inline]
     fn from(input: Visibility) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Visibility> for Option<u16> {
+    #[inline]
     fn from(input: Visibility) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Visibility> for u32 {
+    #[inline]
     fn from(input: Visibility) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Visibility> for Option<u32> {
+    #[inline]
     fn from(input: Visibility) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Visibility {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Visibility::Unobscured),
-            1 => Ok(Visibility::PartiallyObscured),
-            2 => Ok(Visibility::FullyObscured),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Visibility {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Visibility {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Visibility {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Visibility {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -2749,7 +2821,7 @@ impl TryParse for VisibilityNotifyEvent {
         let (window, remaining) = Window::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let state = state.try_into()?;
+        let state = state.into();
         let result = VisibilityNotifyEvent { response_type, sequence, window, state };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -2768,7 +2840,7 @@ impl From<&VisibilityNotifyEvent> for [u8; 32] {
         let response_type_bytes = input.response_type.serialize();
         let sequence_bytes = input.sequence.serialize();
         let window_bytes = input.window.serialize();
-        let state_bytes = u8::from(input.state).serialize();
+        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
         [
             response_type_bytes[0],
             0,
@@ -3527,7 +3599,7 @@ impl TryParse for ConfigureRequestEvent {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (border_width, remaining) = u16::try_parse(remaining)?;
         let (value_mask, remaining) = u16::try_parse(remaining)?;
-        let stack_mode = stack_mode.try_into()?;
+        let stack_mode = stack_mode.into();
         let result = ConfigureRequestEvent { response_type, stack_mode, sequence, parent, window, sibling, x, y, width, height, border_width, value_mask };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -3544,7 +3616,7 @@ impl TryFrom<&[u8]> for ConfigureRequestEvent {
 impl From<&ConfigureRequestEvent> for [u8; 32] {
     fn from(input: &ConfigureRequestEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let stack_mode_bytes = u8::from(input.stack_mode).serialize();
+        let stack_mode_bytes = Option::<u8>::from(input.stack_mode).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let parent_bytes = input.parent.serialize();
         let window_bytes = input.window.serialize();
@@ -3770,73 +3842,79 @@ impl From<ResizeRequestEvent> for [u8; 32] {
 /// * `OnTop` - The window is now on top of all siblings.
 /// * `OnBottom` - The window is now below all siblings.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Place {
-    OnTop = 0,
-    OnBottom = 1,
+pub struct Place(u8);
+impl Place {
+    pub const ON_TOP: Self = Self(0);
+    pub const ON_BOTTOM: Self = Self(1);
 }
-impl From<Place> for bool {
+impl From<Place> for Option<bool> {
+    #[inline]
     fn from(input: Place) -> Self {
-        match input {
-            Place::OnTop => false,
-            Place::OnBottom => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<Place> for u8 {
+    #[inline]
     fn from(input: Place) -> Self {
-        match input {
-            Place::OnTop => 0,
-            Place::OnBottom => 1,
-        }
+        input.0
     }
 }
 impl From<Place> for Option<u8> {
+    #[inline]
     fn from(input: Place) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Place> for u16 {
+    #[inline]
     fn from(input: Place) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Place> for Option<u16> {
+    #[inline]
     fn from(input: Place) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Place> for u32 {
+    #[inline]
     fn from(input: Place) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Place> for Option<u32> {
+    #[inline]
     fn from(input: Place) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Place {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Place::OnTop),
-            1 => Ok(Place::OnBottom),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Place {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Place {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Place {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Place {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -3873,7 +3951,7 @@ impl TryParse for CirculateNotifyEvent {
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (place, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let place = place.try_into()?;
+        let place = place.into();
         let result = CirculateNotifyEvent { response_type, sequence, event, window, place };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -3893,7 +3971,7 @@ impl From<&CirculateNotifyEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let event_bytes = input.event.serialize();
         let window_bytes = input.window.serialize();
-        let place_bytes = u8::from(input.place).serialize();
+        let place_bytes = Option::<u8>::from(input.place).unwrap().serialize();
         [
             response_type_bytes[0],
             0,
@@ -3942,73 +4020,79 @@ pub const CIRCULATE_REQUEST_EVENT: u8 = 27;
 pub type CirculateRequestEvent = CirculateNotifyEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Property {
-    NewValue = 0,
-    Delete = 1,
+pub struct Property(u8);
+impl Property {
+    pub const NEW_VALUE: Self = Self(0);
+    pub const DELETE: Self = Self(1);
 }
-impl From<Property> for bool {
+impl From<Property> for Option<bool> {
+    #[inline]
     fn from(input: Property) -> Self {
-        match input {
-            Property::NewValue => false,
-            Property::Delete => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<Property> for u8 {
+    #[inline]
     fn from(input: Property) -> Self {
-        match input {
-            Property::NewValue => 0,
-            Property::Delete => 1,
-        }
+        input.0
     }
 }
 impl From<Property> for Option<u8> {
+    #[inline]
     fn from(input: Property) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Property> for u16 {
+    #[inline]
     fn from(input: Property) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Property> for Option<u16> {
+    #[inline]
     fn from(input: Property) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Property> for u32 {
+    #[inline]
     fn from(input: Property) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Property> for Option<u32> {
+    #[inline]
     fn from(input: Property) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Property {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Property::NewValue),
-            1 => Ok(Property::Delete),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Property {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Property {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Property {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Property {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -4046,7 +4130,7 @@ impl TryParse for PropertyNotifyEvent {
         let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let state = state.try_into()?;
+        let state = state.into();
         let result = PropertyNotifyEvent { response_type, sequence, window, atom, time, state };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -4067,7 +4151,7 @@ impl From<&PropertyNotifyEvent> for [u8; 32] {
         let window_bytes = input.window.serialize();
         let atom_bytes = input.atom.serialize();
         let time_bytes = input.time.serialize();
-        let state_bytes = u8::from(input.state).serialize();
+        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
         [
             response_type_bytes[0],
             0,
@@ -4194,239 +4278,223 @@ impl From<SelectionClearEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Time {
-    CurrentTime = 0,
+pub struct Time(u8);
+impl Time {
+    pub const CURRENT_TIME: Self = Self(0);
+}
+impl From<Time> for Option<bool> {
+    #[inline]
+    fn from(input: Time) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Time> for u8 {
+    #[inline]
     fn from(input: Time) -> Self {
-        match input {
-            Time::CurrentTime => 0,
-        }
+        input.0
     }
 }
 impl From<Time> for Option<u8> {
+    #[inline]
     fn from(input: Time) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Time> for u16 {
+    #[inline]
     fn from(input: Time) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Time> for Option<u16> {
+    #[inline]
     fn from(input: Time) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Time> for u32 {
+    #[inline]
     fn from(input: Time) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Time> for Option<u32> {
+    #[inline]
     fn from(input: Time) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Time {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Time::CurrentTime),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Time {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Time {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Time {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Time {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
-#[non_exhaustive]
-pub enum AtomEnum {
-    None,
-    Any,
-    PRIMARY,
-    SECONDARY,
-    ARC,
-    ATOM,
-    BITMAP,
-    CARDINAL,
-    COLORMAP,
-    CURSOR,
-    CUT_BUFFER0,
-    CUT_BUFFER1,
-    CUT_BUFFER2,
-    CUT_BUFFER3,
-    CUT_BUFFER4,
-    CUT_BUFFER5,
-    CUT_BUFFER6,
-    CUT_BUFFER7,
-    DRAWABLE,
-    FONT,
-    INTEGER,
-    PIXMAP,
-    POINT,
-    RECTANGLE,
-    RESOURCE_MANAGER,
-    RGB_COLOR_MAP,
-    RGB_BEST_MAP,
-    RGB_BLUE_MAP,
-    RGB_DEFAULT_MAP,
-    RGB_GRAY_MAP,
-    RGB_GREEN_MAP,
-    RGB_RED_MAP,
-    STRING,
-    VISUALID,
-    WINDOW,
-    WM_COMMAND,
-    WM_HINTS,
-    WM_CLIENT_MACHINE,
-    WM_ICON_NAME,
-    WM_ICON_SIZE,
-    WM_NAME,
-    WM_NORMAL_HINTS,
-    WM_SIZE_HINTS,
-    WM_ZOOM_HINTS,
-    MIN_SPACE,
-    NORM_SPACE,
-    MAX_SPACE,
-    END_SPACE,
-    SUPERSCRIPT_X,
-    SUPERSCRIPT_Y,
-    SUBSCRIPT_X,
-    SUBSCRIPT_Y,
-    UNDERLINE_POSITION,
-    UNDERLINE_THICKNESS,
-    STRIKEOUT_ASCENT,
-    STRIKEOUT_DESCENT,
-    ITALIC_ANGLE,
-    X_HEIGHT,
-    QUAD_WIDTH,
-    WEIGHT,
-    POINT_SIZE,
-    RESOLUTION,
-    COPYRIGHT,
-    NOTICE,
-    FONT_NAME,
-    FAMILY_NAME,
-    FULL_NAME,
-    CAP_HEIGHT,
-    WM_CLASS,
-    WM_TRANSIENT_FOR,
+pub struct AtomEnum(u8);
+impl AtomEnum {
+    pub const NONE: Self = Self(0);
+    pub const ANY: Self = Self(0);
+    pub const PRIMARY: Self = Self(1);
+    pub const SECONDARY: Self = Self(2);
+    pub const ARC: Self = Self(3);
+    pub const ATOM: Self = Self(4);
+    pub const BITMAP: Self = Self(5);
+    pub const CARDINAL: Self = Self(6);
+    pub const COLORMAP: Self = Self(7);
+    pub const CURSOR: Self = Self(8);
+    pub const CUT_BUFFE_R0: Self = Self(9);
+    pub const CUT_BUFFE_R1: Self = Self(10);
+    pub const CUT_BUFFE_R2: Self = Self(11);
+    pub const CUT_BUFFE_R3: Self = Self(12);
+    pub const CUT_BUFFE_R4: Self = Self(13);
+    pub const CUT_BUFFE_R5: Self = Self(14);
+    pub const CUT_BUFFE_R6: Self = Self(15);
+    pub const CUT_BUFFE_R7: Self = Self(16);
+    pub const DRAWABLE: Self = Self(17);
+    pub const FONT: Self = Self(18);
+    pub const INTEGER: Self = Self(19);
+    pub const PIXMAP: Self = Self(20);
+    pub const POINT: Self = Self(21);
+    pub const RECTANGLE: Self = Self(22);
+    pub const RESOURCE_MANAGER: Self = Self(23);
+    pub const RGB_COLOR_MAP: Self = Self(24);
+    pub const RGB_BEST_MAP: Self = Self(25);
+    pub const RGB_BLUE_MAP: Self = Self(26);
+    pub const RGB_DEFAULT_MAP: Self = Self(27);
+    pub const RGB_GRAY_MAP: Self = Self(28);
+    pub const RGB_GREEN_MAP: Self = Self(29);
+    pub const RGB_RED_MAP: Self = Self(30);
+    pub const STRING: Self = Self(31);
+    pub const VISUALID: Self = Self(32);
+    pub const WINDOW: Self = Self(33);
+    pub const WM_COMMAND: Self = Self(34);
+    pub const WM_HINTS: Self = Self(35);
+    pub const WM_CLIENT_MACHINE: Self = Self(36);
+    pub const WM_ICON_NAME: Self = Self(37);
+    pub const WM_ICON_SIZE: Self = Self(38);
+    pub const WM_NAME: Self = Self(39);
+    pub const WM_NORMAL_HINTS: Self = Self(40);
+    pub const WM_SIZE_HINTS: Self = Self(41);
+    pub const WM_ZOOM_HINTS: Self = Self(42);
+    pub const MIN_SPACE: Self = Self(43);
+    pub const NORM_SPACE: Self = Self(44);
+    pub const MAX_SPACE: Self = Self(45);
+    pub const END_SPACE: Self = Self(46);
+    pub const SUPERSCRIPT_X: Self = Self(47);
+    pub const SUPERSCRIPT_Y: Self = Self(48);
+    pub const SUBSCRIPT_X: Self = Self(49);
+    pub const SUBSCRIPT_Y: Self = Self(50);
+    pub const UNDERLINE_POSITION: Self = Self(51);
+    pub const UNDERLINE_THICKNESS: Self = Self(52);
+    pub const STRIKEOUT_ASCENT: Self = Self(53);
+    pub const STRIKEOUT_DESCENT: Self = Self(54);
+    pub const ITALIC_ANGLE: Self = Self(55);
+    pub const X_HEIGHT: Self = Self(56);
+    pub const QUAD_WIDTH: Self = Self(57);
+    pub const WEIGHT: Self = Self(58);
+    pub const POINT_SIZE: Self = Self(59);
+    pub const RESOLUTION: Self = Self(60);
+    pub const COPYRIGHT: Self = Self(61);
+    pub const NOTICE: Self = Self(62);
+    pub const FONT_NAME: Self = Self(63);
+    pub const FAMILY_NAME: Self = Self(64);
+    pub const FULL_NAME: Self = Self(65);
+    pub const CAP_HEIGHT: Self = Self(66);
+    pub const WM_CLASS: Self = Self(67);
+    pub const WM_TRANSIENT_FOR: Self = Self(68);
 }
-impl From<AtomEnum> for u8 {
+impl From<AtomEnum> for Option<bool> {
+    #[inline]
     fn from(input: AtomEnum) -> Self {
-        match input {
-            AtomEnum::None => 0,
-            AtomEnum::Any => 0,
-            AtomEnum::PRIMARY => 1,
-            AtomEnum::SECONDARY => 2,
-            AtomEnum::ARC => 3,
-            AtomEnum::ATOM => 4,
-            AtomEnum::BITMAP => 5,
-            AtomEnum::CARDINAL => 6,
-            AtomEnum::COLORMAP => 7,
-            AtomEnum::CURSOR => 8,
-            AtomEnum::CUT_BUFFER0 => 9,
-            AtomEnum::CUT_BUFFER1 => 10,
-            AtomEnum::CUT_BUFFER2 => 11,
-            AtomEnum::CUT_BUFFER3 => 12,
-            AtomEnum::CUT_BUFFER4 => 13,
-            AtomEnum::CUT_BUFFER5 => 14,
-            AtomEnum::CUT_BUFFER6 => 15,
-            AtomEnum::CUT_BUFFER7 => 16,
-            AtomEnum::DRAWABLE => 17,
-            AtomEnum::FONT => 18,
-            AtomEnum::INTEGER => 19,
-            AtomEnum::PIXMAP => 20,
-            AtomEnum::POINT => 21,
-            AtomEnum::RECTANGLE => 22,
-            AtomEnum::RESOURCE_MANAGER => 23,
-            AtomEnum::RGB_COLOR_MAP => 24,
-            AtomEnum::RGB_BEST_MAP => 25,
-            AtomEnum::RGB_BLUE_MAP => 26,
-            AtomEnum::RGB_DEFAULT_MAP => 27,
-            AtomEnum::RGB_GRAY_MAP => 28,
-            AtomEnum::RGB_GREEN_MAP => 29,
-            AtomEnum::RGB_RED_MAP => 30,
-            AtomEnum::STRING => 31,
-            AtomEnum::VISUALID => 32,
-            AtomEnum::WINDOW => 33,
-            AtomEnum::WM_COMMAND => 34,
-            AtomEnum::WM_HINTS => 35,
-            AtomEnum::WM_CLIENT_MACHINE => 36,
-            AtomEnum::WM_ICON_NAME => 37,
-            AtomEnum::WM_ICON_SIZE => 38,
-            AtomEnum::WM_NAME => 39,
-            AtomEnum::WM_NORMAL_HINTS => 40,
-            AtomEnum::WM_SIZE_HINTS => 41,
-            AtomEnum::WM_ZOOM_HINTS => 42,
-            AtomEnum::MIN_SPACE => 43,
-            AtomEnum::NORM_SPACE => 44,
-            AtomEnum::MAX_SPACE => 45,
-            AtomEnum::END_SPACE => 46,
-            AtomEnum::SUPERSCRIPT_X => 47,
-            AtomEnum::SUPERSCRIPT_Y => 48,
-            AtomEnum::SUBSCRIPT_X => 49,
-            AtomEnum::SUBSCRIPT_Y => 50,
-            AtomEnum::UNDERLINE_POSITION => 51,
-            AtomEnum::UNDERLINE_THICKNESS => 52,
-            AtomEnum::STRIKEOUT_ASCENT => 53,
-            AtomEnum::STRIKEOUT_DESCENT => 54,
-            AtomEnum::ITALIC_ANGLE => 55,
-            AtomEnum::X_HEIGHT => 56,
-            AtomEnum::QUAD_WIDTH => 57,
-            AtomEnum::WEIGHT => 58,
-            AtomEnum::POINT_SIZE => 59,
-            AtomEnum::RESOLUTION => 60,
-            AtomEnum::COPYRIGHT => 61,
-            AtomEnum::NOTICE => 62,
-            AtomEnum::FONT_NAME => 63,
-            AtomEnum::FAMILY_NAME => 64,
-            AtomEnum::FULL_NAME => 65,
-            AtomEnum::CAP_HEIGHT => 66,
-            AtomEnum::WM_CLASS => 67,
-            AtomEnum::WM_TRANSIENT_FOR => 68,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
-impl From<AtomEnum> for Option<u8> {
+impl From<AtomEnum> for u8 {
+    #[inline]
     fn from(input: AtomEnum) -> Self {
-        Some(u8::from(input))
+        input.0
+    }
+}
+impl From<AtomEnum> for Option<u8> {
+    #[inline]
+    fn from(input: AtomEnum) -> Self {
+        Some(input.0)
     }
 }
 impl From<AtomEnum> for u16 {
+    #[inline]
     fn from(input: AtomEnum) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<AtomEnum> for Option<u16> {
+    #[inline]
     fn from(input: AtomEnum) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<AtomEnum> for u32 {
+    #[inline]
     fn from(input: AtomEnum) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<AtomEnum> for Option<u32> {
+    #[inline]
     fn from(input: AtomEnum) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
+    }
+}
+impl From<bool> for AtomEnum {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for AtomEnum {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
+    }
+}
+impl TryFrom<u16> for AtomEnum {
+    type Error = ParseError;
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
+    }
+}
+impl TryFrom<u32> for AtomEnum {
+    type Error = ParseError;
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -4614,133 +4682,155 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 /// * `Uninstalled` - The colormap was uninstalled.
 /// * `Installed` - The colormap was installed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ColormapState {
-    Uninstalled = 0,
-    Installed = 1,
+pub struct ColormapState(u8);
+impl ColormapState {
+    pub const UNINSTALLED: Self = Self(0);
+    pub const INSTALLED: Self = Self(1);
 }
-impl From<ColormapState> for bool {
+impl From<ColormapState> for Option<bool> {
+    #[inline]
     fn from(input: ColormapState) -> Self {
-        match input {
-            ColormapState::Uninstalled => false,
-            ColormapState::Installed => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<ColormapState> for u8 {
+    #[inline]
     fn from(input: ColormapState) -> Self {
-        match input {
-            ColormapState::Uninstalled => 0,
-            ColormapState::Installed => 1,
-        }
+        input.0
     }
 }
 impl From<ColormapState> for Option<u8> {
+    #[inline]
     fn from(input: ColormapState) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ColormapState> for u16 {
+    #[inline]
     fn from(input: ColormapState) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ColormapState> for Option<u16> {
+    #[inline]
     fn from(input: ColormapState) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ColormapState> for u32 {
+    #[inline]
     fn from(input: ColormapState) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ColormapState> for Option<u32> {
+    #[inline]
     fn from(input: ColormapState) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ColormapState {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ColormapState::Uninstalled),
-            1 => Ok(ColormapState::Installed),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ColormapState {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ColormapState {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ColormapState {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ColormapState {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ColormapEnum {
-    None = 0,
+pub struct ColormapEnum(u8);
+impl ColormapEnum {
+    pub const NONE: Self = Self(0);
+}
+impl From<ColormapEnum> for Option<bool> {
+    #[inline]
+    fn from(input: ColormapEnum) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ColormapEnum> for u8 {
+    #[inline]
     fn from(input: ColormapEnum) -> Self {
-        match input {
-            ColormapEnum::None => 0,
-        }
+        input.0
     }
 }
 impl From<ColormapEnum> for Option<u8> {
+    #[inline]
     fn from(input: ColormapEnum) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ColormapEnum> for u16 {
+    #[inline]
     fn from(input: ColormapEnum) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ColormapEnum> for Option<u16> {
+    #[inline]
     fn from(input: ColormapEnum) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ColormapEnum> for u32 {
+    #[inline]
     fn from(input: ColormapEnum) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ColormapEnum> for Option<u32> {
+    #[inline]
     fn from(input: ColormapEnum) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ColormapEnum {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ColormapEnum::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ColormapEnum {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ColormapEnum {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ColormapEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ColormapEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -4779,7 +4869,7 @@ impl TryParse for ColormapNotifyEvent {
         let (new, remaining) = bool::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let state = state.try_into()?;
+        let state = state.into();
         let result = ColormapNotifyEvent { response_type, sequence, window, colormap, new, state };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -4800,7 +4890,7 @@ impl From<&ColormapNotifyEvent> for [u8; 32] {
         let window_bytes = input.window.serialize();
         let colormap_bytes = input.colormap.serialize();
         let new_bytes = input.new.serialize();
-        let state_bytes = u8::from(input.state).serialize();
+        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
         [
             response_type_bytes[0],
             0,
@@ -5100,68 +5190,80 @@ impl From<ClientMessageEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Mapping {
-    Modifier = 0,
-    Keyboard = 1,
-    Pointer = 2,
+pub struct Mapping(u8);
+impl Mapping {
+    pub const MODIFIER: Self = Self(0);
+    pub const KEYBOARD: Self = Self(1);
+    pub const POINTER: Self = Self(2);
+}
+impl From<Mapping> for Option<bool> {
+    #[inline]
+    fn from(input: Mapping) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Mapping> for u8 {
+    #[inline]
     fn from(input: Mapping) -> Self {
-        match input {
-            Mapping::Modifier => 0,
-            Mapping::Keyboard => 1,
-            Mapping::Pointer => 2,
-        }
+        input.0
     }
 }
 impl From<Mapping> for Option<u8> {
+    #[inline]
     fn from(input: Mapping) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Mapping> for u16 {
+    #[inline]
     fn from(input: Mapping) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Mapping> for Option<u16> {
+    #[inline]
     fn from(input: Mapping) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Mapping> for u32 {
+    #[inline]
     fn from(input: Mapping) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Mapping> for Option<u32> {
+    #[inline]
     fn from(input: Mapping) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Mapping {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Mapping::Modifier),
-            1 => Ok(Mapping::Keyboard),
-            2 => Ok(Mapping::Pointer),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Mapping {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Mapping {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Mapping {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Mapping {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -5192,7 +5294,7 @@ impl TryParse for MappingNotifyEvent {
         let (first_keycode, remaining) = Keycode::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let request = request.try_into()?;
+        let request = request.into();
         let result = MappingNotifyEvent { response_type, sequence, request, first_keycode, count };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -5210,7 +5312,7 @@ impl From<&MappingNotifyEvent> for [u8; 32] {
     fn from(input: &MappingNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
         let sequence_bytes = input.sequence.serialize();
-        let request_bytes = u8::from(input.request).serialize();
+        let request_bytes = Option::<u8>::from(input.request).unwrap().serialize();
         let first_keycode_bytes = input.first_keycode.serialize();
         let count_bytes = input.count.serialize();
         [
@@ -5348,68 +5450,74 @@ pub const LENGTH_ERROR: u8 = 16;
 pub const IMPLEMENTATION_ERROR: u8 = 17;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum WindowClass {
-    CopyFromParent = 0,
-    InputOutput = 1,
-    InputOnly = 2,
+pub struct WindowClass(u16);
+impl WindowClass {
+    pub const COPY_FROM_PARENT: Self = Self(0);
+    pub const INPUT_OUTPUT: Self = Self(1);
+    pub const INPUT_ONLY: Self = Self(2);
 }
-impl From<WindowClass> for u8 {
+impl From<WindowClass> for Option<bool> {
+    #[inline]
     fn from(input: WindowClass) -> Self {
-        match input {
-            WindowClass::CopyFromParent => 0,
-            WindowClass::InputOutput => 1,
-            WindowClass::InputOnly => 2,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<WindowClass> for Option<u8> {
+    #[inline]
     fn from(input: WindowClass) -> Self {
-        Some(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<WindowClass> for u16 {
+    #[inline]
     fn from(input: WindowClass) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<WindowClass> for Option<u16> {
+    #[inline]
     fn from(input: WindowClass) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<WindowClass> for u32 {
+    #[inline]
     fn from(input: WindowClass) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<WindowClass> for Option<u32> {
+    #[inline]
     fn from(input: WindowClass) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for WindowClass {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(WindowClass::CopyFromParent),
-            1 => Ok(WindowClass::InputOutput),
-            2 => Ok(WindowClass::InputOnly),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for WindowClass {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for WindowClass {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for WindowClass {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for WindowClass {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for WindowClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -5484,146 +5592,156 @@ impl TryFrom<u32> for WindowClass {
 /// fied, the parent's cursor will be used when the pointer is in the window, and any change in the
 /// parent's cursor will cause an immediate change in the displayed cursor.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum CW {
-    BackPixmap = 1 << 0,
-    BackPixel = 1 << 1,
-    BorderPixmap = 1 << 2,
-    BorderPixel = 1 << 3,
-    BitGravity = 1 << 4,
-    WinGravity = 1 << 5,
-    BackingStore = 1 << 6,
-    BackingPlanes = 1 << 7,
-    BackingPixel = 1 << 8,
-    OverrideRedirect = 1 << 9,
-    SaveUnder = 1 << 10,
-    EventMask = 1 << 11,
-    DontPropagate = 1 << 12,
-    Colormap = 1 << 13,
-    Cursor = 1 << 14,
+pub struct CW(u16);
+impl CW {
+    pub const BACK_PIXMAP: Self = Self(1 << 0);
+    pub const BACK_PIXEL: Self = Self(1 << 1);
+    pub const BORDER_PIXMAP: Self = Self(1 << 2);
+    pub const BORDER_PIXEL: Self = Self(1 << 3);
+    pub const BIT_GRAVITY: Self = Self(1 << 4);
+    pub const WIN_GRAVITY: Self = Self(1 << 5);
+    pub const BACKING_STORE: Self = Self(1 << 6);
+    pub const BACKING_PLANES: Self = Self(1 << 7);
+    pub const BACKING_PIXEL: Self = Self(1 << 8);
+    pub const OVERRIDE_REDIRECT: Self = Self(1 << 9);
+    pub const SAVE_UNDER: Self = Self(1 << 10);
+    pub const EVENT_MASK: Self = Self(1 << 11);
+    pub const DONT_PROPAGATE: Self = Self(1 << 12);
+    pub const COLORMAP: Self = Self(1 << 13);
+    pub const CURSOR: Self = Self(1 << 14);
+}
+impl From<CW> for Option<bool> {
+    #[inline]
+    fn from(input: CW) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<CW> for Option<u8> {
+    #[inline]
+    fn from(input: CW) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<CW> for u16 {
+    #[inline]
     fn from(input: CW) -> Self {
-        match input {
-            CW::BackPixmap => 1 << 0,
-            CW::BackPixel => 1 << 1,
-            CW::BorderPixmap => 1 << 2,
-            CW::BorderPixel => 1 << 3,
-            CW::BitGravity => 1 << 4,
-            CW::WinGravity => 1 << 5,
-            CW::BackingStore => 1 << 6,
-            CW::BackingPlanes => 1 << 7,
-            CW::BackingPixel => 1 << 8,
-            CW::OverrideRedirect => 1 << 9,
-            CW::SaveUnder => 1 << 10,
-            CW::EventMask => 1 << 11,
-            CW::DontPropagate => 1 << 12,
-            CW::Colormap => 1 << 13,
-            CW::Cursor => 1 << 14,
-        }
+        input.0
     }
 }
 impl From<CW> for Option<u16> {
+    #[inline]
     fn from(input: CW) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<CW> for u32 {
+    #[inline]
     fn from(input: CW) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CW> for Option<u32> {
+    #[inline]
     fn from(input: CW) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for CW {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(CW::BackPixmap),
-            2 => Ok(CW::BackPixel),
-            4 => Ok(CW::BorderPixmap),
-            8 => Ok(CW::BorderPixel),
-            16 => Ok(CW::BitGravity),
-            32 => Ok(CW::WinGravity),
-            64 => Ok(CW::BackingStore),
-            128 => Ok(CW::BackingPlanes),
-            256 => Ok(CW::BackingPixel),
-            512 => Ok(CW::OverrideRedirect),
-            1024 => Ok(CW::SaveUnder),
-            2048 => Ok(CW::EventMask),
-            4096 => Ok(CW::DontPropagate),
-            8192 => Ok(CW::Colormap),
-            16384 => Ok(CW::Cursor),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CW {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for CW {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for CW {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for CW {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(CW, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum BackPixmap {
-    None = 0,
-    ParentRelative = 1,
+pub struct BackPixmap(bool);
+impl BackPixmap {
+    pub const NONE: Self = Self(false);
+    pub const PARENT_RELATIVE: Self = Self(true);
 }
 impl From<BackPixmap> for bool {
+    #[inline]
     fn from(input: BackPixmap) -> Self {
-        match input {
-            BackPixmap::None => false,
-            BackPixmap::ParentRelative => true,
-        }
+        input.0
+    }
+}
+impl From<BackPixmap> for Option<bool> {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        Some(input.0)
     }
 }
 impl From<BackPixmap> for u8 {
+    #[inline]
     fn from(input: BackPixmap) -> Self {
-        match input {
-            BackPixmap::None => 0,
-            BackPixmap::ParentRelative => 1,
-        }
+        u8::from(input.0)
     }
 }
 impl From<BackPixmap> for Option<u8> {
+    #[inline]
     fn from(input: BackPixmap) -> Self {
-        Some(u8::from(input))
+        Some(u8::from(input.0))
     }
 }
 impl From<BackPixmap> for u16 {
+    #[inline]
     fn from(input: BackPixmap) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<BackPixmap> for Option<u16> {
+    #[inline]
     fn from(input: BackPixmap) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<BackPixmap> for u32 {
+    #[inline]
     fn from(input: BackPixmap) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<BackPixmap> for Option<u32> {
+    #[inline]
     fn from(input: BackPixmap) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
+    }
+}
+impl From<bool> for BackPixmap {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u8> for BackPixmap {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(BackPixmap::None),
-            1 => Ok(BackPixmap::ParentRelative),
+            0 => Ok(Self(false)),
+            1 => Ok(Self(true)),
             _ => Err(ParseError::InvalidValue),
         }
     }
@@ -5631,92 +5749,96 @@ impl TryFrom<u8> for BackPixmap {
 impl TryFrom<u16> for BackPixmap {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        match value {
+            0 => Ok(Self(false)),
+            1 => Ok(Self(true)),
+            _ => Err(ParseError::InvalidValue),
+        }
     }
 }
 impl TryFrom<u32> for BackPixmap {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        match value {
+            0 => Ok(Self(false)),
+            1 => Ok(Self(true)),
+            _ => Err(ParseError::InvalidValue),
+        }
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum Gravity {
-    BitForget,
-    WinUnmap,
-    NorthWest,
-    North,
-    NorthEast,
-    West,
-    Center,
-    East,
-    SouthWest,
-    South,
-    SouthEast,
-    Static,
+pub struct Gravity(u32);
+impl Gravity {
+    pub const BIT_FORGET: Self = Self(0);
+    pub const WIN_UNMAP: Self = Self(0);
+    pub const NORTH_WEST: Self = Self(1);
+    pub const NORTH: Self = Self(2);
+    pub const NORTH_EAST: Self = Self(3);
+    pub const WEST: Self = Self(4);
+    pub const CENTER: Self = Self(5);
+    pub const EAST: Self = Self(6);
+    pub const SOUTH_WEST: Self = Self(7);
+    pub const SOUTH: Self = Self(8);
+    pub const SOUTH_EAST: Self = Self(9);
+    pub const STATIC: Self = Self(10);
 }
-impl From<Gravity> for u8 {
+impl From<Gravity> for Option<bool> {
+    #[inline]
     fn from(input: Gravity) -> Self {
-        match input {
-            Gravity::BitForget => 0,
-            Gravity::WinUnmap => 0,
-            Gravity::NorthWest => 1,
-            Gravity::North => 2,
-            Gravity::NorthEast => 3,
-            Gravity::West => 4,
-            Gravity::Center => 5,
-            Gravity::East => 6,
-            Gravity::SouthWest => 7,
-            Gravity::South => 8,
-            Gravity::SouthEast => 9,
-            Gravity::Static => 10,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<Gravity> for Option<u8> {
+    #[inline]
     fn from(input: Gravity) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<Gravity> for u16 {
-    fn from(input: Gravity) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<Gravity> for Option<u16> {
+    #[inline]
     fn from(input: Gravity) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<Gravity> for u32 {
+    #[inline]
     fn from(input: Gravity) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<Gravity> for Option<u32> {
+    #[inline]
     fn from(input: Gravity) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl Gravity {
-    pub fn try_from(value: impl Into<u32>, value_for_zero: Self) -> Result<Self, ParseError> {
-        let value = value.into();
-        match value {
-            0 => Ok(value_for_zero),
-            1 => Ok(Gravity::NorthWest),
-            2 => Ok(Gravity::North),
-            3 => Ok(Gravity::NorthEast),
-            4 => Ok(Gravity::West),
-            5 => Ok(Gravity::Center),
-            6 => Ok(Gravity::East),
-            7 => Ok(Gravity::SouthWest),
-            8 => Ok(Gravity::South),
-            9 => Ok(Gravity::SouthEast),
-            10 => Ok(Gravity::Static),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Gravity {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Gravity {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for Gravity {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for Gravity {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
@@ -5743,7 +5865,7 @@ impl CreateWindowAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let background_pixmap = if switch_expr & u32::from(CW::BackPixmap) != 0 {
+        let background_pixmap = if switch_expr & u32::from(CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
             let (background_pixmap, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5751,7 +5873,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let background_pixel = if switch_expr & u32::from(CW::BackPixel) != 0 {
+        let background_pixel = if switch_expr & u32::from(CW::BACK_PIXEL) != 0 {
             let remaining = outer_remaining;
             let (background_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5759,7 +5881,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let border_pixmap = if switch_expr & u32::from(CW::BorderPixmap) != 0 {
+        let border_pixmap = if switch_expr & u32::from(CW::BORDER_PIXMAP) != 0 {
             let remaining = outer_remaining;
             let (border_pixmap, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5767,7 +5889,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let border_pixel = if switch_expr & u32::from(CW::BorderPixel) != 0 {
+        let border_pixel = if switch_expr & u32::from(CW::BORDER_PIXEL) != 0 {
             let remaining = outer_remaining;
             let (border_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5775,34 +5897,34 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let bit_gravity = if switch_expr & u32::from(CW::BitGravity) != 0 {
+        let bit_gravity = if switch_expr & u32::from(CW::BIT_GRAVITY) != 0 {
             let remaining = outer_remaining;
             let (bit_gravity, remaining) = u32::try_parse(remaining)?;
-            let bit_gravity = Gravity::try_from(bit_gravity, Gravity::BitForget)?;
+            let bit_gravity = bit_gravity.into();
             outer_remaining = remaining;
             Some(bit_gravity)
         } else {
             None
         };
-        let win_gravity = if switch_expr & u32::from(CW::WinGravity) != 0 {
+        let win_gravity = if switch_expr & u32::from(CW::WIN_GRAVITY) != 0 {
             let remaining = outer_remaining;
             let (win_gravity, remaining) = u32::try_parse(remaining)?;
-            let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
+            let win_gravity = win_gravity.into();
             outer_remaining = remaining;
             Some(win_gravity)
         } else {
             None
         };
-        let backing_store = if switch_expr & u32::from(CW::BackingStore) != 0 {
+        let backing_store = if switch_expr & u32::from(CW::BACKING_STORE) != 0 {
             let remaining = outer_remaining;
             let (backing_store, remaining) = u32::try_parse(remaining)?;
-            let backing_store = backing_store.try_into()?;
+            let backing_store = backing_store.into();
             outer_remaining = remaining;
             Some(backing_store)
         } else {
             None
         };
-        let backing_planes = if switch_expr & u32::from(CW::BackingPlanes) != 0 {
+        let backing_planes = if switch_expr & u32::from(CW::BACKING_PLANES) != 0 {
             let remaining = outer_remaining;
             let (backing_planes, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5810,7 +5932,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let backing_pixel = if switch_expr & u32::from(CW::BackingPixel) != 0 {
+        let backing_pixel = if switch_expr & u32::from(CW::BACKING_PIXEL) != 0 {
             let remaining = outer_remaining;
             let (backing_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5818,7 +5940,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let override_redirect = if switch_expr & u32::from(CW::OverrideRedirect) != 0 {
+        let override_redirect = if switch_expr & u32::from(CW::OVERRIDE_REDIRECT) != 0 {
             let remaining = outer_remaining;
             let (override_redirect, remaining) = Bool32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5826,7 +5948,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let save_under = if switch_expr & u32::from(CW::SaveUnder) != 0 {
+        let save_under = if switch_expr & u32::from(CW::SAVE_UNDER) != 0 {
             let remaining = outer_remaining;
             let (save_under, remaining) = Bool32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5834,7 +5956,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let event_mask = if switch_expr & u32::from(CW::EventMask) != 0 {
+        let event_mask = if switch_expr & u32::from(CW::EVENT_MASK) != 0 {
             let remaining = outer_remaining;
             let (event_mask, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5842,7 +5964,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let do_not_propogate_mask = if switch_expr & u32::from(CW::DontPropagate) != 0 {
+        let do_not_propogate_mask = if switch_expr & u32::from(CW::DONT_PROPAGATE) != 0 {
             let remaining = outer_remaining;
             let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5850,7 +5972,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let colormap = if switch_expr & u32::from(CW::Colormap) != 0 {
+        let colormap = if switch_expr & u32::from(CW::COLORMAP) != 0 {
             let remaining = outer_remaining;
             let (colormap, remaining) = Colormap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5858,7 +5980,7 @@ impl CreateWindowAux {
         } else {
             None
         };
-        let cursor = if switch_expr & u32::from(CW::Cursor) != 0 {
+        let cursor = if switch_expr & u32::from(CW::CURSOR) != 0 {
             let remaining = outer_remaining;
             let (cursor, remaining) = Cursor::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -5892,13 +6014,13 @@ impl CreateWindowAux {
             border_pixel.serialize_into(bytes);
         }
         if let Some(bit_gravity) = self.bit_gravity {
-            u32::from(bit_gravity).serialize_into(bytes);
+            Option::<u32>::from(bit_gravity).unwrap().serialize_into(bytes);
         }
         if let Some(win_gravity) = self.win_gravity {
-            u32::from(win_gravity).serialize_into(bytes);
+            Option::<u32>::from(win_gravity).unwrap().serialize_into(bytes);
         }
         if let Some(backing_store) = self.backing_store {
-            u32::from(backing_store).serialize_into(bytes);
+            Option::<u32>::from(backing_store).unwrap().serialize_into(bytes);
         }
         if let Some(backing_planes) = self.backing_planes {
             backing_planes.serialize_into(bytes);
@@ -5930,49 +6052,49 @@ impl CreateWindowAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.background_pixmap.is_some() {
-            expr_value |= u32::from(CW::BackPixmap);
+            expr_value |= u32::from(CW::BACK_PIXMAP);
         }
         if self.background_pixel.is_some() {
-            expr_value |= u32::from(CW::BackPixel);
+            expr_value |= u32::from(CW::BACK_PIXEL);
         }
         if self.border_pixmap.is_some() {
-            expr_value |= u32::from(CW::BorderPixmap);
+            expr_value |= u32::from(CW::BORDER_PIXMAP);
         }
         if self.border_pixel.is_some() {
-            expr_value |= u32::from(CW::BorderPixel);
+            expr_value |= u32::from(CW::BORDER_PIXEL);
         }
         if self.bit_gravity.is_some() {
-            expr_value |= u32::from(CW::BitGravity);
+            expr_value |= u32::from(CW::BIT_GRAVITY);
         }
         if self.win_gravity.is_some() {
-            expr_value |= u32::from(CW::WinGravity);
+            expr_value |= u32::from(CW::WIN_GRAVITY);
         }
         if self.backing_store.is_some() {
-            expr_value |= u32::from(CW::BackingStore);
+            expr_value |= u32::from(CW::BACKING_STORE);
         }
         if self.backing_planes.is_some() {
-            expr_value |= u32::from(CW::BackingPlanes);
+            expr_value |= u32::from(CW::BACKING_PLANES);
         }
         if self.backing_pixel.is_some() {
-            expr_value |= u32::from(CW::BackingPixel);
+            expr_value |= u32::from(CW::BACKING_PIXEL);
         }
         if self.override_redirect.is_some() {
-            expr_value |= u32::from(CW::OverrideRedirect);
+            expr_value |= u32::from(CW::OVERRIDE_REDIRECT);
         }
         if self.save_under.is_some() {
-            expr_value |= u32::from(CW::SaveUnder);
+            expr_value |= u32::from(CW::SAVE_UNDER);
         }
         if self.event_mask.is_some() {
-            expr_value |= u32::from(CW::EventMask);
+            expr_value |= u32::from(CW::EVENT_MASK);
         }
         if self.do_not_propogate_mask.is_some() {
-            expr_value |= u32::from(CW::DontPropagate);
+            expr_value |= u32::from(CW::DONT_PROPAGATE);
         }
         if self.colormap.is_some() {
-            expr_value |= u32::from(CW::Colormap);
+            expr_value |= u32::from(CW::COLORMAP);
         }
         if self.cursor.is_some() {
-            expr_value |= u32::from(CW::Cursor);
+            expr_value |= u32::from(CW::CURSOR);
         }
         expr_value
     }
@@ -6145,7 +6267,7 @@ impl<'input> CreateWindowRequest<'input> {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let border_width_bytes = self.border_width.serialize();
-        let class_bytes = u16::from(self.class).serialize();
+        let class_bytes = Option::<u16>::from(self.class).unwrap().serialize();
         let visual_bytes = self.visual.serialize();
         let value_mask = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
@@ -6217,7 +6339,7 @@ impl<'input> CreateWindowRequest<'input> {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (border_width, remaining) = u16::try_parse(remaining)?;
         let (class, remaining) = u16::try_parse(remaining)?;
-        let class = class.try_into()?;
+        let class = class.into();
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
         let (value_list, remaining) = CreateWindowAux::try_parse(remaining, value_mask)?;
@@ -6353,7 +6475,7 @@ impl ChangeWindowAttributesAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let background_pixmap = if switch_expr & u32::from(CW::BackPixmap) != 0 {
+        let background_pixmap = if switch_expr & u32::from(CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
             let (background_pixmap, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6361,7 +6483,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let background_pixel = if switch_expr & u32::from(CW::BackPixel) != 0 {
+        let background_pixel = if switch_expr & u32::from(CW::BACK_PIXEL) != 0 {
             let remaining = outer_remaining;
             let (background_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6369,7 +6491,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let border_pixmap = if switch_expr & u32::from(CW::BorderPixmap) != 0 {
+        let border_pixmap = if switch_expr & u32::from(CW::BORDER_PIXMAP) != 0 {
             let remaining = outer_remaining;
             let (border_pixmap, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6377,7 +6499,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let border_pixel = if switch_expr & u32::from(CW::BorderPixel) != 0 {
+        let border_pixel = if switch_expr & u32::from(CW::BORDER_PIXEL) != 0 {
             let remaining = outer_remaining;
             let (border_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6385,34 +6507,34 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let bit_gravity = if switch_expr & u32::from(CW::BitGravity) != 0 {
+        let bit_gravity = if switch_expr & u32::from(CW::BIT_GRAVITY) != 0 {
             let remaining = outer_remaining;
             let (bit_gravity, remaining) = u32::try_parse(remaining)?;
-            let bit_gravity = Gravity::try_from(bit_gravity, Gravity::BitForget)?;
+            let bit_gravity = bit_gravity.into();
             outer_remaining = remaining;
             Some(bit_gravity)
         } else {
             None
         };
-        let win_gravity = if switch_expr & u32::from(CW::WinGravity) != 0 {
+        let win_gravity = if switch_expr & u32::from(CW::WIN_GRAVITY) != 0 {
             let remaining = outer_remaining;
             let (win_gravity, remaining) = u32::try_parse(remaining)?;
-            let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
+            let win_gravity = win_gravity.into();
             outer_remaining = remaining;
             Some(win_gravity)
         } else {
             None
         };
-        let backing_store = if switch_expr & u32::from(CW::BackingStore) != 0 {
+        let backing_store = if switch_expr & u32::from(CW::BACKING_STORE) != 0 {
             let remaining = outer_remaining;
             let (backing_store, remaining) = u32::try_parse(remaining)?;
-            let backing_store = backing_store.try_into()?;
+            let backing_store = backing_store.into();
             outer_remaining = remaining;
             Some(backing_store)
         } else {
             None
         };
-        let backing_planes = if switch_expr & u32::from(CW::BackingPlanes) != 0 {
+        let backing_planes = if switch_expr & u32::from(CW::BACKING_PLANES) != 0 {
             let remaining = outer_remaining;
             let (backing_planes, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6420,7 +6542,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let backing_pixel = if switch_expr & u32::from(CW::BackingPixel) != 0 {
+        let backing_pixel = if switch_expr & u32::from(CW::BACKING_PIXEL) != 0 {
             let remaining = outer_remaining;
             let (backing_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6428,7 +6550,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let override_redirect = if switch_expr & u32::from(CW::OverrideRedirect) != 0 {
+        let override_redirect = if switch_expr & u32::from(CW::OVERRIDE_REDIRECT) != 0 {
             let remaining = outer_remaining;
             let (override_redirect, remaining) = Bool32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6436,7 +6558,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let save_under = if switch_expr & u32::from(CW::SaveUnder) != 0 {
+        let save_under = if switch_expr & u32::from(CW::SAVE_UNDER) != 0 {
             let remaining = outer_remaining;
             let (save_under, remaining) = Bool32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6444,7 +6566,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let event_mask = if switch_expr & u32::from(CW::EventMask) != 0 {
+        let event_mask = if switch_expr & u32::from(CW::EVENT_MASK) != 0 {
             let remaining = outer_remaining;
             let (event_mask, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6452,7 +6574,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let do_not_propogate_mask = if switch_expr & u32::from(CW::DontPropagate) != 0 {
+        let do_not_propogate_mask = if switch_expr & u32::from(CW::DONT_PROPAGATE) != 0 {
             let remaining = outer_remaining;
             let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6460,7 +6582,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let colormap = if switch_expr & u32::from(CW::Colormap) != 0 {
+        let colormap = if switch_expr & u32::from(CW::COLORMAP) != 0 {
             let remaining = outer_remaining;
             let (colormap, remaining) = Colormap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6468,7 +6590,7 @@ impl ChangeWindowAttributesAux {
         } else {
             None
         };
-        let cursor = if switch_expr & u32::from(CW::Cursor) != 0 {
+        let cursor = if switch_expr & u32::from(CW::CURSOR) != 0 {
             let remaining = outer_remaining;
             let (cursor, remaining) = Cursor::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -6502,13 +6624,13 @@ impl ChangeWindowAttributesAux {
             border_pixel.serialize_into(bytes);
         }
         if let Some(bit_gravity) = self.bit_gravity {
-            u32::from(bit_gravity).serialize_into(bytes);
+            Option::<u32>::from(bit_gravity).unwrap().serialize_into(bytes);
         }
         if let Some(win_gravity) = self.win_gravity {
-            u32::from(win_gravity).serialize_into(bytes);
+            Option::<u32>::from(win_gravity).unwrap().serialize_into(bytes);
         }
         if let Some(backing_store) = self.backing_store {
-            u32::from(backing_store).serialize_into(bytes);
+            Option::<u32>::from(backing_store).unwrap().serialize_into(bytes);
         }
         if let Some(backing_planes) = self.backing_planes {
             backing_planes.serialize_into(bytes);
@@ -6540,49 +6662,49 @@ impl ChangeWindowAttributesAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.background_pixmap.is_some() {
-            expr_value |= u32::from(CW::BackPixmap);
+            expr_value |= u32::from(CW::BACK_PIXMAP);
         }
         if self.background_pixel.is_some() {
-            expr_value |= u32::from(CW::BackPixel);
+            expr_value |= u32::from(CW::BACK_PIXEL);
         }
         if self.border_pixmap.is_some() {
-            expr_value |= u32::from(CW::BorderPixmap);
+            expr_value |= u32::from(CW::BORDER_PIXMAP);
         }
         if self.border_pixel.is_some() {
-            expr_value |= u32::from(CW::BorderPixel);
+            expr_value |= u32::from(CW::BORDER_PIXEL);
         }
         if self.bit_gravity.is_some() {
-            expr_value |= u32::from(CW::BitGravity);
+            expr_value |= u32::from(CW::BIT_GRAVITY);
         }
         if self.win_gravity.is_some() {
-            expr_value |= u32::from(CW::WinGravity);
+            expr_value |= u32::from(CW::WIN_GRAVITY);
         }
         if self.backing_store.is_some() {
-            expr_value |= u32::from(CW::BackingStore);
+            expr_value |= u32::from(CW::BACKING_STORE);
         }
         if self.backing_planes.is_some() {
-            expr_value |= u32::from(CW::BackingPlanes);
+            expr_value |= u32::from(CW::BACKING_PLANES);
         }
         if self.backing_pixel.is_some() {
-            expr_value |= u32::from(CW::BackingPixel);
+            expr_value |= u32::from(CW::BACKING_PIXEL);
         }
         if self.override_redirect.is_some() {
-            expr_value |= u32::from(CW::OverrideRedirect);
+            expr_value |= u32::from(CW::OVERRIDE_REDIRECT);
         }
         if self.save_under.is_some() {
-            expr_value |= u32::from(CW::SaveUnder);
+            expr_value |= u32::from(CW::SAVE_UNDER);
         }
         if self.event_mask.is_some() {
-            expr_value |= u32::from(CW::EventMask);
+            expr_value |= u32::from(CW::EVENT_MASK);
         }
         if self.do_not_propogate_mask.is_some() {
-            expr_value |= u32::from(CW::DontPropagate);
+            expr_value |= u32::from(CW::DONT_PROPAGATE);
         }
         if self.colormap.is_some() {
-            expr_value |= u32::from(CW::Colormap);
+            expr_value |= u32::from(CW::COLORMAP);
         }
         if self.cursor.is_some() {
-            expr_value |= u32::from(CW::Cursor);
+            expr_value |= u32::from(CW::CURSOR);
         }
         expr_value
     }
@@ -6801,68 +6923,80 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum MapState {
-    Unmapped = 0,
-    Unviewable = 1,
-    Viewable = 2,
+pub struct MapState(u8);
+impl MapState {
+    pub const UNMAPPED: Self = Self(0);
+    pub const UNVIEWABLE: Self = Self(1);
+    pub const VIEWABLE: Self = Self(2);
+}
+impl From<MapState> for Option<bool> {
+    #[inline]
+    fn from(input: MapState) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<MapState> for u8 {
+    #[inline]
     fn from(input: MapState) -> Self {
-        match input {
-            MapState::Unmapped => 0,
-            MapState::Unviewable => 1,
-            MapState::Viewable => 2,
-        }
+        input.0
     }
 }
 impl From<MapState> for Option<u8> {
+    #[inline]
     fn from(input: MapState) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<MapState> for u16 {
+    #[inline]
     fn from(input: MapState) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<MapState> for Option<u16> {
+    #[inline]
     fn from(input: MapState) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<MapState> for u32 {
+    #[inline]
     fn from(input: MapState) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<MapState> for Option<u32> {
+    #[inline]
     fn from(input: MapState) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for MapState {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(MapState::Unmapped),
-            1 => Ok(MapState::Unviewable),
-            2 => Ok(MapState::Viewable),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for MapState {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for MapState {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for MapState {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for MapState {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -7018,11 +7152,11 @@ impl TryParse for GetWindowAttributesReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let backing_store = backing_store.try_into()?;
-        let class = class.try_into()?;
-        let bit_gravity = Gravity::try_from(bit_gravity, Gravity::BitForget)?;
-        let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
-        let map_state = map_state.try_into()?;
+        let backing_store = backing_store.into();
+        let class = class.into();
+        let bit_gravity = bit_gravity.into();
+        let win_gravity = win_gravity.into();
+        let map_state = map_state.into();
         let result = GetWindowAttributesReply { backing_store, sequence, length, visual, class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -7216,73 +7350,79 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SetMode {
-    Insert = 0,
-    Delete = 1,
+pub struct SetMode(u8);
+impl SetMode {
+    pub const INSERT: Self = Self(0);
+    pub const DELETE: Self = Self(1);
 }
-impl From<SetMode> for bool {
+impl From<SetMode> for Option<bool> {
+    #[inline]
     fn from(input: SetMode) -> Self {
-        match input {
-            SetMode::Insert => false,
-            SetMode::Delete => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<SetMode> for u8 {
+    #[inline]
     fn from(input: SetMode) -> Self {
-        match input {
-            SetMode::Insert => 0,
-            SetMode::Delete => 1,
-        }
+        input.0
     }
 }
 impl From<SetMode> for Option<u8> {
+    #[inline]
     fn from(input: SetMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SetMode> for u16 {
+    #[inline]
     fn from(input: SetMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SetMode> for Option<u16> {
+    #[inline]
     fn from(input: SetMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SetMode> for u32 {
+    #[inline]
     fn from(input: SetMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SetMode> for Option<u32> {
+    #[inline]
     fn from(input: SetMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SetMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SetMode::Insert),
-            1 => Ok(SetMode::Delete),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SetMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SetMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SetMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SetMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -7323,7 +7463,7 @@ impl ChangeSaveSetRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = u8::from(self.mode).serialize();
+        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             CHANGE_SAVE_SET_REQUEST,
@@ -7356,7 +7496,7 @@ impl ChangeSaveSetRequest {
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let _ = remaining;
         let (window, remaining) = Window::try_parse(value)?;
         let _ = remaining;
@@ -7937,154 +8077,153 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ConfigWindow {
-    X = 1 << 0,
-    Y = 1 << 1,
-    Width = 1 << 2,
-    Height = 1 << 3,
-    BorderWidth = 1 << 4,
-    Sibling = 1 << 5,
-    StackMode = 1 << 6,
+pub struct ConfigWindow(u8);
+impl ConfigWindow {
+    pub const X: Self = Self(1 << 0);
+    pub const Y: Self = Self(1 << 1);
+    pub const WIDTH: Self = Self(1 << 2);
+    pub const HEIGHT: Self = Self(1 << 3);
+    pub const BORDER_WIDTH: Self = Self(1 << 4);
+    pub const SIBLING: Self = Self(1 << 5);
+    pub const STACK_MODE: Self = Self(1 << 6);
+}
+impl From<ConfigWindow> for Option<bool> {
+    #[inline]
+    fn from(input: ConfigWindow) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ConfigWindow> for u8 {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        match input {
-            ConfigWindow::X => 1 << 0,
-            ConfigWindow::Y => 1 << 1,
-            ConfigWindow::Width => 1 << 2,
-            ConfigWindow::Height => 1 << 3,
-            ConfigWindow::BorderWidth => 1 << 4,
-            ConfigWindow::Sibling => 1 << 5,
-            ConfigWindow::StackMode => 1 << 6,
-        }
+        input.0
     }
 }
 impl From<ConfigWindow> for Option<u8> {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ConfigWindow> for u16 {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ConfigWindow> for Option<u16> {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ConfigWindow> for u32 {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ConfigWindow> for Option<u32> {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ConfigWindow {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ConfigWindow::X),
-            2 => Ok(ConfigWindow::Y),
-            4 => Ok(ConfigWindow::Width),
-            8 => Ok(ConfigWindow::Height),
-            16 => Ok(ConfigWindow::BorderWidth),
-            32 => Ok(ConfigWindow::Sibling),
-            64 => Ok(ConfigWindow::StackMode),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ConfigWindow {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ConfigWindow {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ConfigWindow {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ConfigWindow {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ConfigWindow, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum StackMode {
-    Above = 0,
-    Below = 1,
-    TopIf = 2,
-    BottomIf = 3,
-    Opposite = 4,
+pub struct StackMode(u32);
+impl StackMode {
+    pub const ABOVE: Self = Self(0);
+    pub const BELOW: Self = Self(1);
+    pub const TOP_IF: Self = Self(2);
+    pub const BOTTOM_IF: Self = Self(3);
+    pub const OPPOSITE: Self = Self(4);
 }
-impl From<StackMode> for u8 {
+impl From<StackMode> for Option<bool> {
+    #[inline]
     fn from(input: StackMode) -> Self {
-        match input {
-            StackMode::Above => 0,
-            StackMode::Below => 1,
-            StackMode::TopIf => 2,
-            StackMode::BottomIf => 3,
-            StackMode::Opposite => 4,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<StackMode> for Option<u8> {
+    #[inline]
     fn from(input: StackMode) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<StackMode> for u16 {
-    fn from(input: StackMode) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<StackMode> for Option<u16> {
+    #[inline]
     fn from(input: StackMode) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<StackMode> for u32 {
+    #[inline]
     fn from(input: StackMode) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<StackMode> for Option<u32> {
+    #[inline]
     fn from(input: StackMode) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for StackMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(StackMode::Above),
-            1 => Ok(StackMode::Below),
-            2 => Ok(StackMode::TopIf),
-            3 => Ok(StackMode::BottomIf),
-            4 => Ok(StackMode::Opposite),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for StackMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for StackMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for StackMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for StackMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for StackMode {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for StackMode {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
@@ -8119,7 +8258,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let width = if switch_expr & u32::from(ConfigWindow::Width) != 0 {
+        let width = if switch_expr & u32::from(ConfigWindow::WIDTH) != 0 {
             let remaining = outer_remaining;
             let (width, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8127,7 +8266,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let height = if switch_expr & u32::from(ConfigWindow::Height) != 0 {
+        let height = if switch_expr & u32::from(ConfigWindow::HEIGHT) != 0 {
             let remaining = outer_remaining;
             let (height, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8135,7 +8274,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let border_width = if switch_expr & u32::from(ConfigWindow::BorderWidth) != 0 {
+        let border_width = if switch_expr & u32::from(ConfigWindow::BORDER_WIDTH) != 0 {
             let remaining = outer_remaining;
             let (border_width, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8143,7 +8282,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let sibling = if switch_expr & u32::from(ConfigWindow::Sibling) != 0 {
+        let sibling = if switch_expr & u32::from(ConfigWindow::SIBLING) != 0 {
             let remaining = outer_remaining;
             let (sibling, remaining) = Window::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8151,10 +8290,10 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let stack_mode = if switch_expr & u32::from(ConfigWindow::StackMode) != 0 {
+        let stack_mode = if switch_expr & u32::from(ConfigWindow::STACK_MODE) != 0 {
             let remaining = outer_remaining;
             let (stack_mode, remaining) = u32::try_parse(remaining)?;
-            let stack_mode = stack_mode.try_into()?;
+            let stack_mode = stack_mode.into();
             outer_remaining = remaining;
             Some(stack_mode)
         } else {
@@ -8192,7 +8331,7 @@ impl ConfigureWindowAux {
             sibling.serialize_into(bytes);
         }
         if let Some(stack_mode) = self.stack_mode {
-            u32::from(stack_mode).serialize_into(bytes);
+            Option::<u32>::from(stack_mode).unwrap().serialize_into(bytes);
         }
     }
 }
@@ -8206,19 +8345,19 @@ impl ConfigureWindowAux {
             expr_value |= u32::from(ConfigWindow::Y);
         }
         if self.width.is_some() {
-            expr_value |= u32::from(ConfigWindow::Width);
+            expr_value |= u32::from(ConfigWindow::WIDTH);
         }
         if self.height.is_some() {
-            expr_value |= u32::from(ConfigWindow::Height);
+            expr_value |= u32::from(ConfigWindow::HEIGHT);
         }
         if self.border_width.is_some() {
-            expr_value |= u32::from(ConfigWindow::BorderWidth);
+            expr_value |= u32::from(ConfigWindow::BORDER_WIDTH);
         }
         if self.sibling.is_some() {
-            expr_value |= u32::from(ConfigWindow::Sibling);
+            expr_value |= u32::from(ConfigWindow::SIBLING);
         }
         if self.stack_mode.is_some() {
-            expr_value |= u32::from(ConfigWindow::StackMode);
+            expr_value |= u32::from(ConfigWindow::STACK_MODE);
         }
         expr_value
     }
@@ -8456,73 +8595,79 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Circulate {
-    RaiseLowest = 0,
-    LowerHighest = 1,
+pub struct Circulate(u8);
+impl Circulate {
+    pub const RAISE_LOWEST: Self = Self(0);
+    pub const LOWER_HIGHEST: Self = Self(1);
 }
-impl From<Circulate> for bool {
+impl From<Circulate> for Option<bool> {
+    #[inline]
     fn from(input: Circulate) -> Self {
-        match input {
-            Circulate::RaiseLowest => false,
-            Circulate::LowerHighest => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<Circulate> for u8 {
+    #[inline]
     fn from(input: Circulate) -> Self {
-        match input {
-            Circulate::RaiseLowest => 0,
-            Circulate::LowerHighest => 1,
-        }
+        input.0
     }
 }
 impl From<Circulate> for Option<u8> {
+    #[inline]
     fn from(input: Circulate) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Circulate> for u16 {
+    #[inline]
     fn from(input: Circulate) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Circulate> for Option<u16> {
+    #[inline]
     fn from(input: Circulate) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Circulate> for u32 {
+    #[inline]
     fn from(input: Circulate) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Circulate> for Option<u32> {
+    #[inline]
     fn from(input: Circulate) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Circulate {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Circulate::RaiseLowest),
-            1 => Ok(Circulate::LowerHighest),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Circulate {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Circulate {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Circulate {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Circulate {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -8558,7 +8703,7 @@ impl CirculateWindowRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let direction_bytes = u8::from(self.direction).serialize();
+        let direction_bytes = Option::<u8>::from(self.direction).unwrap().serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             CIRCULATE_WINDOW_REQUEST,
@@ -8591,7 +8736,7 @@ impl CirculateWindowRequest {
         }
         let remaining = &[header.minor_opcode];
         let (direction, remaining) = u8::try_parse(remaining)?;
-        let direction = direction.try_into()?;
+        let direction = direction.into();
         let _ = remaining;
         let (window, remaining) = Window::try_parse(value)?;
         let _ = remaining;
@@ -9356,68 +9501,80 @@ impl GetAtomNameReply {
 /// match existing property value. If the property is undefined, it is treated as
 /// defined with the correct type and format with zero-length data.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PropMode {
-    Replace = 0,
-    Prepend = 1,
-    Append = 2,
+pub struct PropMode(u8);
+impl PropMode {
+    pub const REPLACE: Self = Self(0);
+    pub const PREPEND: Self = Self(1);
+    pub const APPEND: Self = Self(2);
+}
+impl From<PropMode> for Option<bool> {
+    #[inline]
+    fn from(input: PropMode) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<PropMode> for u8 {
+    #[inline]
     fn from(input: PropMode) -> Self {
-        match input {
-            PropMode::Replace => 0,
-            PropMode::Prepend => 1,
-            PropMode::Append => 2,
-        }
+        input.0
     }
 }
 impl From<PropMode> for Option<u8> {
+    #[inline]
     fn from(input: PropMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PropMode> for u16 {
+    #[inline]
     fn from(input: PropMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PropMode> for Option<u16> {
+    #[inline]
     fn from(input: PropMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PropMode> for u32 {
+    #[inline]
     fn from(input: PropMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PropMode> for Option<u32> {
+    #[inline]
     fn from(input: PropMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PropMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PropMode::Replace),
-            1 => Ok(PropMode::Prepend),
-            2 => Ok(PropMode::Append),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for PropMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for PropMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PropMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PropMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -9492,7 +9649,7 @@ impl<'input> ChangePropertyRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = u8::from(self.mode).serialize();
+        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
         let window_bytes = self.window.serialize();
         let property_bytes = self.property.serialize();
         let type_bytes = self.type_.serialize();
@@ -9549,7 +9706,7 @@ impl<'input> ChangePropertyRequest<'input> {
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let _ = remaining;
         let (window, remaining) = Window::try_parse(value)?;
         let (property, remaining) = Atom::try_parse(remaining)?;
@@ -9733,62 +9890,78 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GetPropertyType {
-    Any = 0,
+pub struct GetPropertyType(u8);
+impl GetPropertyType {
+    pub const ANY: Self = Self(0);
+}
+impl From<GetPropertyType> for Option<bool> {
+    #[inline]
+    fn from(input: GetPropertyType) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<GetPropertyType> for u8 {
+    #[inline]
     fn from(input: GetPropertyType) -> Self {
-        match input {
-            GetPropertyType::Any => 0,
-        }
+        input.0
     }
 }
 impl From<GetPropertyType> for Option<u8> {
+    #[inline]
     fn from(input: GetPropertyType) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<GetPropertyType> for u16 {
+    #[inline]
     fn from(input: GetPropertyType) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<GetPropertyType> for Option<u16> {
+    #[inline]
     fn from(input: GetPropertyType) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<GetPropertyType> for u32 {
+    #[inline]
     fn from(input: GetPropertyType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<GetPropertyType> for Option<u32> {
+    #[inline]
     fn from(input: GetPropertyType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for GetPropertyType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GetPropertyType::Any),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for GetPropertyType {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for GetPropertyType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for GetPropertyType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for GetPropertyType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -10751,59 +10924,71 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SendEventDest {
-    PointerWindow = 0,
-    ItemFocus = 1,
+pub struct SendEventDest(bool);
+impl SendEventDest {
+    pub const POINTER_WINDOW: Self = Self(false);
+    pub const ITEM_FOCUS: Self = Self(true);
 }
 impl From<SendEventDest> for bool {
+    #[inline]
     fn from(input: SendEventDest) -> Self {
-        match input {
-            SendEventDest::PointerWindow => false,
-            SendEventDest::ItemFocus => true,
-        }
+        input.0
+    }
+}
+impl From<SendEventDest> for Option<bool> {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        Some(input.0)
     }
 }
 impl From<SendEventDest> for u8 {
+    #[inline]
     fn from(input: SendEventDest) -> Self {
-        match input {
-            SendEventDest::PointerWindow => 0,
-            SendEventDest::ItemFocus => 1,
-        }
+        u8::from(input.0)
     }
 }
 impl From<SendEventDest> for Option<u8> {
+    #[inline]
     fn from(input: SendEventDest) -> Self {
-        Some(u8::from(input))
+        Some(u8::from(input.0))
     }
 }
 impl From<SendEventDest> for u16 {
+    #[inline]
     fn from(input: SendEventDest) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SendEventDest> for Option<u16> {
+    #[inline]
     fn from(input: SendEventDest) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SendEventDest> for u32 {
+    #[inline]
     fn from(input: SendEventDest) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SendEventDest> for Option<u32> {
+    #[inline]
     fn from(input: SendEventDest) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
+    }
+}
+impl From<bool> for SendEventDest {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u8> for SendEventDest {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(SendEventDest::PointerWindow),
-            1 => Ok(SendEventDest::ItemFocus),
+            0 => Ok(Self(false)),
+            1 => Ok(Self(true)),
             _ => Err(ParseError::InvalidValue),
         }
     }
@@ -10811,13 +10996,21 @@ impl TryFrom<u8> for SendEventDest {
 impl TryFrom<u16> for SendEventDest {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        match value {
+            0 => Ok(Self(false)),
+            1 => Ok(Self(true)),
+            _ => Err(ParseError::InvalidValue),
+        }
     }
 }
 impl TryFrom<u32> for SendEventDest {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        match value {
+            0 => Ok(Self(false)),
+            1 => Ok(Self(true)),
+            _ => Err(ParseError::InvalidValue),
+        }
     }
 }
 
@@ -11075,205 +11268,235 @@ where
 /// `AllowEvents` request or until the keyboard grab is released.
 /// * `Async` - Keyboard event processing continues normally.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GrabMode {
-    Sync = 0,
-    Async = 1,
+pub struct GrabMode(u8);
+impl GrabMode {
+    pub const SYNC: Self = Self(0);
+    pub const ASYNC: Self = Self(1);
 }
-impl From<GrabMode> for bool {
+impl From<GrabMode> for Option<bool> {
+    #[inline]
     fn from(input: GrabMode) -> Self {
-        match input {
-            GrabMode::Sync => false,
-            GrabMode::Async => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<GrabMode> for u8 {
+    #[inline]
     fn from(input: GrabMode) -> Self {
-        match input {
-            GrabMode::Sync => 0,
-            GrabMode::Async => 1,
-        }
+        input.0
     }
 }
 impl From<GrabMode> for Option<u8> {
+    #[inline]
     fn from(input: GrabMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<GrabMode> for u16 {
+    #[inline]
     fn from(input: GrabMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<GrabMode> for Option<u16> {
+    #[inline]
     fn from(input: GrabMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<GrabMode> for u32 {
+    #[inline]
     fn from(input: GrabMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<GrabMode> for Option<u32> {
+    #[inline]
     fn from(input: GrabMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for GrabMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GrabMode::Sync),
-            1 => Ok(GrabMode::Async),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for GrabMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for GrabMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for GrabMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for GrabMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GrabStatus {
-    Success = 0,
-    AlreadyGrabbed = 1,
-    InvalidTime = 2,
-    NotViewable = 3,
-    Frozen = 4,
+pub struct GrabStatus(u8);
+impl GrabStatus {
+    pub const SUCCESS: Self = Self(0);
+    pub const ALREADY_GRABBED: Self = Self(1);
+    pub const INVALID_TIME: Self = Self(2);
+    pub const NOT_VIEWABLE: Self = Self(3);
+    pub const FROZEN: Self = Self(4);
+}
+impl From<GrabStatus> for Option<bool> {
+    #[inline]
+    fn from(input: GrabStatus) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<GrabStatus> for u8 {
+    #[inline]
     fn from(input: GrabStatus) -> Self {
-        match input {
-            GrabStatus::Success => 0,
-            GrabStatus::AlreadyGrabbed => 1,
-            GrabStatus::InvalidTime => 2,
-            GrabStatus::NotViewable => 3,
-            GrabStatus::Frozen => 4,
-        }
+        input.0
     }
 }
 impl From<GrabStatus> for Option<u8> {
+    #[inline]
     fn from(input: GrabStatus) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<GrabStatus> for u16 {
+    #[inline]
     fn from(input: GrabStatus) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<GrabStatus> for Option<u16> {
+    #[inline]
     fn from(input: GrabStatus) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<GrabStatus> for u32 {
+    #[inline]
     fn from(input: GrabStatus) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<GrabStatus> for Option<u32> {
+    #[inline]
     fn from(input: GrabStatus) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for GrabStatus {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GrabStatus::Success),
-            1 => Ok(GrabStatus::AlreadyGrabbed),
-            2 => Ok(GrabStatus::InvalidTime),
-            3 => Ok(GrabStatus::NotViewable),
-            4 => Ok(GrabStatus::Frozen),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for GrabStatus {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for GrabStatus {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for GrabStatus {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for GrabStatus {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CursorEnum {
-    None = 0,
+pub struct CursorEnum(u8);
+impl CursorEnum {
+    pub const NONE: Self = Self(0);
+}
+impl From<CursorEnum> for Option<bool> {
+    #[inline]
+    fn from(input: CursorEnum) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<CursorEnum> for u8 {
+    #[inline]
     fn from(input: CursorEnum) -> Self {
-        match input {
-            CursorEnum::None => 0,
-        }
+        input.0
     }
 }
 impl From<CursorEnum> for Option<u8> {
+    #[inline]
     fn from(input: CursorEnum) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CursorEnum> for u16 {
+    #[inline]
     fn from(input: CursorEnum) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CursorEnum> for Option<u16> {
+    #[inline]
     fn from(input: CursorEnum) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CursorEnum> for u32 {
+    #[inline]
     fn from(input: CursorEnum) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CursorEnum> for Option<u32> {
+    #[inline]
     fn from(input: CursorEnum) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CursorEnum {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(CursorEnum::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CursorEnum {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for CursorEnum {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CursorEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CursorEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -11372,8 +11595,8 @@ impl GrabPointerRequest {
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
         let event_mask_bytes = self.event_mask.serialize();
-        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
-        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
+        let pointer_mode_bytes = Option::<u8>::from(self.pointer_mode).unwrap().serialize();
+        let keyboard_mode_bytes = Option::<u8>::from(self.keyboard_mode).unwrap().serialize();
         let confine_to_bytes = self.confine_to.serialize();
         let cursor_bytes = self.cursor.serialize();
         let time_bytes = self.time.serialize();
@@ -11428,9 +11651,9 @@ impl GrabPointerRequest {
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
-        let pointer_mode = pointer_mode.try_into()?;
+        let pointer_mode = pointer_mode.into();
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
-        let keyboard_mode = keyboard_mode.try_into()?;
+        let keyboard_mode = keyboard_mode.into();
         let (confine_to, remaining) = Window::try_parse(remaining)?;
         let (cursor, remaining) = Cursor::try_parse(remaining)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
@@ -11562,7 +11785,7 @@ impl TryParse for GrabPointerReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = GrabPointerReply { status, sequence, length };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -11701,77 +11924,83 @@ where
 /// * `4` - Scroll wheel. TODO: direction?
 /// * `5` - Scroll wheel. TODO: direction?
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ButtonIndex {
-    Any = 0,
-    M1 = 1,
-    M2 = 2,
-    M3 = 3,
-    M4 = 4,
-    M5 = 5,
+pub struct ButtonIndex(u8);
+impl ButtonIndex {
+    pub const ANY: Self = Self(0);
+    pub const M1: Self = Self(1);
+    pub const M2: Self = Self(2);
+    pub const M3: Self = Self(3);
+    pub const M4: Self = Self(4);
+    pub const M5: Self = Self(5);
+}
+impl From<ButtonIndex> for Option<bool> {
+    #[inline]
+    fn from(input: ButtonIndex) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ButtonIndex> for u8 {
+    #[inline]
     fn from(input: ButtonIndex) -> Self {
-        match input {
-            ButtonIndex::Any => 0,
-            ButtonIndex::M1 => 1,
-            ButtonIndex::M2 => 2,
-            ButtonIndex::M3 => 3,
-            ButtonIndex::M4 => 4,
-            ButtonIndex::M5 => 5,
-        }
+        input.0
     }
 }
 impl From<ButtonIndex> for Option<u8> {
+    #[inline]
     fn from(input: ButtonIndex) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ButtonIndex> for u16 {
+    #[inline]
     fn from(input: ButtonIndex) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ButtonIndex> for Option<u16> {
+    #[inline]
     fn from(input: ButtonIndex) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ButtonIndex> for u32 {
+    #[inline]
     fn from(input: ButtonIndex) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ButtonIndex> for Option<u32> {
+    #[inline]
     fn from(input: ButtonIndex) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ButtonIndex {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ButtonIndex::Any),
-            1 => Ok(ButtonIndex::M1),
-            2 => Ok(ButtonIndex::M2),
-            3 => Ok(ButtonIndex::M3),
-            4 => Ok(ButtonIndex::M4),
-            5 => Ok(ButtonIndex::M5),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ButtonIndex {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ButtonIndex {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ButtonIndex {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ButtonIndex {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -11867,11 +12096,11 @@ impl GrabButtonRequest {
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
         let event_mask_bytes = self.event_mask.serialize();
-        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
-        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
+        let pointer_mode_bytes = Option::<u8>::from(self.pointer_mode).unwrap().serialize();
+        let keyboard_mode_bytes = Option::<u8>::from(self.keyboard_mode).unwrap().serialize();
         let confine_to_bytes = self.confine_to.serialize();
         let cursor_bytes = self.cursor.serialize();
-        let button_bytes = u8::from(self.button).serialize();
+        let button_bytes = Option::<u8>::from(self.button).unwrap().serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
             GRAB_BUTTON_REQUEST,
@@ -11924,13 +12153,13 @@ impl GrabButtonRequest {
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
-        let pointer_mode = pointer_mode.try_into()?;
+        let pointer_mode = pointer_mode.into();
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
-        let keyboard_mode = keyboard_mode.try_into()?;
+        let keyboard_mode = keyboard_mode.into();
         let (confine_to, remaining) = Window::try_parse(remaining)?;
         let (cursor, remaining) = Cursor::try_parse(remaining)?;
         let (button, remaining) = u8::try_parse(remaining)?;
-        let button = button.try_into()?;
+        let button = button.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let _ = remaining;
@@ -12059,7 +12288,7 @@ impl UngrabButtonRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let button_bytes = u8::from(self.button).serialize();
+        let button_bytes = Option::<u8>::from(self.button).unwrap().serialize();
         let grab_window_bytes = self.grab_window.serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
@@ -12097,7 +12326,7 @@ impl UngrabButtonRequest {
         }
         let remaining = &[header.minor_opcode];
         let (button, remaining) = u8::try_parse(remaining)?;
-        let button = button.try_into()?;
+        let button = button.into();
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
@@ -12302,8 +12531,8 @@ impl GrabKeyboardRequest {
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
         let time_bytes = self.time.serialize();
-        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
-        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
+        let pointer_mode_bytes = Option::<u8>::from(self.pointer_mode).unwrap().serialize();
+        let keyboard_mode_bytes = Option::<u8>::from(self.keyboard_mode).unwrap().serialize();
         let mut request0 = vec![
             GRAB_KEYBOARD_REQUEST,
             owner_events_bytes[0],
@@ -12347,9 +12576,9 @@ impl GrabKeyboardRequest {
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
-        let pointer_mode = pointer_mode.try_into()?;
+        let pointer_mode = pointer_mode.into();
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
-        let keyboard_mode = keyboard_mode.try_into()?;
+        let keyboard_mode = keyboard_mode.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GrabKeyboardRequest {
@@ -12458,7 +12687,7 @@ impl TryParse for GrabKeyboardReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = GrabKeyboardReply { status, sequence, length };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -12543,62 +12772,78 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Grab {
-    Any = 0,
+pub struct Grab(u8);
+impl Grab {
+    pub const ANY: Self = Self(0);
+}
+impl From<Grab> for Option<bool> {
+    #[inline]
+    fn from(input: Grab) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Grab> for u8 {
+    #[inline]
     fn from(input: Grab) -> Self {
-        match input {
-            Grab::Any => 0,
-        }
+        input.0
     }
 }
 impl From<Grab> for Option<u8> {
+    #[inline]
     fn from(input: Grab) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Grab> for u16 {
+    #[inline]
     fn from(input: Grab) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Grab> for Option<u16> {
+    #[inline]
     fn from(input: Grab) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Grab> for u32 {
+    #[inline]
     fn from(input: Grab) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Grab> for Option<u32> {
+    #[inline]
     fn from(input: Grab) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Grab {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Grab::Any),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Grab {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Grab {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Grab {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Grab {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -12685,8 +12930,8 @@ impl GrabKeyRequest {
         let grab_window_bytes = self.grab_window.serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let key_bytes = self.key.serialize();
-        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
-        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
+        let pointer_mode_bytes = Option::<u8>::from(self.pointer_mode).unwrap().serialize();
+        let keyboard_mode_bytes = Option::<u8>::from(self.keyboard_mode).unwrap().serialize();
         let mut request0 = vec![
             GRAB_KEY_REQUEST,
             owner_events_bytes[0],
@@ -12731,9 +12976,9 @@ impl GrabKeyRequest {
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let (key, remaining) = Keycode::try_parse(remaining)?;
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
-        let pointer_mode = pointer_mode.try_into()?;
+        let pointer_mode = pointer_mode.into();
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
-        let keyboard_mode = keyboard_mode.try_into()?;
+        let keyboard_mode = keyboard_mode.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GrabKeyRequest {
@@ -13023,83 +13268,85 @@ where
 /// the client on behalf of two separate grabs, AsyncBoth thaws for both. AsyncBoth
 /// has no effect unless both pointer and keyboard are frozen by the client.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Allow {
-    AsyncPointer = 0,
-    SyncPointer = 1,
-    ReplayPointer = 2,
-    AsyncKeyboard = 3,
-    SyncKeyboard = 4,
-    ReplayKeyboard = 5,
-    AsyncBoth = 6,
-    SyncBoth = 7,
+pub struct Allow(u8);
+impl Allow {
+    pub const ASYNC_POINTER: Self = Self(0);
+    pub const SYNC_POINTER: Self = Self(1);
+    pub const REPLAY_POINTER: Self = Self(2);
+    pub const ASYNC_KEYBOARD: Self = Self(3);
+    pub const SYNC_KEYBOARD: Self = Self(4);
+    pub const REPLAY_KEYBOARD: Self = Self(5);
+    pub const ASYNC_BOTH: Self = Self(6);
+    pub const SYNC_BOTH: Self = Self(7);
+}
+impl From<Allow> for Option<bool> {
+    #[inline]
+    fn from(input: Allow) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Allow> for u8 {
+    #[inline]
     fn from(input: Allow) -> Self {
-        match input {
-            Allow::AsyncPointer => 0,
-            Allow::SyncPointer => 1,
-            Allow::ReplayPointer => 2,
-            Allow::AsyncKeyboard => 3,
-            Allow::SyncKeyboard => 4,
-            Allow::ReplayKeyboard => 5,
-            Allow::AsyncBoth => 6,
-            Allow::SyncBoth => 7,
-        }
+        input.0
     }
 }
 impl From<Allow> for Option<u8> {
+    #[inline]
     fn from(input: Allow) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Allow> for u16 {
+    #[inline]
     fn from(input: Allow) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Allow> for Option<u16> {
+    #[inline]
     fn from(input: Allow) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Allow> for u32 {
+    #[inline]
     fn from(input: Allow) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Allow> for Option<u32> {
+    #[inline]
     fn from(input: Allow) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Allow {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Allow::AsyncPointer),
-            1 => Ok(Allow::SyncPointer),
-            2 => Ok(Allow::ReplayPointer),
-            3 => Ok(Allow::AsyncKeyboard),
-            4 => Ok(Allow::SyncKeyboard),
-            5 => Ok(Allow::ReplayKeyboard),
-            6 => Ok(Allow::AsyncBoth),
-            7 => Ok(Allow::SyncBoth),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Allow {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Allow {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Allow {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Allow {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -13136,7 +13383,7 @@ impl AllowEventsRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = u8::from(self.mode).serialize();
+        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
             ALLOW_EVENTS_REQUEST,
@@ -13169,7 +13416,7 @@ impl AllowEventsRequest {
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let _ = remaining;
         let (time, remaining) = Timestamp::try_parse(value)?;
         let _ = remaining;
@@ -13987,71 +14234,81 @@ where
 /// revert_to value is `XCB_INPUT_FOCUS_NONE`.
 /// * `FollowKeyboard` - NOT YET DOCUMENTED. Only relevant for the xinput extension.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum InputFocus {
-    None = 0,
-    PointerRoot = 1,
-    Parent = 2,
-    FollowKeyboard = 3,
+pub struct InputFocus(u8);
+impl InputFocus {
+    pub const NONE: Self = Self(0);
+    pub const POINTER_ROOT: Self = Self(1);
+    pub const PARENT: Self = Self(2);
+    pub const FOLLOW_KEYBOARD: Self = Self(3);
+}
+impl From<InputFocus> for Option<bool> {
+    #[inline]
+    fn from(input: InputFocus) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<InputFocus> for u8 {
+    #[inline]
     fn from(input: InputFocus) -> Self {
-        match input {
-            InputFocus::None => 0,
-            InputFocus::PointerRoot => 1,
-            InputFocus::Parent => 2,
-            InputFocus::FollowKeyboard => 3,
-        }
+        input.0
     }
 }
 impl From<InputFocus> for Option<u8> {
+    #[inline]
     fn from(input: InputFocus) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<InputFocus> for u16 {
+    #[inline]
     fn from(input: InputFocus) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<InputFocus> for Option<u16> {
+    #[inline]
     fn from(input: InputFocus) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<InputFocus> for u32 {
+    #[inline]
     fn from(input: InputFocus) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<InputFocus> for Option<u32> {
+    #[inline]
     fn from(input: InputFocus) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for InputFocus {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(InputFocus::None),
-            1 => Ok(InputFocus::PointerRoot),
-            2 => Ok(InputFocus::Parent),
-            3 => Ok(InputFocus::FollowKeyboard),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for InputFocus {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for InputFocus {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for InputFocus {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for InputFocus {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -14106,7 +14363,7 @@ impl SetInputFocusRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let revert_to_bytes = u8::from(self.revert_to).serialize();
+        let revert_to_bytes = Option::<u8>::from(self.revert_to).unwrap().serialize();
         let focus_bytes = self.focus.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
@@ -14144,7 +14401,7 @@ impl SetInputFocusRequest {
         }
         let remaining = &[header.minor_opcode];
         let (revert_to, remaining) = u8::try_parse(remaining)?;
-        let revert_to = revert_to.try_into()?;
+        let revert_to = revert_to.into();
         let _ = remaining;
         let (focus, remaining) = Window::try_parse(value)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
@@ -14284,7 +14541,7 @@ impl TryParse for GetInputFocusReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let revert_to = revert_to.try_into()?;
+        let revert_to = revert_to.into();
         let result = GetInputFocusReply { revert_to, sequence, length, focus };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -14584,73 +14841,79 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum FontDraw {
-    LeftToRight = 0,
-    RightToLeft = 1,
+pub struct FontDraw(u8);
+impl FontDraw {
+    pub const LEFT_TO_RIGHT: Self = Self(0);
+    pub const RIGHT_TO_LEFT: Self = Self(1);
 }
-impl From<FontDraw> for bool {
+impl From<FontDraw> for Option<bool> {
+    #[inline]
     fn from(input: FontDraw) -> Self {
-        match input {
-            FontDraw::LeftToRight => false,
-            FontDraw::RightToLeft => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<FontDraw> for u8 {
+    #[inline]
     fn from(input: FontDraw) -> Self {
-        match input {
-            FontDraw::LeftToRight => 0,
-            FontDraw::RightToLeft => 1,
-        }
+        input.0
     }
 }
 impl From<FontDraw> for Option<u8> {
+    #[inline]
     fn from(input: FontDraw) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<FontDraw> for u16 {
+    #[inline]
     fn from(input: FontDraw) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<FontDraw> for Option<u16> {
+    #[inline]
     fn from(input: FontDraw) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<FontDraw> for u32 {
+    #[inline]
     fn from(input: FontDraw) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<FontDraw> for Option<u32> {
+    #[inline]
     fn from(input: FontDraw) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for FontDraw {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(FontDraw::LeftToRight),
-            1 => Ok(FontDraw::RightToLeft),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for FontDraw {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for FontDraw {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for FontDraw {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for FontDraw {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -14896,7 +15159,7 @@ impl TryParse for QueryFontReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let draw_direction = draw_direction.try_into()?;
+        let draw_direction = draw_direction.into();
         let result = QueryFontReply { sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, properties, char_infos };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -15135,7 +15398,7 @@ impl TryParse for QueryTextExtentsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let draw_direction = draw_direction.try_into()?;
+        let draw_direction = draw_direction.into();
         let result = QueryTextExtentsReply { draw_direction, sequence, length, font_ascent, font_descent, overall_ascent, overall_descent, overall_width, overall_left, overall_right };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -15532,7 +15795,7 @@ impl TryParse for ListFontsWithInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let draw_direction = draw_direction.try_into()?;
+        let draw_direction = draw_direction.into();
         let result = ListFontsWithInfoReply { sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, replies_hint, properties, name };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16093,685 +16356,629 @@ where
 /// * `DashList` - TODO
 /// * `ArcMode` - TODO
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum GC {
-    Function = 1 << 0,
-    PlaneMask = 1 << 1,
-    Foreground = 1 << 2,
-    Background = 1 << 3,
-    LineWidth = 1 << 4,
-    LineStyle = 1 << 5,
-    CapStyle = 1 << 6,
-    JoinStyle = 1 << 7,
-    FillStyle = 1 << 8,
-    FillRule = 1 << 9,
-    Tile = 1 << 10,
-    Stipple = 1 << 11,
-    TileStippleOriginX = 1 << 12,
-    TileStippleOriginY = 1 << 13,
-    Font = 1 << 14,
-    SubwindowMode = 1 << 15,
-    GraphicsExposures = 1 << 16,
-    ClipOriginX = 1 << 17,
-    ClipOriginY = 1 << 18,
-    ClipMask = 1 << 19,
-    DashOffset = 1 << 20,
-    DashList = 1 << 21,
-    ArcMode = 1 << 22,
+pub struct GC(u32);
+impl GC {
+    pub const FUNCTION: Self = Self(1 << 0);
+    pub const PLANE_MASK: Self = Self(1 << 1);
+    pub const FOREGROUND: Self = Self(1 << 2);
+    pub const BACKGROUND: Self = Self(1 << 3);
+    pub const LINE_WIDTH: Self = Self(1 << 4);
+    pub const LINE_STYLE: Self = Self(1 << 5);
+    pub const CAP_STYLE: Self = Self(1 << 6);
+    pub const JOIN_STYLE: Self = Self(1 << 7);
+    pub const FILL_STYLE: Self = Self(1 << 8);
+    pub const FILL_RULE: Self = Self(1 << 9);
+    pub const TILE: Self = Self(1 << 10);
+    pub const STIPPLE: Self = Self(1 << 11);
+    pub const TILE_STIPPLE_ORIGIN_X: Self = Self(1 << 12);
+    pub const TILE_STIPPLE_ORIGIN_Y: Self = Self(1 << 13);
+    pub const FONT: Self = Self(1 << 14);
+    pub const SUBWINDOW_MODE: Self = Self(1 << 15);
+    pub const GRAPHICS_EXPOSURES: Self = Self(1 << 16);
+    pub const CLIP_ORIGIN_X: Self = Self(1 << 17);
+    pub const CLIP_ORIGIN_Y: Self = Self(1 << 18);
+    pub const CLIP_MASK: Self = Self(1 << 19);
+    pub const DASH_OFFSET: Self = Self(1 << 20);
+    pub const DASH_LIST: Self = Self(1 << 21);
+    pub const ARC_MODE: Self = Self(1 << 22);
+}
+impl From<GC> for Option<bool> {
+    #[inline]
+    fn from(input: GC) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+}
+impl From<GC> for Option<u8> {
+    #[inline]
+    fn from(input: GC) -> Self {
+        u8::try_from(input.0).ok()
+    }
+}
+impl From<GC> for Option<u16> {
+    #[inline]
+    fn from(input: GC) -> Self {
+        u16::try_from(input.0).ok()
+    }
 }
 impl From<GC> for u32 {
+    #[inline]
     fn from(input: GC) -> Self {
-        match input {
-            GC::Function => 1 << 0,
-            GC::PlaneMask => 1 << 1,
-            GC::Foreground => 1 << 2,
-            GC::Background => 1 << 3,
-            GC::LineWidth => 1 << 4,
-            GC::LineStyle => 1 << 5,
-            GC::CapStyle => 1 << 6,
-            GC::JoinStyle => 1 << 7,
-            GC::FillStyle => 1 << 8,
-            GC::FillRule => 1 << 9,
-            GC::Tile => 1 << 10,
-            GC::Stipple => 1 << 11,
-            GC::TileStippleOriginX => 1 << 12,
-            GC::TileStippleOriginY => 1 << 13,
-            GC::Font => 1 << 14,
-            GC::SubwindowMode => 1 << 15,
-            GC::GraphicsExposures => 1 << 16,
-            GC::ClipOriginX => 1 << 17,
-            GC::ClipOriginY => 1 << 18,
-            GC::ClipMask => 1 << 19,
-            GC::DashOffset => 1 << 20,
-            GC::DashList => 1 << 21,
-            GC::ArcMode => 1 << 22,
-        }
+        input.0
     }
 }
 impl From<GC> for Option<u32> {
+    #[inline]
     fn from(input: GC) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u32> for GC {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(GC::Function),
-            2 => Ok(GC::PlaneMask),
-            4 => Ok(GC::Foreground),
-            8 => Ok(GC::Background),
-            16 => Ok(GC::LineWidth),
-            32 => Ok(GC::LineStyle),
-            64 => Ok(GC::CapStyle),
-            128 => Ok(GC::JoinStyle),
-            256 => Ok(GC::FillStyle),
-            512 => Ok(GC::FillRule),
-            1024 => Ok(GC::Tile),
-            2048 => Ok(GC::Stipple),
-            4096 => Ok(GC::TileStippleOriginX),
-            8192 => Ok(GC::TileStippleOriginY),
-            16384 => Ok(GC::Font),
-            32768 => Ok(GC::SubwindowMode),
-            65536 => Ok(GC::GraphicsExposures),
-            131_072 => Ok(GC::ClipOriginX),
-            262_144 => Ok(GC::ClipOriginY),
-            524_288 => Ok(GC::ClipMask),
-            1_048_576 => Ok(GC::DashOffset),
-            2_097_152 => Ok(GC::DashList),
-            4_194_304 => Ok(GC::ArcMode),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for GC {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for GC {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for GC {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for GC {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 bitmask_binop!(GC, u32);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GX {
-    Clear = 0,
-    And = 1,
-    AndReverse = 2,
-    Copy = 3,
-    AndInverted = 4,
-    Noop = 5,
-    Xor = 6,
-    Or = 7,
-    Nor = 8,
-    Equiv = 9,
-    Invert = 10,
-    OrReverse = 11,
-    CopyInverted = 12,
-    OrInverted = 13,
-    Nand = 14,
-    Set = 15,
+pub struct GX(u32);
+impl GX {
+    pub const CLEAR: Self = Self(0);
+    pub const AND: Self = Self(1);
+    pub const AND_REVERSE: Self = Self(2);
+    pub const COPY: Self = Self(3);
+    pub const AND_INVERTED: Self = Self(4);
+    pub const NOOP: Self = Self(5);
+    pub const XOR: Self = Self(6);
+    pub const OR: Self = Self(7);
+    pub const NOR: Self = Self(8);
+    pub const EQUIV: Self = Self(9);
+    pub const INVERT: Self = Self(10);
+    pub const OR_REVERSE: Self = Self(11);
+    pub const COPY_INVERTED: Self = Self(12);
+    pub const OR_INVERTED: Self = Self(13);
+    pub const NAND: Self = Self(14);
+    pub const SET: Self = Self(15);
 }
-impl From<GX> for u8 {
+impl From<GX> for Option<bool> {
+    #[inline]
     fn from(input: GX) -> Self {
-        match input {
-            GX::Clear => 0,
-            GX::And => 1,
-            GX::AndReverse => 2,
-            GX::Copy => 3,
-            GX::AndInverted => 4,
-            GX::Noop => 5,
-            GX::Xor => 6,
-            GX::Or => 7,
-            GX::Nor => 8,
-            GX::Equiv => 9,
-            GX::Invert => 10,
-            GX::OrReverse => 11,
-            GX::CopyInverted => 12,
-            GX::OrInverted => 13,
-            GX::Nand => 14,
-            GX::Set => 15,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<GX> for Option<u8> {
+    #[inline]
     fn from(input: GX) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<GX> for u16 {
-    fn from(input: GX) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<GX> for Option<u16> {
+    #[inline]
     fn from(input: GX) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<GX> for u32 {
+    #[inline]
     fn from(input: GX) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<GX> for Option<u32> {
+    #[inline]
     fn from(input: GX) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for GX {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GX::Clear),
-            1 => Ok(GX::And),
-            2 => Ok(GX::AndReverse),
-            3 => Ok(GX::Copy),
-            4 => Ok(GX::AndInverted),
-            5 => Ok(GX::Noop),
-            6 => Ok(GX::Xor),
-            7 => Ok(GX::Or),
-            8 => Ok(GX::Nor),
-            9 => Ok(GX::Equiv),
-            10 => Ok(GX::Invert),
-            11 => Ok(GX::OrReverse),
-            12 => Ok(GX::CopyInverted),
-            13 => Ok(GX::OrInverted),
-            14 => Ok(GX::Nand),
-            15 => Ok(GX::Set),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for GX {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for GX {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for GX {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for GX {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for GX {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for GX {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum LineStyle {
-    Solid = 0,
-    OnOffDash = 1,
-    DoubleDash = 2,
+pub struct LineStyle(u32);
+impl LineStyle {
+    pub const SOLID: Self = Self(0);
+    pub const ON_OFF_DASH: Self = Self(1);
+    pub const DOUBLE_DASH: Self = Self(2);
 }
-impl From<LineStyle> for u8 {
+impl From<LineStyle> for Option<bool> {
+    #[inline]
     fn from(input: LineStyle) -> Self {
-        match input {
-            LineStyle::Solid => 0,
-            LineStyle::OnOffDash => 1,
-            LineStyle::DoubleDash => 2,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<LineStyle> for Option<u8> {
+    #[inline]
     fn from(input: LineStyle) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<LineStyle> for u16 {
-    fn from(input: LineStyle) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<LineStyle> for Option<u16> {
+    #[inline]
     fn from(input: LineStyle) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<LineStyle> for u32 {
+    #[inline]
     fn from(input: LineStyle) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<LineStyle> for Option<u32> {
+    #[inline]
     fn from(input: LineStyle) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for LineStyle {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(LineStyle::Solid),
-            1 => Ok(LineStyle::OnOffDash),
-            2 => Ok(LineStyle::DoubleDash),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for LineStyle {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for LineStyle {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for LineStyle {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for LineStyle {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for LineStyle {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for LineStyle {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CapStyle {
-    NotLast = 0,
-    Butt = 1,
-    Round = 2,
-    Projecting = 3,
+pub struct CapStyle(u32);
+impl CapStyle {
+    pub const NOT_LAST: Self = Self(0);
+    pub const BUTT: Self = Self(1);
+    pub const ROUND: Self = Self(2);
+    pub const PROJECTING: Self = Self(3);
 }
-impl From<CapStyle> for u8 {
+impl From<CapStyle> for Option<bool> {
+    #[inline]
     fn from(input: CapStyle) -> Self {
-        match input {
-            CapStyle::NotLast => 0,
-            CapStyle::Butt => 1,
-            CapStyle::Round => 2,
-            CapStyle::Projecting => 3,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<CapStyle> for Option<u8> {
+    #[inline]
     fn from(input: CapStyle) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<CapStyle> for u16 {
-    fn from(input: CapStyle) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<CapStyle> for Option<u16> {
+    #[inline]
     fn from(input: CapStyle) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<CapStyle> for u32 {
+    #[inline]
     fn from(input: CapStyle) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<CapStyle> for Option<u32> {
+    #[inline]
     fn from(input: CapStyle) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for CapStyle {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(CapStyle::NotLast),
-            1 => Ok(CapStyle::Butt),
-            2 => Ok(CapStyle::Round),
-            3 => Ok(CapStyle::Projecting),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CapStyle {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for CapStyle {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for CapStyle {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for CapStyle {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for CapStyle {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for CapStyle {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum JoinStyle {
-    Miter = 0,
-    Round = 1,
-    Bevel = 2,
+pub struct JoinStyle(u32);
+impl JoinStyle {
+    pub const MITER: Self = Self(0);
+    pub const ROUND: Self = Self(1);
+    pub const BEVEL: Self = Self(2);
 }
-impl From<JoinStyle> for u8 {
+impl From<JoinStyle> for Option<bool> {
+    #[inline]
     fn from(input: JoinStyle) -> Self {
-        match input {
-            JoinStyle::Miter => 0,
-            JoinStyle::Round => 1,
-            JoinStyle::Bevel => 2,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<JoinStyle> for Option<u8> {
+    #[inline]
     fn from(input: JoinStyle) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<JoinStyle> for u16 {
-    fn from(input: JoinStyle) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<JoinStyle> for Option<u16> {
+    #[inline]
     fn from(input: JoinStyle) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<JoinStyle> for u32 {
+    #[inline]
     fn from(input: JoinStyle) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<JoinStyle> for Option<u32> {
+    #[inline]
     fn from(input: JoinStyle) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for JoinStyle {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(JoinStyle::Miter),
-            1 => Ok(JoinStyle::Round),
-            2 => Ok(JoinStyle::Bevel),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for JoinStyle {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for JoinStyle {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for JoinStyle {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for JoinStyle {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for JoinStyle {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for JoinStyle {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum FillStyle {
-    Solid = 0,
-    Tiled = 1,
-    Stippled = 2,
-    OpaqueStippled = 3,
+pub struct FillStyle(u32);
+impl FillStyle {
+    pub const SOLID: Self = Self(0);
+    pub const TILED: Self = Self(1);
+    pub const STIPPLED: Self = Self(2);
+    pub const OPAQUE_STIPPLED: Self = Self(3);
 }
-impl From<FillStyle> for u8 {
+impl From<FillStyle> for Option<bool> {
+    #[inline]
     fn from(input: FillStyle) -> Self {
-        match input {
-            FillStyle::Solid => 0,
-            FillStyle::Tiled => 1,
-            FillStyle::Stippled => 2,
-            FillStyle::OpaqueStippled => 3,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<FillStyle> for Option<u8> {
+    #[inline]
     fn from(input: FillStyle) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<FillStyle> for u16 {
-    fn from(input: FillStyle) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<FillStyle> for Option<u16> {
+    #[inline]
     fn from(input: FillStyle) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<FillStyle> for u32 {
+    #[inline]
     fn from(input: FillStyle) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<FillStyle> for Option<u32> {
+    #[inline]
     fn from(input: FillStyle) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for FillStyle {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(FillStyle::Solid),
-            1 => Ok(FillStyle::Tiled),
-            2 => Ok(FillStyle::Stippled),
-            3 => Ok(FillStyle::OpaqueStippled),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for FillStyle {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for FillStyle {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for FillStyle {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for FillStyle {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for FillStyle {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for FillStyle {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum FillRule {
-    EvenOdd = 0,
-    Winding = 1,
+pub struct FillRule(u32);
+impl FillRule {
+    pub const EVEN_ODD: Self = Self(0);
+    pub const WINDING: Self = Self(1);
 }
-impl From<FillRule> for bool {
+impl From<FillRule> for Option<bool> {
+    #[inline]
     fn from(input: FillRule) -> Self {
-        match input {
-            FillRule::EvenOdd => false,
-            FillRule::Winding => true,
-        }
-    }
-}
-impl From<FillRule> for u8 {
-    fn from(input: FillRule) -> Self {
-        match input {
-            FillRule::EvenOdd => 0,
-            FillRule::Winding => 1,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<FillRule> for Option<u8> {
+    #[inline]
     fn from(input: FillRule) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<FillRule> for u16 {
-    fn from(input: FillRule) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<FillRule> for Option<u16> {
+    #[inline]
     fn from(input: FillRule) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<FillRule> for u32 {
+    #[inline]
     fn from(input: FillRule) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<FillRule> for Option<u32> {
+    #[inline]
     fn from(input: FillRule) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for FillRule {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(FillRule::EvenOdd),
-            1 => Ok(FillRule::Winding),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for FillRule {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for FillRule {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for FillRule {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for FillRule {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for FillRule {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for FillRule {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SubwindowMode {
-    ClipByChildren = 0,
-    IncludeInferiors = 1,
+pub struct SubwindowMode(u32);
+impl SubwindowMode {
+    pub const CLIP_BY_CHILDREN: Self = Self(0);
+    pub const INCLUDE_INFERIORS: Self = Self(1);
 }
-impl From<SubwindowMode> for bool {
+impl From<SubwindowMode> for Option<bool> {
+    #[inline]
     fn from(input: SubwindowMode) -> Self {
-        match input {
-            SubwindowMode::ClipByChildren => false,
-            SubwindowMode::IncludeInferiors => true,
-        }
-    }
-}
-impl From<SubwindowMode> for u8 {
-    fn from(input: SubwindowMode) -> Self {
-        match input {
-            SubwindowMode::ClipByChildren => 0,
-            SubwindowMode::IncludeInferiors => 1,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<SubwindowMode> for Option<u8> {
+    #[inline]
     fn from(input: SubwindowMode) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<SubwindowMode> for u16 {
-    fn from(input: SubwindowMode) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<SubwindowMode> for Option<u16> {
+    #[inline]
     fn from(input: SubwindowMode) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<SubwindowMode> for u32 {
+    #[inline]
     fn from(input: SubwindowMode) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<SubwindowMode> for Option<u32> {
+    #[inline]
     fn from(input: SubwindowMode) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for SubwindowMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SubwindowMode::ClipByChildren),
-            1 => Ok(SubwindowMode::IncludeInferiors),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SubwindowMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for SubwindowMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for SubwindowMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for SubwindowMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for SubwindowMode {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for SubwindowMode {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ArcMode {
-    Chord = 0,
-    PieSlice = 1,
+pub struct ArcMode(u32);
+impl ArcMode {
+    pub const CHORD: Self = Self(0);
+    pub const PIE_SLICE: Self = Self(1);
 }
-impl From<ArcMode> for bool {
+impl From<ArcMode> for Option<bool> {
+    #[inline]
     fn from(input: ArcMode) -> Self {
-        match input {
-            ArcMode::Chord => false,
-            ArcMode::PieSlice => true,
-        }
-    }
-}
-impl From<ArcMode> for u8 {
-    fn from(input: ArcMode) -> Self {
-        match input {
-            ArcMode::Chord => 0,
-            ArcMode::PieSlice => 1,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<ArcMode> for Option<u8> {
+    #[inline]
     fn from(input: ArcMode) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<ArcMode> for u16 {
-    fn from(input: ArcMode) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<ArcMode> for Option<u16> {
+    #[inline]
     fn from(input: ArcMode) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<ArcMode> for u32 {
+    #[inline]
     fn from(input: ArcMode) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<ArcMode> for Option<u32> {
+    #[inline]
     fn from(input: ArcMode) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for ArcMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ArcMode::Chord),
-            1 => Ok(ArcMode::PieSlice),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ArcMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for ArcMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for ArcMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for ArcMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for ArcMode {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ArcMode {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
@@ -16806,16 +17013,16 @@ impl CreateGCAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let function = if switch_expr & u32::from(GC::Function) != 0 {
+        let function = if switch_expr & u32::from(GC::FUNCTION) != 0 {
             let remaining = outer_remaining;
             let (function, remaining) = u32::try_parse(remaining)?;
-            let function = function.try_into()?;
+            let function = function.into();
             outer_remaining = remaining;
             Some(function)
         } else {
             None
         };
-        let plane_mask = if switch_expr & u32::from(GC::PlaneMask) != 0 {
+        let plane_mask = if switch_expr & u32::from(GC::PLANE_MASK) != 0 {
             let remaining = outer_remaining;
             let (plane_mask, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16823,7 +17030,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let foreground = if switch_expr & u32::from(GC::Foreground) != 0 {
+        let foreground = if switch_expr & u32::from(GC::FOREGROUND) != 0 {
             let remaining = outer_remaining;
             let (foreground, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16831,7 +17038,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let background = if switch_expr & u32::from(GC::Background) != 0 {
+        let background = if switch_expr & u32::from(GC::BACKGROUND) != 0 {
             let remaining = outer_remaining;
             let (background, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16839,7 +17046,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let line_width = if switch_expr & u32::from(GC::LineWidth) != 0 {
+        let line_width = if switch_expr & u32::from(GC::LINE_WIDTH) != 0 {
             let remaining = outer_remaining;
             let (line_width, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16847,52 +17054,52 @@ impl CreateGCAux {
         } else {
             None
         };
-        let line_style = if switch_expr & u32::from(GC::LineStyle) != 0 {
+        let line_style = if switch_expr & u32::from(GC::LINE_STYLE) != 0 {
             let remaining = outer_remaining;
             let (line_style, remaining) = u32::try_parse(remaining)?;
-            let line_style = line_style.try_into()?;
+            let line_style = line_style.into();
             outer_remaining = remaining;
             Some(line_style)
         } else {
             None
         };
-        let cap_style = if switch_expr & u32::from(GC::CapStyle) != 0 {
+        let cap_style = if switch_expr & u32::from(GC::CAP_STYLE) != 0 {
             let remaining = outer_remaining;
             let (cap_style, remaining) = u32::try_parse(remaining)?;
-            let cap_style = cap_style.try_into()?;
+            let cap_style = cap_style.into();
             outer_remaining = remaining;
             Some(cap_style)
         } else {
             None
         };
-        let join_style = if switch_expr & u32::from(GC::JoinStyle) != 0 {
+        let join_style = if switch_expr & u32::from(GC::JOIN_STYLE) != 0 {
             let remaining = outer_remaining;
             let (join_style, remaining) = u32::try_parse(remaining)?;
-            let join_style = join_style.try_into()?;
+            let join_style = join_style.into();
             outer_remaining = remaining;
             Some(join_style)
         } else {
             None
         };
-        let fill_style = if switch_expr & u32::from(GC::FillStyle) != 0 {
+        let fill_style = if switch_expr & u32::from(GC::FILL_STYLE) != 0 {
             let remaining = outer_remaining;
             let (fill_style, remaining) = u32::try_parse(remaining)?;
-            let fill_style = fill_style.try_into()?;
+            let fill_style = fill_style.into();
             outer_remaining = remaining;
             Some(fill_style)
         } else {
             None
         };
-        let fill_rule = if switch_expr & u32::from(GC::FillRule) != 0 {
+        let fill_rule = if switch_expr & u32::from(GC::FILL_RULE) != 0 {
             let remaining = outer_remaining;
             let (fill_rule, remaining) = u32::try_parse(remaining)?;
-            let fill_rule = fill_rule.try_into()?;
+            let fill_rule = fill_rule.into();
             outer_remaining = remaining;
             Some(fill_rule)
         } else {
             None
         };
-        let tile = if switch_expr & u32::from(GC::Tile) != 0 {
+        let tile = if switch_expr & u32::from(GC::TILE) != 0 {
             let remaining = outer_remaining;
             let (tile, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16900,7 +17107,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let stipple = if switch_expr & u32::from(GC::Stipple) != 0 {
+        let stipple = if switch_expr & u32::from(GC::STIPPLE) != 0 {
             let remaining = outer_remaining;
             let (stipple, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16908,7 +17115,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let tile_stipple_x_origin = if switch_expr & u32::from(GC::TileStippleOriginX) != 0 {
+        let tile_stipple_x_origin = if switch_expr & u32::from(GC::TILE_STIPPLE_ORIGIN_X) != 0 {
             let remaining = outer_remaining;
             let (tile_stipple_x_origin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16916,7 +17123,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let tile_stipple_y_origin = if switch_expr & u32::from(GC::TileStippleOriginY) != 0 {
+        let tile_stipple_y_origin = if switch_expr & u32::from(GC::TILE_STIPPLE_ORIGIN_Y) != 0 {
             let remaining = outer_remaining;
             let (tile_stipple_y_origin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16924,7 +17131,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let font = if switch_expr & u32::from(GC::Font) != 0 {
+        let font = if switch_expr & u32::from(GC::FONT) != 0 {
             let remaining = outer_remaining;
             let (font, remaining) = Font::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16932,16 +17139,16 @@ impl CreateGCAux {
         } else {
             None
         };
-        let subwindow_mode = if switch_expr & u32::from(GC::SubwindowMode) != 0 {
+        let subwindow_mode = if switch_expr & u32::from(GC::SUBWINDOW_MODE) != 0 {
             let remaining = outer_remaining;
             let (subwindow_mode, remaining) = u32::try_parse(remaining)?;
-            let subwindow_mode = subwindow_mode.try_into()?;
+            let subwindow_mode = subwindow_mode.into();
             outer_remaining = remaining;
             Some(subwindow_mode)
         } else {
             None
         };
-        let graphics_exposures = if switch_expr & u32::from(GC::GraphicsExposures) != 0 {
+        let graphics_exposures = if switch_expr & u32::from(GC::GRAPHICS_EXPOSURES) != 0 {
             let remaining = outer_remaining;
             let (graphics_exposures, remaining) = Bool32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16949,7 +17156,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let clip_x_origin = if switch_expr & u32::from(GC::ClipOriginX) != 0 {
+        let clip_x_origin = if switch_expr & u32::from(GC::CLIP_ORIGIN_X) != 0 {
             let remaining = outer_remaining;
             let (clip_x_origin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16957,7 +17164,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let clip_y_origin = if switch_expr & u32::from(GC::ClipOriginY) != 0 {
+        let clip_y_origin = if switch_expr & u32::from(GC::CLIP_ORIGIN_Y) != 0 {
             let remaining = outer_remaining;
             let (clip_y_origin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16965,7 +17172,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let clip_mask = if switch_expr & u32::from(GC::ClipMask) != 0 {
+        let clip_mask = if switch_expr & u32::from(GC::CLIP_MASK) != 0 {
             let remaining = outer_remaining;
             let (clip_mask, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16973,7 +17180,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let dash_offset = if switch_expr & u32::from(GC::DashOffset) != 0 {
+        let dash_offset = if switch_expr & u32::from(GC::DASH_OFFSET) != 0 {
             let remaining = outer_remaining;
             let (dash_offset, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16981,7 +17188,7 @@ impl CreateGCAux {
         } else {
             None
         };
-        let dashes = if switch_expr & u32::from(GC::DashList) != 0 {
+        let dashes = if switch_expr & u32::from(GC::DASH_LIST) != 0 {
             let remaining = outer_remaining;
             let (dashes, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -16989,10 +17196,10 @@ impl CreateGCAux {
         } else {
             None
         };
-        let arc_mode = if switch_expr & u32::from(GC::ArcMode) != 0 {
+        let arc_mode = if switch_expr & u32::from(GC::ARC_MODE) != 0 {
             let remaining = outer_remaining;
             let (arc_mode, remaining) = u32::try_parse(remaining)?;
-            let arc_mode = arc_mode.try_into()?;
+            let arc_mode = arc_mode.into();
             outer_remaining = remaining;
             Some(arc_mode)
         } else {
@@ -17012,7 +17219,7 @@ impl CreateGCAux {
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(function) = self.function {
-            u32::from(function).serialize_into(bytes);
+            Option::<u32>::from(function).unwrap().serialize_into(bytes);
         }
         if let Some(plane_mask) = self.plane_mask {
             plane_mask.serialize_into(bytes);
@@ -17027,19 +17234,19 @@ impl CreateGCAux {
             line_width.serialize_into(bytes);
         }
         if let Some(line_style) = self.line_style {
-            u32::from(line_style).serialize_into(bytes);
+            Option::<u32>::from(line_style).unwrap().serialize_into(bytes);
         }
         if let Some(cap_style) = self.cap_style {
-            u32::from(cap_style).serialize_into(bytes);
+            Option::<u32>::from(cap_style).unwrap().serialize_into(bytes);
         }
         if let Some(join_style) = self.join_style {
-            u32::from(join_style).serialize_into(bytes);
+            Option::<u32>::from(join_style).unwrap().serialize_into(bytes);
         }
         if let Some(fill_style) = self.fill_style {
-            u32::from(fill_style).serialize_into(bytes);
+            Option::<u32>::from(fill_style).unwrap().serialize_into(bytes);
         }
         if let Some(fill_rule) = self.fill_rule {
-            u32::from(fill_rule).serialize_into(bytes);
+            Option::<u32>::from(fill_rule).unwrap().serialize_into(bytes);
         }
         if let Some(tile) = self.tile {
             tile.serialize_into(bytes);
@@ -17057,7 +17264,7 @@ impl CreateGCAux {
             font.serialize_into(bytes);
         }
         if let Some(subwindow_mode) = self.subwindow_mode {
-            u32::from(subwindow_mode).serialize_into(bytes);
+            Option::<u32>::from(subwindow_mode).unwrap().serialize_into(bytes);
         }
         if let Some(graphics_exposures) = self.graphics_exposures {
             graphics_exposures.serialize_into(bytes);
@@ -17078,7 +17285,7 @@ impl CreateGCAux {
             dashes.serialize_into(bytes);
         }
         if let Some(arc_mode) = self.arc_mode {
-            u32::from(arc_mode).serialize_into(bytes);
+            Option::<u32>::from(arc_mode).unwrap().serialize_into(bytes);
         }
     }
 }
@@ -17086,73 +17293,73 @@ impl CreateGCAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.function.is_some() {
-            expr_value |= u32::from(GC::Function);
+            expr_value |= u32::from(GC::FUNCTION);
         }
         if self.plane_mask.is_some() {
-            expr_value |= u32::from(GC::PlaneMask);
+            expr_value |= u32::from(GC::PLANE_MASK);
         }
         if self.foreground.is_some() {
-            expr_value |= u32::from(GC::Foreground);
+            expr_value |= u32::from(GC::FOREGROUND);
         }
         if self.background.is_some() {
-            expr_value |= u32::from(GC::Background);
+            expr_value |= u32::from(GC::BACKGROUND);
         }
         if self.line_width.is_some() {
-            expr_value |= u32::from(GC::LineWidth);
+            expr_value |= u32::from(GC::LINE_WIDTH);
         }
         if self.line_style.is_some() {
-            expr_value |= u32::from(GC::LineStyle);
+            expr_value |= u32::from(GC::LINE_STYLE);
         }
         if self.cap_style.is_some() {
-            expr_value |= u32::from(GC::CapStyle);
+            expr_value |= u32::from(GC::CAP_STYLE);
         }
         if self.join_style.is_some() {
-            expr_value |= u32::from(GC::JoinStyle);
+            expr_value |= u32::from(GC::JOIN_STYLE);
         }
         if self.fill_style.is_some() {
-            expr_value |= u32::from(GC::FillStyle);
+            expr_value |= u32::from(GC::FILL_STYLE);
         }
         if self.fill_rule.is_some() {
-            expr_value |= u32::from(GC::FillRule);
+            expr_value |= u32::from(GC::FILL_RULE);
         }
         if self.tile.is_some() {
-            expr_value |= u32::from(GC::Tile);
+            expr_value |= u32::from(GC::TILE);
         }
         if self.stipple.is_some() {
-            expr_value |= u32::from(GC::Stipple);
+            expr_value |= u32::from(GC::STIPPLE);
         }
         if self.tile_stipple_x_origin.is_some() {
-            expr_value |= u32::from(GC::TileStippleOriginX);
+            expr_value |= u32::from(GC::TILE_STIPPLE_ORIGIN_X);
         }
         if self.tile_stipple_y_origin.is_some() {
-            expr_value |= u32::from(GC::TileStippleOriginY);
+            expr_value |= u32::from(GC::TILE_STIPPLE_ORIGIN_Y);
         }
         if self.font.is_some() {
-            expr_value |= u32::from(GC::Font);
+            expr_value |= u32::from(GC::FONT);
         }
         if self.subwindow_mode.is_some() {
-            expr_value |= u32::from(GC::SubwindowMode);
+            expr_value |= u32::from(GC::SUBWINDOW_MODE);
         }
         if self.graphics_exposures.is_some() {
-            expr_value |= u32::from(GC::GraphicsExposures);
+            expr_value |= u32::from(GC::GRAPHICS_EXPOSURES);
         }
         if self.clip_x_origin.is_some() {
-            expr_value |= u32::from(GC::ClipOriginX);
+            expr_value |= u32::from(GC::CLIP_ORIGIN_X);
         }
         if self.clip_y_origin.is_some() {
-            expr_value |= u32::from(GC::ClipOriginY);
+            expr_value |= u32::from(GC::CLIP_ORIGIN_Y);
         }
         if self.clip_mask.is_some() {
-            expr_value |= u32::from(GC::ClipMask);
+            expr_value |= u32::from(GC::CLIP_MASK);
         }
         if self.dash_offset.is_some() {
-            expr_value |= u32::from(GC::DashOffset);
+            expr_value |= u32::from(GC::DASH_OFFSET);
         }
         if self.dashes.is_some() {
-            expr_value |= u32::from(GC::DashList);
+            expr_value |= u32::from(GC::DASH_LIST);
         }
         if self.arc_mode.is_some() {
-            expr_value |= u32::from(GC::ArcMode);
+            expr_value |= u32::from(GC::ARC_MODE);
         }
         expr_value
     }
@@ -17455,16 +17662,16 @@ impl ChangeGCAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let function = if switch_expr & u32::from(GC::Function) != 0 {
+        let function = if switch_expr & u32::from(GC::FUNCTION) != 0 {
             let remaining = outer_remaining;
             let (function, remaining) = u32::try_parse(remaining)?;
-            let function = function.try_into()?;
+            let function = function.into();
             outer_remaining = remaining;
             Some(function)
         } else {
             None
         };
-        let plane_mask = if switch_expr & u32::from(GC::PlaneMask) != 0 {
+        let plane_mask = if switch_expr & u32::from(GC::PLANE_MASK) != 0 {
             let remaining = outer_remaining;
             let (plane_mask, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17472,7 +17679,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let foreground = if switch_expr & u32::from(GC::Foreground) != 0 {
+        let foreground = if switch_expr & u32::from(GC::FOREGROUND) != 0 {
             let remaining = outer_remaining;
             let (foreground, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17480,7 +17687,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let background = if switch_expr & u32::from(GC::Background) != 0 {
+        let background = if switch_expr & u32::from(GC::BACKGROUND) != 0 {
             let remaining = outer_remaining;
             let (background, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17488,7 +17695,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let line_width = if switch_expr & u32::from(GC::LineWidth) != 0 {
+        let line_width = if switch_expr & u32::from(GC::LINE_WIDTH) != 0 {
             let remaining = outer_remaining;
             let (line_width, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17496,52 +17703,52 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let line_style = if switch_expr & u32::from(GC::LineStyle) != 0 {
+        let line_style = if switch_expr & u32::from(GC::LINE_STYLE) != 0 {
             let remaining = outer_remaining;
             let (line_style, remaining) = u32::try_parse(remaining)?;
-            let line_style = line_style.try_into()?;
+            let line_style = line_style.into();
             outer_remaining = remaining;
             Some(line_style)
         } else {
             None
         };
-        let cap_style = if switch_expr & u32::from(GC::CapStyle) != 0 {
+        let cap_style = if switch_expr & u32::from(GC::CAP_STYLE) != 0 {
             let remaining = outer_remaining;
             let (cap_style, remaining) = u32::try_parse(remaining)?;
-            let cap_style = cap_style.try_into()?;
+            let cap_style = cap_style.into();
             outer_remaining = remaining;
             Some(cap_style)
         } else {
             None
         };
-        let join_style = if switch_expr & u32::from(GC::JoinStyle) != 0 {
+        let join_style = if switch_expr & u32::from(GC::JOIN_STYLE) != 0 {
             let remaining = outer_remaining;
             let (join_style, remaining) = u32::try_parse(remaining)?;
-            let join_style = join_style.try_into()?;
+            let join_style = join_style.into();
             outer_remaining = remaining;
             Some(join_style)
         } else {
             None
         };
-        let fill_style = if switch_expr & u32::from(GC::FillStyle) != 0 {
+        let fill_style = if switch_expr & u32::from(GC::FILL_STYLE) != 0 {
             let remaining = outer_remaining;
             let (fill_style, remaining) = u32::try_parse(remaining)?;
-            let fill_style = fill_style.try_into()?;
+            let fill_style = fill_style.into();
             outer_remaining = remaining;
             Some(fill_style)
         } else {
             None
         };
-        let fill_rule = if switch_expr & u32::from(GC::FillRule) != 0 {
+        let fill_rule = if switch_expr & u32::from(GC::FILL_RULE) != 0 {
             let remaining = outer_remaining;
             let (fill_rule, remaining) = u32::try_parse(remaining)?;
-            let fill_rule = fill_rule.try_into()?;
+            let fill_rule = fill_rule.into();
             outer_remaining = remaining;
             Some(fill_rule)
         } else {
             None
         };
-        let tile = if switch_expr & u32::from(GC::Tile) != 0 {
+        let tile = if switch_expr & u32::from(GC::TILE) != 0 {
             let remaining = outer_remaining;
             let (tile, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17549,7 +17756,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let stipple = if switch_expr & u32::from(GC::Stipple) != 0 {
+        let stipple = if switch_expr & u32::from(GC::STIPPLE) != 0 {
             let remaining = outer_remaining;
             let (stipple, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17557,7 +17764,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let tile_stipple_x_origin = if switch_expr & u32::from(GC::TileStippleOriginX) != 0 {
+        let tile_stipple_x_origin = if switch_expr & u32::from(GC::TILE_STIPPLE_ORIGIN_X) != 0 {
             let remaining = outer_remaining;
             let (tile_stipple_x_origin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17565,7 +17772,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let tile_stipple_y_origin = if switch_expr & u32::from(GC::TileStippleOriginY) != 0 {
+        let tile_stipple_y_origin = if switch_expr & u32::from(GC::TILE_STIPPLE_ORIGIN_Y) != 0 {
             let remaining = outer_remaining;
             let (tile_stipple_y_origin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17573,7 +17780,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let font = if switch_expr & u32::from(GC::Font) != 0 {
+        let font = if switch_expr & u32::from(GC::FONT) != 0 {
             let remaining = outer_remaining;
             let (font, remaining) = Font::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17581,16 +17788,16 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let subwindow_mode = if switch_expr & u32::from(GC::SubwindowMode) != 0 {
+        let subwindow_mode = if switch_expr & u32::from(GC::SUBWINDOW_MODE) != 0 {
             let remaining = outer_remaining;
             let (subwindow_mode, remaining) = u32::try_parse(remaining)?;
-            let subwindow_mode = subwindow_mode.try_into()?;
+            let subwindow_mode = subwindow_mode.into();
             outer_remaining = remaining;
             Some(subwindow_mode)
         } else {
             None
         };
-        let graphics_exposures = if switch_expr & u32::from(GC::GraphicsExposures) != 0 {
+        let graphics_exposures = if switch_expr & u32::from(GC::GRAPHICS_EXPOSURES) != 0 {
             let remaining = outer_remaining;
             let (graphics_exposures, remaining) = Bool32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17598,7 +17805,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let clip_x_origin = if switch_expr & u32::from(GC::ClipOriginX) != 0 {
+        let clip_x_origin = if switch_expr & u32::from(GC::CLIP_ORIGIN_X) != 0 {
             let remaining = outer_remaining;
             let (clip_x_origin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17606,7 +17813,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let clip_y_origin = if switch_expr & u32::from(GC::ClipOriginY) != 0 {
+        let clip_y_origin = if switch_expr & u32::from(GC::CLIP_ORIGIN_Y) != 0 {
             let remaining = outer_remaining;
             let (clip_y_origin, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17614,7 +17821,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let clip_mask = if switch_expr & u32::from(GC::ClipMask) != 0 {
+        let clip_mask = if switch_expr & u32::from(GC::CLIP_MASK) != 0 {
             let remaining = outer_remaining;
             let (clip_mask, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17622,7 +17829,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let dash_offset = if switch_expr & u32::from(GC::DashOffset) != 0 {
+        let dash_offset = if switch_expr & u32::from(GC::DASH_OFFSET) != 0 {
             let remaining = outer_remaining;
             let (dash_offset, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17630,7 +17837,7 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let dashes = if switch_expr & u32::from(GC::DashList) != 0 {
+        let dashes = if switch_expr & u32::from(GC::DASH_LIST) != 0 {
             let remaining = outer_remaining;
             let (dashes, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -17638,10 +17845,10 @@ impl ChangeGCAux {
         } else {
             None
         };
-        let arc_mode = if switch_expr & u32::from(GC::ArcMode) != 0 {
+        let arc_mode = if switch_expr & u32::from(GC::ARC_MODE) != 0 {
             let remaining = outer_remaining;
             let (arc_mode, remaining) = u32::try_parse(remaining)?;
-            let arc_mode = arc_mode.try_into()?;
+            let arc_mode = arc_mode.into();
             outer_remaining = remaining;
             Some(arc_mode)
         } else {
@@ -17661,7 +17868,7 @@ impl ChangeGCAux {
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(function) = self.function {
-            u32::from(function).serialize_into(bytes);
+            Option::<u32>::from(function).unwrap().serialize_into(bytes);
         }
         if let Some(plane_mask) = self.plane_mask {
             plane_mask.serialize_into(bytes);
@@ -17676,19 +17883,19 @@ impl ChangeGCAux {
             line_width.serialize_into(bytes);
         }
         if let Some(line_style) = self.line_style {
-            u32::from(line_style).serialize_into(bytes);
+            Option::<u32>::from(line_style).unwrap().serialize_into(bytes);
         }
         if let Some(cap_style) = self.cap_style {
-            u32::from(cap_style).serialize_into(bytes);
+            Option::<u32>::from(cap_style).unwrap().serialize_into(bytes);
         }
         if let Some(join_style) = self.join_style {
-            u32::from(join_style).serialize_into(bytes);
+            Option::<u32>::from(join_style).unwrap().serialize_into(bytes);
         }
         if let Some(fill_style) = self.fill_style {
-            u32::from(fill_style).serialize_into(bytes);
+            Option::<u32>::from(fill_style).unwrap().serialize_into(bytes);
         }
         if let Some(fill_rule) = self.fill_rule {
-            u32::from(fill_rule).serialize_into(bytes);
+            Option::<u32>::from(fill_rule).unwrap().serialize_into(bytes);
         }
         if let Some(tile) = self.tile {
             tile.serialize_into(bytes);
@@ -17706,7 +17913,7 @@ impl ChangeGCAux {
             font.serialize_into(bytes);
         }
         if let Some(subwindow_mode) = self.subwindow_mode {
-            u32::from(subwindow_mode).serialize_into(bytes);
+            Option::<u32>::from(subwindow_mode).unwrap().serialize_into(bytes);
         }
         if let Some(graphics_exposures) = self.graphics_exposures {
             graphics_exposures.serialize_into(bytes);
@@ -17727,7 +17934,7 @@ impl ChangeGCAux {
             dashes.serialize_into(bytes);
         }
         if let Some(arc_mode) = self.arc_mode {
-            u32::from(arc_mode).serialize_into(bytes);
+            Option::<u32>::from(arc_mode).unwrap().serialize_into(bytes);
         }
     }
 }
@@ -17735,73 +17942,73 @@ impl ChangeGCAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.function.is_some() {
-            expr_value |= u32::from(GC::Function);
+            expr_value |= u32::from(GC::FUNCTION);
         }
         if self.plane_mask.is_some() {
-            expr_value |= u32::from(GC::PlaneMask);
+            expr_value |= u32::from(GC::PLANE_MASK);
         }
         if self.foreground.is_some() {
-            expr_value |= u32::from(GC::Foreground);
+            expr_value |= u32::from(GC::FOREGROUND);
         }
         if self.background.is_some() {
-            expr_value |= u32::from(GC::Background);
+            expr_value |= u32::from(GC::BACKGROUND);
         }
         if self.line_width.is_some() {
-            expr_value |= u32::from(GC::LineWidth);
+            expr_value |= u32::from(GC::LINE_WIDTH);
         }
         if self.line_style.is_some() {
-            expr_value |= u32::from(GC::LineStyle);
+            expr_value |= u32::from(GC::LINE_STYLE);
         }
         if self.cap_style.is_some() {
-            expr_value |= u32::from(GC::CapStyle);
+            expr_value |= u32::from(GC::CAP_STYLE);
         }
         if self.join_style.is_some() {
-            expr_value |= u32::from(GC::JoinStyle);
+            expr_value |= u32::from(GC::JOIN_STYLE);
         }
         if self.fill_style.is_some() {
-            expr_value |= u32::from(GC::FillStyle);
+            expr_value |= u32::from(GC::FILL_STYLE);
         }
         if self.fill_rule.is_some() {
-            expr_value |= u32::from(GC::FillRule);
+            expr_value |= u32::from(GC::FILL_RULE);
         }
         if self.tile.is_some() {
-            expr_value |= u32::from(GC::Tile);
+            expr_value |= u32::from(GC::TILE);
         }
         if self.stipple.is_some() {
-            expr_value |= u32::from(GC::Stipple);
+            expr_value |= u32::from(GC::STIPPLE);
         }
         if self.tile_stipple_x_origin.is_some() {
-            expr_value |= u32::from(GC::TileStippleOriginX);
+            expr_value |= u32::from(GC::TILE_STIPPLE_ORIGIN_X);
         }
         if self.tile_stipple_y_origin.is_some() {
-            expr_value |= u32::from(GC::TileStippleOriginY);
+            expr_value |= u32::from(GC::TILE_STIPPLE_ORIGIN_Y);
         }
         if self.font.is_some() {
-            expr_value |= u32::from(GC::Font);
+            expr_value |= u32::from(GC::FONT);
         }
         if self.subwindow_mode.is_some() {
-            expr_value |= u32::from(GC::SubwindowMode);
+            expr_value |= u32::from(GC::SUBWINDOW_MODE);
         }
         if self.graphics_exposures.is_some() {
-            expr_value |= u32::from(GC::GraphicsExposures);
+            expr_value |= u32::from(GC::GRAPHICS_EXPOSURES);
         }
         if self.clip_x_origin.is_some() {
-            expr_value |= u32::from(GC::ClipOriginX);
+            expr_value |= u32::from(GC::CLIP_ORIGIN_X);
         }
         if self.clip_y_origin.is_some() {
-            expr_value |= u32::from(GC::ClipOriginY);
+            expr_value |= u32::from(GC::CLIP_ORIGIN_Y);
         }
         if self.clip_mask.is_some() {
-            expr_value |= u32::from(GC::ClipMask);
+            expr_value |= u32::from(GC::CLIP_MASK);
         }
         if self.dash_offset.is_some() {
-            expr_value |= u32::from(GC::DashOffset);
+            expr_value |= u32::from(GC::DASH_OFFSET);
         }
         if self.dashes.is_some() {
-            expr_value |= u32::from(GC::DashList);
+            expr_value |= u32::from(GC::DASH_LIST);
         }
         if self.arc_mode.is_some() {
-            expr_value |= u32::from(GC::ArcMode);
+            expr_value |= u32::from(GC::ARC_MODE);
         }
         expr_value
     }
@@ -18289,71 +18496,81 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ClipOrdering {
-    Unsorted = 0,
-    YSorted = 1,
-    YXSorted = 2,
-    YXBanded = 3,
+pub struct ClipOrdering(u8);
+impl ClipOrdering {
+    pub const UNSORTED: Self = Self(0);
+    pub const Y_SORTED: Self = Self(1);
+    pub const YX_SORTED: Self = Self(2);
+    pub const YX_BANDED: Self = Self(3);
+}
+impl From<ClipOrdering> for Option<bool> {
+    #[inline]
+    fn from(input: ClipOrdering) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ClipOrdering> for u8 {
+    #[inline]
     fn from(input: ClipOrdering) -> Self {
-        match input {
-            ClipOrdering::Unsorted => 0,
-            ClipOrdering::YSorted => 1,
-            ClipOrdering::YXSorted => 2,
-            ClipOrdering::YXBanded => 3,
-        }
+        input.0
     }
 }
 impl From<ClipOrdering> for Option<u8> {
+    #[inline]
     fn from(input: ClipOrdering) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ClipOrdering> for u16 {
+    #[inline]
     fn from(input: ClipOrdering) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ClipOrdering> for Option<u16> {
+    #[inline]
     fn from(input: ClipOrdering) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ClipOrdering> for u32 {
+    #[inline]
     fn from(input: ClipOrdering) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ClipOrdering> for Option<u32> {
+    #[inline]
     fn from(input: ClipOrdering) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ClipOrdering {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ClipOrdering::Unsorted),
-            1 => Ok(ClipOrdering::YSorted),
-            2 => Ok(ClipOrdering::YXSorted),
-            3 => Ok(ClipOrdering::YXBanded),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ClipOrdering {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ClipOrdering {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ClipOrdering {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ClipOrdering {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -18375,7 +18592,7 @@ impl<'input> SetClipRectanglesRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let ordering_bytes = u8::from(self.ordering).serialize();
+        let ordering_bytes = Option::<u8>::from(self.ordering).unwrap().serialize();
         let gc_bytes = self.gc.serialize();
         let clip_x_origin_bytes = self.clip_x_origin.serialize();
         let clip_y_origin_bytes = self.clip_y_origin.serialize();
@@ -18418,7 +18635,7 @@ impl<'input> SetClipRectanglesRequest<'input> {
         }
         let remaining = &[header.minor_opcode];
         let (ordering, remaining) = u8::try_parse(remaining)?;
-        let ordering = ordering.try_into()?;
+        let ordering = ordering.into();
         let _ = remaining;
         let (gc, remaining) = Gcontext::try_parse(value)?;
         let (clip_x_origin, remaining) = i16::try_parse(remaining)?;
@@ -18966,73 +19183,79 @@ where
 /// * `Origin` - Treats all coordinates as relative to the origin.
 /// * `Previous` - Treats all coordinates after the first as relative to the previous coordinate.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CoordMode {
-    Origin = 0,
-    Previous = 1,
+pub struct CoordMode(u8);
+impl CoordMode {
+    pub const ORIGIN: Self = Self(0);
+    pub const PREVIOUS: Self = Self(1);
 }
-impl From<CoordMode> for bool {
+impl From<CoordMode> for Option<bool> {
+    #[inline]
     fn from(input: CoordMode) -> Self {
-        match input {
-            CoordMode::Origin => false,
-            CoordMode::Previous => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<CoordMode> for u8 {
+    #[inline]
     fn from(input: CoordMode) -> Self {
-        match input {
-            CoordMode::Origin => 0,
-            CoordMode::Previous => 1,
-        }
+        input.0
     }
 }
 impl From<CoordMode> for Option<u8> {
+    #[inline]
     fn from(input: CoordMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CoordMode> for u16 {
+    #[inline]
     fn from(input: CoordMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CoordMode> for Option<u16> {
+    #[inline]
     fn from(input: CoordMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CoordMode> for u32 {
+    #[inline]
     fn from(input: CoordMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CoordMode> for Option<u32> {
+    #[inline]
     fn from(input: CoordMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CoordMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(CoordMode::Origin),
-            1 => Ok(CoordMode::Previous),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CoordMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for CoordMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CoordMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CoordMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -19053,7 +19276,7 @@ impl<'input> PolyPointRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
+        let coordinate_mode_bytes = Option::<u8>::from(self.coordinate_mode).unwrap().serialize();
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
@@ -19095,7 +19318,7 @@ impl<'input> PolyPointRequest<'input> {
         }
         let remaining = &[header.minor_opcode];
         let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
-        let coordinate_mode = coordinate_mode.try_into()?;
+        let coordinate_mode = coordinate_mode.into();
         let _ = remaining;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
@@ -19197,7 +19420,7 @@ impl<'input> PolyLineRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
+        let coordinate_mode_bytes = Option::<u8>::from(self.coordinate_mode).unwrap().serialize();
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
@@ -19239,7 +19462,7 @@ impl<'input> PolyLineRequest<'input> {
         }
         let remaining = &[header.minor_opcode];
         let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
-        let coordinate_mode = coordinate_mode.try_into()?;
+        let coordinate_mode = coordinate_mode.into();
         let _ = remaining;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
@@ -19724,68 +19947,80 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PolyShape {
-    Complex = 0,
-    Nonconvex = 1,
-    Convex = 2,
+pub struct PolyShape(u8);
+impl PolyShape {
+    pub const COMPLEX: Self = Self(0);
+    pub const NONCONVEX: Self = Self(1);
+    pub const CONVEX: Self = Self(2);
+}
+impl From<PolyShape> for Option<bool> {
+    #[inline]
+    fn from(input: PolyShape) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<PolyShape> for u8 {
+    #[inline]
     fn from(input: PolyShape) -> Self {
-        match input {
-            PolyShape::Complex => 0,
-            PolyShape::Nonconvex => 1,
-            PolyShape::Convex => 2,
-        }
+        input.0
     }
 }
 impl From<PolyShape> for Option<u8> {
+    #[inline]
     fn from(input: PolyShape) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PolyShape> for u16 {
+    #[inline]
     fn from(input: PolyShape) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PolyShape> for Option<u16> {
+    #[inline]
     fn from(input: PolyShape) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PolyShape> for u32 {
+    #[inline]
     fn from(input: PolyShape) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PolyShape> for Option<u32> {
+    #[inline]
     fn from(input: PolyShape) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PolyShape {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PolyShape::Complex),
-            1 => Ok(PolyShape::Nonconvex),
-            2 => Ok(PolyShape::Convex),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for PolyShape {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for PolyShape {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PolyShape {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PolyShape {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -19809,8 +20044,8 @@ impl<'input> FillPolyRequest<'input> {
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
-        let shape_bytes = u8::from(self.shape).serialize();
-        let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
+        let shape_bytes = Option::<u8>::from(self.shape).unwrap().serialize();
+        let coordinate_mode_bytes = Option::<u8>::from(self.coordinate_mode).unwrap().serialize();
         let mut request0 = vec![
             FILL_POLY_REQUEST,
             0,
@@ -19858,9 +20093,9 @@ impl<'input> FillPolyRequest<'input> {
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (shape, remaining) = u8::try_parse(remaining)?;
-        let shape = shape.try_into()?;
+        let shape = shape.into();
         let (coordinate_mode, remaining) = u8::try_parse(remaining)?;
-        let coordinate_mode = coordinate_mode.try_into()?;
+        let coordinate_mode = coordinate_mode.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
@@ -20156,68 +20391,80 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ImageFormat {
-    XYBitmap = 0,
-    XYPixmap = 1,
-    ZPixmap = 2,
+pub struct ImageFormat(u8);
+impl ImageFormat {
+    pub const XY_BITMAP: Self = Self(0);
+    pub const XY_PIXMAP: Self = Self(1);
+    pub const Z_PIXMAP: Self = Self(2);
+}
+impl From<ImageFormat> for Option<bool> {
+    #[inline]
+    fn from(input: ImageFormat) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ImageFormat> for u8 {
+    #[inline]
     fn from(input: ImageFormat) -> Self {
-        match input {
-            ImageFormat::XYBitmap => 0,
-            ImageFormat::XYPixmap => 1,
-            ImageFormat::ZPixmap => 2,
-        }
+        input.0
     }
 }
 impl From<ImageFormat> for Option<u8> {
+    #[inline]
     fn from(input: ImageFormat) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ImageFormat> for u16 {
+    #[inline]
     fn from(input: ImageFormat) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ImageFormat> for Option<u16> {
+    #[inline]
     fn from(input: ImageFormat) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ImageFormat> for u32 {
+    #[inline]
     fn from(input: ImageFormat) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ImageFormat> for Option<u32> {
+    #[inline]
     fn from(input: ImageFormat) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ImageFormat {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ImageFormat::XYBitmap),
-            1 => Ok(ImageFormat::XYPixmap),
-            2 => Ok(ImageFormat::ZPixmap),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ImageFormat {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ImageFormat {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ImageFormat {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ImageFormat {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -20244,7 +20491,7 @@ impl<'input> PutImageRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let format_bytes = u8::from(self.format).serialize();
+        let format_bytes = Option::<u8>::from(self.format).unwrap().serialize();
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let width_bytes = self.width.serialize();
@@ -20303,7 +20550,7 @@ impl<'input> PutImageRequest<'input> {
         }
         let remaining = &[header.minor_opcode];
         let (format, remaining) = u8::try_parse(remaining)?;
-        let format = format.try_into()?;
+        let format = format.into();
         let _ = remaining;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
@@ -20387,7 +20634,7 @@ impl GetImageRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let format_bytes = u8::from(self.format).serialize();
+        let format_bytes = Option::<u8>::from(self.format).unwrap().serialize();
         let drawable_bytes = self.drawable.serialize();
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
@@ -20437,7 +20684,7 @@ impl GetImageRequest {
         }
         let remaining = &[header.minor_opcode];
         let (format, remaining) = u8::try_parse(remaining)?;
-        let format = format.try_into()?;
+        let format = format.into();
         let _ = remaining;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (x, remaining) = i16::try_parse(remaining)?;
@@ -21099,73 +21346,79 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ColormapAlloc {
-    None = 0,
-    All = 1,
+pub struct ColormapAlloc(u8);
+impl ColormapAlloc {
+    pub const NONE: Self = Self(0);
+    pub const ALL: Self = Self(1);
 }
-impl From<ColormapAlloc> for bool {
+impl From<ColormapAlloc> for Option<bool> {
+    #[inline]
     fn from(input: ColormapAlloc) -> Self {
-        match input {
-            ColormapAlloc::None => false,
-            ColormapAlloc::All => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<ColormapAlloc> for u8 {
+    #[inline]
     fn from(input: ColormapAlloc) -> Self {
-        match input {
-            ColormapAlloc::None => 0,
-            ColormapAlloc::All => 1,
-        }
+        input.0
     }
 }
 impl From<ColormapAlloc> for Option<u8> {
+    #[inline]
     fn from(input: ColormapAlloc) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ColormapAlloc> for u16 {
+    #[inline]
     fn from(input: ColormapAlloc) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ColormapAlloc> for Option<u16> {
+    #[inline]
     fn from(input: ColormapAlloc) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ColormapAlloc> for u32 {
+    #[inline]
     fn from(input: ColormapAlloc) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ColormapAlloc> for Option<u32> {
+    #[inline]
     fn from(input: ColormapAlloc) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ColormapAlloc {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ColormapAlloc::None),
-            1 => Ok(ColormapAlloc::All),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ColormapAlloc {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ColormapAlloc {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ColormapAlloc {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ColormapAlloc {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -21186,7 +21439,7 @@ impl CreateColormapRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let alloc_bytes = u8::from(self.alloc).serialize();
+        let alloc_bytes = Option::<u8>::from(self.alloc).unwrap().serialize();
         let mid_bytes = self.mid.serialize();
         let window_bytes = self.window.serialize();
         let visual_bytes = self.visual.serialize();
@@ -21229,7 +21482,7 @@ impl CreateColormapRequest {
         }
         let remaining = &[header.minor_opcode];
         let (alloc, remaining) = u8::try_parse(remaining)?;
-        let alloc = alloc.try_into()?;
+        let alloc = alloc.into();
         let _ = remaining;
         let (mid, remaining) = Colormap::try_parse(value)?;
         let (window, remaining) = Window::try_parse(remaining)?;
@@ -22351,68 +22604,80 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ColorFlag {
-    Red = 1 << 0,
-    Green = 1 << 1,
-    Blue = 1 << 2,
+pub struct ColorFlag(u8);
+impl ColorFlag {
+    pub const RED: Self = Self(1 << 0);
+    pub const GREEN: Self = Self(1 << 1);
+    pub const BLUE: Self = Self(1 << 2);
+}
+impl From<ColorFlag> for Option<bool> {
+    #[inline]
+    fn from(input: ColorFlag) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<ColorFlag> for u8 {
+    #[inline]
     fn from(input: ColorFlag) -> Self {
-        match input {
-            ColorFlag::Red => 1 << 0,
-            ColorFlag::Green => 1 << 1,
-            ColorFlag::Blue => 1 << 2,
-        }
+        input.0
     }
 }
 impl From<ColorFlag> for Option<u8> {
+    #[inline]
     fn from(input: ColorFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ColorFlag> for u16 {
+    #[inline]
     fn from(input: ColorFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ColorFlag> for Option<u16> {
+    #[inline]
     fn from(input: ColorFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ColorFlag> for u32 {
+    #[inline]
     fn from(input: ColorFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ColorFlag> for Option<u32> {
+    #[inline]
     fn from(input: ColorFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ColorFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ColorFlag::Red),
-            2 => Ok(ColorFlag::Green),
-            4 => Ok(ColorFlag::Blue),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ColorFlag {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ColorFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ColorFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ColorFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ColorFlag, u8);
@@ -22988,62 +23253,78 @@ impl TryFrom<&[u8]> for LookupColorReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PixmapEnum {
-    None = 0,
+pub struct PixmapEnum(u8);
+impl PixmapEnum {
+    pub const NONE: Self = Self(0);
+}
+impl From<PixmapEnum> for Option<bool> {
+    #[inline]
+    fn from(input: PixmapEnum) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<PixmapEnum> for u8 {
+    #[inline]
     fn from(input: PixmapEnum) -> Self {
-        match input {
-            PixmapEnum::None => 0,
-        }
+        input.0
     }
 }
 impl From<PixmapEnum> for Option<u8> {
+    #[inline]
     fn from(input: PixmapEnum) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PixmapEnum> for u16 {
+    #[inline]
     fn from(input: PixmapEnum) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PixmapEnum> for Option<u16> {
+    #[inline]
     fn from(input: PixmapEnum) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PixmapEnum> for u32 {
+    #[inline]
     fn from(input: PixmapEnum) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PixmapEnum> for Option<u32> {
+    #[inline]
     fn from(input: PixmapEnum) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PixmapEnum {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PixmapEnum::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for PixmapEnum {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for PixmapEnum {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PixmapEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PixmapEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -23191,62 +23472,78 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum FontEnum {
-    None = 0,
+pub struct FontEnum(u8);
+impl FontEnum {
+    pub const NONE: Self = Self(0);
+}
+impl From<FontEnum> for Option<bool> {
+    #[inline]
+    fn from(input: FontEnum) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<FontEnum> for u8 {
+    #[inline]
     fn from(input: FontEnum) -> Self {
-        match input {
-            FontEnum::None => 0,
-        }
+        input.0
     }
 }
 impl From<FontEnum> for Option<u8> {
+    #[inline]
     fn from(input: FontEnum) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<FontEnum> for u16 {
+    #[inline]
     fn from(input: FontEnum) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<FontEnum> for Option<u16> {
+    #[inline]
     fn from(input: FontEnum) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<FontEnum> for u32 {
+    #[inline]
     fn from(input: FontEnum) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<FontEnum> for Option<u32> {
+    #[inline]
     fn from(input: FontEnum) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for FontEnum {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(FontEnum::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for FontEnum {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for FontEnum {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for FontEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for FontEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -23660,68 +23957,80 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum QueryShapeOf {
-    LargestCursor = 0,
-    FastestTile = 1,
-    FastestStipple = 2,
+pub struct QueryShapeOf(u8);
+impl QueryShapeOf {
+    pub const LARGEST_CURSOR: Self = Self(0);
+    pub const FASTEST_TILE: Self = Self(1);
+    pub const FASTEST_STIPPLE: Self = Self(2);
+}
+impl From<QueryShapeOf> for Option<bool> {
+    #[inline]
+    fn from(input: QueryShapeOf) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<QueryShapeOf> for u8 {
+    #[inline]
     fn from(input: QueryShapeOf) -> Self {
-        match input {
-            QueryShapeOf::LargestCursor => 0,
-            QueryShapeOf::FastestTile => 1,
-            QueryShapeOf::FastestStipple => 2,
-        }
+        input.0
     }
 }
 impl From<QueryShapeOf> for Option<u8> {
+    #[inline]
     fn from(input: QueryShapeOf) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<QueryShapeOf> for u16 {
+    #[inline]
     fn from(input: QueryShapeOf) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<QueryShapeOf> for Option<u16> {
+    #[inline]
     fn from(input: QueryShapeOf) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<QueryShapeOf> for u32 {
+    #[inline]
     fn from(input: QueryShapeOf) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<QueryShapeOf> for Option<u32> {
+    #[inline]
     fn from(input: QueryShapeOf) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for QueryShapeOf {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(QueryShapeOf::LargestCursor),
-            1 => Ok(QueryShapeOf::FastestTile),
-            2 => Ok(QueryShapeOf::FastestStipple),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for QueryShapeOf {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for QueryShapeOf {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for QueryShapeOf {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for QueryShapeOf {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -23742,7 +24051,7 @@ impl QueryBestSizeRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let class_bytes = u8::from(self.class).serialize();
+        let class_bytes = Option::<u8>::from(self.class).unwrap().serialize();
         let drawable_bytes = self.drawable.serialize();
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
@@ -23781,7 +24090,7 @@ impl QueryBestSizeRequest {
         }
         let remaining = &[header.minor_opcode];
         let (class, remaining) = u8::try_parse(remaining)?;
-        let class = class.try_into()?;
+        let class = class.into();
         let _ = remaining;
         let (drawable, remaining) = Drawable::try_parse(value)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -24328,221 +24637,217 @@ impl GetKeyboardMappingReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum KB {
-    KeyClickPercent = 1 << 0,
-    BellPercent = 1 << 1,
-    BellPitch = 1 << 2,
-    BellDuration = 1 << 3,
-    Led = 1 << 4,
-    LedMode = 1 << 5,
-    Key = 1 << 6,
-    AutoRepeatMode = 1 << 7,
+pub struct KB(u8);
+impl KB {
+    pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
+    pub const BELL_PERCENT: Self = Self(1 << 1);
+    pub const BELL_PITCH: Self = Self(1 << 2);
+    pub const BELL_DURATION: Self = Self(1 << 3);
+    pub const LED: Self = Self(1 << 4);
+    pub const LED_MODE: Self = Self(1 << 5);
+    pub const KEY: Self = Self(1 << 6);
+    pub const AUTO_REPEAT_MODE: Self = Self(1 << 7);
+}
+impl From<KB> for Option<bool> {
+    #[inline]
+    fn from(input: KB) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<KB> for u8 {
+    #[inline]
     fn from(input: KB) -> Self {
-        match input {
-            KB::KeyClickPercent => 1 << 0,
-            KB::BellPercent => 1 << 1,
-            KB::BellPitch => 1 << 2,
-            KB::BellDuration => 1 << 3,
-            KB::Led => 1 << 4,
-            KB::LedMode => 1 << 5,
-            KB::Key => 1 << 6,
-            KB::AutoRepeatMode => 1 << 7,
-        }
+        input.0
     }
 }
 impl From<KB> for Option<u8> {
+    #[inline]
     fn from(input: KB) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<KB> for u16 {
+    #[inline]
     fn from(input: KB) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<KB> for Option<u16> {
+    #[inline]
     fn from(input: KB) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<KB> for u32 {
+    #[inline]
     fn from(input: KB) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<KB> for Option<u32> {
+    #[inline]
     fn from(input: KB) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for KB {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(KB::KeyClickPercent),
-            2 => Ok(KB::BellPercent),
-            4 => Ok(KB::BellPitch),
-            8 => Ok(KB::BellDuration),
-            16 => Ok(KB::Led),
-            32 => Ok(KB::LedMode),
-            64 => Ok(KB::Key),
-            128 => Ok(KB::AutoRepeatMode),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for KB {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for KB {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for KB {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for KB {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(KB, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum LedMode {
-    Off = 0,
-    On = 1,
+pub struct LedMode(u32);
+impl LedMode {
+    pub const OFF: Self = Self(0);
+    pub const ON: Self = Self(1);
 }
-impl From<LedMode> for bool {
+impl From<LedMode> for Option<bool> {
+    #[inline]
     fn from(input: LedMode) -> Self {
-        match input {
-            LedMode::Off => false,
-            LedMode::On => true,
-        }
-    }
-}
-impl From<LedMode> for u8 {
-    fn from(input: LedMode) -> Self {
-        match input {
-            LedMode::Off => 0,
-            LedMode::On => 1,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<LedMode> for Option<u8> {
+    #[inline]
     fn from(input: LedMode) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<LedMode> for u16 {
-    fn from(input: LedMode) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<LedMode> for Option<u16> {
+    #[inline]
     fn from(input: LedMode) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<LedMode> for u32 {
+    #[inline]
     fn from(input: LedMode) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<LedMode> for Option<u32> {
+    #[inline]
     fn from(input: LedMode) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for LedMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(LedMode::Off),
-            1 => Ok(LedMode::On),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for LedMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for LedMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for LedMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for LedMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for LedMode {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for LedMode {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum AutoRepeatMode {
-    Off = 0,
-    On = 1,
-    Default = 2,
+pub struct AutoRepeatMode(u32);
+impl AutoRepeatMode {
+    pub const OFF: Self = Self(0);
+    pub const ON: Self = Self(1);
+    pub const DEFAULT: Self = Self(2);
 }
-impl From<AutoRepeatMode> for u8 {
+impl From<AutoRepeatMode> for Option<bool> {
+    #[inline]
     fn from(input: AutoRepeatMode) -> Self {
-        match input {
-            AutoRepeatMode::Off => 0,
-            AutoRepeatMode::On => 1,
-            AutoRepeatMode::Default => 2,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<AutoRepeatMode> for Option<u8> {
+    #[inline]
     fn from(input: AutoRepeatMode) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<AutoRepeatMode> for u16 {
-    fn from(input: AutoRepeatMode) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<AutoRepeatMode> for Option<u16> {
+    #[inline]
     fn from(input: AutoRepeatMode) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<AutoRepeatMode> for u32 {
+    #[inline]
     fn from(input: AutoRepeatMode) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<AutoRepeatMode> for Option<u32> {
+    #[inline]
     fn from(input: AutoRepeatMode) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for AutoRepeatMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(AutoRepeatMode::Off),
-            1 => Ok(AutoRepeatMode::On),
-            2 => Ok(AutoRepeatMode::Default),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for AutoRepeatMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for AutoRepeatMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u8> for AutoRepeatMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for AutoRepeatMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for AutoRepeatMode {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for AutoRepeatMode {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
@@ -24562,7 +24867,7 @@ impl ChangeKeyboardControlAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let key_click_percent = if switch_expr & u32::from(KB::KeyClickPercent) != 0 {
+        let key_click_percent = if switch_expr & u32::from(KB::KEY_CLICK_PERCENT) != 0 {
             let remaining = outer_remaining;
             let (key_click_percent, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -24570,7 +24875,7 @@ impl ChangeKeyboardControlAux {
         } else {
             None
         };
-        let bell_percent = if switch_expr & u32::from(KB::BellPercent) != 0 {
+        let bell_percent = if switch_expr & u32::from(KB::BELL_PERCENT) != 0 {
             let remaining = outer_remaining;
             let (bell_percent, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -24578,7 +24883,7 @@ impl ChangeKeyboardControlAux {
         } else {
             None
         };
-        let bell_pitch = if switch_expr & u32::from(KB::BellPitch) != 0 {
+        let bell_pitch = if switch_expr & u32::from(KB::BELL_PITCH) != 0 {
             let remaining = outer_remaining;
             let (bell_pitch, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -24586,7 +24891,7 @@ impl ChangeKeyboardControlAux {
         } else {
             None
         };
-        let bell_duration = if switch_expr & u32::from(KB::BellDuration) != 0 {
+        let bell_duration = if switch_expr & u32::from(KB::BELL_DURATION) != 0 {
             let remaining = outer_remaining;
             let (bell_duration, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -24594,7 +24899,7 @@ impl ChangeKeyboardControlAux {
         } else {
             None
         };
-        let led = if switch_expr & u32::from(KB::Led) != 0 {
+        let led = if switch_expr & u32::from(KB::LED) != 0 {
             let remaining = outer_remaining;
             let (led, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -24602,16 +24907,16 @@ impl ChangeKeyboardControlAux {
         } else {
             None
         };
-        let led_mode = if switch_expr & u32::from(KB::LedMode) != 0 {
+        let led_mode = if switch_expr & u32::from(KB::LED_MODE) != 0 {
             let remaining = outer_remaining;
             let (led_mode, remaining) = u32::try_parse(remaining)?;
-            let led_mode = led_mode.try_into()?;
+            let led_mode = led_mode.into();
             outer_remaining = remaining;
             Some(led_mode)
         } else {
             None
         };
-        let key = if switch_expr & u32::from(KB::Key) != 0 {
+        let key = if switch_expr & u32::from(KB::KEY) != 0 {
             let remaining = outer_remaining;
             let (key, remaining) = Keycode32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -24619,10 +24924,10 @@ impl ChangeKeyboardControlAux {
         } else {
             None
         };
-        let auto_repeat_mode = if switch_expr & u32::from(KB::AutoRepeatMode) != 0 {
+        let auto_repeat_mode = if switch_expr & u32::from(KB::AUTO_REPEAT_MODE) != 0 {
             let remaining = outer_remaining;
             let (auto_repeat_mode, remaining) = u32::try_parse(remaining)?;
-            let auto_repeat_mode = auto_repeat_mode.try_into()?;
+            let auto_repeat_mode = auto_repeat_mode.into();
             outer_remaining = remaining;
             Some(auto_repeat_mode)
         } else {
@@ -24657,13 +24962,13 @@ impl ChangeKeyboardControlAux {
             led.serialize_into(bytes);
         }
         if let Some(led_mode) = self.led_mode {
-            u32::from(led_mode).serialize_into(bytes);
+            Option::<u32>::from(led_mode).unwrap().serialize_into(bytes);
         }
         if let Some(key) = self.key {
             key.serialize_into(bytes);
         }
         if let Some(auto_repeat_mode) = self.auto_repeat_mode {
-            u32::from(auto_repeat_mode).serialize_into(bytes);
+            Option::<u32>::from(auto_repeat_mode).unwrap().serialize_into(bytes);
         }
     }
 }
@@ -24671,28 +24976,28 @@ impl ChangeKeyboardControlAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
         if self.key_click_percent.is_some() {
-            expr_value |= u32::from(KB::KeyClickPercent);
+            expr_value |= u32::from(KB::KEY_CLICK_PERCENT);
         }
         if self.bell_percent.is_some() {
-            expr_value |= u32::from(KB::BellPercent);
+            expr_value |= u32::from(KB::BELL_PERCENT);
         }
         if self.bell_pitch.is_some() {
-            expr_value |= u32::from(KB::BellPitch);
+            expr_value |= u32::from(KB::BELL_PITCH);
         }
         if self.bell_duration.is_some() {
-            expr_value |= u32::from(KB::BellDuration);
+            expr_value |= u32::from(KB::BELL_DURATION);
         }
         if self.led.is_some() {
-            expr_value |= u32::from(KB::Led);
+            expr_value |= u32::from(KB::LED);
         }
         if self.led_mode.is_some() {
-            expr_value |= u32::from(KB::LedMode);
+            expr_value |= u32::from(KB::LED_MODE);
         }
         if self.key.is_some() {
-            expr_value |= u32::from(KB::Key);
+            expr_value |= u32::from(KB::KEY);
         }
         if self.auto_repeat_mode.is_some() {
-            expr_value |= u32::from(KB::AutoRepeatMode);
+            expr_value |= u32::from(KB::AUTO_REPEAT_MODE);
         }
         expr_value
     }
@@ -24909,7 +25214,7 @@ impl TryParse for GetKeyboardControlReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let global_auto_repeat = global_auto_repeat.try_into()?;
+        let global_auto_repeat = global_auto_repeat.into();
         let result = GetKeyboardControlReply { global_auto_repeat, sequence, length, led_mask, key_click_percent, bell_percent, bell_pitch, bell_duration, auto_repeats };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -25170,134 +25475,158 @@ impl TryFrom<&[u8]> for GetPointerControlReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Blanking {
-    NotPreferred = 0,
-    Preferred = 1,
-    Default = 2,
+pub struct Blanking(u8);
+impl Blanking {
+    pub const NOT_PREFERRED: Self = Self(0);
+    pub const PREFERRED: Self = Self(1);
+    pub const DEFAULT: Self = Self(2);
+}
+impl From<Blanking> for Option<bool> {
+    #[inline]
+    fn from(input: Blanking) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Blanking> for u8 {
+    #[inline]
     fn from(input: Blanking) -> Self {
-        match input {
-            Blanking::NotPreferred => 0,
-            Blanking::Preferred => 1,
-            Blanking::Default => 2,
-        }
+        input.0
     }
 }
 impl From<Blanking> for Option<u8> {
+    #[inline]
     fn from(input: Blanking) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Blanking> for u16 {
+    #[inline]
     fn from(input: Blanking) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Blanking> for Option<u16> {
+    #[inline]
     fn from(input: Blanking) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Blanking> for u32 {
+    #[inline]
     fn from(input: Blanking) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Blanking> for Option<u32> {
+    #[inline]
     fn from(input: Blanking) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Blanking {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Blanking::NotPreferred),
-            1 => Ok(Blanking::Preferred),
-            2 => Ok(Blanking::Default),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Blanking {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Blanking {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Blanking {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Blanking {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Exposures {
-    NotAllowed = 0,
-    Allowed = 1,
-    Default = 2,
+pub struct Exposures(u8);
+impl Exposures {
+    pub const NOT_ALLOWED: Self = Self(0);
+    pub const ALLOWED: Self = Self(1);
+    pub const DEFAULT: Self = Self(2);
+}
+impl From<Exposures> for Option<bool> {
+    #[inline]
+    fn from(input: Exposures) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Exposures> for u8 {
+    #[inline]
     fn from(input: Exposures) -> Self {
-        match input {
-            Exposures::NotAllowed => 0,
-            Exposures::Allowed => 1,
-            Exposures::Default => 2,
-        }
+        input.0
     }
 }
 impl From<Exposures> for Option<u8> {
+    #[inline]
     fn from(input: Exposures) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Exposures> for u16 {
+    #[inline]
     fn from(input: Exposures) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Exposures> for Option<u16> {
+    #[inline]
     fn from(input: Exposures) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Exposures> for u32 {
+    #[inline]
     fn from(input: Exposures) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Exposures> for Option<u32> {
+    #[inline]
     fn from(input: Exposures) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Exposures {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Exposures::NotAllowed),
-            1 => Ok(Exposures::Allowed),
-            2 => Ok(Exposures::Default),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Exposures {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Exposures {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Exposures {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Exposures {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -25320,8 +25649,8 @@ impl SetScreenSaverRequest {
         let length_so_far = 0;
         let timeout_bytes = self.timeout.serialize();
         let interval_bytes = self.interval.serialize();
-        let prefer_blanking_bytes = u8::from(self.prefer_blanking).serialize();
-        let allow_exposures_bytes = u8::from(self.allow_exposures).serialize();
+        let prefer_blanking_bytes = Option::<u8>::from(self.prefer_blanking).unwrap().serialize();
+        let allow_exposures_bytes = Option::<u8>::from(self.allow_exposures).unwrap().serialize();
         let mut request0 = vec![
             SET_SCREEN_SAVER_REQUEST,
             0,
@@ -25361,9 +25690,9 @@ impl SetScreenSaverRequest {
         let (timeout, remaining) = i16::try_parse(value)?;
         let (interval, remaining) = i16::try_parse(remaining)?;
         let (prefer_blanking, remaining) = u8::try_parse(remaining)?;
-        let prefer_blanking = prefer_blanking.try_into()?;
+        let prefer_blanking = prefer_blanking.into();
         let (allow_exposures, remaining) = u8::try_parse(remaining)?;
-        let allow_exposures = allow_exposures.try_into()?;
+        let allow_exposures = allow_exposures.into();
         let _ = remaining;
         Ok(SetScreenSaverRequest {
             timeout,
@@ -25469,8 +25798,8 @@ impl TryParse for GetScreenSaverReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let prefer_blanking = prefer_blanking.try_into()?;
-        let allow_exposures = allow_exposures.try_into()?;
+        let prefer_blanking = prefer_blanking.into();
+        let allow_exposures = allow_exposures.into();
         let result = GetScreenSaverReply { sequence, length, timeout, interval, prefer_blanking, allow_exposures };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -25486,145 +25815,159 @@ impl TryFrom<&[u8]> for GetScreenSaverReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum HostMode {
-    Insert = 0,
-    Delete = 1,
+pub struct HostMode(u8);
+impl HostMode {
+    pub const INSERT: Self = Self(0);
+    pub const DELETE: Self = Self(1);
 }
-impl From<HostMode> for bool {
+impl From<HostMode> for Option<bool> {
+    #[inline]
     fn from(input: HostMode) -> Self {
-        match input {
-            HostMode::Insert => false,
-            HostMode::Delete => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<HostMode> for u8 {
+    #[inline]
     fn from(input: HostMode) -> Self {
-        match input {
-            HostMode::Insert => 0,
-            HostMode::Delete => 1,
-        }
+        input.0
     }
 }
 impl From<HostMode> for Option<u8> {
+    #[inline]
     fn from(input: HostMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<HostMode> for u16 {
+    #[inline]
     fn from(input: HostMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<HostMode> for Option<u16> {
+    #[inline]
     fn from(input: HostMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<HostMode> for u32 {
+    #[inline]
     fn from(input: HostMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<HostMode> for Option<u32> {
+    #[inline]
     fn from(input: HostMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for HostMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(HostMode::Insert),
-            1 => Ok(HostMode::Delete),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for HostMode {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for HostMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for HostMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for HostMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Family {
-    Internet = 0,
-    DECnet = 1,
-    Chaos = 2,
-    ServerInterpreted = 5,
-    Internet6 = 6,
+pub struct Family(u8);
+impl Family {
+    pub const INTERNET: Self = Self(0);
+    pub const DEC_NET: Self = Self(1);
+    pub const CHAOS: Self = Self(2);
+    pub const SERVER_INTERPRETED: Self = Self(5);
+    pub const INTERNET6: Self = Self(6);
+}
+impl From<Family> for Option<bool> {
+    #[inline]
+    fn from(input: Family) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Family> for u8 {
+    #[inline]
     fn from(input: Family) -> Self {
-        match input {
-            Family::Internet => 0,
-            Family::DECnet => 1,
-            Family::Chaos => 2,
-            Family::ServerInterpreted => 5,
-            Family::Internet6 => 6,
-        }
+        input.0
     }
 }
 impl From<Family> for Option<u8> {
+    #[inline]
     fn from(input: Family) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Family> for u16 {
+    #[inline]
     fn from(input: Family) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Family> for Option<u16> {
+    #[inline]
     fn from(input: Family) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Family> for u32 {
+    #[inline]
     fn from(input: Family) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Family> for Option<u32> {
+    #[inline]
     fn from(input: Family) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Family {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Family::Internet),
-            1 => Ok(Family::DECnet),
-            2 => Ok(Family::Chaos),
-            5 => Ok(Family::ServerInterpreted),
-            6 => Ok(Family::Internet6),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Family {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Family {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Family {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Family {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -25644,8 +25987,8 @@ impl<'input> ChangeHostsRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = u8::from(self.mode).serialize();
-        let family_bytes = u8::from(self.family).serialize();
+        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let family_bytes = Option::<u8>::from(self.family).unwrap().serialize();
         let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
         let address_len_bytes = address_len.serialize();
         let mut request0 = vec![
@@ -25682,10 +26025,10 @@ impl<'input> ChangeHostsRequest<'input> {
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let _ = remaining;
         let (family, remaining) = u8::try_parse(value)?;
-        let family = family.try_into()?;
+        let family = family.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (address_len, remaining) = u16::try_parse(remaining)?;
         let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -25737,7 +26080,7 @@ impl TryParse for Host {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let family = family.try_into()?;
+        let family = family.into();
         let result = Host { family, address };
         Ok((result, remaining))
     }
@@ -25757,7 +26100,7 @@ impl Serialize for Host {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        u8::from(self.family).serialize_into(bytes);
+        Option::<u8>::from(self.family).unwrap().serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
         address_len.serialize_into(bytes);
@@ -25857,7 +26200,7 @@ impl TryParse for ListHostsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let result = ListHostsReply { mode, sequence, length, hosts };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -25888,73 +26231,79 @@ impl ListHostsReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum AccessControl {
-    Disable = 0,
-    Enable = 1,
+pub struct AccessControl(u8);
+impl AccessControl {
+    pub const DISABLE: Self = Self(0);
+    pub const ENABLE: Self = Self(1);
 }
-impl From<AccessControl> for bool {
+impl From<AccessControl> for Option<bool> {
+    #[inline]
     fn from(input: AccessControl) -> Self {
-        match input {
-            AccessControl::Disable => false,
-            AccessControl::Enable => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<AccessControl> for u8 {
+    #[inline]
     fn from(input: AccessControl) -> Self {
-        match input {
-            AccessControl::Disable => 0,
-            AccessControl::Enable => 1,
-        }
+        input.0
     }
 }
 impl From<AccessControl> for Option<u8> {
+    #[inline]
     fn from(input: AccessControl) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<AccessControl> for u16 {
+    #[inline]
     fn from(input: AccessControl) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<AccessControl> for Option<u16> {
+    #[inline]
     fn from(input: AccessControl) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<AccessControl> for u32 {
+    #[inline]
     fn from(input: AccessControl) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<AccessControl> for Option<u32> {
+    #[inline]
     fn from(input: AccessControl) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for AccessControl {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(AccessControl::Disable),
-            1 => Ok(AccessControl::Enable),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for AccessControl {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for AccessControl {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for AccessControl {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for AccessControl {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -25972,7 +26321,7 @@ impl SetAccessControlRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = u8::from(self.mode).serialize();
+        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
         let mut request0 = vec![
             SET_ACCESS_CONTROL_REQUEST,
             mode_bytes[0],
@@ -26000,7 +26349,7 @@ impl SetAccessControlRequest {
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let _ = remaining;
         let _ = value;
         Ok(SetAccessControlRequest {
@@ -26022,68 +26371,80 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CloseDown {
-    DestroyAll = 0,
-    RetainPermanent = 1,
-    RetainTemporary = 2,
+pub struct CloseDown(u8);
+impl CloseDown {
+    pub const DESTROY_ALL: Self = Self(0);
+    pub const RETAIN_PERMANENT: Self = Self(1);
+    pub const RETAIN_TEMPORARY: Self = Self(2);
+}
+impl From<CloseDown> for Option<bool> {
+    #[inline]
+    fn from(input: CloseDown) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<CloseDown> for u8 {
+    #[inline]
     fn from(input: CloseDown) -> Self {
-        match input {
-            CloseDown::DestroyAll => 0,
-            CloseDown::RetainPermanent => 1,
-            CloseDown::RetainTemporary => 2,
-        }
+        input.0
     }
 }
 impl From<CloseDown> for Option<u8> {
+    #[inline]
     fn from(input: CloseDown) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CloseDown> for u16 {
+    #[inline]
     fn from(input: CloseDown) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CloseDown> for Option<u16> {
+    #[inline]
     fn from(input: CloseDown) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CloseDown> for u32 {
+    #[inline]
     fn from(input: CloseDown) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CloseDown> for Option<u32> {
+    #[inline]
     fn from(input: CloseDown) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CloseDown {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(CloseDown::DestroyAll),
-            1 => Ok(CloseDown::RetainPermanent),
-            2 => Ok(CloseDown::RetainTemporary),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for CloseDown {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for CloseDown {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CloseDown {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CloseDown {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -26101,7 +26462,7 @@ impl SetCloseDownModeRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = u8::from(self.mode).serialize();
+        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
         let mut request0 = vec![
             SET_CLOSE_DOWN_MODE_REQUEST,
             mode_bytes[0],
@@ -26129,7 +26490,7 @@ impl SetCloseDownModeRequest {
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let _ = remaining;
         let _ = value;
         Ok(SetCloseDownModeRequest {
@@ -26151,62 +26512,78 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Kill {
-    AllTemporary = 0,
+pub struct Kill(u8);
+impl Kill {
+    pub const ALL_TEMPORARY: Self = Self(0);
+}
+impl From<Kill> for Option<bool> {
+    #[inline]
+    fn from(input: Kill) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<Kill> for u8 {
+    #[inline]
     fn from(input: Kill) -> Self {
-        match input {
-            Kill::AllTemporary => 0,
-        }
+        input.0
     }
 }
 impl From<Kill> for Option<u8> {
+    #[inline]
     fn from(input: Kill) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Kill> for u16 {
+    #[inline]
     fn from(input: Kill) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Kill> for Option<u16> {
+    #[inline]
     fn from(input: Kill) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Kill> for u32 {
+    #[inline]
     fn from(input: Kill) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Kill> for Option<u32> {
+    #[inline]
     fn from(input: Kill) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Kill {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Kill::AllTemporary),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for Kill {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for Kill {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Kill {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Kill {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -26413,73 +26790,79 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ScreenSaver {
-    Reset = 0,
-    Active = 1,
+pub struct ScreenSaver(u8);
+impl ScreenSaver {
+    pub const RESET: Self = Self(0);
+    pub const ACTIVE: Self = Self(1);
 }
-impl From<ScreenSaver> for bool {
+impl From<ScreenSaver> for Option<bool> {
+    #[inline]
     fn from(input: ScreenSaver) -> Self {
-        match input {
-            ScreenSaver::Reset => false,
-            ScreenSaver::Active => true,
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
         }
     }
 }
 impl From<ScreenSaver> for u8 {
+    #[inline]
     fn from(input: ScreenSaver) -> Self {
-        match input {
-            ScreenSaver::Reset => 0,
-            ScreenSaver::Active => 1,
-        }
+        input.0
     }
 }
 impl From<ScreenSaver> for Option<u8> {
+    #[inline]
     fn from(input: ScreenSaver) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ScreenSaver> for u16 {
+    #[inline]
     fn from(input: ScreenSaver) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ScreenSaver> for Option<u16> {
+    #[inline]
     fn from(input: ScreenSaver) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ScreenSaver> for u32 {
+    #[inline]
     fn from(input: ScreenSaver) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ScreenSaver> for Option<u32> {
+    #[inline]
     fn from(input: ScreenSaver) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ScreenSaver {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ScreenSaver::Reset),
-            1 => Ok(ScreenSaver::Active),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for ScreenSaver {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for ScreenSaver {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ScreenSaver {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ScreenSaver {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -26497,7 +26880,7 @@ impl ForceScreenSaverRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = u8::from(self.mode).serialize();
+        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
         let mut request0 = vec![
             FORCE_SCREEN_SAVER_REQUEST,
             mode_bytes[0],
@@ -26525,7 +26908,7 @@ impl ForceScreenSaverRequest {
         }
         let remaining = &[header.minor_opcode];
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let _ = remaining;
         let _ = value;
         Ok(ForceScreenSaverRequest {
@@ -26547,68 +26930,80 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum MappingStatus {
-    Success = 0,
-    Busy = 1,
-    Failure = 2,
+pub struct MappingStatus(u8);
+impl MappingStatus {
+    pub const SUCCESS: Self = Self(0);
+    pub const BUSY: Self = Self(1);
+    pub const FAILURE: Self = Self(2);
+}
+impl From<MappingStatus> for Option<bool> {
+    #[inline]
+    fn from(input: MappingStatus) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<MappingStatus> for u8 {
+    #[inline]
     fn from(input: MappingStatus) -> Self {
-        match input {
-            MappingStatus::Success => 0,
-            MappingStatus::Busy => 1,
-            MappingStatus::Failure => 2,
-        }
+        input.0
     }
 }
 impl From<MappingStatus> for Option<u8> {
+    #[inline]
     fn from(input: MappingStatus) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<MappingStatus> for u16 {
+    #[inline]
     fn from(input: MappingStatus) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<MappingStatus> for Option<u16> {
+    #[inline]
     fn from(input: MappingStatus) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<MappingStatus> for u32 {
+    #[inline]
     fn from(input: MappingStatus) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<MappingStatus> for Option<u32> {
+    #[inline]
     fn from(input: MappingStatus) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for MappingStatus {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(MappingStatus::Success),
-            1 => Ok(MappingStatus::Busy),
-            2 => Ok(MappingStatus::Failure),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for MappingStatus {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for MappingStatus {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for MappingStatus {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for MappingStatus {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -26701,7 +27096,7 @@ impl TryParse for SetPointerMappingReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = SetPointerMappingReply { status, sequence, length };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -26821,83 +27216,85 @@ impl GetPointerMappingReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum MapIndex {
-    Shift = 0,
-    Lock = 1,
-    Control = 2,
-    M1 = 3,
-    M2 = 4,
-    M3 = 5,
-    M4 = 6,
-    M5 = 7,
+pub struct MapIndex(u8);
+impl MapIndex {
+    pub const SHIFT: Self = Self(0);
+    pub const LOCK: Self = Self(1);
+    pub const CONTROL: Self = Self(2);
+    pub const M1: Self = Self(3);
+    pub const M2: Self = Self(4);
+    pub const M3: Self = Self(5);
+    pub const M4: Self = Self(6);
+    pub const M5: Self = Self(7);
+}
+impl From<MapIndex> for Option<bool> {
+    #[inline]
+    fn from(input: MapIndex) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<MapIndex> for u8 {
+    #[inline]
     fn from(input: MapIndex) -> Self {
-        match input {
-            MapIndex::Shift => 0,
-            MapIndex::Lock => 1,
-            MapIndex::Control => 2,
-            MapIndex::M1 => 3,
-            MapIndex::M2 => 4,
-            MapIndex::M3 => 5,
-            MapIndex::M4 => 6,
-            MapIndex::M5 => 7,
-        }
+        input.0
     }
 }
 impl From<MapIndex> for Option<u8> {
+    #[inline]
     fn from(input: MapIndex) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<MapIndex> for u16 {
+    #[inline]
     fn from(input: MapIndex) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<MapIndex> for Option<u16> {
+    #[inline]
     fn from(input: MapIndex) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<MapIndex> for u32 {
+    #[inline]
     fn from(input: MapIndex) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<MapIndex> for Option<u32> {
+    #[inline]
     fn from(input: MapIndex) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for MapIndex {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(MapIndex::Shift),
-            1 => Ok(MapIndex::Lock),
-            2 => Ok(MapIndex::Control),
-            3 => Ok(MapIndex::M1),
-            4 => Ok(MapIndex::M2),
-            5 => Ok(MapIndex::M3),
-            6 => Ok(MapIndex::M4),
-            7 => Ok(MapIndex::M5),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for MapIndex {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for MapIndex {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for MapIndex {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for MapIndex {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -26991,7 +27388,7 @@ impl TryParse for SetModifierMappingReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = SetModifierMappingReply { status, sequence, length };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)

@@ -40,140 +40,160 @@ pub type Op = u8;
 pub type Kind = u8;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SO {
-    Set = 0,
-    Union = 1,
-    Intersect = 2,
-    Subtract = 3,
-    Invert = 4,
+pub struct SO(u8);
+impl SO {
+    pub const SET: Self = Self(0);
+    pub const UNION: Self = Self(1);
+    pub const INTERSECT: Self = Self(2);
+    pub const SUBTRACT: Self = Self(3);
+    pub const INVERT: Self = Self(4);
+}
+impl From<SO> for Option<bool> {
+    #[inline]
+    fn from(input: SO) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SO> for u8 {
+    #[inline]
     fn from(input: SO) -> Self {
-        match input {
-            SO::Set => 0,
-            SO::Union => 1,
-            SO::Intersect => 2,
-            SO::Subtract => 3,
-            SO::Invert => 4,
-        }
+        input.0
     }
 }
 impl From<SO> for Option<u8> {
+    #[inline]
     fn from(input: SO) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SO> for u16 {
+    #[inline]
     fn from(input: SO) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SO> for Option<u16> {
+    #[inline]
     fn from(input: SO) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SO> for u32 {
+    #[inline]
     fn from(input: SO) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SO> for Option<u32> {
+    #[inline]
     fn from(input: SO) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SO {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SO::Set),
-            1 => Ok(SO::Union),
-            2 => Ok(SO::Intersect),
-            3 => Ok(SO::Subtract),
-            4 => Ok(SO::Invert),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SO {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SO {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SO {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SO {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum SK {
-    Bounding = 0,
-    Clip = 1,
-    Input = 2,
+pub struct SK(u8);
+impl SK {
+    pub const BOUNDING: Self = Self(0);
+    pub const CLIP: Self = Self(1);
+    pub const INPUT: Self = Self(2);
+}
+impl From<SK> for Option<bool> {
+    #[inline]
+    fn from(input: SK) -> Self {
+        match input.0 {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
 }
 impl From<SK> for u8 {
+    #[inline]
     fn from(input: SK) -> Self {
-        match input {
-            SK::Bounding => 0,
-            SK::Clip => 1,
-            SK::Input => 2,
-        }
+        input.0
     }
 }
 impl From<SK> for Option<u8> {
+    #[inline]
     fn from(input: SK) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<SK> for u16 {
+    #[inline]
     fn from(input: SK) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<SK> for Option<u16> {
+    #[inline]
     fn from(input: SK) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<SK> for u32 {
+    #[inline]
     fn from(input: SK) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<SK> for Option<u32> {
+    #[inline]
     fn from(input: SK) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for SK {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(SK::Bounding),
-            1 => Ok(SK::Clip),
-            2 => Ok(SK::Input),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<bool> for SK {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u8> for SK {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for SK {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for SK {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -206,7 +226,7 @@ impl TryParse for NotifyEvent {
         let (server_time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (shaped, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
-        let shape_kind = shape_kind.try_into()?;
+        let shape_kind = shape_kind.into();
         let result = NotifyEvent { response_type, shape_kind, sequence, affected_window, extents_x, extents_y, extents_width, extents_height, server_time, shaped };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -223,7 +243,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let shape_kind_bytes = Kind::from(input.shape_kind).serialize();
+        let shape_kind_bytes = Option::<Kind>::from(input.shape_kind).unwrap().serialize();
         let sequence_bytes = input.sequence.serialize();
         let affected_window_bytes = input.affected_window.serialize();
         let extents_x_bytes = input.extents_x.serialize();
@@ -382,9 +402,9 @@ impl<'input> RectanglesRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let operation_bytes = Op::from(self.operation).serialize();
-        let destination_kind_bytes = Kind::from(self.destination_kind).serialize();
-        let ordering_bytes = u8::from(self.ordering).serialize();
+        let operation_bytes = Option::<Op>::from(self.operation).unwrap().serialize();
+        let destination_kind_bytes = Option::<Kind>::from(self.destination_kind).unwrap().serialize();
+        let ordering_bytes = Option::<u8>::from(self.ordering).unwrap().serialize();
         let destination_window_bytes = self.destination_window.serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
@@ -430,11 +450,11 @@ impl<'input> RectanglesRequest<'input> {
             return Err(ParseError::InvalidValue);
         }
         let (operation, remaining) = Op::try_parse(value)?;
-        let operation = operation.try_into()?;
+        let operation = operation.into();
         let (destination_kind, remaining) = Kind::try_parse(remaining)?;
-        let destination_kind = destination_kind.try_into()?;
+        let destination_kind = destination_kind.into();
         let (ordering, remaining) = u8::try_parse(remaining)?;
-        let ordering = ordering.try_into()?;
+        let ordering = ordering.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
@@ -510,8 +530,8 @@ impl MaskRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let operation_bytes = Op::from(self.operation).serialize();
-        let destination_kind_bytes = Kind::from(self.destination_kind).serialize();
+        let operation_bytes = Option::<Op>::from(self.operation).unwrap().serialize();
+        let destination_kind_bytes = Option::<Kind>::from(self.destination_kind).unwrap().serialize();
         let destination_window_bytes = self.destination_window.serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
@@ -558,9 +578,9 @@ impl MaskRequest {
             return Err(ParseError::InvalidValue);
         }
         let (operation, remaining) = Op::try_parse(value)?;
-        let operation = operation.try_into()?;
+        let operation = operation.into();
         let (destination_kind, remaining) = Kind::try_parse(remaining)?;
-        let destination_kind = destination_kind.try_into()?;
+        let destination_kind = destination_kind.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
@@ -618,9 +638,9 @@ impl CombineRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let operation_bytes = Op::from(self.operation).serialize();
-        let destination_kind_bytes = Kind::from(self.destination_kind).serialize();
-        let source_kind_bytes = Kind::from(self.source_kind).serialize();
+        let operation_bytes = Option::<Op>::from(self.operation).unwrap().serialize();
+        let destination_kind_bytes = Option::<Kind>::from(self.destination_kind).unwrap().serialize();
+        let source_kind_bytes = Option::<Kind>::from(self.source_kind).unwrap().serialize();
         let destination_window_bytes = self.destination_window.serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
@@ -667,11 +687,11 @@ impl CombineRequest {
             return Err(ParseError::InvalidValue);
         }
         let (operation, remaining) = Op::try_parse(value)?;
-        let operation = operation.try_into()?;
+        let operation = operation.into();
         let (destination_kind, remaining) = Kind::try_parse(remaining)?;
-        let destination_kind = destination_kind.try_into()?;
+        let destination_kind = destination_kind.into();
         let (source_kind, remaining) = Kind::try_parse(remaining)?;
-        let source_kind = source_kind.try_into()?;
+        let source_kind = source_kind.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
@@ -726,7 +746,7 @@ impl OffsetRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let destination_kind_bytes = Kind::from(self.destination_kind).serialize();
+        let destination_kind_bytes = Option::<Kind>::from(self.destination_kind).unwrap().serialize();
         let destination_window_bytes = self.destination_window.serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
@@ -768,7 +788,7 @@ impl OffsetRequest {
             return Err(ParseError::InvalidValue);
         }
         let (destination_kind, remaining) = Kind::try_parse(value)?;
-        let destination_kind = destination_kind.try_into()?;
+        let destination_kind = destination_kind.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (destination_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (x_offset, remaining) = i16::try_parse(remaining)?;
@@ -1100,7 +1120,7 @@ impl GetRectanglesRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let source_kind_bytes = Kind::from(self.source_kind).serialize();
+        let source_kind_bytes = Option::<Kind>::from(self.source_kind).unwrap().serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             GET_RECTANGLES_REQUEST,
@@ -1136,7 +1156,7 @@ impl GetRectanglesRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (source_kind, remaining) = Kind::try_parse(remaining)?;
-        let source_kind = source_kind.try_into()?;
+        let source_kind = source_kind.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(GetRectanglesRequest {
@@ -1179,7 +1199,7 @@ impl TryParse for GetRectanglesReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let ordering = ordering.try_into()?;
+        let ordering = ordering.into();
         let result = GetRectanglesReply { ordering, sequence, length, rectangles };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)

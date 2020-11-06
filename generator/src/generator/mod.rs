@@ -41,6 +41,8 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     outln!(main_out, "");
 
     let caches = RefCell::new(namespace::Caches::default());
+    caches.borrow_mut().gather_global_enum_sizes(module);
+
     let mut enum_cases = HashMap::new();
     for ns in module.sorted_namespaces() {
         let mut ns_out = Output::new();
