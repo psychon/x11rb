@@ -205,7 +205,7 @@ fn example1() -> Result<(), Box<dyn Error>> {
 
     let (conn, _) = x11rb::connect(None)?;
     const COUNT: usize = 500;
-    let mut atoms = [Into::<u32>::into(AtomEnum::None); COUNT];
+    let mut atoms = [Into::<u32>::into(AtomEnum::NONE); COUNT];
 
     // Init names
     let names = (0..COUNT).map(|i| format!("NAME{}", i)).collect::<Vec<_>>();
@@ -403,16 +403,16 @@ fn example4() -> Result<(), Box<dyn Error>> {
 
     // Create the window
     conn.create_window(
-        COPY_DEPTH_FROM_PARENT,   // depth (same as root)
-        win,                      // window Id
-        screen.root,              // parent window
-        0,                        // x
-        0,                        // y
-        150,                      // width
-        150,                      // height
-        10,                       // border width
-        WindowClass::InputOutput, // class
-        screen.root_visual,       // visual
+        COPY_DEPTH_FROM_PARENT,    // depth (same as root)
+        win,                       // window Id
+        screen.root,               // parent window
+        0,                         // x
+        0,                         // y
+        150,                       // width
+        150,                       // height
+        10,                        // border width
+        WindowClass::INPUT_OUTPUT, // class
+        screen.root_visual,        // visual
         &Default::default(),
     )?; // masks, not used yet
 
@@ -765,18 +765,18 @@ fn example6() -> Result<(), Box<dyn Error>> {
     // Create the window
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
-        .event_mask(EventMask::Exposure);
+        .event_mask(EventMask::EXPOSURE);
     conn.create_window(
-        COPY_DEPTH_FROM_PARENT,   // depth
-        win,                      // window Id
-        screen.root,              // parent window
-        0,                        // x
-        0,                        // y
-        150,                      // width
-        150,                      // height
-        10,                       // border_width
-        WindowClass::InputOutput, // class
-        screen.root_visual,       // visual
+        COPY_DEPTH_FROM_PARENT,    // depth
+        win,                       // window Id
+        screen.root,               // parent window
+        0,                         // x
+        0,                         // y
+        150,                       // width
+        150,                       // height
+        10,                        // border_width
+        WindowClass::INPUT_OUTPUT, // class
+        screen.root_visual,        // visual
         &values,
     )?;
 
@@ -790,10 +790,10 @@ fn example6() -> Result<(), Box<dyn Error>> {
         let event = conn.wait_for_event()?;
         if let Event::Expose(_) = event {
             // We draw the points
-            conn.poly_point(CoordMode::Origin, win, foreground, &points)?;
+            conn.poly_point(CoordMode::ORIGIN, win, foreground, &points)?;
 
             // We draw the polygonal line
-            conn.poly_line(CoordMode::Previous, win, foreground, &polyline)?;
+            conn.poly_line(CoordMode::PREVIOUS, win, foreground, &polyline)?;
 
             // We draw the segments
             conn.poly_segment(win, foreground, &segments)?;
@@ -841,7 +841,7 @@ fn example_expose<C: Connection>(
     depth: u8,
     screen: &Screen,
 ) -> Result<(), Box<dyn Error>> {
-    let values = CreateWindowAux::default().event_mask(EventMask::Exposure);
+    let values = CreateWindowAux::default().event_mask(EventMask::EXPOSURE);
     let win = conn.generate_id()?;
     conn.create_window(
         depth,
@@ -852,7 +852,7 @@ fn example_expose<C: Connection>(
         150,
         150,
         10,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         screen.root_visual,
         &values,
     )?;
@@ -867,7 +867,7 @@ fn example_expose<C: Connection>(
 #[allow(unused)]
 fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(), Box<dyn Error>> {
     let values =
-        CreateWindowAux::default().event_mask(EventMask::Exposure | EventMask::ButtonPress);
+        CreateWindowAux::default().event_mask(EventMask::EXPOSURE | EventMask::BUTTON_PRESS);
     let win = conn.generate_id()?;
     conn.create_window(
         depth,
@@ -878,7 +878,7 @@ fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(),
         150,
         150,
         10,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         screen.root_visual,
         &values,
     )?;
@@ -924,7 +924,7 @@ fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(),
 #[allow(unused)]
 fn example_change_event_mask<C: Connection>(conn: &C, win: Window) -> Result<(), Box<dyn Error>> {
     let values = ChangeWindowAttributesAux::default()
-        .event_mask(EventMask::Exposure | EventMask::ButtonPress);
+        .event_mask(EventMask::EXPOSURE | EventMask::BUTTON_PRESS);
     conn.change_window_attributes(win, &values)?;
     Ok(())
 }
@@ -1237,21 +1237,20 @@ pub struct RenamedKeyPressEvent {
 // those which have been described above.
 
 fn print_modifiers(mask: u16) {
-    use KeyButMask::*;
     let mods = [
-        (Shift, "Shift"),
-        (Lock, "Lock"),
-        (Control, "Ctrl"),
-        (Mod1, "Alt"),
-        (Mod2, "Mod2"),
-        (Mod3, "Mod3"),
-        (Mod4, "Mod4"),
-        (Mod5, "Mod5"),
-        (Button1, "Button1"),
-        (Button2, "Button2"),
-        (Button3, "Button3"),
-        (Button4, "Button4"),
-        (Button5, "Button5"),
+        (KeyButMask::SHIFT, "Shift"),
+        (KeyButMask::LOCK, "Lock"),
+        (KeyButMask::CONTROL, "Ctrl"),
+        (KeyButMask::MOD1, "Alt"),
+        (KeyButMask::MOD2, "Mod2"),
+        (KeyButMask::MOD3, "Mod3"),
+        (KeyButMask::MOD4, "Mod4"),
+        (KeyButMask::MOD5, "Mod5"),
+        (KeyButMask::BUTTON1, "Button1"),
+        (KeyButMask::BUTTON2, "Button2"),
+        (KeyButMask::BUTTON3, "Button3"),
+        (KeyButMask::BUTTON4, "Button4"),
+        (KeyButMask::BUTTON5, "Button5"),
     ];
 
     let active = mods
@@ -1276,26 +1275,26 @@ fn example7() -> Result<(), Box<dyn Error>> {
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(
-            EventMask::Exposure
-                | EventMask::ButtonPress
-                | EventMask::ButtonRelease
-                | EventMask::PointerMotion
-                | EventMask::EnterWindow
-                | EventMask::LeaveWindow
-                | EventMask::KeyPress
-                | EventMask::KeyRelease,
+            EventMask::EXPOSURE
+                | EventMask::BUTTON_PRESS
+                | EventMask::BUTTON_RELEASE
+                | EventMask::POINTER_MOTION
+                | EventMask::ENTER_WINDOW
+                | EventMask::LEAVE_WINDOW
+                | EventMask::KEY_PRESS
+                | EventMask::KEY_RELEASE,
         );
     conn.create_window(
-        COPY_DEPTH_FROM_PARENT,   // depth
-        win,                      // window Id
-        screen.root,              // parent window
-        0,                        // x
-        0,                        // y
-        150,                      // width
-        150,                      // height
-        10,                       // border_width
-        WindowClass::InputOutput, // class
-        screen.root_visual,       // visual
+        COPY_DEPTH_FROM_PARENT,    // depth
+        win,                       // window Id
+        screen.root,               // parent window
+        0,                         // x
+        0,                         // y
+        150,                       // width
+        150,                       // height
+        10,                        // border_width
+        WindowClass::INPUT_OUTPUT, // class
+        screen.root_visual,        // visual
         &values,
     )?;
 
@@ -1510,10 +1509,10 @@ fn example8() -> Result<(), Box<dyn Error>> {
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(
-            EventMask::KeyRelease
-                | EventMask::ButtonPress
-                | EventMask::Exposure
-                | EventMask::PointerMotion,
+            EventMask::KEY_RELEASE
+                | EventMask::BUTTON_PRESS
+                | EventMask::EXPOSURE
+                | EventMask::POINTER_MOTION,
         );
     conn.create_window(
         screen.root_depth,
@@ -1524,7 +1523,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
         WIDTH,
         HEIGHT,
         0,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         screen.root_visual,
         &values,
     )?;
@@ -1656,7 +1655,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
         250,
         150,
         10,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         screen.root_visual,
         &Default::default(),
     )?;
@@ -1664,7 +1663,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
     // Set the title of the window
     let title = "Hello World !";
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win,
         AtomEnum::WM_NAME,
         AtomEnum::STRING,
@@ -1674,7 +1673,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
     // Set the title of the window icon
     let title_icon = "Hello World ! (iconified)";
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win,
         AtomEnum::WM_ICON_NAME,
         AtomEnum::STRING,
@@ -1811,7 +1810,7 @@ fn example_move_resize<C: Connection>(conn: &C, win: Window) -> Result<(), Reply
 #[allow(unused)]
 fn example_stack_above<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     // Move the window on the top of the stack
-    let values = ConfigureWindowAux::default().stack_mode(StackMode::Above);
+    let values = ConfigureWindowAux::default().stack_mode(StackMode::ABOVE);
     conn.configure_window(win, &values)?;
     Ok(())
 }
@@ -1819,7 +1818,7 @@ fn example_stack_above<C: Connection>(conn: &C, win: Window) -> Result<(), Reply
 #[allow(unused)]
 fn example_stack_below<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     // Move the window to the bottom of the stack
-    let values = ConfigureWindowAux::default().stack_mode(StackMode::Below);
+    let values = ConfigureWindowAux::default().stack_mode(StackMode::BELOW);
     conn.configure_window(win, &values)?;
     Ok(())
 }
@@ -2046,7 +2045,7 @@ fn example_create_colormap<C: Connection>(
     screen: &Screen,
 ) -> Result<(), ReplyOrIdError> {
     let cmap = conn.generate_id()?;
-    conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
+    conn.create_colormap(ColormapAlloc::NONE, cmap, win, screen.root_visual)?;
 
     Ok(())
 }
@@ -2088,7 +2087,7 @@ fn example_fill_colormap<C: Connection>(
     screen: &Screen,
 ) -> Result<(), ReplyOrIdError> {
     let cmap = conn.generate_id()?;
-    conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
+    conn.create_colormap(ColormapAlloc::NONE, cmap, win, screen.root_visual)?;
     let _rep = conn.alloc_color(cmap, 65535, 0, 0)?.reply()?;
 
     // Do something with r.pixel or the components
@@ -2324,7 +2323,7 @@ fn button_draw<C: Connection>(
         },
         Point { x: x1, y: y1 },
     ];
-    conn.poly_line(CoordMode::Origin, window, gc, &points)?;
+    conn.poly_line(CoordMode::ORIGIN, window, gc, &points)?;
     conn.image_text8(window, gc, x1 + inset + 1, y1 - inset - 1, label.as_bytes())?;
     conn.free_gc(gc)?;
     Ok(())
@@ -2385,7 +2384,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
     let window = conn.generate_id()?;
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
-        .event_mask(EventMask::KeyRelease | EventMask::ButtonPress | EventMask::Exposure);
+        .event_mask(EventMask::KEY_RELEASE | EventMask::BUTTON_PRESS | EventMask::EXPOSURE);
     conn.create_window(
         screen.root_depth,
         window,
@@ -2395,7 +2394,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
         WIDTH as u16,
         HEIGHT as u16,
         0,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         screen.root_visual,
         &values,
     )?;

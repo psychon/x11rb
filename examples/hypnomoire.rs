@@ -103,15 +103,17 @@ fn run<C: Connection>(
         default_size, // width
         default_size, // height
         0,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         screen.root_visual,
         &CreateWindowAux::new()
             .background_pixel(screen.white_pixel)
-            .event_mask(EventMask::ButtonRelease | EventMask::Exposure | EventMask::StructureNotify)
-            .do_not_propogate_mask(EventMask::ButtonPress),
+            .event_mask(
+                EventMask::BUTTON_RELEASE | EventMask::EXPOSURE | EventMask::STRUCTURE_NOTIFY,
+            )
+            .do_not_propogate_mask(EventMask::BUTTON_PRESS),
     )?;
     conn.change_property32(
-        PropMode::Replace,
+        PropMode::REPLACE,
         window,
         wm_protocols,
         AtomEnum::ATOM,
@@ -150,7 +152,7 @@ fn run<C: Connection>(
             },
             Point { x, y },
         ];
-        conn.poly_line(CoordMode::Previous, pixmap, black, &lines)?;
+        conn.poly_line(CoordMode::PREVIOUS, pixmap, black, &lines)?;
 
         let (sin, cos) = (theta + LAG).sin_cos();
         let (x, y) = ((radius * cos) as i16, (radius * sin) as i16);
@@ -161,7 +163,7 @@ fn run<C: Connection>(
             },
             Point { x, y },
         ];
-        conn.poly_line(CoordMode::Previous, pixmap, white, &lines)?;
+        conn.poly_line(CoordMode::PREVIOUS, pixmap, white, &lines)?;
 
         conn.copy_area(
             pixmap,

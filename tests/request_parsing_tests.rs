@@ -73,12 +73,12 @@ fn test_create_window1() {
             width: 0x03f5,
             height: 0x033b,
             border_width: 0,
-            class: WindowClass::InputOutput,
+            class: WindowClass::INPUT_OUTPUT,
             visual: 0x47,
             value_list: Cow::Owned(CreateWindowAux {
                 background_pixel: Some(0xfff2_f1f0),
                 border_pixel: Some(0),
-                bit_gravity: Some(Gravity::NorthWest),
+                bit_gravity: Some(Gravity::NORTH_WEST),
                 ..Default::default()
             }),
         }
@@ -119,12 +119,12 @@ fn test_create_window2() {
             width: 1,
             height: 1,
             border_width: 0,
-            class: WindowClass::InputOutput,
+            class: WindowClass::INPUT_OUTPUT,
             visual: 0x35a,
             value_list: Cow::Owned(CreateWindowAux {
                 background_pixel: Some(0),
                 border_pixel: Some(0),
-                bit_gravity: Some(Gravity::NorthWest),
+                bit_gravity: Some(Gravity::NORTH_WEST),
                 colormap: Some(0x0540_0002),
                 ..Default::default()
             }),
@@ -152,7 +152,7 @@ fn test_change_window_attributes() {
         ChangeWindowAttributesRequest {
             window: 0x0513,
             value_list: Cow::Owned(ChangeWindowAttributesAux {
-                event_mask: Some(EventMask::PropertyChange.into()),
+                event_mask: Some(EventMask::PROPERTY_CHANGE.into()),
                 ..Default::default()
             }),
         }

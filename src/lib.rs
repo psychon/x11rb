@@ -59,7 +59,7 @@
 //!         100,
 //!         100,
 //!         0,
-//!         WindowClass::InputOutput,
+//!         WindowClass::INPUT_OUTPUT,
 //!         0,
 //!         &CreateWindowAux::new().background_pixel(screen.white_pixel),
 //!     )?;

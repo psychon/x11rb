@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         client_died: false,
     };
     ctrl_conn
-        .record_create_context(rc, 0, &[record::CS::AllClients.into()], &[range])?
+        .record_create_context(rc, 0, &[record::CS::ALL_CLIENTS.into()], &[range])?
         .check()?;
 
     // Apply a timeout if we are requested to do so.

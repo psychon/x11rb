@@ -11,9 +11,9 @@ fn main() {
     for reply in conn.list_fonts_with_info(u16::max_value(), b"*").unwrap() {
         let reply = reply.unwrap();
 
-        let dir = if reply.draw_direction == FontDraw::LeftToRight {
+        let dir = if reply.draw_direction == FontDraw::LEFT_TO_RIGHT {
             "-->"
-        } else if reply.draw_direction == FontDraw::RightToLeft {
+        } else if reply.draw_direction == FontDraw::RIGHT_TO_LEFT {
             "<--"
         } else {
             "???"

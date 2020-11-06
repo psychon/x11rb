@@ -112,7 +112,7 @@ impl<'a, C: Connection> WMState<'a, C> {
                 continue;
             }
             let (attr, geom) = (attr.unwrap(), geom.unwrap());
-            if !attr.override_redirect && attr.map_state != MapState::Unmapped {
+            if !attr.override_redirect && attr.map_state != MapState::UNMAPPED {
                 self.manage_window(win, &geom)?;
             }
         }
@@ -133,12 +133,12 @@ impl<'a, C: Connection> WMState<'a, C> {
         let frame_win = self.conn.generate_id()?;
         let win_aux = CreateWindowAux::new()
             .event_mask(
-                EventMask::Exposure
-                    | EventMask::SubstructureNotify
-                    | EventMask::ButtonPress
-                    | EventMask::ButtonRelease
-                    | EventMask::PointerMotion
-                    | EventMask::EnterWindow,
+                EventMask::EXPOSURE
+                    | EventMask::SUBSTRUCTURE_NOTIFY
+                    | EventMask::BUTTON_PRESS
+                    | EventMask::BUTTON_RELEASE
+                    | EventMask::POINTER_MOTION
+                    | EventMask::ENTER_WINDOW,
             )
             .background_pixel(screen.white_pixel);
         self.conn.create_window(
@@ -150,13 +150,13 @@ impl<'a, C: Connection> WMState<'a, C> {
             geom.width,
             geom.height + TITLEBAR_HEIGHT,
             1,
-            WindowClass::InputOutput,
+            WindowClass::INPUT_OUTPUT,
             0,
             &win_aux,
         )?;
 
         self.conn.grab_server()?;
-        self.conn.change_save_set(SetMode::Insert, win)?;
+        self.conn.change_save_set(SetMode::INSERT, win)?;
         let cookie = self
             .conn
             .reparent_window(win, frame_win, 0, TITLEBAR_HEIGHT as _)?;
@@ -179,7 +179,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     fn redraw_titlebar(&self, state: &WindowState) -> Result<(), ReplyError> {
         let close_x = state.close_x_position();
         self.conn.poly_line(
-            CoordMode::Origin,
+            CoordMode::ORIGIN,
             state.frame_window,
             self.black_gc,
             &[
@@ -191,7 +191,7 @@ impl<'a, C: Connection> WMState<'a, C> {
             ],
         )?;
         self.conn.poly_line(
-            CoordMode::Origin,
+            CoordMode::ORIGIN,
             state.frame_window,
             self.black_gc,
             &[
@@ -294,7 +294,7 @@ impl<'a, C: Connection> WMState<'a, C> {
             if state.window != event.window {
                 return true;
             }
-            conn.change_save_set(SetMode::Delete, state.window).unwrap();
+            conn.change_save_set(SetMode::DELETE, state.window).unwrap();
             conn.reparent_window(state.window, root, state.x, state.y)
                 .unwrap();
             conn.destroy_window(state.frame_window).unwrap();
@@ -315,10 +315,10 @@ impl<'a, C: Connection> WMState<'a, C> {
         if event.value_mask & u16::from(ConfigWindow::Y) != 0 {
             aux = aux.y(i32::from(event.y));
         }
-        if event.value_mask & u16::from(ConfigWindow::Width) != 0 {
+        if event.value_mask & u16::from(ConfigWindow::WIDTH) != 0 {
             aux = aux.width(u32::from(event.width));
         }
-        if event.value_mask & u16::from(ConfigWindow::Height) != 0 {
+        if event.value_mask & u16::from(ConfigWindow::HEIGHT) != 0 {
             aux = aux.height(u32::from(event.height));
         }
         println!("Configure: {:?}", aux);
@@ -342,11 +342,11 @@ impl<'a, C: Connection> WMState<'a, C> {
         if let Some(state) = self.find_window_by_id(event.event) {
             // Set the input focus (ignoring ICCCM's WM_PROTOCOLS / WM_TAKE_FOCUS)
             self.conn
-                .set_input_focus(InputFocus::Parent, state.window, CURRENT_TIME)?;
+                .set_input_focus(InputFocus::PARENT, state.window, CURRENT_TIME)?;
             // Also raise the window to the top of the stacking order
             self.conn.configure_window(
                 state.frame_window,
-                &ConfigureWindowAux::new().stack_mode(StackMode::Above),
+                &ConfigureWindowAux::new().stack_mode(StackMode::ABOVE),
             )?;
         }
         Ok(())
@@ -381,7 +381,7 @@ impl<'a, C: Connection> WMState<'a, C> {
                     data: data.into(),
                 };
                 self.conn
-                    .send_event(false, state.window, EventMask::NoEvent, &event)?;
+                    .send_event(false, state.window, EventMask::NO_EVENT, &event)?;
             }
         }
         Ok(())
@@ -402,7 +402,7 @@ impl<'a, C: Connection> WMState<'a, C> {
 fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError> {
     // Try to become the window manager. This causes an error if there is already another WM.
     let change = ChangeWindowAttributesAux::default()
-        .event_mask(EventMask::SubstructureRedirect | EventMask::SubstructureNotify);
+        .event_mask(EventMask::SUBSTRUCTURE_REDIRECT | EventMask::SUBSTRUCTURE_NOTIFY);
     let res = conn.change_window_attributes(screen.root, &change)?.check();
     if let Err(ReplyError::X11Error(error)) = res {
         if error.error_kind == ErrorKind::Access {

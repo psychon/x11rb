@@ -62,7 +62,7 @@ fn get_shared_memory_content_at_offset<C: Connection>(
     let pixmap = FreePixmap(conn, pixmap);
 
     let image =
-        xproto::get_image(conn, ImageFormat::ZPixmap, pixmap.1, 0, 0, width, 1, !0)?.reply()?;
+        xproto::get_image(conn, ImageFormat::Z_PIXMAP, pixmap.1, 0, 0, width, 1, !0)?.reply()?;
     Ok(image.data)
 }
 

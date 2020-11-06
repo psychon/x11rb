@@ -124,7 +124,7 @@ fn parse_setup() -> Result<(), ParseError> {
     assert_eq!(1, depth.visuals.len());
     let visual = &depth.visuals[0];
     assert_eq!(80, visual.visual_id);
-    assert_eq!(VisualClass::StaticColor, visual.class);
+    assert_eq!(VisualClass::STATIC_COLOR, visual.class);
     assert_eq!(4, visual.bits_per_rgb_value);
     assert_eq!(81, visual.colormap_entries);
     assert_eq!(82, visual.red_mask);

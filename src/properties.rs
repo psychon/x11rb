@@ -779,7 +779,7 @@ mod test {
         assert_eq!(wm_size_hints.size_increment, Some((10, 19)));
         assert!(wm_size_hints.aspect.is_none(), "{:?}", wm_size_hints.aspect);
         assert_eq!(wm_size_hints.base_size, Some((11, 4)));
-        assert_eq!(wm_size_hints.win_gravity, Some(Gravity::NorthWest));
+        assert_eq!(wm_size_hints.win_gravity, Some(Gravity::NORTH_WEST));
 
         assert_eq!(input, wm_size_hints.serialize());
     }

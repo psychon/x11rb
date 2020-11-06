@@ -38,7 +38,7 @@ fn multithread_test() {
         };
 
         conn1
-            .send_event(false, 0u32, EventMask::NoEvent, &event)
+            .send_event(false, 0u32, EventMask::NO_EVENT, &event)
             .unwrap();
         conn1.flush().unwrap();
     });
@@ -80,8 +80,8 @@ mod fake_stream {
             resource_id_mask: 0xff,
             motion_buffer_size: 0,
             maximum_request_length: 0,
-            image_byte_order: ImageOrder::LSBFirst,
-            bitmap_format_bit_order: ImageOrder::LSBFirst,
+            image_byte_order: ImageOrder::LSB_FIRST,
+            bitmap_format_bit_order: ImageOrder::LSB_FIRST,
             bitmap_format_scanline_unit: 0,
             bitmap_format_scanline_pad: 0,
             min_keycode: 0,
