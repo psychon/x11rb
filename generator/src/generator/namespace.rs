@@ -4613,8 +4613,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if !was_deduced && self.use_enum_type_in_field(type_).is_some() {
             let rust_wire_type = self.type_to_rust_type(type_.type_.get_resolved());
             format!(
-                "Option::<{}>::from({}).unwrap().serialize()",
-                rust_wire_type, value
+                "{}::<{}>::from({}).unwrap().serialize()",
+                self.option_name, rust_wire_type, value
             )
         } else {
             format!("{}.serialize()", value)
@@ -4634,7 +4634,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             let rust_wire_type = self.type_to_rust_type(type_.type_.get_resolved());
             outln!(
                 out,
-                "Option::<{}>::from({}).unwrap().serialize_into({});",
+                "{}::<{}>::from({}).unwrap().serialize_into({});",
+                self.option_name,
                 rust_wire_type,
                 value,
                 bytes_var,
