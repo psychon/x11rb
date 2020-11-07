@@ -73,12 +73,6 @@ pub enum ParseError {
     MissingFileDescriptors,
 }
 
-impl From<std::convert::Infallible> for ParseError {
-    fn from(e: std::convert::Infallible) -> Self {
-        match e {}
-    }
-}
-
 impl std::error::Error for ParseError {}
 
 impl std::fmt::Display for ParseError {
