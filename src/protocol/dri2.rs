@@ -227,7 +227,7 @@ impl TryFrom<&[u8]> for DRI2Buffer {
 impl Serialize for DRI2Buffer {
     type Bytes = [u8; 20];
     fn serialize(&self) -> [u8; 20] {
-        let attachment_bytes = Option::<u32>::from(self.attachment).unwrap().serialize();
+        let attachment_bytes = u32::from(self.attachment).serialize();
         let name_bytes = self.name.serialize();
         let pitch_bytes = self.pitch.serialize();
         let cpp_bytes = self.cpp.serialize();
@@ -257,7 +257,7 @@ impl Serialize for DRI2Buffer {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        Option::<u32>::from(self.attachment).unwrap().serialize_into(bytes);
+        u32::from(self.attachment).serialize_into(bytes);
         self.name.serialize_into(bytes);
         self.pitch.serialize_into(bytes);
         self.cpp.serialize_into(bytes);
@@ -288,7 +288,7 @@ impl TryFrom<&[u8]> for AttachFormat {
 impl Serialize for AttachFormat {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let attachment_bytes = Option::<u32>::from(self.attachment).unwrap().serialize();
+        let attachment_bytes = u32::from(self.attachment).serialize();
         let format_bytes = self.format.serialize();
         [
             attachment_bytes[0],
@@ -303,7 +303,7 @@ impl Serialize for AttachFormat {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u32>::from(self.attachment).unwrap().serialize_into(bytes);
+        u32::from(self.attachment).serialize_into(bytes);
         self.format.serialize_into(bytes);
     }
 }
@@ -432,7 +432,7 @@ impl ConnectRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let driver_type_bytes = Option::<u32>::from(self.driver_type).unwrap().serialize();
+        let driver_type_bytes = u32::from(self.driver_type).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             CONNECT_REQUEST,
@@ -1983,7 +1983,7 @@ impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
         let sequence_bytes = input.sequence.serialize();
-        let event_type_bytes = Option::<u16>::from(input.event_type).unwrap().serialize();
+        let event_type_bytes = u16::from(input.event_type).serialize();
         let drawable_bytes = input.drawable.serialize();
         let ust_hi_bytes = input.ust_hi.serialize();
         let ust_lo_bytes = input.ust_lo.serialize();

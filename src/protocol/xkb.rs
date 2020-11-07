@@ -1916,10 +1916,10 @@ impl TryFrom<&[u8]> for IndicatorMap {
 impl Serialize for IndicatorMap {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
-        let flags_bytes = Option::<u8>::from(self.flags).unwrap().serialize();
-        let which_groups_bytes = Option::<u8>::from(self.which_groups).unwrap().serialize();
-        let groups_bytes = Option::<u8>::from(self.groups).unwrap().serialize();
-        let which_mods_bytes = Option::<u8>::from(self.which_mods).unwrap().serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
+        let which_groups_bytes = u8::from(self.which_groups).serialize();
+        let groups_bytes = u8::from(self.groups).serialize();
+        let which_mods_bytes = u8::from(self.which_mods).serialize();
         let mods_bytes = self.mods.serialize();
         let real_mods_bytes = self.real_mods.serialize();
         let vmods_bytes = self.vmods.serialize();
@@ -1941,10 +1941,10 @@ impl Serialize for IndicatorMap {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Option::<u8>::from(self.flags).unwrap().serialize_into(bytes);
-        Option::<u8>::from(self.which_groups).unwrap().serialize_into(bytes);
-        Option::<u8>::from(self.groups).unwrap().serialize_into(bytes);
-        Option::<u8>::from(self.which_mods).unwrap().serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
+        u8::from(self.which_groups).serialize_into(bytes);
+        u8::from(self.groups).serialize_into(bytes);
+        u8::from(self.which_mods).serialize_into(bytes);
         self.mods.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
         self.vmods.serialize_into(bytes);
@@ -3795,7 +3795,7 @@ impl Serialize for DeviceLedInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        Option::<LedClassSpec>::from(self.led_class).unwrap().serialize_into(bytes);
+        LedClassSpec::from(self.led_class).serialize_into(bytes);
         self.led_id.serialize_into(bytes);
         self.names_present.serialize_into(bytes);
         self.maps_present.serialize_into(bytes);
@@ -4039,7 +4039,7 @@ impl TryFrom<&[u8]> for SANoAction {
 impl Serialize for SANoAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         [
             type_bytes[0],
             0,
@@ -4053,7 +4053,7 @@ impl Serialize for SANoAction {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
     }
 }
@@ -4090,7 +4090,7 @@ impl TryFrom<&[u8]> for SASetMods {
 impl Serialize for SASetMods {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4109,7 +4109,7 @@ impl Serialize for SASetMods {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -4149,7 +4149,7 @@ impl TryFrom<&[u8]> for SASetGroup {
 impl Serialize for SASetGroup {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let group_bytes = self.group.serialize();
         [
@@ -4165,7 +4165,7 @@ impl Serialize for SASetGroup {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -4271,7 +4271,7 @@ impl TryFrom<&[u8]> for SAMovePtr {
 impl Serialize for SAMovePtr {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let x_high_bytes = self.x_high.serialize();
         let x_low_bytes = self.x_low.serialize();
@@ -4290,7 +4290,7 @@ impl Serialize for SAMovePtr {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.x_high.serialize_into(bytes);
         self.x_low.serialize_into(bytes);
@@ -4328,7 +4328,7 @@ impl TryFrom<&[u8]> for SAPtrBtn {
 impl Serialize for SAPtrBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
         let button_bytes = self.button.serialize();
@@ -4345,7 +4345,7 @@ impl Serialize for SAPtrBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.count.serialize_into(bytes);
         self.button.serialize_into(bytes);
@@ -4380,7 +4380,7 @@ impl TryFrom<&[u8]> for SALockPtrBtn {
 impl Serialize for SALockPtrBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
         [
@@ -4396,7 +4396,7 @@ impl Serialize for SALockPtrBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
@@ -4494,7 +4494,7 @@ impl TryFrom<&[u8]> for SASetPtrDflt {
 impl Serialize for SASetPtrDflt {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let affect_bytes = self.affect.serialize();
         let value_bytes = self.value.serialize();
@@ -4511,7 +4511,7 @@ impl Serialize for SASetPtrDflt {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.affect.serialize_into(bytes);
         self.value.serialize_into(bytes);
@@ -4683,7 +4683,7 @@ impl TryFrom<&[u8]> for SAIsoLock {
 impl Serialize for SAIsoLock {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4704,7 +4704,7 @@ impl Serialize for SAIsoLock {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -4737,7 +4737,7 @@ impl TryFrom<&[u8]> for SATerminate {
 impl Serialize for SATerminate {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         [
             type_bytes[0],
             0,
@@ -4751,7 +4751,7 @@ impl Serialize for SATerminate {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
     }
 }
@@ -4844,7 +4844,7 @@ impl TryFrom<&[u8]> for SASwitchScreen {
 impl Serialize for SASwitchScreen {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let new_screen_bytes = self.new_screen.serialize();
         [
@@ -4860,7 +4860,7 @@ impl Serialize for SASwitchScreen {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.new_screen.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -5027,7 +5027,7 @@ impl TryFrom<&[u8]> for SASetControls {
 impl Serialize for SASetControls {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let bool_ctrls_high_bytes = self.bool_ctrls_high.serialize();
         let bool_ctrls_low_bytes = self.bool_ctrls_low.serialize();
         [
@@ -5043,7 +5043,7 @@ impl Serialize for SASetControls {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.bool_ctrls_high.serialize_into(bytes);
         self.bool_ctrls_low.serialize_into(bytes);
@@ -5142,7 +5142,7 @@ impl TryFrom<&[u8]> for SAActionMessage {
 impl Serialize for SAActionMessage {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         [
             type_bytes[0],
@@ -5157,7 +5157,7 @@ impl Serialize for SAActionMessage {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&self.message);
     }
@@ -5198,7 +5198,7 @@ impl TryFrom<&[u8]> for SARedirectKey {
 impl Serialize for SARedirectKey {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let newkey_bytes = self.newkey.serialize();
         let mask_bytes = self.mask.serialize();
         let real_modifiers_bytes = self.real_modifiers.serialize();
@@ -5219,7 +5219,7 @@ impl Serialize for SARedirectKey {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.newkey.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_modifiers.serialize_into(bytes);
@@ -5260,7 +5260,7 @@ impl TryFrom<&[u8]> for SADeviceBtn {
 impl Serialize for SADeviceBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
         let button_bytes = self.button.serialize();
@@ -5278,7 +5278,7 @@ impl Serialize for SADeviceBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.count.serialize_into(bytes);
         self.button.serialize_into(bytes);
@@ -5378,7 +5378,7 @@ impl TryFrom<&[u8]> for SALockDeviceBtn {
 impl Serialize for SALockDeviceBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
         let device_bytes = self.device.serialize();
@@ -5395,7 +5395,7 @@ impl Serialize for SALockDeviceBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
@@ -5506,12 +5506,12 @@ impl TryFrom<&[u8]> for SADeviceValuator {
 impl Serialize for SADeviceValuator {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let device_bytes = self.device.serialize();
-        let val1what_bytes = Option::<u8>::from(self.val1what).unwrap().serialize();
+        let val1what_bytes = u8::from(self.val1what).serialize();
         let val1index_bytes = self.val1index.serialize();
         let val1value_bytes = self.val1value.serialize();
-        let val2what_bytes = Option::<u8>::from(self.val2what).unwrap().serialize();
+        let val2what_bytes = u8::from(self.val2what).serialize();
         let val2index_bytes = self.val2index.serialize();
         let val2value_bytes = self.val2value.serialize();
         [
@@ -5527,12 +5527,12 @@ impl Serialize for SADeviceValuator {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.device.serialize_into(bytes);
-        Option::<u8>::from(self.val1what).unwrap().serialize_into(bytes);
+        u8::from(self.val1what).serialize_into(bytes);
         self.val1index.serialize_into(bytes);
         self.val1value.serialize_into(bytes);
-        Option::<u8>::from(self.val2what).unwrap().serialize_into(bytes);
+        u8::from(self.val2what).serialize_into(bytes);
         self.val2index.serialize_into(bytes);
         self.val2value.serialize_into(bytes);
     }
@@ -5562,7 +5562,7 @@ impl TryFrom<&[u8]> for SIAction {
 impl Serialize for SIAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         [
             type_bytes[0],
             self.data[0],
@@ -5576,7 +5576,7 @@ impl Serialize for SIAction {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&self.data);
     }
 }
@@ -5945,7 +5945,7 @@ impl From<SADeviceValuator> for Action {
 }
 impl From<SAType> for Action {
     fn from(type_: SAType) -> Self {
-        let type_bytes = Option::<u8>::from(type_).unwrap().serialize();
+        let type_bytes = u8::from(type_).serialize();
         let value = [
             type_bytes[0],
             0,
@@ -7132,7 +7132,7 @@ impl LatchLockStateRequest {
         let affect_mod_locks_bytes = self.affect_mod_locks.serialize();
         let mod_locks_bytes = self.mod_locks.serialize();
         let lock_group_bytes = self.lock_group.serialize();
-        let group_lock_bytes = Option::<u8>::from(self.group_lock).unwrap().serialize();
+        let group_lock_bytes = u8::from(self.group_lock).serialize();
         let affect_mod_latches_bytes = self.affect_mod_latches.serialize();
         let latch_group_bytes = self.latch_group.serialize();
         let group_latch_bytes = self.group_latch.serialize();
@@ -9195,7 +9195,7 @@ impl GetNamedIndicatorRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let led_class_bytes = Option::<LedClassSpec>::from(self.led_class).unwrap().serialize();
+        let led_class_bytes = LedClassSpec::from(self.led_class).serialize();
         let led_id_bytes = self.led_id.serialize();
         let indicator_bytes = self.indicator.serialize();
         let mut request0 = vec![
@@ -9357,7 +9357,7 @@ impl SetNamedIndicatorRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let led_class_bytes = Option::<LedClassSpec>::from(self.led_class).unwrap().serialize();
+        let led_class_bytes = LedClassSpec::from(self.led_class).serialize();
         let led_id_bytes = self.led_id.serialize();
         let indicator_bytes = self.indicator.serialize();
         let set_state_bytes = self.set_state.serialize();
@@ -11453,7 +11453,7 @@ impl GetDeviceInfoRequest {
         let all_buttons_bytes = self.all_buttons.serialize();
         let first_button_bytes = self.first_button.serialize();
         let n_buttons_bytes = self.n_buttons.serialize();
-        let led_class_bytes = Option::<LedClassSpec>::from(self.led_class).unwrap().serialize();
+        let led_class_bytes = LedClassSpec::from(self.led_class).serialize();
         let led_id_bytes = self.led_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -12236,10 +12236,10 @@ impl From<&StateNotifyEvent> for [u8; 32] {
         let base_mods_bytes = input.base_mods.serialize();
         let latched_mods_bytes = input.latched_mods.serialize();
         let locked_mods_bytes = input.locked_mods.serialize();
-        let group_bytes = Option::<u8>::from(input.group).unwrap().serialize();
+        let group_bytes = u8::from(input.group).serialize();
         let base_group_bytes = input.base_group.serialize();
         let latched_group_bytes = input.latched_group.serialize();
-        let locked_group_bytes = Option::<u8>::from(input.locked_group).unwrap().serialize();
+        let locked_group_bytes = u8::from(input.locked_group).serialize();
         let compat_state_bytes = input.compat_state.serialize();
         let grab_mods_bytes = input.grab_mods.serialize();
         let compat_grab_mods_bytes = input.compat_grab_mods.serialize();
@@ -12843,7 +12843,7 @@ impl From<&BellNotifyEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
-        let bell_class_bytes = Option::<u8>::from(input.bell_class).unwrap().serialize();
+        let bell_class_bytes = u8::from(input.bell_class).serialize();
         let bell_id_bytes = input.bell_id.serialize();
         let percent_bytes = input.percent.serialize();
         let pitch_bytes = input.pitch.serialize();
@@ -12950,7 +12950,7 @@ impl From<&ActionMessageEvent> for [u8; 32] {
         let press_bytes = input.press.serialize();
         let key_event_follows_bytes = input.key_event_follows.serialize();
         let mods_bytes = input.mods.serialize();
-        let group_bytes = Option::<u8>::from(input.group).unwrap().serialize();
+        let group_bytes = u8::from(input.group).serialize();
         [
             response_type_bytes[0],
             xkb_type_bytes[0],
@@ -13146,7 +13146,7 @@ impl From<&ExtensionDeviceNotifyEvent> for [u8; 32] {
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
         let reason_bytes = input.reason.serialize();
-        let led_class_bytes = Option::<u16>::from(input.led_class).unwrap().serialize();
+        let led_class_bytes = u16::from(input.led_class).serialize();
         let led_id_bytes = input.led_id.serialize();
         let leds_defined_bytes = input.leds_defined.serialize();
         let led_state_bytes = input.led_state.serialize();

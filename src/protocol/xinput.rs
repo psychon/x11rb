@@ -422,7 +422,7 @@ impl Serialize for DeviceInfo {
         let device_type_bytes = self.device_type.serialize();
         let device_id_bytes = self.device_id.serialize();
         let num_class_info_bytes = self.num_class_info.serialize();
-        let device_use_bytes = Option::<u8>::from(self.device_use).unwrap().serialize();
+        let device_use_bytes = u8::from(self.device_use).serialize();
         [
             device_type_bytes[0],
             device_type_bytes[1],
@@ -439,7 +439,7 @@ impl Serialize for DeviceInfo {
         self.device_type.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
         self.num_class_info.serialize_into(bytes);
-        Option::<u8>::from(self.device_use).unwrap().serialize_into(bytes);
+        u8::from(self.device_use).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
     }
 }
@@ -474,7 +474,7 @@ impl TryFrom<&[u8]> for KeyInfo {
 impl Serialize for KeyInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let min_keycode_bytes = self.min_keycode.serialize();
         let max_keycode_bytes = self.max_keycode.serialize();
@@ -492,7 +492,7 @@ impl Serialize for KeyInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.min_keycode.serialize_into(bytes);
         self.max_keycode.serialize_into(bytes);
@@ -526,7 +526,7 @@ impl TryFrom<&[u8]> for ButtonInfo {
 impl Serialize for ButtonInfo {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_buttons_bytes = self.num_buttons.serialize();
         [
@@ -538,7 +538,7 @@ impl Serialize for ButtonInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
     }
@@ -631,11 +631,11 @@ impl Serialize for ValuatorInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let axes_len = u8::try_from(self.axes.len()).expect("`axes` has too many elements");
         axes_len.serialize_into(bytes);
-        Option::<u8>::from(self.mode).unwrap().serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
         self.axes.serialize_into(bytes);
     }
@@ -766,7 +766,7 @@ impl Serialize for InputInfoInfoValuator {
         bytes.reserve(6);
         let axes_len = u8::try_from(self.axes.len()).expect("`axes` has too many elements");
         axes_len.serialize_into(bytes);
-        Option::<u8>::from(self.mode).unwrap().serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
         self.axes.serialize_into(bytes);
     }
@@ -1089,7 +1089,7 @@ impl TryFrom<&[u8]> for InputClassInfo {
 impl Serialize for InputClassInfo {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let event_type_base_bytes = self.event_type_base.serialize();
         [
             class_id_bytes[0],
@@ -1098,7 +1098,7 @@ impl Serialize for InputClassInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.event_type_base.serialize_into(bytes);
     }
 }
@@ -1306,7 +1306,7 @@ impl SetDeviceModeRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let device_id_bytes = self.device_id.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             SET_DEVICE_MODE_REQUEST,
@@ -1694,7 +1694,7 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
         let window_bytes = self.window.serialize();
         let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
         let num_classes_bytes = num_classes.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST,
@@ -2293,8 +2293,8 @@ impl<'input> GrabDeviceRequest<'input> {
         let time_bytes = self.time.serialize();
         let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
         let num_classes_bytes = num_classes.serialize();
-        let this_device_mode_bytes = Option::<u8>::from(self.this_device_mode).unwrap().serialize();
-        let other_device_mode_bytes = Option::<u8>::from(self.other_device_mode).unwrap().serialize();
+        let this_device_mode_bytes = u8::from(self.this_device_mode).serialize();
+        let other_device_mode_bytes = u8::from(self.other_device_mode).serialize();
         let owner_events_bytes = self.owner_events.serialize();
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
@@ -2599,8 +2599,8 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         let modifier_device_bytes = self.modifier_device.serialize();
         let grabbed_device_bytes = self.grabbed_device.serialize();
         let key_bytes = self.key.serialize();
-        let this_device_mode_bytes = Option::<u8>::from(self.this_device_mode).unwrap().serialize();
-        let other_device_mode_bytes = Option::<u8>::from(self.other_device_mode).unwrap().serialize();
+        let this_device_mode_bytes = u8::from(self.this_device_mode).serialize();
+        let other_device_mode_bytes = u8::from(self.other_device_mode).serialize();
         let owner_events_bytes = self.owner_events.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -2843,8 +2843,8 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
         let num_classes_bytes = num_classes.serialize();
         let modifiers_bytes = self.modifiers.serialize();
-        let this_device_mode_bytes = Option::<u8>::from(self.this_device_mode).unwrap().serialize();
-        let other_device_mode_bytes = Option::<u8>::from(self.other_device_mode).unwrap().serialize();
+        let this_device_mode_bytes = u8::from(self.this_device_mode).serialize();
+        let other_device_mode_bytes = u8::from(self.other_device_mode).serialize();
         let button_bytes = self.button.serialize();
         let owner_events_bytes = self.owner_events.serialize();
         let mut request0 = vec![
@@ -3143,7 +3143,7 @@ impl AllowDeviceEventsRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let time_bytes = self.time.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -3332,7 +3332,7 @@ impl SetDeviceFocusRequest {
         let length_so_far = 0;
         let focus_bytes = self.focus.serialize();
         let time_bytes = self.time.serialize();
-        let revert_to_bytes = Option::<u8>::from(self.revert_to).unwrap().serialize();
+        let revert_to_bytes = u8::from(self.revert_to).serialize();
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -3514,7 +3514,7 @@ impl TryFrom<&[u8]> for KbdFeedbackState {
 impl Serialize for KbdFeedbackState {
     type Bytes = [u8; 52];
     fn serialize(&self) -> [u8; 52] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let pitch_bytes = self.pitch.serialize();
@@ -3581,7 +3581,7 @@ impl Serialize for KbdFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(52);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.pitch.serialize_into(bytes);
@@ -3628,7 +3628,7 @@ impl TryFrom<&[u8]> for PtrFeedbackState {
 impl Serialize for PtrFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let accel_num_bytes = self.accel_num.serialize();
@@ -3651,7 +3651,7 @@ impl Serialize for PtrFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -3692,7 +3692,7 @@ impl TryFrom<&[u8]> for IntegerFeedbackState {
 impl Serialize for IntegerFeedbackState {
     type Bytes = [u8; 16];
     fn serialize(&self) -> [u8; 16] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let resolution_bytes = self.resolution.serialize();
@@ -3719,7 +3719,7 @@ impl Serialize for IntegerFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(16);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
@@ -3764,7 +3764,7 @@ impl Serialize for StringFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.max_symbols.serialize_into(bytes);
@@ -3821,7 +3821,7 @@ impl TryFrom<&[u8]> for BellFeedbackState {
 impl Serialize for BellFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let percent_bytes = self.percent.serialize();
@@ -3844,7 +3844,7 @@ impl Serialize for BellFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.percent.serialize_into(bytes);
@@ -3883,7 +3883,7 @@ impl TryFrom<&[u8]> for LedFeedbackState {
 impl Serialize for LedFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let led_mask_bytes = self.led_mask.serialize();
@@ -3905,7 +3905,7 @@ impl Serialize for LedFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
@@ -4575,7 +4575,7 @@ impl TryFrom<&[u8]> for KbdFeedbackCtl {
 impl Serialize for KbdFeedbackCtl {
     type Bytes = [u8; 20];
     fn serialize(&self) -> [u8; 20] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let key_bytes = self.key.serialize();
@@ -4611,7 +4611,7 @@ impl Serialize for KbdFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.key.serialize_into(bytes);
@@ -4657,7 +4657,7 @@ impl TryFrom<&[u8]> for PtrFeedbackCtl {
 impl Serialize for PtrFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let num_bytes = self.num.serialize();
@@ -4680,7 +4680,7 @@ impl Serialize for PtrFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -4717,7 +4717,7 @@ impl TryFrom<&[u8]> for IntegerFeedbackCtl {
 impl Serialize for IntegerFeedbackCtl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let int_to_display_bytes = self.int_to_display.serialize();
@@ -4734,7 +4734,7 @@ impl Serialize for IntegerFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.int_to_display.serialize_into(bytes);
@@ -4776,7 +4776,7 @@ impl Serialize for StringFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -4833,7 +4833,7 @@ impl TryFrom<&[u8]> for BellFeedbackCtl {
 impl Serialize for BellFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let percent_bytes = self.percent.serialize();
@@ -4856,7 +4856,7 @@ impl Serialize for BellFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.percent.serialize_into(bytes);
@@ -4895,7 +4895,7 @@ impl TryFrom<&[u8]> for LedFeedbackCtl {
 impl Serialize for LedFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let led_mask_bytes = self.led_mask.serialize();
@@ -4917,7 +4917,7 @@ impl Serialize for LedFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
@@ -6269,7 +6269,7 @@ impl TryFrom<&[u8]> for KeyState {
 impl Serialize for KeyState {
     type Bytes = [u8; 36];
     fn serialize(&self) -> [u8; 36] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_keys_bytes = self.num_keys.serialize();
         [
@@ -6313,7 +6313,7 @@ impl Serialize for KeyState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
@@ -6350,7 +6350,7 @@ impl TryFrom<&[u8]> for ButtonState {
 impl Serialize for ButtonState {
     type Bytes = [u8; 36];
     fn serialize(&self) -> [u8; 36] {
-        let class_id_bytes = Option::<u8>::from(self.class_id).unwrap().serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_buttons_bytes = self.num_buttons.serialize();
         [
@@ -6394,7 +6394,7 @@ impl Serialize for ButtonState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
@@ -6498,7 +6498,7 @@ impl Serialize for ValuatorState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Option::<u8>::from(self.class_id).unwrap().serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let num_valuators = u8::try_from(self.valuators.len()).expect("`valuators` has too many elements");
         num_valuators.serialize_into(bytes);
@@ -7240,7 +7240,7 @@ impl Serialize for DeviceResolutionState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let num_valuators = u32::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
         num_valuators.serialize_into(bytes);
@@ -7306,7 +7306,7 @@ impl TryFrom<&[u8]> for DeviceAbsCalibState {
 impl Serialize for DeviceAbsCalibState {
     type Bytes = [u8; 36];
     fn serialize(&self) -> [u8; 36] {
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let min_x_bytes = self.min_x.serialize();
         let max_x_bytes = self.max_x.serialize();
@@ -7357,7 +7357,7 @@ impl Serialize for DeviceAbsCalibState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.min_x.serialize_into(bytes);
         self.max_x.serialize_into(bytes);
@@ -7405,7 +7405,7 @@ impl TryFrom<&[u8]> for DeviceAbsAreaState {
 impl Serialize for DeviceAbsAreaState {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let offset_x_bytes = self.offset_x.serialize();
         let offset_y_bytes = self.offset_y.serialize();
@@ -7446,7 +7446,7 @@ impl Serialize for DeviceAbsAreaState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.offset_x.serialize_into(bytes);
         self.offset_y.serialize_into(bytes);
@@ -7485,7 +7485,7 @@ impl TryFrom<&[u8]> for DeviceCoreState {
 impl Serialize for DeviceCoreState {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let status_bytes = self.status.serialize();
         let iscore_bytes = self.iscore.serialize();
@@ -7502,7 +7502,7 @@ impl Serialize for DeviceCoreState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.status.serialize_into(bytes);
         self.iscore.serialize_into(bytes);
@@ -7536,7 +7536,7 @@ impl TryFrom<&[u8]> for DeviceEnableState {
 impl Serialize for DeviceEnableState {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let enable_bytes = self.enable.serialize();
         [
@@ -7552,7 +7552,7 @@ impl Serialize for DeviceEnableState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
@@ -7983,7 +7983,7 @@ impl GetDeviceControlRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -8109,7 +8109,7 @@ impl Serialize for DeviceResolutionCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.first_valuator.serialize_into(bytes);
         let num_valuators = u8::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
@@ -8173,7 +8173,7 @@ impl TryFrom<&[u8]> for DeviceAbsCalibCtl {
 impl Serialize for DeviceAbsCalibCtl {
     type Bytes = [u8; 36];
     fn serialize(&self) -> [u8; 36] {
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let min_x_bytes = self.min_x.serialize();
         let max_x_bytes = self.max_x.serialize();
@@ -8224,7 +8224,7 @@ impl Serialize for DeviceAbsCalibCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.min_x.serialize_into(bytes);
         self.max_x.serialize_into(bytes);
@@ -8272,7 +8272,7 @@ impl TryFrom<&[u8]> for DeviceAbsAreaCtrl {
 impl Serialize for DeviceAbsAreaCtrl {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let offset_x_bytes = self.offset_x.serialize();
         let offset_y_bytes = self.offset_y.serialize();
@@ -8313,7 +8313,7 @@ impl Serialize for DeviceAbsAreaCtrl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.offset_x.serialize_into(bytes);
         self.offset_y.serialize_into(bytes);
@@ -8350,7 +8350,7 @@ impl TryFrom<&[u8]> for DeviceCoreCtrl {
 impl Serialize for DeviceCoreCtrl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let status_bytes = self.status.serialize();
         [
@@ -8366,7 +8366,7 @@ impl Serialize for DeviceCoreCtrl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.status.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
@@ -8399,7 +8399,7 @@ impl TryFrom<&[u8]> for DeviceEnableCtrl {
 impl Serialize for DeviceEnableCtrl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let enable_bytes = self.enable.serialize();
         [
@@ -8415,7 +8415,7 @@ impl Serialize for DeviceEnableCtrl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.control_id).unwrap().serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
@@ -8841,7 +8841,7 @@ impl ChangeDeviceControlRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let control_id_bytes = Option::<u16>::from(self.control_id).unwrap().serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let device_id_bytes = self.device_id.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -9245,7 +9245,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let device_id_bytes = self.device_id.serialize();
         let format = u8::try_from(self.items.switch_expr()).unwrap();
         let format_bytes = format.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let num_items_bytes = self.num_items.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -10289,7 +10289,7 @@ impl Serialize for AddMaster {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
@@ -10348,10 +10348,10 @@ impl TryFrom<&[u8]> for RemoveMaster {
 impl Serialize for RemoveMaster {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
-        let type_bytes = Option::<u16>::from(self.type_).unwrap().serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
-        let return_mode_bytes = Option::<u8>::from(self.return_mode).unwrap().serialize();
+        let return_mode_bytes = u8::from(self.return_mode).serialize();
         let return_pointer_bytes = self.return_pointer.serialize();
         let return_keyboard_bytes = self.return_keyboard.serialize();
         [
@@ -10371,10 +10371,10 @@ impl Serialize for RemoveMaster {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
-        Option::<u8>::from(self.return_mode).unwrap().serialize_into(bytes);
+        u8::from(self.return_mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.return_pointer.serialize_into(bytes);
         self.return_keyboard.serialize_into(bytes);
@@ -10408,7 +10408,7 @@ impl TryFrom<&[u8]> for AttachSlave {
 impl Serialize for AttachSlave {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u16>::from(self.type_).unwrap().serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
         let master_bytes = self.master.serialize();
@@ -10425,7 +10425,7 @@ impl Serialize for AttachSlave {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
         self.master.serialize_into(bytes);
@@ -10458,7 +10458,7 @@ impl TryFrom<&[u8]> for DetachSlave {
 impl Serialize for DetachSlave {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u16>::from(self.type_).unwrap().serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
         [
@@ -10474,7 +10474,7 @@ impl Serialize for DetachSlave {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -10570,7 +10570,7 @@ impl Serialize for HierarchyChangeDataRemoveMaster {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let deviceid_bytes = self.deviceid.serialize();
-        let return_mode_bytes = Option::<u8>::from(self.return_mode).unwrap().serialize();
+        let return_mode_bytes = u8::from(self.return_mode).serialize();
         let return_pointer_bytes = self.return_pointer.serialize();
         let return_keyboard_bytes = self.return_keyboard.serialize();
         [
@@ -10587,7 +10587,7 @@ impl Serialize for HierarchyChangeDataRemoveMaster {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.deviceid.serialize_into(bytes);
-        Option::<u8>::from(self.return_mode).unwrap().serialize_into(bytes);
+        u8::from(self.return_mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.return_pointer.serialize_into(bytes);
         self.return_keyboard.serialize_into(bytes);
@@ -11699,7 +11699,7 @@ impl Serialize for ButtonClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         let num_buttons = u16::try_from(self.labels.len()).expect("`labels` has too many elements");
@@ -11759,7 +11759,7 @@ impl Serialize for KeyClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         let num_keys = u16::try_from(self.keys.len()).expect("`keys` has too many elements");
@@ -11818,11 +11818,11 @@ impl TryFrom<&[u8]> for ScrollClass {
 impl Serialize for ScrollClass {
     type Bytes = [u8; 24];
     fn serialize(&self) -> [u8; 24] {
-        let type_bytes = Option::<u16>::from(self.type_).unwrap().serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
         let number_bytes = self.number.serialize();
-        let scroll_type_bytes = Option::<u16>::from(self.scroll_type).unwrap().serialize();
+        let scroll_type_bytes = u16::from(self.scroll_type).serialize();
         let flags_bytes = self.flags.serialize();
         let increment_bytes = self.increment.serialize();
         [
@@ -11854,11 +11854,11 @@ impl Serialize for ScrollClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.number.serialize_into(bytes);
-        Option::<u16>::from(self.scroll_type).unwrap().serialize_into(bytes);
+        u16::from(self.scroll_type).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
         self.increment.serialize_into(bytes);
@@ -11895,10 +11895,10 @@ impl TryFrom<&[u8]> for TouchClass {
 impl Serialize for TouchClass {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let type_bytes = Option::<u16>::from(self.type_).unwrap().serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let num_touches_bytes = self.num_touches.serialize();
         [
             type_bytes[0],
@@ -11913,10 +11913,10 @@ impl Serialize for TouchClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
-        Option::<u8>::from(self.mode).unwrap().serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.num_touches.serialize_into(bytes);
     }
 }
@@ -11962,7 +11962,7 @@ impl TryFrom<&[u8]> for ValuatorClass {
 impl Serialize for ValuatorClass {
     type Bytes = [u8; 44];
     fn serialize(&self) -> [u8; 44] {
-        let type_bytes = Option::<u16>::from(self.type_).unwrap().serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
         let number_bytes = self.number.serialize();
@@ -11971,7 +11971,7 @@ impl Serialize for ValuatorClass {
         let max_bytes = self.max.serialize();
         let value_bytes = self.value.serialize();
         let resolution_bytes = self.resolution.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         [
             type_bytes[0],
             type_bytes[1],
@@ -12021,7 +12021,7 @@ impl Serialize for ValuatorClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(44);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.number.serialize_into(bytes);
@@ -12030,7 +12030,7 @@ impl Serialize for ValuatorClass {
         self.max.serialize_into(bytes);
         self.value.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
-        Option::<u8>::from(self.mode).unwrap().serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
 }
@@ -12171,7 +12171,7 @@ impl Serialize for DeviceClassDataValuator {
         let max_bytes = self.max.serialize();
         let value_bytes = self.value.serialize();
         let resolution_bytes = self.resolution.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         [
             number_bytes[0],
             number_bytes[1],
@@ -12221,7 +12221,7 @@ impl Serialize for DeviceClassDataValuator {
         self.max.serialize_into(bytes);
         self.value.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
-        Option::<u8>::from(self.mode).unwrap().serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
 }
@@ -12254,7 +12254,7 @@ impl Serialize for DeviceClassDataScroll {
     type Bytes = [u8; 18];
     fn serialize(&self) -> [u8; 18] {
         let number_bytes = self.number.serialize();
-        let scroll_type_bytes = Option::<u16>::from(self.scroll_type).unwrap().serialize();
+        let scroll_type_bytes = u16::from(self.scroll_type).serialize();
         let flags_bytes = self.flags.serialize();
         let increment_bytes = self.increment.serialize();
         [
@@ -12281,7 +12281,7 @@ impl Serialize for DeviceClassDataScroll {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(18);
         self.number.serialize_into(bytes);
-        Option::<u16>::from(self.scroll_type).unwrap().serialize_into(bytes);
+        u16::from(self.scroll_type).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
         self.increment.serialize_into(bytes);
@@ -12310,7 +12310,7 @@ impl TryFrom<&[u8]> for DeviceClassDataTouch {
 impl Serialize for DeviceClassDataTouch {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let num_touches_bytes = self.num_touches.serialize();
         [
             mode_bytes[0],
@@ -12319,7 +12319,7 @@ impl Serialize for DeviceClassDataTouch {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        Option::<u8>::from(self.mode).unwrap().serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.num_touches.serialize_into(bytes);
     }
 }
@@ -12520,7 +12520,7 @@ impl Serialize for XIDeviceInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.deviceid.serialize_into(bytes);
-        Option::<u16>::from(self.type_).unwrap().serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.attachment.serialize_into(bytes);
         let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
         num_classes.serialize_into(bytes);
@@ -12917,9 +12917,9 @@ impl<'input> XIGrabDeviceRequest<'input> {
         let time_bytes = self.time.serialize();
         let cursor_bytes = self.cursor.serialize();
         let deviceid_bytes = self.deviceid.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
-        let paired_device_mode_bytes = Option::<u8>::from(self.paired_device_mode).unwrap().serialize();
-        let owner_events_bytes = Option::<bool>::from(self.owner_events).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
+        let paired_device_mode_bytes = u8::from(self.paired_device_mode).serialize();
+        let owner_events_bytes = bool::from(self.owner_events).serialize();
         let mask_len = u16::try_from(self.mask.len()).expect("`mask` has too many elements");
         let mask_len_bytes = mask_len.serialize();
         let mut request0 = vec![
@@ -13234,7 +13234,7 @@ impl XIAllowEventsRequest {
         let length_so_far = 0;
         let time_bytes = self.time.serialize();
         let deviceid_bytes = self.deviceid.serialize();
-        let event_mode_bytes = Option::<u8>::from(self.event_mode).unwrap().serialize();
+        let event_mode_bytes = u8::from(self.event_mode).serialize();
         let touchid_bytes = self.touchid.serialize();
         let grab_window_bytes = self.grab_window.serialize();
         let mut request0 = vec![
@@ -13516,7 +13516,7 @@ impl Serialize for GrabModifierInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let modifiers_bytes = self.modifiers.serialize();
-        let status_bytes = Option::<u8>::from(self.status).unwrap().serialize();
+        let status_bytes = u8::from(self.status).serialize();
         [
             modifiers_bytes[0],
             modifiers_bytes[1],
@@ -13531,7 +13531,7 @@ impl Serialize for GrabModifierInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.modifiers.serialize_into(bytes);
-        Option::<u8>::from(self.status).unwrap().serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
 }
@@ -13570,10 +13570,10 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         let num_modifiers_bytes = num_modifiers.serialize();
         let mask_len = u16::try_from(self.mask.len()).expect("`mask` has too many elements");
         let mask_len_bytes = mask_len.serialize();
-        let grab_type_bytes = Option::<u8>::from(self.grab_type).unwrap().serialize();
-        let grab_mode_bytes = Option::<u8>::from(self.grab_mode).unwrap().serialize();
-        let paired_device_mode_bytes = Option::<u8>::from(self.paired_device_mode).unwrap().serialize();
-        let owner_events_bytes = Option::<bool>::from(self.owner_events).unwrap().serialize();
+        let grab_type_bytes = u8::from(self.grab_type).serialize();
+        let grab_mode_bytes = u8::from(self.grab_mode).serialize();
+        let paired_device_mode_bytes = u8::from(self.paired_device_mode).serialize();
+        let owner_events_bytes = bool::from(self.owner_events).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             XI_PASSIVE_GRAB_DEVICE_REQUEST,
@@ -13782,7 +13782,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         let deviceid_bytes = self.deviceid.serialize();
         let num_modifiers = u16::try_from(self.modifiers.len()).expect("`modifiers` has too many elements");
         let num_modifiers_bytes = num_modifiers.serialize();
-        let grab_type_bytes = Option::<u8>::from(self.grab_type).unwrap().serialize();
+        let grab_type_bytes = u8::from(self.grab_type).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             XI_PASSIVE_UNGRAB_DEVICE_REQUEST,
@@ -14118,7 +14118,7 @@ impl<'input> XIChangePropertyRequest<'input> {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let deviceid_bytes = self.deviceid.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let format = u8::try_from(self.items.switch_expr()).unwrap();
         let format_bytes = format.serialize();
         let property_bytes = self.property.serialize();
@@ -15085,11 +15085,11 @@ impl TryFrom<&[u8]> for DeviceFocusInEvent {
 impl From<&DeviceFocusInEvent> for [u8; 32] {
     fn from(input: &DeviceFocusInEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let detail_bytes = Option::<u8>::from(input.detail).unwrap().serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let window_bytes = input.window.serialize();
-        let mode_bytes = Option::<u8>::from(input.mode).unwrap().serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
         let device_id_bytes = input.device_id.serialize();
         [
             response_type_bytes[0],
@@ -15360,7 +15360,7 @@ impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
         let response_type_bytes = input.response_type.serialize();
         let device_id_bytes = input.device_id.serialize();
         let sequence_bytes = input.sequence.serialize();
-        let request_bytes = Option::<u8>::from(input.request).unwrap().serialize();
+        let request_bytes = u8::from(input.request).serialize();
         let first_keycode_bytes = input.first_keycode.serialize();
         let count_bytes = input.count.serialize();
         let time_bytes = input.time.serialize();
@@ -15506,7 +15506,7 @@ impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
         let device_id_bytes = input.device_id.serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
-        let request_bytes = Option::<u8>::from(input.request).unwrap().serialize();
+        let request_bytes = u8::from(input.request).serialize();
         [
             response_type_bytes[0],
             device_id_bytes[0],
@@ -15809,7 +15809,7 @@ impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
         let response_type_bytes = input.response_type.serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
-        let devchange_bytes = Option::<u8>::from(input.devchange).unwrap().serialize();
+        let devchange_bytes = u8::from(input.devchange).serialize();
         let device_id_bytes = input.device_id.serialize();
         let control_bytes = input.control.serialize();
         [
@@ -15892,7 +15892,7 @@ impl TryFrom<&[u8]> for DevicePropertyNotifyEvent {
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePropertyNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
+        let state_bytes = u8::from(input.state).serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let property_bytes = input.property.serialize();

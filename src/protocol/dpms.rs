@@ -572,7 +572,7 @@ impl ForceLevelRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let power_level_bytes = Option::<u16>::from(self.power_level).unwrap().serialize();
+        let power_level_bytes = u16::from(self.power_level).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             FORCE_LEVEL_REQUEST,

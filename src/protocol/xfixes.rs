@@ -346,9 +346,9 @@ impl ChangeSaveSetRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
-        let target_bytes = Option::<u8>::from(self.target).unwrap().serialize();
-        let map_bytes = Option::<u8>::from(self.map).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
+        let target_bytes = u8::from(self.target).serialize();
+        let map_bytes = u8::from(self.map).serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -583,7 +583,7 @@ impl TryFrom<&[u8]> for SelectionNotifyEvent {
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let subtype_bytes = Option::<u8>::from(input.subtype).unwrap().serialize();
+        let subtype_bytes = u8::from(input.subtype).serialize();
         let sequence_bytes = input.sequence.serialize();
         let window_bytes = input.window.serialize();
         let owner_bytes = input.owner.serialize();
@@ -878,7 +878,7 @@ impl TryFrom<&[u8]> for CursorNotifyEvent {
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let subtype_bytes = Option::<u8>::from(input.subtype).unwrap().serialize();
+        let subtype_bytes = u8::from(input.subtype).serialize();
         let sequence_bytes = input.sequence.serialize();
         let window_bytes = input.window.serialize();
         let cursor_serial_bytes = input.cursor_serial.serialize();
@@ -1347,7 +1347,7 @@ impl CreateRegionFromWindowRequest {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let window_bytes = self.window.serialize();
-        let kind_bytes = Option::<shape::Kind>::from(self.kind).unwrap().serialize();
+        let kind_bytes = shape::Kind::from(self.kind).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             CREATE_REGION_FROM_WINDOW_REQUEST,
@@ -2500,7 +2500,7 @@ impl SetWindowShapeRegionRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let dest_bytes = self.dest.serialize();
-        let dest_kind_bytes = Option::<shape::Kind>::from(self.dest_kind).unwrap().serialize();
+        let dest_kind_bytes = shape::Kind::from(self.dest_kind).serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
         let region_bytes = self.region.serialize();

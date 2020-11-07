@@ -395,7 +395,7 @@ impl Serialize for Visualtype {
     type Bytes = [u8; 24];
     fn serialize(&self) -> [u8; 24] {
         let visual_id_bytes = self.visual_id.serialize();
-        let class_bytes = Option::<u8>::from(self.class).unwrap().serialize();
+        let class_bytes = u8::from(self.class).serialize();
         let bits_per_rgb_value_bytes = self.bits_per_rgb_value.serialize();
         let colormap_entries_bytes = self.colormap_entries.serialize();
         let red_mask_bytes = self.red_mask.serialize();
@@ -431,7 +431,7 @@ impl Serialize for Visualtype {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
         self.visual_id.serialize_into(bytes);
-        Option::<u8>::from(self.class).unwrap().serialize_into(bytes);
+        u8::from(self.class).serialize_into(bytes);
         self.bits_per_rgb_value.serialize_into(bytes);
         self.colormap_entries.serialize_into(bytes);
         self.red_mask.serialize_into(bytes);
@@ -1074,8 +1074,8 @@ impl Serialize for Setup {
         roots_len.serialize_into(bytes);
         let pixmap_formats_len = u8::try_from(self.pixmap_formats.len()).expect("`pixmap_formats` has too many elements");
         pixmap_formats_len.serialize_into(bytes);
-        Option::<u8>::from(self.image_byte_order).unwrap().serialize_into(bytes);
-        Option::<u8>::from(self.bitmap_format_bit_order).unwrap().serialize_into(bytes);
+        u8::from(self.image_byte_order).serialize_into(bytes);
+        u8::from(self.bitmap_format_bit_order).serialize_into(bytes);
         self.bitmap_format_scanline_unit.serialize_into(bytes);
         self.bitmap_format_scanline_pad.serialize_into(bytes);
         self.min_keycode.serialize_into(bytes);
@@ -1782,7 +1782,7 @@ impl TryFrom<&[u8]> for MotionNotifyEvent {
 impl From<&MotionNotifyEvent> for [u8; 32] {
     fn from(input: &MotionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let detail_bytes = Option::<u8>::from(input.detail).unwrap().serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let root_bytes = input.root.serialize();
@@ -2035,7 +2035,7 @@ impl TryFrom<&[u8]> for EnterNotifyEvent {
 impl From<&EnterNotifyEvent> for [u8; 32] {
     fn from(input: &EnterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let detail_bytes = Option::<u8>::from(input.detail).unwrap().serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let root_bytes = input.root.serialize();
@@ -2046,7 +2046,7 @@ impl From<&EnterNotifyEvent> for [u8; 32] {
         let event_x_bytes = input.event_x.serialize();
         let event_y_bytes = input.event_y.serialize();
         let state_bytes = input.state.serialize();
-        let mode_bytes = Option::<u8>::from(input.mode).unwrap().serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
         let same_screen_focus_bytes = input.same_screen_focus.serialize();
         [
             response_type_bytes[0],
@@ -2139,10 +2139,10 @@ impl TryFrom<&[u8]> for FocusInEvent {
 impl From<&FocusInEvent> for [u8; 32] {
     fn from(input: &FocusInEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let detail_bytes = Option::<u8>::from(input.detail).unwrap().serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
         let sequence_bytes = input.sequence.serialize();
         let event_bytes = input.event.serialize();
-        let mode_bytes = Option::<u8>::from(input.mode).unwrap().serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
         [
             response_type_bytes[0],
             detail_bytes[0],
@@ -2648,7 +2648,7 @@ impl From<&VisibilityNotifyEvent> for [u8; 32] {
         let response_type_bytes = input.response_type.serialize();
         let sequence_bytes = input.sequence.serialize();
         let window_bytes = input.window.serialize();
-        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
+        let state_bytes = u8::from(input.state).serialize();
         [
             response_type_bytes[0],
             0,
@@ -3763,7 +3763,7 @@ impl From<&CirculateNotifyEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let event_bytes = input.event.serialize();
         let window_bytes = input.window.serialize();
-        let place_bytes = Option::<u8>::from(input.place).unwrap().serialize();
+        let place_bytes = u8::from(input.place).serialize();
         [
             response_type_bytes[0],
             0,
@@ -3927,7 +3927,7 @@ impl From<&PropertyNotifyEvent> for [u8; 32] {
         let window_bytes = input.window.serialize();
         let atom_bytes = input.atom.serialize();
         let time_bytes = input.time.serialize();
-        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
+        let state_bytes = u8::from(input.state).serialize();
         [
             response_type_bytes[0],
             0,
@@ -4602,7 +4602,7 @@ impl From<&ColormapNotifyEvent> for [u8; 32] {
         let window_bytes = input.window.serialize();
         let colormap_bytes = input.colormap.serialize();
         let new_bytes = input.new.serialize();
-        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
+        let state_bytes = u8::from(input.state).serialize();
         [
             response_type_bytes[0],
             0,
@@ -5008,7 +5008,7 @@ impl From<&MappingNotifyEvent> for [u8; 32] {
     fn from(input: &MappingNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
         let sequence_bytes = input.sequence.serialize();
-        let request_bytes = Option::<u8>::from(input.request).unwrap().serialize();
+        let request_bytes = u8::from(input.request).serialize();
         let first_keycode_bytes = input.first_keycode.serialize();
         let count_bytes = input.count.serialize();
         [
@@ -5596,13 +5596,13 @@ impl CreateWindowAux {
             border_pixel.serialize_into(bytes);
         }
         if let Some(bit_gravity) = self.bit_gravity {
-            Option::<u32>::from(bit_gravity).unwrap().serialize_into(bytes);
+            u32::from(bit_gravity).serialize_into(bytes);
         }
         if let Some(win_gravity) = self.win_gravity {
-            Option::<u32>::from(win_gravity).unwrap().serialize_into(bytes);
+            u32::from(win_gravity).serialize_into(bytes);
         }
         if let Some(backing_store) = self.backing_store {
-            Option::<u32>::from(backing_store).unwrap().serialize_into(bytes);
+            u32::from(backing_store).serialize_into(bytes);
         }
         if let Some(backing_planes) = self.backing_planes {
             backing_planes.serialize_into(bytes);
@@ -5849,7 +5849,7 @@ impl<'input> CreateWindowRequest<'input> {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let border_width_bytes = self.border_width.serialize();
-        let class_bytes = Option::<u16>::from(self.class).unwrap().serialize();
+        let class_bytes = u16::from(self.class).serialize();
         let visual_bytes = self.visual.serialize();
         let value_mask = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
@@ -6206,13 +6206,13 @@ impl ChangeWindowAttributesAux {
             border_pixel.serialize_into(bytes);
         }
         if let Some(bit_gravity) = self.bit_gravity {
-            Option::<u32>::from(bit_gravity).unwrap().serialize_into(bytes);
+            u32::from(bit_gravity).serialize_into(bytes);
         }
         if let Some(win_gravity) = self.win_gravity {
-            Option::<u32>::from(win_gravity).unwrap().serialize_into(bytes);
+            u32::from(win_gravity).serialize_into(bytes);
         }
         if let Some(backing_store) = self.backing_store {
-            Option::<u32>::from(backing_store).unwrap().serialize_into(bytes);
+            u32::from(backing_store).serialize_into(bytes);
         }
         if let Some(backing_planes) = self.backing_planes {
             backing_planes.serialize_into(bytes);
@@ -7013,7 +7013,7 @@ impl ChangeSaveSetRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             CHANGE_SAVE_SET_REQUEST,
@@ -7849,7 +7849,7 @@ impl ConfigureWindowAux {
             sibling.serialize_into(bytes);
         }
         if let Some(stack_mode) = self.stack_mode {
-            Option::<u32>::from(stack_mode).unwrap().serialize_into(bytes);
+            u32::from(stack_mode).serialize_into(bytes);
         }
     }
 }
@@ -8205,7 +8205,7 @@ impl CirculateWindowRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let direction_bytes = Option::<u8>::from(self.direction).unwrap().serialize();
+        let direction_bytes = u8::from(self.direction).serialize();
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
             CIRCULATE_WINDOW_REQUEST,
@@ -9135,7 +9135,7 @@ impl<'input> ChangePropertyRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let window_bytes = self.window.serialize();
         let property_bytes = self.property.serialize();
         let type_bytes = self.type_.serialize();
@@ -10951,8 +10951,8 @@ impl GrabPointerRequest {
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
         let event_mask_bytes = self.event_mask.serialize();
-        let pointer_mode_bytes = Option::<u8>::from(self.pointer_mode).unwrap().serialize();
-        let keyboard_mode_bytes = Option::<u8>::from(self.keyboard_mode).unwrap().serialize();
+        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
+        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let confine_to_bytes = self.confine_to.serialize();
         let cursor_bytes = self.cursor.serialize();
         let time_bytes = self.time.serialize();
@@ -11436,11 +11436,11 @@ impl GrabButtonRequest {
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
         let event_mask_bytes = self.event_mask.serialize();
-        let pointer_mode_bytes = Option::<u8>::from(self.pointer_mode).unwrap().serialize();
-        let keyboard_mode_bytes = Option::<u8>::from(self.keyboard_mode).unwrap().serialize();
+        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
+        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let confine_to_bytes = self.confine_to.serialize();
         let cursor_bytes = self.cursor.serialize();
-        let button_bytes = Option::<u8>::from(self.button).unwrap().serialize();
+        let button_bytes = u8::from(self.button).serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
             GRAB_BUTTON_REQUEST,
@@ -11628,7 +11628,7 @@ impl UngrabButtonRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let button_bytes = Option::<u8>::from(self.button).unwrap().serialize();
+        let button_bytes = u8::from(self.button).serialize();
         let grab_window_bytes = self.grab_window.serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let mut request0 = vec![
@@ -11871,8 +11871,8 @@ impl GrabKeyboardRequest {
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
         let time_bytes = self.time.serialize();
-        let pointer_mode_bytes = Option::<u8>::from(self.pointer_mode).unwrap().serialize();
-        let keyboard_mode_bytes = Option::<u8>::from(self.keyboard_mode).unwrap().serialize();
+        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
+        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let mut request0 = vec![
             GRAB_KEYBOARD_REQUEST,
             owner_events_bytes[0],
@@ -12254,8 +12254,8 @@ impl GrabKeyRequest {
         let grab_window_bytes = self.grab_window.serialize();
         let modifiers_bytes = self.modifiers.serialize();
         let key_bytes = self.key.serialize();
-        let pointer_mode_bytes = Option::<u8>::from(self.pointer_mode).unwrap().serialize();
-        let keyboard_mode_bytes = Option::<u8>::from(self.keyboard_mode).unwrap().serialize();
+        let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
+        let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let mut request0 = vec![
             GRAB_KEY_REQUEST,
             owner_events_bytes[0],
@@ -12691,7 +12691,7 @@ impl AllowEventsRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
             ALLOW_EVENTS_REQUEST,
@@ -13655,7 +13655,7 @@ impl SetInputFocusRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let revert_to_bytes = Option::<u8>::from(self.revert_to).unwrap().serialize();
+        let revert_to_bytes = u8::from(self.revert_to).serialize();
         let focus_bytes = self.focus.serialize();
         let time_bytes = self.time.serialize();
         let mut request0 = vec![
@@ -16351,7 +16351,7 @@ impl CreateGCAux {
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(function) = self.function {
-            Option::<u32>::from(function).unwrap().serialize_into(bytes);
+            u32::from(function).serialize_into(bytes);
         }
         if let Some(plane_mask) = self.plane_mask {
             plane_mask.serialize_into(bytes);
@@ -16366,19 +16366,19 @@ impl CreateGCAux {
             line_width.serialize_into(bytes);
         }
         if let Some(line_style) = self.line_style {
-            Option::<u32>::from(line_style).unwrap().serialize_into(bytes);
+            u32::from(line_style).serialize_into(bytes);
         }
         if let Some(cap_style) = self.cap_style {
-            Option::<u32>::from(cap_style).unwrap().serialize_into(bytes);
+            u32::from(cap_style).serialize_into(bytes);
         }
         if let Some(join_style) = self.join_style {
-            Option::<u32>::from(join_style).unwrap().serialize_into(bytes);
+            u32::from(join_style).serialize_into(bytes);
         }
         if let Some(fill_style) = self.fill_style {
-            Option::<u32>::from(fill_style).unwrap().serialize_into(bytes);
+            u32::from(fill_style).serialize_into(bytes);
         }
         if let Some(fill_rule) = self.fill_rule {
-            Option::<u32>::from(fill_rule).unwrap().serialize_into(bytes);
+            u32::from(fill_rule).serialize_into(bytes);
         }
         if let Some(tile) = self.tile {
             tile.serialize_into(bytes);
@@ -16396,7 +16396,7 @@ impl CreateGCAux {
             font.serialize_into(bytes);
         }
         if let Some(subwindow_mode) = self.subwindow_mode {
-            Option::<u32>::from(subwindow_mode).unwrap().serialize_into(bytes);
+            u32::from(subwindow_mode).serialize_into(bytes);
         }
         if let Some(graphics_exposures) = self.graphics_exposures {
             graphics_exposures.serialize_into(bytes);
@@ -16417,7 +16417,7 @@ impl CreateGCAux {
             dashes.serialize_into(bytes);
         }
         if let Some(arc_mode) = self.arc_mode {
-            Option::<u32>::from(arc_mode).unwrap().serialize_into(bytes);
+            u32::from(arc_mode).serialize_into(bytes);
         }
     }
 }
@@ -17000,7 +17000,7 @@ impl ChangeGCAux {
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(function) = self.function {
-            Option::<u32>::from(function).unwrap().serialize_into(bytes);
+            u32::from(function).serialize_into(bytes);
         }
         if let Some(plane_mask) = self.plane_mask {
             plane_mask.serialize_into(bytes);
@@ -17015,19 +17015,19 @@ impl ChangeGCAux {
             line_width.serialize_into(bytes);
         }
         if let Some(line_style) = self.line_style {
-            Option::<u32>::from(line_style).unwrap().serialize_into(bytes);
+            u32::from(line_style).serialize_into(bytes);
         }
         if let Some(cap_style) = self.cap_style {
-            Option::<u32>::from(cap_style).unwrap().serialize_into(bytes);
+            u32::from(cap_style).serialize_into(bytes);
         }
         if let Some(join_style) = self.join_style {
-            Option::<u32>::from(join_style).unwrap().serialize_into(bytes);
+            u32::from(join_style).serialize_into(bytes);
         }
         if let Some(fill_style) = self.fill_style {
-            Option::<u32>::from(fill_style).unwrap().serialize_into(bytes);
+            u32::from(fill_style).serialize_into(bytes);
         }
         if let Some(fill_rule) = self.fill_rule {
-            Option::<u32>::from(fill_rule).unwrap().serialize_into(bytes);
+            u32::from(fill_rule).serialize_into(bytes);
         }
         if let Some(tile) = self.tile {
             tile.serialize_into(bytes);
@@ -17045,7 +17045,7 @@ impl ChangeGCAux {
             font.serialize_into(bytes);
         }
         if let Some(subwindow_mode) = self.subwindow_mode {
-            Option::<u32>::from(subwindow_mode).unwrap().serialize_into(bytes);
+            u32::from(subwindow_mode).serialize_into(bytes);
         }
         if let Some(graphics_exposures) = self.graphics_exposures {
             graphics_exposures.serialize_into(bytes);
@@ -17066,7 +17066,7 @@ impl ChangeGCAux {
             dashes.serialize_into(bytes);
         }
         if let Some(arc_mode) = self.arc_mode {
-            Option::<u32>::from(arc_mode).unwrap().serialize_into(bytes);
+            u32::from(arc_mode).serialize_into(bytes);
         }
     }
 }
@@ -17708,7 +17708,7 @@ impl<'input> SetClipRectanglesRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let ordering_bytes = Option::<u8>::from(self.ordering).unwrap().serialize();
+        let ordering_bytes = u8::from(self.ordering).serialize();
         let gc_bytes = self.gc.serialize();
         let clip_x_origin_bytes = self.clip_x_origin.serialize();
         let clip_y_origin_bytes = self.clip_y_origin.serialize();
@@ -18376,7 +18376,7 @@ impl<'input> PolyPointRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let coordinate_mode_bytes = Option::<u8>::from(self.coordinate_mode).unwrap().serialize();
+        let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
@@ -18520,7 +18520,7 @@ impl<'input> PolyLineRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let coordinate_mode_bytes = Option::<u8>::from(self.coordinate_mode).unwrap().serialize();
+        let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let mut request0 = vec![
@@ -19128,8 +19128,8 @@ impl<'input> FillPolyRequest<'input> {
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
-        let shape_bytes = Option::<u8>::from(self.shape).unwrap().serialize();
-        let coordinate_mode_bytes = Option::<u8>::from(self.coordinate_mode).unwrap().serialize();
+        let shape_bytes = u8::from(self.shape).serialize();
+        let coordinate_mode_bytes = u8::from(self.coordinate_mode).serialize();
         let mut request0 = vec![
             FILL_POLY_REQUEST,
             0,
@@ -19559,7 +19559,7 @@ impl<'input> PutImageRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let format_bytes = Option::<u8>::from(self.format).unwrap().serialize();
+        let format_bytes = u8::from(self.format).serialize();
         let drawable_bytes = self.drawable.serialize();
         let gc_bytes = self.gc.serialize();
         let width_bytes = self.width.serialize();
@@ -19702,7 +19702,7 @@ impl GetImageRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let format_bytes = Option::<u8>::from(self.format).unwrap().serialize();
+        let format_bytes = u8::from(self.format).serialize();
         let drawable_bytes = self.drawable.serialize();
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
@@ -20491,7 +20491,7 @@ impl CreateColormapRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let alloc_bytes = Option::<u8>::from(self.alloc).unwrap().serialize();
+        let alloc_bytes = u8::from(self.alloc).serialize();
         let mid_bytes = self.mid.serialize();
         let window_bytes = self.window.serialize();
         let visual_bytes = self.visual.serialize();
@@ -23039,7 +23039,7 @@ impl QueryBestSizeRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let class_bytes = Option::<u8>::from(self.class).unwrap().serialize();
+        let class_bytes = u8::from(self.class).serialize();
         let drawable_bytes = self.drawable.serialize();
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
@@ -23902,13 +23902,13 @@ impl ChangeKeyboardControlAux {
             led.serialize_into(bytes);
         }
         if let Some(led_mode) = self.led_mode {
-            Option::<u32>::from(led_mode).unwrap().serialize_into(bytes);
+            u32::from(led_mode).serialize_into(bytes);
         }
         if let Some(key) = self.key {
             key.serialize_into(bytes);
         }
         if let Some(auto_repeat_mode) = self.auto_repeat_mode {
-            Option::<u32>::from(auto_repeat_mode).unwrap().serialize_into(bytes);
+            u32::from(auto_repeat_mode).serialize_into(bytes);
         }
     }
 }
@@ -24557,8 +24557,8 @@ impl SetScreenSaverRequest {
         let length_so_far = 0;
         let timeout_bytes = self.timeout.serialize();
         let interval_bytes = self.interval.serialize();
-        let prefer_blanking_bytes = Option::<u8>::from(self.prefer_blanking).unwrap().serialize();
-        let allow_exposures_bytes = Option::<u8>::from(self.allow_exposures).unwrap().serialize();
+        let prefer_blanking_bytes = u8::from(self.prefer_blanking).serialize();
+        let allow_exposures_bytes = u8::from(self.allow_exposures).serialize();
         let mut request0 = vec![
             SET_SCREEN_SAVER_REQUEST,
             0,
@@ -24863,8 +24863,8 @@ impl<'input> ChangeHostsRequest<'input> {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
-        let family_bytes = Option::<u8>::from(self.family).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
+        let family_bytes = u8::from(self.family).serialize();
         let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
         let address_len_bytes = address_len.serialize();
         let mut request0 = vec![
@@ -24976,7 +24976,7 @@ impl Serialize for Host {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Option::<u8>::from(self.family).unwrap().serialize_into(bytes);
+        u8::from(self.family).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
         address_len.serialize_into(bytes);
@@ -25181,7 +25181,7 @@ impl SetAccessControlRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
             SET_ACCESS_CONTROL_REQUEST,
             mode_bytes[0],
@@ -25306,7 +25306,7 @@ impl SetCloseDownModeRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
             SET_CLOSE_DOWN_MODE_REQUEST,
             mode_bytes[0],
@@ -25692,7 +25692,7 @@ impl ForceScreenSaverRequest {
     {
         let _ = conn;
         let length_so_far = 0;
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let mut request0 = vec![
             FORCE_SCREEN_SAVER_REQUEST,
             mode_bytes[0],

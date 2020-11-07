@@ -667,7 +667,7 @@ impl Serialize for Pictforminfo {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
         let id_bytes = self.id.serialize();
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let depth_bytes = self.depth.serialize();
         let direct_bytes = self.direct.serialize();
         let colormap_bytes = self.colormap.serialize();
@@ -705,7 +705,7 @@ impl Serialize for Pictforminfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
         self.id.serialize_into(bytes);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.depth.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.direct.serialize_into(bytes);
@@ -1777,7 +1777,7 @@ impl CreatePictureAux {
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(repeat) = self.repeat {
-            Option::<u32>::from(repeat).unwrap().serialize_into(bytes);
+            u32::from(repeat).serialize_into(bytes);
         }
         if let Some(alphamap) = self.alphamap {
             alphamap.serialize_into(bytes);
@@ -1801,13 +1801,13 @@ impl CreatePictureAux {
             graphicsexposure.serialize_into(bytes);
         }
         if let Some(subwindowmode) = self.subwindowmode {
-            Option::<u32>::from(subwindowmode).unwrap().serialize_into(bytes);
+            u32::from(subwindowmode).serialize_into(bytes);
         }
         if let Some(polyedge) = self.polyedge {
-            Option::<u32>::from(polyedge).unwrap().serialize_into(bytes);
+            u32::from(polyedge).serialize_into(bytes);
         }
         if let Some(polymode) = self.polymode {
-            Option::<u32>::from(polymode).unwrap().serialize_into(bytes);
+            u32::from(polymode).serialize_into(bytes);
         }
         if let Some(dither) = self.dither {
             dither.serialize_into(bytes);
@@ -2184,7 +2184,7 @@ impl ChangePictureAux {
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(repeat) = self.repeat {
-            Option::<u32>::from(repeat).unwrap().serialize_into(bytes);
+            u32::from(repeat).serialize_into(bytes);
         }
         if let Some(alphamap) = self.alphamap {
             alphamap.serialize_into(bytes);
@@ -2208,13 +2208,13 @@ impl ChangePictureAux {
             graphicsexposure.serialize_into(bytes);
         }
         if let Some(subwindowmode) = self.subwindowmode {
-            Option::<u32>::from(subwindowmode).unwrap().serialize_into(bytes);
+            u32::from(subwindowmode).serialize_into(bytes);
         }
         if let Some(polyedge) = self.polyedge {
-            Option::<u32>::from(polyedge).unwrap().serialize_into(bytes);
+            u32::from(polyedge).serialize_into(bytes);
         }
         if let Some(polymode) = self.polymode {
-            Option::<u32>::from(polymode).unwrap().serialize_into(bytes);
+            u32::from(polymode).serialize_into(bytes);
         }
         if let Some(dither) = self.dither {
             dither.serialize_into(bytes);
@@ -2622,7 +2622,7 @@ impl CompositeRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
+        let op_bytes = u8::from(self.op).serialize();
         let src_bytes = self.src.serialize();
         let mask_bytes = self.mask.serialize();
         let dst_bytes = self.dst.serialize();
@@ -2769,7 +2769,7 @@ impl<'input> TrapezoidsRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
+        let op_bytes = u8::from(self.op).serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -2904,7 +2904,7 @@ impl<'input> TrianglesRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
+        let op_bytes = u8::from(self.op).serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3039,7 +3039,7 @@ impl<'input> TriStripRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
+        let op_bytes = u8::from(self.op).serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3174,7 +3174,7 @@ impl<'input> TriFanRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
+        let op_bytes = u8::from(self.op).serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3711,7 +3711,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
+        let op_bytes = u8::from(self.op).serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3848,7 +3848,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
+        let op_bytes = u8::from(self.op).serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -3985,7 +3985,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
+        let op_bytes = u8::from(self.op).serialize();
         let src_bytes = self.src.serialize();
         let dst_bytes = self.dst.serialize();
         let mask_format_bytes = self.mask_format.serialize();
@@ -4118,7 +4118,7 @@ impl<'input> FillRectanglesRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let op_bytes = Option::<u8>::from(self.op).unwrap().serialize();
+        let op_bytes = u8::from(self.op).serialize();
         let dst_bytes = self.dst.serialize();
         let color_bytes = self.color.serialize();
         let mut request0 = vec![

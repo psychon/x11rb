@@ -1989,7 +1989,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         let property_bytes = self.property.serialize();
         let type_bytes = self.type_.serialize();
         let format_bytes = self.format.serialize();
-        let mode_bytes = Option::<u8>::from(self.mode).unwrap().serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let num_units_bytes = self.num_units.serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
@@ -5921,7 +5921,7 @@ impl Serialize for OutputChange {
         let crtc_bytes = self.crtc.serialize();
         let mode_bytes = self.mode.serialize();
         let rotation_bytes = self.rotation.serialize();
-        let connection_bytes = Option::<u8>::from(self.connection).unwrap().serialize();
+        let connection_bytes = u8::from(self.connection).serialize();
         let subpixel_order_bytes = Option::<u8>::from(self.subpixel_order).unwrap().serialize();
         [
             timestamp_bytes[0],
@@ -5963,7 +5963,7 @@ impl Serialize for OutputChange {
         self.crtc.serialize_into(bytes);
         self.mode.serialize_into(bytes);
         self.rotation.serialize_into(bytes);
-        Option::<u8>::from(self.connection).unwrap().serialize_into(bytes);
+        u8::from(self.connection).serialize_into(bytes);
         Option::<u8>::from(self.subpixel_order).unwrap().serialize_into(bytes);
     }
 }
@@ -6002,7 +6002,7 @@ impl Serialize for OutputProperty {
         let output_bytes = self.output.serialize();
         let atom_bytes = self.atom.serialize();
         let timestamp_bytes = self.timestamp.serialize();
-        let status_bytes = Option::<u8>::from(self.status).unwrap().serialize();
+        let status_bytes = u8::from(self.status).serialize();
         [
             window_bytes[0],
             window_bytes[1],
@@ -6040,7 +6040,7 @@ impl Serialize for OutputProperty {
         self.output.serialize_into(bytes);
         self.atom.serialize_into(bytes);
         self.timestamp.serialize_into(bytes);
-        Option::<u8>::from(self.status).unwrap().serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
     }
 }
@@ -7044,7 +7044,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let sub_code_bytes = Option::<u8>::from(input.sub_code).unwrap().serialize();
+        let sub_code_bytes = u8::from(input.sub_code).serialize();
         let sequence_bytes = input.sequence.serialize();
         let u_bytes = input.u.serialize();
         [

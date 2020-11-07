@@ -231,7 +231,7 @@ impl CreateRequest {
         let length_so_far = 0;
         let damage_bytes = self.damage.serialize();
         let drawable_bytes = self.drawable.serialize();
-        let level_bytes = Option::<u8>::from(self.level).unwrap().serialize();
+        let level_bytes = u8::from(self.level).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             CREATE_REQUEST,
@@ -564,7 +564,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let level_bytes = Option::<u8>::from(input.level).unwrap().serialize();
+        let level_bytes = u8::from(input.level).serialize();
         let sequence_bytes = input.sequence.serialize();
         let drawable_bytes = input.drawable.serialize();
         let damage_bytes = input.damage.serialize();

@@ -296,6 +296,11 @@ pub(super) struct Caches {
 }
 
 impl Caches {
+    #[inline]
+    fn enum_info(&self, enum_def: &xcbdefs::EnumDef) -> EnumInfo {
+        self.enum_infos[&(enum_def as *const xcbdefs::EnumDef as usize)]
+    }
+
     fn put_enum_max_value_size(&mut self, enum_def: &xcbdefs::EnumDef, max_value_size: u8) {
         let id = enum_def as *const xcbdefs::EnumDef as usize;
         match self.enum_infos.entry(id) {
@@ -2334,8 +2339,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn generate_enum_def(&self, enum_def: &xcbdefs::EnumDef, out: &mut Output) {
         let rust_name = self.get_enum_rust_name(enum_def);
 
-        let enum_info =
-            self.caches.borrow().enum_infos[&(enum_def as *const xcbdefs::EnumDef as usize)];
+        let enum_info = self.caches.borrow().enum_info(enum_def);
         let global_enum_size = enum_info
             .max_value_size
             .unwrap()
@@ -4609,13 +4613,21 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         value: &str,
         was_deduced: bool,
     ) -> String {
-        // Deduced fields are not converter to their enum value
-        if !was_deduced && self.use_enum_type_in_field(type_).is_some() {
+        // Deduced fields are not converted to their enum value
+        if let (false, Some(enum_def)) = (was_deduced, self.use_enum_type_in_field(type_)) {
+            let enum_info = self.caches.borrow().enum_info(&enum_def);
+            let (_, max_wire_size) = enum_info.wire_size.unwrap();
             let rust_wire_type = self.type_to_rust_type(type_.type_.get_resolved());
-            format!(
-                "{}::<{}>::from({}).unwrap().serialize()",
-                self.option_name, rust_wire_type, value
-            )
+            let current_wire_size = type_.type_.get_resolved().size().unwrap();
+
+            if max_wire_size > 1 && u32::from(max_wire_size / 8) > current_wire_size {
+                format!(
+                    "{}::<{}>::from({}).unwrap().serialize()",
+                    self.option_name, rust_wire_type, value,
+                )
+            } else {
+                format!("{}::from({}).serialize()", rust_wire_type, value)
+            }
         } else {
             format!("{}.serialize()", value)
         }
@@ -4630,16 +4642,30 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         out: &mut Output,
     ) {
         // Deduced fields are not converted to their enum value
-        if !was_deduced && self.use_enum_type_in_field(type_).is_some() {
+        if let (false, Some(enum_def)) = (was_deduced, self.use_enum_type_in_field(type_)) {
+            let enum_info = self.caches.borrow().enum_info(&enum_def);
+            let (_, max_wire_size) = enum_info.wire_size.unwrap();
             let rust_wire_type = self.type_to_rust_type(type_.type_.get_resolved());
-            outln!(
-                out,
-                "{}::<{}>::from({}).unwrap().serialize_into({});",
-                self.option_name,
-                rust_wire_type,
-                value,
-                bytes_var,
-            );
+            let current_wire_size = type_.type_.get_resolved().size().unwrap();
+
+            if max_wire_size > 1 && u32::from(max_wire_size / 8) > current_wire_size {
+                outln!(
+                    out,
+                    "{}::<{}>::from({}).unwrap().serialize_into({});",
+                    self.option_name,
+                    rust_wire_type,
+                    value,
+                    bytes_var,
+                );
+            } else {
+                outln!(
+                    out,
+                    "{}::from({}).serialize_into({});",
+                    rust_wire_type,
+                    value,
+                    bytes_var,
+                );
+            }
         } else {
             outln!(out, "{}.serialize_into({});", value, bytes_var);
         }

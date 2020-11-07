@@ -938,15 +938,15 @@ impl Serialize for ImageFormatInfo {
     type Bytes = [u8; 128];
     fn serialize(&self) -> [u8; 128] {
         let id_bytes = self.id.serialize();
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
-        let byte_order_bytes = Option::<u8>::from(self.byte_order).unwrap().serialize();
+        let type_bytes = u8::from(self.type_).serialize();
+        let byte_order_bytes = u8::from(self.byte_order).serialize();
         let bpp_bytes = self.bpp.serialize();
         let num_planes_bytes = self.num_planes.serialize();
         let depth_bytes = self.depth.serialize();
         let red_mask_bytes = self.red_mask.serialize();
         let green_mask_bytes = self.green_mask.serialize();
         let blue_mask_bytes = self.blue_mask.serialize();
-        let format_bytes = Option::<u8>::from(self.format).unwrap().serialize();
+        let format_bytes = u8::from(self.format).serialize();
         let y_sample_bits_bytes = self.y_sample_bits.serialize();
         let u_sample_bits_bytes = self.u_sample_bits.serialize();
         let v_sample_bits_bytes = self.v_sample_bits.serialize();
@@ -956,7 +956,7 @@ impl Serialize for ImageFormatInfo {
         let vvert_y_period_bytes = self.vvert_y_period.serialize();
         let vvert_u_period_bytes = self.vvert_u_period.serialize();
         let vvert_v_period_bytes = self.vvert_v_period.serialize();
-        let vscanline_order_bytes = Option::<u8>::from(self.vscanline_order).unwrap().serialize();
+        let vscanline_order_bytes = u8::from(self.vscanline_order).serialize();
         [
             id_bytes[0],
             id_bytes[1],
@@ -1091,8 +1091,8 @@ impl Serialize for ImageFormatInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(128);
         self.id.serialize_into(bytes);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
-        Option::<u8>::from(self.byte_order).unwrap().serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
+        u8::from(self.byte_order).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         bytes.extend_from_slice(&self.guid);
         self.bpp.serialize_into(bytes);
@@ -1103,7 +1103,7 @@ impl Serialize for ImageFormatInfo {
         self.red_mask.serialize_into(bytes);
         self.green_mask.serialize_into(bytes);
         self.blue_mask.serialize_into(bytes);
-        Option::<u8>::from(self.format).unwrap().serialize_into(bytes);
+        u8::from(self.format).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.y_sample_bits.serialize_into(bytes);
         self.u_sample_bits.serialize_into(bytes);
@@ -1115,7 +1115,7 @@ impl Serialize for ImageFormatInfo {
         self.vvert_u_period.serialize_into(bytes);
         self.vvert_v_period.serialize_into(bytes);
         bytes.extend_from_slice(&self.vcomp_order);
-        Option::<u8>::from(self.vscanline_order).unwrap().serialize_into(bytes);
+        u8::from(self.vscanline_order).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
     }
 }
@@ -1166,7 +1166,7 @@ impl TryFrom<&[u8]> for VideoNotifyEvent {
 impl From<&VideoNotifyEvent> for [u8; 32] {
     fn from(input: &VideoNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let reason_bytes = Option::<u8>::from(input.reason).unwrap().serialize();
+        let reason_bytes = u8::from(input.reason).serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let drawable_bytes = input.drawable.serialize();

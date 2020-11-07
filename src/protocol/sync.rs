@@ -401,9 +401,9 @@ impl Serialize for Trigger {
     type Bytes = [u8; 20];
     fn serialize(&self) -> [u8; 20] {
         let counter_bytes = self.counter.serialize();
-        let wait_type_bytes = Option::<u32>::from(self.wait_type).unwrap().serialize();
+        let wait_type_bytes = u32::from(self.wait_type).serialize();
         let wait_value_bytes = self.wait_value.serialize();
-        let test_type_bytes = Option::<u32>::from(self.test_type).unwrap().serialize();
+        let test_type_bytes = u32::from(self.test_type).serialize();
         [
             counter_bytes[0],
             counter_bytes[1],
@@ -430,9 +430,9 @@ impl Serialize for Trigger {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
         self.counter.serialize_into(bytes);
-        Option::<u32>::from(self.wait_type).unwrap().serialize_into(bytes);
+        u32::from(self.wait_type).serialize_into(bytes);
         self.wait_value.serialize_into(bytes);
-        Option::<u32>::from(self.test_type).unwrap().serialize_into(bytes);
+        u32::from(self.test_type).serialize_into(bytes);
     }
 }
 
@@ -1263,13 +1263,13 @@ impl CreateAlarmAux {
             counter.serialize_into(bytes);
         }
         if let Some(value_type) = self.value_type {
-            Option::<u32>::from(value_type).unwrap().serialize_into(bytes);
+            u32::from(value_type).serialize_into(bytes);
         }
         if let Some(ref value) = self.value {
             value.serialize_into(bytes);
         }
         if let Some(test_type) = self.test_type {
-            Option::<u32>::from(test_type).unwrap().serialize_into(bytes);
+            u32::from(test_type).serialize_into(bytes);
         }
         if let Some(ref delta) = self.delta {
             delta.serialize_into(bytes);
@@ -1508,13 +1508,13 @@ impl ChangeAlarmAux {
             counter.serialize_into(bytes);
         }
         if let Some(value_type) = self.value_type {
-            Option::<u32>::from(value_type).unwrap().serialize_into(bytes);
+            u32::from(value_type).serialize_into(bytes);
         }
         if let Some(ref value) = self.value {
             value.serialize_into(bytes);
         }
         if let Some(test_type) = self.test_type {
-            Option::<u32>::from(test_type).unwrap().serialize_into(bytes);
+            u32::from(test_type).serialize_into(bytes);
         }
         if let Some(ref delta) = self.delta {
             delta.serialize_into(bytes);
@@ -2604,7 +2604,7 @@ impl From<&AlarmNotifyEvent> for [u8; 32] {
         let counter_value_bytes = input.counter_value.serialize();
         let alarm_value_bytes = input.alarm_value.serialize();
         let timestamp_bytes = input.timestamp.serialize();
-        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
+        let state_bytes = u8::from(input.state).serialize();
         [
             response_type_bytes[0],
             kind_bytes[0],

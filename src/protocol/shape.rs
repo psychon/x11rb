@@ -211,7 +211,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let shape_kind_bytes = Option::<Kind>::from(input.shape_kind).unwrap().serialize();
+        let shape_kind_bytes = Kind::from(input.shape_kind).serialize();
         let sequence_bytes = input.sequence.serialize();
         let affected_window_bytes = input.affected_window.serialize();
         let extents_x_bytes = input.extents_x.serialize();
@@ -370,9 +370,9 @@ impl<'input> RectanglesRequest<'input> {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let operation_bytes = Option::<Op>::from(self.operation).unwrap().serialize();
-        let destination_kind_bytes = Option::<Kind>::from(self.destination_kind).unwrap().serialize();
-        let ordering_bytes = Option::<u8>::from(self.ordering).unwrap().serialize();
+        let operation_bytes = Op::from(self.operation).serialize();
+        let destination_kind_bytes = Kind::from(self.destination_kind).serialize();
+        let ordering_bytes = u8::from(self.ordering).serialize();
         let destination_window_bytes = self.destination_window.serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
@@ -498,8 +498,8 @@ impl MaskRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let operation_bytes = Option::<Op>::from(self.operation).unwrap().serialize();
-        let destination_kind_bytes = Option::<Kind>::from(self.destination_kind).unwrap().serialize();
+        let operation_bytes = Op::from(self.operation).serialize();
+        let destination_kind_bytes = Kind::from(self.destination_kind).serialize();
         let destination_window_bytes = self.destination_window.serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
@@ -606,9 +606,9 @@ impl CombineRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let operation_bytes = Option::<Op>::from(self.operation).unwrap().serialize();
-        let destination_kind_bytes = Option::<Kind>::from(self.destination_kind).unwrap().serialize();
-        let source_kind_bytes = Option::<Kind>::from(self.source_kind).unwrap().serialize();
+        let operation_bytes = Op::from(self.operation).serialize();
+        let destination_kind_bytes = Kind::from(self.destination_kind).serialize();
+        let source_kind_bytes = Kind::from(self.source_kind).serialize();
         let destination_window_bytes = self.destination_window.serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
@@ -714,7 +714,7 @@ impl OffsetRequest {
         let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
-        let destination_kind_bytes = Option::<Kind>::from(self.destination_kind).unwrap().serialize();
+        let destination_kind_bytes = Kind::from(self.destination_kind).serialize();
         let destination_window_bytes = self.destination_window.serialize();
         let x_offset_bytes = self.x_offset.serialize();
         let y_offset_bytes = self.y_offset.serialize();
@@ -1088,7 +1088,7 @@ impl GetRectanglesRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let source_kind_bytes = Option::<Kind>::from(self.source_kind).unwrap().serialize();
+        let source_kind_bytes = Kind::from(self.source_kind).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             GET_RECTANGLES_REQUEST,

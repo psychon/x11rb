@@ -682,13 +682,13 @@ impl SetAttributesAux {
             border_pixel.serialize_into(bytes);
         }
         if let Some(bit_gravity) = self.bit_gravity {
-            Option::<u32>::from(bit_gravity).unwrap().serialize_into(bytes);
+            u32::from(bit_gravity).serialize_into(bytes);
         }
         if let Some(win_gravity) = self.win_gravity {
-            Option::<u32>::from(win_gravity).unwrap().serialize_into(bytes);
+            u32::from(win_gravity).serialize_into(bytes);
         }
         if let Some(backing_store) = self.backing_store {
-            Option::<u32>::from(backing_store).unwrap().serialize_into(bytes);
+            u32::from(backing_store).serialize_into(bytes);
         }
         if let Some(backing_planes) = self.backing_planes {
             backing_planes.serialize_into(bytes);
@@ -1174,12 +1174,12 @@ impl TryFrom<&[u8]> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let state_bytes = Option::<u8>::from(input.state).unwrap().serialize();
+        let state_bytes = u8::from(input.state).serialize();
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let root_bytes = input.root.serialize();
         let window_bytes = input.window.serialize();
-        let kind_bytes = Option::<u8>::from(input.kind).unwrap().serialize();
+        let kind_bytes = u8::from(input.kind).serialize();
         let forced_bytes = input.forced.serialize();
         [
             response_type_bytes[0],

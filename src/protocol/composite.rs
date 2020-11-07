@@ -222,7 +222,7 @@ impl RedirectWindowRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let update_bytes = Option::<u8>::from(self.update).unwrap().serialize();
+        let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             REDIRECT_WINDOW_REQUEST,
@@ -298,7 +298,7 @@ impl RedirectSubwindowsRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let update_bytes = Option::<u8>::from(self.update).unwrap().serialize();
+        let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             REDIRECT_SUBWINDOWS_REQUEST,
@@ -374,7 +374,7 @@ impl UnredirectWindowRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let update_bytes = Option::<u8>::from(self.update).unwrap().serialize();
+        let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             UNREDIRECT_WINDOW_REQUEST,
@@ -450,7 +450,7 @@ impl UnredirectSubwindowsRequest {
             .ok_or(ConnectionError::UnsupportedExtension)?;
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let update_bytes = Option::<u8>::from(self.update).unwrap().serialize();
+        let update_bytes = u8::from(self.update).serialize();
         let mut request0 = vec![
             extension_information.major_opcode,
             UNREDIRECT_SUBWINDOWS_REQUEST,
