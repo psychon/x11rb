@@ -2340,12 +2340,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let rust_name = self.get_enum_rust_name(enum_def);
 
         let enum_info = self.caches.borrow().enum_info(enum_def);
-        let global_enum_size = enum_info
-            .max_value_size
-            .unwrap()
-            .max(enum_info.wire_size.unwrap_or((0, 0)).1);
+        let max_value_size = enum_info.max_value_size.unwrap();
+        let global_enum_size = max_value_size.max(enum_info.wire_size.unwrap_or((0, 0)).1);
 
         if let Some((min_wire_size, max_wire_size)) = enum_info.wire_size {
+            assert!(max_wire_size >= global_enum_size);
             if min_wire_size != max_wire_size {
                 // if it is bool, it is always bool
                 assert_ne!(min_wire_size, 1);
