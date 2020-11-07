@@ -55,16 +55,6 @@ impl ModeFlag {
     pub const DOUBLE_CLOCK: Self = Self(1 << 11);
     pub const HALF_CLOCK: Self = Self(1 << 12);
 }
-impl From<ModeFlag> for Option<bool> {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<ModeFlag> for Option<u8> {
     #[inline]
     fn from(input: ModeFlag) -> Self {
@@ -95,12 +85,6 @@ impl From<ModeFlag> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for ModeFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for ModeFlag {
     #[inline]
     fn from(value: u8) -> Self {
@@ -125,16 +109,6 @@ bitmask_binop!(ModeFlag, u16);
 pub struct ClockFlag(u8);
 impl ClockFlag {
     pub const PROGRAMABLE: Self = Self(1 << 0);
-}
-impl From<ClockFlag> for Option<bool> {
-    #[inline]
-    fn from(input: ClockFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<ClockFlag> for u8 {
     #[inline]
@@ -172,12 +146,6 @@ impl From<ClockFlag> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for ClockFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for ClockFlag {
     #[inline]
     fn from(value: u8) -> Self {
@@ -203,16 +171,6 @@ pub struct Permission(u8);
 impl Permission {
     pub const READ: Self = Self(1 << 0);
     pub const WRITE: Self = Self(1 << 1);
-}
-impl From<Permission> for Option<bool> {
-    #[inline]
-    fn from(input: Permission) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<Permission> for u8 {
     #[inline]
@@ -248,12 +206,6 @@ impl From<Permission> for Option<u32> {
     #[inline]
     fn from(input: Permission) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for Permission {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Permission {

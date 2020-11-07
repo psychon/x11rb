@@ -46,16 +46,6 @@ impl EventEnum {
     pub const IDLE_NOTIFY: Self = Self(2);
     pub const REDIRECT_NOTIFY: Self = Self(3);
 }
-impl From<EventEnum> for std::option::Option<bool> {
-    #[inline]
-    fn from(input: EventEnum) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<EventEnum> for u8 {
     #[inline]
     fn from(input: EventEnum) -> Self {
@@ -92,12 +82,6 @@ impl From<EventEnum> for std::option::Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for EventEnum {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for EventEnum {
     #[inline]
     fn from(value: u8) -> Self {
@@ -125,16 +109,6 @@ impl EventMask {
     pub const COMPLETE_NOTIFY: Self = Self(1 << 1);
     pub const IDLE_NOTIFY: Self = Self(1 << 2);
     pub const REDIRECT_NOTIFY: Self = Self(1 << 3);
-}
-impl From<EventMask> for std::option::Option<bool> {
-    #[inline]
-    fn from(input: EventMask) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<EventMask> for u8 {
     #[inline]
@@ -172,12 +146,6 @@ impl From<EventMask> for std::option::Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for EventMask {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for EventMask {
     #[inline]
     fn from(value: u8) -> Self {
@@ -206,16 +174,6 @@ impl Option {
     pub const COPY: Self = Self(1 << 1);
     pub const UST: Self = Self(1 << 2);
     pub const SUBOPTIMAL: Self = Self(1 << 3);
-}
-impl From<Option> for std::option::Option<bool> {
-    #[inline]
-    fn from(input: Option) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<Option> for u8 {
     #[inline]
@@ -253,12 +211,6 @@ impl From<Option> for std::option::Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Option {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Option {
     #[inline]
     fn from(value: u8) -> Self {
@@ -286,16 +238,6 @@ impl Capability {
     pub const ASYNC: Self = Self(1 << 0);
     pub const FENCE: Self = Self(1 << 1);
     pub const UST: Self = Self(1 << 2);
-}
-impl From<Capability> for std::option::Option<bool> {
-    #[inline]
-    fn from(input: Capability) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<Capability> for u8 {
     #[inline]
@@ -333,12 +275,6 @@ impl From<Capability> for std::option::Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Capability {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Capability {
     #[inline]
     fn from(value: u8) -> Self {
@@ -364,16 +300,6 @@ pub struct CompleteKind(u8);
 impl CompleteKind {
     pub const PIXMAP: Self = Self(0);
     pub const NOTIFY_MSC: Self = Self(1);
-}
-impl From<CompleteKind> for std::option::Option<bool> {
-    #[inline]
-    fn from(input: CompleteKind) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<CompleteKind> for u8 {
     #[inline]
@@ -411,12 +337,6 @@ impl From<CompleteKind> for std::option::Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for CompleteKind {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for CompleteKind {
     #[inline]
     fn from(value: u8) -> Self {
@@ -443,16 +363,6 @@ impl CompleteMode {
     pub const FLIP: Self = Self(1);
     pub const SKIP: Self = Self(2);
     pub const SUBOPTIMAL_COPY: Self = Self(3);
-}
-impl From<CompleteMode> for std::option::Option<bool> {
-    #[inline]
-    fn from(input: CompleteMode) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<CompleteMode> for u8 {
     #[inline]
@@ -488,12 +398,6 @@ impl From<CompleteMode> for std::option::Option<u32> {
     #[inline]
     fn from(input: CompleteMode) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for CompleteMode {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for CompleteMode {

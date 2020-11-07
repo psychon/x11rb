@@ -44,16 +44,6 @@ impl ALARMSTATE {
     pub const INACTIVE: Self = Self(1);
     pub const DESTROYED: Self = Self(2);
 }
-impl From<ALARMSTATE> for Option<bool> {
-    #[inline]
-    fn from(input: ALARMSTATE) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<ALARMSTATE> for u8 {
     #[inline]
     fn from(input: ALARMSTATE) -> Self {
@@ -90,12 +80,6 @@ impl From<ALARMSTATE> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for ALARMSTATE {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for ALARMSTATE {
     #[inline]
     fn from(value: u8) -> Self {
@@ -127,16 +111,6 @@ impl TESTTYPE {
     pub const POSITIVE_COMPARISON: Self = Self(2);
     pub const NEGATIVE_COMPARISON: Self = Self(3);
 }
-impl From<TESTTYPE> for Option<bool> {
-    #[inline]
-    fn from(input: TESTTYPE) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<TESTTYPE> for Option<u8> {
     #[inline]
     fn from(input: TESTTYPE) -> Self {
@@ -159,12 +133,6 @@ impl From<TESTTYPE> for Option<u32> {
     #[inline]
     fn from(input: TESTTYPE) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for TESTTYPE {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for TESTTYPE {
@@ -192,16 +160,6 @@ impl VALUETYPE {
     pub const ABSOLUTE: Self = Self(0);
     pub const RELATIVE: Self = Self(1);
 }
-impl From<VALUETYPE> for Option<bool> {
-    #[inline]
-    fn from(input: VALUETYPE) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<VALUETYPE> for Option<u8> {
     #[inline]
     fn from(input: VALUETYPE) -> Self {
@@ -224,12 +182,6 @@ impl From<VALUETYPE> for Option<u32> {
     #[inline]
     fn from(input: VALUETYPE) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for VALUETYPE {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for VALUETYPE {
@@ -260,16 +212,6 @@ impl CA {
     pub const TEST_TYPE: Self = Self(1 << 3);
     pub const DELTA: Self = Self(1 << 4);
     pub const EVENTS: Self = Self(1 << 5);
-}
-impl From<CA> for Option<bool> {
-    #[inline]
-    fn from(input: CA) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<CA> for u8 {
     #[inline]
@@ -305,12 +247,6 @@ impl From<CA> for Option<u32> {
     #[inline]
     fn from(input: CA) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for CA {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for CA {

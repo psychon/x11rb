@@ -246,16 +246,6 @@ impl HType {
     pub const FROM_CLIENT_TIME: Self = Self(1 << 1);
     pub const FROM_CLIENT_SEQUENCE: Self = Self(1 << 2);
 }
-impl From<HType> for Option<bool> {
-    #[inline]
-    fn from(input: HType) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<HType> for u8 {
     #[inline]
     fn from(input: HType) -> Self {
@@ -292,12 +282,6 @@ impl From<HType> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for HType {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for HType {
     #[inline]
     fn from(value: u8) -> Self {
@@ -326,16 +310,6 @@ impl CS {
     pub const CURRENT_CLIENTS: Self = Self(1);
     pub const FUTURE_CLIENTS: Self = Self(2);
     pub const ALL_CLIENTS: Self = Self(3);
-}
-impl From<CS> for Option<bool> {
-    #[inline]
-    fn from(input: CS) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<CS> for u8 {
     #[inline]
@@ -371,12 +345,6 @@ impl From<CS> for Option<u32> {
     #[inline]
     fn from(input: CS) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for CS {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for CS {

@@ -48,16 +48,6 @@ impl SO {
     pub const SUBTRACT: Self = Self(3);
     pub const INVERT: Self = Self(4);
 }
-impl From<SO> for Option<bool> {
-    #[inline]
-    fn from(input: SO) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SO> for u8 {
     #[inline]
     fn from(input: SO) -> Self {
@@ -94,12 +84,6 @@ impl From<SO> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for SO {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for SO {
     #[inline]
     fn from(value: u8) -> Self {
@@ -125,16 +109,6 @@ impl SK {
     pub const BOUNDING: Self = Self(0);
     pub const CLIP: Self = Self(1);
     pub const INPUT: Self = Self(2);
-}
-impl From<SK> for Option<bool> {
-    #[inline]
-    fn from(input: SK) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SK> for u8 {
     #[inline]
@@ -170,12 +144,6 @@ impl From<SK> for Option<u32> {
     #[inline]
     fn from(input: SK) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SK {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SK {

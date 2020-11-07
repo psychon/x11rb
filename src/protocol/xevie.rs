@@ -346,76 +346,10 @@ impl From<Datatype> for Option<bool> {
         Some(input.0)
     }
 }
-impl From<Datatype> for u8 {
-    #[inline]
-    fn from(input: Datatype) -> Self {
-        u8::from(input.0)
-    }
-}
-impl From<Datatype> for Option<u8> {
-    #[inline]
-    fn from(input: Datatype) -> Self {
-        Some(u8::from(input.0))
-    }
-}
-impl From<Datatype> for u16 {
-    #[inline]
-    fn from(input: Datatype) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<Datatype> for Option<u16> {
-    #[inline]
-    fn from(input: Datatype) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<Datatype> for u32 {
-    #[inline]
-    fn from(input: Datatype) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<Datatype> for Option<u32> {
-    #[inline]
-    fn from(input: Datatype) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<bool> for Datatype {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u8> for Datatype {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Self(false)),
-            1 => Ok(Self(true)),
-            _ => Err(ParseError::InvalidValue),
-        }
-    }
-}
-impl TryFrom<u16> for Datatype {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Self(false)),
-            1 => Ok(Self(true)),
-            _ => Err(ParseError::InvalidValue),
-        }
-    }
-}
-impl TryFrom<u32> for Datatype {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Self(false)),
-            1 => Ok(Self(true)),
-            _ => Err(ParseError::InvalidValue),
-        }
     }
 }
 

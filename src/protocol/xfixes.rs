@@ -151,16 +151,6 @@ impl SaveSetMode {
     pub const INSERT: Self = Self(0);
     pub const DELETE: Self = Self(1);
 }
-impl From<SaveSetMode> for Option<bool> {
-    #[inline]
-    fn from(input: SaveSetMode) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SaveSetMode> for u8 {
     #[inline]
     fn from(input: SaveSetMode) -> Self {
@@ -197,12 +187,6 @@ impl From<SaveSetMode> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for SaveSetMode {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for SaveSetMode {
     #[inline]
     fn from(value: u8) -> Self {
@@ -227,16 +211,6 @@ pub struct SaveSetTarget(u8);
 impl SaveSetTarget {
     pub const NEAREST: Self = Self(0);
     pub const ROOT: Self = Self(1);
-}
-impl From<SaveSetTarget> for Option<bool> {
-    #[inline]
-    fn from(input: SaveSetTarget) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SaveSetTarget> for u8 {
     #[inline]
@@ -274,12 +248,6 @@ impl From<SaveSetTarget> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for SaveSetTarget {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for SaveSetTarget {
     #[inline]
     fn from(value: u8) -> Self {
@@ -304,16 +272,6 @@ pub struct SaveSetMapping(u8);
 impl SaveSetMapping {
     pub const MAP: Self = Self(0);
     pub const UNMAP: Self = Self(1);
-}
-impl From<SaveSetMapping> for Option<bool> {
-    #[inline]
-    fn from(input: SaveSetMapping) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SaveSetMapping> for u8 {
     #[inline]
@@ -349,12 +307,6 @@ impl From<SaveSetMapping> for Option<u32> {
     #[inline]
     fn from(input: SaveSetMapping) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SaveSetMapping {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SaveSetMapping {
@@ -471,16 +423,6 @@ impl SelectionEvent {
     pub const SELECTION_WINDOW_DESTROY: Self = Self(1);
     pub const SELECTION_CLIENT_CLOSE: Self = Self(2);
 }
-impl From<SelectionEvent> for Option<bool> {
-    #[inline]
-    fn from(input: SelectionEvent) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SelectionEvent> for u8 {
     #[inline]
     fn from(input: SelectionEvent) -> Self {
@@ -517,12 +459,6 @@ impl From<SelectionEvent> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for SelectionEvent {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for SelectionEvent {
     #[inline]
     fn from(value: u8) -> Self {
@@ -548,16 +484,6 @@ impl SelectionEventMask {
     pub const SET_SELECTION_OWNER: Self = Self(1 << 0);
     pub const SELECTION_WINDOW_DESTROY: Self = Self(1 << 1);
     pub const SELECTION_CLIENT_CLOSE: Self = Self(1 << 2);
-}
-impl From<SelectionEventMask> for Option<bool> {
-    #[inline]
-    fn from(input: SelectionEventMask) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SelectionEventMask> for u8 {
     #[inline]
@@ -593,12 +519,6 @@ impl From<SelectionEventMask> for Option<u32> {
     #[inline]
     fn from(input: SelectionEventMask) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SelectionEventMask {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SelectionEventMask {
@@ -802,16 +722,6 @@ pub struct CursorNotify(u8);
 impl CursorNotify {
     pub const DISPLAY_CURSOR: Self = Self(0);
 }
-impl From<CursorNotify> for Option<bool> {
-    #[inline]
-    fn from(input: CursorNotify) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<CursorNotify> for u8 {
     #[inline]
     fn from(input: CursorNotify) -> Self {
@@ -848,12 +758,6 @@ impl From<CursorNotify> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for CursorNotify {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for CursorNotify {
     #[inline]
     fn from(value: u8) -> Self {
@@ -877,16 +781,6 @@ impl TryFrom<u32> for CursorNotify {
 pub struct CursorNotifyMask(u8);
 impl CursorNotifyMask {
     pub const DISPLAY_CURSOR: Self = Self(1 << 0);
-}
-impl From<CursorNotifyMask> for Option<bool> {
-    #[inline]
-    fn from(input: CursorNotifyMask) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<CursorNotifyMask> for u8 {
     #[inline]
@@ -922,12 +816,6 @@ impl From<CursorNotifyMask> for Option<u32> {
     #[inline]
     fn from(input: CursorNotifyMask) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for CursorNotifyMask {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for CursorNotifyMask {
@@ -1224,16 +1112,6 @@ pub struct RegionEnum(u8);
 impl RegionEnum {
     pub const NONE: Self = Self(0);
 }
-impl From<RegionEnum> for Option<bool> {
-    #[inline]
-    fn from(input: RegionEnum) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<RegionEnum> for u8 {
     #[inline]
     fn from(input: RegionEnum) -> Self {
@@ -1268,12 +1146,6 @@ impl From<RegionEnum> for Option<u32> {
     #[inline]
     fn from(input: RegionEnum) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for RegionEnum {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for RegionEnum {
@@ -3526,16 +3398,6 @@ impl BarrierDirections {
     pub const NEGATIVE_X: Self = Self(1 << 2);
     pub const NEGATIVE_Y: Self = Self(1 << 3);
 }
-impl From<BarrierDirections> for Option<bool> {
-    #[inline]
-    fn from(input: BarrierDirections) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<BarrierDirections> for u8 {
     #[inline]
     fn from(input: BarrierDirections) -> Self {
@@ -3570,12 +3432,6 @@ impl From<BarrierDirections> for Option<u32> {
     #[inline]
     fn from(input: BarrierDirections) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for BarrierDirections {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for BarrierDirections {

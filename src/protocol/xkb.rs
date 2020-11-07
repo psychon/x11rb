@@ -42,16 +42,6 @@ impl Const {
     pub const PER_KEY_BIT_ARRAY_SIZE: Self = Self(32);
     pub const KEY_NAME_LENGTH: Self = Self(4);
 }
-impl From<Const> for Option<bool> {
-    #[inline]
-    fn from(input: Const) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Const> for u8 {
     #[inline]
     fn from(input: Const) -> Self {
@@ -86,12 +76,6 @@ impl From<Const> for Option<u32> {
     #[inline]
     fn from(input: Const) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for Const {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Const {
@@ -129,16 +113,6 @@ impl EventType {
     pub const ACCESS_X_NOTIFY: Self = Self(1 << 10);
     pub const EXTENSION_DEVICE_NOTIFY: Self = Self(1 << 11);
 }
-impl From<EventType> for Option<bool> {
-    #[inline]
-    fn from(input: EventType) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<EventType> for Option<u8> {
     #[inline]
     fn from(input: EventType) -> Self {
@@ -169,12 +143,6 @@ impl From<EventType> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for EventType {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for EventType {
     #[inline]
     fn from(value: u8) -> Self {
@@ -201,16 +169,6 @@ impl NKNDetail {
     pub const KEYCODES: Self = Self(1 << 0);
     pub const GEOMETRY: Self = Self(1 << 1);
     pub const DEVICE_ID: Self = Self(1 << 2);
-}
-impl From<NKNDetail> for Option<bool> {
-    #[inline]
-    fn from(input: NKNDetail) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<NKNDetail> for u8 {
     #[inline]
@@ -248,12 +206,6 @@ impl From<NKNDetail> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for NKNDetail {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for NKNDetail {
     #[inline]
     fn from(value: u8) -> Self {
@@ -284,16 +236,6 @@ impl AXNDetail {
     pub const BK_ACCEPT: Self = Self(1 << 4);
     pub const BK_REJECT: Self = Self(1 << 5);
     pub const AXK_WARNING: Self = Self(1 << 6);
-}
-impl From<AXNDetail> for Option<bool> {
-    #[inline]
-    fn from(input: AXNDetail) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<AXNDetail> for u8 {
     #[inline]
@@ -331,12 +273,6 @@ impl From<AXNDetail> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for AXNDetail {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for AXNDetail {
     #[inline]
     fn from(value: u8) -> Self {
@@ -368,16 +304,6 @@ impl MapPart {
     pub const KEY_BEHAVIORS: Self = Self(1 << 5);
     pub const VIRTUAL_MODS: Self = Self(1 << 6);
     pub const VIRTUAL_MOD_MAP: Self = Self(1 << 7);
-}
-impl From<MapPart> for Option<bool> {
-    #[inline]
-    fn from(input: MapPart) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<MapPart> for u8 {
     #[inline]
@@ -415,12 +341,6 @@ impl From<MapPart> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for MapPart {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for MapPart {
     #[inline]
     fn from(value: u8) -> Self {
@@ -446,16 +366,6 @@ pub struct SetMapFlags(u8);
 impl SetMapFlags {
     pub const RESIZE_TYPES: Self = Self(1 << 0);
     pub const RECOMPUTE_ACTIONS: Self = Self(1 << 1);
-}
-impl From<SetMapFlags> for Option<bool> {
-    #[inline]
-    fn from(input: SetMapFlags) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SetMapFlags> for u8 {
     #[inline]
@@ -491,12 +401,6 @@ impl From<SetMapFlags> for Option<u32> {
     #[inline]
     fn from(input: SetMapFlags) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SetMapFlags {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SetMapFlags {
@@ -537,16 +441,6 @@ impl StatePart {
     pub const COMPAT_LOOKUP_MODS: Self = Self(1 << 12);
     pub const POINTER_BUTTONS: Self = Self(1 << 13);
 }
-impl From<StatePart> for Option<bool> {
-    #[inline]
-    fn from(input: StatePart) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<StatePart> for Option<u8> {
     #[inline]
     fn from(input: StatePart) -> Self {
@@ -575,12 +469,6 @@ impl From<StatePart> for Option<u32> {
     #[inline]
     fn from(input: StatePart) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for StatePart {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for StatePart {
@@ -620,16 +508,6 @@ impl BoolCtrl {
     pub const OVERLAY2_MASK: Self = Self(1 << 11);
     pub const IGNORE_GROUP_LOCK_MASK: Self = Self(1 << 12);
 }
-impl From<BoolCtrl> for Option<bool> {
-    #[inline]
-    fn from(input: BoolCtrl) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<BoolCtrl> for Option<u8> {
     #[inline]
     fn from(input: BoolCtrl) -> Self {
@@ -658,12 +536,6 @@ impl From<BoolCtrl> for Option<u32> {
     #[inline]
     fn from(input: BoolCtrl) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for BoolCtrl {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for BoolCtrl {
@@ -695,16 +567,6 @@ impl Control {
     pub const PER_KEY_REPEAT: Self = Self(1 << 30);
     pub const CONTROLS_ENABLED: Self = Self(1 << 31);
 }
-impl From<Control> for Option<bool> {
-    #[inline]
-    fn from(input: Control) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Control> for Option<u8> {
     #[inline]
     fn from(input: Control) -> Self {
@@ -727,12 +589,6 @@ impl From<Control> for Option<u32> {
     #[inline]
     fn from(input: Control) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for Control {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Control {
@@ -771,16 +627,6 @@ impl AXOption {
     pub const BK_REJECT_FB: Self = Self(1 << 10);
     pub const DUMB_BELL: Self = Self(1 << 11);
 }
-impl From<AXOption> for Option<bool> {
-    #[inline]
-    fn from(input: AXOption) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<AXOption> for Option<u8> {
     #[inline]
     fn from(input: AXOption) -> Self {
@@ -811,12 +657,6 @@ impl From<AXOption> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for AXOption {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for AXOption {
     #[inline]
     fn from(value: u8) -> Self {
@@ -844,16 +684,6 @@ pub struct LedClassResult(u16);
 impl LedClassResult {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
     pub const LED_FEEDBACK_CLASS: Self = Self(4);
-}
-impl From<LedClassResult> for Option<bool> {
-    #[inline]
-    fn from(input: LedClassResult) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<LedClassResult> for Option<u8> {
     #[inline]
@@ -885,12 +715,6 @@ impl From<LedClassResult> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for LedClassResult {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for LedClassResult {
     #[inline]
     fn from(value: u8) -> Self {
@@ -917,16 +741,6 @@ impl LedClass {
     pub const LED_FEEDBACK_CLASS: Self = Self(4);
     pub const DFLT_XI_CLASS: Self = Self(768);
     pub const ALL_XI_CLASSES: Self = Self(1280);
-}
-impl From<LedClass> for Option<bool> {
-    #[inline]
-    fn from(input: LedClass) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<LedClass> for Option<u8> {
     #[inline]
@@ -958,12 +772,6 @@ impl From<LedClass> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for LedClass {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for LedClass {
     #[inline]
     fn from(value: u8) -> Self {
@@ -990,16 +798,6 @@ pub struct BellClassResult(u8);
 impl BellClassResult {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
     pub const BELL_FEEDBACK_CLASS: Self = Self(5);
-}
-impl From<BellClassResult> for Option<bool> {
-    #[inline]
-    fn from(input: BellClassResult) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<BellClassResult> for u8 {
     #[inline]
@@ -1037,12 +835,6 @@ impl From<BellClassResult> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for BellClassResult {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for BellClassResult {
     #[inline]
     fn from(value: u8) -> Self {
@@ -1068,16 +860,6 @@ impl BellClass {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
     pub const BELL_FEEDBACK_CLASS: Self = Self(5);
     pub const DFLT_XI_CLASS: Self = Self(768);
-}
-impl From<BellClass> for Option<bool> {
-    #[inline]
-    fn from(input: BellClass) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<BellClass> for Option<u8> {
     #[inline]
@@ -1107,12 +889,6 @@ impl From<BellClass> for Option<u32> {
     #[inline]
     fn from(input: BellClass) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for BellClass {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for BellClass {
@@ -1147,16 +923,6 @@ impl ID {
     pub const ALL_XI_ID: Self = Self(1536);
     pub const XI_NONE: Self = Self(65280);
 }
-impl From<ID> for Option<bool> {
-    #[inline]
-    fn from(input: ID) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<ID> for Option<u8> {
     #[inline]
     fn from(input: ID) -> Self {
@@ -1187,12 +953,6 @@ impl From<ID> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for ID {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for ID {
     #[inline]
     fn from(value: u8) -> Self {
@@ -1221,16 +981,6 @@ impl Group {
     pub const M2: Self = Self(1);
     pub const M3: Self = Self(2);
     pub const M4: Self = Self(3);
-}
-impl From<Group> for Option<bool> {
-    #[inline]
-    fn from(input: Group) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<Group> for u8 {
     #[inline]
@@ -1268,12 +1018,6 @@ impl From<Group> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Group {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Group {
     #[inline]
     fn from(value: u8) -> Self {
@@ -1298,16 +1042,6 @@ pub struct Groups(u8);
 impl Groups {
     pub const ANY: Self = Self(254);
     pub const ALL: Self = Self(255);
-}
-impl From<Groups> for Option<bool> {
-    #[inline]
-    fn from(input: Groups) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<Groups> for u8 {
     #[inline]
@@ -1345,12 +1079,6 @@ impl From<Groups> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Groups {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Groups {
     #[inline]
     fn from(value: u8) -> Self {
@@ -1377,16 +1105,6 @@ impl SetOfGroup {
     pub const GROUP2: Self = Self(1 << 1);
     pub const GROUP3: Self = Self(1 << 2);
     pub const GROUP4: Self = Self(1 << 3);
-}
-impl From<SetOfGroup> for Option<bool> {
-    #[inline]
-    fn from(input: SetOfGroup) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SetOfGroup> for u8 {
     #[inline]
@@ -1424,12 +1142,6 @@ impl From<SetOfGroup> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for SetOfGroup {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for SetOfGroup {
     #[inline]
     fn from(value: u8) -> Self {
@@ -1454,16 +1166,6 @@ bitmask_binop!(SetOfGroup, u8);
 pub struct SetOfGroups(u8);
 impl SetOfGroups {
     pub const ANY: Self = Self(1 << 7);
-}
-impl From<SetOfGroups> for Option<bool> {
-    #[inline]
-    fn from(input: SetOfGroups) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SetOfGroups> for u8 {
     #[inline]
@@ -1501,12 +1203,6 @@ impl From<SetOfGroups> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for SetOfGroups {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for SetOfGroups {
     #[inline]
     fn from(value: u8) -> Self {
@@ -1533,16 +1229,6 @@ impl GroupsWrap {
     pub const WRAP_INTO_RANGE: Self = Self(0);
     pub const CLAMP_INTO_RANGE: Self = Self(1 << 6);
     pub const REDIRECT_INTO_RANGE: Self = Self(1 << 7);
-}
-impl From<GroupsWrap> for Option<bool> {
-    #[inline]
-    fn from(input: GroupsWrap) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<GroupsWrap> for u8 {
     #[inline]
@@ -1580,12 +1266,6 @@ impl From<GroupsWrap> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for GroupsWrap {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for GroupsWrap {
     #[inline]
     fn from(value: u8) -> Self {
@@ -1617,16 +1297,6 @@ impl VModsHigh {
     pub const M10: Self = Self(1 << 2);
     pub const M9: Self = Self(1 << 1);
     pub const M8: Self = Self(1 << 0);
-}
-impl From<VModsHigh> for Option<bool> {
-    #[inline]
-    fn from(input: VModsHigh) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<VModsHigh> for u8 {
     #[inline]
@@ -1664,12 +1334,6 @@ impl From<VModsHigh> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for VModsHigh {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for VModsHigh {
     #[inline]
     fn from(value: u8) -> Self {
@@ -1701,16 +1365,6 @@ impl VModsLow {
     pub const M2: Self = Self(1 << 2);
     pub const M1: Self = Self(1 << 1);
     pub const M0: Self = Self(1 << 0);
-}
-impl From<VModsLow> for Option<bool> {
-    #[inline]
-    fn from(input: VModsLow) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<VModsLow> for u8 {
     #[inline]
@@ -1746,12 +1400,6 @@ impl From<VModsLow> for Option<u32> {
     #[inline]
     fn from(input: VModsLow) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for VModsLow {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for VModsLow {
@@ -1794,16 +1442,6 @@ impl VMod {
     pub const M1: Self = Self(1 << 1);
     pub const M0: Self = Self(1 << 0);
 }
-impl From<VMod> for Option<bool> {
-    #[inline]
-    fn from(input: VMod) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<VMod> for Option<u8> {
     #[inline]
     fn from(input: VMod) -> Self {
@@ -1832,12 +1470,6 @@ impl From<VMod> for Option<u32> {
     #[inline]
     fn from(input: VMod) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for VMod {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for VMod {
@@ -1871,16 +1503,6 @@ impl Explicit {
     pub const KEY_TYPE3: Self = Self(1 << 2);
     pub const KEY_TYPE2: Self = Self(1 << 1);
     pub const KEY_TYPE1: Self = Self(1 << 0);
-}
-impl From<Explicit> for Option<bool> {
-    #[inline]
-    fn from(input: Explicit) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<Explicit> for u8 {
     #[inline]
@@ -1918,12 +1540,6 @@ impl From<Explicit> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Explicit {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Explicit {
     #[inline]
     fn from(value: u8) -> Self {
@@ -1952,16 +1568,6 @@ impl SymInterpretMatch {
     pub const ANY_OF: Self = Self(2);
     pub const ALL_OF: Self = Self(3);
     pub const EXACTLY: Self = Self(4);
-}
-impl From<SymInterpretMatch> for Option<bool> {
-    #[inline]
-    fn from(input: SymInterpretMatch) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SymInterpretMatch> for u8 {
     #[inline]
@@ -1999,12 +1605,6 @@ impl From<SymInterpretMatch> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for SymInterpretMatch {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for SymInterpretMatch {
     #[inline]
     fn from(value: u8) -> Self {
@@ -2029,16 +1629,6 @@ pub struct SymInterpMatch(u8);
 impl SymInterpMatch {
     pub const LEVEL_ONE_ONLY: Self = Self(1 << 7);
     pub const OP_MASK: Self = Self(127);
-}
-impl From<SymInterpMatch> for Option<bool> {
-    #[inline]
-    fn from(input: SymInterpMatch) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SymInterpMatch> for u8 {
     #[inline]
@@ -2076,12 +1666,6 @@ impl From<SymInterpMatch> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for SymInterpMatch {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for SymInterpMatch {
     #[inline]
     fn from(value: u8) -> Self {
@@ -2107,16 +1691,6 @@ impl IMFlag {
     pub const NO_EXPLICIT: Self = Self(1 << 7);
     pub const NO_AUTOMATIC: Self = Self(1 << 6);
     pub const LED_DRIVES_KB: Self = Self(1 << 5);
-}
-impl From<IMFlag> for Option<bool> {
-    #[inline]
-    fn from(input: IMFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<IMFlag> for u8 {
     #[inline]
@@ -2154,12 +1728,6 @@ impl From<IMFlag> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for IMFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for IMFlag {
     #[inline]
     fn from(value: u8) -> Self {
@@ -2188,16 +1756,6 @@ impl IMModsWhich {
     pub const USE_LOCKED: Self = Self(1 << 2);
     pub const USE_LATCHED: Self = Self(1 << 1);
     pub const USE_BASE: Self = Self(1 << 0);
-}
-impl From<IMModsWhich> for Option<bool> {
-    #[inline]
-    fn from(input: IMModsWhich) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<IMModsWhich> for u8 {
     #[inline]
@@ -2235,12 +1793,6 @@ impl From<IMModsWhich> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for IMModsWhich {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for IMModsWhich {
     #[inline]
     fn from(value: u8) -> Self {
@@ -2269,16 +1821,6 @@ impl IMGroupsWhich {
     pub const USE_LOCKED: Self = Self(1 << 2);
     pub const USE_LATCHED: Self = Self(1 << 1);
     pub const USE_BASE: Self = Self(1 << 0);
-}
-impl From<IMGroupsWhich> for Option<bool> {
-    #[inline]
-    fn from(input: IMGroupsWhich) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<IMGroupsWhich> for u8 {
     #[inline]
@@ -2314,12 +1856,6 @@ impl From<IMGroupsWhich> for Option<u32> {
     #[inline]
     fn from(input: IMGroupsWhich) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for IMGroupsWhich {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for IMGroupsWhich {
@@ -2422,16 +1958,6 @@ impl CMDetail {
     pub const SYM_INTERP: Self = Self(1 << 0);
     pub const GROUP_COMPAT: Self = Self(1 << 1);
 }
-impl From<CMDetail> for Option<bool> {
-    #[inline]
-    fn from(input: CMDetail) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<CMDetail> for u8 {
     #[inline]
     fn from(input: CMDetail) -> Self {
@@ -2466,12 +1992,6 @@ impl From<CMDetail> for Option<u32> {
     #[inline]
     fn from(input: CMDetail) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for CMDetail {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for CMDetail {
@@ -2512,16 +2032,6 @@ impl NameDetail {
     pub const GROUP_NAMES: Self = Self(1 << 12);
     pub const RG_NAMES: Self = Self(1 << 13);
 }
-impl From<NameDetail> for Option<bool> {
-    #[inline]
-    fn from(input: NameDetail) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<NameDetail> for Option<u8> {
     #[inline]
     fn from(input: NameDetail) -> Self {
@@ -2550,12 +2060,6 @@ impl From<NameDetail> for Option<u32> {
     #[inline]
     fn from(input: NameDetail) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for NameDetail {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for NameDetail {
@@ -2589,16 +2093,6 @@ impl GBNDetail {
     pub const KEY_NAMES: Self = Self(1 << 5);
     pub const GEOMETRY: Self = Self(1 << 6);
     pub const OTHER_NAMES: Self = Self(1 << 7);
-}
-impl From<GBNDetail> for Option<bool> {
-    #[inline]
-    fn from(input: GBNDetail) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<GBNDetail> for u8 {
     #[inline]
@@ -2636,12 +2130,6 @@ impl From<GBNDetail> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for GBNDetail {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for GBNDetail {
     #[inline]
     fn from(value: u8) -> Self {
@@ -2670,16 +2158,6 @@ impl XIFeature {
     pub const INDICATOR_NAMES: Self = Self(1 << 2);
     pub const INDICATOR_MAPS: Self = Self(1 << 3);
     pub const INDICATOR_STATE: Self = Self(1 << 4);
-}
-impl From<XIFeature> for Option<bool> {
-    #[inline]
-    fn from(input: XIFeature) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<XIFeature> for u8 {
     #[inline]
@@ -2717,12 +2195,6 @@ impl From<XIFeature> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for XIFeature {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for XIFeature {
     #[inline]
     fn from(value: u8) -> Self {
@@ -2751,16 +2223,6 @@ impl PerClientFlag {
     pub const AUTO_RESET_CONTROLS: Self = Self(1 << 2);
     pub const LOOKUP_STATE_WHEN_GRABBED: Self = Self(1 << 3);
     pub const SEND_EVENT_USES_XKB_STATE: Self = Self(1 << 4);
-}
-impl From<PerClientFlag> for Option<bool> {
-    #[inline]
-    fn from(input: PerClientFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<PerClientFlag> for u8 {
     #[inline]
@@ -2796,12 +2258,6 @@ impl From<PerClientFlag> for Option<u32> {
     #[inline]
     fn from(input: PerClientFlag) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for PerClientFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for PerClientFlag {
@@ -3487,16 +2943,6 @@ impl BehaviorType {
     pub const PERMAMENT_OVERLAY1: Self = Self(131);
     pub const PERMAMENT_OVERLAY2: Self = Self(132);
 }
-impl From<BehaviorType> for Option<bool> {
-    #[inline]
-    fn from(input: BehaviorType) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<BehaviorType> for u8 {
     #[inline]
     fn from(input: BehaviorType) -> Self {
@@ -3531,12 +2977,6 @@ impl From<BehaviorType> for Option<u32> {
     #[inline]
     fn from(input: BehaviorType) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for BehaviorType {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for BehaviorType {
@@ -4201,16 +3641,6 @@ impl DoodadType {
     pub const INDICATOR: Self = Self(4);
     pub const LOGO: Self = Self(5);
 }
-impl From<DoodadType> for Option<bool> {
-    #[inline]
-    fn from(input: DoodadType) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<DoodadType> for u8 {
     #[inline]
     fn from(input: DoodadType) -> Self {
@@ -4245,12 +3675,6 @@ impl From<DoodadType> for Option<u32> {
     #[inline]
     fn from(input: DoodadType) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for DoodadType {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for DoodadType {
@@ -4391,16 +3815,6 @@ impl Error {
     pub const BAD_CLASS: Self = Self(254);
     pub const BAD_ID: Self = Self(253);
 }
-impl From<Error> for Option<bool> {
-    #[inline]
-    fn from(input: Error) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Error> for u8 {
     #[inline]
     fn from(input: Error) -> Self {
@@ -4437,12 +3851,6 @@ impl From<Error> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Error {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Error {
     #[inline]
     fn from(value: u8) -> Self {
@@ -4472,16 +3880,6 @@ impl SA {
     pub const LATCH_TO_LOCK: Self = Self(1 << 1);
     pub const USE_MOD_MAP_MODS: Self = Self(1 << 2);
     pub const GROUP_ABSOLUTE: Self = Self(1 << 2);
-}
-impl From<SA> for Option<bool> {
-    #[inline]
-    fn from(input: SA) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SA> for u8 {
     #[inline]
@@ -4517,12 +3915,6 @@ impl From<SA> for Option<u32> {
     #[inline]
     fn from(input: SA) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SA {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SA {
@@ -4570,16 +3962,6 @@ impl SAType {
     pub const LOCK_DEVICE_BTN: Self = Self(19);
     pub const DEVICE_VALUATOR: Self = Self(20);
 }
-impl From<SAType> for Option<bool> {
-    #[inline]
-    fn from(input: SAType) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SAType> for u8 {
     #[inline]
     fn from(input: SAType) -> Self {
@@ -4614,12 +3996,6 @@ impl From<SAType> for Option<u32> {
     #[inline]
     fn from(input: SAType) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SAType {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SAType {
@@ -4807,16 +4183,6 @@ impl SAMovePtrFlag {
     pub const MOVE_ABSOLUTE_X: Self = Self(1 << 1);
     pub const MOVE_ABSOLUTE_Y: Self = Self(1 << 2);
 }
-impl From<SAMovePtrFlag> for Option<bool> {
-    #[inline]
-    fn from(input: SAMovePtrFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SAMovePtrFlag> for u8 {
     #[inline]
     fn from(input: SAMovePtrFlag) -> Self {
@@ -4851,12 +4217,6 @@ impl From<SAMovePtrFlag> for Option<u32> {
     #[inline]
     fn from(input: SAMovePtrFlag) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SAMovePtrFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SAMovePtrFlag {
@@ -5050,16 +4410,6 @@ impl SASetPtrDfltFlag {
     pub const DFLT_BTN_ABSOLUTE: Self = Self(1 << 2);
     pub const AFFECT_DFLT_BUTTON: Self = Self(1 << 0);
 }
-impl From<SASetPtrDfltFlag> for Option<bool> {
-    #[inline]
-    fn from(input: SASetPtrDfltFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SASetPtrDfltFlag> for u8 {
     #[inline]
     fn from(input: SASetPtrDfltFlag) -> Self {
@@ -5094,12 +4444,6 @@ impl From<SASetPtrDfltFlag> for Option<u32> {
     #[inline]
     fn from(input: SASetPtrDfltFlag) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SASetPtrDfltFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SASetPtrDfltFlag {
@@ -5184,16 +4528,6 @@ impl SAIsoLockFlag {
     pub const GROUP_ABSOLUTE: Self = Self(1 << 2);
     pub const ISO_DFLT_IS_GROUP: Self = Self(1 << 3);
 }
-impl From<SAIsoLockFlag> for Option<bool> {
-    #[inline]
-    fn from(input: SAIsoLockFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SAIsoLockFlag> for u8 {
     #[inline]
     fn from(input: SAIsoLockFlag) -> Self {
@@ -5230,12 +4564,6 @@ impl From<SAIsoLockFlag> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for SAIsoLockFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for SAIsoLockFlag {
     #[inline]
     fn from(value: u8) -> Self {
@@ -5263,16 +4591,6 @@ impl SAIsoLockNoAffect {
     pub const PTR: Self = Self(1 << 4);
     pub const GROUP: Self = Self(1 << 5);
     pub const MODS: Self = Self(1 << 6);
-}
-impl From<SAIsoLockNoAffect> for Option<bool> {
-    #[inline]
-    fn from(input: SAIsoLockNoAffect) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<SAIsoLockNoAffect> for u8 {
     #[inline]
@@ -5308,12 +4626,6 @@ impl From<SAIsoLockNoAffect> for Option<u32> {
     #[inline]
     fn from(input: SAIsoLockNoAffect) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SAIsoLockNoAffect {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SAIsoLockNoAffect {
@@ -5450,16 +4762,6 @@ impl SwitchScreenFlag {
     pub const APPLICATION: Self = Self(1 << 0);
     pub const ABSOLUTE: Self = Self(1 << 2);
 }
-impl From<SwitchScreenFlag> for Option<bool> {
-    #[inline]
-    fn from(input: SwitchScreenFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SwitchScreenFlag> for u8 {
     #[inline]
     fn from(input: SwitchScreenFlag) -> Self {
@@ -5494,12 +4796,6 @@ impl From<SwitchScreenFlag> for Option<u32> {
     #[inline]
     fn from(input: SwitchScreenFlag) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SwitchScreenFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SwitchScreenFlag {
@@ -5580,16 +4876,6 @@ impl BoolCtrlsHigh {
     pub const OVERLAY2: Self = Self(1 << 3);
     pub const IGNORE_GROUP_LOCK: Self = Self(1 << 4);
 }
-impl From<BoolCtrlsHigh> for Option<bool> {
-    #[inline]
-    fn from(input: BoolCtrlsHigh) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<BoolCtrlsHigh> for u8 {
     #[inline]
     fn from(input: BoolCtrlsHigh) -> Self {
@@ -5626,12 +4912,6 @@ impl From<BoolCtrlsHigh> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for BoolCtrlsHigh {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for BoolCtrlsHigh {
     #[inline]
     fn from(value: u8) -> Self {
@@ -5663,16 +4943,6 @@ impl BoolCtrlsLow {
     pub const MOUSE_KEYS_ACCEL: Self = Self(1 << 5);
     pub const ACCESS_X_KEYS: Self = Self(1 << 6);
     pub const ACCESS_X_TIMEOUT: Self = Self(1 << 7);
-}
-impl From<BoolCtrlsLow> for Option<bool> {
-    #[inline]
-    fn from(input: BoolCtrlsLow) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<BoolCtrlsLow> for u8 {
     #[inline]
@@ -5708,12 +4978,6 @@ impl From<BoolCtrlsLow> for Option<u32> {
     #[inline]
     fn from(input: BoolCtrlsLow) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for BoolCtrlsLow {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for BoolCtrlsLow {
@@ -5796,16 +5060,6 @@ impl ActionMessageFlag {
     pub const ON_RELEASE: Self = Self(1 << 1);
     pub const GEN_KEY_EVENT: Self = Self(1 << 2);
 }
-impl From<ActionMessageFlag> for Option<bool> {
-    #[inline]
-    fn from(input: ActionMessageFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<ActionMessageFlag> for u8 {
     #[inline]
     fn from(input: ActionMessageFlag) -> Self {
@@ -5840,12 +5094,6 @@ impl From<ActionMessageFlag> for Option<u32> {
     #[inline]
     fn from(input: ActionMessageFlag) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for ActionMessageFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for ActionMessageFlag {
@@ -6045,16 +5293,6 @@ impl LockDeviceFlags {
     pub const NO_LOCK: Self = Self(1 << 0);
     pub const NO_UNLOCK: Self = Self(1 << 1);
 }
-impl From<LockDeviceFlags> for Option<bool> {
-    #[inline]
-    fn from(input: LockDeviceFlags) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<LockDeviceFlags> for u8 {
     #[inline]
     fn from(input: LockDeviceFlags) -> Self {
@@ -6089,12 +5327,6 @@ impl From<LockDeviceFlags> for Option<u32> {
     #[inline]
     fn from(input: LockDeviceFlags) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for LockDeviceFlags {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for LockDeviceFlags {
@@ -6182,16 +5414,6 @@ impl SAValWhat {
     pub const SET_VAL_RELATIVE: Self = Self(4);
     pub const SET_VAL_ABSOLUTE: Self = Self(5);
 }
-impl From<SAValWhat> for Option<bool> {
-    #[inline]
-    fn from(input: SAValWhat) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SAValWhat> for u8 {
     #[inline]
     fn from(input: SAValWhat) -> Self {
@@ -6226,12 +5448,6 @@ impl From<SAValWhat> for Option<u32> {
     #[inline]
     fn from(input: SAValWhat) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SAValWhat {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SAValWhat {

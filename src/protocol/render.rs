@@ -41,16 +41,6 @@ impl PictType {
     pub const INDEXED: Self = Self(0);
     pub const DIRECT: Self = Self(1);
 }
-impl From<PictType> for Option<bool> {
-    #[inline]
-    fn from(input: PictType) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<PictType> for u8 {
     #[inline]
     fn from(input: PictType) -> Self {
@@ -87,12 +77,6 @@ impl From<PictType> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for PictType {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for PictType {
     #[inline]
     fn from(value: u8) -> Self {
@@ -116,16 +100,6 @@ impl TryFrom<u32> for PictType {
 pub struct PictureEnum(u8);
 impl PictureEnum {
     pub const NONE: Self = Self(0);
-}
-impl From<PictureEnum> for Option<bool> {
-    #[inline]
-    fn from(input: PictureEnum) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<PictureEnum> for u8 {
     #[inline]
@@ -161,12 +135,6 @@ impl From<PictureEnum> for Option<u32> {
     #[inline]
     fn from(input: PictureEnum) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for PictureEnum {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for PictureEnum {
@@ -245,16 +213,6 @@ impl PictOp {
     pub const HSL_COLOR: Self = Self(61);
     pub const HSL_LUMINOSITY: Self = Self(62);
 }
-impl From<PictOp> for Option<bool> {
-    #[inline]
-    fn from(input: PictOp) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<PictOp> for u8 {
     #[inline]
     fn from(input: PictOp) -> Self {
@@ -291,12 +249,6 @@ impl From<PictOp> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for PictOp {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for PictOp {
     #[inline]
     fn from(value: u8) -> Self {
@@ -322,16 +274,6 @@ impl PolyEdge {
     pub const SHARP: Self = Self(0);
     pub const SMOOTH: Self = Self(1);
 }
-impl From<PolyEdge> for Option<bool> {
-    #[inline]
-    fn from(input: PolyEdge) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<PolyEdge> for Option<u8> {
     #[inline]
     fn from(input: PolyEdge) -> Self {
@@ -354,12 +296,6 @@ impl From<PolyEdge> for Option<u32> {
     #[inline]
     fn from(input: PolyEdge) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for PolyEdge {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for PolyEdge {
@@ -387,16 +323,6 @@ impl PolyMode {
     pub const PRECISE: Self = Self(0);
     pub const IMPRECISE: Self = Self(1);
 }
-impl From<PolyMode> for Option<bool> {
-    #[inline]
-    fn from(input: PolyMode) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<PolyMode> for Option<u8> {
     #[inline]
     fn from(input: PolyMode) -> Self {
@@ -419,12 +345,6 @@ impl From<PolyMode> for Option<u32> {
     #[inline]
     fn from(input: PolyMode) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for PolyMode {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for PolyMode {
@@ -463,16 +383,6 @@ impl CP {
     pub const DITHER: Self = Self(1 << 11);
     pub const COMPONENT_ALPHA: Self = Self(1 << 12);
 }
-impl From<CP> for Option<bool> {
-    #[inline]
-    fn from(input: CP) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<CP> for Option<u8> {
     #[inline]
     fn from(input: CP) -> Self {
@@ -501,12 +411,6 @@ impl From<CP> for Option<u32> {
     #[inline]
     fn from(input: CP) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for CP {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for CP {
@@ -539,16 +443,6 @@ impl SubPixel {
     pub const VERTICAL_BGR: Self = Self(4);
     pub const NONE: Self = Self(5);
 }
-impl From<SubPixel> for Option<bool> {
-    #[inline]
-    fn from(input: SubPixel) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SubPixel> for Option<u8> {
     #[inline]
     fn from(input: SubPixel) -> Self {
@@ -571,12 +465,6 @@ impl From<SubPixel> for Option<u32> {
     #[inline]
     fn from(input: SubPixel) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for SubPixel {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SubPixel {
@@ -606,16 +494,6 @@ impl Repeat {
     pub const PAD: Self = Self(2);
     pub const REFLECT: Self = Self(3);
 }
-impl From<Repeat> for Option<bool> {
-    #[inline]
-    fn from(input: Repeat) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Repeat> for Option<u8> {
     #[inline]
     fn from(input: Repeat) -> Self {
@@ -638,12 +516,6 @@ impl From<Repeat> for Option<u32> {
     #[inline]
     fn from(input: Repeat) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for Repeat {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Repeat {

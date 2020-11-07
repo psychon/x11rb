@@ -42,16 +42,6 @@ impl Redirect {
     pub const AUTOMATIC: Self = Self(0);
     pub const MANUAL: Self = Self(1);
 }
-impl From<Redirect> for Option<bool> {
-    #[inline]
-    fn from(input: Redirect) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Redirect> for u8 {
     #[inline]
     fn from(input: Redirect) -> Self {
@@ -86,12 +76,6 @@ impl From<Redirect> for Option<u32> {
     #[inline]
     fn from(input: Redirect) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for Redirect {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Redirect {

@@ -49,16 +49,6 @@ impl Type {
     pub const STILL_MASK: Self = Self(1 << 3);
     pub const IMAGE_MASK: Self = Self(1 << 4);
 }
-impl From<Type> for Option<bool> {
-    #[inline]
-    fn from(input: Type) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Type> for u8 {
     #[inline]
     fn from(input: Type) -> Self {
@@ -95,12 +85,6 @@ impl From<Type> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Type {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Type {
     #[inline]
     fn from(value: u8) -> Self {
@@ -126,16 +110,6 @@ pub struct ImageFormatInfoType(u8);
 impl ImageFormatInfoType {
     pub const RGB: Self = Self(0);
     pub const YUV: Self = Self(1);
-}
-impl From<ImageFormatInfoType> for Option<bool> {
-    #[inline]
-    fn from(input: ImageFormatInfoType) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<ImageFormatInfoType> for u8 {
     #[inline]
@@ -173,12 +147,6 @@ impl From<ImageFormatInfoType> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for ImageFormatInfoType {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for ImageFormatInfoType {
     #[inline]
     fn from(value: u8) -> Self {
@@ -203,16 +171,6 @@ pub struct ImageFormatInfoFormat(u8);
 impl ImageFormatInfoFormat {
     pub const PACKED: Self = Self(0);
     pub const PLANAR: Self = Self(1);
-}
-impl From<ImageFormatInfoFormat> for Option<bool> {
-    #[inline]
-    fn from(input: ImageFormatInfoFormat) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<ImageFormatInfoFormat> for u8 {
     #[inline]
@@ -250,12 +208,6 @@ impl From<ImageFormatInfoFormat> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for ImageFormatInfoFormat {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for ImageFormatInfoFormat {
     #[inline]
     fn from(value: u8) -> Self {
@@ -280,16 +232,6 @@ pub struct AttributeFlag(u8);
 impl AttributeFlag {
     pub const GETTABLE: Self = Self(1 << 0);
     pub const SETTABLE: Self = Self(1 << 1);
-}
-impl From<AttributeFlag> for Option<bool> {
-    #[inline]
-    fn from(input: AttributeFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<AttributeFlag> for u8 {
     #[inline]
@@ -327,12 +269,6 @@ impl From<AttributeFlag> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for AttributeFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for AttributeFlag {
     #[inline]
     fn from(value: u8) -> Self {
@@ -361,16 +297,6 @@ impl VideoNotifyReason {
     pub const BUSY: Self = Self(2);
     pub const PREEMPTED: Self = Self(3);
     pub const HARD_ERROR: Self = Self(4);
-}
-impl From<VideoNotifyReason> for Option<bool> {
-    #[inline]
-    fn from(input: VideoNotifyReason) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<VideoNotifyReason> for u8 {
     #[inline]
@@ -408,12 +334,6 @@ impl From<VideoNotifyReason> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for VideoNotifyReason {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for VideoNotifyReason {
     #[inline]
     fn from(value: u8) -> Self {
@@ -438,16 +358,6 @@ pub struct ScanlineOrder(u8);
 impl ScanlineOrder {
     pub const TOP_TO_BOTTOM: Self = Self(0);
     pub const BOTTOM_TO_TOP: Self = Self(1);
-}
-impl From<ScanlineOrder> for Option<bool> {
-    #[inline]
-    fn from(input: ScanlineOrder) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<ScanlineOrder> for u8 {
     #[inline]
@@ -485,12 +395,6 @@ impl From<ScanlineOrder> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for ScanlineOrder {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for ScanlineOrder {
     #[inline]
     fn from(value: u8) -> Self {
@@ -519,16 +423,6 @@ impl GrabPortStatus {
     pub const INVALID_TIME: Self = Self(3);
     pub const BAD_REPLY: Self = Self(4);
     pub const BAD_ALLOC: Self = Self(5);
-}
-impl From<GrabPortStatus> for Option<bool> {
-    #[inline]
-    fn from(input: GrabPortStatus) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<GrabPortStatus> for u8 {
     #[inline]
@@ -564,12 +458,6 @@ impl From<GrabPortStatus> for Option<u32> {
     #[inline]
     fn from(input: GrabPortStatus) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for GrabPortStatus {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for GrabPortStatus {

@@ -42,16 +42,6 @@ impl Kind {
     pub const INTERNAL: Self = Self(1);
     pub const EXTERNAL: Self = Self(2);
 }
-impl From<Kind> for Option<bool> {
-    #[inline]
-    fn from(input: Kind) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Kind> for u8 {
     #[inline]
     fn from(input: Kind) -> Self {
@@ -88,12 +78,6 @@ impl From<Kind> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Kind {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Kind {
     #[inline]
     fn from(value: u8) -> Self {
@@ -118,16 +102,6 @@ pub struct Event(u8);
 impl Event {
     pub const NOTIFY_MASK: Self = Self(1 << 0);
     pub const CYCLE_MASK: Self = Self(1 << 1);
-}
-impl From<Event> for Option<bool> {
-    #[inline]
-    fn from(input: Event) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<Event> for u8 {
     #[inline]
@@ -165,12 +139,6 @@ impl From<Event> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Event {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Event {
     #[inline]
     fn from(value: u8) -> Self {
@@ -198,16 +166,6 @@ impl State {
     pub const ON: Self = Self(1);
     pub const CYCLE: Self = Self(2);
     pub const DISABLED: Self = Self(3);
-}
-impl From<State> for Option<bool> {
-    #[inline]
-    fn from(input: State) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<State> for u8 {
     #[inline]
@@ -243,12 +201,6 @@ impl From<State> for Option<u32> {
     #[inline]
     fn from(input: State) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for State {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for State {

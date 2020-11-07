@@ -68,16 +68,6 @@ impl Rotation {
     pub const REFLECT_X: Self = Self(1 << 4);
     pub const REFLECT_Y: Self = Self(1 << 5);
 }
-impl From<Rotation> for Option<bool> {
-    #[inline]
-    fn from(input: Rotation) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Rotation> for u8 {
     #[inline]
     fn from(input: Rotation) -> Self {
@@ -112,12 +102,6 @@ impl From<Rotation> for Option<u32> {
     #[inline]
     fn from(input: Rotation) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for Rotation {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Rotation {
@@ -353,16 +337,6 @@ impl SetConfig {
     pub const INVALID_TIME: Self = Self(2);
     pub const FAILED: Self = Self(3);
 }
-impl From<SetConfig> for Option<bool> {
-    #[inline]
-    fn from(input: SetConfig) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<SetConfig> for u8 {
     #[inline]
     fn from(input: SetConfig) -> Self {
@@ -397,12 +371,6 @@ impl From<SetConfig> for Option<u32> {
     #[inline]
     fn from(input: SetConfig) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for SetConfig {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for SetConfig {
@@ -586,16 +554,6 @@ impl NotifyMask {
     pub const RESOURCE_CHANGE: Self = Self(1 << 6);
     pub const LEASE: Self = Self(1 << 7);
 }
-impl From<NotifyMask> for Option<bool> {
-    #[inline]
-    fn from(input: NotifyMask) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<NotifyMask> for u8 {
     #[inline]
     fn from(input: NotifyMask) -> Self {
@@ -630,12 +588,6 @@ impl From<NotifyMask> for Option<u32> {
     #[inline]
     fn from(input: NotifyMask) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for NotifyMask {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for NotifyMask {
@@ -1083,16 +1035,6 @@ impl ModeFlag {
     pub const DOUBLE_CLOCK: Self = Self(1 << 12);
     pub const HALVE_CLOCK: Self = Self(1 << 13);
 }
-impl From<ModeFlag> for Option<bool> {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<ModeFlag> for Option<u8> {
     #[inline]
     fn from(input: ModeFlag) -> Self {
@@ -1121,12 +1063,6 @@ impl From<ModeFlag> for Option<u32> {
     #[inline]
     fn from(input: ModeFlag) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for ModeFlag {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for ModeFlag {
@@ -1432,16 +1368,6 @@ impl Connection {
     pub const DISCONNECTED: Self = Self(1);
     pub const UNKNOWN: Self = Self(2);
 }
-impl From<Connection> for Option<bool> {
-    #[inline]
-    fn from(input: Connection) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Connection> for u8 {
     #[inline]
     fn from(input: Connection) -> Self {
@@ -1476,12 +1402,6 @@ impl From<Connection> for Option<u32> {
     #[inline]
     fn from(input: Connection) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for Connection {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Connection {
@@ -3593,16 +3513,6 @@ impl Transform {
     pub const SCALE_DOWN: Self = Self(1 << 2);
     pub const PROJECTIVE: Self = Self(1 << 3);
 }
-impl From<Transform> for Option<bool> {
-    #[inline]
-    fn from(input: Transform) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Transform> for u8 {
     #[inline]
     fn from(input: Transform) -> Self {
@@ -3637,12 +3547,6 @@ impl From<Transform> for Option<u32> {
     #[inline]
     fn from(input: Transform) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for Transform {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Transform {
@@ -4599,16 +4503,6 @@ impl ProviderCapability {
     pub const SOURCE_OFFLOAD: Self = Self(1 << 2);
     pub const SINK_OFFLOAD: Self = Self(1 << 3);
 }
-impl From<ProviderCapability> for Option<bool> {
-    #[inline]
-    fn from(input: ProviderCapability) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<ProviderCapability> for u8 {
     #[inline]
     fn from(input: ProviderCapability) -> Self {
@@ -4643,12 +4537,6 @@ impl From<ProviderCapability> for Option<u32> {
     #[inline]
     fn from(input: ProviderCapability) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for ProviderCapability {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for ProviderCapability {
@@ -5841,16 +5729,6 @@ impl Notify {
     pub const RESOURCE_CHANGE: Self = Self(5);
     pub const LEASE: Self = Self(6);
 }
-impl From<Notify> for Option<bool> {
-    #[inline]
-    fn from(input: Notify) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Notify> for u8 {
     #[inline]
     fn from(input: Notify) -> Self {
@@ -5885,12 +5763,6 @@ impl From<Notify> for Option<u32> {
     #[inline]
     fn from(input: Notify) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for Notify {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Notify {

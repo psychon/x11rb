@@ -50,16 +50,6 @@ impl Attachment {
     pub const BUFFER_DEPTH_STENCIL: Self = Self(9);
     pub const BUFFER_HIZ: Self = Self(10);
 }
-impl From<Attachment> for Option<bool> {
-    #[inline]
-    fn from(input: Attachment) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<Attachment> for Option<u8> {
     #[inline]
     fn from(input: Attachment) -> Self {
@@ -82,12 +72,6 @@ impl From<Attachment> for Option<u32> {
     #[inline]
     fn from(input: Attachment) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for Attachment {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Attachment {
@@ -115,16 +99,6 @@ impl DriverType {
     pub const DRI: Self = Self(0);
     pub const VDPAU: Self = Self(1);
 }
-impl From<DriverType> for Option<bool> {
-    #[inline]
-    fn from(input: DriverType) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<DriverType> for Option<u8> {
     #[inline]
     fn from(input: DriverType) -> Self {
@@ -147,12 +121,6 @@ impl From<DriverType> for Option<u32> {
     #[inline]
     fn from(input: DriverType) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for DriverType {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for DriverType {
@@ -180,16 +148,6 @@ impl EventType {
     pub const EXCHANGE_COMPLETE: Self = Self(1);
     pub const BLIT_COMPLETE: Self = Self(2);
     pub const FLIP_COMPLETE: Self = Self(3);
-}
-impl From<EventType> for Option<bool> {
-    #[inline]
-    fn from(input: EventType) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<EventType> for Option<u8> {
     #[inline]
@@ -219,12 +177,6 @@ impl From<EventType> for Option<u32> {
     #[inline]
     fn from(input: EventType) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for EventType {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for EventType {

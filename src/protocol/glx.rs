@@ -301,16 +301,6 @@ impl PBCET {
     pub const DAMAGED: Self = Self(32791);
     pub const SAVED: Self = Self(32792);
 }
-impl From<PBCET> for Option<bool> {
-    #[inline]
-    fn from(input: PBCET) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<PBCET> for Option<u8> {
     #[inline]
     fn from(input: PBCET) -> Self {
@@ -341,12 +331,6 @@ impl From<PBCET> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for PBCET {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for PBCET {
     #[inline]
     fn from(value: u8) -> Self {
@@ -371,16 +355,6 @@ pub struct PBCDT(u16);
 impl PBCDT {
     pub const WINDOW: Self = Self(32793);
     pub const PBUFFER: Self = Self(32794);
-}
-impl From<PBCDT> for Option<bool> {
-    #[inline]
-    fn from(input: PBCDT) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<PBCDT> for Option<u8> {
     #[inline]
@@ -410,12 +384,6 @@ impl From<PBCDT> for Option<u32> {
     #[inline]
     fn from(input: PBCDT) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for PBCDT {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for PBCDT {
@@ -1352,16 +1320,6 @@ impl GC {
     pub const GL_SCISSOR_BIT: Self = Self(1 << 19);
     pub const GL_ALL_ATTRIB_BITS: Self = Self(16_777_215);
 }
-impl From<GC> for Option<bool> {
-    #[inline]
-    fn from(input: GC) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<GC> for Option<u8> {
     #[inline]
     fn from(input: GC) -> Self {
@@ -1384,12 +1342,6 @@ impl From<GC> for Option<u32> {
     #[inline]
     fn from(input: GC) -> Self {
         Some(input.0)
-    }
-}
-impl From<bool> for GC {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for GC {
@@ -4614,16 +4566,6 @@ impl RM {
     pub const GL_FEEDBACK: Self = Self(7169);
     pub const GL_SELECT: Self = Self(7170);
 }
-impl From<RM> for Option<bool> {
-    #[inline]
-    fn from(input: RM) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<RM> for Option<u8> {
     #[inline]
     fn from(input: RM) -> Self {
@@ -4652,12 +4594,6 @@ impl From<RM> for Option<u32> {
     #[inline]
     fn from(input: RM) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for RM {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for RM {

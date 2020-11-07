@@ -46,16 +46,6 @@ impl ReportLevel {
     pub const BOUNDING_BOX: Self = Self(2);
     pub const NON_EMPTY: Self = Self(3);
 }
-impl From<ReportLevel> for Option<bool> {
-    #[inline]
-    fn from(input: ReportLevel) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<ReportLevel> for u8 {
     #[inline]
     fn from(input: ReportLevel) -> Self {
@@ -90,12 +80,6 @@ impl From<ReportLevel> for Option<u32> {
     #[inline]
     fn from(input: ReportLevel) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for ReportLevel {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for ReportLevel {

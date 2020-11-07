@@ -508,16 +508,6 @@ impl DPMSMode {
     pub const SUSPEND: Self = Self(2);
     pub const OFF: Self = Self(3);
 }
-impl From<DPMSMode> for Option<bool> {
-    #[inline]
-    fn from(input: DPMSMode) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<DPMSMode> for Option<u8> {
     #[inline]
     fn from(input: DPMSMode) -> Self {
@@ -546,12 +536,6 @@ impl From<DPMSMode> for Option<u32> {
     #[inline]
     fn from(input: DPMSMode) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for DPMSMode {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for DPMSMode {

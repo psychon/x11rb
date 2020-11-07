@@ -125,16 +125,6 @@ impl ClientIdMask {
     pub const CLIENT_XID: Self = Self(1 << 0);
     pub const LOCAL_CLIENT_PID: Self = Self(1 << 1);
 }
-impl From<ClientIdMask> for Option<bool> {
-    #[inline]
-    fn from(input: ClientIdMask) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
-}
 impl From<ClientIdMask> for u8 {
     #[inline]
     fn from(input: ClientIdMask) -> Self {
@@ -169,12 +159,6 @@ impl From<ClientIdMask> for Option<u32> {
     #[inline]
     fn from(input: ClientIdMask) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for ClientIdMask {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for ClientIdMask {

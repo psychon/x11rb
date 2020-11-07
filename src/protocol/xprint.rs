@@ -136,76 +136,10 @@ impl From<GetDoc> for Option<bool> {
         Some(input.0)
     }
 }
-impl From<GetDoc> for u8 {
-    #[inline]
-    fn from(input: GetDoc) -> Self {
-        u8::from(input.0)
-    }
-}
-impl From<GetDoc> for Option<u8> {
-    #[inline]
-    fn from(input: GetDoc) -> Self {
-        Some(u8::from(input.0))
-    }
-}
-impl From<GetDoc> for u16 {
-    #[inline]
-    fn from(input: GetDoc) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<GetDoc> for Option<u16> {
-    #[inline]
-    fn from(input: GetDoc) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<GetDoc> for u32 {
-    #[inline]
-    fn from(input: GetDoc) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<GetDoc> for Option<u32> {
-    #[inline]
-    fn from(input: GetDoc) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<bool> for GetDoc {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u8> for GetDoc {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Self(false)),
-            1 => Ok(Self(true)),
-            _ => Err(ParseError::InvalidValue),
-        }
-    }
-}
-impl TryFrom<u16> for GetDoc {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Self(false)),
-            1 => Ok(Self(true)),
-            _ => Err(ParseError::InvalidValue),
-        }
-    }
-}
-impl TryFrom<u32> for GetDoc {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Self(false)),
-            1 => Ok(Self(true)),
-            _ => Err(ParseError::InvalidValue),
-        }
     }
 }
 
@@ -215,16 +149,6 @@ impl EvMask {
     pub const NO_EVENT_MASK: Self = Self(0);
     pub const PRINT_MASK: Self = Self(1 << 0);
     pub const ATTRIBUTE_MASK: Self = Self(1 << 1);
-}
-impl From<EvMask> for Option<bool> {
-    #[inline]
-    fn from(input: EvMask) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<EvMask> for u8 {
     #[inline]
@@ -262,12 +186,6 @@ impl From<EvMask> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for EvMask {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for EvMask {
     #[inline]
     fn from(value: u8) -> Self {
@@ -297,16 +215,6 @@ impl Detail {
     pub const END_DOC_NOTIFY: Self = Self(4);
     pub const START_PAGE_NOTIFY: Self = Self(5);
     pub const END_PAGE_NOTIFY: Self = Self(6);
-}
-impl From<Detail> for Option<bool> {
-    #[inline]
-    fn from(input: Detail) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<Detail> for u8 {
     #[inline]
@@ -344,12 +252,6 @@ impl From<Detail> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<bool> for Detail {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
-    }
-}
 impl From<u8> for Detail {
     #[inline]
     fn from(value: u8) -> Self {
@@ -379,16 +281,6 @@ impl Attr {
     pub const SERVER_ATTR: Self = Self(5);
     pub const MEDIUM_ATTR: Self = Self(6);
     pub const SPOOLER_ATTR: Self = Self(7);
-}
-impl From<Attr> for Option<bool> {
-    #[inline]
-    fn from(input: Attr) -> Self {
-        match input.0 {
-            0 => Some(false),
-            1 => Some(true),
-            _ => None,
-        }
-    }
 }
 impl From<Attr> for u8 {
     #[inline]
@@ -424,12 +316,6 @@ impl From<Attr> for Option<u32> {
     #[inline]
     fn from(input: Attr) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<bool> for Attr {
-    #[inline]
-    fn from(value: bool) -> Self {
-        Self(value.into())
     }
 }
 impl From<u8> for Attr {

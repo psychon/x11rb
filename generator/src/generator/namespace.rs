@@ -2302,10 +2302,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let (raw_type, smaller_types, larger_types): (&str, &[&str], &[&str]) =
             match global_enum_size {
-                1 => ("bool", &[], &["u8", "u16", "u32"]),
-                8 => ("u8", &["bool"], &["u16", "u32"]),
-                16 => ("u16", &["bool", "u8"], &["u32"]),
-                32 => ("u32", &["bool", "u8", "u16"], &[]),
+                1 => ("bool", &[], &[]),
+                8 => ("u8", &[], &["u16", "u32"]),
+                16 => ("u16", &["u8"], &["u32"]),
+                32 => ("u32", &["u8", "u16"], &[]),
                 _ => unreachable!(),
             };
 
@@ -2364,17 +2364,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             out.indented(|out| {
                 outln!(out, "#[inline]");
                 outln!(out, "fn from(input: {}) -> Self {{", rust_name);
-                if smaller_type != "bool" {
-                    outln!(out.indent(), "{}::try_from(input.0).ok()", smaller_type);
-                } else {
-                    out.indented(|out| {
-                        outln!(out, "match input.0 {{");
-                        outln!(out.indent(), "0 => Some(false),");
-                        outln!(out.indent(), "1 => Some(true),");
-                        outln!(out.indent(), "_ => None,");
-                        outln!(out, "}}");
-                    });
-                }
+                outln!(out.indent(), "{}::try_from(input.0).ok()", smaller_type);
                 outln!(out, "}}");
             });
             outln!(out, "}}");
@@ -2458,21 +2448,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     "fn try_from(value: {}) -> Result<Self, Self::Error> {{",
                     larger_type,
                 );
-                if global_enum_size != 1 {
-                    outln!(
-                        out.indent(),
-                        "{}::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)",
-                        raw_type,
-                    );
-                } else {
-                    out.indented(|out| {
-                        outln!(out, "match value {{");
-                        outln!(out.indent(), "0 => Ok(Self(false)),");
-                        outln!(out.indent(), "1 => Ok(Self(true)),");
-                        outln!(out.indent(), "_ => Err(ParseError::InvalidValue),");
-                        outln!(out, "}}");
-                    });
-                }
+                outln!(
+                    out.indent(),
+                    "{}::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)",
+                    raw_type,
+                );
                 outln!(out, "}}");
             });
             outln!(out, "}}");
