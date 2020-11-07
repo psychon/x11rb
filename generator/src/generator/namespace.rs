@@ -278,37 +278,76 @@ enum IovecConversion {
     CowStripLength,
 }
 
+#[derive(Copy, Clone)]
+struct EnumInfo {
+    // The size needed to hold all defined values for the enum
+    max_value_size: Option<u8>,
+    // The range of wire sizes used for the enum
+    // min, max
+    wire_size: Option<(u8, u8)>,
+}
+
 /// Caches to avoid repeating some operations.
 #[derive(Default)]
 pub(super) struct Caches {
-    global_enum_sizes: HashMap<usize, u32>,
+    enum_infos: HashMap<usize, EnumInfo>,
     derives: HashMap<usize, Derives>,
     rust_type_names: HashMap<usize, String>,
 }
 
 impl Caches {
-    fn put_enum_size(&mut self, enum_def: &xcbdefs::EnumDef, size: u32) {
+    fn put_enum_max_value_size(&mut self, enum_def: &xcbdefs::EnumDef, max_value_size: u8) {
         let id = enum_def as *const xcbdefs::EnumDef as usize;
-        match self.global_enum_sizes.entry(id) {
+        match self.enum_infos.entry(id) {
             HashMapEntry::Vacant(entry) => {
-                entry.insert(size);
+                entry.insert(EnumInfo {
+                    max_value_size: Some(max_value_size),
+                    wire_size: None,
+                });
             }
             HashMapEntry::Occupied(mut entry) => {
                 let entry_value = entry.get_mut();
-                *entry_value = (*entry_value).max(size);
+                if entry_value.max_value_size.is_none() {
+                    entry_value.max_value_size = Some(max_value_size);
+                } else {
+                    // Expected only once
+                    unreachable!();
+                }
             }
         }
     }
 
-    pub(super) fn gather_global_enum_sizes(&mut self, module: &xcbdefs::Module) {
+    fn put_enum_wire_size(&mut self, enum_def: &xcbdefs::EnumDef, wire_size: u8) {
+        let id = enum_def as *const xcbdefs::EnumDef as usize;
+        match self.enum_infos.entry(id) {
+            HashMapEntry::Vacant(entry) => {
+                entry.insert(EnumInfo {
+                    max_value_size: None,
+                    wire_size: Some((wire_size, wire_size)),
+                });
+            }
+            HashMapEntry::Occupied(mut entry) => {
+                let entry_value = entry.get_mut();
+                match entry_value.wire_size {
+                    None => entry_value.wire_size = Some((wire_size, wire_size)),
+                    Some((ref mut min, ref mut max)) => {
+                        *min = (*min).min(wire_size);
+                        *max = (*max).max(wire_size)
+                    }
+                }
+            }
+        }
+    }
+
+    pub(super) fn gather_enum_infos(&mut self, module: &xcbdefs::Module) {
         for ns in module.namespaces.borrow().values() {
             for request_def in ns.request_defs.borrow().values() {
                 for field in request_def.fields.borrow().iter() {
-                    self.gather_global_enum_sizes_in_field(field);
+                    self.gather_enum_infos_in_field(field);
                 }
                 if let Some(ref reply_def) = request_def.reply {
                     for field in reply_def.fields.borrow().iter() {
-                        self.gather_global_enum_sizes_in_field(field);
+                        self.gather_enum_infos_in_field(field);
                     }
                 }
             }
@@ -317,7 +356,7 @@ impl Caches {
                 match event_def {
                     xcbdefs::EventDef::Full(event_def) => {
                         for field in event_def.fields.borrow().iter() {
-                            self.gather_global_enum_sizes_in_field(field);
+                            self.gather_enum_infos_in_field(field);
                         }
                     }
                     xcbdefs::EventDef::Copy(_) => {}
@@ -328,7 +367,7 @@ impl Caches {
                 match error_def {
                     xcbdefs::ErrorDef::Full(error_def) => {
                         for field in error_def.fields.borrow().iter() {
-                            self.gather_global_enum_sizes_in_field(field);
+                            self.gather_enum_infos_in_field(field);
                         }
                     }
                     xcbdefs::ErrorDef::Copy(_) => {}
@@ -339,19 +378,19 @@ impl Caches {
                 match type_def {
                     xcbdefs::TypeDef::Struct(struct_def) => {
                         for field in struct_def.fields.borrow().iter() {
-                            self.gather_global_enum_sizes_in_field(field);
+                            self.gather_enum_infos_in_field(field);
                         }
                     }
                     xcbdefs::TypeDef::Union(union_def) => {
                         for field in union_def.fields.iter() {
-                            self.gather_global_enum_sizes_in_field(field);
+                            self.gather_enum_infos_in_field(field);
                         }
                     }
                     xcbdefs::TypeDef::EventStruct(_) => {}
                     xcbdefs::TypeDef::Xid(_) => {}
                     xcbdefs::TypeDef::XidUnion(_) => {}
                     xcbdefs::TypeDef::Enum(enum_def) => {
-                        self.gather_global_enum_sizes_in_enum_def(enum_def);
+                        self.gather_enum_infos_in_enum_def(enum_def);
                     }
                     xcbdefs::TypeDef::Alias(_) => {}
                 }
@@ -359,35 +398,32 @@ impl Caches {
         }
     }
 
-    fn gather_global_enum_sizes_in_field(&mut self, field: &xcbdefs::FieldDef) {
+    fn gather_enum_infos_in_field(&mut self, field: &xcbdefs::FieldDef) {
         match field {
             xcbdefs::FieldDef::Pad(_) => {}
             xcbdefs::FieldDef::Normal(normal_field) => {
-                self.gather_global_enum_sizes_in_field_value_type(&normal_field.type_);
+                self.gather_enum_infos_in_field_value_type(&normal_field.type_);
             }
             xcbdefs::FieldDef::List(list_field) => {
-                self.gather_global_enum_sizes_in_field_value_type(&list_field.element_type);
+                self.gather_enum_infos_in_field_value_type(&list_field.element_type);
             }
             xcbdefs::FieldDef::Switch(switch_field) => {
                 for case in switch_field.cases.iter() {
                     for field in case.fields.borrow().iter() {
-                        self.gather_global_enum_sizes_in_field(field);
+                        self.gather_enum_infos_in_field(field);
                     }
                 }
             }
             xcbdefs::FieldDef::Fd(_) => {}
             xcbdefs::FieldDef::FdList(_) => {}
             xcbdefs::FieldDef::Expr(expr_field) => {
-                self.gather_global_enum_sizes_in_field_value_type(&expr_field.type_);
+                self.gather_enum_infos_in_field_value_type(&expr_field.type_);
             }
             xcbdefs::FieldDef::VirtualLen(_) => {}
         }
     }
 
-    fn gather_global_enum_sizes_in_field_value_type(
-        &mut self,
-        value_type: &xcbdefs::FieldValueType,
-    ) {
+    fn gather_enum_infos_in_field_value_type(&mut self, value_type: &xcbdefs::FieldValueType) {
         match value_type.value_set {
             xcbdefs::FieldValueSet::None => {}
             xcbdefs::FieldValueSet::Enum(ref enum_type) => {
@@ -404,7 +440,7 @@ impl Caches {
                     xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Byte) => 8,
                     _ => unreachable!(),
                 };
-                self.put_enum_size(&enum_def, size);
+                self.put_enum_wire_size(&enum_def, size);
             }
             xcbdefs::FieldValueSet::AltEnum(_) => {}
             xcbdefs::FieldValueSet::Mask(_) => {}
@@ -412,7 +448,7 @@ impl Caches {
         }
     }
 
-    fn gather_global_enum_sizes_in_enum_def(&mut self, enum_def: &xcbdefs::EnumDef) {
+    fn gather_enum_infos_in_enum_def(&mut self, enum_def: &xcbdefs::EnumDef) {
         // Get the maximum value of the defined variants for this enum
         let max_value = enum_def
             .items
@@ -434,7 +470,7 @@ impl Caches {
             32
         };
 
-        self.put_enum_size(enum_def, size);
+        self.put_enum_max_value_size(enum_def, size);
     }
 }
 
@@ -2297,8 +2333,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn generate_enum_def(&self, enum_def: &xcbdefs::EnumDef, out: &mut Output) {
         let rust_name = self.get_enum_rust_name(enum_def);
-        let global_enum_size =
-            self.caches.borrow().global_enum_sizes[&(enum_def as *const xcbdefs::EnumDef as usize)];
+
+        let enum_info =
+            self.caches.borrow().enum_infos[&(enum_def as *const xcbdefs::EnumDef as usize)];
+        let global_enum_size = enum_info
+            .max_value_size
+            .unwrap()
+            .max(enum_info.wire_size.unwrap_or((0, 0)).1);
+
+        if let Some((min_wire_size, max_wire_size)) = enum_info.wire_size {
+            if min_wire_size != max_wire_size {
+                // if it is bool, it is always bool
+                assert_ne!(min_wire_size, 1);
+            }
+        }
 
         let (raw_type, smaller_types, larger_types): (&str, &[&str], &[&str]) =
             match global_enum_size {
