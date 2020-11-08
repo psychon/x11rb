@@ -16692,7 +16692,7 @@ impl Serialize for HierarchyInfo {
     fn serialize(&self) -> [u8; 12] {
         let deviceid_bytes = self.deviceid.serialize();
         let attachment_bytes = self.attachment.serialize();
-        let type_bytes = Option::<u8>::from(self.type_).unwrap().serialize();
+        let type_bytes = (u16::from(self.type_) as u8).serialize();
         let enabled_bytes = self.enabled.serialize();
         let flags_bytes = self.flags.serialize();
         [
@@ -16714,7 +16714,7 @@ impl Serialize for HierarchyInfo {
         bytes.reserve(12);
         self.deviceid.serialize_into(bytes);
         self.attachment.serialize_into(bytes);
-        Option::<u8>::from(self.type_).unwrap().serialize_into(bytes);
+        (u16::from(self.type_) as u8).serialize_into(bytes);
         self.enabled.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);

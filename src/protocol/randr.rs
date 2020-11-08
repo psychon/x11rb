@@ -5671,7 +5671,7 @@ impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
         let root_bytes = input.root.serialize();
         let request_window_bytes = input.request_window.serialize();
         let size_id_bytes = input.size_id.serialize();
-        let subpixel_order_bytes = Option::<u16>::from(input.subpixel_order).unwrap().serialize();
+        let subpixel_order_bytes = (u32::from(input.subpixel_order) as u16).serialize();
         let width_bytes = input.width.serialize();
         let height_bytes = input.height.serialize();
         let mwidth_bytes = input.mwidth.serialize();
@@ -5922,7 +5922,7 @@ impl Serialize for OutputChange {
         let mode_bytes = self.mode.serialize();
         let rotation_bytes = self.rotation.serialize();
         let connection_bytes = u8::from(self.connection).serialize();
-        let subpixel_order_bytes = Option::<u8>::from(self.subpixel_order).unwrap().serialize();
+        let subpixel_order_bytes = (u32::from(self.subpixel_order) as u8).serialize();
         [
             timestamp_bytes[0],
             timestamp_bytes[1],
@@ -5964,7 +5964,7 @@ impl Serialize for OutputChange {
         self.mode.serialize_into(bytes);
         self.rotation.serialize_into(bytes);
         u8::from(self.connection).serialize_into(bytes);
-        Option::<u8>::from(self.subpixel_order).unwrap().serialize_into(bytes);
+        (u32::from(self.subpixel_order) as u8).serialize_into(bytes);
     }
 }
 

@@ -4621,8 +4621,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
             if max_wire_size > 1 && u32::from(max_wire_size / 8) > current_wire_size {
                 format!(
-                    "{}::<{}>::from({}).unwrap().serialize()",
-                    self.option_name, rust_wire_type, value,
+                    "(u{}::from({}) as {}).serialize()",
+                    max_wire_size, value, rust_wire_type,
                 )
             } else {
                 format!("{}::from({}).serialize()", rust_wire_type, value)
@@ -4650,10 +4650,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             if max_wire_size > 1 && u32::from(max_wire_size / 8) > current_wire_size {
                 outln!(
                     out,
-                    "{}::<{}>::from({}).unwrap().serialize_into({});",
-                    self.option_name,
-                    rust_wire_type,
+                    "(u{}::from({}) as {}).serialize_into({});",
+                    max_wire_size,
                     value,
+                    rust_wire_type,
                     bytes_var,
                 );
             } else {

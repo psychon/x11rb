@@ -879,7 +879,7 @@ impl<'input> SetAttributesRequest<'input> {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let border_width_bytes = self.border_width.serialize();
-        let class_bytes = Option::<u8>::from(self.class).unwrap().serialize();
+        let class_bytes = (u16::from(self.class) as u8).serialize();
         let depth_bytes = self.depth.serialize();
         let visual_bytes = self.visual.serialize();
         let value_mask = self.value_list.switch_expr();

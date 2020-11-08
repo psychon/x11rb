@@ -690,7 +690,7 @@ impl Serialize for Screen {
         self.min_installed_maps.serialize_into(bytes);
         self.max_installed_maps.serialize_into(bytes);
         self.root_visual.serialize_into(bytes);
-        Option::<u8>::from(self.backing_stores).unwrap().serialize_into(bytes);
+        (u32::from(self.backing_stores) as u8).serialize_into(bytes);
         self.save_unders.serialize_into(bytes);
         self.root_depth.serialize_into(bytes);
         let allowed_depths_len = u8::try_from(self.allowed_depths.len()).expect("`allowed_depths` has too many elements");
@@ -3424,7 +3424,7 @@ impl TryFrom<&[u8]> for ConfigureRequestEvent {
 impl From<&ConfigureRequestEvent> for [u8; 32] {
     fn from(input: &ConfigureRequestEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let stack_mode_bytes = Option::<u8>::from(input.stack_mode).unwrap().serialize();
+        let stack_mode_bytes = (u32::from(input.stack_mode) as u8).serialize();
         let sequence_bytes = input.sequence.serialize();
         let parent_bytes = input.parent.serialize();
         let window_bytes = input.window.serialize();
