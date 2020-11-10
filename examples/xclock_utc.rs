@@ -26,7 +26,7 @@ fn create_window(
 ) -> Result<Window, ReplyOrIdError> {
     let win_id = conn.generate_id()?;
     let win_aux =
-        CreateWindowAux::new().event_mask(EventMask::Exposure | EventMask::StructureNotify);
+        CreateWindowAux::new().event_mask(EventMask::EXPOSURE | EventMask::STRUCTURE_NOTIFY);
 
     conn.create_window(
         screen.root_depth,
@@ -37,28 +37,28 @@ fn create_window(
         width,
         height,
         0,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         0,
         &win_aux,
     )?;
 
     let title = "xclock";
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         AtomEnum::WM_NAME,
         AtomEnum::STRING,
         title.as_bytes(),
     )?;
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         atoms._NET_WM_NAME,
         atoms.UTF8_STRING,
         title.as_bytes(),
     )?;
     conn.change_property32(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         atoms.WM_PROTOCOLS,
         AtomEnum::ATOM,
@@ -157,8 +157,8 @@ fn redraw(
         conn.fill_poly(
             win_id,
             gc_id,
-            PolyShape::Complex,
-            CoordMode::Origin,
+            PolyShape::COMPLEX,
+            CoordMode::ORIGIN,
             &polygon,
         )?;
     }

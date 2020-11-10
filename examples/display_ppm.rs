@@ -53,14 +53,14 @@ fn create_window(
         image.width(),
         image.height(),
         0,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         0,
         &CreateWindowAux::default().background_pixmap(pixmap_id),
     )?;
     conn.free_pixmap(pixmap_id)?;
 
     conn.change_property32(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         atoms.WM_PROTOCOLS,
         AtomEnum::ATOM,
@@ -91,7 +91,7 @@ fn check_visual(screen: &Screen, id: Visualid) -> PixelLayout {
     };
     // Check that the pixels have red/green/blue components that we can set directly.
     match visual_type.class {
-        VisualClass::TrueColor | VisualClass::DirectColor => {}
+        VisualClass::TRUE_COLOR | VisualClass::DIRECT_COLOR => {}
         _ => {
             eprintln!(
                 "The root visual is not true / direct color, but {:?}",
@@ -164,8 +164,7 @@ mod ppm_parser {
     use std::ffi::OsStr;
     use std::io::{Error as IOError, ErrorKind, Read, Result as IOResult};
 
-    use x11rb::image::{BitsPerPixel, Image, ScanlinePad};
-    use x11rb::protocol::xproto::ImageOrder;
+    use x11rb::image::{BitsPerPixel, Image, ImageOrder, ScanlinePad};
 
     fn make_io_error(text: &'static str) -> IOError {
         IOError::new(ErrorKind::Other, text)

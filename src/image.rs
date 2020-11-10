@@ -28,8 +28,8 @@ use crate::connection::Connection;
 use crate::cookie::VoidCookie;
 use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::protocol::xproto::{
-    Drawable, Format, Gcontext, GetImageReply, GetImageRequest, ImageFormat, ImageOrder,
-    PutImageRequest, Setup, VisualClass, Visualtype,
+    Drawable, Format, Gcontext, GetImageReply, GetImageRequest, ImageFormat,
+    ImageOrder as XprotoImageOrder, PutImageRequest, Setup, VisualClass, Visualtype,
 };
 
 /// The description of a single color component.
@@ -176,7 +176,7 @@ impl PixelLayout {
     /// because color pallets and grayscales are not supported. This function also errors if the
     /// mask components of the visual are malformed.
     pub fn from_visual_type(visual: Visualtype) -> Result<Self, ParseError> {
-        if visual.class != VisualClass::TrueColor && visual.class != VisualClass::DirectColor {
+        if visual.class != VisualClass::TRUE_COLOR && visual.class != VisualClass::DIRECT_COLOR {
             Err(ParseError::InvalidValue)
         } else {
             Ok(Self::new(
@@ -456,6 +456,30 @@ number_enum! {
     }
 }
 
+/// Order in which bytes are stored in memory.
+///
+/// If the numberof bits per pixel is less than 8, then this is the
+/// order in which bits are packed into bytes.
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+pub enum ImageOrder {
+    /// Least significant byte first
+    LSBFirst,
+    /// Most significant byte first
+    MSBFirst,
+}
+
+impl TryFrom<XprotoImageOrder> for ImageOrder {
+    type Error = ParseError;
+
+    fn try_from(value: XprotoImageOrder) -> Result<Self, ParseError> {
+        match value {
+            XprotoImageOrder::LSB_FIRST => Ok(Self::LSBFirst),
+            XprotoImageOrder::MSB_FIRST => Ok(Self::MSBFirst),
+            _ => Err(ParseError::InvalidValue),
+        }
+    }
+}
+
 /// The description of an image.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Image<'a> {
@@ -640,7 +664,7 @@ impl<'a> Image<'a> {
             format.scanline_pad.try_into()?,
             depth,
             format.bits_per_pixel.try_into()?,
-            setup.image_byte_order,
+            setup.image_byte_order.try_into()?,
         ))
     }
 
@@ -670,7 +694,7 @@ impl<'a> Image<'a> {
             y,
             width,
             height,
-            format: ImageFormat::ZPixmap,
+            format: ImageFormat::Z_PIXMAP,
             plane_mask: !0,
         }
         .send(conn)?
@@ -734,7 +758,7 @@ impl<'a> Image<'a> {
             let next_byte_offset = byte_offset + usize::from(next_lines) * stride;
             let data = &self.data[byte_offset..next_byte_offset];
             let request = PutImageRequest {
-                format: ImageFormat::ZPixmap,
+                format: ImageFormat::Z_PIXMAP,
                 drawable,
                 gc,
                 width: self.width,
@@ -794,7 +818,7 @@ impl<'a> Image<'a> {
         Ok(self.convert(
             format.scanline_pad.try_into()?,
             format.bits_per_pixel.try_into()?,
-            setup.image_byte_order,
+            setup.image_byte_order.try_into()?,
         ))
     }
 

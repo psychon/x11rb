@@ -201,223 +201,193 @@ impl TryFrom<&[u8]> for GetExtensionVersionReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum DeviceUse {
-    IsXPointer = 0,
-    IsXKeyboard = 1,
-    IsXExtensionDevice = 2,
-    IsXExtensionKeyboard = 3,
-    IsXExtensionPointer = 4,
+pub struct DeviceUse(u8);
+impl DeviceUse {
+    pub const IS_X_POINTER: Self = Self(0);
+    pub const IS_X_KEYBOARD: Self = Self(1);
+    pub const IS_X_EXTENSION_DEVICE: Self = Self(2);
+    pub const IS_X_EXTENSION_KEYBOARD: Self = Self(3);
+    pub const IS_X_EXTENSION_POINTER: Self = Self(4);
 }
 impl From<DeviceUse> for u8 {
+    #[inline]
     fn from(input: DeviceUse) -> Self {
-        match input {
-            DeviceUse::IsXPointer => 0,
-            DeviceUse::IsXKeyboard => 1,
-            DeviceUse::IsXExtensionDevice => 2,
-            DeviceUse::IsXExtensionKeyboard => 3,
-            DeviceUse::IsXExtensionPointer => 4,
-        }
+        input.0
     }
 }
 impl From<DeviceUse> for Option<u8> {
+    #[inline]
     fn from(input: DeviceUse) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<DeviceUse> for u16 {
+    #[inline]
     fn from(input: DeviceUse) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<DeviceUse> for Option<u16> {
+    #[inline]
     fn from(input: DeviceUse) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<DeviceUse> for u32 {
+    #[inline]
     fn from(input: DeviceUse) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<DeviceUse> for Option<u32> {
+    #[inline]
     fn from(input: DeviceUse) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for DeviceUse {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(DeviceUse::IsXPointer),
-            1 => Ok(DeviceUse::IsXKeyboard),
-            2 => Ok(DeviceUse::IsXExtensionDevice),
-            3 => Ok(DeviceUse::IsXExtensionKeyboard),
-            4 => Ok(DeviceUse::IsXExtensionPointer),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for DeviceUse {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for DeviceUse {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for DeviceUse {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum InputClass {
-    Key = 0,
-    Button = 1,
-    Valuator = 2,
-    Feedback = 3,
-    Proximity = 4,
-    Focus = 5,
-    Other = 6,
+pub struct InputClass(u8);
+impl InputClass {
+    pub const KEY: Self = Self(0);
+    pub const BUTTON: Self = Self(1);
+    pub const VALUATOR: Self = Self(2);
+    pub const FEEDBACK: Self = Self(3);
+    pub const PROXIMITY: Self = Self(4);
+    pub const FOCUS: Self = Self(5);
+    pub const OTHER: Self = Self(6);
 }
 impl From<InputClass> for u8 {
+    #[inline]
     fn from(input: InputClass) -> Self {
-        match input {
-            InputClass::Key => 0,
-            InputClass::Button => 1,
-            InputClass::Valuator => 2,
-            InputClass::Feedback => 3,
-            InputClass::Proximity => 4,
-            InputClass::Focus => 5,
-            InputClass::Other => 6,
-        }
+        input.0
     }
 }
 impl From<InputClass> for Option<u8> {
+    #[inline]
     fn from(input: InputClass) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<InputClass> for u16 {
+    #[inline]
     fn from(input: InputClass) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<InputClass> for Option<u16> {
+    #[inline]
     fn from(input: InputClass) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<InputClass> for u32 {
+    #[inline]
     fn from(input: InputClass) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<InputClass> for Option<u32> {
+    #[inline]
     fn from(input: InputClass) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for InputClass {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(InputClass::Key),
-            1 => Ok(InputClass::Button),
-            2 => Ok(InputClass::Valuator),
-            3 => Ok(InputClass::Feedback),
-            4 => Ok(InputClass::Proximity),
-            5 => Ok(InputClass::Focus),
-            6 => Ok(InputClass::Other),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for InputClass {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for InputClass {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for InputClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ValuatorMode {
-    Relative = 0,
-    Absolute = 1,
-}
-impl From<ValuatorMode> for bool {
-    fn from(input: ValuatorMode) -> Self {
-        match input {
-            ValuatorMode::Relative => false,
-            ValuatorMode::Absolute => true,
-        }
-    }
+pub struct ValuatorMode(u8);
+impl ValuatorMode {
+    pub const RELATIVE: Self = Self(0);
+    pub const ABSOLUTE: Self = Self(1);
 }
 impl From<ValuatorMode> for u8 {
+    #[inline]
     fn from(input: ValuatorMode) -> Self {
-        match input {
-            ValuatorMode::Relative => 0,
-            ValuatorMode::Absolute => 1,
-        }
+        input.0
     }
 }
 impl From<ValuatorMode> for Option<u8> {
+    #[inline]
     fn from(input: ValuatorMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ValuatorMode> for u16 {
+    #[inline]
     fn from(input: ValuatorMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ValuatorMode> for Option<u16> {
+    #[inline]
     fn from(input: ValuatorMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ValuatorMode> for u32 {
+    #[inline]
     fn from(input: ValuatorMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ValuatorMode> for Option<u32> {
+    #[inline]
     fn from(input: ValuatorMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ValuatorMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ValuatorMode::Relative),
-            1 => Ok(ValuatorMode::Absolute),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ValuatorMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ValuatorMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ValuatorMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -435,7 +405,7 @@ impl TryParse for DeviceInfo {
         let (num_class_info, remaining) = u8::try_parse(remaining)?;
         let (device_use, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let device_use = device_use.try_into()?;
+        let device_use = device_use.into();
         let result = DeviceInfo { device_type, device_id, num_class_info, device_use };
         Ok((result, remaining))
     }
@@ -490,7 +460,7 @@ impl TryParse for KeyInfo {
         let (max_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (num_keys, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = KeyInfo { class_id, len, min_keycode, max_keycode, num_keys };
         Ok((result, remaining))
     }
@@ -542,7 +512,7 @@ impl TryParse for ButtonInfo {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = ButtonInfo { class_id, len, num_buttons };
         Ok((result, remaining))
     }
@@ -640,8 +610,8 @@ impl TryParse for ValuatorInfo {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (motion_size, remaining) = u32::try_parse(remaining)?;
         let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let class_id = class_id.try_into()?;
-        let mode = mode.try_into()?;
+        let class_id = class_id.into();
+        let mode = mode.into();
         let result = ValuatorInfo { class_id, len, mode, motion_size, axes };
         Ok((result, remaining))
     }
@@ -774,7 +744,7 @@ impl TryParse for InputInfoInfoValuator {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (motion_size, remaining) = u32::try_parse(remaining)?;
         let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let result = InputInfoInfoValuator { mode, motion_size, axes };
         Ok((result, remaining))
     }
@@ -827,19 +797,19 @@ impl InputInfoInfo {
         let switch_expr = u32::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(InputClass::Key) {
+        if switch_expr == u32::from(InputClass::KEY) {
             let (key, new_remaining) = InputInfoInfoKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Key(key));
         }
-        if switch_expr == u32::from(InputClass::Button) {
+        if switch_expr == u32::from(InputClass::BUTTON) {
             let (button, new_remaining) = InputInfoInfoButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Button(button));
         }
-        if switch_expr == u32::from(InputClass::Valuator) {
+        if switch_expr == u32::from(InputClass::VALUATOR) {
             let (valuator, new_remaining) = InputInfoInfoValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -890,9 +860,9 @@ impl InputInfoInfo {
 impl InputInfoInfo {
     fn switch_expr(&self) -> u32 {
         match self {
-            InputInfoInfo::Key(_) => u32::from(InputClass::Key),
-            InputInfoInfo::Button(_) => u32::from(InputClass::Button),
-            InputInfoInfo::Valuator(_) => u32::from(InputClass::Valuator),
+            InputInfoInfo::Key(_) => u32::from(InputClass::KEY),
+            InputInfoInfo::Button(_) => u32::from(InputClass::BUTTON),
+            InputInfoInfo::Valuator(_) => u32::from(InputClass::VALUATOR),
         }
     }
 }
@@ -1105,7 +1075,7 @@ impl TryParse for InputClassInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (event_type_base, remaining) = EventTypeBase::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = InputClassInfo { class_id, event_type_base };
         Ok((result, remaining))
     }
@@ -1368,7 +1338,7 @@ impl SetDeviceModeRequest {
         }
         let (device_id, remaining) = u8::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(SetDeviceModeRequest {
@@ -1410,7 +1380,7 @@ impl TryParse for SetDeviceModeReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = SetDeviceModeReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -1644,73 +1614,63 @@ impl GetSelectedExtensionEventsReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PropagateMode {
-    AddToList = 0,
-    DeleteFromList = 1,
-}
-impl From<PropagateMode> for bool {
-    fn from(input: PropagateMode) -> Self {
-        match input {
-            PropagateMode::AddToList => false,
-            PropagateMode::DeleteFromList => true,
-        }
-    }
+pub struct PropagateMode(u8);
+impl PropagateMode {
+    pub const ADD_TO_LIST: Self = Self(0);
+    pub const DELETE_FROM_LIST: Self = Self(1);
 }
 impl From<PropagateMode> for u8 {
+    #[inline]
     fn from(input: PropagateMode) -> Self {
-        match input {
-            PropagateMode::AddToList => 0,
-            PropagateMode::DeleteFromList => 1,
-        }
+        input.0
     }
 }
 impl From<PropagateMode> for Option<u8> {
+    #[inline]
     fn from(input: PropagateMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PropagateMode> for u16 {
+    #[inline]
     fn from(input: PropagateMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PropagateMode> for Option<u16> {
+    #[inline]
     fn from(input: PropagateMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PropagateMode> for u32 {
+    #[inline]
     fn from(input: PropagateMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PropagateMode> for Option<u32> {
+    #[inline]
     fn from(input: PropagateMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PropagateMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PropagateMode::AddToList),
-            1 => Ok(PropagateMode::DeleteFromList),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for PropagateMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PropagateMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PropagateMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -1775,7 +1735,7 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
@@ -2068,7 +2028,7 @@ impl TryParse for GetDeviceMotionEventsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let device_mode = device_mode.try_into()?;
+        let device_mode = device_mode.into();
         let result = GetDeviceMotionEventsReply { xi_reply_type, sequence, length, num_axes, device_mode, events };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -2183,7 +2143,7 @@ impl TryParse for ChangeKeyboardDeviceReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = ChangeKeyboardDeviceReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -2293,7 +2253,7 @@ impl TryParse for ChangePointerDeviceReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = ChangePointerDeviceReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -2386,9 +2346,9 @@ impl<'input> GrabDeviceRequest<'input> {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (this_device_mode, remaining) = u8::try_parse(remaining)?;
-        let this_device_mode = this_device_mode.try_into()?;
+        let this_device_mode = this_device_mode.into();
         let (other_device_mode, remaining) = u8::try_parse(remaining)?;
-        let other_device_mode = other_device_mode.try_into()?;
+        let other_device_mode = other_device_mode.into();
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -2457,7 +2417,7 @@ impl TryParse for GrabDeviceReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = GrabDeviceReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -2550,62 +2510,62 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ModifierDevice {
-    UseXKeyboard = 255,
+pub struct ModifierDevice(u8);
+impl ModifierDevice {
+    pub const USE_X_KEYBOARD: Self = Self(255);
 }
 impl From<ModifierDevice> for u8 {
+    #[inline]
     fn from(input: ModifierDevice) -> Self {
-        match input {
-            ModifierDevice::UseXKeyboard => 255,
-        }
+        input.0
     }
 }
 impl From<ModifierDevice> for Option<u8> {
+    #[inline]
     fn from(input: ModifierDevice) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ModifierDevice> for u16 {
+    #[inline]
     fn from(input: ModifierDevice) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ModifierDevice> for Option<u16> {
+    #[inline]
     fn from(input: ModifierDevice) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ModifierDevice> for u32 {
+    #[inline]
     fn from(input: ModifierDevice) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ModifierDevice> for Option<u32> {
+    #[inline]
     fn from(input: ModifierDevice) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ModifierDevice {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            255 => Ok(ModifierDevice::UseXKeyboard),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ModifierDevice {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ModifierDevice {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ModifierDevice {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -2694,9 +2654,9 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         let (grabbed_device, remaining) = u8::try_parse(remaining)?;
         let (key, remaining) = u8::try_parse(remaining)?;
         let (this_device_mode, remaining) = u8::try_parse(remaining)?;
-        let this_device_mode = this_device_mode.try_into()?;
+        let this_device_mode = this_device_mode.into();
         let (other_device_mode, remaining) = u8::try_parse(remaining)?;
-        let other_device_mode = other_device_mode.try_into()?;
+        let other_device_mode = other_device_mode.into();
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -2938,9 +2898,9 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
         let (this_device_mode, remaining) = u8::try_parse(remaining)?;
-        let this_device_mode = this_device_mode.try_into()?;
+        let this_device_mode = this_device_mode.into();
         let (other_device_mode, remaining) = u8::try_parse(remaining)?;
-        let other_device_mode = other_device_mode.try_into()?;
+        let other_device_mode = other_device_mode.into();
         let (button, remaining) = u8::try_parse(remaining)?;
         let (owner_events, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -3101,77 +3061,67 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum DeviceInputMode {
-    AsyncThisDevice = 0,
-    SyncThisDevice = 1,
-    ReplayThisDevice = 2,
-    AsyncOtherDevices = 3,
-    AsyncAll = 4,
-    SyncAll = 5,
+pub struct DeviceInputMode(u8);
+impl DeviceInputMode {
+    pub const ASYNC_THIS_DEVICE: Self = Self(0);
+    pub const SYNC_THIS_DEVICE: Self = Self(1);
+    pub const REPLAY_THIS_DEVICE: Self = Self(2);
+    pub const ASYNC_OTHER_DEVICES: Self = Self(3);
+    pub const ASYNC_ALL: Self = Self(4);
+    pub const SYNC_ALL: Self = Self(5);
 }
 impl From<DeviceInputMode> for u8 {
+    #[inline]
     fn from(input: DeviceInputMode) -> Self {
-        match input {
-            DeviceInputMode::AsyncThisDevice => 0,
-            DeviceInputMode::SyncThisDevice => 1,
-            DeviceInputMode::ReplayThisDevice => 2,
-            DeviceInputMode::AsyncOtherDevices => 3,
-            DeviceInputMode::AsyncAll => 4,
-            DeviceInputMode::SyncAll => 5,
-        }
+        input.0
     }
 }
 impl From<DeviceInputMode> for Option<u8> {
+    #[inline]
     fn from(input: DeviceInputMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<DeviceInputMode> for u16 {
+    #[inline]
     fn from(input: DeviceInputMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<DeviceInputMode> for Option<u16> {
+    #[inline]
     fn from(input: DeviceInputMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<DeviceInputMode> for u32 {
+    #[inline]
     fn from(input: DeviceInputMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<DeviceInputMode> for Option<u32> {
+    #[inline]
     fn from(input: DeviceInputMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for DeviceInputMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(DeviceInputMode::AsyncThisDevice),
-            1 => Ok(DeviceInputMode::SyncThisDevice),
-            2 => Ok(DeviceInputMode::ReplayThisDevice),
-            3 => Ok(DeviceInputMode::AsyncOtherDevices),
-            4 => Ok(DeviceInputMode::AsyncAll),
-            5 => Ok(DeviceInputMode::SyncAll),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for DeviceInputMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for DeviceInputMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for DeviceInputMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -3230,7 +3180,7 @@ impl AllowDeviceEventsRequest {
         }
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
@@ -3347,7 +3297,7 @@ impl TryParse for GetDeviceFocusReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let revert_to = revert_to.try_into()?;
+        let revert_to = revert_to.into();
         let result = GetDeviceFocusReply { xi_reply_type, sequence, length, focus, time, revert_to };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -3424,7 +3374,7 @@ impl SetDeviceFocusRequest {
         let (focus, remaining) = xproto::Window::try_parse(value)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (revert_to, remaining) = u8::try_parse(remaining)?;
-        let revert_to = revert_to.try_into()?;
+        let revert_to = revert_to.into();
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
@@ -3457,77 +3407,67 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum FeedbackClass {
-    Keyboard = 0,
-    Pointer = 1,
-    String = 2,
-    Integer = 3,
-    Led = 4,
-    Bell = 5,
+pub struct FeedbackClass(u8);
+impl FeedbackClass {
+    pub const KEYBOARD: Self = Self(0);
+    pub const POINTER: Self = Self(1);
+    pub const STRING: Self = Self(2);
+    pub const INTEGER: Self = Self(3);
+    pub const LED: Self = Self(4);
+    pub const BELL: Self = Self(5);
 }
 impl From<FeedbackClass> for u8 {
+    #[inline]
     fn from(input: FeedbackClass) -> Self {
-        match input {
-            FeedbackClass::Keyboard => 0,
-            FeedbackClass::Pointer => 1,
-            FeedbackClass::String => 2,
-            FeedbackClass::Integer => 3,
-            FeedbackClass::Led => 4,
-            FeedbackClass::Bell => 5,
-        }
+        input.0
     }
 }
 impl From<FeedbackClass> for Option<u8> {
+    #[inline]
     fn from(input: FeedbackClass) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<FeedbackClass> for u16 {
+    #[inline]
     fn from(input: FeedbackClass) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<FeedbackClass> for Option<u16> {
+    #[inline]
     fn from(input: FeedbackClass) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<FeedbackClass> for u32 {
+    #[inline]
     fn from(input: FeedbackClass) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<FeedbackClass> for Option<u32> {
+    #[inline]
     fn from(input: FeedbackClass) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for FeedbackClass {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(FeedbackClass::Keyboard),
-            1 => Ok(FeedbackClass::Pointer),
-            2 => Ok(FeedbackClass::String),
-            3 => Ok(FeedbackClass::Integer),
-            4 => Ok(FeedbackClass::Led),
-            5 => Ok(FeedbackClass::Bell),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for FeedbackClass {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for FeedbackClass {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for FeedbackClass {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -3560,7 +3500,7 @@ impl TryParse for KbdFeedbackState {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = KbdFeedbackState { class_id, feedback_id, len, pitch, duration, led_mask, led_values, global_auto_repeat, click, percent, auto_repeats };
         Ok((result, remaining))
     }
@@ -3674,7 +3614,7 @@ impl TryParse for PtrFeedbackState {
         let (accel_num, remaining) = u16::try_parse(remaining)?;
         let (accel_denom, remaining) = u16::try_parse(remaining)?;
         let (threshold, remaining) = u16::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = PtrFeedbackState { class_id, feedback_id, len, accel_num, accel_denom, threshold };
         Ok((result, remaining))
     }
@@ -3738,7 +3678,7 @@ impl TryParse for IntegerFeedbackState {
         let (resolution, remaining) = u32::try_parse(remaining)?;
         let (min_value, remaining) = i32::try_parse(remaining)?;
         let (max_value, remaining) = i32::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = IntegerFeedbackState { class_id, feedback_id, len, resolution, min_value, max_value };
         Ok((result, remaining))
     }
@@ -3804,7 +3744,7 @@ impl TryParse for StringFeedbackState {
         let (max_symbols, remaining) = u16::try_parse(remaining)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = StringFeedbackState { class_id, feedback_id, len, max_symbols, keysyms };
         Ok((result, remaining))
     }
@@ -3867,7 +3807,7 @@ impl TryParse for BellFeedbackState {
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (pitch, remaining) = u16::try_parse(remaining)?;
         let (duration, remaining) = u16::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = BellFeedbackState { class_id, feedback_id, len, percent, pitch, duration };
         Ok((result, remaining))
     }
@@ -3929,7 +3869,7 @@ impl TryParse for LedFeedbackState {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (led_mask, remaining) = u32::try_parse(remaining)?;
         let (led_values, remaining) = u32::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = LedFeedbackState { class_id, feedback_id, len, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -4328,37 +4268,37 @@ impl FeedbackStateData {
         let switch_expr = u32::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(FeedbackClass::Keyboard) {
+        if switch_expr == u32::from(FeedbackClass::KEYBOARD) {
             let (keyboard, new_remaining) = FeedbackStateDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Keyboard(keyboard));
         }
-        if switch_expr == u32::from(FeedbackClass::Pointer) {
+        if switch_expr == u32::from(FeedbackClass::POINTER) {
             let (pointer, new_remaining) = FeedbackStateDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Pointer(pointer));
         }
-        if switch_expr == u32::from(FeedbackClass::String) {
+        if switch_expr == u32::from(FeedbackClass::STRING) {
             let (string, new_remaining) = FeedbackStateDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::String(string));
         }
-        if switch_expr == u32::from(FeedbackClass::Integer) {
+        if switch_expr == u32::from(FeedbackClass::INTEGER) {
             let (integer, new_remaining) = FeedbackStateDataInteger::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Integer(integer));
         }
-        if switch_expr == u32::from(FeedbackClass::Led) {
+        if switch_expr == u32::from(FeedbackClass::LED) {
             let (led, new_remaining) = FeedbackStateDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Led(led));
         }
-        if switch_expr == u32::from(FeedbackClass::Bell) {
+        if switch_expr == u32::from(FeedbackClass::BELL) {
             let (bell, new_remaining) = FeedbackStateDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -4430,12 +4370,12 @@ impl FeedbackStateData {
 impl FeedbackStateData {
     fn switch_expr(&self) -> u32 {
         match self {
-            FeedbackStateData::Keyboard(_) => u32::from(FeedbackClass::Keyboard),
-            FeedbackStateData::Pointer(_) => u32::from(FeedbackClass::Pointer),
-            FeedbackStateData::String(_) => u32::from(FeedbackClass::String),
-            FeedbackStateData::Integer(_) => u32::from(FeedbackClass::Integer),
-            FeedbackStateData::Led(_) => u32::from(FeedbackClass::Led),
-            FeedbackStateData::Bell(_) => u32::from(FeedbackClass::Bell),
+            FeedbackStateData::Keyboard(_) => u32::from(FeedbackClass::KEYBOARD),
+            FeedbackStateData::Pointer(_) => u32::from(FeedbackClass::POINTER),
+            FeedbackStateData::String(_) => u32::from(FeedbackClass::STRING),
+            FeedbackStateData::Integer(_) => u32::from(FeedbackClass::INTEGER),
+            FeedbackStateData::Led(_) => u32::from(FeedbackClass::LED),
+            FeedbackStateData::Bell(_) => u32::from(FeedbackClass::BELL),
         }
     }
 }
@@ -4621,7 +4561,7 @@ impl TryParse for KbdFeedbackCtl {
         let (bell_duration, remaining) = i16::try_parse(remaining)?;
         let (led_mask, remaining) = u32::try_parse(remaining)?;
         let (led_values, remaining) = u32::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = KbdFeedbackCtl { class_id, feedback_id, len, key, auto_repeat_mode, key_click_percent, bell_percent, bell_pitch, bell_duration, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -4703,7 +4643,7 @@ impl TryParse for PtrFeedbackCtl {
         let (num, remaining) = i16::try_parse(remaining)?;
         let (denom, remaining) = i16::try_parse(remaining)?;
         let (threshold, remaining) = i16::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = PtrFeedbackCtl { class_id, feedback_id, len, num, denom, threshold };
         Ok((result, remaining))
     }
@@ -4763,7 +4703,7 @@ impl TryParse for IntegerFeedbackCtl {
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (int_to_display, remaining) = i32::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = IntegerFeedbackCtl { class_id, feedback_id, len, int_to_display };
         Ok((result, remaining))
     }
@@ -4816,7 +4756,7 @@ impl TryParse for StringFeedbackCtl {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = StringFeedbackCtl { class_id, feedback_id, len, keysyms };
         Ok((result, remaining))
     }
@@ -4879,7 +4819,7 @@ impl TryParse for BellFeedbackCtl {
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (pitch, remaining) = i16::try_parse(remaining)?;
         let (duration, remaining) = i16::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = BellFeedbackCtl { class_id, feedback_id, len, percent, pitch, duration };
         Ok((result, remaining))
     }
@@ -4941,7 +4881,7 @@ impl TryParse for LedFeedbackCtl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (led_mask, remaining) = u32::try_parse(remaining)?;
         let (led_values, remaining) = u32::try_parse(remaining)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = LedFeedbackCtl { class_id, feedback_id, len, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -5289,37 +5229,37 @@ impl FeedbackCtlData {
         let switch_expr = u32::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(FeedbackClass::Keyboard) {
+        if switch_expr == u32::from(FeedbackClass::KEYBOARD) {
             let (keyboard, new_remaining) = FeedbackCtlDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Keyboard(keyboard));
         }
-        if switch_expr == u32::from(FeedbackClass::Pointer) {
+        if switch_expr == u32::from(FeedbackClass::POINTER) {
             let (pointer, new_remaining) = FeedbackCtlDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Pointer(pointer));
         }
-        if switch_expr == u32::from(FeedbackClass::String) {
+        if switch_expr == u32::from(FeedbackClass::STRING) {
             let (string, new_remaining) = FeedbackCtlDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::String(string));
         }
-        if switch_expr == u32::from(FeedbackClass::Integer) {
+        if switch_expr == u32::from(FeedbackClass::INTEGER) {
             let (integer, new_remaining) = FeedbackCtlDataInteger::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Integer(integer));
         }
-        if switch_expr == u32::from(FeedbackClass::Led) {
+        if switch_expr == u32::from(FeedbackClass::LED) {
             let (led, new_remaining) = FeedbackCtlDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Led(led));
         }
-        if switch_expr == u32::from(FeedbackClass::Bell) {
+        if switch_expr == u32::from(FeedbackClass::BELL) {
             let (bell, new_remaining) = FeedbackCtlDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -5391,12 +5331,12 @@ impl FeedbackCtlData {
 impl FeedbackCtlData {
     fn switch_expr(&self) -> u32 {
         match self {
-            FeedbackCtlData::Keyboard(_) => u32::from(FeedbackClass::Keyboard),
-            FeedbackCtlData::Pointer(_) => u32::from(FeedbackClass::Pointer),
-            FeedbackCtlData::String(_) => u32::from(FeedbackClass::String),
-            FeedbackCtlData::Integer(_) => u32::from(FeedbackClass::Integer),
-            FeedbackCtlData::Led(_) => u32::from(FeedbackClass::Led),
-            FeedbackCtlData::Bell(_) => u32::from(FeedbackClass::Bell),
+            FeedbackCtlData::Keyboard(_) => u32::from(FeedbackClass::KEYBOARD),
+            FeedbackCtlData::Pointer(_) => u32::from(FeedbackClass::POINTER),
+            FeedbackCtlData::String(_) => u32::from(FeedbackClass::STRING),
+            FeedbackCtlData::Integer(_) => u32::from(FeedbackClass::INTEGER),
+            FeedbackCtlData::Led(_) => u32::from(FeedbackClass::LED),
+            FeedbackCtlData::Bell(_) => u32::from(FeedbackClass::BELL),
         }
     }
 }
@@ -5441,64 +5381,74 @@ impl Serialize for FeedbackCtl {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum ChangeFeedbackControlMask {
-    KeyClickPercent,
-    Percent,
-    Pitch,
-    Duration,
-    Led,
-    LedMode,
-    Key,
-    AutoRepeatMode,
-    String,
-    Integer,
-    AccelNum,
-    AccelDenom,
-    Threshold,
+pub struct ChangeFeedbackControlMask(u8);
+impl ChangeFeedbackControlMask {
+    pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
+    pub const PERCENT: Self = Self(1 << 1);
+    pub const PITCH: Self = Self(1 << 2);
+    pub const DURATION: Self = Self(1 << 3);
+    pub const LED: Self = Self(1 << 4);
+    pub const LED_MODE: Self = Self(1 << 5);
+    pub const KEY: Self = Self(1 << 6);
+    pub const AUTO_REPEAT_MODE: Self = Self(1 << 7);
+    pub const STRING: Self = Self(1 << 0);
+    pub const INTEGER: Self = Self(1 << 0);
+    pub const ACCEL_NUM: Self = Self(1 << 0);
+    pub const ACCEL_DENOM: Self = Self(1 << 1);
+    pub const THRESHOLD: Self = Self(1 << 2);
 }
 impl From<ChangeFeedbackControlMask> for u8 {
+    #[inline]
     fn from(input: ChangeFeedbackControlMask) -> Self {
-        match input {
-            ChangeFeedbackControlMask::KeyClickPercent => 1 << 0,
-            ChangeFeedbackControlMask::Percent => 1 << 1,
-            ChangeFeedbackControlMask::Pitch => 1 << 2,
-            ChangeFeedbackControlMask::Duration => 1 << 3,
-            ChangeFeedbackControlMask::Led => 1 << 4,
-            ChangeFeedbackControlMask::LedMode => 1 << 5,
-            ChangeFeedbackControlMask::Key => 1 << 6,
-            ChangeFeedbackControlMask::AutoRepeatMode => 1 << 7,
-            ChangeFeedbackControlMask::String => 1 << 0,
-            ChangeFeedbackControlMask::Integer => 1 << 0,
-            ChangeFeedbackControlMask::AccelNum => 1 << 0,
-            ChangeFeedbackControlMask::AccelDenom => 1 << 1,
-            ChangeFeedbackControlMask::Threshold => 1 << 2,
-        }
+        input.0
     }
 }
 impl From<ChangeFeedbackControlMask> for Option<u8> {
+    #[inline]
     fn from(input: ChangeFeedbackControlMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ChangeFeedbackControlMask> for u16 {
+    #[inline]
     fn from(input: ChangeFeedbackControlMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ChangeFeedbackControlMask> for Option<u16> {
+    #[inline]
     fn from(input: ChangeFeedbackControlMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ChangeFeedbackControlMask> for u32 {
+    #[inline]
     fn from(input: ChangeFeedbackControlMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ChangeFeedbackControlMask> for Option<u32> {
+    #[inline]
     fn from(input: ChangeFeedbackControlMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
+    }
+}
+impl From<u8> for ChangeFeedbackControlMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
+    }
+}
+impl TryFrom<u16> for ChangeFeedbackControlMask {
+    type Error = ParseError;
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
+    }
+}
+impl TryFrom<u32> for ChangeFeedbackControlMask {
+    type Error = ParseError;
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ChangeFeedbackControlMask, u8);
@@ -6037,7 +5987,7 @@ impl TryParse for SetDeviceModifierMappingReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = SetDeviceModifierMappingReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -6275,7 +6225,7 @@ impl TryParse for SetDeviceButtonMappingReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = SetDeviceButtonMappingReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -6305,7 +6255,7 @@ impl TryParse for KeyState {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let keys = <[u8; 32]>::try_from(keys).unwrap();
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = KeyState { class_id, len, num_keys, keys };
         Ok((result, remaining))
     }
@@ -6386,7 +6336,7 @@ impl TryParse for ButtonState {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let buttons = <[u8; 32]>::try_from(buttons).unwrap();
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = ButtonState { class_id, len, num_buttons, buttons };
         Ok((result, remaining))
     }
@@ -6453,65 +6403,63 @@ impl Serialize for ButtonState {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ValuatorStateModeMask {
-    DeviceModeAbsolute = 1 << 0,
-    OutOfProximity = 1 << 1,
+pub struct ValuatorStateModeMask(u8);
+impl ValuatorStateModeMask {
+    pub const DEVICE_MODE_ABSOLUTE: Self = Self(1 << 0);
+    pub const OUT_OF_PROXIMITY: Self = Self(1 << 1);
 }
 impl From<ValuatorStateModeMask> for u8 {
+    #[inline]
     fn from(input: ValuatorStateModeMask) -> Self {
-        match input {
-            ValuatorStateModeMask::DeviceModeAbsolute => 1 << 0,
-            ValuatorStateModeMask::OutOfProximity => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<ValuatorStateModeMask> for Option<u8> {
+    #[inline]
     fn from(input: ValuatorStateModeMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ValuatorStateModeMask> for u16 {
+    #[inline]
     fn from(input: ValuatorStateModeMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ValuatorStateModeMask> for Option<u16> {
+    #[inline]
     fn from(input: ValuatorStateModeMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ValuatorStateModeMask> for u32 {
+    #[inline]
     fn from(input: ValuatorStateModeMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ValuatorStateModeMask> for Option<u32> {
+    #[inline]
     fn from(input: ValuatorStateModeMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ValuatorStateModeMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ValuatorStateModeMask::DeviceModeAbsolute),
-            2 => Ok(ValuatorStateModeMask::OutOfProximity),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ValuatorStateModeMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ValuatorStateModeMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ValuatorStateModeMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ValuatorStateModeMask, u8);
@@ -6530,7 +6478,7 @@ impl TryParse for ValuatorState {
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let class_id = class_id.try_into()?;
+        let class_id = class_id.into();
         let result = ValuatorState { class_id, len, mode, valuators };
         Ok((result, remaining))
     }
@@ -6773,19 +6721,19 @@ impl InputStateData {
         let switch_expr = u32::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(InputClass::Key) {
+        if switch_expr == u32::from(InputClass::KEY) {
             let (key, new_remaining) = InputStateDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Key(key));
         }
-        if switch_expr == u32::from(InputClass::Button) {
+        if switch_expr == u32::from(InputClass::BUTTON) {
             let (button, new_remaining) = InputStateDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Button(button));
         }
-        if switch_expr == u32::from(InputClass::Valuator) {
+        if switch_expr == u32::from(InputClass::VALUATOR) {
             let (valuator, new_remaining) = InputStateDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -6836,9 +6784,9 @@ impl InputStateData {
 impl InputStateData {
     fn switch_expr(&self) -> u32 {
         match self {
-            InputStateData::Key(_) => u32::from(InputClass::Key),
-            InputStateData::Button(_) => u32::from(InputClass::Button),
-            InputStateData::Valuator(_) => u32::from(InputClass::Valuator),
+            InputStateData::Key(_) => u32::from(InputClass::KEY),
+            InputStateData::Button(_) => u32::from(InputClass::BUTTON),
+            InputStateData::Valuator(_) => u32::from(InputClass::VALUATOR),
         }
     }
 }
@@ -7183,7 +7131,7 @@ impl TryParse for SetDeviceValuatorsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = SetDeviceValuatorsReply { xi_reply_type, sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -7199,74 +7147,60 @@ impl TryFrom<&[u8]> for SetDeviceValuatorsReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum DeviceControl {
-    Resolution = 1,
-    Abscalib = 2,
-    Core = 3,
-    Enable = 4,
-    Absarea = 5,
-}
-impl From<DeviceControl> for u8 {
-    fn from(input: DeviceControl) -> Self {
-        match input {
-            DeviceControl::Resolution => 1,
-            DeviceControl::Abscalib => 2,
-            DeviceControl::Core => 3,
-            DeviceControl::Enable => 4,
-            DeviceControl::Absarea => 5,
-        }
-    }
+pub struct DeviceControl(u16);
+impl DeviceControl {
+    pub const RESOLUTION: Self = Self(1);
+    pub const ABSCALIB: Self = Self(2);
+    pub const CORE: Self = Self(3);
+    pub const ENABLE: Self = Self(4);
+    pub const ABSAREA: Self = Self(5);
 }
 impl From<DeviceControl> for Option<u8> {
+    #[inline]
     fn from(input: DeviceControl) -> Self {
-        Some(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<DeviceControl> for u16 {
+    #[inline]
     fn from(input: DeviceControl) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<DeviceControl> for Option<u16> {
+    #[inline]
     fn from(input: DeviceControl) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<DeviceControl> for u32 {
+    #[inline]
     fn from(input: DeviceControl) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<DeviceControl> for Option<u32> {
+    #[inline]
     fn from(input: DeviceControl) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for DeviceControl {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(DeviceControl::Resolution),
-            2 => Ok(DeviceControl::Abscalib),
-            3 => Ok(DeviceControl::Core),
-            4 => Ok(DeviceControl::Enable),
-            5 => Ok(DeviceControl::Absarea),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for DeviceControl {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for DeviceControl {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for DeviceControl {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for DeviceControl {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -7286,7 +7220,7 @@ impl TryParse for DeviceResolutionState {
         let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceResolutionState { control_id, len, resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
@@ -7358,7 +7292,7 @@ impl TryParse for DeviceAbsCalibState {
         let (flip_y, remaining) = u32::try_parse(remaining)?;
         let (rotation, remaining) = u32::try_parse(remaining)?;
         let (button_threshold, remaining) = u32::try_parse(remaining)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceAbsCalibState { control_id, len, min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
     }
@@ -7457,7 +7391,7 @@ impl TryParse for DeviceAbsAreaState {
         let (height, remaining) = u32::try_parse(remaining)?;
         let (screen, remaining) = u32::try_parse(remaining)?;
         let (following, remaining) = u32::try_parse(remaining)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceAbsAreaState { control_id, len, offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
     }
@@ -7537,7 +7471,7 @@ impl TryParse for DeviceCoreState {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (iscore, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceCoreState { control_id, len, status, iscore };
         Ok((result, remaining))
     }
@@ -7588,7 +7522,7 @@ impl TryParse for DeviceEnableState {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (enable, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceEnableState { control_id, len, enable };
         Ok((result, remaining))
     }
@@ -7893,25 +7827,25 @@ impl DeviceStateData {
         let switch_expr = u32::from(control_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(DeviceControl::Resolution) {
+        if switch_expr == u32::from(DeviceControl::RESOLUTION) {
             let (resolution, new_remaining) = DeviceStateDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Resolution(resolution));
         }
-        if switch_expr == u32::from(DeviceControl::Abscalib) {
+        if switch_expr == u32::from(DeviceControl::ABSCALIB) {
             let (abs_calib, new_remaining) = DeviceStateDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::AbsCalib(abs_calib));
         }
-        if switch_expr == u32::from(DeviceControl::Core) {
+        if switch_expr == u32::from(DeviceControl::CORE) {
             let (core, new_remaining) = DeviceStateDataCore::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Core(core));
         }
-        if switch_expr == u32::from(DeviceControl::Enable) {
+        if switch_expr == u32::from(DeviceControl::ENABLE) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -7919,7 +7853,7 @@ impl DeviceStateData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Enable(enable));
         }
-        if switch_expr == u32::from(DeviceControl::Absarea) {
+        if switch_expr == u32::from(DeviceControl::ABSAREA) {
             let (abs_area, new_remaining) = DeviceStateDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -7988,11 +7922,11 @@ impl DeviceStateData {
 impl DeviceStateData {
     fn switch_expr(&self) -> u32 {
         match self {
-            DeviceStateData::Resolution(_) => u32::from(DeviceControl::Resolution),
-            DeviceStateData::AbsCalib(_) => u32::from(DeviceControl::Abscalib),
-            DeviceStateData::Core(_) => u32::from(DeviceControl::Core),
-            DeviceStateData::Enable(_) => u32::from(DeviceControl::Enable),
-            DeviceStateData::AbsArea(_) => u32::from(DeviceControl::Absarea),
+            DeviceStateData::Resolution(_) => u32::from(DeviceControl::RESOLUTION),
+            DeviceStateData::AbsCalib(_) => u32::from(DeviceControl::ABSCALIB),
+            DeviceStateData::Core(_) => u32::from(DeviceControl::CORE),
+            DeviceStateData::Enable(_) => u32::from(DeviceControl::ENABLE),
+            DeviceStateData::AbsArea(_) => u32::from(DeviceControl::ABSAREA),
         }
     }
 }
@@ -8081,7 +8015,7 @@ impl GetDeviceControlRequest {
             return Err(ParseError::InvalidValue);
         }
         let (control_id, remaining) = u16::try_parse(value)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
@@ -8155,7 +8089,7 @@ impl TryParse for DeviceResolutionCtl {
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceResolutionCtl { control_id, len, first_valuator, resolution_values };
         Ok((result, remaining))
     }
@@ -8225,7 +8159,7 @@ impl TryParse for DeviceAbsCalibCtl {
         let (flip_y, remaining) = u32::try_parse(remaining)?;
         let (rotation, remaining) = u32::try_parse(remaining)?;
         let (button_threshold, remaining) = u32::try_parse(remaining)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceAbsCalibCtl { control_id, len, min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
     }
@@ -8324,7 +8258,7 @@ impl TryParse for DeviceAbsAreaCtrl {
         let (height, remaining) = i32::try_parse(remaining)?;
         let (screen, remaining) = i32::try_parse(remaining)?;
         let (following, remaining) = u32::try_parse(remaining)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceAbsAreaCtrl { control_id, len, offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
     }
@@ -8402,7 +8336,7 @@ impl TryParse for DeviceCoreCtrl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceCoreCtrl { control_id, len, status };
         Ok((result, remaining))
     }
@@ -8451,7 +8385,7 @@ impl TryParse for DeviceEnableCtrl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (enable, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let result = DeviceEnableCtrl { control_id, len, enable };
         Ok((result, remaining))
     }
@@ -8750,25 +8684,25 @@ impl DeviceCtlData {
         let switch_expr = u32::from(control_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(DeviceControl::Resolution) {
+        if switch_expr == u32::from(DeviceControl::RESOLUTION) {
             let (resolution, new_remaining) = DeviceCtlDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Resolution(resolution));
         }
-        if switch_expr == u32::from(DeviceControl::Abscalib) {
+        if switch_expr == u32::from(DeviceControl::ABSCALIB) {
             let (abs_calib, new_remaining) = DeviceCtlDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::AbsCalib(abs_calib));
         }
-        if switch_expr == u32::from(DeviceControl::Core) {
+        if switch_expr == u32::from(DeviceControl::CORE) {
             let (core, new_remaining) = DeviceCtlDataCore::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Core(core));
         }
-        if switch_expr == u32::from(DeviceControl::Enable) {
+        if switch_expr == u32::from(DeviceControl::ENABLE) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -8776,7 +8710,7 @@ impl DeviceCtlData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Enable(enable));
         }
-        if switch_expr == u32::from(DeviceControl::Absarea) {
+        if switch_expr == u32::from(DeviceControl::ABSAREA) {
             let (abs_area, new_remaining) = DeviceCtlDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -8845,11 +8779,11 @@ impl DeviceCtlData {
 impl DeviceCtlData {
     fn switch_expr(&self) -> u32 {
         match self {
-            DeviceCtlData::Resolution(_) => u32::from(DeviceControl::Resolution),
-            DeviceCtlData::AbsCalib(_) => u32::from(DeviceControl::Abscalib),
-            DeviceCtlData::Core(_) => u32::from(DeviceControl::Core),
-            DeviceCtlData::Enable(_) => u32::from(DeviceControl::Enable),
-            DeviceCtlData::AbsArea(_) => u32::from(DeviceControl::Absarea),
+            DeviceCtlData::Resolution(_) => u32::from(DeviceControl::RESOLUTION),
+            DeviceCtlData::AbsCalib(_) => u32::from(DeviceControl::ABSCALIB),
+            DeviceCtlData::Core(_) => u32::from(DeviceControl::CORE),
+            DeviceCtlData::Enable(_) => u32::from(DeviceControl::ENABLE),
+            DeviceCtlData::AbsArea(_) => u32::from(DeviceControl::ABSAREA),
         }
     }
 }
@@ -8943,7 +8877,7 @@ impl ChangeDeviceControlRequest {
             return Err(ParseError::InvalidValue);
         }
         let (control_id, remaining) = u16::try_parse(value)?;
-        let control_id = control_id.try_into()?;
+        let control_id = control_id.into();
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (control, remaining) = DeviceCtl::try_parse(remaining)?;
@@ -9119,68 +9053,64 @@ impl ListDevicePropertiesReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PropertyFormat {
-    M8Bits = 8,
-    M16Bits = 16,
-    M32Bits = 32,
+pub struct PropertyFormat(u8);
+impl PropertyFormat {
+    pub const M8_BITS: Self = Self(8);
+    pub const M16_BITS: Self = Self(16);
+    pub const M32_BITS: Self = Self(32);
 }
 impl From<PropertyFormat> for u8 {
+    #[inline]
     fn from(input: PropertyFormat) -> Self {
-        match input {
-            PropertyFormat::M8Bits => 8,
-            PropertyFormat::M16Bits => 16,
-            PropertyFormat::M32Bits => 32,
-        }
+        input.0
     }
 }
 impl From<PropertyFormat> for Option<u8> {
+    #[inline]
     fn from(input: PropertyFormat) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PropertyFormat> for u16 {
+    #[inline]
     fn from(input: PropertyFormat) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PropertyFormat> for Option<u16> {
+    #[inline]
     fn from(input: PropertyFormat) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PropertyFormat> for u32 {
+    #[inline]
     fn from(input: PropertyFormat) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PropertyFormat> for Option<u32> {
+    #[inline]
     fn from(input: PropertyFormat) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PropertyFormat {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            8 => Ok(PropertyFormat::M8Bits),
-            16 => Ok(PropertyFormat::M16Bits),
-            32 => Ok(PropertyFormat::M32Bits),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for PropertyFormat {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PropertyFormat {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PropertyFormat {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -9195,7 +9125,7 @@ impl ChangeDevicePropertyAux {
         let switch_expr = u32::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(PropertyFormat::M8Bits) {
+        if switch_expr == u32::from(PropertyFormat::M8_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -9208,7 +9138,7 @@ impl ChangeDevicePropertyAux {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(ChangeDevicePropertyAux::Data8(data8));
         }
-        if switch_expr == u32::from(PropertyFormat::M16Bits) {
+        if switch_expr == u32::from(PropertyFormat::M16_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -9220,7 +9150,7 @@ impl ChangeDevicePropertyAux {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(ChangeDevicePropertyAux::Data16(data16));
         }
-        if switch_expr == u32::from(PropertyFormat::M32Bits) {
+        if switch_expr == u32::from(PropertyFormat::M32_BITS) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -9283,9 +9213,9 @@ impl ChangeDevicePropertyAux {
 impl ChangeDevicePropertyAux {
     fn switch_expr(&self) -> u32 {
         match self {
-            ChangeDevicePropertyAux::Data8(_) => u32::from(PropertyFormat::M8Bits),
-            ChangeDevicePropertyAux::Data16(_) => u32::from(PropertyFormat::M16Bits),
-            ChangeDevicePropertyAux::Data32(_) => u32::from(PropertyFormat::M32Bits),
+            ChangeDevicePropertyAux::Data8(_) => u32::from(PropertyFormat::M8_BITS),
+            ChangeDevicePropertyAux::Data16(_) => u32::from(PropertyFormat::M16_BITS),
+            ChangeDevicePropertyAux::Data32(_) => u32::from(PropertyFormat::M32_BITS),
         }
     }
 }
@@ -9367,7 +9297,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (items, remaining) = ChangeDevicePropertyAux::try_parse(remaining, format, num_items)?;
@@ -9604,7 +9534,7 @@ impl GetDevicePropertyItems {
         let switch_expr = u32::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(PropertyFormat::M8Bits) {
+        if switch_expr == u32::from(PropertyFormat::M8_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -9617,7 +9547,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data8(data8));
         }
-        if switch_expr == u32::from(PropertyFormat::M16Bits) {
+        if switch_expr == u32::from(PropertyFormat::M16_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -9629,7 +9559,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data16(data16));
         }
-        if switch_expr == u32::from(PropertyFormat::M32Bits) {
+        if switch_expr == u32::from(PropertyFormat::M32_BITS) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -9706,73 +9636,27 @@ impl TryFrom<&[u8]> for GetDevicePropertyReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Device {
-    All = 0,
-    AllMaster = 1,
+pub struct Device(bool);
+impl Device {
+    pub const ALL: Self = Self(false);
+    pub const ALL_MASTER: Self = Self(true);
 }
 impl From<Device> for bool {
+    #[inline]
     fn from(input: Device) -> Self {
-        match input {
-            Device::All => false,
-            Device::AllMaster => true,
-        }
+        input.0
     }
 }
-impl From<Device> for u8 {
+impl From<Device> for Option<bool> {
+    #[inline]
     fn from(input: Device) -> Self {
-        match input {
-            Device::All => 0,
-            Device::AllMaster => 1,
-        }
+        Some(input.0)
     }
 }
-impl From<Device> for Option<u8> {
-    fn from(input: Device) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<Device> for u16 {
-    fn from(input: Device) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<Device> for Option<u16> {
-    fn from(input: Device) -> Self {
-        Some(u16::from(input))
-    }
-}
-impl From<Device> for u32 {
-    fn from(input: Device) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<Device> for Option<u32> {
-    fn from(input: Device) -> Self {
-        Some(u32::from(input))
-    }
-}
-impl TryFrom<u8> for Device {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Device::All),
-            1 => Ok(Device::AllMaster),
-            _ => Err(ParseError::InvalidValue),
-        }
-    }
-}
-impl TryFrom<u16> for Device {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
-    }
-}
-impl TryFrom<u32> for Device {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<bool> for Device {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value)
     }
 }
 
@@ -10246,134 +10130,120 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum HierarchyChangeType {
-    AddMaster = 1,
-    RemoveMaster = 2,
-    AttachSlave = 3,
-    DetachSlave = 4,
-}
-impl From<HierarchyChangeType> for u8 {
-    fn from(input: HierarchyChangeType) -> Self {
-        match input {
-            HierarchyChangeType::AddMaster => 1,
-            HierarchyChangeType::RemoveMaster => 2,
-            HierarchyChangeType::AttachSlave => 3,
-            HierarchyChangeType::DetachSlave => 4,
-        }
-    }
+pub struct HierarchyChangeType(u16);
+impl HierarchyChangeType {
+    pub const ADD_MASTER: Self = Self(1);
+    pub const REMOVE_MASTER: Self = Self(2);
+    pub const ATTACH_SLAVE: Self = Self(3);
+    pub const DETACH_SLAVE: Self = Self(4);
 }
 impl From<HierarchyChangeType> for Option<u8> {
+    #[inline]
     fn from(input: HierarchyChangeType) -> Self {
-        Some(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<HierarchyChangeType> for u16 {
+    #[inline]
     fn from(input: HierarchyChangeType) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<HierarchyChangeType> for Option<u16> {
+    #[inline]
     fn from(input: HierarchyChangeType) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<HierarchyChangeType> for u32 {
+    #[inline]
     fn from(input: HierarchyChangeType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<HierarchyChangeType> for Option<u32> {
+    #[inline]
     fn from(input: HierarchyChangeType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for HierarchyChangeType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(HierarchyChangeType::AddMaster),
-            2 => Ok(HierarchyChangeType::RemoveMaster),
-            3 => Ok(HierarchyChangeType::AttachSlave),
-            4 => Ok(HierarchyChangeType::DetachSlave),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for HierarchyChangeType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for HierarchyChangeType {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for HierarchyChangeType {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for HierarchyChangeType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ChangeMode {
-    Attach = 1,
-    Float = 2,
+pub struct ChangeMode(u8);
+impl ChangeMode {
+    pub const ATTACH: Self = Self(1);
+    pub const FLOAT: Self = Self(2);
 }
 impl From<ChangeMode> for u8 {
+    #[inline]
     fn from(input: ChangeMode) -> Self {
-        match input {
-            ChangeMode::Attach => 1,
-            ChangeMode::Float => 2,
-        }
+        input.0
     }
 }
 impl From<ChangeMode> for Option<u8> {
+    #[inline]
     fn from(input: ChangeMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ChangeMode> for u16 {
+    #[inline]
     fn from(input: ChangeMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ChangeMode> for Option<u16> {
+    #[inline]
     fn from(input: ChangeMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ChangeMode> for u32 {
+    #[inline]
     fn from(input: ChangeMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ChangeMode> for Option<u32> {
+    #[inline]
     fn from(input: ChangeMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ChangeMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ChangeMode::Attach),
-            2 => Ok(ChangeMode::Float),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ChangeMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ChangeMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ChangeMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -10399,7 +10269,7 @@ impl TryParse for AddMaster {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = AddMaster { type_, len, send_core, enable, name };
         Ok((result, remaining))
     }
@@ -10463,8 +10333,8 @@ impl TryParse for RemoveMaster {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (return_pointer, remaining) = DeviceId::try_parse(remaining)?;
         let (return_keyboard, remaining) = DeviceId::try_parse(remaining)?;
-        let type_ = type_.try_into()?;
-        let return_mode = return_mode.try_into()?;
+        let type_ = type_.into();
+        let return_mode = return_mode.into();
         let result = RemoveMaster { type_, len, deviceid, return_mode, return_pointer, return_keyboard };
         Ok((result, remaining))
     }
@@ -10524,7 +10394,7 @@ impl TryParse for AttachSlave {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (master, remaining) = DeviceId::try_parse(remaining)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = AttachSlave { type_, len, deviceid, master };
         Ok((result, remaining))
     }
@@ -10574,7 +10444,7 @@ impl TryParse for DetachSlave {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = DetachSlave { type_, len, deviceid };
         Ok((result, remaining))
     }
@@ -10685,7 +10555,7 @@ impl TryParse for HierarchyChangeDataRemoveMaster {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (return_pointer, remaining) = DeviceId::try_parse(remaining)?;
         let (return_keyboard, remaining) = DeviceId::try_parse(remaining)?;
-        let return_mode = return_mode.try_into()?;
+        let return_mode = return_mode.into();
         let result = HierarchyChangeDataRemoveMaster { deviceid, return_mode, return_pointer, return_keyboard };
         Ok((result, remaining))
     }
@@ -10807,25 +10677,25 @@ impl HierarchyChangeData {
         let switch_expr = u32::from(type_);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(HierarchyChangeType::AddMaster) {
+        if switch_expr == u32::from(HierarchyChangeType::ADD_MASTER) {
             let (add_master, new_remaining) = HierarchyChangeDataAddMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AddMaster(add_master));
         }
-        if switch_expr == u32::from(HierarchyChangeType::RemoveMaster) {
+        if switch_expr == u32::from(HierarchyChangeType::REMOVE_MASTER) {
             let (remove_master, new_remaining) = HierarchyChangeDataRemoveMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::RemoveMaster(remove_master));
         }
-        if switch_expr == u32::from(HierarchyChangeType::AttachSlave) {
+        if switch_expr == u32::from(HierarchyChangeType::ATTACH_SLAVE) {
             let (attach_slave, new_remaining) = HierarchyChangeDataAttachSlave::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AttachSlave(attach_slave));
         }
-        if switch_expr == u32::from(HierarchyChangeType::DetachSlave) {
+        if switch_expr == u32::from(HierarchyChangeType::DETACH_SLAVE) {
             let (detach_slave, new_remaining) = HierarchyChangeDataDetachSlave::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -10883,10 +10753,10 @@ impl HierarchyChangeData {
 impl HierarchyChangeData {
     fn switch_expr(&self) -> u32 {
         match self {
-            HierarchyChangeData::AddMaster(_) => u32::from(HierarchyChangeType::AddMaster),
-            HierarchyChangeData::RemoveMaster(_) => u32::from(HierarchyChangeType::RemoveMaster),
-            HierarchyChangeData::AttachSlave(_) => u32::from(HierarchyChangeType::AttachSlave),
-            HierarchyChangeData::DetachSlave(_) => u32::from(HierarchyChangeType::DetachSlave),
+            HierarchyChangeData::AddMaster(_) => u32::from(HierarchyChangeType::ADD_MASTER),
+            HierarchyChangeData::RemoveMaster(_) => u32::from(HierarchyChangeType::REMOVE_MASTER),
+            HierarchyChangeData::AttachSlave(_) => u32::from(HierarchyChangeType::ATTACH_SLAVE),
+            HierarchyChangeData::DetachSlave(_) => u32::from(HierarchyChangeType::DETACH_SLAVE),
         }
     }
 }
@@ -11183,105 +11053,75 @@ impl TryFrom<&[u8]> for XIGetClientPointerReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum XIEventMask {
-    DeviceChanged = 1 << 1,
-    KeyPress = 1 << 2,
-    KeyRelease = 1 << 3,
-    ButtonPress = 1 << 4,
-    ButtonRelease = 1 << 5,
-    Motion = 1 << 6,
-    Enter = 1 << 7,
-    Leave = 1 << 8,
-    FocusIn = 1 << 9,
-    FocusOut = 1 << 10,
-    Hierarchy = 1 << 11,
-    Property = 1 << 12,
-    RawKeyPress = 1 << 13,
-    RawKeyRelease = 1 << 14,
-    RawButtonPress = 1 << 15,
-    RawButtonRelease = 1 << 16,
-    RawMotion = 1 << 17,
-    TouchBegin = 1 << 18,
-    TouchUpdate = 1 << 19,
-    TouchEnd = 1 << 20,
-    TouchOwnership = 1 << 21,
-    RawTouchBegin = 1 << 22,
-    RawTouchUpdate = 1 << 23,
-    RawTouchEnd = 1 << 24,
-    BarrierHit = 1 << 25,
-    BarrierLeave = 1 << 26,
+pub struct XIEventMask(u32);
+impl XIEventMask {
+    pub const DEVICE_CHANGED: Self = Self(1 << 1);
+    pub const KEY_PRESS: Self = Self(1 << 2);
+    pub const KEY_RELEASE: Self = Self(1 << 3);
+    pub const BUTTON_PRESS: Self = Self(1 << 4);
+    pub const BUTTON_RELEASE: Self = Self(1 << 5);
+    pub const MOTION: Self = Self(1 << 6);
+    pub const ENTER: Self = Self(1 << 7);
+    pub const LEAVE: Self = Self(1 << 8);
+    pub const FOCUS_IN: Self = Self(1 << 9);
+    pub const FOCUS_OUT: Self = Self(1 << 10);
+    pub const HIERARCHY: Self = Self(1 << 11);
+    pub const PROPERTY: Self = Self(1 << 12);
+    pub const RAW_KEY_PRESS: Self = Self(1 << 13);
+    pub const RAW_KEY_RELEASE: Self = Self(1 << 14);
+    pub const RAW_BUTTON_PRESS: Self = Self(1 << 15);
+    pub const RAW_BUTTON_RELEASE: Self = Self(1 << 16);
+    pub const RAW_MOTION: Self = Self(1 << 17);
+    pub const TOUCH_BEGIN: Self = Self(1 << 18);
+    pub const TOUCH_UPDATE: Self = Self(1 << 19);
+    pub const TOUCH_END: Self = Self(1 << 20);
+    pub const TOUCH_OWNERSHIP: Self = Self(1 << 21);
+    pub const RAW_TOUCH_BEGIN: Self = Self(1 << 22);
+    pub const RAW_TOUCH_UPDATE: Self = Self(1 << 23);
+    pub const RAW_TOUCH_END: Self = Self(1 << 24);
+    pub const BARRIER_HIT: Self = Self(1 << 25);
+    pub const BARRIER_LEAVE: Self = Self(1 << 26);
+}
+impl From<XIEventMask> for Option<u8> {
+    #[inline]
+    fn from(input: XIEventMask) -> Self {
+        u8::try_from(input.0).ok()
+    }
+}
+impl From<XIEventMask> for Option<u16> {
+    #[inline]
+    fn from(input: XIEventMask) -> Self {
+        u16::try_from(input.0).ok()
+    }
 }
 impl From<XIEventMask> for u32 {
+    #[inline]
     fn from(input: XIEventMask) -> Self {
-        match input {
-            XIEventMask::DeviceChanged => 1 << 1,
-            XIEventMask::KeyPress => 1 << 2,
-            XIEventMask::KeyRelease => 1 << 3,
-            XIEventMask::ButtonPress => 1 << 4,
-            XIEventMask::ButtonRelease => 1 << 5,
-            XIEventMask::Motion => 1 << 6,
-            XIEventMask::Enter => 1 << 7,
-            XIEventMask::Leave => 1 << 8,
-            XIEventMask::FocusIn => 1 << 9,
-            XIEventMask::FocusOut => 1 << 10,
-            XIEventMask::Hierarchy => 1 << 11,
-            XIEventMask::Property => 1 << 12,
-            XIEventMask::RawKeyPress => 1 << 13,
-            XIEventMask::RawKeyRelease => 1 << 14,
-            XIEventMask::RawButtonPress => 1 << 15,
-            XIEventMask::RawButtonRelease => 1 << 16,
-            XIEventMask::RawMotion => 1 << 17,
-            XIEventMask::TouchBegin => 1 << 18,
-            XIEventMask::TouchUpdate => 1 << 19,
-            XIEventMask::TouchEnd => 1 << 20,
-            XIEventMask::TouchOwnership => 1 << 21,
-            XIEventMask::RawTouchBegin => 1 << 22,
-            XIEventMask::RawTouchUpdate => 1 << 23,
-            XIEventMask::RawTouchEnd => 1 << 24,
-            XIEventMask::BarrierHit => 1 << 25,
-            XIEventMask::BarrierLeave => 1 << 26,
-        }
+        input.0
     }
 }
 impl From<XIEventMask> for Option<u32> {
+    #[inline]
     fn from(input: XIEventMask) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u32> for XIEventMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            2 => Ok(XIEventMask::DeviceChanged),
-            4 => Ok(XIEventMask::KeyPress),
-            8 => Ok(XIEventMask::KeyRelease),
-            16 => Ok(XIEventMask::ButtonPress),
-            32 => Ok(XIEventMask::ButtonRelease),
-            64 => Ok(XIEventMask::Motion),
-            128 => Ok(XIEventMask::Enter),
-            256 => Ok(XIEventMask::Leave),
-            512 => Ok(XIEventMask::FocusIn),
-            1024 => Ok(XIEventMask::FocusOut),
-            2048 => Ok(XIEventMask::Hierarchy),
-            4096 => Ok(XIEventMask::Property),
-            8192 => Ok(XIEventMask::RawKeyPress),
-            16384 => Ok(XIEventMask::RawKeyRelease),
-            32768 => Ok(XIEventMask::RawButtonPress),
-            65536 => Ok(XIEventMask::RawButtonRelease),
-            131_072 => Ok(XIEventMask::RawMotion),
-            262_144 => Ok(XIEventMask::TouchBegin),
-            524_288 => Ok(XIEventMask::TouchUpdate),
-            1_048_576 => Ok(XIEventMask::TouchEnd),
-            2_097_152 => Ok(XIEventMask::TouchOwnership),
-            4_194_304 => Ok(XIEventMask::RawTouchBegin),
-            8_388_608 => Ok(XIEventMask::RawTouchUpdate),
-            16_777_216 => Ok(XIEventMask::RawTouchEnd),
-            33_554_432 => Ok(XIEventMask::BarrierHit),
-            67_108_864 => Ok(XIEventMask::BarrierLeave),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for XIEventMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for XIEventMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for XIEventMask {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 bitmask_binop!(XIEventMask, u32);
@@ -11530,336 +11370,296 @@ impl TryFrom<&[u8]> for XIQueryVersionReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum DeviceClassType {
-    Key = 0,
-    Button = 1,
-    Valuator = 2,
-    Scroll = 3,
-    Touch = 8,
-}
-impl From<DeviceClassType> for u8 {
-    fn from(input: DeviceClassType) -> Self {
-        match input {
-            DeviceClassType::Key => 0,
-            DeviceClassType::Button => 1,
-            DeviceClassType::Valuator => 2,
-            DeviceClassType::Scroll => 3,
-            DeviceClassType::Touch => 8,
-        }
-    }
+pub struct DeviceClassType(u16);
+impl DeviceClassType {
+    pub const KEY: Self = Self(0);
+    pub const BUTTON: Self = Self(1);
+    pub const VALUATOR: Self = Self(2);
+    pub const SCROLL: Self = Self(3);
+    pub const TOUCH: Self = Self(8);
 }
 impl From<DeviceClassType> for Option<u8> {
+    #[inline]
     fn from(input: DeviceClassType) -> Self {
-        Some(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<DeviceClassType> for u16 {
+    #[inline]
     fn from(input: DeviceClassType) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<DeviceClassType> for Option<u16> {
+    #[inline]
     fn from(input: DeviceClassType) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<DeviceClassType> for u32 {
+    #[inline]
     fn from(input: DeviceClassType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<DeviceClassType> for Option<u32> {
+    #[inline]
     fn from(input: DeviceClassType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for DeviceClassType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(DeviceClassType::Key),
-            1 => Ok(DeviceClassType::Button),
-            2 => Ok(DeviceClassType::Valuator),
-            3 => Ok(DeviceClassType::Scroll),
-            8 => Ok(DeviceClassType::Touch),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for DeviceClassType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for DeviceClassType {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for DeviceClassType {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for DeviceClassType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum DeviceType {
-    MasterPointer = 1,
-    MasterKeyboard = 2,
-    SlavePointer = 3,
-    SlaveKeyboard = 4,
-    FloatingSlave = 5,
-}
-impl From<DeviceType> for u8 {
-    fn from(input: DeviceType) -> Self {
-        match input {
-            DeviceType::MasterPointer => 1,
-            DeviceType::MasterKeyboard => 2,
-            DeviceType::SlavePointer => 3,
-            DeviceType::SlaveKeyboard => 4,
-            DeviceType::FloatingSlave => 5,
-        }
-    }
+pub struct DeviceType(u16);
+impl DeviceType {
+    pub const MASTER_POINTER: Self = Self(1);
+    pub const MASTER_KEYBOARD: Self = Self(2);
+    pub const SLAVE_POINTER: Self = Self(3);
+    pub const SLAVE_KEYBOARD: Self = Self(4);
+    pub const FLOATING_SLAVE: Self = Self(5);
 }
 impl From<DeviceType> for Option<u8> {
+    #[inline]
     fn from(input: DeviceType) -> Self {
-        Some(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<DeviceType> for u16 {
+    #[inline]
     fn from(input: DeviceType) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<DeviceType> for Option<u16> {
+    #[inline]
     fn from(input: DeviceType) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<DeviceType> for u32 {
+    #[inline]
     fn from(input: DeviceType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<DeviceType> for Option<u32> {
+    #[inline]
     fn from(input: DeviceType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for DeviceType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(DeviceType::MasterPointer),
-            2 => Ok(DeviceType::MasterKeyboard),
-            3 => Ok(DeviceType::SlavePointer),
-            4 => Ok(DeviceType::SlaveKeyboard),
-            5 => Ok(DeviceType::FloatingSlave),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for DeviceType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for DeviceType {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for DeviceType {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for DeviceType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ScrollFlags {
-    NoEmulation = 1 << 0,
-    Preferred = 1 << 1,
+pub struct ScrollFlags(u8);
+impl ScrollFlags {
+    pub const NO_EMULATION: Self = Self(1 << 0);
+    pub const PREFERRED: Self = Self(1 << 1);
 }
 impl From<ScrollFlags> for u8 {
+    #[inline]
     fn from(input: ScrollFlags) -> Self {
-        match input {
-            ScrollFlags::NoEmulation => 1 << 0,
-            ScrollFlags::Preferred => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<ScrollFlags> for Option<u8> {
+    #[inline]
     fn from(input: ScrollFlags) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ScrollFlags> for u16 {
+    #[inline]
     fn from(input: ScrollFlags) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ScrollFlags> for Option<u16> {
+    #[inline]
     fn from(input: ScrollFlags) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ScrollFlags> for u32 {
+    #[inline]
     fn from(input: ScrollFlags) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ScrollFlags> for Option<u32> {
+    #[inline]
     fn from(input: ScrollFlags) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ScrollFlags {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ScrollFlags::NoEmulation),
-            2 => Ok(ScrollFlags::Preferred),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ScrollFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ScrollFlags {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ScrollFlags {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ScrollFlags, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ScrollType {
-    Vertical = 1,
-    Horizontal = 2,
-}
-impl From<ScrollType> for u8 {
-    fn from(input: ScrollType) -> Self {
-        match input {
-            ScrollType::Vertical => 1,
-            ScrollType::Horizontal => 2,
-        }
-    }
+pub struct ScrollType(u16);
+impl ScrollType {
+    pub const VERTICAL: Self = Self(1);
+    pub const HORIZONTAL: Self = Self(2);
 }
 impl From<ScrollType> for Option<u8> {
+    #[inline]
     fn from(input: ScrollType) -> Self {
-        Some(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<ScrollType> for u16 {
+    #[inline]
     fn from(input: ScrollType) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<ScrollType> for Option<u16> {
+    #[inline]
     fn from(input: ScrollType) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<ScrollType> for u32 {
+    #[inline]
     fn from(input: ScrollType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ScrollType> for Option<u32> {
+    #[inline]
     fn from(input: ScrollType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ScrollType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ScrollType::Vertical),
-            2 => Ok(ScrollType::Horizontal),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ScrollType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for ScrollType {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for ScrollType {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for ScrollType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum TouchMode {
-    Direct = 1,
-    Dependent = 2,
+pub struct TouchMode(u8);
+impl TouchMode {
+    pub const DIRECT: Self = Self(1);
+    pub const DEPENDENT: Self = Self(2);
 }
 impl From<TouchMode> for u8 {
+    #[inline]
     fn from(input: TouchMode) -> Self {
-        match input {
-            TouchMode::Direct => 1,
-            TouchMode::Dependent => 2,
-        }
+        input.0
     }
 }
 impl From<TouchMode> for Option<u8> {
+    #[inline]
     fn from(input: TouchMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<TouchMode> for u16 {
+    #[inline]
     fn from(input: TouchMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<TouchMode> for Option<u16> {
+    #[inline]
     fn from(input: TouchMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<TouchMode> for u32 {
+    #[inline]
     fn from(input: TouchMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<TouchMode> for Option<u32> {
+    #[inline]
     fn from(input: TouchMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for TouchMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(TouchMode::Direct),
-            2 => Ok(TouchMode::Dependent),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for TouchMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for TouchMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for TouchMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -11879,7 +11679,7 @@ impl TryParse for ButtonClass {
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
         let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::InvalidExpression)?.checked_div(32u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = ButtonClass { type_, len, sourceid, state, labels };
         Ok((result, remaining))
     }
@@ -11939,7 +11739,7 @@ impl TryParse for KeyClass {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (num_keys, remaining) = u16::try_parse(remaining)?;
         let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = KeyClass { type_, len, sourceid, keys };
         Ok((result, remaining))
     }
@@ -12003,8 +11803,8 @@ impl TryParse for ScrollClass {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (increment, remaining) = Fp3232::try_parse(remaining)?;
-        let type_ = type_.try_into()?;
-        let scroll_type = scroll_type.try_into()?;
+        let type_ = type_.into();
+        let scroll_type = scroll_type.into();
         let result = ScrollClass { type_, len, sourceid, number, scroll_type, flags, increment };
         Ok((result, remaining))
     }
@@ -12080,8 +11880,8 @@ impl TryParse for TouchClass {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (num_touches, remaining) = u8::try_parse(remaining)?;
-        let type_ = type_.try_into()?;
-        let mode = mode.try_into()?;
+        let type_ = type_.into();
+        let mode = mode.into();
         let result = TouchClass { type_, len, sourceid, mode, num_touches };
         Ok((result, remaining))
     }
@@ -12147,8 +11947,8 @@ impl TryParse for ValuatorClass {
         let (resolution, remaining) = u32::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let type_ = type_.try_into()?;
-        let mode = mode.try_into()?;
+        let type_ = type_.into();
+        let mode = mode.into();
         let result = ValuatorClass { type_, len, sourceid, number, label, min, max, value, resolution, mode };
         Ok((result, remaining))
     }
@@ -12351,7 +12151,7 @@ impl TryParse for DeviceClassDataValuator {
         let (resolution, remaining) = u32::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let result = DeviceClassDataValuator { number, label, min, max, value, resolution, mode };
         Ok((result, remaining))
     }
@@ -12439,7 +12239,7 @@ impl TryParse for DeviceClassDataScroll {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (increment, remaining) = Fp3232::try_parse(remaining)?;
-        let scroll_type = scroll_type.try_into()?;
+        let scroll_type = scroll_type.into();
         let result = DeviceClassDataScroll { number, scroll_type, flags, increment };
         Ok((result, remaining))
     }
@@ -12496,7 +12296,7 @@ impl TryParse for DeviceClassDataTouch {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (num_touches, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let result = DeviceClassDataTouch { mode, num_touches };
         Ok((result, remaining))
     }
@@ -12536,31 +12336,31 @@ impl DeviceClassData {
         let switch_expr = u32::from(type_);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(DeviceClassType::Key) {
+        if switch_expr == u32::from(DeviceClassType::KEY) {
             let (key, new_remaining) = DeviceClassDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Key(key));
         }
-        if switch_expr == u32::from(DeviceClassType::Button) {
+        if switch_expr == u32::from(DeviceClassType::BUTTON) {
             let (button, new_remaining) = DeviceClassDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Button(button));
         }
-        if switch_expr == u32::from(DeviceClassType::Valuator) {
+        if switch_expr == u32::from(DeviceClassType::VALUATOR) {
             let (valuator, new_remaining) = DeviceClassDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Valuator(valuator));
         }
-        if switch_expr == u32::from(DeviceClassType::Scroll) {
+        if switch_expr == u32::from(DeviceClassType::SCROLL) {
             let (scroll, new_remaining) = DeviceClassDataScroll::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Scroll(scroll));
         }
-        if switch_expr == u32::from(DeviceClassType::Touch) {
+        if switch_expr == u32::from(DeviceClassType::TOUCH) {
             let (touch, new_remaining) = DeviceClassDataTouch::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -12625,11 +12425,11 @@ impl DeviceClassData {
 impl DeviceClassData {
     fn switch_expr(&self) -> u32 {
         match self {
-            DeviceClassData::Key(_) => u32::from(DeviceClassType::Key),
-            DeviceClassData::Button(_) => u32::from(DeviceClassType::Button),
-            DeviceClassData::Valuator(_) => u32::from(DeviceClassType::Valuator),
-            DeviceClassData::Scroll(_) => u32::from(DeviceClassType::Scroll),
-            DeviceClassData::Touch(_) => u32::from(DeviceClassType::Touch),
+            DeviceClassData::Key(_) => u32::from(DeviceClassType::KEY),
+            DeviceClassData::Button(_) => u32::from(DeviceClassType::BUTTON),
+            DeviceClassData::Valuator(_) => u32::from(DeviceClassType::VALUATOR),
+            DeviceClassData::Scroll(_) => u32::from(DeviceClassType::SCROLL),
+            DeviceClassData::Touch(_) => u32::from(DeviceClassType::TOUCH),
         }
     }
 }
@@ -12699,7 +12499,7 @@ impl TryParse for XIDeviceInfo {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = XIDeviceInfo { deviceid, type_, attachment, enabled, name, classes };
         Ok((result, remaining))
     }
@@ -13067,73 +12867,27 @@ impl TryFrom<&[u8]> for XIGetFocusReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GrabOwner {
-    NoOwner = 0,
-    Owner = 1,
+pub struct GrabOwner(bool);
+impl GrabOwner {
+    pub const NO_OWNER: Self = Self(false);
+    pub const OWNER: Self = Self(true);
 }
 impl From<GrabOwner> for bool {
+    #[inline]
     fn from(input: GrabOwner) -> Self {
-        match input {
-            GrabOwner::NoOwner => false,
-            GrabOwner::Owner => true,
-        }
+        input.0
     }
 }
-impl From<GrabOwner> for u8 {
+impl From<GrabOwner> for Option<bool> {
+    #[inline]
     fn from(input: GrabOwner) -> Self {
-        match input {
-            GrabOwner::NoOwner => 0,
-            GrabOwner::Owner => 1,
-        }
+        Some(input.0)
     }
 }
-impl From<GrabOwner> for Option<u8> {
-    fn from(input: GrabOwner) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<GrabOwner> for u16 {
-    fn from(input: GrabOwner) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<GrabOwner> for Option<u16> {
-    fn from(input: GrabOwner) -> Self {
-        Some(u16::from(input))
-    }
-}
-impl From<GrabOwner> for u32 {
-    fn from(input: GrabOwner) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<GrabOwner> for Option<u32> {
-    fn from(input: GrabOwner) -> Self {
-        Some(u32::from(input))
-    }
-}
-impl TryFrom<u8> for GrabOwner {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GrabOwner::NoOwner),
-            1 => Ok(GrabOwner::Owner),
-            _ => Err(ParseError::InvalidValue),
-        }
-    }
-}
-impl TryFrom<u16> for GrabOwner {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
-    }
-}
-impl TryFrom<u32> for GrabOwner {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<bool> for GrabOwner {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value)
     }
 }
 
@@ -13222,11 +12976,11 @@ impl<'input> XIGrabDeviceRequest<'input> {
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let (paired_device_mode, remaining) = u8::try_parse(remaining)?;
-        let paired_device_mode = paired_device_mode.try_into()?;
+        let paired_device_mode = paired_device_mode.into();
         let (owner_events, remaining) = bool::try_parse(remaining)?;
-        let owner_events = u8::from(owner_events).try_into()?;
+        let owner_events = owner_events.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (mask_len, remaining) = u16::try_parse(remaining)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -13298,7 +13052,7 @@ impl TryParse for XIGrabDeviceReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let status = status.try_into()?;
+        let status = status.into();
         let result = XIGrabDeviceReply { sequence, length, status };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -13393,83 +13147,69 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum EventMode {
-    AsyncDevice = 0,
-    SyncDevice = 1,
-    ReplayDevice = 2,
-    AsyncPairedDevice = 3,
-    AsyncPair = 4,
-    SyncPair = 5,
-    AcceptTouch = 6,
-    RejectTouch = 7,
+pub struct EventMode(u8);
+impl EventMode {
+    pub const ASYNC_DEVICE: Self = Self(0);
+    pub const SYNC_DEVICE: Self = Self(1);
+    pub const REPLAY_DEVICE: Self = Self(2);
+    pub const ASYNC_PAIRED_DEVICE: Self = Self(3);
+    pub const ASYNC_PAIR: Self = Self(4);
+    pub const SYNC_PAIR: Self = Self(5);
+    pub const ACCEPT_TOUCH: Self = Self(6);
+    pub const REJECT_TOUCH: Self = Self(7);
 }
 impl From<EventMode> for u8 {
+    #[inline]
     fn from(input: EventMode) -> Self {
-        match input {
-            EventMode::AsyncDevice => 0,
-            EventMode::SyncDevice => 1,
-            EventMode::ReplayDevice => 2,
-            EventMode::AsyncPairedDevice => 3,
-            EventMode::AsyncPair => 4,
-            EventMode::SyncPair => 5,
-            EventMode::AcceptTouch => 6,
-            EventMode::RejectTouch => 7,
-        }
+        input.0
     }
 }
 impl From<EventMode> for Option<u8> {
+    #[inline]
     fn from(input: EventMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<EventMode> for u16 {
+    #[inline]
     fn from(input: EventMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<EventMode> for Option<u16> {
+    #[inline]
     fn from(input: EventMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<EventMode> for u32 {
+    #[inline]
     fn from(input: EventMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<EventMode> for Option<u32> {
+    #[inline]
     fn from(input: EventMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for EventMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(EventMode::AsyncDevice),
-            1 => Ok(EventMode::SyncDevice),
-            2 => Ok(EventMode::ReplayDevice),
-            3 => Ok(EventMode::AsyncPairedDevice),
-            4 => Ok(EventMode::AsyncPair),
-            5 => Ok(EventMode::SyncPair),
-            6 => Ok(EventMode::AcceptTouch),
-            7 => Ok(EventMode::RejectTouch),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for EventMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for EventMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for EventMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -13541,7 +13281,7 @@ impl XIAllowEventsRequest {
         let (time, remaining) = xproto::Timestamp::try_parse(value)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (event_mode, remaining) = u8::try_parse(remaining)?;
-        let event_mode = event_mode.try_into()?;
+        let event_mode = event_mode.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (touchid, remaining) = u32::try_parse(remaining)?;
         let (grab_window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -13577,168 +13317,176 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GrabMode22 {
-    Sync = 0,
-    Async = 1,
-    Touch = 2,
+pub struct GrabMode22(u8);
+impl GrabMode22 {
+    pub const SYNC: Self = Self(0);
+    pub const ASYNC: Self = Self(1);
+    pub const TOUCH: Self = Self(2);
 }
 impl From<GrabMode22> for u8 {
+    #[inline]
     fn from(input: GrabMode22) -> Self {
-        match input {
-            GrabMode22::Sync => 0,
-            GrabMode22::Async => 1,
-            GrabMode22::Touch => 2,
-        }
+        input.0
     }
 }
 impl From<GrabMode22> for Option<u8> {
+    #[inline]
     fn from(input: GrabMode22) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<GrabMode22> for u16 {
+    #[inline]
     fn from(input: GrabMode22) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<GrabMode22> for Option<u16> {
+    #[inline]
     fn from(input: GrabMode22) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<GrabMode22> for u32 {
+    #[inline]
     fn from(input: GrabMode22) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<GrabMode22> for Option<u32> {
+    #[inline]
     fn from(input: GrabMode22) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for GrabMode22 {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GrabMode22::Sync),
-            1 => Ok(GrabMode22::Async),
-            2 => Ok(GrabMode22::Touch),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for GrabMode22 {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for GrabMode22 {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for GrabMode22 {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GrabType {
-    Button = 0,
-    Keycode = 1,
-    Enter = 2,
-    FocusIn = 3,
-    TouchBegin = 4,
+pub struct GrabType(u8);
+impl GrabType {
+    pub const BUTTON: Self = Self(0);
+    pub const KEYCODE: Self = Self(1);
+    pub const ENTER: Self = Self(2);
+    pub const FOCUS_IN: Self = Self(3);
+    pub const TOUCH_BEGIN: Self = Self(4);
 }
 impl From<GrabType> for u8 {
+    #[inline]
     fn from(input: GrabType) -> Self {
-        match input {
-            GrabType::Button => 0,
-            GrabType::Keycode => 1,
-            GrabType::Enter => 2,
-            GrabType::FocusIn => 3,
-            GrabType::TouchBegin => 4,
-        }
+        input.0
     }
 }
 impl From<GrabType> for Option<u8> {
+    #[inline]
     fn from(input: GrabType) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<GrabType> for u16 {
+    #[inline]
     fn from(input: GrabType) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<GrabType> for Option<u16> {
+    #[inline]
     fn from(input: GrabType) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<GrabType> for u32 {
+    #[inline]
     fn from(input: GrabType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<GrabType> for Option<u32> {
+    #[inline]
     fn from(input: GrabType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for GrabType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GrabType::Button),
-            1 => Ok(GrabType::Keycode),
-            2 => Ok(GrabType::Enter),
-            3 => Ok(GrabType::FocusIn),
-            4 => Ok(GrabType::TouchBegin),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for GrabType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for GrabType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for GrabType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum ModifierMask {
-    Any = 1 << 31,
+pub struct ModifierMask(u32);
+impl ModifierMask {
+    pub const ANY: Self = Self(1 << 31);
+}
+impl From<ModifierMask> for Option<u8> {
+    #[inline]
+    fn from(input: ModifierMask) -> Self {
+        u8::try_from(input.0).ok()
+    }
+}
+impl From<ModifierMask> for Option<u16> {
+    #[inline]
+    fn from(input: ModifierMask) -> Self {
+        u16::try_from(input.0).ok()
+    }
 }
 impl From<ModifierMask> for u32 {
+    #[inline]
     fn from(input: ModifierMask) -> Self {
-        match input {
-            ModifierMask::Any => 1 << 31,
-        }
+        input.0
     }
 }
 impl From<ModifierMask> for Option<u32> {
+    #[inline]
     fn from(input: ModifierMask) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u32> for ModifierMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            2_147_483_648 => Ok(ModifierMask::Any),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ModifierMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ModifierMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ModifierMask {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 bitmask_binop!(ModifierMask, u32);
@@ -13753,7 +13501,7 @@ impl TryParse for GrabModifierInfo {
         let (modifiers, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let status = status.try_into()?;
+        let status = status.into();
         let result = GrabModifierInfo { modifiers, status };
         Ok((result, remaining))
     }
@@ -13893,13 +13641,13 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         let (num_modifiers, remaining) = u16::try_parse(remaining)?;
         let (mask_len, remaining) = u16::try_parse(remaining)?;
         let (grab_type, remaining) = u8::try_parse(remaining)?;
-        let grab_type = grab_type.try_into()?;
+        let grab_type = grab_type.into();
         let (grab_mode, remaining) = u8::try_parse(remaining)?;
-        let grab_mode = grab_mode.try_into()?;
+        let grab_mode = grab_mode.into();
         let (paired_device_mode, remaining) = u8::try_parse(remaining)?;
-        let paired_device_mode = paired_device_mode.try_into()?;
+        let paired_device_mode = paired_device_mode.into();
         let (owner_events, remaining) = bool::try_parse(remaining)?;
-        let owner_events = u8::from(owner_events).try_into()?;
+        let owner_events = owner_events.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -14085,7 +13833,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (num_modifiers, remaining) = u16::try_parse(remaining)?;
         let (grab_type, remaining) = u8::try_parse(remaining)?;
-        let grab_type = grab_type.try_into()?;
+        let grab_type = grab_type.into();
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (modifiers, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
         let _ = remaining;
@@ -14254,7 +14002,7 @@ impl XIChangePropertyAux {
         let switch_expr = u32::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(PropertyFormat::M8Bits) {
+        if switch_expr == u32::from(PropertyFormat::M8_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -14267,7 +14015,7 @@ impl XIChangePropertyAux {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIChangePropertyAux::Data8(data8));
         }
-        if switch_expr == u32::from(PropertyFormat::M16Bits) {
+        if switch_expr == u32::from(PropertyFormat::M16_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -14279,7 +14027,7 @@ impl XIChangePropertyAux {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIChangePropertyAux::Data16(data16));
         }
-        if switch_expr == u32::from(PropertyFormat::M32Bits) {
+        if switch_expr == u32::from(PropertyFormat::M32_BITS) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -14342,9 +14090,9 @@ impl XIChangePropertyAux {
 impl XIChangePropertyAux {
     fn switch_expr(&self) -> u32 {
         match self {
-            XIChangePropertyAux::Data8(_) => u32::from(PropertyFormat::M8Bits),
-            XIChangePropertyAux::Data16(_) => u32::from(PropertyFormat::M16Bits),
-            XIChangePropertyAux::Data32(_) => u32::from(PropertyFormat::M32Bits),
+            XIChangePropertyAux::Data8(_) => u32::from(PropertyFormat::M8_BITS),
+            XIChangePropertyAux::Data16(_) => u32::from(PropertyFormat::M16_BITS),
+            XIChangePropertyAux::Data32(_) => u32::from(PropertyFormat::M32_BITS),
         }
     }
 }
@@ -14423,7 +14171,7 @@ impl<'input> XIChangePropertyRequest<'input> {
         }
         let (deviceid, remaining) = DeviceId::try_parse(value)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let mode = mode.try_into()?;
+        let mode = mode.into();
         let (format, remaining) = u8::try_parse(remaining)?;
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -14668,7 +14416,7 @@ impl XIGetPropertyItems {
         let switch_expr = u32::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(PropertyFormat::M8Bits) {
+        if switch_expr == u32::from(PropertyFormat::M8_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -14681,7 +14429,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data8(data8));
         }
-        if switch_expr == u32::from(PropertyFormat::M16Bits) {
+        if switch_expr == u32::from(PropertyFormat::M16_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
@@ -14693,7 +14441,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data16(data16));
         }
-        if switch_expr == u32::from(PropertyFormat::M32Bits) {
+        if switch_expr == u32::from(PropertyFormat::M32_BITS) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ConversionFailed))?)?;
             outer_remaining = remaining;
@@ -15113,62 +14861,62 @@ impl From<DeviceValuatorEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum MoreEventsMask {
-    MoreEvents = 1 << 7,
+pub struct MoreEventsMask(u8);
+impl MoreEventsMask {
+    pub const MORE_EVENTS: Self = Self(1 << 7);
 }
 impl From<MoreEventsMask> for u8 {
+    #[inline]
     fn from(input: MoreEventsMask) -> Self {
-        match input {
-            MoreEventsMask::MoreEvents => 1 << 7,
-        }
+        input.0
     }
 }
 impl From<MoreEventsMask> for Option<u8> {
+    #[inline]
     fn from(input: MoreEventsMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<MoreEventsMask> for u16 {
+    #[inline]
     fn from(input: MoreEventsMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<MoreEventsMask> for Option<u16> {
+    #[inline]
     fn from(input: MoreEventsMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<MoreEventsMask> for u32 {
+    #[inline]
     fn from(input: MoreEventsMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<MoreEventsMask> for Option<u32> {
+    #[inline]
     fn from(input: MoreEventsMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for MoreEventsMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            128 => Ok(MoreEventsMask::MoreEvents),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for MoreEventsMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for MoreEventsMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for MoreEventsMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(MoreEventsMask, u8);
@@ -15319,8 +15067,8 @@ impl TryParse for DeviceFocusInEvent {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
-        let detail = detail.try_into()?;
-        let mode = mode.try_into()?;
+        let detail = detail.into();
+        let mode = mode.into();
         let result = DeviceFocusInEvent { response_type, detail, sequence, time, window, mode, device_id };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -15398,74 +15146,66 @@ pub const PROXIMITY_OUT_EVENT: u8 = 9;
 pub type ProximityOutEvent = DeviceKeyPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ClassesReportedMask {
-    OutOfProximity = 1 << 7,
-    DeviceModeAbsolute = 1 << 6,
-    ReportingValuators = 1 << 2,
-    ReportingButtons = 1 << 1,
-    ReportingKeys = 1 << 0,
+pub struct ClassesReportedMask(u8);
+impl ClassesReportedMask {
+    pub const OUT_OF_PROXIMITY: Self = Self(1 << 7);
+    pub const DEVICE_MODE_ABSOLUTE: Self = Self(1 << 6);
+    pub const REPORTING_VALUATORS: Self = Self(1 << 2);
+    pub const REPORTING_BUTTONS: Self = Self(1 << 1);
+    pub const REPORTING_KEYS: Self = Self(1 << 0);
 }
 impl From<ClassesReportedMask> for u8 {
+    #[inline]
     fn from(input: ClassesReportedMask) -> Self {
-        match input {
-            ClassesReportedMask::OutOfProximity => 1 << 7,
-            ClassesReportedMask::DeviceModeAbsolute => 1 << 6,
-            ClassesReportedMask::ReportingValuators => 1 << 2,
-            ClassesReportedMask::ReportingButtons => 1 << 1,
-            ClassesReportedMask::ReportingKeys => 1 << 0,
-        }
+        input.0
     }
 }
 impl From<ClassesReportedMask> for Option<u8> {
+    #[inline]
     fn from(input: ClassesReportedMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ClassesReportedMask> for u16 {
+    #[inline]
     fn from(input: ClassesReportedMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ClassesReportedMask> for Option<u16> {
+    #[inline]
     fn from(input: ClassesReportedMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ClassesReportedMask> for u32 {
+    #[inline]
     fn from(input: ClassesReportedMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ClassesReportedMask> for Option<u32> {
+    #[inline]
     fn from(input: ClassesReportedMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ClassesReportedMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            128 => Ok(ClassesReportedMask::OutOfProximity),
-            64 => Ok(ClassesReportedMask::DeviceModeAbsolute),
-            4 => Ok(ClassesReportedMask::ReportingValuators),
-            2 => Ok(ClassesReportedMask::ReportingButtons),
-            1 => Ok(ClassesReportedMask::ReportingKeys),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ClassesReportedMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ClassesReportedMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ClassesReportedMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ClassesReportedMask, u8);
@@ -15601,7 +15341,7 @@ impl TryParse for DeviceMappingNotifyEvent {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let request = request.try_into()?;
+        let request = request.into();
         let result = DeviceMappingNotifyEvent { response_type, device_id, sequence, request, first_keycode, count, time };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -15667,73 +15407,63 @@ impl From<DeviceMappingNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ChangeDevice {
-    NewPointer = 0,
-    NewKeyboard = 1,
-}
-impl From<ChangeDevice> for bool {
-    fn from(input: ChangeDevice) -> Self {
-        match input {
-            ChangeDevice::NewPointer => false,
-            ChangeDevice::NewKeyboard => true,
-        }
-    }
+pub struct ChangeDevice(u8);
+impl ChangeDevice {
+    pub const NEW_POINTER: Self = Self(0);
+    pub const NEW_KEYBOARD: Self = Self(1);
 }
 impl From<ChangeDevice> for u8 {
+    #[inline]
     fn from(input: ChangeDevice) -> Self {
-        match input {
-            ChangeDevice::NewPointer => 0,
-            ChangeDevice::NewKeyboard => 1,
-        }
+        input.0
     }
 }
 impl From<ChangeDevice> for Option<u8> {
+    #[inline]
     fn from(input: ChangeDevice) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ChangeDevice> for u16 {
+    #[inline]
     fn from(input: ChangeDevice) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ChangeDevice> for Option<u16> {
+    #[inline]
     fn from(input: ChangeDevice) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ChangeDevice> for u32 {
+    #[inline]
     fn from(input: ChangeDevice) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ChangeDevice> for Option<u32> {
+    #[inline]
     fn from(input: ChangeDevice) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ChangeDevice {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(ChangeDevice::NewPointer),
-            1 => Ok(ChangeDevice::NewKeyboard),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ChangeDevice {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ChangeDevice {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ChangeDevice {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -15756,7 +15486,7 @@ impl TryParse for ChangeDeviceNotifyEvent {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (request, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::InsufficientData)?;
-        let request = request.try_into()?;
+        let request = request.into();
         let result = ChangeDeviceNotifyEvent { response_type, device_id, sequence, time, request };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -15974,77 +15704,67 @@ impl From<DeviceButtonStateNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum DeviceChange {
-    Added = 0,
-    Removed = 1,
-    Enabled = 2,
-    Disabled = 3,
-    Unrecoverable = 4,
-    ControlChanged = 5,
+pub struct DeviceChange(u8);
+impl DeviceChange {
+    pub const ADDED: Self = Self(0);
+    pub const REMOVED: Self = Self(1);
+    pub const ENABLED: Self = Self(2);
+    pub const DISABLED: Self = Self(3);
+    pub const UNRECOVERABLE: Self = Self(4);
+    pub const CONTROL_CHANGED: Self = Self(5);
 }
 impl From<DeviceChange> for u8 {
+    #[inline]
     fn from(input: DeviceChange) -> Self {
-        match input {
-            DeviceChange::Added => 0,
-            DeviceChange::Removed => 1,
-            DeviceChange::Enabled => 2,
-            DeviceChange::Disabled => 3,
-            DeviceChange::Unrecoverable => 4,
-            DeviceChange::ControlChanged => 5,
-        }
+        input.0
     }
 }
 impl From<DeviceChange> for Option<u8> {
+    #[inline]
     fn from(input: DeviceChange) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<DeviceChange> for u16 {
+    #[inline]
     fn from(input: DeviceChange) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<DeviceChange> for Option<u16> {
+    #[inline]
     fn from(input: DeviceChange) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<DeviceChange> for u32 {
+    #[inline]
     fn from(input: DeviceChange) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<DeviceChange> for Option<u32> {
+    #[inline]
     fn from(input: DeviceChange) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for DeviceChange {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(DeviceChange::Added),
-            1 => Ok(DeviceChange::Removed),
-            2 => Ok(DeviceChange::Enabled),
-            3 => Ok(DeviceChange::Disabled),
-            4 => Ok(DeviceChange::Unrecoverable),
-            5 => Ok(DeviceChange::ControlChanged),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for DeviceChange {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for DeviceChange {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for DeviceChange {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -16070,7 +15790,7 @@ impl TryParse for DevicePresenceNotifyEvent {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (control, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let devchange = devchange.try_into()?;
+        let devchange = devchange.into();
         let result = DevicePresenceNotifyEvent { response_type, sequence, time, devchange, device_id, control };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -16155,7 +15875,7 @@ impl TryParse for DevicePropertyNotifyEvent {
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
         let remaining = remaining.get(19..).ok_or(ParseError::InsufficientData)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let state = state.try_into()?;
+        let state = state.into();
         let result = DevicePropertyNotifyEvent { response_type, state, sequence, time, property, device_id };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -16220,65 +15940,63 @@ impl From<DevicePropertyNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ChangeReason {
-    SlaveSwitch = 1,
-    DeviceChange = 2,
+pub struct ChangeReason(u8);
+impl ChangeReason {
+    pub const SLAVE_SWITCH: Self = Self(1);
+    pub const DEVICE_CHANGE: Self = Self(2);
 }
 impl From<ChangeReason> for u8 {
+    #[inline]
     fn from(input: ChangeReason) -> Self {
-        match input {
-            ChangeReason::SlaveSwitch => 1,
-            ChangeReason::DeviceChange => 2,
-        }
+        input.0
     }
 }
 impl From<ChangeReason> for Option<u8> {
+    #[inline]
     fn from(input: ChangeReason) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ChangeReason> for u16 {
+    #[inline]
     fn from(input: ChangeReason) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ChangeReason> for Option<u16> {
+    #[inline]
     fn from(input: ChangeReason) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ChangeReason> for u32 {
+    #[inline]
     fn from(input: ChangeReason) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ChangeReason> for Option<u32> {
+    #[inline]
     fn from(input: ChangeReason) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ChangeReason {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ChangeReason::SlaveSwitch),
-            2 => Ok(ChangeReason::DeviceChange),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ChangeReason {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ChangeReason {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ChangeReason {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -16312,7 +16030,7 @@ impl TryParse for DeviceChangedEvent {
         let (reason, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let reason = reason.try_into()?;
+        let reason = reason.into();
         let result = DeviceChangedEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, reason, classes };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16343,30 +16061,50 @@ impl DeviceChangedEvent {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum KeyEventFlags {
-    KeyRepeat = 1 << 16,
+pub struct KeyEventFlags(u32);
+impl KeyEventFlags {
+    pub const KEY_REPEAT: Self = Self(1 << 16);
+}
+impl From<KeyEventFlags> for Option<u8> {
+    #[inline]
+    fn from(input: KeyEventFlags) -> Self {
+        u8::try_from(input.0).ok()
+    }
+}
+impl From<KeyEventFlags> for Option<u16> {
+    #[inline]
+    fn from(input: KeyEventFlags) -> Self {
+        u16::try_from(input.0).ok()
+    }
 }
 impl From<KeyEventFlags> for u32 {
+    #[inline]
     fn from(input: KeyEventFlags) -> Self {
-        match input {
-            KeyEventFlags::KeyRepeat => 1 << 16,
-        }
+        input.0
     }
 }
 impl From<KeyEventFlags> for Option<u32> {
+    #[inline]
     fn from(input: KeyEventFlags) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u32> for KeyEventFlags {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            65536 => Ok(KeyEventFlags::KeyRepeat),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for KeyEventFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for KeyEventFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for KeyEventFlags {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 bitmask_binop!(KeyEventFlags, u32);
@@ -16473,30 +16211,50 @@ pub const KEY_RELEASE_EVENT: u16 = 3;
 pub type KeyReleaseEvent = KeyPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum PointerEventFlags {
-    PointerEmulated = 1 << 16,
+pub struct PointerEventFlags(u32);
+impl PointerEventFlags {
+    pub const POINTER_EMULATED: Self = Self(1 << 16);
+}
+impl From<PointerEventFlags> for Option<u8> {
+    #[inline]
+    fn from(input: PointerEventFlags) -> Self {
+        u8::try_from(input.0).ok()
+    }
+}
+impl From<PointerEventFlags> for Option<u16> {
+    #[inline]
+    fn from(input: PointerEventFlags) -> Self {
+        u16::try_from(input.0).ok()
+    }
 }
 impl From<PointerEventFlags> for u32 {
+    #[inline]
     fn from(input: PointerEventFlags) -> Self {
-        match input {
-            PointerEventFlags::PointerEmulated => 1 << 16,
-        }
+        input.0
     }
 }
 impl From<PointerEventFlags> for Option<u32> {
+    #[inline]
     fn from(input: PointerEventFlags) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u32> for PointerEventFlags {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            65536 => Ok(PointerEventFlags::PointerEmulated),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for PointerEventFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for PointerEventFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for PointerEventFlags {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 bitmask_binop!(PointerEventFlags, u32);
@@ -16607,158 +16365,134 @@ pub const MOTION_EVENT: u16 = 6;
 pub type MotionEvent = ButtonPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum NotifyMode {
-    Normal = 0,
-    Grab = 1,
-    Ungrab = 2,
-    WhileGrabbed = 3,
-    PassiveGrab = 4,
-    PassiveUngrab = 5,
+pub struct NotifyMode(u8);
+impl NotifyMode {
+    pub const NORMAL: Self = Self(0);
+    pub const GRAB: Self = Self(1);
+    pub const UNGRAB: Self = Self(2);
+    pub const WHILE_GRABBED: Self = Self(3);
+    pub const PASSIVE_GRAB: Self = Self(4);
+    pub const PASSIVE_UNGRAB: Self = Self(5);
 }
 impl From<NotifyMode> for u8 {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        match input {
-            NotifyMode::Normal => 0,
-            NotifyMode::Grab => 1,
-            NotifyMode::Ungrab => 2,
-            NotifyMode::WhileGrabbed => 3,
-            NotifyMode::PassiveGrab => 4,
-            NotifyMode::PassiveUngrab => 5,
-        }
+        input.0
     }
 }
 impl From<NotifyMode> for Option<u8> {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<NotifyMode> for u16 {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<NotifyMode> for Option<u16> {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<NotifyMode> for u32 {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<NotifyMode> for Option<u32> {
+    #[inline]
     fn from(input: NotifyMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for NotifyMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(NotifyMode::Normal),
-            1 => Ok(NotifyMode::Grab),
-            2 => Ok(NotifyMode::Ungrab),
-            3 => Ok(NotifyMode::WhileGrabbed),
-            4 => Ok(NotifyMode::PassiveGrab),
-            5 => Ok(NotifyMode::PassiveUngrab),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for NotifyMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for NotifyMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for NotifyMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum NotifyDetail {
-    Ancestor = 0,
-    Virtual = 1,
-    Inferior = 2,
-    Nonlinear = 3,
-    NonlinearVirtual = 4,
-    Pointer = 5,
-    PointerRoot = 6,
-    None = 7,
+pub struct NotifyDetail(u8);
+impl NotifyDetail {
+    pub const ANCESTOR: Self = Self(0);
+    pub const VIRTUAL: Self = Self(1);
+    pub const INFERIOR: Self = Self(2);
+    pub const NONLINEAR: Self = Self(3);
+    pub const NONLINEAR_VIRTUAL: Self = Self(4);
+    pub const POINTER: Self = Self(5);
+    pub const POINTER_ROOT: Self = Self(6);
+    pub const NONE: Self = Self(7);
 }
 impl From<NotifyDetail> for u8 {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        match input {
-            NotifyDetail::Ancestor => 0,
-            NotifyDetail::Virtual => 1,
-            NotifyDetail::Inferior => 2,
-            NotifyDetail::Nonlinear => 3,
-            NotifyDetail::NonlinearVirtual => 4,
-            NotifyDetail::Pointer => 5,
-            NotifyDetail::PointerRoot => 6,
-            NotifyDetail::None => 7,
-        }
+        input.0
     }
 }
 impl From<NotifyDetail> for Option<u8> {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<NotifyDetail> for u16 {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<NotifyDetail> for Option<u16> {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<NotifyDetail> for u32 {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<NotifyDetail> for Option<u32> {
+    #[inline]
     fn from(input: NotifyDetail) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for NotifyDetail {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(NotifyDetail::Ancestor),
-            1 => Ok(NotifyDetail::Virtual),
-            2 => Ok(NotifyDetail::Inferior),
-            3 => Ok(NotifyDetail::Nonlinear),
-            4 => Ok(NotifyDetail::NonlinearVirtual),
-            5 => Ok(NotifyDetail::Pointer),
-            6 => Ok(NotifyDetail::PointerRoot),
-            7 => Ok(NotifyDetail::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for NotifyDetail {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for NotifyDetail {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for NotifyDetail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -16815,8 +16549,8 @@ impl TryParse for EnterEvent {
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let mode = mode.try_into()?;
-        let detail = detail.try_into()?;
+        let mode = mode.into();
+        let detail = detail.into();
         let result = EnterEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -16859,83 +16593,69 @@ pub const FOCUS_OUT_EVENT: u16 = 10;
 pub type FocusOutEvent = EnterEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum HierarchyMask {
-    MasterAdded = 1 << 0,
-    MasterRemoved = 1 << 1,
-    SlaveAdded = 1 << 2,
-    SlaveRemoved = 1 << 3,
-    SlaveAttached = 1 << 4,
-    SlaveDetached = 1 << 5,
-    DeviceEnabled = 1 << 6,
-    DeviceDisabled = 1 << 7,
+pub struct HierarchyMask(u8);
+impl HierarchyMask {
+    pub const MASTER_ADDED: Self = Self(1 << 0);
+    pub const MASTER_REMOVED: Self = Self(1 << 1);
+    pub const SLAVE_ADDED: Self = Self(1 << 2);
+    pub const SLAVE_REMOVED: Self = Self(1 << 3);
+    pub const SLAVE_ATTACHED: Self = Self(1 << 4);
+    pub const SLAVE_DETACHED: Self = Self(1 << 5);
+    pub const DEVICE_ENABLED: Self = Self(1 << 6);
+    pub const DEVICE_DISABLED: Self = Self(1 << 7);
 }
 impl From<HierarchyMask> for u8 {
+    #[inline]
     fn from(input: HierarchyMask) -> Self {
-        match input {
-            HierarchyMask::MasterAdded => 1 << 0,
-            HierarchyMask::MasterRemoved => 1 << 1,
-            HierarchyMask::SlaveAdded => 1 << 2,
-            HierarchyMask::SlaveRemoved => 1 << 3,
-            HierarchyMask::SlaveAttached => 1 << 4,
-            HierarchyMask::SlaveDetached => 1 << 5,
-            HierarchyMask::DeviceEnabled => 1 << 6,
-            HierarchyMask::DeviceDisabled => 1 << 7,
-        }
+        input.0
     }
 }
 impl From<HierarchyMask> for Option<u8> {
+    #[inline]
     fn from(input: HierarchyMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<HierarchyMask> for u16 {
+    #[inline]
     fn from(input: HierarchyMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<HierarchyMask> for Option<u16> {
+    #[inline]
     fn from(input: HierarchyMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<HierarchyMask> for u32 {
+    #[inline]
     fn from(input: HierarchyMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<HierarchyMask> for Option<u32> {
+    #[inline]
     fn from(input: HierarchyMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for HierarchyMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(HierarchyMask::MasterAdded),
-            2 => Ok(HierarchyMask::MasterRemoved),
-            4 => Ok(HierarchyMask::SlaveAdded),
-            8 => Ok(HierarchyMask::SlaveRemoved),
-            16 => Ok(HierarchyMask::SlaveAttached),
-            32 => Ok(HierarchyMask::SlaveDetached),
-            64 => Ok(HierarchyMask::DeviceEnabled),
-            128 => Ok(HierarchyMask::DeviceDisabled),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for HierarchyMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for HierarchyMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for HierarchyMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(HierarchyMask, u8);
@@ -16956,7 +16676,7 @@ impl TryParse for HierarchyInfo {
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
-        let type_ = type_.try_into()?;
+        let type_ = type_.into();
         let result = HierarchyInfo { deviceid, attachment, type_, enabled, flags };
         Ok((result, remaining))
     }
@@ -16972,7 +16692,7 @@ impl Serialize for HierarchyInfo {
     fn serialize(&self) -> [u8; 12] {
         let deviceid_bytes = self.deviceid.serialize();
         let attachment_bytes = self.attachment.serialize();
-        let type_bytes = u8::from(self.type_).serialize();
+        let type_bytes = (u16::from(self.type_) as u8).serialize();
         let enabled_bytes = self.enabled.serialize();
         let flags_bytes = self.flags.serialize();
         [
@@ -16994,7 +16714,7 @@ impl Serialize for HierarchyInfo {
         bytes.reserve(12);
         self.deviceid.serialize_into(bytes);
         self.attachment.serialize_into(bytes);
-        u8::from(self.type_).serialize_into(bytes);
+        (u16::from(self.type_) as u8).serialize_into(bytes);
         self.enabled.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
@@ -17059,68 +16779,64 @@ impl HierarchyEvent {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum PropertyFlag {
-    Deleted = 0,
-    Created = 1,
-    Modified = 2,
+pub struct PropertyFlag(u8);
+impl PropertyFlag {
+    pub const DELETED: Self = Self(0);
+    pub const CREATED: Self = Self(1);
+    pub const MODIFIED: Self = Self(2);
 }
 impl From<PropertyFlag> for u8 {
+    #[inline]
     fn from(input: PropertyFlag) -> Self {
-        match input {
-            PropertyFlag::Deleted => 0,
-            PropertyFlag::Created => 1,
-            PropertyFlag::Modified => 2,
-        }
+        input.0
     }
 }
 impl From<PropertyFlag> for Option<u8> {
+    #[inline]
     fn from(input: PropertyFlag) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<PropertyFlag> for u16 {
+    #[inline]
     fn from(input: PropertyFlag) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<PropertyFlag> for Option<u16> {
+    #[inline]
     fn from(input: PropertyFlag) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<PropertyFlag> for u32 {
+    #[inline]
     fn from(input: PropertyFlag) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PropertyFlag> for Option<u32> {
+    #[inline]
     fn from(input: PropertyFlag) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for PropertyFlag {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(PropertyFlag::Deleted),
-            1 => Ok(PropertyFlag::Created),
-            2 => Ok(PropertyFlag::Modified),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for PropertyFlag {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for PropertyFlag {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for PropertyFlag {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -17151,7 +16867,7 @@ impl TryParse for PropertyEvent {
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
         let (what, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
-        let what = what.try_into()?;
+        let what = what.into();
         let result = PropertyEvent { response_type, extension, sequence, length, event_type, deviceid, time, property, what };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -17309,33 +17025,51 @@ pub const RAW_MOTION_EVENT: u16 = 17;
 pub type RawMotionEvent = RawButtonPressEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum TouchEventFlags {
-    TouchPendingEnd = 1 << 16,
-    TouchEmulatingPointer = 1 << 17,
+pub struct TouchEventFlags(u32);
+impl TouchEventFlags {
+    pub const TOUCH_PENDING_END: Self = Self(1 << 16);
+    pub const TOUCH_EMULATING_POINTER: Self = Self(1 << 17);
+}
+impl From<TouchEventFlags> for Option<u8> {
+    #[inline]
+    fn from(input: TouchEventFlags) -> Self {
+        u8::try_from(input.0).ok()
+    }
+}
+impl From<TouchEventFlags> for Option<u16> {
+    #[inline]
+    fn from(input: TouchEventFlags) -> Self {
+        u16::try_from(input.0).ok()
+    }
 }
 impl From<TouchEventFlags> for u32 {
+    #[inline]
     fn from(input: TouchEventFlags) -> Self {
-        match input {
-            TouchEventFlags::TouchPendingEnd => 1 << 16,
-            TouchEventFlags::TouchEmulatingPointer => 1 << 17,
-        }
+        input.0
     }
 }
 impl From<TouchEventFlags> for Option<u32> {
+    #[inline]
     fn from(input: TouchEventFlags) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u32> for TouchEventFlags {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            65536 => Ok(TouchEventFlags::TouchPendingEnd),
-            131_072 => Ok(TouchEventFlags::TouchEmulatingPointer),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for TouchEventFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for TouchEventFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for TouchEventFlags {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 bitmask_binop!(TouchEventFlags, u32);
@@ -17446,62 +17180,50 @@ pub const TOUCH_END_EVENT: u16 = 20;
 pub type TouchEndEvent = TouchBeginEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum TouchOwnershipFlags {
-    None = 0,
-}
-impl From<TouchOwnershipFlags> for u8 {
-    fn from(input: TouchOwnershipFlags) -> Self {
-        match input {
-            TouchOwnershipFlags::None => 0,
-        }
-    }
+pub struct TouchOwnershipFlags(u32);
+impl TouchOwnershipFlags {
+    pub const NONE: Self = Self(0);
 }
 impl From<TouchOwnershipFlags> for Option<u8> {
+    #[inline]
     fn from(input: TouchOwnershipFlags) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<TouchOwnershipFlags> for u16 {
-    fn from(input: TouchOwnershipFlags) -> Self {
-        Self::from(u8::from(input))
+        u8::try_from(input.0).ok()
     }
 }
 impl From<TouchOwnershipFlags> for Option<u16> {
+    #[inline]
     fn from(input: TouchOwnershipFlags) -> Self {
-        Some(u16::from(input))
+        u16::try_from(input.0).ok()
     }
 }
 impl From<TouchOwnershipFlags> for u32 {
+    #[inline]
     fn from(input: TouchOwnershipFlags) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<TouchOwnershipFlags> for Option<u32> {
+    #[inline]
     fn from(input: TouchOwnershipFlags) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for TouchOwnershipFlags {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(TouchOwnershipFlags::None),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for TouchOwnershipFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for TouchOwnershipFlags {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for TouchOwnershipFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for TouchOwnershipFlags {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u32> for TouchOwnershipFlags {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
@@ -17541,7 +17263,7 @@ impl TryParse for TouchOwnershipEvent {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let flags = flags.try_into()?;
+        let flags = flags.into();
         let result = TouchOwnershipEvent { response_type, extension, sequence, length, event_type, deviceid, time, touchid, root, event, child, sourceid, flags };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -17630,65 +17352,63 @@ pub const RAW_TOUCH_END_EVENT: u16 = 24;
 pub type RawTouchEndEvent = RawTouchBeginEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum BarrierFlags {
-    PointerReleased = 1 << 0,
-    DeviceIsGrabbed = 1 << 1,
+pub struct BarrierFlags(u8);
+impl BarrierFlags {
+    pub const POINTER_RELEASED: Self = Self(1 << 0);
+    pub const DEVICE_IS_GRABBED: Self = Self(1 << 1);
 }
 impl From<BarrierFlags> for u8 {
+    #[inline]
     fn from(input: BarrierFlags) -> Self {
-        match input {
-            BarrierFlags::PointerReleased => 1 << 0,
-            BarrierFlags::DeviceIsGrabbed => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<BarrierFlags> for Option<u8> {
+    #[inline]
     fn from(input: BarrierFlags) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<BarrierFlags> for u16 {
+    #[inline]
     fn from(input: BarrierFlags) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<BarrierFlags> for Option<u16> {
+    #[inline]
     fn from(input: BarrierFlags) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<BarrierFlags> for u32 {
+    #[inline]
     fn from(input: BarrierFlags) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<BarrierFlags> for Option<u32> {
+    #[inline]
     fn from(input: BarrierFlags) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for BarrierFlags {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(BarrierFlags::PointerReleased),
-            2 => Ok(BarrierFlags::DeviceIsGrabbed),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for BarrierFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for BarrierFlags {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for BarrierFlags {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(BarrierFlags, u8);

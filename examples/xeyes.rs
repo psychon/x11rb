@@ -203,7 +203,7 @@ fn shape_window<C: Connection>(
     draw_eyes(conn, pixmap.1, gc, gc, window_size)?;
 
     // Set the shape of the window
-    conn.shape_mask(shape::SO::Set, shape::SK::Bounding, win_id, 0, 0, pixmap.1)?;
+    conn.shape_mask(shape::SO::SET, shape::SK::BOUNDING, win_id, 0, 0, pixmap.1)?;
     Ok(())
 }
 
@@ -216,7 +216,7 @@ fn setup_window<C: Connection>(
 ) -> Result<Window, ReplyOrIdError> {
     let win_id = conn.generate_id()?;
     let win_aux = CreateWindowAux::new()
-        .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::PointerMotion)
+        .event_mask(EventMask::EXPOSURE | EventMask::STRUCTURE_NOTIFY | EventMask::POINTER_MOTION)
         .background_pixel(screen.white_pixel);
 
     conn.create_window(
@@ -228,14 +228,14 @@ fn setup_window<C: Connection>(
         window_size.0,
         window_size.1,
         0,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         0,
         &win_aux,
     )?;
 
     let title = "xeyes";
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         AtomEnum::WM_NAME,
         AtomEnum::STRING,
@@ -243,7 +243,7 @@ fn setup_window<C: Connection>(
     )
     .unwrap();
     conn.change_property32(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         wm_protocols,
         AtomEnum::ATOM,

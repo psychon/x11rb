@@ -120,65 +120,63 @@ impl Serialize for Type {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ClientIdMask {
-    ClientXID = 1 << 0,
-    LocalClientPID = 1 << 1,
+pub struct ClientIdMask(u8);
+impl ClientIdMask {
+    pub const CLIENT_XID: Self = Self(1 << 0);
+    pub const LOCAL_CLIENT_PID: Self = Self(1 << 1);
 }
 impl From<ClientIdMask> for u8 {
+    #[inline]
     fn from(input: ClientIdMask) -> Self {
-        match input {
-            ClientIdMask::ClientXID => 1 << 0,
-            ClientIdMask::LocalClientPID => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<ClientIdMask> for Option<u8> {
+    #[inline]
     fn from(input: ClientIdMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ClientIdMask> for u16 {
+    #[inline]
     fn from(input: ClientIdMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ClientIdMask> for Option<u16> {
+    #[inline]
     fn from(input: ClientIdMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ClientIdMask> for u32 {
+    #[inline]
     fn from(input: ClientIdMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ClientIdMask> for Option<u32> {
+    #[inline]
     fn from(input: ClientIdMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ClientIdMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ClientIdMask::ClientXID),
-            2 => Ok(ClientIdMask::LocalClientPID),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ClientIdMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for ClientIdMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for ClientIdMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ClientIdMask, u8);

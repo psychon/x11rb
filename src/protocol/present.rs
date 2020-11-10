@@ -39,429 +39,383 @@ pub const X11_EXTENSION_NAME: &str = "Present";
 pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum EventEnum {
-    ConfigureNotify = 0,
-    CompleteNotify = 1,
-    IdleNotify = 2,
-    RedirectNotify = 3,
+pub struct EventEnum(u8);
+impl EventEnum {
+    pub const CONFIGURE_NOTIFY: Self = Self(0);
+    pub const COMPLETE_NOTIFY: Self = Self(1);
+    pub const IDLE_NOTIFY: Self = Self(2);
+    pub const REDIRECT_NOTIFY: Self = Self(3);
 }
 impl From<EventEnum> for u8 {
+    #[inline]
     fn from(input: EventEnum) -> Self {
-        match input {
-            EventEnum::ConfigureNotify => 0,
-            EventEnum::CompleteNotify => 1,
-            EventEnum::IdleNotify => 2,
-            EventEnum::RedirectNotify => 3,
-        }
+        input.0
     }
 }
 impl From<EventEnum> for std::option::Option<u8> {
+    #[inline]
     fn from(input: EventEnum) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<EventEnum> for u16 {
+    #[inline]
     fn from(input: EventEnum) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<EventEnum> for std::option::Option<u16> {
+    #[inline]
     fn from(input: EventEnum) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<EventEnum> for u32 {
+    #[inline]
     fn from(input: EventEnum) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<EventEnum> for std::option::Option<u32> {
+    #[inline]
     fn from(input: EventEnum) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for EventEnum {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(EventEnum::ConfigureNotify),
-            1 => Ok(EventEnum::CompleteNotify),
-            2 => Ok(EventEnum::IdleNotify),
-            3 => Ok(EventEnum::RedirectNotify),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for EventEnum {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for EventEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for EventEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum EventMask {
-    NoEvent = 0,
-    ConfigureNotify = 1 << 0,
-    CompleteNotify = 1 << 1,
-    IdleNotify = 1 << 2,
-    RedirectNotify = 1 << 3,
+pub struct EventMask(u8);
+impl EventMask {
+    pub const NO_EVENT: Self = Self(0);
+    pub const CONFIGURE_NOTIFY: Self = Self(1 << 0);
+    pub const COMPLETE_NOTIFY: Self = Self(1 << 1);
+    pub const IDLE_NOTIFY: Self = Self(1 << 2);
+    pub const REDIRECT_NOTIFY: Self = Self(1 << 3);
 }
 impl From<EventMask> for u8 {
+    #[inline]
     fn from(input: EventMask) -> Self {
-        match input {
-            EventMask::NoEvent => 0,
-            EventMask::ConfigureNotify => 1 << 0,
-            EventMask::CompleteNotify => 1 << 1,
-            EventMask::IdleNotify => 1 << 2,
-            EventMask::RedirectNotify => 1 << 3,
-        }
+        input.0
     }
 }
 impl From<EventMask> for std::option::Option<u8> {
+    #[inline]
     fn from(input: EventMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<EventMask> for u16 {
+    #[inline]
     fn from(input: EventMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<EventMask> for std::option::Option<u16> {
+    #[inline]
     fn from(input: EventMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<EventMask> for u32 {
+    #[inline]
     fn from(input: EventMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<EventMask> for std::option::Option<u32> {
+    #[inline]
     fn from(input: EventMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for EventMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(EventMask::NoEvent),
-            1 => Ok(EventMask::ConfigureNotify),
-            2 => Ok(EventMask::CompleteNotify),
-            4 => Ok(EventMask::IdleNotify),
-            8 => Ok(EventMask::RedirectNotify),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for EventMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for EventMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for EventMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(EventMask, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Option {
-    None = 0,
-    Async = 1 << 0,
-    Copy = 1 << 1,
-    UST = 1 << 2,
-    Suboptimal = 1 << 3,
+pub struct Option(u8);
+impl Option {
+    pub const NONE: Self = Self(0);
+    pub const ASYNC: Self = Self(1 << 0);
+    pub const COPY: Self = Self(1 << 1);
+    pub const UST: Self = Self(1 << 2);
+    pub const SUBOPTIMAL: Self = Self(1 << 3);
 }
 impl From<Option> for u8 {
+    #[inline]
     fn from(input: Option) -> Self {
-        match input {
-            Option::None => 0,
-            Option::Async => 1 << 0,
-            Option::Copy => 1 << 1,
-            Option::UST => 1 << 2,
-            Option::Suboptimal => 1 << 3,
-        }
+        input.0
     }
 }
 impl From<Option> for std::option::Option<u8> {
+    #[inline]
     fn from(input: Option) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Option> for u16 {
+    #[inline]
     fn from(input: Option) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Option> for std::option::Option<u16> {
+    #[inline]
     fn from(input: Option) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Option> for u32 {
+    #[inline]
     fn from(input: Option) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Option> for std::option::Option<u32> {
+    #[inline]
     fn from(input: Option) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Option {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Option::None),
-            1 => Ok(Option::Async),
-            2 => Ok(Option::Copy),
-            4 => Ok(Option::UST),
-            8 => Ok(Option::Suboptimal),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for Option {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Option {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Option {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(Option, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Capability {
-    None = 0,
-    Async = 1 << 0,
-    Fence = 1 << 1,
-    UST = 1 << 2,
+pub struct Capability(u8);
+impl Capability {
+    pub const NONE: Self = Self(0);
+    pub const ASYNC: Self = Self(1 << 0);
+    pub const FENCE: Self = Self(1 << 1);
+    pub const UST: Self = Self(1 << 2);
 }
 impl From<Capability> for u8 {
+    #[inline]
     fn from(input: Capability) -> Self {
-        match input {
-            Capability::None => 0,
-            Capability::Async => 1 << 0,
-            Capability::Fence => 1 << 1,
-            Capability::UST => 1 << 2,
-        }
+        input.0
     }
 }
 impl From<Capability> for std::option::Option<u8> {
+    #[inline]
     fn from(input: Capability) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Capability> for u16 {
+    #[inline]
     fn from(input: Capability) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Capability> for std::option::Option<u16> {
+    #[inline]
     fn from(input: Capability) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Capability> for u32 {
+    #[inline]
     fn from(input: Capability) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Capability> for std::option::Option<u32> {
+    #[inline]
     fn from(input: Capability) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Capability {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Capability::None),
-            1 => Ok(Capability::Async),
-            2 => Ok(Capability::Fence),
-            4 => Ok(Capability::UST),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for Capability {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Capability {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Capability {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(Capability, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CompleteKind {
-    Pixmap = 0,
-    NotifyMSC = 1,
-}
-impl From<CompleteKind> for bool {
-    fn from(input: CompleteKind) -> Self {
-        match input {
-            CompleteKind::Pixmap => false,
-            CompleteKind::NotifyMSC => true,
-        }
-    }
+pub struct CompleteKind(u8);
+impl CompleteKind {
+    pub const PIXMAP: Self = Self(0);
+    pub const NOTIFY_MSC: Self = Self(1);
 }
 impl From<CompleteKind> for u8 {
+    #[inline]
     fn from(input: CompleteKind) -> Self {
-        match input {
-            CompleteKind::Pixmap => 0,
-            CompleteKind::NotifyMSC => 1,
-        }
+        input.0
     }
 }
 impl From<CompleteKind> for std::option::Option<u8> {
+    #[inline]
     fn from(input: CompleteKind) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CompleteKind> for u16 {
+    #[inline]
     fn from(input: CompleteKind) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CompleteKind> for std::option::Option<u16> {
+    #[inline]
     fn from(input: CompleteKind) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CompleteKind> for u32 {
+    #[inline]
     fn from(input: CompleteKind) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CompleteKind> for std::option::Option<u32> {
+    #[inline]
     fn from(input: CompleteKind) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CompleteKind {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(CompleteKind::Pixmap),
-            1 => Ok(CompleteKind::NotifyMSC),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for CompleteKind {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CompleteKind {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CompleteKind {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CompleteMode {
-    Copy = 0,
-    Flip = 1,
-    Skip = 2,
-    SuboptimalCopy = 3,
+pub struct CompleteMode(u8);
+impl CompleteMode {
+    pub const COPY: Self = Self(0);
+    pub const FLIP: Self = Self(1);
+    pub const SKIP: Self = Self(2);
+    pub const SUBOPTIMAL_COPY: Self = Self(3);
 }
 impl From<CompleteMode> for u8 {
+    #[inline]
     fn from(input: CompleteMode) -> Self {
-        match input {
-            CompleteMode::Copy => 0,
-            CompleteMode::Flip => 1,
-            CompleteMode::Skip => 2,
-            CompleteMode::SuboptimalCopy => 3,
-        }
+        input.0
     }
 }
 impl From<CompleteMode> for std::option::Option<u8> {
+    #[inline]
     fn from(input: CompleteMode) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CompleteMode> for u16 {
+    #[inline]
     fn from(input: CompleteMode) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CompleteMode> for std::option::Option<u16> {
+    #[inline]
     fn from(input: CompleteMode) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CompleteMode> for u32 {
+    #[inline]
     fn from(input: CompleteMode) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CompleteMode> for std::option::Option<u32> {
+    #[inline]
     fn from(input: CompleteMode) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CompleteMode {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(CompleteMode::Copy),
-            1 => Ok(CompleteMode::Flip),
-            2 => Ok(CompleteMode::Skip),
-            3 => Ok(CompleteMode::SuboptimalCopy),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for CompleteMode {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CompleteMode {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CompleteMode {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -1317,8 +1271,8 @@ impl TryParse for CompleteNotifyEvent {
         let (serial, remaining) = u32::try_parse(remaining)?;
         let (ust, remaining) = u64::try_parse(remaining)?;
         let (msc, remaining) = u64::try_parse(remaining)?;
-        let kind = kind.try_into()?;
-        let mode = mode.try_into()?;
+        let kind = kind.into();
+        let mode = mode.into();
         let result = CompleteNotifyEvent { response_type, extension, sequence, length, event_type, kind, mode, event, window, serial, ust, msc };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)

@@ -119,293 +119,221 @@ impl Printer {
 pub type Pcontext = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum GetDoc {
-    Finished = 0,
-    SecondConsumer = 1,
+pub struct GetDoc(bool);
+impl GetDoc {
+    pub const FINISHED: Self = Self(false);
+    pub const SECOND_CONSUMER: Self = Self(true);
 }
 impl From<GetDoc> for bool {
+    #[inline]
     fn from(input: GetDoc) -> Self {
-        match input {
-            GetDoc::Finished => false,
-            GetDoc::SecondConsumer => true,
-        }
+        input.0
     }
 }
-impl From<GetDoc> for u8 {
+impl From<GetDoc> for Option<bool> {
+    #[inline]
     fn from(input: GetDoc) -> Self {
-        match input {
-            GetDoc::Finished => 0,
-            GetDoc::SecondConsumer => 1,
-        }
+        Some(input.0)
     }
 }
-impl From<GetDoc> for Option<u8> {
-    fn from(input: GetDoc) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<GetDoc> for u16 {
-    fn from(input: GetDoc) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<GetDoc> for Option<u16> {
-    fn from(input: GetDoc) -> Self {
-        Some(u16::from(input))
-    }
-}
-impl From<GetDoc> for u32 {
-    fn from(input: GetDoc) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<GetDoc> for Option<u32> {
-    fn from(input: GetDoc) -> Self {
-        Some(u32::from(input))
-    }
-}
-impl TryFrom<u8> for GetDoc {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(GetDoc::Finished),
-            1 => Ok(GetDoc::SecondConsumer),
-            _ => Err(ParseError::InvalidValue),
-        }
-    }
-}
-impl TryFrom<u16> for GetDoc {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
-    }
-}
-impl TryFrom<u32> for GetDoc {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<bool> for GetDoc {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum EvMask {
-    NoEventMask = 0,
-    PrintMask = 1 << 0,
-    AttributeMask = 1 << 1,
+pub struct EvMask(u8);
+impl EvMask {
+    pub const NO_EVENT_MASK: Self = Self(0);
+    pub const PRINT_MASK: Self = Self(1 << 0);
+    pub const ATTRIBUTE_MASK: Self = Self(1 << 1);
 }
 impl From<EvMask> for u8 {
+    #[inline]
     fn from(input: EvMask) -> Self {
-        match input {
-            EvMask::NoEventMask => 0,
-            EvMask::PrintMask => 1 << 0,
-            EvMask::AttributeMask => 1 << 1,
-        }
+        input.0
     }
 }
 impl From<EvMask> for Option<u8> {
+    #[inline]
     fn from(input: EvMask) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<EvMask> for u16 {
+    #[inline]
     fn from(input: EvMask) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<EvMask> for Option<u16> {
+    #[inline]
     fn from(input: EvMask) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<EvMask> for u32 {
+    #[inline]
     fn from(input: EvMask) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<EvMask> for Option<u32> {
+    #[inline]
     fn from(input: EvMask) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for EvMask {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(EvMask::NoEventMask),
-            1 => Ok(EvMask::PrintMask),
-            2 => Ok(EvMask::AttributeMask),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for EvMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for EvMask {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for EvMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(EvMask, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Detail {
-    StartJobNotify = 1,
-    EndJobNotify = 2,
-    StartDocNotify = 3,
-    EndDocNotify = 4,
-    StartPageNotify = 5,
-    EndPageNotify = 6,
+pub struct Detail(u8);
+impl Detail {
+    pub const START_JOB_NOTIFY: Self = Self(1);
+    pub const END_JOB_NOTIFY: Self = Self(2);
+    pub const START_DOC_NOTIFY: Self = Self(3);
+    pub const END_DOC_NOTIFY: Self = Self(4);
+    pub const START_PAGE_NOTIFY: Self = Self(5);
+    pub const END_PAGE_NOTIFY: Self = Self(6);
 }
 impl From<Detail> for u8 {
+    #[inline]
     fn from(input: Detail) -> Self {
-        match input {
-            Detail::StartJobNotify => 1,
-            Detail::EndJobNotify => 2,
-            Detail::StartDocNotify => 3,
-            Detail::EndDocNotify => 4,
-            Detail::StartPageNotify => 5,
-            Detail::EndPageNotify => 6,
-        }
+        input.0
     }
 }
 impl From<Detail> for Option<u8> {
+    #[inline]
     fn from(input: Detail) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Detail> for u16 {
+    #[inline]
     fn from(input: Detail) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Detail> for Option<u16> {
+    #[inline]
     fn from(input: Detail) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Detail> for u32 {
+    #[inline]
     fn from(input: Detail) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Detail> for Option<u32> {
+    #[inline]
     fn from(input: Detail) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Detail {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(Detail::StartJobNotify),
-            2 => Ok(Detail::EndJobNotify),
-            3 => Ok(Detail::StartDocNotify),
-            4 => Ok(Detail::EndDocNotify),
-            5 => Ok(Detail::StartPageNotify),
-            6 => Ok(Detail::EndPageNotify),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for Detail {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Detail {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Detail {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Attr {
-    JobAttr = 1,
-    DocAttr = 2,
-    PageAttr = 3,
-    PrinterAttr = 4,
-    ServerAttr = 5,
-    MediumAttr = 6,
-    SpoolerAttr = 7,
+pub struct Attr(u8);
+impl Attr {
+    pub const JOB_ATTR: Self = Self(1);
+    pub const DOC_ATTR: Self = Self(2);
+    pub const PAGE_ATTR: Self = Self(3);
+    pub const PRINTER_ATTR: Self = Self(4);
+    pub const SERVER_ATTR: Self = Self(5);
+    pub const MEDIUM_ATTR: Self = Self(6);
+    pub const SPOOLER_ATTR: Self = Self(7);
 }
 impl From<Attr> for u8 {
+    #[inline]
     fn from(input: Attr) -> Self {
-        match input {
-            Attr::JobAttr => 1,
-            Attr::DocAttr => 2,
-            Attr::PageAttr => 3,
-            Attr::PrinterAttr => 4,
-            Attr::ServerAttr => 5,
-            Attr::MediumAttr => 6,
-            Attr::SpoolerAttr => 7,
-        }
+        input.0
     }
 }
 impl From<Attr> for Option<u8> {
+    #[inline]
     fn from(input: Attr) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<Attr> for u16 {
+    #[inline]
     fn from(input: Attr) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<Attr> for Option<u16> {
+    #[inline]
     fn from(input: Attr) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<Attr> for u32 {
+    #[inline]
     fn from(input: Attr) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<Attr> for Option<u32> {
+    #[inline]
     fn from(input: Attr) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for Attr {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(Attr::JobAttr),
-            2 => Ok(Attr::DocAttr),
-            3 => Ok(Attr::PageAttr),
-            4 => Ok(Attr::PrinterAttr),
-            5 => Ok(Attr::ServerAttr),
-            6 => Ok(Attr::MediumAttr),
-            7 => Ok(Attr::SpoolerAttr),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for Attr {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for Attr {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for Attr {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 

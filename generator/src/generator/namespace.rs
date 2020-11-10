@@ -278,12 +278,205 @@ enum IovecConversion {
     CowStripLength,
 }
 
+#[derive(Copy, Clone)]
+struct EnumInfo {
+    // The size needed to hold all defined values for the enum
+    max_value_size: Option<u8>,
+    // The range of wire sizes used for the enum
+    // min, max
+    wire_size: Option<(u8, u8)>,
+}
+
 /// Caches to avoid repeating some operations.
 #[derive(Default)]
 pub(super) struct Caches {
+    enum_infos: HashMap<usize, EnumInfo>,
     derives: HashMap<usize, Derives>,
-    enum_has_repeated_values: HashMap<usize, bool>,
     rust_type_names: HashMap<usize, String>,
+}
+
+impl Caches {
+    #[inline]
+    fn enum_info(&self, enum_def: &xcbdefs::EnumDef) -> EnumInfo {
+        self.enum_infos[&(enum_def as *const xcbdefs::EnumDef as usize)]
+    }
+
+    fn put_enum_max_value_size(&mut self, enum_def: &xcbdefs::EnumDef, max_value_size: u8) {
+        let id = enum_def as *const xcbdefs::EnumDef as usize;
+        match self.enum_infos.entry(id) {
+            HashMapEntry::Vacant(entry) => {
+                entry.insert(EnumInfo {
+                    max_value_size: Some(max_value_size),
+                    wire_size: None,
+                });
+            }
+            HashMapEntry::Occupied(mut entry) => {
+                let entry_value = entry.get_mut();
+                if entry_value.max_value_size.is_none() {
+                    entry_value.max_value_size = Some(max_value_size);
+                } else {
+                    // Expected only once
+                    unreachable!();
+                }
+            }
+        }
+    }
+
+    fn put_enum_wire_size(&mut self, enum_def: &xcbdefs::EnumDef, wire_size: u8) {
+        let id = enum_def as *const xcbdefs::EnumDef as usize;
+        match self.enum_infos.entry(id) {
+            HashMapEntry::Vacant(entry) => {
+                entry.insert(EnumInfo {
+                    max_value_size: None,
+                    wire_size: Some((wire_size, wire_size)),
+                });
+            }
+            HashMapEntry::Occupied(mut entry) => {
+                let entry_value = entry.get_mut();
+                match entry_value.wire_size {
+                    None => entry_value.wire_size = Some((wire_size, wire_size)),
+                    Some((ref mut min, ref mut max)) => {
+                        *min = (*min).min(wire_size);
+                        *max = (*max).max(wire_size)
+                    }
+                }
+            }
+        }
+    }
+
+    pub(super) fn gather_enum_infos(&mut self, module: &xcbdefs::Module) {
+        for ns in module.namespaces.borrow().values() {
+            for request_def in ns.request_defs.borrow().values() {
+                for field in request_def.fields.borrow().iter() {
+                    self.gather_enum_infos_in_field(field);
+                }
+                if let Some(ref reply_def) = request_def.reply {
+                    for field in reply_def.fields.borrow().iter() {
+                        self.gather_enum_infos_in_field(field);
+                    }
+                }
+            }
+
+            for event_def in ns.event_defs.borrow().values() {
+                match event_def {
+                    xcbdefs::EventDef::Full(event_def) => {
+                        for field in event_def.fields.borrow().iter() {
+                            self.gather_enum_infos_in_field(field);
+                        }
+                    }
+                    xcbdefs::EventDef::Copy(_) => {}
+                }
+            }
+
+            for error_def in ns.error_defs.borrow().values() {
+                match error_def {
+                    xcbdefs::ErrorDef::Full(error_def) => {
+                        for field in error_def.fields.borrow().iter() {
+                            self.gather_enum_infos_in_field(field);
+                        }
+                    }
+                    xcbdefs::ErrorDef::Copy(_) => {}
+                }
+            }
+
+            for type_def in ns.type_defs.borrow().values() {
+                match type_def {
+                    xcbdefs::TypeDef::Struct(struct_def) => {
+                        for field in struct_def.fields.borrow().iter() {
+                            self.gather_enum_infos_in_field(field);
+                        }
+                    }
+                    xcbdefs::TypeDef::Union(union_def) => {
+                        for field in union_def.fields.iter() {
+                            self.gather_enum_infos_in_field(field);
+                        }
+                    }
+                    xcbdefs::TypeDef::EventStruct(_) => {}
+                    xcbdefs::TypeDef::Xid(_) => {}
+                    xcbdefs::TypeDef::XidUnion(_) => {}
+                    xcbdefs::TypeDef::Enum(enum_def) => {
+                        self.gather_enum_infos_in_enum_def(enum_def);
+                    }
+                    xcbdefs::TypeDef::Alias(_) => {}
+                }
+            }
+        }
+    }
+
+    fn gather_enum_infos_in_field(&mut self, field: &xcbdefs::FieldDef) {
+        match field {
+            xcbdefs::FieldDef::Pad(_) => {}
+            xcbdefs::FieldDef::Normal(normal_field) => {
+                self.gather_enum_infos_in_field_value_type(&normal_field.type_);
+            }
+            xcbdefs::FieldDef::List(list_field) => {
+                self.gather_enum_infos_in_field_value_type(&list_field.element_type);
+            }
+            xcbdefs::FieldDef::Switch(switch_field) => {
+                for case in switch_field.cases.iter() {
+                    for field in case.fields.borrow().iter() {
+                        self.gather_enum_infos_in_field(field);
+                    }
+                }
+            }
+            xcbdefs::FieldDef::Fd(_) => {}
+            xcbdefs::FieldDef::FdList(_) => {}
+            xcbdefs::FieldDef::Expr(expr_field) => {
+                self.gather_enum_infos_in_field_value_type(&expr_field.type_);
+            }
+            xcbdefs::FieldDef::VirtualLen(_) => {}
+        }
+    }
+
+    fn gather_enum_infos_in_field_value_type(&mut self, value_type: &xcbdefs::FieldValueType) {
+        match value_type.value_set {
+            xcbdefs::FieldValueSet::None => {}
+            xcbdefs::FieldValueSet::Enum(ref enum_type) => {
+                let enum_def = match enum_type.get_resolved().get_original_type() {
+                    xcbdefs::TypeRef::Enum(enum_type) => enum_type.upgrade().unwrap(),
+                    _ => unreachable!(),
+                };
+
+                let size = match value_type.type_.get_resolved().get_original_type() {
+                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Bool) => 1,
+                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card8) => 8,
+                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card16) => 16,
+                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => 32,
+                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Byte) => 8,
+                    _ => unreachable!(),
+                };
+                self.put_enum_wire_size(&enum_def, size);
+            }
+            xcbdefs::FieldValueSet::AltEnum(_) => {}
+            xcbdefs::FieldValueSet::Mask(_) => {}
+            xcbdefs::FieldValueSet::AltMask(_) => {}
+        }
+    }
+
+    fn gather_enum_infos_in_enum_def(&mut self, enum_def: &xcbdefs::EnumDef) {
+        // Get the maximum value of the defined variants for this enum
+        let max_value = enum_def
+            .items
+            .iter()
+            .map(|enum_item| match enum_item.value {
+                xcbdefs::EnumValue::Value(value) => value,
+                xcbdefs::EnumValue::Bit(bit) => 1 << bit,
+            })
+            .max()
+            .unwrap();
+
+        let size = if max_value == 1 && enum_def.items.len() == 2 {
+            1
+        } else if max_value <= 0xFF {
+            8
+        } else if max_value <= 0xFFFF {
+            16
+        } else {
+            32
+        };
+
+        self.put_enum_max_value_size(enum_def, size);
+    }
 }
 
 struct NamespaceGenerator<'ns, 'c> {
@@ -2145,149 +2338,119 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn generate_enum_def(&self, enum_def: &xcbdefs::EnumDef, out: &mut Output) {
         let rust_name = self.get_enum_rust_name(enum_def);
-        let assign_discriminators = !self.enum_has_repeated_values(enum_def);
 
-        // Guess which types this enum can be represented in. We do this based on the
-        // highest value that appears in any of the variants
-        let max_value = enum_def
-            .items
-            .iter()
-            .map(|enum_item| match enum_item.value {
-                xcbdefs::EnumValue::Value(value) => value,
-                xcbdefs::EnumValue::Bit(bit) => 1 << bit,
-            })
-            .max()
-            .unwrap();
+        let enum_info = self.caches.borrow().enum_info(enum_def);
+        let max_value_size = enum_info.max_value_size.unwrap();
+        let global_enum_size = max_value_size.max(enum_info.wire_size.unwrap_or((0, 0)).1);
 
-        let (to_type, larger_types): (&str, &[&str]) = if max_value <= 0xFF {
-            ("u8", &["u16", "u32"])
-        } else if max_value <= 0xFFFF {
-            ("u16", &["u32"])
-        } else {
-            ("u32", &[])
-        };
+        if let Some((min_wire_size, max_wire_size)) = enum_info.wire_size {
+            assert!(max_wire_size >= global_enum_size);
+            if min_wire_size != max_wire_size {
+                // if it is bool, it is always bool
+                assert_ne!(min_wire_size, 1);
+            }
+        }
+
+        let (raw_type, smaller_types, larger_types): (&str, &[&str], &[&str]) =
+            match global_enum_size {
+                1 => ("bool", &[], &[]),
+                8 => ("u8", &[], &["u16", "u32"]),
+                16 => ("u16", &["u8"], &["u32"]),
+                32 => ("u32", &["u8", "u16"], &[]),
+                _ => unreachable!(),
+            };
 
         if let Some(ref doc) = enum_def.doc {
             self.emit_doc(doc, out);
         }
 
         outln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
-        let needs_lint_allow = enum_def.items.iter().any(|enum_item| {
-            enum_item
-                .name
-                .bytes()
-                .all(|c| !c.is_ascii_lowercase() && !c.is_ascii_digit())
-        });
-        if needs_lint_allow {
-            outln!(out, "#[allow(non_camel_case_types)]");
-        }
-        if assign_discriminators {
-            // Specify the representation if we are assigning discriminators, so we make sure that
-            // all the values fit. This prevents the 'enum_clike_unportable_variant' clippy warning.
-            outln!(out, "#[repr({})]", to_type);
-        }
-        outln!(out, "#[non_exhaustive]");
-        outln!(out, "pub enum {} {{", rust_name);
+        outln!(out, "pub struct {}({});", rust_name, raw_type);
+
+        outln!(out, "impl {} {{", rust_name);
         for enum_item in enum_def.items.iter() {
             let rust_item_name = ename_to_rust(&enum_item.name);
-            if assign_discriminators {
+            if global_enum_size != 1 {
                 match enum_item.value {
                     xcbdefs::EnumValue::Value(value) => {
                         outln!(
                             out.indent(),
-                            "{} = {},",
+                            "pub const {}: Self = Self({});",
                             rust_item_name,
                             format_literal_integer(value),
                         );
                     }
                     xcbdefs::EnumValue::Bit(bit) => {
-                        outln!(out.indent(), "{} = 1 << {},", rust_item_name, bit);
+                        outln!(
+                            out.indent(),
+                            "pub const {}: Self = Self(1 << {});",
+                            rust_item_name,
+                            bit,
+                        );
                     }
                 }
             } else {
-                outln!(out.indent(), "{},", rust_item_name);
+                let value = match enum_item.value {
+                    xcbdefs::EnumValue::Value(value) => value,
+                    xcbdefs::EnumValue::Bit(bit) => 1 << bit,
+                };
+                outln!(
+                    out.indent(),
+                    "pub const {}: Self = Self({});",
+                    rust_item_name,
+                    if value == 0 { "false" } else { "true" },
+                );
             }
         }
         outln!(out, "}}");
 
-        if max_value == 1 && enum_def.items.len() == 2 {
-            outln!(out, "impl From<{}> for bool {{", rust_name);
+        for &smaller_type in smaller_types.iter() {
+            outln!(
+                out,
+                "impl From<{}> for {}<{}> {{",
+                rust_name,
+                self.option_name,
+                smaller_type,
+            );
             out.indented(|out| {
+                outln!(out, "#[inline]");
                 outln!(out, "fn from(input: {}) -> Self {{", rust_name);
-                out.indented(|out| {
-                    outln!(out, "match input {{");
-                    for enum_item in enum_def.items.iter() {
-                        let bool_value = match enum_item.value {
-                            xcbdefs::EnumValue::Value(0) => "false",
-                            xcbdefs::EnumValue::Value(1) => "true",
-                            _ => unreachable!(),
-                        };
-                        outln!(
-                            out.indent(),
-                            "{}::{} => {},",
-                            rust_name,
-                            ename_to_rust(&enum_item.name),
-                            bool_value,
-                        );
-                    }
-                    outln!(out, "}}");
-                });
+                outln!(out.indent(), "{}::try_from(input.0).ok()", smaller_type);
                 outln!(out, "}}");
             });
             outln!(out, "}}");
         }
 
-        outln!(out, "impl From<{}> for {} {{", rust_name, to_type);
+        outln!(out, "impl From<{}> for {} {{", rust_name, raw_type);
         out.indented(|out| {
+            outln!(out, "#[inline]");
             outln!(out, "fn from(input: {}) -> Self {{", rust_name);
-            out.indented(|out| {
-                outln!(out, "match input {{");
-                for enum_item in enum_def.items.iter() {
-                    let rust_item_name = ename_to_rust(&enum_item.name);
-                    match enum_item.value {
-                        xcbdefs::EnumValue::Value(value) => {
-                            outln!(
-                                out.indent(),
-                                "{}::{} => {},",
-                                rust_name,
-                                rust_item_name,
-                                format_literal_integer(value),
-                            );
-                        }
-                        xcbdefs::EnumValue::Bit(bit) => {
-                            outln!(
-                                out.indent(),
-                                "{}::{} => 1 << {},",
-                                rust_name,
-                                rust_item_name,
-                                bit,
-                            );
-                        }
-                    }
-                }
-                outln!(out, "}}");
-            });
+            outln!(out.indent(), "input.0");
             outln!(out, "}}");
         });
         outln!(out, "}}");
+
         outln!(
             out,
             "impl From<{}> for {}<{}> {{",
             rust_name,
             self.option_name,
-            to_type
+            raw_type,
         );
         out.indented(|out| {
+            outln!(out, "#[inline]");
             outln!(out, "fn from(input: {}) -> Self {{", rust_name);
-            outln!(out.indent(), "Some({}::from(input))", to_type);
+            outln!(out.indent(), "Some(input.0)");
             outln!(out, "}}");
         });
         outln!(out, "}}");
+
         for larger_type in larger_types.iter() {
             outln!(out, "impl From<{}> for {} {{", rust_name, larger_type);
             out.indented(|out| {
+                outln!(out, "#[inline]");
                 outln!(out, "fn from(input: {}) -> Self {{", rust_name);
-                outln!(out.indent(), "Self::from({}::from(input))", to_type);
+                outln!(out.indent(), "{}::from(input.0)", larger_type);
                 outln!(out, "}}");
             });
             outln!(out, "}}");
@@ -2299,97 +2462,51 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 larger_type,
             );
             out.indented(|out| {
+                outln!(out, "#[inline]");
                 outln!(out, "fn from(input: {}) -> Self {{", rust_name);
-                outln!(out.indent(), "Some({}::from(input))", larger_type);
+                outln!(out.indent(), "Some({}::from(input.0))", larger_type);
                 outln!(out, "}}");
             });
             outln!(out, "}}");
         }
 
-        // Values can only be parsed if they are unique.
-        // As a special case, xproto's Gravity enum gets special API.
-        let is_xproto_gravity = is_xproto_gravity(enum_def);
-        if !self.enum_has_repeated_values(enum_def) || is_xproto_gravity {
-            if !is_xproto_gravity {
-                outln!(out, "impl TryFrom<{}> for {} {{", to_type, rust_name);
-            } else {
-                outln!(out, "impl {} {{", rust_name);
-            }
+        for smaller_type in smaller_types.iter() {
+            outln!(out, "impl From<{}> for {} {{", smaller_type, rust_name);
             out.indented(|out| {
-                if !is_xproto_gravity {
-                    outln!(out, "type Error = ParseError;");
-                    outln!(
-                        out,
-                        "fn try_from(value: {}) -> Result<Self, Self::Error> {{",
-                        to_type,
-                    );
-                } else {
-                    let largest_type = larger_types.last().unwrap();
-                    outln!(
-                        out,
-                        "pub fn try_from(value: impl Into<{}>, value_for_zero: Self) -> \
-                         Result<Self, ParseError> {{",
-                        largest_type,
-                    );
-                    outln!(out.indent(), "let value = value.into();");
-                }
-                out.indented(|out| {
-                    outln!(out, "match value {{");
-                    for enum_item in enum_def.items.iter() {
-                        let rust_item_name = ename_to_rust(&enum_item.name);
-                        match enum_item.value {
-                            xcbdefs::EnumValue::Value(0) if is_xproto_gravity => {
-                                if enum_item.name == "BitForget" {
-                                    outln!(out.indent(), "0 => Ok(value_for_zero),");
-                                }
-                            }
-                            xcbdefs::EnumValue::Value(value) => {
-                                outln!(
-                                    out.indent(),
-                                    "{} => Ok({}::{}),",
-                                    format_literal_integer(value),
-                                    rust_name,
-                                    rust_item_name,
-                                );
-                            }
-                            xcbdefs::EnumValue::Bit(bit) => {
-                                outln!(
-                                    out.indent(),
-                                    "{} => Ok({}::{}),",
-                                    format_literal_integer(1u32 << bit),
-                                    rust_name,
-                                    rust_item_name,
-                                );
-                            }
-                        }
-                    }
-                    outln!(out.indent(), "_ => Err(ParseError::InvalidValue),");
-                    outln!(out, "}}");
-                });
+                outln!(out, "#[inline]");
+                outln!(out, "fn from(value: {}) -> Self {{", smaller_type);
+                outln!(out.indent(), "Self(value.into())");
                 outln!(out, "}}");
             });
             outln!(out, "}}");
+        }
 
-            if !is_xproto_gravity {
-                for larger_type in larger_types.iter() {
-                    outln!(out, "impl TryFrom<{}> for {} {{", larger_type, rust_name);
-                    out.indented(|out| {
-                        outln!(out, "type Error = ParseError;");
-                        outln!(
-                            out,
-                            "fn try_from(value: {}) -> Result<Self, Self::Error> {{",
-                            larger_type,
-                        );
-                        outln!(
-                            out.indent(),
-                            "Self::try_from({}::try_from(value).or(Err(ParseError::InvalidValue))?)",
-                            to_type,
-                        );
-                        outln!(out, "}}");
-                    });
-                    outln!(out, "}}");
-                }
-            }
+        outln!(out, "impl From<{}> for {} {{", raw_type, rust_name);
+        out.indented(|out| {
+            outln!(out, "#[inline]");
+            outln!(out, "fn from(value: {}) -> Self {{", raw_type);
+            outln!(out.indent(), "Self(value)");
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+
+        for larger_type in larger_types.iter() {
+            outln!(out, "impl TryFrom<{}> for {} {{", larger_type, rust_name);
+            out.indented(|out| {
+                outln!(out, "type Error = ParseError;");
+                outln!(
+                    out,
+                    "fn try_from(value: {}) -> Result<Self, Self::Error> {{",
+                    larger_type,
+                );
+                outln!(
+                    out.indent(),
+                    "{}::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)",
+                    raw_type,
+                );
+                outln!(out, "}}");
+            });
+            outln!(out, "}}");
         }
 
         // An enum is ok for bitmask if all its values are <bit>
@@ -2410,7 +2527,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 });
 
         if ok_for_bitmask {
-            outln!(out, "bitmask_binop!({}, {});", rust_name, to_type);
+            outln!(out, "bitmask_binop!({}, {});", rust_name, raw_type);
         }
 
         outln!(out, "");
@@ -4144,56 +4261,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         var_name: &str,
         out: &mut Output,
     ) {
-        if let xcbdefs::FieldValueSet::Enum(ref enum_) = type_.value_set {
-            // Handle turning things into enum instances where necessary.
-            let enum_def = match enum_.get_resolved() {
-                xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
-                _ => unreachable!(),
-            };
-            if !self.enum_has_repeated_values(&enum_def) {
-                let type_type = type_.type_.get_resolved();
-                if let xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Bool) = type_type {
-                    // Cast this to a u8 before calling try_into, because there's
-                    // no TryFrom<bool> implementation.
-                    outln!(
-                        out,
-                        "let {var} = u8::from({var}).try_into()?;",
-                        var = var_name
-                    );
-                } else {
-                    outln!(out, "let {var} = {var}.try_into()?;", var = var_name);
-                }
-            }
-            if is_xproto_gravity(&enum_def) {
-                let enum_ns = enum_def.namespace.upgrade().unwrap();
-                let ns = if enum_ns.header != self.ns.header {
-                    format!("{}::", enum_ns.header)
-                } else {
-                    String::new()
-                };
-                let zero_type = match var_name {
-                    "bit_gravity" => "BitForget",
-                    "win_gravity" => "WinUnmap",
-                    _ => unreachable!(),
-                };
-                outln!(
-                    out,
-                    "let {var} = {ns}Gravity::try_from({var}, {ns}Gravity::{zero})?;",
-                    var = var_name,
-                    ns = ns,
-                    zero = zero_type,
-                );
-            }
+        if let xcbdefs::FieldValueSet::Enum(_) = type_.value_set {
+            // Handle turning things into enum instances.
+            outln!(out, "let {var} = {var}.into();", var = var_name);
         }
     }
 
     fn needs_post_parse(&self, type_: &xcbdefs::FieldValueType) -> bool {
-        if let xcbdefs::FieldValueSet::Enum(ref enum_) = type_.value_set {
-            let enum_def = match enum_.get_resolved() {
-                xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
-                _ => unreachable!(),
-            };
-            !self.enum_has_repeated_values(&enum_def)
+        if let xcbdefs::FieldValueSet::Enum(_) = type_.value_set {
+            true
         } else {
             false
         }
@@ -4536,10 +4612,21 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         value: &str,
         was_deduced: bool,
     ) -> String {
-        // Deduced fields are not converter to their enum value
-        if !was_deduced && self.use_enum_type_in_field(type_).is_some() {
+        // Deduced fields are not converted to their enum value
+        if let (false, Some(enum_def)) = (was_deduced, self.use_enum_type_in_field(type_)) {
+            let enum_info = self.caches.borrow().enum_info(&enum_def);
+            let (_, max_wire_size) = enum_info.wire_size.unwrap();
             let rust_wire_type = self.type_to_rust_type(type_.type_.get_resolved());
-            format!("{}::from({}).serialize()", rust_wire_type, value)
+            let current_wire_size = type_.type_.get_resolved().size().unwrap();
+
+            if max_wire_size > 1 && u32::from(max_wire_size / 8) > current_wire_size {
+                format!(
+                    "(u{}::from({}) as {}).serialize()",
+                    max_wire_size, value, rust_wire_type,
+                )
+            } else {
+                format!("{}::from({}).serialize()", rust_wire_type, value)
+            }
         } else {
             format!("{}.serialize()", value)
         }
@@ -4554,15 +4641,30 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         out: &mut Output,
     ) {
         // Deduced fields are not converted to their enum value
-        if !was_deduced && self.use_enum_type_in_field(type_).is_some() {
+        if let (false, Some(enum_def)) = (was_deduced, self.use_enum_type_in_field(type_)) {
+            let enum_info = self.caches.borrow().enum_info(&enum_def);
+            let (_, max_wire_size) = enum_info.wire_size.unwrap();
             let rust_wire_type = self.type_to_rust_type(type_.type_.get_resolved());
-            outln!(
-                out,
-                "{}::from({}).serialize_into({});",
-                rust_wire_type,
-                value,
-                bytes_var
-            );
+            let current_wire_size = type_.type_.get_resolved().size().unwrap();
+
+            if max_wire_size > 1 && u32::from(max_wire_size / 8) > current_wire_size {
+                outln!(
+                    out,
+                    "(u{}::from({}) as {}).serialize_into({});",
+                    max_wire_size,
+                    value,
+                    rust_wire_type,
+                    bytes_var,
+                );
+            } else {
+                outln!(
+                    out,
+                    "{}::from({}).serialize_into({});",
+                    rust_wire_type,
+                    value,
+                    bytes_var,
+                );
+            }
         } else {
             outln!(out, "{}.serialize_into({});", value, bytes_var);
         }
@@ -4712,13 +4814,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
                 _ => unreachable!(),
             };
-            if !self.enum_has_repeated_values(&enum_def) || is_xproto_gravity(&enum_def) {
-                // The field can only have the values from the enum,
-                // use its type.
-                Some(enum_def)
-            } else {
-                None
-            }
+            Some(enum_def)
         } else {
             None
         }
@@ -5181,31 +5277,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn get_type_alias_rust_name(&self, type_alias_def: &xcbdefs::TypeAliasDef) -> String {
         let id = type_alias_def as *const _ as usize;
         self.get_normal_type_name(id, &type_alias_def.new_name)
-    }
-
-    /// Returns whether `enum_def` has repeated values.
-    fn enum_has_repeated_values(&self, enum_def: &xcbdefs::EnumDef) -> bool {
-        let id = enum_def as *const xcbdefs::EnumDef as usize;
-        match self.caches.borrow_mut().enum_has_repeated_values.entry(id) {
-            HashMapEntry::Occupied(entry) => *entry.get(),
-            HashMapEntry::Vacant(entry) => {
-                let mut value_set = HashSet::new();
-                let mut has_repeated = false;
-                for enum_item in enum_def.items.iter() {
-                    let value = match enum_item.value {
-                        xcbdefs::EnumValue::Value(v) => v,
-                        xcbdefs::EnumValue::Bit(bit) => 1 << bit,
-                    };
-                    if !value_set.insert(value) {
-                        // value already present
-                        has_repeated = true;
-                        break;
-                    }
-                }
-                entry.insert(has_repeated);
-                has_repeated
-            }
-        }
     }
 
     /// Gathers information about the fields of a request,
@@ -6189,20 +6260,23 @@ fn postfix_var_name(name: &str, postfix: &str) -> String {
 /// Converts the name of a enum value from the XML
 /// to a Rust name.
 fn ename_to_rust(name: &str) -> String {
-    let mut name = String::from(name);
-    if name.as_bytes()[0].is_ascii_digit() {
-        name.insert(0, 'M');
-    }
-    if name.contains('_') && name.bytes().any(|c| c.is_ascii_lowercase()) {
-        // xf86vidmode has a ModeFlag enum with items like
-        // Positive_HSync. Turn this into PositiveHSync.
-        name = name.replace('_', "");
-    }
-    name[..1].make_ascii_uppercase();
-    name
-}
+    if name == "DECnet" {
+        // Special case
+        "DEC_NET".into()
+    } else {
+        // First convert to proper camel-case
+        let mut name = String::from(name);
+        if name.as_bytes()[0].is_ascii_digit() {
+            name.insert(0, 'M');
+        }
+        if name.contains('_') && name.bytes().any(|c| c.is_ascii_lowercase()) {
+            // xf86vidmode has a ModeFlag enum with items like
+            // Positive_HSync. Turn this into PositiveHSync.
+            name = name.replace('_', "");
+        }
+        name[..1].make_ascii_uppercase();
 
-/// Check if an enum definition is xproto's Gravity enum.
-fn is_xproto_gravity(enum_def: &xcbdefs::EnumDef) -> bool {
-    enum_def.name == "Gravity" && enum_def.namespace.upgrade().unwrap().header == "xproto"
+        // Now convert to upper-snake-case
+        super::camel_case_to_upper_snake(&name)
+    }
 }

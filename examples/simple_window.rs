@@ -29,9 +29,9 @@ fn main() {
     let cursor_handle = cursor_handle.reply().unwrap();
 
     let win_aux = CreateWindowAux::new()
-        .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::NoEvent)
+        .event_mask(EventMask::EXPOSURE | EventMask::STRUCTURE_NOTIFY | EventMask::NO_EVENT)
         .background_pixel(screen.white_pixel)
-        .win_gravity(Gravity::NorthWest)
+        .win_gravity(Gravity::NORTH_WEST)
         // Just because, we set the cursor to "wait"
         .cursor(cursor_handle.load_cursor(conn, "wait").unwrap());
 
@@ -48,7 +48,7 @@ fn main() {
         width,
         height,
         0,
-        WindowClass::InputOutput,
+        WindowClass::INPUT_OUTPUT,
         0,
         &win_aux,
     )
@@ -58,7 +58,7 @@ fn main() {
 
     let title = "Simple Window";
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         AtomEnum::WM_NAME,
         AtomEnum::STRING,
@@ -66,7 +66,7 @@ fn main() {
     )
     .unwrap();
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         net_wm_name,
         utf8_string,
@@ -74,7 +74,7 @@ fn main() {
     )
     .unwrap();
     conn.change_property32(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         wm_protocols,
         AtomEnum::ATOM,
@@ -82,7 +82,7 @@ fn main() {
     )
     .unwrap();
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         AtomEnum::WM_CLASS,
         AtomEnum::STRING,
@@ -90,7 +90,7 @@ fn main() {
     )
     .unwrap();
     conn.change_property8(
-        PropMode::Replace,
+        PropMode::REPLACE,
         win_id,
         AtomEnum::WM_CLIENT_MACHINE,
         AtomEnum::STRING,
@@ -138,7 +138,7 @@ fn main() {
                             y: -10,
                         },
                     ];
-                    conn.poly_line(CoordMode::Origin, win_id, gc_id, &points)
+                    conn.poly_line(CoordMode::ORIGIN, win_id, gc_id, &points)
                         .unwrap();
                     conn.flush().unwrap();
                 }

@@ -139,73 +139,27 @@ impl TryFrom<&[u8]> for GetVersionReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Cursor {
-    None = 0,
-    Current = 1,
+pub struct Cursor(bool);
+impl Cursor {
+    pub const NONE: Self = Self(false);
+    pub const CURRENT: Self = Self(true);
 }
 impl From<Cursor> for bool {
+    #[inline]
     fn from(input: Cursor) -> Self {
-        match input {
-            Cursor::None => false,
-            Cursor::Current => true,
-        }
+        input.0
     }
 }
-impl From<Cursor> for u8 {
+impl From<Cursor> for Option<bool> {
+    #[inline]
     fn from(input: Cursor) -> Self {
-        match input {
-            Cursor::None => 0,
-            Cursor::Current => 1,
-        }
+        Some(input.0)
     }
 }
-impl From<Cursor> for Option<u8> {
-    fn from(input: Cursor) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<Cursor> for u16 {
-    fn from(input: Cursor) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<Cursor> for Option<u16> {
-    fn from(input: Cursor) -> Self {
-        Some(u16::from(input))
-    }
-}
-impl From<Cursor> for u32 {
-    fn from(input: Cursor) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<Cursor> for Option<u32> {
-    fn from(input: Cursor) -> Self {
-        Some(u32::from(input))
-    }
-}
-impl TryFrom<u8> for Cursor {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Cursor::None),
-            1 => Ok(Cursor::Current),
-            _ => Err(ParseError::InvalidValue),
-        }
-    }
-}
-impl TryFrom<u16> for Cursor {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
-    }
-}
-impl TryFrom<u32> for Cursor {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<bool> for Cursor {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value)
     }
 }
 

@@ -240,68 +240,64 @@ impl Serialize for Range {
 pub type ElementHeader = u8;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum HType {
-    FromServerTime = 1 << 0,
-    FromClientTime = 1 << 1,
-    FromClientSequence = 1 << 2,
+pub struct HType(u8);
+impl HType {
+    pub const FROM_SERVER_TIME: Self = Self(1 << 0);
+    pub const FROM_CLIENT_TIME: Self = Self(1 << 1);
+    pub const FROM_CLIENT_SEQUENCE: Self = Self(1 << 2);
 }
 impl From<HType> for u8 {
+    #[inline]
     fn from(input: HType) -> Self {
-        match input {
-            HType::FromServerTime => 1 << 0,
-            HType::FromClientTime => 1 << 1,
-            HType::FromClientSequence => 1 << 2,
-        }
+        input.0
     }
 }
 impl From<HType> for Option<u8> {
+    #[inline]
     fn from(input: HType) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<HType> for u16 {
+    #[inline]
     fn from(input: HType) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<HType> for Option<u16> {
+    #[inline]
     fn from(input: HType) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<HType> for u32 {
+    #[inline]
     fn from(input: HType) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<HType> for Option<u32> {
+    #[inline]
     fn from(input: HType) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for HType {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(HType::FromServerTime),
-            2 => Ok(HType::FromClientTime),
-            4 => Ok(HType::FromClientSequence),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for HType {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for HType {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for HType {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(HType, u8);
@@ -309,68 +305,64 @@ bitmask_binop!(HType, u8);
 pub type ClientSpec = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum CS {
-    CurrentClients = 1,
-    FutureClients = 2,
-    AllClients = 3,
+pub struct CS(u8);
+impl CS {
+    pub const CURRENT_CLIENTS: Self = Self(1);
+    pub const FUTURE_CLIENTS: Self = Self(2);
+    pub const ALL_CLIENTS: Self = Self(3);
 }
 impl From<CS> for u8 {
+    #[inline]
     fn from(input: CS) -> Self {
-        match input {
-            CS::CurrentClients => 1,
-            CS::FutureClients => 2,
-            CS::AllClients => 3,
-        }
+        input.0
     }
 }
 impl From<CS> for Option<u8> {
+    #[inline]
     fn from(input: CS) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<CS> for u16 {
+    #[inline]
     fn from(input: CS) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<CS> for Option<u16> {
+    #[inline]
     fn from(input: CS) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<CS> for u32 {
+    #[inline]
     fn from(input: CS) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<CS> for Option<u32> {
+    #[inline]
     fn from(input: CS) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for CS {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(CS::CurrentClients),
-            2 => Ok(CS::FutureClients),
-            3 => Ok(CS::AllClients),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for CS {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u16> for CS {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 impl TryFrom<u32> for CS {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 

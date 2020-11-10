@@ -314,7 +314,7 @@ impl WmSizeHints {
         let data = self.serialize();
         xproto::change_property(
             conn,
-            xproto::PropMode::Replace,
+            xproto::PropMode::REPLACE,
             window,
             property.into(),
             AtomEnum::WM_SIZE_HINTS,
@@ -355,16 +355,16 @@ impl TryParse for WmSizeHints {
         // WinUnmap both are assigned the value 0, which does not matter here.
         let win_gravity = match wire_win_gravity {
             None => None,
-            Some(1) => Some(xproto::Gravity::NorthWest),
-            Some(2) => Some(xproto::Gravity::North),
-            Some(3) => Some(xproto::Gravity::NorthEast),
-            Some(4) => Some(xproto::Gravity::West),
-            Some(5) => Some(xproto::Gravity::Center),
-            Some(6) => Some(xproto::Gravity::East),
-            Some(7) => Some(xproto::Gravity::SouthWest),
-            Some(8) => Some(xproto::Gravity::South),
-            Some(9) => Some(xproto::Gravity::SouthEast),
-            Some(10) => Some(xproto::Gravity::Static),
+            Some(1) => Some(xproto::Gravity::NORTH_WEST),
+            Some(2) => Some(xproto::Gravity::NORTH),
+            Some(3) => Some(xproto::Gravity::NORTH_EAST),
+            Some(4) => Some(xproto::Gravity::WEST),
+            Some(5) => Some(xproto::Gravity::CENTER),
+            Some(6) => Some(xproto::Gravity::EAST),
+            Some(7) => Some(xproto::Gravity::SOUTH_WEST),
+            Some(8) => Some(xproto::Gravity::SOUTH),
+            Some(9) => Some(xproto::Gravity::SOUTH_EAST),
+            Some(10) => Some(xproto::Gravity::STATIC),
             // BitForget and WinUnmap are not allowed here
             _ => return Err(ParseError::InvalidValue),
         };
@@ -588,7 +588,7 @@ impl WmHints {
         let data = self.serialize();
         xproto::change_property(
             conn,
-            xproto::PropMode::Replace,
+            xproto::PropMode::REPLACE,
             window,
             xproto::AtomEnum::WM_HINTS,
             xproto::AtomEnum::WM_HINTS,
@@ -779,7 +779,7 @@ mod test {
         assert_eq!(wm_size_hints.size_increment, Some((10, 19)));
         assert!(wm_size_hints.aspect.is_none(), "{:?}", wm_size_hints.aspect);
         assert_eq!(wm_size_hints.base_size, Some((11, 4)));
-        assert_eq!(wm_size_hints.win_gravity, Some(Gravity::NorthWest));
+        assert_eq!(wm_size_hints.win_gravity, Some(Gravity::NORTH_WEST));
 
         assert_eq!(input, wm_size_hints.serialize());
     }

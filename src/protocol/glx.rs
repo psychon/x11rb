@@ -296,96 +296,112 @@ impl From<BufferSwapCompleteEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum PBCET {
-    Damaged = 32791,
-    Saved = 32792,
+pub struct PBCET(u16);
+impl PBCET {
+    pub const DAMAGED: Self = Self(32791);
+    pub const SAVED: Self = Self(32792);
+}
+impl From<PBCET> for Option<u8> {
+    #[inline]
+    fn from(input: PBCET) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<PBCET> for u16 {
+    #[inline]
     fn from(input: PBCET) -> Self {
-        match input {
-            PBCET::Damaged => 32791,
-            PBCET::Saved => 32792,
-        }
+        input.0
     }
 }
 impl From<PBCET> for Option<u16> {
+    #[inline]
     fn from(input: PBCET) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<PBCET> for u32 {
+    #[inline]
     fn from(input: PBCET) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PBCET> for Option<u32> {
+    #[inline]
     fn from(input: PBCET) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for PBCET {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            32791 => Ok(PBCET::Damaged),
-            32792 => Ok(PBCET::Saved),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for PBCET {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for PBCET {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for PBCET {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum PBCDT {
-    Window = 32793,
-    Pbuffer = 32794,
+pub struct PBCDT(u16);
+impl PBCDT {
+    pub const WINDOW: Self = Self(32793);
+    pub const PBUFFER: Self = Self(32794);
+}
+impl From<PBCDT> for Option<u8> {
+    #[inline]
+    fn from(input: PBCDT) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<PBCDT> for u16 {
+    #[inline]
     fn from(input: PBCDT) -> Self {
-        match input {
-            PBCDT::Window => 32793,
-            PBCDT::Pbuffer => 32794,
-        }
+        input.0
     }
 }
 impl From<PBCDT> for Option<u16> {
+    #[inline]
     fn from(input: PBCDT) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<PBCDT> for u32 {
+    #[inline]
     fn from(input: PBCDT) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<PBCDT> for Option<u32> {
+    #[inline]
     fn from(input: PBCDT) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for PBCDT {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            32793 => Ok(PBCDT::Window),
-            32794 => Ok(PBCDT::Pbuffer),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for PBCDT {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for PBCDT {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for PBCDT {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -1280,91 +1296,70 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum GC {
-    GL_CURRENT_BIT = 1 << 0,
-    GL_POINT_BIT = 1 << 1,
-    GL_LINE_BIT = 1 << 2,
-    GL_POLYGON_BIT = 1 << 3,
-    GL_POLYGON_STIPPLE_BIT = 1 << 4,
-    GL_PIXEL_MODE_BIT = 1 << 5,
-    GL_LIGHTING_BIT = 1 << 6,
-    GL_FOG_BIT = 1 << 7,
-    GL_DEPTH_BUFFER_BIT = 1 << 8,
-    GL_ACCUM_BUFFER_BIT = 1 << 9,
-    GL_STENCIL_BUFFER_BIT = 1 << 10,
-    GL_VIEWPORT_BIT = 1 << 11,
-    GL_TRANSFORM_BIT = 1 << 12,
-    GL_ENABLE_BIT = 1 << 13,
-    GL_COLOR_BUFFER_BIT = 1 << 14,
-    GL_HINT_BIT = 1 << 15,
-    GL_EVAL_BIT = 1 << 16,
-    GL_LIST_BIT = 1 << 17,
-    GL_TEXTURE_BIT = 1 << 18,
-    GL_SCISSOR_BIT = 1 << 19,
-    GL_ALL_ATTRIB_BITS = 16_777_215,
+pub struct GC(u32);
+impl GC {
+    pub const GL_CURRENT_BIT: Self = Self(1 << 0);
+    pub const GL_POINT_BIT: Self = Self(1 << 1);
+    pub const GL_LINE_BIT: Self = Self(1 << 2);
+    pub const GL_POLYGON_BIT: Self = Self(1 << 3);
+    pub const GL_POLYGON_STIPPLE_BIT: Self = Self(1 << 4);
+    pub const GL_PIXEL_MODE_BIT: Self = Self(1 << 5);
+    pub const GL_LIGHTING_BIT: Self = Self(1 << 6);
+    pub const GL_FOG_BIT: Self = Self(1 << 7);
+    pub const GL_DEPTH_BUFFER_BIT: Self = Self(1 << 8);
+    pub const GL_ACCUM_BUFFER_BIT: Self = Self(1 << 9);
+    pub const GL_STENCIL_BUFFER_BIT: Self = Self(1 << 10);
+    pub const GL_VIEWPORT_BIT: Self = Self(1 << 11);
+    pub const GL_TRANSFORM_BIT: Self = Self(1 << 12);
+    pub const GL_ENABLE_BIT: Self = Self(1 << 13);
+    pub const GL_COLOR_BUFFER_BIT: Self = Self(1 << 14);
+    pub const GL_HINT_BIT: Self = Self(1 << 15);
+    pub const GL_EVAL_BIT: Self = Self(1 << 16);
+    pub const GL_LIST_BIT: Self = Self(1 << 17);
+    pub const GL_TEXTURE_BIT: Self = Self(1 << 18);
+    pub const GL_SCISSOR_BIT: Self = Self(1 << 19);
+    pub const GL_ALL_ATTRIB_BITS: Self = Self(16_777_215);
+}
+impl From<GC> for Option<u8> {
+    #[inline]
+    fn from(input: GC) -> Self {
+        u8::try_from(input.0).ok()
+    }
+}
+impl From<GC> for Option<u16> {
+    #[inline]
+    fn from(input: GC) -> Self {
+        u16::try_from(input.0).ok()
+    }
 }
 impl From<GC> for u32 {
+    #[inline]
     fn from(input: GC) -> Self {
-        match input {
-            GC::GL_CURRENT_BIT => 1 << 0,
-            GC::GL_POINT_BIT => 1 << 1,
-            GC::GL_LINE_BIT => 1 << 2,
-            GC::GL_POLYGON_BIT => 1 << 3,
-            GC::GL_POLYGON_STIPPLE_BIT => 1 << 4,
-            GC::GL_PIXEL_MODE_BIT => 1 << 5,
-            GC::GL_LIGHTING_BIT => 1 << 6,
-            GC::GL_FOG_BIT => 1 << 7,
-            GC::GL_DEPTH_BUFFER_BIT => 1 << 8,
-            GC::GL_ACCUM_BUFFER_BIT => 1 << 9,
-            GC::GL_STENCIL_BUFFER_BIT => 1 << 10,
-            GC::GL_VIEWPORT_BIT => 1 << 11,
-            GC::GL_TRANSFORM_BIT => 1 << 12,
-            GC::GL_ENABLE_BIT => 1 << 13,
-            GC::GL_COLOR_BUFFER_BIT => 1 << 14,
-            GC::GL_HINT_BIT => 1 << 15,
-            GC::GL_EVAL_BIT => 1 << 16,
-            GC::GL_LIST_BIT => 1 << 17,
-            GC::GL_TEXTURE_BIT => 1 << 18,
-            GC::GL_SCISSOR_BIT => 1 << 19,
-            GC::GL_ALL_ATTRIB_BITS => 16_777_215,
-        }
+        input.0
     }
 }
 impl From<GC> for Option<u32> {
+    #[inline]
     fn from(input: GC) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u32> for GC {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(GC::GL_CURRENT_BIT),
-            2 => Ok(GC::GL_POINT_BIT),
-            4 => Ok(GC::GL_LINE_BIT),
-            8 => Ok(GC::GL_POLYGON_BIT),
-            16 => Ok(GC::GL_POLYGON_STIPPLE_BIT),
-            32 => Ok(GC::GL_PIXEL_MODE_BIT),
-            64 => Ok(GC::GL_LIGHTING_BIT),
-            128 => Ok(GC::GL_FOG_BIT),
-            256 => Ok(GC::GL_DEPTH_BUFFER_BIT),
-            512 => Ok(GC::GL_ACCUM_BUFFER_BIT),
-            1024 => Ok(GC::GL_STENCIL_BUFFER_BIT),
-            2048 => Ok(GC::GL_VIEWPORT_BIT),
-            4096 => Ok(GC::GL_TRANSFORM_BIT),
-            8192 => Ok(GC::GL_ENABLE_BIT),
-            16384 => Ok(GC::GL_COLOR_BUFFER_BIT),
-            32768 => Ok(GC::GL_HINT_BIT),
-            65536 => Ok(GC::GL_EVAL_BIT),
-            131_072 => Ok(GC::GL_LIST_BIT),
-            262_144 => Ok(GC::GL_TEXTURE_BIT),
-            524_288 => Ok(GC::GL_SCISSOR_BIT),
-            16_777_215 => Ok(GC::GL_ALL_ATTRIB_BITS),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for GC {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for GC {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for GC {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
     }
 }
 
@@ -4565,53 +4560,58 @@ impl RenderModeReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
-#[repr(u16)]
-#[non_exhaustive]
-pub enum RM {
-    GL_RENDER = 7168,
-    GL_FEEDBACK = 7169,
-    GL_SELECT = 7170,
+pub struct RM(u16);
+impl RM {
+    pub const GL_RENDER: Self = Self(7168);
+    pub const GL_FEEDBACK: Self = Self(7169);
+    pub const GL_SELECT: Self = Self(7170);
+}
+impl From<RM> for Option<u8> {
+    #[inline]
+    fn from(input: RM) -> Self {
+        u8::try_from(input.0).ok()
+    }
 }
 impl From<RM> for u16 {
+    #[inline]
     fn from(input: RM) -> Self {
-        match input {
-            RM::GL_RENDER => 7168,
-            RM::GL_FEEDBACK => 7169,
-            RM::GL_SELECT => 7170,
-        }
+        input.0
     }
 }
 impl From<RM> for Option<u16> {
+    #[inline]
     fn from(input: RM) -> Self {
-        Some(u16::from(input))
+        Some(input.0)
     }
 }
 impl From<RM> for u32 {
+    #[inline]
     fn from(input: RM) -> Self {
-        Self::from(u16::from(input))
+        u32::from(input.0)
     }
 }
 impl From<RM> for Option<u32> {
+    #[inline]
     fn from(input: RM) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u16> for RM {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        match value {
-            7168 => Ok(RM::GL_RENDER),
-            7169 => Ok(RM::GL_FEEDBACK),
-            7170 => Ok(RM::GL_SELECT),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for RM {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for RM {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value)
     }
 }
 impl TryFrom<u32> for RM {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u16::try_from(value).or(Err(ParseError::InvalidValue))?)
+        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 

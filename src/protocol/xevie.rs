@@ -329,73 +329,27 @@ impl TryFrom<&[u8]> for EndReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum Datatype {
-    Unmodified = 0,
-    Modified = 1,
+pub struct Datatype(bool);
+impl Datatype {
+    pub const UNMODIFIED: Self = Self(false);
+    pub const MODIFIED: Self = Self(true);
 }
 impl From<Datatype> for bool {
+    #[inline]
     fn from(input: Datatype) -> Self {
-        match input {
-            Datatype::Unmodified => false,
-            Datatype::Modified => true,
-        }
+        input.0
     }
 }
-impl From<Datatype> for u8 {
+impl From<Datatype> for Option<bool> {
+    #[inline]
     fn from(input: Datatype) -> Self {
-        match input {
-            Datatype::Unmodified => 0,
-            Datatype::Modified => 1,
-        }
+        Some(input.0)
     }
 }
-impl From<Datatype> for Option<u8> {
-    fn from(input: Datatype) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<Datatype> for u16 {
-    fn from(input: Datatype) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<Datatype> for Option<u16> {
-    fn from(input: Datatype) -> Self {
-        Some(u16::from(input))
-    }
-}
-impl From<Datatype> for u32 {
-    fn from(input: Datatype) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<Datatype> for Option<u32> {
-    fn from(input: Datatype) -> Self {
-        Some(u32::from(input))
-    }
-}
-impl TryFrom<u8> for Datatype {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Datatype::Unmodified),
-            1 => Ok(Datatype::Modified),
-            _ => Err(ParseError::InvalidValue),
-        }
-    }
-}
-impl TryFrom<u16> for Datatype {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
-    }
-}
-impl TryFrom<u32> for Datatype {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<bool> for Datatype {
+    #[inline]
+    fn from(value: bool) -> Self {
+        Self(value)
     }
 }
 
