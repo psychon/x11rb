@@ -275,14 +275,14 @@ impl DefaultStream {
                             ip
                         } else {
                             // Okay, this is really a v6 address
-                            return Ok((Family::Internet6, ip.octets().to_vec()));
+                            return Ok((Family::INTERNET6, ip.octets().to_vec()));
                         }
                     }
                 };
 
                 // Handle the v4 address
                 if !ip.is_loopback() {
-                    return Ok((Family::Internet, ip.octets().to_vec()));
+                    return Ok((Family::INTERNET, ip.octets().to_vec()));
                 } else {
                     // This is only reached for loopback addresses. The code below handles this.
                 }
@@ -298,7 +298,7 @@ impl DefaultStream {
             .to_str()
             .map(|name| name.as_bytes().to_vec())
             .unwrap_or_else(Vec::new);
-        Ok((Family::Local, hostname))
+        Ok((Family::LOCAL, hostname))
     }
 }
 

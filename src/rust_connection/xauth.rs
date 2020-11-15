@@ -7,58 +7,34 @@ use crate::protocol::xproto::Family as X11Family;
 const MIT_MAGIC_COOKIE_1: &[u8] = b"MIT-MAGIC-COOKIE-1";
 
 /// A family describes how to interpret some bytes as an address in an `AuthEntry`.
+///
+/// Compared to [`x11rb::protocol::xproto::Family`], this is a `u16` and not an `u8`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum Family {
-    Internet,
-    DECnet,
-    Chaos,
-    ServerInterpreted,
-    Internet6,
-    Wild,
-    Local,
-    Netname,
-    Krb5Principal,
-    LocalHost,
-    Unknown(u16),
+pub(crate) struct Family(u16);
+
+#[allow(dead_code)] // Some of these constants are unused, but still serve as documentation
+impl Family {
+    pub(crate) const INTERNET: Self = Self(0);
+    pub(crate) const DEC_NET: Self = Self(1);
+    pub(crate) const CHAOS: Self = Self(2);
+    pub(crate) const SERVER_INTERPRETED: Self = Self(5);
+    pub(crate) const INTERNET6: Self = Self(6);
+    pub(crate) const WILD: Self = Self(65535);
+    pub(crate) const LOCAL: Self = Self(256);
+    pub(crate) const NETNAME: Self = Self(254);
+    pub(crate) const KRB5_PRINCIPAL: Self = Self(253);
+    pub(crate) const LOCAL_HOST: Self = Self(252);
 }
 
 impl From<X11Family> for Family {
     fn from(value: X11Family) -> Self {
-        match value {
-            X11Family::INTERNET => Family::Internet,
-            X11Family::DEC_NET => Family::DECnet,
-            X11Family::CHAOS => Family::Chaos,
-            X11Family::SERVER_INTERPRETED => Family::ServerInterpreted,
-            X11Family::INTERNET6 => Family::Internet6,
-            _ => Family::Unknown(value.into()),
-        }
+        Self(value.into())
     }
 }
 
 impl From<u16> for Family {
     fn from(value: u16) -> Self {
-        let x11family = {
-            match value {
-                0 => Some(X11Family::INTERNET),
-                1 => Some(X11Family::DEC_NET),
-                2 => Some(X11Family::CHAOS),
-                5 => Some(X11Family::SERVER_INTERPRETED),
-                6 => Some(X11Family::INTERNET6),
-                _ => None,
-            }
-        };
-        if let Some(x11family) = x11family {
-            assert_eq!(value, x11family.into());
-            return x11family.into();
-        }
-        match value {
-            65535 => Family::Wild,
-            256 => Family::Local,
-            254 => Family::Netname,
-            253 => Family::Krb5Principal,
-            252 => Family::LocalHost,
-            value => Family::Unknown(value),
-        }
+        Self(value)
     }
 }
 
@@ -190,7 +166,7 @@ mod file {
             assert_eq!(
                 entry,
                 Some(AuthEntry {
-                    family: Family::Local,
+                    family: Family::LOCAL,
                     address: b"ZweiLED".to_vec(),
                     number: b"1".to_vec(),
                     name: b"bar".to_vec(),
@@ -213,14 +189,14 @@ mod file {
             let mut cursor = Cursor::new(&data[..]);
             for expected in &[
                 AuthEntry {
-                    family: Family::Local,
+                    family: Family::LOCAL,
                     address: b"ZweiLED".to_vec(),
                     number: b"1".to_vec(),
                     name: b"bar".to_vec(),
                     data: u32::to_be_bytes(0xdead_beef).to_vec(),
                 },
                 AuthEntry {
-                    family: Family::Internet,
+                    family: Family::INTERNET,
                     address: vec![1, 2, 3, 4],
                     number: b"2".to_vec(),
                     name: b"baz".to_vec(),
@@ -268,7 +244,7 @@ pub(crate) fn get_auth_impl(
         (family1, address1): (Family, &[u8]),
         (family2, address2): (Family, &[u8]),
     ) -> bool {
-        if family1 == Family::Wild || family2 == Family::Wild {
+        if family1 == Family::WILD || family2 == Family::WILD {
             true
         } else if family1 != family2 {
             false
@@ -309,7 +285,7 @@ mod test {
         F: FnOnce(&mut AuthEntry),
     {
         let mut entry = AuthEntry {
-            family: Family::Local,
+            family: Family::LOCAL,
             address: b"whatever".to_vec(),
             number: b"42".to_vec(),
             name: MIT_MAGIC_COOKIE_1.to_vec(),
@@ -318,7 +294,7 @@ mod test {
         f(&mut entry);
         let entries = vec![Ok(entry)];
         assert_eq!(
-            get_auth_impl(entries.into_iter(), Family::Local, b"whatever", 42)
+            get_auth_impl(entries.into_iter(), Family::LOCAL, b"whatever", 42)
                 .unwrap()
                 .unwrap(),
             (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec())
@@ -332,7 +308,7 @@ mod test {
         F: FnOnce(&mut AuthEntry),
     {
         let mut entry = AuthEntry {
-            family: Family::Local,
+            family: Family::LOCAL,
             address: b"whatever".to_vec(),
             number: b"42".to_vec(),
             name: MIT_MAGIC_COOKIE_1.to_vec(),
@@ -341,7 +317,7 @@ mod test {
         f(&mut entry);
         let entries = vec![Ok(entry)];
         assert_eq!(
-            get_auth_impl(entries.into_iter(), Family::Local, b"whatever", 42).unwrap(),
+            get_auth_impl(entries.into_iter(), Family::LOCAL, b"whatever", 42).unwrap(),
             None
         );
     }
@@ -359,13 +335,13 @@ mod test {
 
     #[test]
     fn address_wildcard_match1() {
-        expect_match(|entry| entry.family = Family::Wild);
+        expect_match(|entry| entry.family = Family::WILD);
     }
 
     #[test]
     fn address_wildcard_match2() {
         let entry = AuthEntry {
-            family: Family::Local,
+            family: Family::LOCAL,
             address: b"whatever".to_vec(),
             number: b"42".to_vec(),
             name: MIT_MAGIC_COOKIE_1.to_vec(),
@@ -373,7 +349,7 @@ mod test {
         };
         let entries = vec![Ok(entry)];
         assert_eq!(
-            get_auth_impl(entries.into_iter(), Family::Wild, &[], 42)
+            get_auth_impl(entries.into_iter(), Family::WILD, &[], 42)
                 .unwrap()
                 .unwrap(),
             (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec())
@@ -382,7 +358,7 @@ mod test {
 
     #[test]
     fn family_mismatch() {
-        expect_mismatch(|entry| entry.family = Family::Krb5Principal);
+        expect_mismatch(|entry| entry.family = Family::KRB5_PRINCIPAL);
     }
 
     #[test]
