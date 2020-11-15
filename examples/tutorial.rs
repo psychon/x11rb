@@ -1893,7 +1893,6 @@ fn example_get_geometry<C: Connection>(conn: &C, win: Window) -> Result<(), Repl
 //
 // As usual, we need two functions to fill this structure:
 //
-//
 //    fn translate_coordinates(&self, src_window: u32, dst_window: u32, src_x: i16, src_y: i16)
 //    -> Result<Cookie<Self, TranslateCoordinatesReply>, ConnectionError>
 //
