@@ -2490,25 +2490,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         });
         outln!(out, "}}");
 
-        for larger_type in larger_types.iter() {
-            outln!(out, "impl TryFrom<{}> for {} {{", larger_type, rust_name);
-            out.indented(|out| {
-                outln!(out, "type Error = ParseError;");
-                outln!(
-                    out,
-                    "fn try_from(value: {}) -> Result<Self, Self::Error> {{",
-                    larger_type,
-                );
-                outln!(
-                    out.indent(),
-                    "{}::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)",
-                    raw_type,
-                );
-                outln!(out, "}}");
-            });
-            outln!(out, "}}");
-        }
-
         // An enum is ok for bitmask if all its values are <bit>
         // or have value zero (but not if all values are zero)
         let ok_for_bitmask = enum_def

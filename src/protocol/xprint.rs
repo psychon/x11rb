@@ -192,18 +192,6 @@ impl From<u8> for EvMask {
         Self(value)
     }
 }
-impl TryFrom<u16> for EvMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for EvMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(EvMask, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -258,18 +246,6 @@ impl From<u8> for Detail {
         Self(value)
     }
 }
-impl TryFrom<u16> for Detail {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for Detail {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Attr(u8);
@@ -322,18 +298,6 @@ impl From<u8> for Attr {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for Attr {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for Attr {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 

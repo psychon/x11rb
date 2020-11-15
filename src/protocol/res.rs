@@ -167,18 +167,6 @@ impl From<u8> for ClientIdMask {
         Self(value)
     }
 }
-impl TryFrom<u16> for ClientIdMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ClientIdMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(ClientIdMask, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

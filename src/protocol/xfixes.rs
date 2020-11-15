@@ -193,18 +193,6 @@ impl From<u8> for SaveSetMode {
         Self(value)
     }
 }
-impl TryFrom<u16> for SaveSetMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for SaveSetMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SaveSetTarget(u8);
@@ -254,18 +242,6 @@ impl From<u8> for SaveSetTarget {
         Self(value)
     }
 }
-impl TryFrom<u16> for SaveSetTarget {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for SaveSetTarget {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SaveSetMapping(u8);
@@ -313,18 +289,6 @@ impl From<u8> for SaveSetMapping {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for SaveSetMapping {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for SaveSetMapping {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -465,18 +429,6 @@ impl From<u8> for SelectionEvent {
         Self(value)
     }
 }
-impl TryFrom<u16> for SelectionEvent {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for SelectionEvent {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectionEventMask(u8);
@@ -525,18 +477,6 @@ impl From<u8> for SelectionEventMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for SelectionEventMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for SelectionEventMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(SelectionEventMask, u8);
@@ -764,18 +704,6 @@ impl From<u8> for CursorNotify {
         Self(value)
     }
 }
-impl TryFrom<u16> for CursorNotify {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for CursorNotify {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CursorNotifyMask(u8);
@@ -822,18 +750,6 @@ impl From<u8> for CursorNotifyMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for CursorNotifyMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for CursorNotifyMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(CursorNotifyMask, u8);
@@ -1152,18 +1068,6 @@ impl From<u8> for RegionEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for RegionEnum {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for RegionEnum {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -3438,18 +3342,6 @@ impl From<u8> for BarrierDirections {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for BarrierDirections {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for BarrierDirections {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(BarrierDirections, u8);

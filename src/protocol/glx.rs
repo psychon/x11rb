@@ -343,12 +343,6 @@ impl From<u16> for PBCET {
         Self(value)
     }
 }
-impl TryFrom<u32> for PBCET {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PBCDT(u16);
@@ -396,12 +390,6 @@ impl From<u16> for PBCDT {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for PBCDT {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -4606,12 +4594,6 @@ impl From<u16> for RM {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for RM {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 

@@ -191,12 +191,6 @@ impl From<u16> for EventType {
         Self(value)
     }
 }
-impl TryFrom<u32> for EventType {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DRI2Buffer {

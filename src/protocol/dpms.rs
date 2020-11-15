@@ -550,12 +550,6 @@ impl From<u16> for DPMSMode {
         Self(value)
     }
 }
-impl TryFrom<u32> for DPMSMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 /// Opcode for the ForceLevel request
 pub const FORCE_LEVEL_REQUEST: u8 = 6;
