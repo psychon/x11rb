@@ -55,12 +55,6 @@ impl ModeFlag {
     pub const DOUBLE_CLOCK: Self = Self(1 << 11);
     pub const HALF_CLOCK: Self = Self(1 << 12);
 }
-impl From<ModeFlag> for Option<u8> {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<ModeFlag> for u16 {
     #[inline]
     fn from(input: ModeFlag) -> Self {

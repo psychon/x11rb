@@ -238,18 +238,6 @@ impl PolyEdge {
     pub const SHARP: Self = Self(0);
     pub const SMOOTH: Self = Self(1);
 }
-impl From<PolyEdge> for Option<u8> {
-    #[inline]
-    fn from(input: PolyEdge) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<PolyEdge> for Option<u16> {
-    #[inline]
-    fn from(input: PolyEdge) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<PolyEdge> for u32 {
     #[inline]
     fn from(input: PolyEdge) -> Self {
@@ -286,18 +274,6 @@ pub struct PolyMode(u32);
 impl PolyMode {
     pub const PRECISE: Self = Self(0);
     pub const IMPRECISE: Self = Self(1);
-}
-impl From<PolyMode> for Option<u8> {
-    #[inline]
-    fn from(input: PolyMode) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<PolyMode> for Option<u16> {
-    #[inline]
-    fn from(input: PolyMode) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<PolyMode> for u32 {
     #[inline]
@@ -347,12 +323,6 @@ impl CP {
     pub const DITHER: Self = Self(1 << 11);
     pub const COMPONENT_ALPHA: Self = Self(1 << 12);
 }
-impl From<CP> for Option<u8> {
-    #[inline]
-    fn from(input: CP) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<CP> for u16 {
     #[inline]
     fn from(input: CP) -> Self {
@@ -401,18 +371,6 @@ impl SubPixel {
     pub const VERTICAL_BGR: Self = Self(4);
     pub const NONE: Self = Self(5);
 }
-impl From<SubPixel> for Option<u8> {
-    #[inline]
-    fn from(input: SubPixel) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<SubPixel> for Option<u16> {
-    #[inline]
-    fn from(input: SubPixel) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<SubPixel> for u32 {
     #[inline]
     fn from(input: SubPixel) -> Self {
@@ -451,18 +409,6 @@ impl Repeat {
     pub const NORMAL: Self = Self(1);
     pub const PAD: Self = Self(2);
     pub const REFLECT: Self = Self(3);
-}
-impl From<Repeat> for Option<u8> {
-    #[inline]
-    fn from(input: Repeat) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<Repeat> for Option<u16> {
-    #[inline]
-    fn from(input: Repeat) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<Repeat> for u32 {
     #[inline]

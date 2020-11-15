@@ -301,12 +301,6 @@ impl PBCET {
     pub const DAMAGED: Self = Self(32791);
     pub const SAVED: Self = Self(32792);
 }
-impl From<PBCET> for Option<u8> {
-    #[inline]
-    fn from(input: PBCET) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<PBCET> for u16 {
     #[inline]
     fn from(input: PBCET) -> Self {
@@ -349,12 +343,6 @@ pub struct PBCDT(u16);
 impl PBCDT {
     pub const WINDOW: Self = Self(32793);
     pub const PBUFFER: Self = Self(32794);
-}
-impl From<PBCDT> for Option<u8> {
-    #[inline]
-    fn from(input: PBCDT) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<PBCDT> for u16 {
     #[inline]
@@ -1307,18 +1295,6 @@ impl GC {
     pub const GL_TEXTURE_BIT: Self = Self(1 << 18);
     pub const GL_SCISSOR_BIT: Self = Self(1 << 19);
     pub const GL_ALL_ATTRIB_BITS: Self = Self(16_777_215);
-}
-impl From<GC> for Option<u8> {
-    #[inline]
-    fn from(input: GC) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<GC> for Option<u16> {
-    #[inline]
-    fn from(input: GC) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<GC> for u32 {
     #[inline]
@@ -4553,12 +4529,6 @@ impl RM {
     pub const GL_RENDER: Self = Self(7168);
     pub const GL_FEEDBACK: Self = Self(7169);
     pub const GL_SELECT: Self = Self(7170);
-}
-impl From<RM> for Option<u8> {
-    #[inline]
-    fn from(input: RM) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<RM> for u16 {
     #[inline]

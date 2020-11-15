@@ -101,12 +101,6 @@ impl EventType {
     pub const ACCESS_X_NOTIFY: Self = Self(1 << 10);
     pub const EXTENSION_DEVICE_NOTIFY: Self = Self(1 << 11);
 }
-impl From<EventType> for Option<u8> {
-    #[inline]
-    fn from(input: EventType) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<EventType> for u16 {
     #[inline]
     fn from(input: EventType) -> Self {
@@ -375,12 +369,6 @@ impl StatePart {
     pub const COMPAT_LOOKUP_MODS: Self = Self(1 << 12);
     pub const POINTER_BUTTONS: Self = Self(1 << 13);
 }
-impl From<StatePart> for Option<u8> {
-    #[inline]
-    fn from(input: StatePart) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<StatePart> for u16 {
     #[inline]
     fn from(input: StatePart) -> Self {
@@ -436,12 +424,6 @@ impl BoolCtrl {
     pub const OVERLAY2_MASK: Self = Self(1 << 11);
     pub const IGNORE_GROUP_LOCK_MASK: Self = Self(1 << 12);
 }
-impl From<BoolCtrl> for Option<u8> {
-    #[inline]
-    fn from(input: BoolCtrl) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<BoolCtrl> for u16 {
     #[inline]
     fn from(input: BoolCtrl) -> Self {
@@ -488,18 +470,6 @@ impl Control {
     pub const IGNORE_LOCK_MODS: Self = Self(1 << 29);
     pub const PER_KEY_REPEAT: Self = Self(1 << 30);
     pub const CONTROLS_ENABLED: Self = Self(1 << 31);
-}
-impl From<Control> for Option<u8> {
-    #[inline]
-    fn from(input: Control) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<Control> for Option<u16> {
-    #[inline]
-    fn from(input: Control) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<Control> for u32 {
     #[inline]
@@ -549,12 +519,6 @@ impl AXOption {
     pub const BK_REJECT_FB: Self = Self(1 << 10);
     pub const DUMB_BELL: Self = Self(1 << 11);
 }
-impl From<AXOption> for Option<u8> {
-    #[inline]
-    fn from(input: AXOption) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<AXOption> for u16 {
     #[inline]
     fn from(input: AXOption) -> Self {
@@ -601,12 +565,6 @@ impl LedClassResult {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
     pub const LED_FEEDBACK_CLASS: Self = Self(4);
 }
-impl From<LedClassResult> for Option<u8> {
-    #[inline]
-    fn from(input: LedClassResult) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<LedClassResult> for u16 {
     #[inline]
     fn from(input: LedClassResult) -> Self {
@@ -651,12 +609,6 @@ impl LedClass {
     pub const LED_FEEDBACK_CLASS: Self = Self(4);
     pub const DFLT_XI_CLASS: Self = Self(768);
     pub const ALL_XI_CLASSES: Self = Self(1280);
-}
-impl From<LedClass> for Option<u8> {
-    #[inline]
-    fn from(input: LedClass) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<LedClass> for u16 {
     #[inline]
@@ -753,12 +705,6 @@ impl BellClass {
     pub const BELL_FEEDBACK_CLASS: Self = Self(5);
     pub const DFLT_XI_CLASS: Self = Self(768);
 }
-impl From<BellClass> for Option<u8> {
-    #[inline]
-    fn from(input: BellClass) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<BellClass> for u16 {
     #[inline]
     fn from(input: BellClass) -> Self {
@@ -808,12 +754,6 @@ impl ID {
     pub const ALL_XI_CLASS: Self = Self(1280);
     pub const ALL_XI_ID: Self = Self(1536);
     pub const XI_NONE: Self = Self(65280);
-}
-impl From<ID> for Option<u8> {
-    #[inline]
-    fn from(input: ID) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<ID> for u16 {
     #[inline]
@@ -1237,12 +1177,6 @@ impl VMod {
     pub const M2: Self = Self(1 << 2);
     pub const M1: Self = Self(1 << 1);
     pub const M0: Self = Self(1 << 0);
-}
-impl From<VMod> for Option<u8> {
-    #[inline]
-    fn from(input: VMod) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<VMod> for u16 {
     #[inline]
@@ -1737,12 +1671,6 @@ impl NameDetail {
     pub const VIRTUAL_MOD_NAMES: Self = Self(1 << 11);
     pub const GROUP_NAMES: Self = Self(1 << 12);
     pub const RG_NAMES: Self = Self(1 << 13);
-}
-impl From<NameDetail> for Option<u8> {
-    #[inline]
-    fn from(input: NameDetail) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<NameDetail> for u16 {
     #[inline]

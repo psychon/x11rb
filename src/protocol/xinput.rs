@@ -7047,12 +7047,6 @@ impl DeviceControl {
     pub const ENABLE: Self = Self(4);
     pub const ABSAREA: Self = Self(5);
 }
-impl From<DeviceControl> for Option<u8> {
-    #[inline]
-    fn from(input: DeviceControl) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<DeviceControl> for u16 {
     #[inline]
     fn from(input: DeviceControl) -> Self {
@@ -10011,12 +10005,6 @@ impl HierarchyChangeType {
     pub const ATTACH_SLAVE: Self = Self(3);
     pub const DETACH_SLAVE: Self = Self(4);
 }
-impl From<HierarchyChangeType> for Option<u8> {
-    #[inline]
-    fn from(input: HierarchyChangeType) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<HierarchyChangeType> for u16 {
     #[inline]
     fn from(input: HierarchyChangeType) -> Self {
@@ -10938,18 +10926,6 @@ impl XIEventMask {
     pub const BARRIER_HIT: Self = Self(1 << 25);
     pub const BARRIER_LEAVE: Self = Self(1 << 26);
 }
-impl From<XIEventMask> for Option<u8> {
-    #[inline]
-    fn from(input: XIEventMask) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<XIEventMask> for Option<u16> {
-    #[inline]
-    fn from(input: XIEventMask) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<XIEventMask> for u32 {
     #[inline]
     fn from(input: XIEventMask) -> Self {
@@ -11234,12 +11210,6 @@ impl DeviceClassType {
     pub const SCROLL: Self = Self(3);
     pub const TOUCH: Self = Self(8);
 }
-impl From<DeviceClassType> for Option<u8> {
-    #[inline]
-    fn from(input: DeviceClassType) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<DeviceClassType> for u16 {
     #[inline]
     fn from(input: DeviceClassType) -> Self {
@@ -11285,12 +11255,6 @@ impl DeviceType {
     pub const SLAVE_POINTER: Self = Self(3);
     pub const SLAVE_KEYBOARD: Self = Self(4);
     pub const FLOATING_SLAVE: Self = Self(5);
-}
-impl From<DeviceType> for Option<u8> {
-    #[inline]
-    fn from(input: DeviceType) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<DeviceType> for u16 {
     #[inline]
@@ -11384,12 +11348,6 @@ pub struct ScrollType(u16);
 impl ScrollType {
     pub const VERTICAL: Self = Self(1);
     pub const HORIZONTAL: Self = Self(2);
-}
-impl From<ScrollType> for Option<u8> {
-    #[inline]
-    fn from(input: ScrollType) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<ScrollType> for u16 {
     #[inline]
@@ -13224,18 +13182,6 @@ impl From<u8> for GrabType {
 pub struct ModifierMask(u32);
 impl ModifierMask {
     pub const ANY: Self = Self(1 << 31);
-}
-impl From<ModifierMask> for Option<u8> {
-    #[inline]
-    fn from(input: ModifierMask) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<ModifierMask> for Option<u16> {
-    #[inline]
-    fn from(input: ModifierMask) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<ModifierMask> for u32 {
     #[inline]
@@ -15783,18 +15729,6 @@ pub struct KeyEventFlags(u32);
 impl KeyEventFlags {
     pub const KEY_REPEAT: Self = Self(1 << 16);
 }
-impl From<KeyEventFlags> for Option<u8> {
-    #[inline]
-    fn from(input: KeyEventFlags) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<KeyEventFlags> for Option<u16> {
-    #[inline]
-    fn from(input: KeyEventFlags) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<KeyEventFlags> for u32 {
     #[inline]
     fn from(input: KeyEventFlags) -> Self {
@@ -15932,18 +15866,6 @@ pub type KeyReleaseEvent = KeyPressEvent;
 pub struct PointerEventFlags(u32);
 impl PointerEventFlags {
     pub const POINTER_EMULATED: Self = Self(1 << 16);
-}
-impl From<PointerEventFlags> for Option<u8> {
-    #[inline]
-    fn from(input: PointerEventFlags) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<PointerEventFlags> for Option<u16> {
-    #[inline]
-    fn from(input: PointerEventFlags) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<PointerEventFlags> for u32 {
     #[inline]
@@ -16700,18 +16622,6 @@ impl TouchEventFlags {
     pub const TOUCH_PENDING_END: Self = Self(1 << 16);
     pub const TOUCH_EMULATING_POINTER: Self = Self(1 << 17);
 }
-impl From<TouchEventFlags> for Option<u8> {
-    #[inline]
-    fn from(input: TouchEventFlags) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<TouchEventFlags> for Option<u16> {
-    #[inline]
-    fn from(input: TouchEventFlags) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<TouchEventFlags> for u32 {
     #[inline]
     fn from(input: TouchEventFlags) -> Self {
@@ -16853,18 +16763,6 @@ pub type TouchEndEvent = TouchBeginEvent;
 pub struct TouchOwnershipFlags(u32);
 impl TouchOwnershipFlags {
     pub const NONE: Self = Self(0);
-}
-impl From<TouchOwnershipFlags> for Option<u8> {
-    #[inline]
-    fn from(input: TouchOwnershipFlags) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<TouchOwnershipFlags> for Option<u16> {
-    #[inline]
-    fn from(input: TouchOwnershipFlags) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<TouchOwnershipFlags> for u32 {
     #[inline]

@@ -508,12 +508,6 @@ impl DPMSMode {
     pub const SUSPEND: Self = Self(2);
     pub const OFF: Self = Self(3);
 }
-impl From<DPMSMode> for Option<u8> {
-    #[inline]
-    fn from(input: DPMSMode) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<DPMSMode> for u16 {
     #[inline]
     fn from(input: DPMSMode) -> Self {

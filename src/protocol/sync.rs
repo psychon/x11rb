@@ -99,18 +99,6 @@ impl TESTTYPE {
     pub const POSITIVE_COMPARISON: Self = Self(2);
     pub const NEGATIVE_COMPARISON: Self = Self(3);
 }
-impl From<TESTTYPE> for Option<u8> {
-    #[inline]
-    fn from(input: TESTTYPE) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<TESTTYPE> for Option<u16> {
-    #[inline]
-    fn from(input: TESTTYPE) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<TESTTYPE> for u32 {
     #[inline]
     fn from(input: TESTTYPE) -> Self {
@@ -147,18 +135,6 @@ pub struct VALUETYPE(u32);
 impl VALUETYPE {
     pub const ABSOLUTE: Self = Self(0);
     pub const RELATIVE: Self = Self(1);
-}
-impl From<VALUETYPE> for Option<u8> {
-    #[inline]
-    fn from(input: VALUETYPE) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<VALUETYPE> for Option<u16> {
-    #[inline]
-    fn from(input: VALUETYPE) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<VALUETYPE> for u32 {
     #[inline]

@@ -2404,23 +2404,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
         outln!(out, "}}");
 
-        for &smaller_type in smaller_types.iter() {
-            outln!(
-                out,
-                "impl From<{}> for {}<{}> {{",
-                rust_name,
-                self.option_name,
-                smaller_type,
-            );
-            out.indented(|out| {
-                outln!(out, "#[inline]");
-                outln!(out, "fn from(input: {}) -> Self {{", rust_name);
-                outln!(out.indent(), "{}::try_from(input.0).ok()", smaller_type);
-                outln!(out, "}}");
-            });
-            outln!(out, "}}");
-        }
-
         outln!(out, "impl From<{}> for {} {{", rust_name, raw_type);
         out.indented(|out| {
             outln!(out, "#[inline]");

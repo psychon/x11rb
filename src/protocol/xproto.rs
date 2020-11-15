@@ -514,18 +514,6 @@ impl EventMask {
     pub const COLOR_MAP_CHANGE: Self = Self(1 << 23);
     pub const OWNER_GRAB_BUTTON: Self = Self(1 << 24);
 }
-impl From<EventMask> for Option<u8> {
-    #[inline]
-    fn from(input: EventMask) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<EventMask> for Option<u16> {
-    #[inline]
-    fn from(input: EventMask) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<EventMask> for u32 {
     #[inline]
     fn from(input: EventMask) -> Self {
@@ -564,18 +552,6 @@ impl BackingStore {
     pub const NOT_USEFUL: Self = Self(0);
     pub const WHEN_MAPPED: Self = Self(1);
     pub const ALWAYS: Self = Self(2);
-}
-impl From<BackingStore> for Option<u8> {
-    #[inline]
-    fn from(input: BackingStore) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<BackingStore> for Option<u16> {
-    #[inline]
-    fn from(input: BackingStore) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<BackingStore> for u32 {
     #[inline]
@@ -1118,12 +1094,6 @@ impl ModMask {
     pub const M5: Self = Self(1 << 7);
     pub const ANY: Self = Self(1 << 15);
 }
-impl From<ModMask> for Option<u8> {
-    #[inline]
-    fn from(input: ModMask) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<ModMask> for u16 {
     #[inline]
     fn from(input: ModMask) -> Self {
@@ -1178,12 +1148,6 @@ impl KeyButMask {
     pub const BUTTON3: Self = Self(1 << 10);
     pub const BUTTON4: Self = Self(1 << 11);
     pub const BUTTON5: Self = Self(1 << 12);
-}
-impl From<KeyButMask> for Option<u8> {
-    #[inline]
-    fn from(input: KeyButMask) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<KeyButMask> for u16 {
     #[inline]
@@ -1413,12 +1377,6 @@ impl ButtonMask {
     pub const M4: Self = Self(1 << 11);
     pub const M5: Self = Self(1 << 12);
     pub const ANY: Self = Self(1 << 15);
-}
-impl From<ButtonMask> for Option<u8> {
-    #[inline]
-    fn from(input: ButtonMask) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<ButtonMask> for u16 {
     #[inline]
@@ -4966,12 +4924,6 @@ impl WindowClass {
     pub const INPUT_OUTPUT: Self = Self(1);
     pub const INPUT_ONLY: Self = Self(2);
 }
-impl From<WindowClass> for Option<u8> {
-    #[inline]
-    fn from(input: WindowClass) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<WindowClass> for u16 {
     #[inline]
     fn from(input: WindowClass) -> Self {
@@ -5098,12 +5050,6 @@ impl CW {
     pub const COLORMAP: Self = Self(1 << 13);
     pub const CURSOR: Self = Self(1 << 14);
 }
-impl From<CW> for Option<u8> {
-    #[inline]
-    fn from(input: CW) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<CW> for u16 {
     #[inline]
     fn from(input: CW) -> Self {
@@ -5182,18 +5128,6 @@ impl Gravity {
     pub const SOUTH: Self = Self(8);
     pub const SOUTH_EAST: Self = Self(9);
     pub const STATIC: Self = Self(10);
-}
-impl From<Gravity> for Option<u8> {
-    #[inline]
-    fn from(input: Gravity) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<Gravity> for Option<u16> {
-    #[inline]
-    fn from(input: Gravity) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<Gravity> for u32 {
     #[inline]
@@ -7467,18 +7401,6 @@ impl StackMode {
     pub const TOP_IF: Self = Self(2);
     pub const BOTTOM_IF: Self = Self(3);
     pub const OPPOSITE: Self = Self(4);
-}
-impl From<StackMode> for Option<u8> {
-    #[inline]
-    fn from(input: StackMode) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<StackMode> for Option<u16> {
-    #[inline]
-    fn from(input: StackMode) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<StackMode> for u32 {
     #[inline]
@@ -15292,18 +15214,6 @@ impl GC {
     pub const DASH_LIST: Self = Self(1 << 21);
     pub const ARC_MODE: Self = Self(1 << 22);
 }
-impl From<GC> for Option<u8> {
-    #[inline]
-    fn from(input: GC) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<GC> for Option<u16> {
-    #[inline]
-    fn from(input: GC) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<GC> for u32 {
     #[inline]
     fn from(input: GC) -> Self {
@@ -15356,18 +15266,6 @@ impl GX {
     pub const NAND: Self = Self(14);
     pub const SET: Self = Self(15);
 }
-impl From<GX> for Option<u8> {
-    #[inline]
-    fn from(input: GX) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<GX> for Option<u16> {
-    #[inline]
-    fn from(input: GX) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<GX> for u32 {
     #[inline]
     fn from(input: GX) -> Self {
@@ -15405,18 +15303,6 @@ impl LineStyle {
     pub const SOLID: Self = Self(0);
     pub const ON_OFF_DASH: Self = Self(1);
     pub const DOUBLE_DASH: Self = Self(2);
-}
-impl From<LineStyle> for Option<u8> {
-    #[inline]
-    fn from(input: LineStyle) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<LineStyle> for Option<u16> {
-    #[inline]
-    fn from(input: LineStyle) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<LineStyle> for u32 {
     #[inline]
@@ -15457,18 +15343,6 @@ impl CapStyle {
     pub const ROUND: Self = Self(2);
     pub const PROJECTING: Self = Self(3);
 }
-impl From<CapStyle> for Option<u8> {
-    #[inline]
-    fn from(input: CapStyle) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<CapStyle> for Option<u16> {
-    #[inline]
-    fn from(input: CapStyle) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<CapStyle> for u32 {
     #[inline]
     fn from(input: CapStyle) -> Self {
@@ -15506,18 +15380,6 @@ impl JoinStyle {
     pub const MITER: Self = Self(0);
     pub const ROUND: Self = Self(1);
     pub const BEVEL: Self = Self(2);
-}
-impl From<JoinStyle> for Option<u8> {
-    #[inline]
-    fn from(input: JoinStyle) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<JoinStyle> for Option<u16> {
-    #[inline]
-    fn from(input: JoinStyle) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<JoinStyle> for u32 {
     #[inline]
@@ -15558,18 +15420,6 @@ impl FillStyle {
     pub const STIPPLED: Self = Self(2);
     pub const OPAQUE_STIPPLED: Self = Self(3);
 }
-impl From<FillStyle> for Option<u8> {
-    #[inline]
-    fn from(input: FillStyle) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<FillStyle> for Option<u16> {
-    #[inline]
-    fn from(input: FillStyle) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<FillStyle> for u32 {
     #[inline]
     fn from(input: FillStyle) -> Self {
@@ -15606,18 +15456,6 @@ pub struct FillRule(u32);
 impl FillRule {
     pub const EVEN_ODD: Self = Self(0);
     pub const WINDING: Self = Self(1);
-}
-impl From<FillRule> for Option<u8> {
-    #[inline]
-    fn from(input: FillRule) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<FillRule> for Option<u16> {
-    #[inline]
-    fn from(input: FillRule) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<FillRule> for u32 {
     #[inline]
@@ -15656,18 +15494,6 @@ impl SubwindowMode {
     pub const CLIP_BY_CHILDREN: Self = Self(0);
     pub const INCLUDE_INFERIORS: Self = Self(1);
 }
-impl From<SubwindowMode> for Option<u8> {
-    #[inline]
-    fn from(input: SubwindowMode) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<SubwindowMode> for Option<u16> {
-    #[inline]
-    fn from(input: SubwindowMode) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<SubwindowMode> for u32 {
     #[inline]
     fn from(input: SubwindowMode) -> Self {
@@ -15704,18 +15530,6 @@ pub struct ArcMode(u32);
 impl ArcMode {
     pub const CHORD: Self = Self(0);
     pub const PIE_SLICE: Self = Self(1);
-}
-impl From<ArcMode> for Option<u8> {
-    #[inline]
-    fn from(input: ArcMode) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<ArcMode> for Option<u16> {
-    #[inline]
-    fn from(input: ArcMode) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<ArcMode> for u32 {
     #[inline]
@@ -23212,18 +23026,6 @@ impl LedMode {
     pub const OFF: Self = Self(0);
     pub const ON: Self = Self(1);
 }
-impl From<LedMode> for Option<u8> {
-    #[inline]
-    fn from(input: LedMode) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<LedMode> for Option<u16> {
-    #[inline]
-    fn from(input: LedMode) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<LedMode> for u32 {
     #[inline]
     fn from(input: LedMode) -> Self {
@@ -23261,18 +23063,6 @@ impl AutoRepeatMode {
     pub const OFF: Self = Self(0);
     pub const ON: Self = Self(1);
     pub const DEFAULT: Self = Self(2);
-}
-impl From<AutoRepeatMode> for Option<u8> {
-    #[inline]
-    fn from(input: AutoRepeatMode) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<AutoRepeatMode> for Option<u16> {
-    #[inline]
-    fn from(input: AutoRepeatMode) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<AutoRepeatMode> for u32 {
     #[inline]
