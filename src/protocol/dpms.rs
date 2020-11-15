@@ -508,12 +508,6 @@ impl DPMSMode {
     pub const SUSPEND: Self = Self(2);
     pub const OFF: Self = Self(3);
 }
-impl From<DPMSMode> for Option<u8> {
-    #[inline]
-    fn from(input: DPMSMode) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<DPMSMode> for u16 {
     #[inline]
     fn from(input: DPMSMode) -> Self {
@@ -548,12 +542,6 @@ impl From<u16> for DPMSMode {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for DPMSMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 

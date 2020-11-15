@@ -50,18 +50,6 @@ impl Attachment {
     pub const BUFFER_DEPTH_STENCIL: Self = Self(9);
     pub const BUFFER_HIZ: Self = Self(10);
 }
-impl From<Attachment> for Option<u8> {
-    #[inline]
-    fn from(input: Attachment) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<Attachment> for Option<u16> {
-    #[inline]
-    fn from(input: Attachment) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<Attachment> for u32 {
     #[inline]
     fn from(input: Attachment) -> Self {
@@ -98,18 +86,6 @@ pub struct DriverType(u32);
 impl DriverType {
     pub const DRI: Self = Self(0);
     pub const VDPAU: Self = Self(1);
-}
-impl From<DriverType> for Option<u8> {
-    #[inline]
-    fn from(input: DriverType) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<DriverType> for Option<u16> {
-    #[inline]
-    fn from(input: DriverType) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<DriverType> for u32 {
     #[inline]
@@ -149,12 +125,6 @@ impl EventType {
     pub const BLIT_COMPLETE: Self = Self(2);
     pub const FLIP_COMPLETE: Self = Self(3);
 }
-impl From<EventType> for Option<u8> {
-    #[inline]
-    fn from(input: EventType) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<EventType> for u16 {
     #[inline]
     fn from(input: EventType) -> Self {
@@ -189,12 +159,6 @@ impl From<u16> for EventType {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for EventType {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 

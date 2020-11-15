@@ -110,18 +110,6 @@ impl From<u8> for Rotation {
         Self(value)
     }
 }
-impl TryFrom<u16> for Rotation {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for Rotation {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(Rotation, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -379,18 +367,6 @@ impl From<u8> for SetConfig {
         Self(value)
     }
 }
-impl TryFrom<u16> for SetConfig {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for SetConfig {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 /// Opcode for the SetScreenConfig request
 pub const SET_SCREEN_CONFIG_REQUEST: u8 = 2;
@@ -594,18 +570,6 @@ impl From<u8> for NotifyMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for NotifyMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for NotifyMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(NotifyMask, u8);
@@ -1035,12 +999,6 @@ impl ModeFlag {
     pub const DOUBLE_CLOCK: Self = Self(1 << 12);
     pub const HALVE_CLOCK: Self = Self(1 << 13);
 }
-impl From<ModeFlag> for Option<u8> {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<ModeFlag> for u16 {
     #[inline]
     fn from(input: ModeFlag) -> Self {
@@ -1075,12 +1033,6 @@ impl From<u16> for ModeFlag {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for ModeFlag {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ModeFlag, u16);
@@ -1408,18 +1360,6 @@ impl From<u8> for Connection {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for Connection {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for Connection {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -3555,18 +3495,6 @@ impl From<u8> for Transform {
         Self(value)
     }
 }
-impl TryFrom<u16> for Transform {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for Transform {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(Transform, u8);
 
 /// Opcode for the SetCrtcTransform request
@@ -4543,18 +4471,6 @@ impl From<u8> for ProviderCapability {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for ProviderCapability {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ProviderCapability {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ProviderCapability, u8);
@@ -5769,18 +5685,6 @@ impl From<u8> for Notify {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for Notify {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for Notify {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 

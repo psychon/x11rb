@@ -88,18 +88,6 @@ impl From<u8> for ReportLevel {
         Self(value)
     }
 }
-impl TryFrom<u16> for ReportLevel {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ReportLevel {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 /// Opcode for the BadDamage error
 pub const BAD_DAMAGE_ERROR: u8 = 0;

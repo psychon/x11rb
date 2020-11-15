@@ -251,18 +251,6 @@ impl From<u8> for DeviceUse {
         Self(value)
     }
 }
-impl TryFrom<u16> for DeviceUse {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for DeviceUse {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InputClass(u8);
@@ -317,18 +305,6 @@ impl From<u8> for InputClass {
         Self(value)
     }
 }
-impl TryFrom<u16> for InputClass {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for InputClass {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ValuatorMode(u8);
@@ -376,18 +352,6 @@ impl From<u8> for ValuatorMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for ValuatorMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ValuatorMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -1661,18 +1625,6 @@ impl From<u8> for PropagateMode {
         Self(value)
     }
 }
-impl TryFrom<u16> for PropagateMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for PropagateMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 /// Opcode for the ChangeDeviceDontPropagateList request
 pub const CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 8;
@@ -2556,18 +2508,6 @@ impl From<u8> for ModifierDevice {
         Self(value)
     }
 }
-impl TryFrom<u16> for ModifierDevice {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ModifierDevice {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 /// Opcode for the GrabDeviceKey request
 pub const GRAB_DEVICE_KEY_REQUEST: u8 = 15;
@@ -3112,18 +3052,6 @@ impl From<u8> for DeviceInputMode {
         Self(value)
     }
 }
-impl TryFrom<u16> for DeviceInputMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for DeviceInputMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 /// Opcode for the AllowDeviceEvents request
 pub const ALLOW_DEVICE_EVENTS_REQUEST: u8 = 19;
@@ -3456,18 +3384,6 @@ impl From<u8> for FeedbackClass {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for FeedbackClass {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for FeedbackClass {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -5439,18 +5355,6 @@ impl From<u8> for ChangeFeedbackControlMask {
         Self(value)
     }
 }
-impl TryFrom<u16> for ChangeFeedbackControlMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ChangeFeedbackControlMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(ChangeFeedbackControlMask, u8);
 
 /// Opcode for the ChangeFeedbackControl request
@@ -6450,18 +6354,6 @@ impl From<u8> for ValuatorStateModeMask {
         Self(value)
     }
 }
-impl TryFrom<u16> for ValuatorStateModeMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ValuatorStateModeMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(ValuatorStateModeMask, u8);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -7155,12 +7047,6 @@ impl DeviceControl {
     pub const ENABLE: Self = Self(4);
     pub const ABSAREA: Self = Self(5);
 }
-impl From<DeviceControl> for Option<u8> {
-    #[inline]
-    fn from(input: DeviceControl) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<DeviceControl> for u16 {
     #[inline]
     fn from(input: DeviceControl) -> Self {
@@ -7195,12 +7081,6 @@ impl From<u16> for DeviceControl {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for DeviceControl {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -9101,18 +8981,6 @@ impl From<u8> for PropertyFormat {
         Self(value)
     }
 }
-impl TryFrom<u16> for PropertyFormat {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for PropertyFormat {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ChangeDevicePropertyAux {
@@ -10137,12 +10005,6 @@ impl HierarchyChangeType {
     pub const ATTACH_SLAVE: Self = Self(3);
     pub const DETACH_SLAVE: Self = Self(4);
 }
-impl From<HierarchyChangeType> for Option<u8> {
-    #[inline]
-    fn from(input: HierarchyChangeType) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<HierarchyChangeType> for u16 {
     #[inline]
     fn from(input: HierarchyChangeType) -> Self {
@@ -10177,12 +10039,6 @@ impl From<u16> for HierarchyChangeType {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for HierarchyChangeType {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -10232,18 +10088,6 @@ impl From<u8> for ChangeMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for ChangeMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ChangeMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -11082,18 +10926,6 @@ impl XIEventMask {
     pub const BARRIER_HIT: Self = Self(1 << 25);
     pub const BARRIER_LEAVE: Self = Self(1 << 26);
 }
-impl From<XIEventMask> for Option<u8> {
-    #[inline]
-    fn from(input: XIEventMask) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<XIEventMask> for Option<u16> {
-    #[inline]
-    fn from(input: XIEventMask) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<XIEventMask> for u32 {
     #[inline]
     fn from(input: XIEventMask) -> Self {
@@ -11378,12 +11210,6 @@ impl DeviceClassType {
     pub const SCROLL: Self = Self(3);
     pub const TOUCH: Self = Self(8);
 }
-impl From<DeviceClassType> for Option<u8> {
-    #[inline]
-    fn from(input: DeviceClassType) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<DeviceClassType> for u16 {
     #[inline]
     fn from(input: DeviceClassType) -> Self {
@@ -11420,12 +11246,6 @@ impl From<u16> for DeviceClassType {
         Self(value)
     }
 }
-impl TryFrom<u32> for DeviceClassType {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceType(u16);
@@ -11435,12 +11255,6 @@ impl DeviceType {
     pub const SLAVE_POINTER: Self = Self(3);
     pub const SLAVE_KEYBOARD: Self = Self(4);
     pub const FLOATING_SLAVE: Self = Self(5);
-}
-impl From<DeviceType> for Option<u8> {
-    #[inline]
-    fn from(input: DeviceType) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<DeviceType> for u16 {
     #[inline]
@@ -11476,12 +11290,6 @@ impl From<u16> for DeviceType {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for DeviceType {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -11533,18 +11341,6 @@ impl From<u8> for ScrollFlags {
         Self(value)
     }
 }
-impl TryFrom<u16> for ScrollFlags {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ScrollFlags {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(ScrollFlags, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -11552,12 +11348,6 @@ pub struct ScrollType(u16);
 impl ScrollType {
     pub const VERTICAL: Self = Self(1);
     pub const HORIZONTAL: Self = Self(2);
-}
-impl From<ScrollType> for Option<u8> {
-    #[inline]
-    fn from(input: ScrollType) -> Self {
-        u8::try_from(input.0).ok()
-    }
 }
 impl From<ScrollType> for u16 {
     #[inline]
@@ -11593,12 +11383,6 @@ impl From<u16> for ScrollType {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for ScrollType {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -11648,18 +11432,6 @@ impl From<u8> for TouchMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for TouchMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for TouchMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -13200,18 +12972,6 @@ impl From<u8> for EventMode {
         Self(value)
     }
 }
-impl TryFrom<u16> for EventMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for EventMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 /// Opcode for the XIAllowEvents request
 pub const XI_ALLOW_EVENTS_REQUEST: u8 = 53;
@@ -13365,18 +13125,6 @@ impl From<u8> for GrabMode22 {
         Self(value)
     }
 }
-impl TryFrom<u16> for GrabMode22 {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for GrabMode22 {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabType(u8);
@@ -13429,35 +13177,11 @@ impl From<u8> for GrabType {
         Self(value)
     }
 }
-impl TryFrom<u16> for GrabType {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for GrabType {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ModifierMask(u32);
 impl ModifierMask {
     pub const ANY: Self = Self(1 << 31);
-}
-impl From<ModifierMask> for Option<u8> {
-    #[inline]
-    fn from(input: ModifierMask) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<ModifierMask> for Option<u16> {
-    #[inline]
-    fn from(input: ModifierMask) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<ModifierMask> for u32 {
     #[inline]
@@ -14907,18 +14631,6 @@ impl From<u8> for MoreEventsMask {
         Self(value)
     }
 }
-impl TryFrom<u16> for MoreEventsMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for MoreEventsMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(MoreEventsMask, u8);
 
 /// Opcode for the DeviceKeyPress event
@@ -15196,18 +14908,6 @@ impl From<u8> for ClassesReportedMask {
         Self(value)
     }
 }
-impl TryFrom<u16> for ClassesReportedMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ClassesReportedMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(ClassesReportedMask, u8);
 
 /// Opcode for the DeviceStateNotify event
@@ -15452,18 +15152,6 @@ impl From<u8> for ChangeDevice {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for ChangeDevice {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ChangeDevice {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -15755,18 +15443,6 @@ impl From<u8> for DeviceChange {
         Self(value)
     }
 }
-impl TryFrom<u16> for DeviceChange {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for DeviceChange {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 /// Opcode for the DevicePresenceNotify event
 pub const DEVICE_PRESENCE_NOTIFY_EVENT: u8 = 15;
@@ -15987,18 +15663,6 @@ impl From<u8> for ChangeReason {
         Self(value)
     }
 }
-impl TryFrom<u16> for ChangeReason {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ChangeReason {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 /// Opcode for the DeviceChanged event
 pub const DEVICE_CHANGED_EVENT: u16 = 1;
@@ -16064,18 +15728,6 @@ impl DeviceChangedEvent {
 pub struct KeyEventFlags(u32);
 impl KeyEventFlags {
     pub const KEY_REPEAT: Self = Self(1 << 16);
-}
-impl From<KeyEventFlags> for Option<u8> {
-    #[inline]
-    fn from(input: KeyEventFlags) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<KeyEventFlags> for Option<u16> {
-    #[inline]
-    fn from(input: KeyEventFlags) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<KeyEventFlags> for u32 {
     #[inline]
@@ -16214,18 +15866,6 @@ pub type KeyReleaseEvent = KeyPressEvent;
 pub struct PointerEventFlags(u32);
 impl PointerEventFlags {
     pub const POINTER_EMULATED: Self = Self(1 << 16);
-}
-impl From<PointerEventFlags> for Option<u8> {
-    #[inline]
-    fn from(input: PointerEventFlags) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<PointerEventFlags> for Option<u16> {
-    #[inline]
-    fn from(input: PointerEventFlags) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<PointerEventFlags> for u32 {
     #[inline]
@@ -16416,18 +16056,6 @@ impl From<u8> for NotifyMode {
         Self(value)
     }
 }
-impl TryFrom<u16> for NotifyMode {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for NotifyMode {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NotifyDetail(u8);
@@ -16481,18 +16109,6 @@ impl From<u8> for NotifyDetail {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for NotifyDetail {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for NotifyDetail {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -16644,18 +16260,6 @@ impl From<u8> for HierarchyMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for HierarchyMask {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for HierarchyMask {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(HierarchyMask, u8);
@@ -16825,18 +16429,6 @@ impl From<u8> for PropertyFlag {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for PropertyFlag {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for PropertyFlag {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -17030,18 +16622,6 @@ impl TouchEventFlags {
     pub const TOUCH_PENDING_END: Self = Self(1 << 16);
     pub const TOUCH_EMULATING_POINTER: Self = Self(1 << 17);
 }
-impl From<TouchEventFlags> for Option<u8> {
-    #[inline]
-    fn from(input: TouchEventFlags) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<TouchEventFlags> for Option<u16> {
-    #[inline]
-    fn from(input: TouchEventFlags) -> Self {
-        u16::try_from(input.0).ok()
-    }
-}
 impl From<TouchEventFlags> for u32 {
     #[inline]
     fn from(input: TouchEventFlags) -> Self {
@@ -17183,18 +16763,6 @@ pub type TouchEndEvent = TouchBeginEvent;
 pub struct TouchOwnershipFlags(u32);
 impl TouchOwnershipFlags {
     pub const NONE: Self = Self(0);
-}
-impl From<TouchOwnershipFlags> for Option<u8> {
-    #[inline]
-    fn from(input: TouchOwnershipFlags) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<TouchOwnershipFlags> for Option<u16> {
-    #[inline]
-    fn from(input: TouchOwnershipFlags) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<TouchOwnershipFlags> for u32 {
     #[inline]
@@ -17397,18 +16965,6 @@ impl From<u8> for BarrierFlags {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for BarrierFlags {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for BarrierFlags {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(BarrierFlags, u8);

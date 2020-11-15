@@ -83,18 +83,6 @@ impl From<u8> for PictType {
         Self(value)
     }
 }
-impl TryFrom<u16> for PictType {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for PictType {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PictureEnum(u8);
@@ -141,18 +129,6 @@ impl From<u8> for PictureEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for PictureEnum {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for PictureEnum {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 
@@ -255,36 +231,12 @@ impl From<u8> for PictOp {
         Self(value)
     }
 }
-impl TryFrom<u16> for PictOp {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for PictOp {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PolyEdge(u32);
 impl PolyEdge {
     pub const SHARP: Self = Self(0);
     pub const SMOOTH: Self = Self(1);
-}
-impl From<PolyEdge> for Option<u8> {
-    #[inline]
-    fn from(input: PolyEdge) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<PolyEdge> for Option<u16> {
-    #[inline]
-    fn from(input: PolyEdge) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<PolyEdge> for u32 {
     #[inline]
@@ -322,18 +274,6 @@ pub struct PolyMode(u32);
 impl PolyMode {
     pub const PRECISE: Self = Self(0);
     pub const IMPRECISE: Self = Self(1);
-}
-impl From<PolyMode> for Option<u8> {
-    #[inline]
-    fn from(input: PolyMode) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<PolyMode> for Option<u16> {
-    #[inline]
-    fn from(input: PolyMode) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<PolyMode> for u32 {
     #[inline]
@@ -383,12 +323,6 @@ impl CP {
     pub const DITHER: Self = Self(1 << 11);
     pub const COMPONENT_ALPHA: Self = Self(1 << 12);
 }
-impl From<CP> for Option<u8> {
-    #[inline]
-    fn from(input: CP) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<CP> for u16 {
     #[inline]
     fn from(input: CP) -> Self {
@@ -425,12 +359,6 @@ impl From<u16> for CP {
         Self(value)
     }
 }
-impl TryFrom<u32> for CP {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(CP, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -442,18 +370,6 @@ impl SubPixel {
     pub const VERTICAL_RGB: Self = Self(3);
     pub const VERTICAL_BGR: Self = Self(4);
     pub const NONE: Self = Self(5);
-}
-impl From<SubPixel> for Option<u8> {
-    #[inline]
-    fn from(input: SubPixel) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<SubPixel> for Option<u16> {
-    #[inline]
-    fn from(input: SubPixel) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<SubPixel> for u32 {
     #[inline]
@@ -493,18 +409,6 @@ impl Repeat {
     pub const NORMAL: Self = Self(1);
     pub const PAD: Self = Self(2);
     pub const REFLECT: Self = Self(3);
-}
-impl From<Repeat> for Option<u8> {
-    #[inline]
-    fn from(input: Repeat) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
-impl From<Repeat> for Option<u16> {
-    #[inline]
-    fn from(input: Repeat) -> Self {
-        u16::try_from(input.0).ok()
-    }
 }
 impl From<Repeat> for u32 {
     #[inline]

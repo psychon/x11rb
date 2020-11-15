@@ -55,12 +55,6 @@ impl ModeFlag {
     pub const DOUBLE_CLOCK: Self = Self(1 << 11);
     pub const HALF_CLOCK: Self = Self(1 << 12);
 }
-impl From<ModeFlag> for Option<u8> {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        u8::try_from(input.0).ok()
-    }
-}
 impl From<ModeFlag> for u16 {
     #[inline]
     fn from(input: ModeFlag) -> Self {
@@ -95,12 +89,6 @@ impl From<u16> for ModeFlag {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u32> for ModeFlag {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u16::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(ModeFlag, u16);
@@ -152,18 +140,6 @@ impl From<u8> for ClockFlag {
         Self(value)
     }
 }
-impl TryFrom<u16> for ClockFlag {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for ClockFlag {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
 bitmask_binop!(ClockFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -212,18 +188,6 @@ impl From<u8> for Permission {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
-    }
-}
-impl TryFrom<u16> for Permission {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
-    }
-}
-impl TryFrom<u32> for Permission {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        u8::try_from(value).or(Err(ParseError::InvalidValue)).map(Self)
     }
 }
 bitmask_binop!(Permission, u8);
