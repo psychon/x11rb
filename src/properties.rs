@@ -341,34 +341,14 @@ impl TryParse for WmSizeHints {
         let (aspect, remaining) =
             parse_with_flag::<(AspectRatio, AspectRatio)>(remaining, flags, P_ASPECT)?;
         // Apparently, some older version of ICCCM didn't have these...?
-        let (base_size, wire_win_gravity, remaining) = if remaining.is_empty() {
-            (min_size, Some(1), remaining)
+        let (base_size, win_gravity, remaining) = if remaining.is_empty() {
+            (min_size, Some(xproto::Gravity::NORTH_WEST), remaining)
         } else {
             let (base_size, remaining) =
                 parse_with_flag::<(i32, i32)>(remaining, flags, P_BASE_SIZE)?;
-            let (wire_win_gravity, remaining) =
-                parse_with_flag::<u32>(remaining, flags, P_WIN_GRAVITY)?;
-            (base_size, wire_win_gravity, remaining)
+            let (win_gravity, remaining) = parse_with_flag::<u32>(remaining, flags, P_WIN_GRAVITY)?;
+            (base_size, win_gravity.map(Into::into), remaining)
         };
-
-        // FIXME: Move this into the code generator. Currently, the trouble is that BitForget and
-        // WinUnmap both are assigned the value 0, which does not matter here.
-        let win_gravity = match wire_win_gravity {
-            None => None,
-            Some(1) => Some(xproto::Gravity::NORTH_WEST),
-            Some(2) => Some(xproto::Gravity::NORTH),
-            Some(3) => Some(xproto::Gravity::NORTH_EAST),
-            Some(4) => Some(xproto::Gravity::WEST),
-            Some(5) => Some(xproto::Gravity::CENTER),
-            Some(6) => Some(xproto::Gravity::EAST),
-            Some(7) => Some(xproto::Gravity::SOUTH_WEST),
-            Some(8) => Some(xproto::Gravity::SOUTH),
-            Some(9) => Some(xproto::Gravity::SOUTH_EAST),
-            Some(10) => Some(xproto::Gravity::STATIC),
-            // BitForget and WinUnmap are not allowed here
-            _ => return Err(ParseError::InvalidValue),
-        };
-        assert_eq!(wire_win_gravity, win_gravity.map(Into::into));
 
         let position = if flags & U_S_POSITION != 0 {
             Some((WmSizeHintsSpecification::UserSpecified, x, y))
