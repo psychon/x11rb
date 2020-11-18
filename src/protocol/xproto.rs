@@ -5106,6 +5106,54 @@ impl From<BackPixmap> for Option<bool> {
         Some(input.0)
     }
 }
+impl From<BackPixmap> for u8 {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<BackPixmap> for Option<u8> {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<BackPixmap> for u16 {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<BackPixmap> for Option<u16> {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<BackPixmap> for u32 {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<BackPixmap> for Option<u32> {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        Some(u32::from(input.0))
+    }
+}
+impl From<BackPixmap> for u64 {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        u64::from(input.0)
+    }
+}
+impl From<BackPixmap> for Option<u64> {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        Some(u64::from(input.0))
+    }
+}
 impl From<bool> for BackPixmap {
     #[inline]
     fn from(value: bool) -> Self {
@@ -10061,6 +10109,54 @@ impl From<SendEventDest> for Option<bool> {
     #[inline]
     fn from(input: SendEventDest) -> Self {
         Some(input.0)
+    }
+}
+impl From<SendEventDest> for u8 {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<SendEventDest> for Option<u8> {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<SendEventDest> for u16 {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<SendEventDest> for Option<u16> {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<SendEventDest> for u32 {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<SendEventDest> for Option<u32> {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        Some(u32::from(input.0))
+    }
+}
+impl From<SendEventDest> for u64 {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        u64::from(input.0)
+    }
+}
+impl From<SendEventDest> for Option<u64> {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        Some(u64::from(input.0))
     }
 }
 impl From<bool> for SendEventDest {
