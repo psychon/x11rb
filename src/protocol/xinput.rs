@@ -9521,6 +9521,42 @@ impl From<Device> for Option<bool> {
         Some(input.0)
     }
 }
+impl From<Device> for u8 {
+    #[inline]
+    fn from(input: Device) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<Device> for Option<u8> {
+    #[inline]
+    fn from(input: Device) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<Device> for u16 {
+    #[inline]
+    fn from(input: Device) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<Device> for Option<u16> {
+    #[inline]
+    fn from(input: Device) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<Device> for u32 {
+    #[inline]
+    fn from(input: Device) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<Device> for Option<u32> {
+    #[inline]
+    fn from(input: Device) -> Self {
+        Some(u32::from(input.0))
+    }
+}
 impl From<bool> for Device {
     #[inline]
     fn from(value: bool) -> Self {
@@ -12654,6 +12690,42 @@ impl From<GrabOwner> for Option<bool> {
     #[inline]
     fn from(input: GrabOwner) -> Self {
         Some(input.0)
+    }
+}
+impl From<GrabOwner> for u8 {
+    #[inline]
+    fn from(input: GrabOwner) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<GrabOwner> for Option<u8> {
+    #[inline]
+    fn from(input: GrabOwner) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<GrabOwner> for u16 {
+    #[inline]
+    fn from(input: GrabOwner) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<GrabOwner> for Option<u16> {
+    #[inline]
+    fn from(input: GrabOwner) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<GrabOwner> for u32 {
+    #[inline]
+    fn from(input: GrabOwner) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<GrabOwner> for Option<u32> {
+    #[inline]
+    fn from(input: GrabOwner) -> Self {
+        Some(u32::from(input.0))
     }
 }
 impl From<bool> for GrabOwner {

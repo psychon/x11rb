@@ -346,6 +346,42 @@ impl From<Datatype> for Option<bool> {
         Some(input.0)
     }
 }
+impl From<Datatype> for u8 {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<Datatype> for Option<u8> {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<Datatype> for u16 {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<Datatype> for Option<u16> {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<Datatype> for u32 {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<Datatype> for Option<u32> {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        Some(u32::from(input.0))
+    }
+}
 impl From<bool> for Datatype {
     #[inline]
     fn from(value: bool) -> Self {

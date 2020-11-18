@@ -136,6 +136,42 @@ impl From<GetDoc> for Option<bool> {
         Some(input.0)
     }
 }
+impl From<GetDoc> for u8 {
+    #[inline]
+    fn from(input: GetDoc) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<GetDoc> for Option<u8> {
+    #[inline]
+    fn from(input: GetDoc) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<GetDoc> for u16 {
+    #[inline]
+    fn from(input: GetDoc) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<GetDoc> for Option<u16> {
+    #[inline]
+    fn from(input: GetDoc) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<GetDoc> for u32 {
+    #[inline]
+    fn from(input: GetDoc) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<GetDoc> for Option<u32> {
+    #[inline]
+    fn from(input: GetDoc) -> Self {
+        Some(u32::from(input.0))
+    }
+}
 impl From<bool> for GetDoc {
     #[inline]
     fn from(value: bool) -> Self {

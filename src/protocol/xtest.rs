@@ -156,6 +156,42 @@ impl From<Cursor> for Option<bool> {
         Some(input.0)
     }
 }
+impl From<Cursor> for u8 {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<Cursor> for Option<u8> {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<Cursor> for u16 {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<Cursor> for Option<u16> {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<Cursor> for u32 {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<Cursor> for Option<u32> {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        Some(u32::from(input.0))
+    }
+}
 impl From<bool> for Cursor {
     #[inline]
     fn from(value: bool) -> Self {
