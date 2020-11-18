@@ -172,18 +172,6 @@ impl From<GetDoc> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<GetDoc> for u64 {
-    #[inline]
-    fn from(input: GetDoc) -> Self {
-        u64::from(input.0)
-    }
-}
-impl From<GetDoc> for Option<u64> {
-    #[inline]
-    fn from(input: GetDoc) -> Self {
-        Some(u64::from(input.0))
-    }
-}
 impl From<bool> for GetDoc {
     #[inline]
     fn from(value: bool) -> Self {

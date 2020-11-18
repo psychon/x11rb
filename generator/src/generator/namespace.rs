@@ -2353,7 +2353,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let (raw_type, smaller_types, larger_types): (&str, &[&str], &[&str]) =
             match global_enum_size {
-                1 => ("bool", &[], &["u8", "u16", "u32", "u64"]),
+                1 => ("bool", &[], &["u8", "u16", "u32"]),
                 8 => ("u8", &[], &["u16", "u32"]),
                 16 => ("u16", &["u8"], &["u32"]),
                 32 => ("u32", &["u8", "u16"], &[]),

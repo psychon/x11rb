@@ -382,18 +382,6 @@ impl From<Datatype> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<Datatype> for u64 {
-    #[inline]
-    fn from(input: Datatype) -> Self {
-        u64::from(input.0)
-    }
-}
-impl From<Datatype> for Option<u64> {
-    #[inline]
-    fn from(input: Datatype) -> Self {
-        Some(u64::from(input.0))
-    }
-}
 impl From<bool> for Datatype {
     #[inline]
     fn from(value: bool) -> Self {

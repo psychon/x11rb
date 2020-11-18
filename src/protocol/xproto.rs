@@ -5142,18 +5142,6 @@ impl From<BackPixmap> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<BackPixmap> for u64 {
-    #[inline]
-    fn from(input: BackPixmap) -> Self {
-        u64::from(input.0)
-    }
-}
-impl From<BackPixmap> for Option<u64> {
-    #[inline]
-    fn from(input: BackPixmap) -> Self {
-        Some(u64::from(input.0))
-    }
-}
 impl From<bool> for BackPixmap {
     #[inline]
     fn from(value: bool) -> Self {
@@ -10145,18 +10133,6 @@ impl From<SendEventDest> for Option<u32> {
     #[inline]
     fn from(input: SendEventDest) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<SendEventDest> for u64 {
-    #[inline]
-    fn from(input: SendEventDest) -> Self {
-        u64::from(input.0)
-    }
-}
-impl From<SendEventDest> for Option<u64> {
-    #[inline]
-    fn from(input: SendEventDest) -> Self {
-        Some(u64::from(input.0))
     }
 }
 impl From<bool> for SendEventDest {

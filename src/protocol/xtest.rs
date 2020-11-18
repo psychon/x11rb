@@ -192,18 +192,6 @@ impl From<Cursor> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<Cursor> for u64 {
-    #[inline]
-    fn from(input: Cursor) -> Self {
-        u64::from(input.0)
-    }
-}
-impl From<Cursor> for Option<u64> {
-    #[inline]
-    fn from(input: Cursor) -> Self {
-        Some(u64::from(input.0))
-    }
-}
 impl From<bool> for Cursor {
     #[inline]
     fn from(value: bool) -> Self {

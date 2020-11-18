@@ -9557,18 +9557,6 @@ impl From<Device> for Option<u32> {
         Some(u32::from(input.0))
     }
 }
-impl From<Device> for u64 {
-    #[inline]
-    fn from(input: Device) -> Self {
-        u64::from(input.0)
-    }
-}
-impl From<Device> for Option<u64> {
-    #[inline]
-    fn from(input: Device) -> Self {
-        Some(u64::from(input.0))
-    }
-}
 impl From<bool> for Device {
     #[inline]
     fn from(value: bool) -> Self {
@@ -12738,18 +12726,6 @@ impl From<GrabOwner> for Option<u32> {
     #[inline]
     fn from(input: GrabOwner) -> Self {
         Some(u32::from(input.0))
-    }
-}
-impl From<GrabOwner> for u64 {
-    #[inline]
-    fn from(input: GrabOwner) -> Self {
-        u64::from(input.0)
-    }
-}
-impl From<GrabOwner> for Option<u64> {
-    #[inline]
-    fn from(input: GrabOwner) -> Self {
-        Some(u64::from(input.0))
     }
 }
 impl From<bool> for GrabOwner {
