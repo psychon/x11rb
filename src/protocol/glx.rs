@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -295,7 +295,7 @@ impl From<BufferSwapCompleteEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PBCET(u16);
 impl PBCET {
     pub const DAMAGED: Self = Self(32791);
@@ -337,8 +337,22 @@ impl From<u16> for PBCET {
         Self(value)
     }
 }
+impl std::fmt::Debug for PBCET {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::DAMAGED.into(), "DAMAGED"),
+            (Self::SAVED.into(), "SAVED"),
+        ];
+        let variants2 = [
+            (Self::DAMAGED.into(), "Damaged"),
+            (Self::SAVED.into(), "Saved"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PBCDT(u16);
 impl PBCDT {
     pub const WINDOW: Self = Self(32793);
@@ -378,6 +392,20 @@ impl From<u16> for PBCDT {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PBCDT {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::WINDOW.into(), "WINDOW"),
+            (Self::PBUFFER.into(), "PBUFFER"),
+        ];
+        let variants2 = [
+            (Self::WINDOW.into(), "Window"),
+            (Self::PBUFFER.into(), "Pbuffer"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -1271,7 +1299,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GC(u32);
 impl GC {
     pub const GL_CURRENT_BIT: Self = Self(1 << 0);
@@ -1324,6 +1352,58 @@ impl From<u32> for GC {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for GC {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::GL_CURRENT_BIT.into(), "GL_CURRENT_BIT"),
+            (Self::GL_POINT_BIT.into(), "GL_POINT_BIT"),
+            (Self::GL_LINE_BIT.into(), "GL_LINE_BIT"),
+            (Self::GL_POLYGON_BIT.into(), "GL_POLYGON_BIT"),
+            (Self::GL_POLYGON_STIPPLE_BIT.into(), "GL_POLYGON_STIPPLE_BIT"),
+            (Self::GL_PIXEL_MODE_BIT.into(), "GL_PIXEL_MODE_BIT"),
+            (Self::GL_LIGHTING_BIT.into(), "GL_LIGHTING_BIT"),
+            (Self::GL_FOG_BIT.into(), "GL_FOG_BIT"),
+            (Self::GL_DEPTH_BUFFER_BIT.into(), "GL_DEPTH_BUFFER_BIT"),
+            (Self::GL_ACCUM_BUFFER_BIT.into(), "GL_ACCUM_BUFFER_BIT"),
+            (Self::GL_STENCIL_BUFFER_BIT.into(), "GL_STENCIL_BUFFER_BIT"),
+            (Self::GL_VIEWPORT_BIT.into(), "GL_VIEWPORT_BIT"),
+            (Self::GL_TRANSFORM_BIT.into(), "GL_TRANSFORM_BIT"),
+            (Self::GL_ENABLE_BIT.into(), "GL_ENABLE_BIT"),
+            (Self::GL_COLOR_BUFFER_BIT.into(), "GL_COLOR_BUFFER_BIT"),
+            (Self::GL_HINT_BIT.into(), "GL_HINT_BIT"),
+            (Self::GL_EVAL_BIT.into(), "GL_EVAL_BIT"),
+            (Self::GL_LIST_BIT.into(), "GL_LIST_BIT"),
+            (Self::GL_TEXTURE_BIT.into(), "GL_TEXTURE_BIT"),
+            (Self::GL_SCISSOR_BIT.into(), "GL_SCISSOR_BIT"),
+            (Self::GL_ALL_ATTRIB_BITS.into(), "GL_ALL_ATTRIB_BITS"),
+        ];
+        let variants2 = [
+            (Self::GL_CURRENT_BIT.into(), "GL_CURRENT_BIT"),
+            (Self::GL_POINT_BIT.into(), "GL_POINT_BIT"),
+            (Self::GL_LINE_BIT.into(), "GL_LINE_BIT"),
+            (Self::GL_POLYGON_BIT.into(), "GL_POLYGON_BIT"),
+            (Self::GL_POLYGON_STIPPLE_BIT.into(), "GL_POLYGON_STIPPLE_BIT"),
+            (Self::GL_PIXEL_MODE_BIT.into(), "GL_PIXEL_MODE_BIT"),
+            (Self::GL_LIGHTING_BIT.into(), "GL_LIGHTING_BIT"),
+            (Self::GL_FOG_BIT.into(), "GL_FOG_BIT"),
+            (Self::GL_DEPTH_BUFFER_BIT.into(), "GL_DEPTH_BUFFER_BIT"),
+            (Self::GL_ACCUM_BUFFER_BIT.into(), "GL_ACCUM_BUFFER_BIT"),
+            (Self::GL_STENCIL_BUFFER_BIT.into(), "GL_STENCIL_BUFFER_BIT"),
+            (Self::GL_VIEWPORT_BIT.into(), "GL_VIEWPORT_BIT"),
+            (Self::GL_TRANSFORM_BIT.into(), "GL_TRANSFORM_BIT"),
+            (Self::GL_ENABLE_BIT.into(), "GL_ENABLE_BIT"),
+            (Self::GL_COLOR_BUFFER_BIT.into(), "GL_COLOR_BUFFER_BIT"),
+            (Self::GL_HINT_BIT.into(), "GL_HINT_BIT"),
+            (Self::GL_EVAL_BIT.into(), "GL_EVAL_BIT"),
+            (Self::GL_LIST_BIT.into(), "GL_LIST_BIT"),
+            (Self::GL_TEXTURE_BIT.into(), "GL_TEXTURE_BIT"),
+            (Self::GL_SCISSOR_BIT.into(), "GL_SCISSOR_BIT"),
+            (Self::GL_ALL_ATTRIB_BITS.into(), "GL_ALL_ATTRIB_BITS"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -4523,7 +4603,7 @@ impl RenderModeReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct RM(u16);
 impl RM {
     pub const GL_RENDER: Self = Self(7168);
@@ -4564,6 +4644,22 @@ impl From<u16> for RM {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for RM {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::GL_RENDER.into(), "GL_RENDER"),
+            (Self::GL_FEEDBACK.into(), "GL_FEEDBACK"),
+            (Self::GL_SELECT.into(), "GL_SELECT"),
+        ];
+        let variants2 = [
+            (Self::GL_RENDER.into(), "GL_RENDER"),
+            (Self::GL_FEEDBACK.into(), "GL_FEEDBACK"),
+            (Self::GL_SELECT.into(), "GL_SELECT"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

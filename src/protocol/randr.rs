@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -58,7 +58,7 @@ pub const BAD_MODE_ERROR: u8 = 2;
 /// Opcode for the BadProvider error
 pub const BAD_PROVIDER_ERROR: u8 = 3;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Rotation(u8);
 impl Rotation {
     pub const ROTATE0: Self = Self(1 << 0);
@@ -108,6 +108,28 @@ impl From<u8> for Rotation {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Rotation {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ROTATE0.into(), "ROTATE0"),
+            (Self::ROTATE90.into(), "ROTATE90"),
+            (Self::ROTATE180.into(), "ROTATE180"),
+            (Self::ROTATE270.into(), "ROTATE270"),
+            (Self::REFLECT_X.into(), "REFLECT_X"),
+            (Self::REFLECT_Y.into(), "REFLECT_Y"),
+        ];
+        let variants2 = [
+            (Self::ROTATE0.into(), "Rotate0"),
+            (Self::ROTATE90.into(), "Rotate90"),
+            (Self::ROTATE180.into(), "Rotate180"),
+            (Self::ROTATE270.into(), "Rotate270"),
+            (Self::REFLECT_X.into(), "ReflectX"),
+            (Self::REFLECT_Y.into(), "ReflectY"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(Rotation, u8);
@@ -317,7 +339,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SetConfig(u8);
 impl SetConfig {
     pub const SUCCESS: Self = Self(0);
@@ -365,6 +387,24 @@ impl From<u8> for SetConfig {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SetConfig {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SUCCESS.into(), "SUCCESS"),
+            (Self::INVALID_CONFIG_TIME.into(), "INVALID_CONFIG_TIME"),
+            (Self::INVALID_TIME.into(), "INVALID_TIME"),
+            (Self::FAILED.into(), "FAILED"),
+        ];
+        let variants2 = [
+            (Self::SUCCESS.into(), "Success"),
+            (Self::INVALID_CONFIG_TIME.into(), "InvalidConfigTime"),
+            (Self::INVALID_TIME.into(), "InvalidTime"),
+            (Self::FAILED.into(), "Failed"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -518,7 +558,7 @@ impl TryFrom<&[u8]> for SetScreenConfigReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct NotifyMask(u8);
 impl NotifyMask {
     pub const SCREEN_CHANGE: Self = Self(1 << 0);
@@ -570,6 +610,32 @@ impl From<u8> for NotifyMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for NotifyMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SCREEN_CHANGE.into(), "SCREEN_CHANGE"),
+            (Self::CRTC_CHANGE.into(), "CRTC_CHANGE"),
+            (Self::OUTPUT_CHANGE.into(), "OUTPUT_CHANGE"),
+            (Self::OUTPUT_PROPERTY.into(), "OUTPUT_PROPERTY"),
+            (Self::PROVIDER_CHANGE.into(), "PROVIDER_CHANGE"),
+            (Self::PROVIDER_PROPERTY.into(), "PROVIDER_PROPERTY"),
+            (Self::RESOURCE_CHANGE.into(), "RESOURCE_CHANGE"),
+            (Self::LEASE.into(), "LEASE"),
+        ];
+        let variants2 = [
+            (Self::SCREEN_CHANGE.into(), "ScreenChange"),
+            (Self::CRTC_CHANGE.into(), "CrtcChange"),
+            (Self::OUTPUT_CHANGE.into(), "OutputChange"),
+            (Self::OUTPUT_PROPERTY.into(), "OutputProperty"),
+            (Self::PROVIDER_CHANGE.into(), "ProviderChange"),
+            (Self::PROVIDER_PROPERTY.into(), "ProviderProperty"),
+            (Self::RESOURCE_CHANGE.into(), "ResourceChange"),
+            (Self::LEASE.into(), "Lease"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(NotifyMask, u8);
@@ -981,7 +1047,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModeFlag(u16);
 impl ModeFlag {
     pub const HSYNC_POSITIVE: Self = Self(1 << 0);
@@ -1033,6 +1099,44 @@ impl From<u16> for ModeFlag {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ModeFlag {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::HSYNC_POSITIVE.into(), "HSYNC_POSITIVE"),
+            (Self::HSYNC_NEGATIVE.into(), "HSYNC_NEGATIVE"),
+            (Self::VSYNC_POSITIVE.into(), "VSYNC_POSITIVE"),
+            (Self::VSYNC_NEGATIVE.into(), "VSYNC_NEGATIVE"),
+            (Self::INTERLACE.into(), "INTERLACE"),
+            (Self::DOUBLE_SCAN.into(), "DOUBLE_SCAN"),
+            (Self::CSYNC.into(), "CSYNC"),
+            (Self::CSYNC_POSITIVE.into(), "CSYNC_POSITIVE"),
+            (Self::CSYNC_NEGATIVE.into(), "CSYNC_NEGATIVE"),
+            (Self::HSKEW_PRESENT.into(), "HSKEW_PRESENT"),
+            (Self::BCAST.into(), "BCAST"),
+            (Self::PIXEL_MULTIPLEX.into(), "PIXEL_MULTIPLEX"),
+            (Self::DOUBLE_CLOCK.into(), "DOUBLE_CLOCK"),
+            (Self::HALVE_CLOCK.into(), "HALVE_CLOCK"),
+        ];
+        let variants2 = [
+            (Self::HSYNC_POSITIVE.into(), "HsyncPositive"),
+            (Self::HSYNC_NEGATIVE.into(), "HsyncNegative"),
+            (Self::VSYNC_POSITIVE.into(), "VsyncPositive"),
+            (Self::VSYNC_NEGATIVE.into(), "VsyncNegative"),
+            (Self::INTERLACE.into(), "Interlace"),
+            (Self::DOUBLE_SCAN.into(), "DoubleScan"),
+            (Self::CSYNC.into(), "Csync"),
+            (Self::CSYNC_POSITIVE.into(), "CsyncPositive"),
+            (Self::CSYNC_NEGATIVE.into(), "CsyncNegative"),
+            (Self::HSKEW_PRESENT.into(), "HskewPresent"),
+            (Self::BCAST.into(), "Bcast"),
+            (Self::PIXEL_MULTIPLEX.into(), "PixelMultiplex"),
+            (Self::DOUBLE_CLOCK.into(), "DoubleClock"),
+            (Self::HALVE_CLOCK.into(), "HalveClock"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(ModeFlag, u16);
@@ -1313,7 +1417,7 @@ impl GetScreenResourcesReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Connection(u8);
 impl Connection {
     pub const CONNECTED: Self = Self(0);
@@ -1360,6 +1464,22 @@ impl From<u8> for Connection {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Connection {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::CONNECTED.into(), "CONNECTED"),
+            (Self::DISCONNECTED.into(), "DISCONNECTED"),
+            (Self::UNKNOWN.into(), "UNKNOWN"),
+        ];
+        let variants2 = [
+            (Self::CONNECTED.into(), "Connected"),
+            (Self::DISCONNECTED.into(), "Disconnected"),
+            (Self::UNKNOWN.into(), "Unknown"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -3445,7 +3565,7 @@ impl GetScreenResourcesCurrentReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Transform(u8);
 impl Transform {
     pub const UNIT: Self = Self(1 << 0);
@@ -3493,6 +3613,24 @@ impl From<u8> for Transform {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Transform {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::UNIT.into(), "UNIT"),
+            (Self::SCALE_UP.into(), "SCALE_UP"),
+            (Self::SCALE_DOWN.into(), "SCALE_DOWN"),
+            (Self::PROJECTIVE.into(), "PROJECTIVE"),
+        ];
+        let variants2 = [
+            (Self::UNIT.into(), "Unit"),
+            (Self::SCALE_UP.into(), "ScaleUp"),
+            (Self::SCALE_DOWN.into(), "ScaleDown"),
+            (Self::PROJECTIVE.into(), "Projective"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(Transform, u8);
@@ -4423,7 +4561,7 @@ impl GetProvidersReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ProviderCapability(u8);
 impl ProviderCapability {
     pub const SOURCE_OUTPUT: Self = Self(1 << 0);
@@ -4471,6 +4609,24 @@ impl From<u8> for ProviderCapability {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ProviderCapability {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SOURCE_OUTPUT.into(), "SOURCE_OUTPUT"),
+            (Self::SINK_OUTPUT.into(), "SINK_OUTPUT"),
+            (Self::SOURCE_OFFLOAD.into(), "SOURCE_OFFLOAD"),
+            (Self::SINK_OFFLOAD.into(), "SINK_OFFLOAD"),
+        ];
+        let variants2 = [
+            (Self::SOURCE_OUTPUT.into(), "SourceOutput"),
+            (Self::SINK_OUTPUT.into(), "SinkOutput"),
+            (Self::SOURCE_OFFLOAD.into(), "SourceOffload"),
+            (Self::SINK_OFFLOAD.into(), "SinkOffload"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(ProviderCapability, u8);
@@ -5634,7 +5790,7 @@ impl From<ScreenChangeNotifyEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Notify(u8);
 impl Notify {
     pub const CRTC_CHANGE: Self = Self(0);
@@ -5685,6 +5841,30 @@ impl From<u8> for Notify {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Notify {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::CRTC_CHANGE.into(), "CRTC_CHANGE"),
+            (Self::OUTPUT_CHANGE.into(), "OUTPUT_CHANGE"),
+            (Self::OUTPUT_PROPERTY.into(), "OUTPUT_PROPERTY"),
+            (Self::PROVIDER_CHANGE.into(), "PROVIDER_CHANGE"),
+            (Self::PROVIDER_PROPERTY.into(), "PROVIDER_PROPERTY"),
+            (Self::RESOURCE_CHANGE.into(), "RESOURCE_CHANGE"),
+            (Self::LEASE.into(), "LEASE"),
+        ];
+        let variants2 = [
+            (Self::CRTC_CHANGE.into(), "CrtcChange"),
+            (Self::OUTPUT_CHANGE.into(), "OutputChange"),
+            (Self::OUTPUT_PROPERTY.into(), "OutputProperty"),
+            (Self::PROVIDER_CHANGE.into(), "ProviderChange"),
+            (Self::PROVIDER_PROPERTY.into(), "ProviderProperty"),
+            (Self::RESOURCE_CHANGE.into(), "ResourceChange"),
+            (Self::LEASE.into(), "Lease"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

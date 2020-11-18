@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -38,7 +38,7 @@ pub type Syncrange = u32;
 
 pub type Dotclock = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModeFlag(u16);
 impl ModeFlag {
     pub const POSITIVE_H_SYNC: Self = Self(1 << 0);
@@ -91,9 +91,45 @@ impl From<u16> for ModeFlag {
         Self(value)
     }
 }
+impl std::fmt::Debug for ModeFlag {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::POSITIVE_H_SYNC.into(), "POSITIVE_H_SYNC"),
+            (Self::NEGATIVE_H_SYNC.into(), "NEGATIVE_H_SYNC"),
+            (Self::POSITIVE_V_SYNC.into(), "POSITIVE_V_SYNC"),
+            (Self::NEGATIVE_V_SYNC.into(), "NEGATIVE_V_SYNC"),
+            (Self::INTERLACE.into(), "INTERLACE"),
+            (Self::COMPOSITE_SYNC.into(), "COMPOSITE_SYNC"),
+            (Self::POSITIVE_C_SYNC.into(), "POSITIVE_C_SYNC"),
+            (Self::NEGATIVE_C_SYNC.into(), "NEGATIVE_C_SYNC"),
+            (Self::H_SKEW.into(), "H_SKEW"),
+            (Self::BROADCAST.into(), "BROADCAST"),
+            (Self::PIXMUX.into(), "PIXMUX"),
+            (Self::DOUBLE_CLOCK.into(), "DOUBLE_CLOCK"),
+            (Self::HALF_CLOCK.into(), "HALF_CLOCK"),
+        ];
+        let variants2 = [
+            (Self::POSITIVE_H_SYNC.into(), "PositiveHSync"),
+            (Self::NEGATIVE_H_SYNC.into(), "NegativeHSync"),
+            (Self::POSITIVE_V_SYNC.into(), "PositiveVSync"),
+            (Self::NEGATIVE_V_SYNC.into(), "NegativeVSync"),
+            (Self::INTERLACE.into(), "Interlace"),
+            (Self::COMPOSITE_SYNC.into(), "CompositeSync"),
+            (Self::POSITIVE_C_SYNC.into(), "PositiveCSync"),
+            (Self::NEGATIVE_C_SYNC.into(), "NegativeCSync"),
+            (Self::H_SKEW.into(), "HSkew"),
+            (Self::BROADCAST.into(), "Broadcast"),
+            (Self::PIXMUX.into(), "Pixmux"),
+            (Self::DOUBLE_CLOCK.into(), "DoubleClock"),
+            (Self::HALF_CLOCK.into(), "HalfClock"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(ModeFlag, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ClockFlag(u8);
 impl ClockFlag {
     pub const PROGRAMABLE: Self = Self(1 << 0);
@@ -140,9 +176,21 @@ impl From<u8> for ClockFlag {
         Self(value)
     }
 }
+impl std::fmt::Debug for ClockFlag {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::PROGRAMABLE.into(), "PROGRAMABLE"),
+        ];
+        let variants2 = [
+            (Self::PROGRAMABLE.into(), "Programable"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(ClockFlag, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Permission(u8);
 impl Permission {
     pub const READ: Self = Self(1 << 0);
@@ -188,6 +236,20 @@ impl From<u8> for Permission {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Permission {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::READ.into(), "READ"),
+            (Self::WRITE.into(), "WRITE"),
+        ];
+        let variants2 = [
+            (Self::READ.into(), "Read"),
+            (Self::WRITE.into(), "Write"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(Permission, u8);

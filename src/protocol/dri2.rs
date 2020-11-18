@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -35,7 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "DRI2";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 4);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Attachment(u32);
 impl Attachment {
     pub const BUFFER_FRONT_LEFT: Self = Self(0);
@@ -80,8 +80,40 @@ impl From<u32> for Attachment {
         Self(value)
     }
 }
+impl std::fmt::Debug for Attachment {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::BUFFER_FRONT_LEFT.into(), "BUFFER_FRONT_LEFT"),
+            (Self::BUFFER_BACK_LEFT.into(), "BUFFER_BACK_LEFT"),
+            (Self::BUFFER_FRONT_RIGHT.into(), "BUFFER_FRONT_RIGHT"),
+            (Self::BUFFER_BACK_RIGHT.into(), "BUFFER_BACK_RIGHT"),
+            (Self::BUFFER_DEPTH.into(), "BUFFER_DEPTH"),
+            (Self::BUFFER_STENCIL.into(), "BUFFER_STENCIL"),
+            (Self::BUFFER_ACCUM.into(), "BUFFER_ACCUM"),
+            (Self::BUFFER_FAKE_FRONT_LEFT.into(), "BUFFER_FAKE_FRONT_LEFT"),
+            (Self::BUFFER_FAKE_FRONT_RIGHT.into(), "BUFFER_FAKE_FRONT_RIGHT"),
+            (Self::BUFFER_DEPTH_STENCIL.into(), "BUFFER_DEPTH_STENCIL"),
+            (Self::BUFFER_HIZ.into(), "BUFFER_HIZ"),
+        ];
+        let variants2 = [
+            (Self::BUFFER_FRONT_LEFT.into(), "BufferFrontLeft"),
+            (Self::BUFFER_BACK_LEFT.into(), "BufferBackLeft"),
+            (Self::BUFFER_FRONT_RIGHT.into(), "BufferFrontRight"),
+            (Self::BUFFER_BACK_RIGHT.into(), "BufferBackRight"),
+            (Self::BUFFER_DEPTH.into(), "BufferDepth"),
+            (Self::BUFFER_STENCIL.into(), "BufferStencil"),
+            (Self::BUFFER_ACCUM.into(), "BufferAccum"),
+            (Self::BUFFER_FAKE_FRONT_LEFT.into(), "BufferFakeFrontLeft"),
+            (Self::BUFFER_FAKE_FRONT_RIGHT.into(), "BufferFakeFrontRight"),
+            (Self::BUFFER_DEPTH_STENCIL.into(), "BufferDepthStencil"),
+            (Self::BUFFER_HIZ.into(), "BufferHiz"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DriverType(u32);
 impl DriverType {
     pub const DRI: Self = Self(0);
@@ -117,8 +149,22 @@ impl From<u32> for DriverType {
         Self(value)
     }
 }
+impl std::fmt::Debug for DriverType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::DRI.into(), "DRI"),
+            (Self::VDPAU.into(), "VDPAU"),
+        ];
+        let variants2 = [
+            (Self::DRI.into(), "DRI"),
+            (Self::VDPAU.into(), "VDPAU"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EventType(u16);
 impl EventType {
     pub const EXCHANGE_COMPLETE: Self = Self(1);
@@ -159,6 +205,22 @@ impl From<u16> for EventType {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for EventType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::EXCHANGE_COMPLETE.into(), "EXCHANGE_COMPLETE"),
+            (Self::BLIT_COMPLETE.into(), "BLIT_COMPLETE"),
+            (Self::FLIP_COMPLETE.into(), "FLIP_COMPLETE"),
+        ];
+        let variants2 = [
+            (Self::EXCHANGE_COMPLETE.into(), "ExchangeComplete"),
+            (Self::BLIT_COMPLETE.into(), "BlitComplete"),
+            (Self::FLIP_COMPLETE.into(), "FlipComplete"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

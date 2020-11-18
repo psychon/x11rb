@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -38,7 +38,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
 pub type Damage = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ReportLevel(u8);
 impl ReportLevel {
     pub const RAW_RECTANGLES: Self = Self(0);
@@ -86,6 +86,24 @@ impl From<u8> for ReportLevel {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ReportLevel {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::RAW_RECTANGLES.into(), "RAW_RECTANGLES"),
+            (Self::DELTA_RECTANGLES.into(), "DELTA_RECTANGLES"),
+            (Self::BOUNDING_BOX.into(), "BOUNDING_BOX"),
+            (Self::NON_EMPTY.into(), "NON_EMPTY"),
+        ];
+        let variants2 = [
+            (Self::RAW_RECTANGLES.into(), "RawRectangles"),
+            (Self::DELTA_RECTANGLES.into(), "DeltaRectangles"),
+            (Self::BOUNDING_BOX.into(), "BoundingBox"),
+            (Self::NON_EMPTY.into(), "NonEmpty"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

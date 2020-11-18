@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -118,7 +118,7 @@ impl Printer {
 
 pub type Pcontext = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GetDoc(bool);
 impl GetDoc {
     pub const FINISHED: Self = Self(false);
@@ -142,8 +142,22 @@ impl From<bool> for GetDoc {
         Self(value)
     }
 }
+impl std::fmt::Debug for GetDoc {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::FINISHED.into(), "FINISHED"),
+            (Self::SECOND_CONSUMER.into(), "SECOND_CONSUMER"),
+        ];
+        let variants2 = [
+            (Self::FINISHED.into(), "Finished"),
+            (Self::SECOND_CONSUMER.into(), "SecondConsumer"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EvMask(u8);
 impl EvMask {
     pub const NO_EVENT_MASK: Self = Self(0);
@@ -192,9 +206,25 @@ impl From<u8> for EvMask {
         Self(value)
     }
 }
+impl std::fmt::Debug for EvMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NO_EVENT_MASK.into(), "NO_EVENT_MASK"),
+            (Self::PRINT_MASK.into(), "PRINT_MASK"),
+            (Self::ATTRIBUTE_MASK.into(), "ATTRIBUTE_MASK"),
+        ];
+        let variants2 = [
+            (Self::NO_EVENT_MASK.into(), "NoEventMask"),
+            (Self::PRINT_MASK.into(), "PrintMask"),
+            (Self::ATTRIBUTE_MASK.into(), "AttributeMask"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(EvMask, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Detail(u8);
 impl Detail {
     pub const START_JOB_NOTIFY: Self = Self(1);
@@ -246,8 +276,30 @@ impl From<u8> for Detail {
         Self(value)
     }
 }
+impl std::fmt::Debug for Detail {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::START_JOB_NOTIFY.into(), "START_JOB_NOTIFY"),
+            (Self::END_JOB_NOTIFY.into(), "END_JOB_NOTIFY"),
+            (Self::START_DOC_NOTIFY.into(), "START_DOC_NOTIFY"),
+            (Self::END_DOC_NOTIFY.into(), "END_DOC_NOTIFY"),
+            (Self::START_PAGE_NOTIFY.into(), "START_PAGE_NOTIFY"),
+            (Self::END_PAGE_NOTIFY.into(), "END_PAGE_NOTIFY"),
+        ];
+        let variants2 = [
+            (Self::START_JOB_NOTIFY.into(), "StartJobNotify"),
+            (Self::END_JOB_NOTIFY.into(), "EndJobNotify"),
+            (Self::START_DOC_NOTIFY.into(), "StartDocNotify"),
+            (Self::END_DOC_NOTIFY.into(), "EndDocNotify"),
+            (Self::START_PAGE_NOTIFY.into(), "StartPageNotify"),
+            (Self::END_PAGE_NOTIFY.into(), "EndPageNotify"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Attr(u8);
 impl Attr {
     pub const JOB_ATTR: Self = Self(1);
@@ -298,6 +350,30 @@ impl From<u8> for Attr {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Attr {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::JOB_ATTR.into(), "JOB_ATTR"),
+            (Self::DOC_ATTR.into(), "DOC_ATTR"),
+            (Self::PAGE_ATTR.into(), "PAGE_ATTR"),
+            (Self::PRINTER_ATTR.into(), "PRINTER_ATTR"),
+            (Self::SERVER_ATTR.into(), "SERVER_ATTR"),
+            (Self::MEDIUM_ATTR.into(), "MEDIUM_ATTR"),
+            (Self::SPOOLER_ATTR.into(), "SPOOLER_ATTR"),
+        ];
+        let variants2 = [
+            (Self::JOB_ATTR.into(), "JobAttr"),
+            (Self::DOC_ATTR.into(), "DocAttr"),
+            (Self::PAGE_ATTR.into(), "PageAttr"),
+            (Self::PRINTER_ATTR.into(), "PrinterAttr"),
+            (Self::SERVER_ATTR.into(), "ServerAttr"),
+            (Self::MEDIUM_ATTR.into(), "MediumAttr"),
+            (Self::SPOOLER_ATTR.into(), "SpoolerAttr"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

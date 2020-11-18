@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -239,7 +239,7 @@ impl Serialize for Range {
 
 pub type ElementHeader = u8;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct HType(u8);
 impl HType {
     pub const FROM_SERVER_TIME: Self = Self(1 << 0);
@@ -288,11 +288,27 @@ impl From<u8> for HType {
         Self(value)
     }
 }
+impl std::fmt::Debug for HType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::FROM_SERVER_TIME.into(), "FROM_SERVER_TIME"),
+            (Self::FROM_CLIENT_TIME.into(), "FROM_CLIENT_TIME"),
+            (Self::FROM_CLIENT_SEQUENCE.into(), "FROM_CLIENT_SEQUENCE"),
+        ];
+        let variants2 = [
+            (Self::FROM_SERVER_TIME.into(), "FromServerTime"),
+            (Self::FROM_CLIENT_TIME.into(), "FromClientTime"),
+            (Self::FROM_CLIENT_SEQUENCE.into(), "FromClientSequence"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(HType, u8);
 
 pub type ClientSpec = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CS(u8);
 impl CS {
     pub const CURRENT_CLIENTS: Self = Self(1);
@@ -339,6 +355,22 @@ impl From<u8> for CS {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CS {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::CURRENT_CLIENTS.into(), "CURRENT_CLIENTS"),
+            (Self::FUTURE_CLIENTS.into(), "FUTURE_CLIENTS"),
+            (Self::ALL_CLIENTS.into(), "ALL_CLIENTS"),
+        ];
+        let variants2 = [
+            (Self::CURRENT_CLIENTS.into(), "CurrentClients"),
+            (Self::FUTURE_CLIENTS.into(), "FutureClients"),
+            (Self::ALL_CLIENTS.into(), "AllClients"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

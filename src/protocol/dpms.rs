@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -500,7 +500,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DPMSMode(u16);
 impl DPMSMode {
     pub const ON: Self = Self(0);
@@ -542,6 +542,24 @@ impl From<u16> for DPMSMode {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for DPMSMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ON.into(), "ON"),
+            (Self::STANDBY.into(), "STANDBY"),
+            (Self::SUSPEND.into(), "SUSPEND"),
+            (Self::OFF.into(), "OFF"),
+        ];
+        let variants2 = [
+            (Self::ON.into(), "On"),
+            (Self::STANDBY.into(), "Standby"),
+            (Self::SUSPEND.into(), "Suspend"),
+            (Self::OFF.into(), "Off"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

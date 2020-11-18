@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -38,7 +38,7 @@ pub const X11_EXTENSION_NAME: &str = "Present";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EventEnum(u8);
 impl EventEnum {
     pub const CONFIGURE_NOTIFY: Self = Self(0);
@@ -88,8 +88,26 @@ impl From<u8> for EventEnum {
         Self(value)
     }
 }
+impl std::fmt::Debug for EventEnum {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::CONFIGURE_NOTIFY.into(), "CONFIGURE_NOTIFY"),
+            (Self::COMPLETE_NOTIFY.into(), "COMPLETE_NOTIFY"),
+            (Self::IDLE_NOTIFY.into(), "IDLE_NOTIFY"),
+            (Self::REDIRECT_NOTIFY.into(), "REDIRECT_NOTIFY"),
+        ];
+        let variants2 = [
+            (Self::CONFIGURE_NOTIFY.into(), "ConfigureNotify"),
+            (Self::COMPLETE_NOTIFY.into(), "CompleteNotify"),
+            (Self::IDLE_NOTIFY.into(), "IdleNotify"),
+            (Self::REDIRECT_NOTIFY.into(), "RedirectNotify"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EventMask(u8);
 impl EventMask {
     pub const NO_EVENT: Self = Self(0);
@@ -140,9 +158,29 @@ impl From<u8> for EventMask {
         Self(value)
     }
 }
+impl std::fmt::Debug for EventMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NO_EVENT.into(), "NO_EVENT"),
+            (Self::CONFIGURE_NOTIFY.into(), "CONFIGURE_NOTIFY"),
+            (Self::COMPLETE_NOTIFY.into(), "COMPLETE_NOTIFY"),
+            (Self::IDLE_NOTIFY.into(), "IDLE_NOTIFY"),
+            (Self::REDIRECT_NOTIFY.into(), "REDIRECT_NOTIFY"),
+        ];
+        let variants2 = [
+            (Self::NO_EVENT.into(), "NoEvent"),
+            (Self::CONFIGURE_NOTIFY.into(), "ConfigureNotify"),
+            (Self::COMPLETE_NOTIFY.into(), "CompleteNotify"),
+            (Self::IDLE_NOTIFY.into(), "IdleNotify"),
+            (Self::REDIRECT_NOTIFY.into(), "RedirectNotify"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(EventMask, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Option(u8);
 impl Option {
     pub const NONE: Self = Self(0);
@@ -193,9 +231,29 @@ impl From<u8> for Option {
         Self(value)
     }
 }
+impl std::fmt::Debug for Option {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NONE.into(), "NONE"),
+            (Self::ASYNC.into(), "ASYNC"),
+            (Self::COPY.into(), "COPY"),
+            (Self::UST.into(), "UST"),
+            (Self::SUBOPTIMAL.into(), "SUBOPTIMAL"),
+        ];
+        let variants2 = [
+            (Self::NONE.into(), "None"),
+            (Self::ASYNC.into(), "Async"),
+            (Self::COPY.into(), "Copy"),
+            (Self::UST.into(), "UST"),
+            (Self::SUBOPTIMAL.into(), "Suboptimal"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(Option, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Capability(u8);
 impl Capability {
     pub const NONE: Self = Self(0);
@@ -245,9 +303,27 @@ impl From<u8> for Capability {
         Self(value)
     }
 }
+impl std::fmt::Debug for Capability {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NONE.into(), "NONE"),
+            (Self::ASYNC.into(), "ASYNC"),
+            (Self::FENCE.into(), "FENCE"),
+            (Self::UST.into(), "UST"),
+        ];
+        let variants2 = [
+            (Self::NONE.into(), "None"),
+            (Self::ASYNC.into(), "Async"),
+            (Self::FENCE.into(), "Fence"),
+            (Self::UST.into(), "UST"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(Capability, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CompleteKind(u8);
 impl CompleteKind {
     pub const PIXMAP: Self = Self(0);
@@ -295,8 +371,22 @@ impl From<u8> for CompleteKind {
         Self(value)
     }
 }
+impl std::fmt::Debug for CompleteKind {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::PIXMAP.into(), "PIXMAP"),
+            (Self::NOTIFY_MSC.into(), "NOTIFY_MSC"),
+        ];
+        let variants2 = [
+            (Self::PIXMAP.into(), "Pixmap"),
+            (Self::NOTIFY_MSC.into(), "NotifyMSC"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CompleteMode(u8);
 impl CompleteMode {
     pub const COPY: Self = Self(0);
@@ -344,6 +434,24 @@ impl From<u8> for CompleteMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CompleteMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::COPY.into(), "COPY"),
+            (Self::FLIP.into(), "FLIP"),
+            (Self::SKIP.into(), "SKIP"),
+            (Self::SUBOPTIMAL_COPY.into(), "SUBOPTIMAL_COPY"),
+        ];
+        let variants2 = [
+            (Self::COPY.into(), "Copy"),
+            (Self::FLIP.into(), "Flip"),
+            (Self::SKIP.into(), "Skip"),
+            (Self::SUBOPTIMAL_COPY.into(), "SuboptimalCopy"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

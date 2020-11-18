@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -40,7 +40,7 @@ pub type Port = u32;
 
 pub type Encoding = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Type(u8);
 impl Type {
     pub const INPUT_MASK: Self = Self(1 << 0);
@@ -91,9 +91,29 @@ impl From<u8> for Type {
         Self(value)
     }
 }
+impl std::fmt::Debug for Type {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::INPUT_MASK.into(), "INPUT_MASK"),
+            (Self::OUTPUT_MASK.into(), "OUTPUT_MASK"),
+            (Self::VIDEO_MASK.into(), "VIDEO_MASK"),
+            (Self::STILL_MASK.into(), "STILL_MASK"),
+            (Self::IMAGE_MASK.into(), "IMAGE_MASK"),
+        ];
+        let variants2 = [
+            (Self::INPUT_MASK.into(), "InputMask"),
+            (Self::OUTPUT_MASK.into(), "OutputMask"),
+            (Self::VIDEO_MASK.into(), "VideoMask"),
+            (Self::STILL_MASK.into(), "StillMask"),
+            (Self::IMAGE_MASK.into(), "ImageMask"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(Type, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ImageFormatInfoType(u8);
 impl ImageFormatInfoType {
     pub const RGB: Self = Self(0);
@@ -141,8 +161,22 @@ impl From<u8> for ImageFormatInfoType {
         Self(value)
     }
 }
+impl std::fmt::Debug for ImageFormatInfoType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::RGB.into(), "RGB"),
+            (Self::YUV.into(), "YUV"),
+        ];
+        let variants2 = [
+            (Self::RGB.into(), "RGB"),
+            (Self::YUV.into(), "YUV"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ImageFormatInfoFormat(u8);
 impl ImageFormatInfoFormat {
     pub const PACKED: Self = Self(0);
@@ -190,8 +224,22 @@ impl From<u8> for ImageFormatInfoFormat {
         Self(value)
     }
 }
+impl std::fmt::Debug for ImageFormatInfoFormat {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::PACKED.into(), "PACKED"),
+            (Self::PLANAR.into(), "PLANAR"),
+        ];
+        let variants2 = [
+            (Self::PACKED.into(), "Packed"),
+            (Self::PLANAR.into(), "Planar"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct AttributeFlag(u8);
 impl AttributeFlag {
     pub const GETTABLE: Self = Self(1 << 0);
@@ -239,9 +287,23 @@ impl From<u8> for AttributeFlag {
         Self(value)
     }
 }
+impl std::fmt::Debug for AttributeFlag {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::GETTABLE.into(), "GETTABLE"),
+            (Self::SETTABLE.into(), "SETTABLE"),
+        ];
+        let variants2 = [
+            (Self::GETTABLE.into(), "Gettable"),
+            (Self::SETTABLE.into(), "Settable"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(AttributeFlag, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VideoNotifyReason(u8);
 impl VideoNotifyReason {
     pub const STARTED: Self = Self(0);
@@ -292,8 +354,28 @@ impl From<u8> for VideoNotifyReason {
         Self(value)
     }
 }
+impl std::fmt::Debug for VideoNotifyReason {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::STARTED.into(), "STARTED"),
+            (Self::STOPPED.into(), "STOPPED"),
+            (Self::BUSY.into(), "BUSY"),
+            (Self::PREEMPTED.into(), "PREEMPTED"),
+            (Self::HARD_ERROR.into(), "HARD_ERROR"),
+        ];
+        let variants2 = [
+            (Self::STARTED.into(), "Started"),
+            (Self::STOPPED.into(), "Stopped"),
+            (Self::BUSY.into(), "Busy"),
+            (Self::PREEMPTED.into(), "Preempted"),
+            (Self::HARD_ERROR.into(), "HardError"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ScanlineOrder(u8);
 impl ScanlineOrder {
     pub const TOP_TO_BOTTOM: Self = Self(0);
@@ -341,8 +423,22 @@ impl From<u8> for ScanlineOrder {
         Self(value)
     }
 }
+impl std::fmt::Debug for ScanlineOrder {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::TOP_TO_BOTTOM.into(), "TOP_TO_BOTTOM"),
+            (Self::BOTTOM_TO_TOP.into(), "BOTTOM_TO_TOP"),
+        ];
+        let variants2 = [
+            (Self::TOP_TO_BOTTOM.into(), "TopToBottom"),
+            (Self::BOTTOM_TO_TOP.into(), "BottomToTop"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortStatus(u8);
 impl GrabPortStatus {
     pub const SUCCESS: Self = Self(0);
@@ -392,6 +488,28 @@ impl From<u8> for GrabPortStatus {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for GrabPortStatus {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SUCCESS.into(), "SUCCESS"),
+            (Self::BAD_EXTENSION.into(), "BAD_EXTENSION"),
+            (Self::ALREADY_GRABBED.into(), "ALREADY_GRABBED"),
+            (Self::INVALID_TIME.into(), "INVALID_TIME"),
+            (Self::BAD_REPLY.into(), "BAD_REPLY"),
+            (Self::BAD_ALLOC.into(), "BAD_ALLOC"),
+        ];
+        let variants2 = [
+            (Self::SUCCESS.into(), "Success"),
+            (Self::BAD_EXTENSION.into(), "BadExtension"),
+            (Self::ALREADY_GRABBED.into(), "AlreadyGrabbed"),
+            (Self::INVALID_TIME.into(), "InvalidTime"),
+            (Self::BAD_REPLY.into(), "BadReply"),
+            (Self::BAD_ALLOC.into(), "BadAlloc"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -35,7 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "RENDER";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (0, 11);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PictType(u8);
 impl PictType {
     pub const INDEXED: Self = Self(0);
@@ -83,8 +83,22 @@ impl From<u8> for PictType {
         Self(value)
     }
 }
+impl std::fmt::Debug for PictType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::INDEXED.into(), "INDEXED"),
+            (Self::DIRECT.into(), "DIRECT"),
+        ];
+        let variants2 = [
+            (Self::INDEXED.into(), "Indexed"),
+            (Self::DIRECT.into(), "Direct"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PictureEnum(u8);
 impl PictureEnum {
     pub const NONE: Self = Self(0);
@@ -131,8 +145,20 @@ impl From<u8> for PictureEnum {
         Self(value)
     }
 }
+impl std::fmt::Debug for PictureEnum {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NONE.into(), "NONE"),
+        ];
+        let variants2 = [
+            (Self::NONE.into(), "None"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PictOp(u8);
 impl PictOp {
     pub const CLEAR: Self = Self(0);
@@ -231,8 +257,124 @@ impl From<u8> for PictOp {
         Self(value)
     }
 }
+impl std::fmt::Debug for PictOp {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::CLEAR.into(), "CLEAR"),
+            (Self::SRC.into(), "SRC"),
+            (Self::DST.into(), "DST"),
+            (Self::OVER.into(), "OVER"),
+            (Self::OVER_REVERSE.into(), "OVER_REVERSE"),
+            (Self::IN.into(), "IN"),
+            (Self::IN_REVERSE.into(), "IN_REVERSE"),
+            (Self::OUT.into(), "OUT"),
+            (Self::OUT_REVERSE.into(), "OUT_REVERSE"),
+            (Self::ATOP.into(), "ATOP"),
+            (Self::ATOP_REVERSE.into(), "ATOP_REVERSE"),
+            (Self::XOR.into(), "XOR"),
+            (Self::ADD.into(), "ADD"),
+            (Self::SATURATE.into(), "SATURATE"),
+            (Self::DISJOINT_CLEAR.into(), "DISJOINT_CLEAR"),
+            (Self::DISJOINT_SRC.into(), "DISJOINT_SRC"),
+            (Self::DISJOINT_DST.into(), "DISJOINT_DST"),
+            (Self::DISJOINT_OVER.into(), "DISJOINT_OVER"),
+            (Self::DISJOINT_OVER_REVERSE.into(), "DISJOINT_OVER_REVERSE"),
+            (Self::DISJOINT_IN.into(), "DISJOINT_IN"),
+            (Self::DISJOINT_IN_REVERSE.into(), "DISJOINT_IN_REVERSE"),
+            (Self::DISJOINT_OUT.into(), "DISJOINT_OUT"),
+            (Self::DISJOINT_OUT_REVERSE.into(), "DISJOINT_OUT_REVERSE"),
+            (Self::DISJOINT_ATOP.into(), "DISJOINT_ATOP"),
+            (Self::DISJOINT_ATOP_REVERSE.into(), "DISJOINT_ATOP_REVERSE"),
+            (Self::DISJOINT_XOR.into(), "DISJOINT_XOR"),
+            (Self::CONJOINT_CLEAR.into(), "CONJOINT_CLEAR"),
+            (Self::CONJOINT_SRC.into(), "CONJOINT_SRC"),
+            (Self::CONJOINT_DST.into(), "CONJOINT_DST"),
+            (Self::CONJOINT_OVER.into(), "CONJOINT_OVER"),
+            (Self::CONJOINT_OVER_REVERSE.into(), "CONJOINT_OVER_REVERSE"),
+            (Self::CONJOINT_IN.into(), "CONJOINT_IN"),
+            (Self::CONJOINT_IN_REVERSE.into(), "CONJOINT_IN_REVERSE"),
+            (Self::CONJOINT_OUT.into(), "CONJOINT_OUT"),
+            (Self::CONJOINT_OUT_REVERSE.into(), "CONJOINT_OUT_REVERSE"),
+            (Self::CONJOINT_ATOP.into(), "CONJOINT_ATOP"),
+            (Self::CONJOINT_ATOP_REVERSE.into(), "CONJOINT_ATOP_REVERSE"),
+            (Self::CONJOINT_XOR.into(), "CONJOINT_XOR"),
+            (Self::MULTIPLY.into(), "MULTIPLY"),
+            (Self::SCREEN.into(), "SCREEN"),
+            (Self::OVERLAY.into(), "OVERLAY"),
+            (Self::DARKEN.into(), "DARKEN"),
+            (Self::LIGHTEN.into(), "LIGHTEN"),
+            (Self::COLOR_DODGE.into(), "COLOR_DODGE"),
+            (Self::COLOR_BURN.into(), "COLOR_BURN"),
+            (Self::HARD_LIGHT.into(), "HARD_LIGHT"),
+            (Self::SOFT_LIGHT.into(), "SOFT_LIGHT"),
+            (Self::DIFFERENCE.into(), "DIFFERENCE"),
+            (Self::EXCLUSION.into(), "EXCLUSION"),
+            (Self::HSL_HUE.into(), "HSL_HUE"),
+            (Self::HSL_SATURATION.into(), "HSL_SATURATION"),
+            (Self::HSL_COLOR.into(), "HSL_COLOR"),
+            (Self::HSL_LUMINOSITY.into(), "HSL_LUMINOSITY"),
+        ];
+        let variants2 = [
+            (Self::CLEAR.into(), "Clear"),
+            (Self::SRC.into(), "Src"),
+            (Self::DST.into(), "Dst"),
+            (Self::OVER.into(), "Over"),
+            (Self::OVER_REVERSE.into(), "OverReverse"),
+            (Self::IN.into(), "In"),
+            (Self::IN_REVERSE.into(), "InReverse"),
+            (Self::OUT.into(), "Out"),
+            (Self::OUT_REVERSE.into(), "OutReverse"),
+            (Self::ATOP.into(), "Atop"),
+            (Self::ATOP_REVERSE.into(), "AtopReverse"),
+            (Self::XOR.into(), "Xor"),
+            (Self::ADD.into(), "Add"),
+            (Self::SATURATE.into(), "Saturate"),
+            (Self::DISJOINT_CLEAR.into(), "DisjointClear"),
+            (Self::DISJOINT_SRC.into(), "DisjointSrc"),
+            (Self::DISJOINT_DST.into(), "DisjointDst"),
+            (Self::DISJOINT_OVER.into(), "DisjointOver"),
+            (Self::DISJOINT_OVER_REVERSE.into(), "DisjointOverReverse"),
+            (Self::DISJOINT_IN.into(), "DisjointIn"),
+            (Self::DISJOINT_IN_REVERSE.into(), "DisjointInReverse"),
+            (Self::DISJOINT_OUT.into(), "DisjointOut"),
+            (Self::DISJOINT_OUT_REVERSE.into(), "DisjointOutReverse"),
+            (Self::DISJOINT_ATOP.into(), "DisjointAtop"),
+            (Self::DISJOINT_ATOP_REVERSE.into(), "DisjointAtopReverse"),
+            (Self::DISJOINT_XOR.into(), "DisjointXor"),
+            (Self::CONJOINT_CLEAR.into(), "ConjointClear"),
+            (Self::CONJOINT_SRC.into(), "ConjointSrc"),
+            (Self::CONJOINT_DST.into(), "ConjointDst"),
+            (Self::CONJOINT_OVER.into(), "ConjointOver"),
+            (Self::CONJOINT_OVER_REVERSE.into(), "ConjointOverReverse"),
+            (Self::CONJOINT_IN.into(), "ConjointIn"),
+            (Self::CONJOINT_IN_REVERSE.into(), "ConjointInReverse"),
+            (Self::CONJOINT_OUT.into(), "ConjointOut"),
+            (Self::CONJOINT_OUT_REVERSE.into(), "ConjointOutReverse"),
+            (Self::CONJOINT_ATOP.into(), "ConjointAtop"),
+            (Self::CONJOINT_ATOP_REVERSE.into(), "ConjointAtopReverse"),
+            (Self::CONJOINT_XOR.into(), "ConjointXor"),
+            (Self::MULTIPLY.into(), "Multiply"),
+            (Self::SCREEN.into(), "Screen"),
+            (Self::OVERLAY.into(), "Overlay"),
+            (Self::DARKEN.into(), "Darken"),
+            (Self::LIGHTEN.into(), "Lighten"),
+            (Self::COLOR_DODGE.into(), "ColorDodge"),
+            (Self::COLOR_BURN.into(), "ColorBurn"),
+            (Self::HARD_LIGHT.into(), "HardLight"),
+            (Self::SOFT_LIGHT.into(), "SoftLight"),
+            (Self::DIFFERENCE.into(), "Difference"),
+            (Self::EXCLUSION.into(), "Exclusion"),
+            (Self::HSL_HUE.into(), "HSLHue"),
+            (Self::HSL_SATURATION.into(), "HSLSaturation"),
+            (Self::HSL_COLOR.into(), "HSLColor"),
+            (Self::HSL_LUMINOSITY.into(), "HSLLuminosity"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PolyEdge(u32);
 impl PolyEdge {
     pub const SHARP: Self = Self(0);
@@ -268,8 +410,22 @@ impl From<u32> for PolyEdge {
         Self(value)
     }
 }
+impl std::fmt::Debug for PolyEdge {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SHARP.into(), "SHARP"),
+            (Self::SMOOTH.into(), "SMOOTH"),
+        ];
+        let variants2 = [
+            (Self::SHARP.into(), "Sharp"),
+            (Self::SMOOTH.into(), "Smooth"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PolyMode(u32);
 impl PolyMode {
     pub const PRECISE: Self = Self(0);
@@ -305,8 +461,22 @@ impl From<u32> for PolyMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for PolyMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::PRECISE.into(), "PRECISE"),
+            (Self::IMPRECISE.into(), "IMPRECISE"),
+        ];
+        let variants2 = [
+            (Self::PRECISE.into(), "Precise"),
+            (Self::IMPRECISE.into(), "Imprecise"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CP(u16);
 impl CP {
     pub const REPEAT: Self = Self(1 << 0);
@@ -359,9 +529,45 @@ impl From<u16> for CP {
         Self(value)
     }
 }
+impl std::fmt::Debug for CP {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::REPEAT.into(), "REPEAT"),
+            (Self::ALPHA_MAP.into(), "ALPHA_MAP"),
+            (Self::ALPHA_X_ORIGIN.into(), "ALPHA_X_ORIGIN"),
+            (Self::ALPHA_Y_ORIGIN.into(), "ALPHA_Y_ORIGIN"),
+            (Self::CLIP_X_ORIGIN.into(), "CLIP_X_ORIGIN"),
+            (Self::CLIP_Y_ORIGIN.into(), "CLIP_Y_ORIGIN"),
+            (Self::CLIP_MASK.into(), "CLIP_MASK"),
+            (Self::GRAPHICS_EXPOSURE.into(), "GRAPHICS_EXPOSURE"),
+            (Self::SUBWINDOW_MODE.into(), "SUBWINDOW_MODE"),
+            (Self::POLY_EDGE.into(), "POLY_EDGE"),
+            (Self::POLY_MODE.into(), "POLY_MODE"),
+            (Self::DITHER.into(), "DITHER"),
+            (Self::COMPONENT_ALPHA.into(), "COMPONENT_ALPHA"),
+        ];
+        let variants2 = [
+            (Self::REPEAT.into(), "Repeat"),
+            (Self::ALPHA_MAP.into(), "AlphaMap"),
+            (Self::ALPHA_X_ORIGIN.into(), "AlphaXOrigin"),
+            (Self::ALPHA_Y_ORIGIN.into(), "AlphaYOrigin"),
+            (Self::CLIP_X_ORIGIN.into(), "ClipXOrigin"),
+            (Self::CLIP_Y_ORIGIN.into(), "ClipYOrigin"),
+            (Self::CLIP_MASK.into(), "ClipMask"),
+            (Self::GRAPHICS_EXPOSURE.into(), "GraphicsExposure"),
+            (Self::SUBWINDOW_MODE.into(), "SubwindowMode"),
+            (Self::POLY_EDGE.into(), "PolyEdge"),
+            (Self::POLY_MODE.into(), "PolyMode"),
+            (Self::DITHER.into(), "Dither"),
+            (Self::COMPONENT_ALPHA.into(), "ComponentAlpha"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(CP, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SubPixel(u32);
 impl SubPixel {
     pub const UNKNOWN: Self = Self(0);
@@ -401,8 +607,30 @@ impl From<u32> for SubPixel {
         Self(value)
     }
 }
+impl std::fmt::Debug for SubPixel {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::UNKNOWN.into(), "UNKNOWN"),
+            (Self::HORIZONTAL_RGB.into(), "HORIZONTAL_RGB"),
+            (Self::HORIZONTAL_BGR.into(), "HORIZONTAL_BGR"),
+            (Self::VERTICAL_RGB.into(), "VERTICAL_RGB"),
+            (Self::VERTICAL_BGR.into(), "VERTICAL_BGR"),
+            (Self::NONE.into(), "NONE"),
+        ];
+        let variants2 = [
+            (Self::UNKNOWN.into(), "Unknown"),
+            (Self::HORIZONTAL_RGB.into(), "HorizontalRGB"),
+            (Self::HORIZONTAL_BGR.into(), "HorizontalBGR"),
+            (Self::VERTICAL_RGB.into(), "VerticalRGB"),
+            (Self::VERTICAL_BGR.into(), "VerticalBGR"),
+            (Self::NONE.into(), "None"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Repeat(u32);
 impl Repeat {
     pub const NONE: Self = Self(0);
@@ -438,6 +666,24 @@ impl From<u32> for Repeat {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Repeat {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NONE.into(), "NONE"),
+            (Self::NORMAL.into(), "NORMAL"),
+            (Self::PAD.into(), "PAD"),
+            (Self::REFLECT.into(), "REFLECT"),
+        ];
+        let variants2 = [
+            (Self::NONE.into(), "None"),
+            (Self::NORMAL.into(), "Normal"),
+            (Self::PAD.into(), "Pad"),
+            (Self::REFLECT.into(), "Reflect"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

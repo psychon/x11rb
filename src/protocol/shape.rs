@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -39,7 +39,7 @@ pub type Op = u8;
 
 pub type Kind = u8;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SO(u8);
 impl SO {
     pub const SET: Self = Self(0);
@@ -90,8 +90,28 @@ impl From<u8> for SO {
         Self(value)
     }
 }
+impl std::fmt::Debug for SO {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SET.into(), "SET"),
+            (Self::UNION.into(), "UNION"),
+            (Self::INTERSECT.into(), "INTERSECT"),
+            (Self::SUBTRACT.into(), "SUBTRACT"),
+            (Self::INVERT.into(), "INVERT"),
+        ];
+        let variants2 = [
+            (Self::SET.into(), "Set"),
+            (Self::UNION.into(), "Union"),
+            (Self::INTERSECT.into(), "Intersect"),
+            (Self::SUBTRACT.into(), "Subtract"),
+            (Self::INVERT.into(), "Invert"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SK(u8);
 impl SK {
     pub const BOUNDING: Self = Self(0);
@@ -138,6 +158,22 @@ impl From<u8> for SK {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SK {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::BOUNDING.into(), "BOUNDING"),
+            (Self::CLIP.into(), "CLIP"),
+            (Self::INPUT.into(), "INPUT"),
+        ];
+        let variants2 = [
+            (Self::BOUNDING.into(), "Bounding"),
+            (Self::CLIP.into(), "Clip"),
+            (Self::INPUT.into(), "Input"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

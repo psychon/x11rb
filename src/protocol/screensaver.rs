@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -35,7 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "MIT-SCREEN-SAVER";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Kind(u8);
 impl Kind {
     pub const BLANKED: Self = Self(0);
@@ -84,8 +84,24 @@ impl From<u8> for Kind {
         Self(value)
     }
 }
+impl std::fmt::Debug for Kind {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::BLANKED.into(), "BLANKED"),
+            (Self::INTERNAL.into(), "INTERNAL"),
+            (Self::EXTERNAL.into(), "EXTERNAL"),
+        ];
+        let variants2 = [
+            (Self::BLANKED.into(), "Blanked"),
+            (Self::INTERNAL.into(), "Internal"),
+            (Self::EXTERNAL.into(), "External"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Event(u8);
 impl Event {
     pub const NOTIFY_MASK: Self = Self(1 << 0);
@@ -133,9 +149,23 @@ impl From<u8> for Event {
         Self(value)
     }
 }
+impl std::fmt::Debug for Event {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NOTIFY_MASK.into(), "NOTIFY_MASK"),
+            (Self::CYCLE_MASK.into(), "CYCLE_MASK"),
+        ];
+        let variants2 = [
+            (Self::NOTIFY_MASK.into(), "NotifyMask"),
+            (Self::CYCLE_MASK.into(), "CycleMask"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(Event, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct State(u8);
 impl State {
     pub const OFF: Self = Self(0);
@@ -183,6 +213,24 @@ impl From<u8> for State {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for State {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::OFF.into(), "OFF"),
+            (Self::ON.into(), "ON"),
+            (Self::CYCLE.into(), "CYCLE"),
+            (Self::DISABLED.into(), "DISABLED"),
+        ];
+        let variants2 = [
+            (Self::OFF.into(), "Off"),
+            (Self::ON.into(), "On"),
+            (Self::CYCLE.into(), "Cycle"),
+            (Self::DISABLED.into(), "Disabled"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

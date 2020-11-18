@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -328,7 +328,7 @@ impl TryFrom<&[u8]> for EndReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Datatype(bool);
 impl Datatype {
     pub const UNMODIFIED: Self = Self(false);
@@ -350,6 +350,20 @@ impl From<bool> for Datatype {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Datatype {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::UNMODIFIED.into(), "UNMODIFIED"),
+            (Self::MODIFIED.into(), "MODIFIED"),
+        ];
+        let variants2 = [
+            (Self::UNMODIFIED.into(), "Unmodified"),
+            (Self::MODIFIED.into(), "Modified"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 

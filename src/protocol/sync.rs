@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -37,7 +37,7 @@ pub const X11_XML_VERSION: (u32, u32) = (3, 1);
 
 pub type Alarm = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ALARMSTATE(u8);
 impl ALARMSTATE {
     pub const ACTIVE: Self = Self(0);
@@ -86,12 +86,28 @@ impl From<u8> for ALARMSTATE {
         Self(value)
     }
 }
+impl std::fmt::Debug for ALARMSTATE {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ACTIVE.into(), "ACTIVE"),
+            (Self::INACTIVE.into(), "INACTIVE"),
+            (Self::DESTROYED.into(), "DESTROYED"),
+        ];
+        let variants2 = [
+            (Self::ACTIVE.into(), "Active"),
+            (Self::INACTIVE.into(), "Inactive"),
+            (Self::DESTROYED.into(), "Destroyed"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
 pub type Counter = u32;
 
 pub type Fence = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct TESTTYPE(u32);
 impl TESTTYPE {
     pub const POSITIVE_TRANSITION: Self = Self(0);
@@ -129,8 +145,26 @@ impl From<u32> for TESTTYPE {
         Self(value)
     }
 }
+impl std::fmt::Debug for TESTTYPE {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::POSITIVE_TRANSITION.into(), "POSITIVE_TRANSITION"),
+            (Self::NEGATIVE_TRANSITION.into(), "NEGATIVE_TRANSITION"),
+            (Self::POSITIVE_COMPARISON.into(), "POSITIVE_COMPARISON"),
+            (Self::NEGATIVE_COMPARISON.into(), "NEGATIVE_COMPARISON"),
+        ];
+        let variants2 = [
+            (Self::POSITIVE_TRANSITION.into(), "PositiveTransition"),
+            (Self::NEGATIVE_TRANSITION.into(), "NegativeTransition"),
+            (Self::POSITIVE_COMPARISON.into(), "PositiveComparison"),
+            (Self::NEGATIVE_COMPARISON.into(), "NegativeComparison"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VALUETYPE(u32);
 impl VALUETYPE {
     pub const ABSOLUTE: Self = Self(0);
@@ -166,8 +200,22 @@ impl From<u32> for VALUETYPE {
         Self(value)
     }
 }
+impl std::fmt::Debug for VALUETYPE {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ABSOLUTE.into(), "ABSOLUTE"),
+            (Self::RELATIVE.into(), "RELATIVE"),
+        ];
+        let variants2 = [
+            (Self::ABSOLUTE.into(), "Absolute"),
+            (Self::RELATIVE.into(), "Relative"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CA(u8);
 impl CA {
     pub const COUNTER: Self = Self(1 << 0);
@@ -217,6 +265,28 @@ impl From<u8> for CA {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CA {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::COUNTER.into(), "COUNTER"),
+            (Self::VALUE_TYPE.into(), "VALUE_TYPE"),
+            (Self::VALUE.into(), "VALUE"),
+            (Self::TEST_TYPE.into(), "TEST_TYPE"),
+            (Self::DELTA.into(), "DELTA"),
+            (Self::EVENTS.into(), "EVENTS"),
+        ];
+        let variants2 = [
+            (Self::COUNTER.into(), "Counter"),
+            (Self::VALUE_TYPE.into(), "ValueType"),
+            (Self::VALUE.into(), "Value"),
+            (Self::TEST_TYPE.into(), "TestType"),
+            (Self::DELTA.into(), "Delta"),
+            (Self::EVENTS.into(), "Events"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(CA, u8);

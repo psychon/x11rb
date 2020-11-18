@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -119,7 +119,7 @@ impl Serialize for Type {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ClientIdMask(u8);
 impl ClientIdMask {
     pub const CLIENT_XID: Self = Self(1 << 0);
@@ -165,6 +165,20 @@ impl From<u8> for ClientIdMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ClientIdMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::CLIENT_XID.into(), "CLIENT_XID"),
+            (Self::LOCAL_CLIENT_PID.into(), "LOCAL_CLIENT_PID"),
+        ];
+        let variants2 = [
+            (Self::CLIENT_XID.into(), "ClientXID"),
+            (Self::LOCAL_CLIENT_PID.into(), "LocalClientPID"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(ClientIdMask, u8);

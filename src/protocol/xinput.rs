@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -200,7 +200,7 @@ impl TryFrom<&[u8]> for GetExtensionVersionReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceUse(u8);
 impl DeviceUse {
     pub const IS_X_POINTER: Self = Self(0);
@@ -251,8 +251,28 @@ impl From<u8> for DeviceUse {
         Self(value)
     }
 }
+impl std::fmt::Debug for DeviceUse {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::IS_X_POINTER.into(), "IS_X_POINTER"),
+            (Self::IS_X_KEYBOARD.into(), "IS_X_KEYBOARD"),
+            (Self::IS_X_EXTENSION_DEVICE.into(), "IS_X_EXTENSION_DEVICE"),
+            (Self::IS_X_EXTENSION_KEYBOARD.into(), "IS_X_EXTENSION_KEYBOARD"),
+            (Self::IS_X_EXTENSION_POINTER.into(), "IS_X_EXTENSION_POINTER"),
+        ];
+        let variants2 = [
+            (Self::IS_X_POINTER.into(), "IsXPointer"),
+            (Self::IS_X_KEYBOARD.into(), "IsXKeyboard"),
+            (Self::IS_X_EXTENSION_DEVICE.into(), "IsXExtensionDevice"),
+            (Self::IS_X_EXTENSION_KEYBOARD.into(), "IsXExtensionKeyboard"),
+            (Self::IS_X_EXTENSION_POINTER.into(), "IsXExtensionPointer"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct InputClass(u8);
 impl InputClass {
     pub const KEY: Self = Self(0);
@@ -305,8 +325,32 @@ impl From<u8> for InputClass {
         Self(value)
     }
 }
+impl std::fmt::Debug for InputClass {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::KEY.into(), "KEY"),
+            (Self::BUTTON.into(), "BUTTON"),
+            (Self::VALUATOR.into(), "VALUATOR"),
+            (Self::FEEDBACK.into(), "FEEDBACK"),
+            (Self::PROXIMITY.into(), "PROXIMITY"),
+            (Self::FOCUS.into(), "FOCUS"),
+            (Self::OTHER.into(), "OTHER"),
+        ];
+        let variants2 = [
+            (Self::KEY.into(), "Key"),
+            (Self::BUTTON.into(), "Button"),
+            (Self::VALUATOR.into(), "Valuator"),
+            (Self::FEEDBACK.into(), "Feedback"),
+            (Self::PROXIMITY.into(), "Proximity"),
+            (Self::FOCUS.into(), "Focus"),
+            (Self::OTHER.into(), "Other"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ValuatorMode(u8);
 impl ValuatorMode {
     pub const RELATIVE: Self = Self(0);
@@ -352,6 +396,20 @@ impl From<u8> for ValuatorMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ValuatorMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::RELATIVE.into(), "RELATIVE"),
+            (Self::ABSOLUTE.into(), "ABSOLUTE"),
+        ];
+        let variants2 = [
+            (Self::RELATIVE.into(), "Relative"),
+            (Self::ABSOLUTE.into(), "Absolute"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -1577,7 +1635,7 @@ impl GetSelectedExtensionEventsReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PropagateMode(u8);
 impl PropagateMode {
     pub const ADD_TO_LIST: Self = Self(0);
@@ -1623,6 +1681,20 @@ impl From<u8> for PropagateMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PropagateMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ADD_TO_LIST.into(), "ADD_TO_LIST"),
+            (Self::DELETE_FROM_LIST.into(), "DELETE_FROM_LIST"),
+        ];
+        let variants2 = [
+            (Self::ADD_TO_LIST.into(), "AddToList"),
+            (Self::DELETE_FROM_LIST.into(), "DeleteFromList"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -2461,7 +2533,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModifierDevice(u8);
 impl ModifierDevice {
     pub const USE_X_KEYBOARD: Self = Self(255);
@@ -2506,6 +2578,18 @@ impl From<u8> for ModifierDevice {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ModifierDevice {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::USE_X_KEYBOARD.into(), "USE_X_KEYBOARD"),
+        ];
+        let variants2 = [
+            (Self::USE_X_KEYBOARD.into(), "UseXKeyboard"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -3000,7 +3084,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceInputMode(u8);
 impl DeviceInputMode {
     pub const ASYNC_THIS_DEVICE: Self = Self(0);
@@ -3050,6 +3134,28 @@ impl From<u8> for DeviceInputMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for DeviceInputMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ASYNC_THIS_DEVICE.into(), "ASYNC_THIS_DEVICE"),
+            (Self::SYNC_THIS_DEVICE.into(), "SYNC_THIS_DEVICE"),
+            (Self::REPLAY_THIS_DEVICE.into(), "REPLAY_THIS_DEVICE"),
+            (Self::ASYNC_OTHER_DEVICES.into(), "ASYNC_OTHER_DEVICES"),
+            (Self::ASYNC_ALL.into(), "ASYNC_ALL"),
+            (Self::SYNC_ALL.into(), "SYNC_ALL"),
+        ];
+        let variants2 = [
+            (Self::ASYNC_THIS_DEVICE.into(), "AsyncThisDevice"),
+            (Self::SYNC_THIS_DEVICE.into(), "SyncThisDevice"),
+            (Self::REPLAY_THIS_DEVICE.into(), "ReplayThisDevice"),
+            (Self::ASYNC_OTHER_DEVICES.into(), "AsyncOtherDevices"),
+            (Self::ASYNC_ALL.into(), "AsyncAll"),
+            (Self::SYNC_ALL.into(), "SyncAll"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -3334,7 +3440,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FeedbackClass(u8);
 impl FeedbackClass {
     pub const KEYBOARD: Self = Self(0);
@@ -3384,6 +3490,28 @@ impl From<u8> for FeedbackClass {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for FeedbackClass {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::KEYBOARD.into(), "KEYBOARD"),
+            (Self::POINTER.into(), "POINTER"),
+            (Self::STRING.into(), "STRING"),
+            (Self::INTEGER.into(), "INTEGER"),
+            (Self::LED.into(), "LED"),
+            (Self::BELL.into(), "BELL"),
+        ];
+        let variants2 = [
+            (Self::KEYBOARD.into(), "Keyboard"),
+            (Self::POINTER.into(), "Pointer"),
+            (Self::STRING.into(), "String"),
+            (Self::INTEGER.into(), "Integer"),
+            (Self::LED.into(), "Led"),
+            (Self::BELL.into(), "Bell"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -5296,7 +5424,7 @@ impl Serialize for FeedbackCtl {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ChangeFeedbackControlMask(u8);
 impl ChangeFeedbackControlMask {
     pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
@@ -5353,6 +5481,42 @@ impl From<u8> for ChangeFeedbackControlMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ChangeFeedbackControlMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::KEY_CLICK_PERCENT.into(), "KEY_CLICK_PERCENT"),
+            (Self::PERCENT.into(), "PERCENT"),
+            (Self::PITCH.into(), "PITCH"),
+            (Self::DURATION.into(), "DURATION"),
+            (Self::LED.into(), "LED"),
+            (Self::LED_MODE.into(), "LED_MODE"),
+            (Self::KEY.into(), "KEY"),
+            (Self::AUTO_REPEAT_MODE.into(), "AUTO_REPEAT_MODE"),
+            (Self::STRING.into(), "STRING"),
+            (Self::INTEGER.into(), "INTEGER"),
+            (Self::ACCEL_NUM.into(), "ACCEL_NUM"),
+            (Self::ACCEL_DENOM.into(), "ACCEL_DENOM"),
+            (Self::THRESHOLD.into(), "THRESHOLD"),
+        ];
+        let variants2 = [
+            (Self::KEY_CLICK_PERCENT.into(), "KeyClickPercent"),
+            (Self::PERCENT.into(), "Percent"),
+            (Self::PITCH.into(), "Pitch"),
+            (Self::DURATION.into(), "Duration"),
+            (Self::LED.into(), "Led"),
+            (Self::LED_MODE.into(), "LedMode"),
+            (Self::KEY.into(), "Key"),
+            (Self::AUTO_REPEAT_MODE.into(), "AutoRepeatMode"),
+            (Self::STRING.into(), "String"),
+            (Self::INTEGER.into(), "Integer"),
+            (Self::ACCEL_NUM.into(), "AccelNum"),
+            (Self::ACCEL_DENOM.into(), "AccelDenom"),
+            (Self::THRESHOLD.into(), "Threshold"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(ChangeFeedbackControlMask, u8);
@@ -6306,7 +6470,7 @@ impl Serialize for ButtonState {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ValuatorStateModeMask(u8);
 impl ValuatorStateModeMask {
     pub const DEVICE_MODE_ABSOLUTE: Self = Self(1 << 0);
@@ -6352,6 +6516,20 @@ impl From<u8> for ValuatorStateModeMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ValuatorStateModeMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::DEVICE_MODE_ABSOLUTE.into(), "DEVICE_MODE_ABSOLUTE"),
+            (Self::OUT_OF_PROXIMITY.into(), "OUT_OF_PROXIMITY"),
+        ];
+        let variants2 = [
+            (Self::DEVICE_MODE_ABSOLUTE.into(), "DeviceModeAbsolute"),
+            (Self::OUT_OF_PROXIMITY.into(), "OutOfProximity"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(ValuatorStateModeMask, u8);
@@ -7038,7 +7216,7 @@ impl TryFrom<&[u8]> for SetDeviceValuatorsReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceControl(u16);
 impl DeviceControl {
     pub const RESOLUTION: Self = Self(1);
@@ -7081,6 +7259,26 @@ impl From<u16> for DeviceControl {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for DeviceControl {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::RESOLUTION.into(), "RESOLUTION"),
+            (Self::ABSCALIB.into(), "ABSCALIB"),
+            (Self::CORE.into(), "CORE"),
+            (Self::ENABLE.into(), "ENABLE"),
+            (Self::ABSAREA.into(), "ABSAREA"),
+        ];
+        let variants2 = [
+            (Self::RESOLUTION.into(), "Resolution"),
+            (Self::ABSCALIB.into(), "Abscalib"),
+            (Self::CORE.into(), "Core"),
+            (Self::ENABLE.into(), "Enable"),
+            (Self::ABSAREA.into(), "Absarea"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -8932,7 +9130,7 @@ impl ListDevicePropertiesReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PropertyFormat(u8);
 impl PropertyFormat {
     pub const M8_BITS: Self = Self(8);
@@ -8979,6 +9177,22 @@ impl From<u8> for PropertyFormat {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PropertyFormat {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::M8_BITS.into(), "M8_BITS"),
+            (Self::M16_BITS.into(), "M16_BITS"),
+            (Self::M32_BITS.into(), "M32_BITS"),
+        ];
+        let variants2 = [
+            (Self::M8_BITS.into(), "M8Bits"),
+            (Self::M16_BITS.into(), "M16Bits"),
+            (Self::M32_BITS.into(), "M32Bits"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -9503,7 +9717,7 @@ impl TryFrom<&[u8]> for GetDevicePropertyReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Device(bool);
 impl Device {
     pub const ALL: Self = Self(false);
@@ -9525,6 +9739,20 @@ impl From<bool> for Device {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Device {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ALL.into(), "ALL"),
+            (Self::ALL_MASTER.into(), "ALL_MASTER"),
+        ];
+        let variants2 = [
+            (Self::ALL.into(), "All"),
+            (Self::ALL_MASTER.into(), "AllMaster"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -9997,7 +10225,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct HierarchyChangeType(u16);
 impl HierarchyChangeType {
     pub const ADD_MASTER: Self = Self(1);
@@ -10041,8 +10269,26 @@ impl From<u16> for HierarchyChangeType {
         Self(value)
     }
 }
+impl std::fmt::Debug for HierarchyChangeType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ADD_MASTER.into(), "ADD_MASTER"),
+            (Self::REMOVE_MASTER.into(), "REMOVE_MASTER"),
+            (Self::ATTACH_SLAVE.into(), "ATTACH_SLAVE"),
+            (Self::DETACH_SLAVE.into(), "DETACH_SLAVE"),
+        ];
+        let variants2 = [
+            (Self::ADD_MASTER.into(), "AddMaster"),
+            (Self::REMOVE_MASTER.into(), "RemoveMaster"),
+            (Self::ATTACH_SLAVE.into(), "AttachSlave"),
+            (Self::DETACH_SLAVE.into(), "DetachSlave"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ChangeMode(u8);
 impl ChangeMode {
     pub const ATTACH: Self = Self(1);
@@ -10088,6 +10334,20 @@ impl From<u8> for ChangeMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ChangeMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ATTACH.into(), "ATTACH"),
+            (Self::FLOAT.into(), "FLOAT"),
+        ];
+        let variants2 = [
+            (Self::ATTACH.into(), "Attach"),
+            (Self::FLOAT.into(), "Float"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -10896,7 +11156,7 @@ impl TryFrom<&[u8]> for XIGetClientPointerReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct XIEventMask(u32);
 impl XIEventMask {
     pub const DEVICE_CHANGED: Self = Self(1 << 1);
@@ -10954,6 +11214,68 @@ impl From<u32> for XIEventMask {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for XIEventMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::DEVICE_CHANGED.into(), "DEVICE_CHANGED"),
+            (Self::KEY_PRESS.into(), "KEY_PRESS"),
+            (Self::KEY_RELEASE.into(), "KEY_RELEASE"),
+            (Self::BUTTON_PRESS.into(), "BUTTON_PRESS"),
+            (Self::BUTTON_RELEASE.into(), "BUTTON_RELEASE"),
+            (Self::MOTION.into(), "MOTION"),
+            (Self::ENTER.into(), "ENTER"),
+            (Self::LEAVE.into(), "LEAVE"),
+            (Self::FOCUS_IN.into(), "FOCUS_IN"),
+            (Self::FOCUS_OUT.into(), "FOCUS_OUT"),
+            (Self::HIERARCHY.into(), "HIERARCHY"),
+            (Self::PROPERTY.into(), "PROPERTY"),
+            (Self::RAW_KEY_PRESS.into(), "RAW_KEY_PRESS"),
+            (Self::RAW_KEY_RELEASE.into(), "RAW_KEY_RELEASE"),
+            (Self::RAW_BUTTON_PRESS.into(), "RAW_BUTTON_PRESS"),
+            (Self::RAW_BUTTON_RELEASE.into(), "RAW_BUTTON_RELEASE"),
+            (Self::RAW_MOTION.into(), "RAW_MOTION"),
+            (Self::TOUCH_BEGIN.into(), "TOUCH_BEGIN"),
+            (Self::TOUCH_UPDATE.into(), "TOUCH_UPDATE"),
+            (Self::TOUCH_END.into(), "TOUCH_END"),
+            (Self::TOUCH_OWNERSHIP.into(), "TOUCH_OWNERSHIP"),
+            (Self::RAW_TOUCH_BEGIN.into(), "RAW_TOUCH_BEGIN"),
+            (Self::RAW_TOUCH_UPDATE.into(), "RAW_TOUCH_UPDATE"),
+            (Self::RAW_TOUCH_END.into(), "RAW_TOUCH_END"),
+            (Self::BARRIER_HIT.into(), "BARRIER_HIT"),
+            (Self::BARRIER_LEAVE.into(), "BARRIER_LEAVE"),
+        ];
+        let variants2 = [
+            (Self::DEVICE_CHANGED.into(), "DeviceChanged"),
+            (Self::KEY_PRESS.into(), "KeyPress"),
+            (Self::KEY_RELEASE.into(), "KeyRelease"),
+            (Self::BUTTON_PRESS.into(), "ButtonPress"),
+            (Self::BUTTON_RELEASE.into(), "ButtonRelease"),
+            (Self::MOTION.into(), "Motion"),
+            (Self::ENTER.into(), "Enter"),
+            (Self::LEAVE.into(), "Leave"),
+            (Self::FOCUS_IN.into(), "FocusIn"),
+            (Self::FOCUS_OUT.into(), "FocusOut"),
+            (Self::HIERARCHY.into(), "Hierarchy"),
+            (Self::PROPERTY.into(), "Property"),
+            (Self::RAW_KEY_PRESS.into(), "RawKeyPress"),
+            (Self::RAW_KEY_RELEASE.into(), "RawKeyRelease"),
+            (Self::RAW_BUTTON_PRESS.into(), "RawButtonPress"),
+            (Self::RAW_BUTTON_RELEASE.into(), "RawButtonRelease"),
+            (Self::RAW_MOTION.into(), "RawMotion"),
+            (Self::TOUCH_BEGIN.into(), "TouchBegin"),
+            (Self::TOUCH_UPDATE.into(), "TouchUpdate"),
+            (Self::TOUCH_END.into(), "TouchEnd"),
+            (Self::TOUCH_OWNERSHIP.into(), "TouchOwnership"),
+            (Self::RAW_TOUCH_BEGIN.into(), "RawTouchBegin"),
+            (Self::RAW_TOUCH_UPDATE.into(), "RawTouchUpdate"),
+            (Self::RAW_TOUCH_END.into(), "RawTouchEnd"),
+            (Self::BARRIER_HIT.into(), "BarrierHit"),
+            (Self::BARRIER_LEAVE.into(), "BarrierLeave"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(XIEventMask, u32);
@@ -11201,7 +11523,7 @@ impl TryFrom<&[u8]> for XIQueryVersionReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceClassType(u16);
 impl DeviceClassType {
     pub const KEY: Self = Self(0);
@@ -11246,8 +11568,28 @@ impl From<u16> for DeviceClassType {
         Self(value)
     }
 }
+impl std::fmt::Debug for DeviceClassType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::KEY.into(), "KEY"),
+            (Self::BUTTON.into(), "BUTTON"),
+            (Self::VALUATOR.into(), "VALUATOR"),
+            (Self::SCROLL.into(), "SCROLL"),
+            (Self::TOUCH.into(), "TOUCH"),
+        ];
+        let variants2 = [
+            (Self::KEY.into(), "Key"),
+            (Self::BUTTON.into(), "Button"),
+            (Self::VALUATOR.into(), "Valuator"),
+            (Self::SCROLL.into(), "Scroll"),
+            (Self::TOUCH.into(), "Touch"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceType(u16);
 impl DeviceType {
     pub const MASTER_POINTER: Self = Self(1);
@@ -11292,8 +11634,28 @@ impl From<u16> for DeviceType {
         Self(value)
     }
 }
+impl std::fmt::Debug for DeviceType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::MASTER_POINTER.into(), "MASTER_POINTER"),
+            (Self::MASTER_KEYBOARD.into(), "MASTER_KEYBOARD"),
+            (Self::SLAVE_POINTER.into(), "SLAVE_POINTER"),
+            (Self::SLAVE_KEYBOARD.into(), "SLAVE_KEYBOARD"),
+            (Self::FLOATING_SLAVE.into(), "FLOATING_SLAVE"),
+        ];
+        let variants2 = [
+            (Self::MASTER_POINTER.into(), "MasterPointer"),
+            (Self::MASTER_KEYBOARD.into(), "MasterKeyboard"),
+            (Self::SLAVE_POINTER.into(), "SlavePointer"),
+            (Self::SLAVE_KEYBOARD.into(), "SlaveKeyboard"),
+            (Self::FLOATING_SLAVE.into(), "FloatingSlave"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ScrollFlags(u8);
 impl ScrollFlags {
     pub const NO_EMULATION: Self = Self(1 << 0);
@@ -11341,9 +11703,23 @@ impl From<u8> for ScrollFlags {
         Self(value)
     }
 }
+impl std::fmt::Debug for ScrollFlags {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NO_EMULATION.into(), "NO_EMULATION"),
+            (Self::PREFERRED.into(), "PREFERRED"),
+        ];
+        let variants2 = [
+            (Self::NO_EMULATION.into(), "NoEmulation"),
+            (Self::PREFERRED.into(), "Preferred"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 bitmask_binop!(ScrollFlags, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ScrollType(u16);
 impl ScrollType {
     pub const VERTICAL: Self = Self(1);
@@ -11385,8 +11761,22 @@ impl From<u16> for ScrollType {
         Self(value)
     }
 }
+impl std::fmt::Debug for ScrollType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::VERTICAL.into(), "VERTICAL"),
+            (Self::HORIZONTAL.into(), "HORIZONTAL"),
+        ];
+        let variants2 = [
+            (Self::VERTICAL.into(), "Vertical"),
+            (Self::HORIZONTAL.into(), "Horizontal"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct TouchMode(u8);
 impl TouchMode {
     pub const DIRECT: Self = Self(1);
@@ -11432,6 +11822,20 @@ impl From<u8> for TouchMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for TouchMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::DIRECT.into(), "DIRECT"),
+            (Self::DEPENDENT.into(), "DEPENDENT"),
+        ];
+        let variants2 = [
+            (Self::DIRECT.into(), "Direct"),
+            (Self::DEPENDENT.into(), "Dependent"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -12638,7 +13042,7 @@ impl TryFrom<&[u8]> for XIGetFocusReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabOwner(bool);
 impl GrabOwner {
     pub const NO_OWNER: Self = Self(false);
@@ -12660,6 +13064,20 @@ impl From<bool> for GrabOwner {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for GrabOwner {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NO_OWNER.into(), "NO_OWNER"),
+            (Self::OWNER.into(), "OWNER"),
+        ];
+        let variants2 = [
+            (Self::NO_OWNER.into(), "NoOwner"),
+            (Self::OWNER.into(), "Owner"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -12918,7 +13336,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EventMode(u8);
 impl EventMode {
     pub const ASYNC_DEVICE: Self = Self(0);
@@ -12970,6 +13388,32 @@ impl From<u8> for EventMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for EventMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ASYNC_DEVICE.into(), "ASYNC_DEVICE"),
+            (Self::SYNC_DEVICE.into(), "SYNC_DEVICE"),
+            (Self::REPLAY_DEVICE.into(), "REPLAY_DEVICE"),
+            (Self::ASYNC_PAIRED_DEVICE.into(), "ASYNC_PAIRED_DEVICE"),
+            (Self::ASYNC_PAIR.into(), "ASYNC_PAIR"),
+            (Self::SYNC_PAIR.into(), "SYNC_PAIR"),
+            (Self::ACCEPT_TOUCH.into(), "ACCEPT_TOUCH"),
+            (Self::REJECT_TOUCH.into(), "REJECT_TOUCH"),
+        ];
+        let variants2 = [
+            (Self::ASYNC_DEVICE.into(), "AsyncDevice"),
+            (Self::SYNC_DEVICE.into(), "SyncDevice"),
+            (Self::REPLAY_DEVICE.into(), "ReplayDevice"),
+            (Self::ASYNC_PAIRED_DEVICE.into(), "AsyncPairedDevice"),
+            (Self::ASYNC_PAIR.into(), "AsyncPair"),
+            (Self::SYNC_PAIR.into(), "SyncPair"),
+            (Self::ACCEPT_TOUCH.into(), "AcceptTouch"),
+            (Self::REJECT_TOUCH.into(), "RejectTouch"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -13076,7 +13520,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabMode22(u8);
 impl GrabMode22 {
     pub const SYNC: Self = Self(0);
@@ -13125,8 +13569,24 @@ impl From<u8> for GrabMode22 {
         Self(value)
     }
 }
+impl std::fmt::Debug for GrabMode22 {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SYNC.into(), "SYNC"),
+            (Self::ASYNC.into(), "ASYNC"),
+            (Self::TOUCH.into(), "TOUCH"),
+        ];
+        let variants2 = [
+            (Self::SYNC.into(), "Sync"),
+            (Self::ASYNC.into(), "Async"),
+            (Self::TOUCH.into(), "Touch"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabType(u8);
 impl GrabType {
     pub const BUTTON: Self = Self(0);
@@ -13177,8 +13637,28 @@ impl From<u8> for GrabType {
         Self(value)
     }
 }
+impl std::fmt::Debug for GrabType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::BUTTON.into(), "BUTTON"),
+            (Self::KEYCODE.into(), "KEYCODE"),
+            (Self::ENTER.into(), "ENTER"),
+            (Self::FOCUS_IN.into(), "FOCUS_IN"),
+            (Self::TOUCH_BEGIN.into(), "TOUCH_BEGIN"),
+        ];
+        let variants2 = [
+            (Self::BUTTON.into(), "Button"),
+            (Self::KEYCODE.into(), "Keycode"),
+            (Self::ENTER.into(), "Enter"),
+            (Self::FOCUS_IN.into(), "FocusIn"),
+            (Self::TOUCH_BEGIN.into(), "TouchBegin"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModifierMask(u32);
 impl ModifierMask {
     pub const ANY: Self = Self(1 << 31);
@@ -13211,6 +13691,18 @@ impl From<u32> for ModifierMask {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ModifierMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ANY.into(), "ANY"),
+        ];
+        let variants2 = [
+            (Self::ANY.into(), "Any"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(ModifierMask, u32);
@@ -14584,7 +15076,7 @@ impl From<DeviceValuatorEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct MoreEventsMask(u8);
 impl MoreEventsMask {
     pub const MORE_EVENTS: Self = Self(1 << 7);
@@ -14629,6 +15121,18 @@ impl From<u8> for MoreEventsMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for MoreEventsMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::MORE_EVENTS.into(), "MORE_EVENTS"),
+        ];
+        let variants2 = [
+            (Self::MORE_EVENTS.into(), "MoreEvents"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(MoreEventsMask, u8);
@@ -14857,7 +15361,7 @@ pub type ProximityInEvent = DeviceKeyPressEvent;
 pub const PROXIMITY_OUT_EVENT: u8 = 9;
 pub type ProximityOutEvent = DeviceKeyPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ClassesReportedMask(u8);
 impl ClassesReportedMask {
     pub const OUT_OF_PROXIMITY: Self = Self(1 << 7);
@@ -14906,6 +15410,26 @@ impl From<u8> for ClassesReportedMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ClassesReportedMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::OUT_OF_PROXIMITY.into(), "OUT_OF_PROXIMITY"),
+            (Self::DEVICE_MODE_ABSOLUTE.into(), "DEVICE_MODE_ABSOLUTE"),
+            (Self::REPORTING_VALUATORS.into(), "REPORTING_VALUATORS"),
+            (Self::REPORTING_BUTTONS.into(), "REPORTING_BUTTONS"),
+            (Self::REPORTING_KEYS.into(), "REPORTING_KEYS"),
+        ];
+        let variants2 = [
+            (Self::OUT_OF_PROXIMITY.into(), "OutOfProximity"),
+            (Self::DEVICE_MODE_ABSOLUTE.into(), "DeviceModeAbsolute"),
+            (Self::REPORTING_VALUATORS.into(), "ReportingValuators"),
+            (Self::REPORTING_BUTTONS.into(), "ReportingButtons"),
+            (Self::REPORTING_KEYS.into(), "ReportingKeys"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(ClassesReportedMask, u8);
@@ -15106,7 +15630,7 @@ impl From<DeviceMappingNotifyEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ChangeDevice(u8);
 impl ChangeDevice {
     pub const NEW_POINTER: Self = Self(0);
@@ -15152,6 +15676,20 @@ impl From<u8> for ChangeDevice {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ChangeDevice {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NEW_POINTER.into(), "NEW_POINTER"),
+            (Self::NEW_KEYBOARD.into(), "NEW_KEYBOARD"),
+        ];
+        let variants2 = [
+            (Self::NEW_POINTER.into(), "NewPointer"),
+            (Self::NEW_KEYBOARD.into(), "NewKeyboard"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -15391,7 +15929,7 @@ impl From<DeviceButtonStateNotifyEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceChange(u8);
 impl DeviceChange {
     pub const ADDED: Self = Self(0);
@@ -15441,6 +15979,28 @@ impl From<u8> for DeviceChange {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for DeviceChange {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ADDED.into(), "ADDED"),
+            (Self::REMOVED.into(), "REMOVED"),
+            (Self::ENABLED.into(), "ENABLED"),
+            (Self::DISABLED.into(), "DISABLED"),
+            (Self::UNRECOVERABLE.into(), "UNRECOVERABLE"),
+            (Self::CONTROL_CHANGED.into(), "CONTROL_CHANGED"),
+        ];
+        let variants2 = [
+            (Self::ADDED.into(), "Added"),
+            (Self::REMOVED.into(), "Removed"),
+            (Self::ENABLED.into(), "Enabled"),
+            (Self::DISABLED.into(), "Disabled"),
+            (Self::UNRECOVERABLE.into(), "Unrecoverable"),
+            (Self::CONTROL_CHANGED.into(), "ControlChanged"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -15615,7 +16175,7 @@ impl From<DevicePropertyNotifyEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ChangeReason(u8);
 impl ChangeReason {
     pub const SLAVE_SWITCH: Self = Self(1);
@@ -15661,6 +16221,20 @@ impl From<u8> for ChangeReason {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ChangeReason {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SLAVE_SWITCH.into(), "SLAVE_SWITCH"),
+            (Self::DEVICE_CHANGE.into(), "DEVICE_CHANGE"),
+        ];
+        let variants2 = [
+            (Self::SLAVE_SWITCH.into(), "SlaveSwitch"),
+            (Self::DEVICE_CHANGE.into(), "DeviceChange"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -15724,7 +16298,7 @@ impl DeviceChangedEvent {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct KeyEventFlags(u32);
 impl KeyEventFlags {
     pub const KEY_REPEAT: Self = Self(1 << 16);
@@ -15757,6 +16331,18 @@ impl From<u32> for KeyEventFlags {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for KeyEventFlags {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::KEY_REPEAT.into(), "KEY_REPEAT"),
+        ];
+        let variants2 = [
+            (Self::KEY_REPEAT.into(), "KeyRepeat"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(KeyEventFlags, u32);
@@ -15862,7 +16448,7 @@ impl KeyPressEvent {
 pub const KEY_RELEASE_EVENT: u16 = 3;
 pub type KeyReleaseEvent = KeyPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PointerEventFlags(u32);
 impl PointerEventFlags {
     pub const POINTER_EMULATED: Self = Self(1 << 16);
@@ -15895,6 +16481,18 @@ impl From<u32> for PointerEventFlags {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PointerEventFlags {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::POINTER_EMULATED.into(), "POINTER_EMULATED"),
+        ];
+        let variants2 = [
+            (Self::POINTER_EMULATED.into(), "PointerEmulated"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(PointerEventFlags, u32);
@@ -16004,7 +16602,7 @@ pub type ButtonReleaseEvent = ButtonPressEvent;
 pub const MOTION_EVENT: u16 = 6;
 pub type MotionEvent = ButtonPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct NotifyMode(u8);
 impl NotifyMode {
     pub const NORMAL: Self = Self(0);
@@ -16056,8 +16654,30 @@ impl From<u8> for NotifyMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for NotifyMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NORMAL.into(), "NORMAL"),
+            (Self::GRAB.into(), "GRAB"),
+            (Self::UNGRAB.into(), "UNGRAB"),
+            (Self::WHILE_GRABBED.into(), "WHILE_GRABBED"),
+            (Self::PASSIVE_GRAB.into(), "PASSIVE_GRAB"),
+            (Self::PASSIVE_UNGRAB.into(), "PASSIVE_UNGRAB"),
+        ];
+        let variants2 = [
+            (Self::NORMAL.into(), "Normal"),
+            (Self::GRAB.into(), "Grab"),
+            (Self::UNGRAB.into(), "Ungrab"),
+            (Self::WHILE_GRABBED.into(), "WhileGrabbed"),
+            (Self::PASSIVE_GRAB.into(), "PassiveGrab"),
+            (Self::PASSIVE_UNGRAB.into(), "PassiveUngrab"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct NotifyDetail(u8);
 impl NotifyDetail {
     pub const ANCESTOR: Self = Self(0);
@@ -16109,6 +16729,32 @@ impl From<u8> for NotifyDetail {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for NotifyDetail {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::ANCESTOR.into(), "ANCESTOR"),
+            (Self::VIRTUAL.into(), "VIRTUAL"),
+            (Self::INFERIOR.into(), "INFERIOR"),
+            (Self::NONLINEAR.into(), "NONLINEAR"),
+            (Self::NONLINEAR_VIRTUAL.into(), "NONLINEAR_VIRTUAL"),
+            (Self::POINTER.into(), "POINTER"),
+            (Self::POINTER_ROOT.into(), "POINTER_ROOT"),
+            (Self::NONE.into(), "NONE"),
+        ];
+        let variants2 = [
+            (Self::ANCESTOR.into(), "Ancestor"),
+            (Self::VIRTUAL.into(), "Virtual"),
+            (Self::INFERIOR.into(), "Inferior"),
+            (Self::NONLINEAR.into(), "Nonlinear"),
+            (Self::NONLINEAR_VIRTUAL.into(), "NonlinearVirtual"),
+            (Self::POINTER.into(), "Pointer"),
+            (Self::POINTER_ROOT.into(), "PointerRoot"),
+            (Self::NONE.into(), "None"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -16208,7 +16854,7 @@ pub type FocusInEvent = EnterEvent;
 pub const FOCUS_OUT_EVENT: u16 = 10;
 pub type FocusOutEvent = EnterEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct HierarchyMask(u8);
 impl HierarchyMask {
     pub const MASTER_ADDED: Self = Self(1 << 0);
@@ -16260,6 +16906,32 @@ impl From<u8> for HierarchyMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for HierarchyMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::MASTER_ADDED.into(), "MASTER_ADDED"),
+            (Self::MASTER_REMOVED.into(), "MASTER_REMOVED"),
+            (Self::SLAVE_ADDED.into(), "SLAVE_ADDED"),
+            (Self::SLAVE_REMOVED.into(), "SLAVE_REMOVED"),
+            (Self::SLAVE_ATTACHED.into(), "SLAVE_ATTACHED"),
+            (Self::SLAVE_DETACHED.into(), "SLAVE_DETACHED"),
+            (Self::DEVICE_ENABLED.into(), "DEVICE_ENABLED"),
+            (Self::DEVICE_DISABLED.into(), "DEVICE_DISABLED"),
+        ];
+        let variants2 = [
+            (Self::MASTER_ADDED.into(), "MasterAdded"),
+            (Self::MASTER_REMOVED.into(), "MasterRemoved"),
+            (Self::SLAVE_ADDED.into(), "SlaveAdded"),
+            (Self::SLAVE_REMOVED.into(), "SlaveRemoved"),
+            (Self::SLAVE_ATTACHED.into(), "SlaveAttached"),
+            (Self::SLAVE_DETACHED.into(), "SlaveDetached"),
+            (Self::DEVICE_ENABLED.into(), "DeviceEnabled"),
+            (Self::DEVICE_DISABLED.into(), "DeviceDisabled"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(HierarchyMask, u8);
@@ -16382,7 +17054,7 @@ impl HierarchyEvent {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PropertyFlag(u8);
 impl PropertyFlag {
     pub const DELETED: Self = Self(0);
@@ -16429,6 +17101,22 @@ impl From<u8> for PropertyFlag {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PropertyFlag {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::DELETED.into(), "DELETED"),
+            (Self::CREATED.into(), "CREATED"),
+            (Self::MODIFIED.into(), "MODIFIED"),
+        ];
+        let variants2 = [
+            (Self::DELETED.into(), "Deleted"),
+            (Self::CREATED.into(), "Created"),
+            (Self::MODIFIED.into(), "Modified"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -16616,7 +17304,7 @@ pub type RawButtonReleaseEvent = RawButtonPressEvent;
 pub const RAW_MOTION_EVENT: u16 = 17;
 pub type RawMotionEvent = RawButtonPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct TouchEventFlags(u32);
 impl TouchEventFlags {
     pub const TOUCH_PENDING_END: Self = Self(1 << 16);
@@ -16650,6 +17338,20 @@ impl From<u32> for TouchEventFlags {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for TouchEventFlags {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::TOUCH_PENDING_END.into(), "TOUCH_PENDING_END"),
+            (Self::TOUCH_EMULATING_POINTER.into(), "TOUCH_EMULATING_POINTER"),
+        ];
+        let variants2 = [
+            (Self::TOUCH_PENDING_END.into(), "TouchPendingEnd"),
+            (Self::TOUCH_EMULATING_POINTER.into(), "TouchEmulatingPointer"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(TouchEventFlags, u32);
@@ -16759,7 +17461,7 @@ pub type TouchUpdateEvent = TouchBeginEvent;
 pub const TOUCH_END_EVENT: u16 = 20;
 pub type TouchEndEvent = TouchBeginEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct TouchOwnershipFlags(u32);
 impl TouchOwnershipFlags {
     pub const NONE: Self = Self(0);
@@ -16792,6 +17494,18 @@ impl From<u32> for TouchOwnershipFlags {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for TouchOwnershipFlags {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NONE.into(), "NONE"),
+        ];
+        let variants2 = [
+            (Self::NONE.into(), "None"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -16919,7 +17633,7 @@ pub type RawTouchUpdateEvent = RawTouchBeginEvent;
 pub const RAW_TOUCH_END_EVENT: u16 = 24;
 pub type RawTouchEndEvent = RawTouchBeginEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BarrierFlags(u8);
 impl BarrierFlags {
     pub const POINTER_RELEASED: Self = Self(1 << 0);
@@ -16965,6 +17679,20 @@ impl From<u8> for BarrierFlags {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for BarrierFlags {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::POINTER_RELEASED.into(), "POINTER_RELEASED"),
+            (Self::DEVICE_IS_GRABBED.into(), "DEVICE_IS_GRABBED"),
+        ];
+        let variants2 = [
+            (Self::POINTER_RELEASED.into(), "PointerReleased"),
+            (Self::DEVICE_IS_GRABBED.into(), "DeviceIsGrabbed"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(BarrierFlags, u8);

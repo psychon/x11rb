@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{BitmaskPrettyPrinter, EnumPrettyPrinter, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -145,7 +145,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SaveSetMode(u8);
 impl SaveSetMode {
     pub const INSERT: Self = Self(0);
@@ -193,8 +193,22 @@ impl From<u8> for SaveSetMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for SaveSetMode {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::INSERT.into(), "INSERT"),
+            (Self::DELETE.into(), "DELETE"),
+        ];
+        let variants2 = [
+            (Self::INSERT.into(), "Insert"),
+            (Self::DELETE.into(), "Delete"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SaveSetTarget(u8);
 impl SaveSetTarget {
     pub const NEAREST: Self = Self(0);
@@ -242,8 +256,22 @@ impl From<u8> for SaveSetTarget {
         Self(value)
     }
 }
+impl std::fmt::Debug for SaveSetTarget {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NEAREST.into(), "NEAREST"),
+            (Self::ROOT.into(), "ROOT"),
+        ];
+        let variants2 = [
+            (Self::NEAREST.into(), "Nearest"),
+            (Self::ROOT.into(), "Root"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SaveSetMapping(u8);
 impl SaveSetMapping {
     pub const MAP: Self = Self(0);
@@ -289,6 +317,20 @@ impl From<u8> for SaveSetMapping {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SaveSetMapping {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::MAP.into(), "MAP"),
+            (Self::UNMAP.into(), "UNMAP"),
+        ];
+        let variants2 = [
+            (Self::MAP.into(), "Map"),
+            (Self::UNMAP.into(), "Unmap"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -380,7 +422,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SelectionEvent(u8);
 impl SelectionEvent {
     pub const SET_SELECTION_OWNER: Self = Self(0);
@@ -429,8 +471,24 @@ impl From<u8> for SelectionEvent {
         Self(value)
     }
 }
+impl std::fmt::Debug for SelectionEvent {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SET_SELECTION_OWNER.into(), "SET_SELECTION_OWNER"),
+            (Self::SELECTION_WINDOW_DESTROY.into(), "SELECTION_WINDOW_DESTROY"),
+            (Self::SELECTION_CLIENT_CLOSE.into(), "SELECTION_CLIENT_CLOSE"),
+        ];
+        let variants2 = [
+            (Self::SET_SELECTION_OWNER.into(), "SetSelectionOwner"),
+            (Self::SELECTION_WINDOW_DESTROY.into(), "SelectionWindowDestroy"),
+            (Self::SELECTION_CLIENT_CLOSE.into(), "SelectionClientClose"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SelectionEventMask(u8);
 impl SelectionEventMask {
     pub const SET_SELECTION_OWNER: Self = Self(1 << 0);
@@ -477,6 +535,22 @@ impl From<u8> for SelectionEventMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SelectionEventMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::SET_SELECTION_OWNER.into(), "SET_SELECTION_OWNER"),
+            (Self::SELECTION_WINDOW_DESTROY.into(), "SELECTION_WINDOW_DESTROY"),
+            (Self::SELECTION_CLIENT_CLOSE.into(), "SELECTION_CLIENT_CLOSE"),
+        ];
+        let variants2 = [
+            (Self::SET_SELECTION_OWNER.into(), "SetSelectionOwner"),
+            (Self::SELECTION_WINDOW_DESTROY.into(), "SelectionWindowDestroy"),
+            (Self::SELECTION_CLIENT_CLOSE.into(), "SelectionClientClose"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(SelectionEventMask, u8);
@@ -657,7 +731,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CursorNotify(u8);
 impl CursorNotify {
     pub const DISPLAY_CURSOR: Self = Self(0);
@@ -704,8 +778,20 @@ impl From<u8> for CursorNotify {
         Self(value)
     }
 }
+impl std::fmt::Debug for CursorNotify {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::DISPLAY_CURSOR.into(), "DISPLAY_CURSOR"),
+        ];
+        let variants2 = [
+            (Self::DISPLAY_CURSOR.into(), "DisplayCursor"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CursorNotifyMask(u8);
 impl CursorNotifyMask {
     pub const DISPLAY_CURSOR: Self = Self(1 << 0);
@@ -750,6 +836,18 @@ impl From<u8> for CursorNotifyMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CursorNotifyMask {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::DISPLAY_CURSOR.into(), "DISPLAY_CURSOR"),
+        ];
+        let variants2 = [
+            (Self::DISPLAY_CURSOR.into(), "DisplayCursor"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(CursorNotifyMask, u8);
@@ -1023,7 +1121,7 @@ pub type Region = u32;
 /// Opcode for the BadRegion error
 pub const BAD_REGION_ERROR: u8 = 0;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct RegionEnum(u8);
 impl RegionEnum {
     pub const NONE: Self = Self(0);
@@ -1068,6 +1166,18 @@ impl From<u8> for RegionEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for RegionEnum {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::NONE.into(), "NONE"),
+        ];
+        let variants2 = [
+            (Self::NONE.into(), "None"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        EnumPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 
@@ -3294,7 +3404,7 @@ where
 
 pub type Barrier = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BarrierDirections(u8);
 impl BarrierDirections {
     pub const POSITIVE_X: Self = Self(1 << 0);
@@ -3342,6 +3452,24 @@ impl From<u8> for BarrierDirections {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for BarrierDirections {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants1 = [
+            (Self::POSITIVE_X.into(), "POSITIVE_X"),
+            (Self::POSITIVE_Y.into(), "POSITIVE_Y"),
+            (Self::NEGATIVE_X.into(), "NEGATIVE_X"),
+            (Self::NEGATIVE_Y.into(), "NEGATIVE_Y"),
+        ];
+        let variants2 = [
+            (Self::POSITIVE_X.into(), "PositiveX"),
+            (Self::POSITIVE_Y.into(), "PositiveY"),
+            (Self::NEGATIVE_X.into(), "NegativeX"),
+            (Self::NEGATIVE_Y.into(), "NegativeY"),
+        ];
+        let variants = if fmt.alternate() { variants2 } else { variants1 };
+        BitmaskPrettyPrinter::new(self.0, &variants).fmt(fmt)
     }
 }
 bitmask_binop!(BarrierDirections, u8);
