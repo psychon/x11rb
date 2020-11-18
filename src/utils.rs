@@ -208,3 +208,108 @@ mod raw_fd_container {
 }
 
 pub use raw_fd_container::RawFdContainer;
+
+mod pretty_printer {
+    use std::fmt::{Debug, Formatter, Result};
+
+    /// A helper struct to pretty-print an enumeration value.
+    pub(crate) struct EnumPrettyPrinter<'a, T> {
+        value: T,
+        cases: &'a [(T, &'a str)],
+    }
+
+    impl<'a, T> EnumPrettyPrinter<'a, T> {
+        pub(crate) fn new(value: T, cases: &'a [(T, &'a str)]) -> Self {
+            Self { value, cases }
+        }
+    }
+
+    impl<'a, T> Debug for EnumPrettyPrinter<'a, T>
+        where T: Debug + PartialEq
+    {
+        fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
+            for (value, name) in self.cases {
+                if &self.value == value {
+                    return fmt.write_str(name);
+                }
+            }
+            Debug::fmt(&self.value, fmt)
+        }
+    }
+
+    /// A helper struct to pretty-print a bitmask.
+    pub(crate) struct BitmaskPrettyPrinter<'a> {
+        value: u32,
+        masks: &'a [(u32, &'a str)],
+    }
+
+    impl<'a> BitmaskPrettyPrinter<'a> {
+        pub(crate) fn new(value: impl Into<u32>, masks: &'a [(u32, &'a str)]) -> Self {
+            let value = value.into();
+            Self { value, masks }
+        }
+    }
+
+    impl<'a> Debug for BitmaskPrettyPrinter<'a> {
+        fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
+            // First, figure out if there are any bits not covered by any case
+            let known_bits = self.masks.iter()
+                .fold(0, |acc, (value, _)| acc | value);
+            let remaining = self.value & !known_bits;
+            let mut already_printed = if remaining != 0 {
+                Debug::fmt(&remaining, fmt)?;
+                true
+            } else {
+                false
+            };
+            for (value, name) in self.masks {
+                if value & self.value != 0 {
+                    if already_printed {
+                        fmt.write_str(" | ")?;
+                    }
+                    already_printed = true;
+                    fmt.write_str(name)?;
+                }
+            }
+            Ok(())
+        }
+    }
+
+    #[cfg(test)]
+    mod test {
+        use super::{BitmaskPrettyPrinter, EnumPrettyPrinter};
+
+        #[test]
+        fn test_enum() {
+            let cases = [
+                (0, "zero"),
+                (42, "the answer"),
+            ];
+            let printer = EnumPrettyPrinter::new(0, &cases);
+            assert_eq!(&format!("{:?}", printer), "zero");
+            let printer = EnumPrettyPrinter::new(1, &cases);
+            assert_eq!(&format!("{:?}", printer), "1");
+            let printer = EnumPrettyPrinter::new(42, &cases);
+            assert_eq!(&format!("{:?}", printer), "the answer");
+        }
+
+        #[test]
+        fn test_bitmask() {
+            let bits = [
+                (1 << 5, "b5"),
+                (1 << 1, "b1"),
+                (1 << 0, "unused"),
+            ];
+            let printer = BitmaskPrettyPrinter::new(8u8, &bits);
+            assert_eq!(&format!("{:?}", printer), "8");
+            let printer = BitmaskPrettyPrinter::new(32u8, &bits);
+            assert_eq!(&format!("{:?}", printer), "b5");
+            let printer = BitmaskPrettyPrinter::new(34u8, &bits);
+            assert_eq!(&format!("{:?}", printer), "b5 | b1");
+            let printer = BitmaskPrettyPrinter::new(42u8, &bits);
+            assert_eq!(&format!("{:?}", printer), "8 | b5 | b1");
+        }
+    }
+}
+
+pub(crate) use pretty_printer::{BitmaskPrettyPrinter, EnumPrettyPrinter};
