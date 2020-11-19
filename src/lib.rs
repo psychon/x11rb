@@ -147,6 +147,8 @@ pub mod wrapper;
 #[rustfmt::skip]
 #[allow(missing_docs)]
 pub mod protocol;
+#[cfg(feature = "resource_manager")]
+pub mod resource_manager;
 
 use connection::Connection;
 use errors::ConnectError;

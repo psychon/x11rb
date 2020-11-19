@@ -45,6 +45,9 @@ cursor = ["render"]
 # Enable utility functions in `x11rb::image` for working with image data.
 image = []
 
+# FOO TODO
+resource_manager = []
+
 dl-libxcb = ["allow-unsafe-code", "libloading", "once_cell"]
 
 # Enable this feature to enable all the X11 extensions
