@@ -9380,7 +9380,7 @@ impl GetPropertyReply {
     /// };
     /// assert!(reply.value8().is_none());
     /// ```
-    pub fn value8<'a>(&'a self) -> Option<impl Iterator<Item=u8> + 'a> {
+    pub fn value8(&self) -> Option<impl Iterator<Item=u8> + '_> {
         if self.format == 8 {
             Some(crate::wrapper::PropertyIterator::new(&self.value))
         } else {
@@ -9431,7 +9431,7 @@ impl GetPropertyReply {
     /// };
     /// assert!(reply.value16().is_none());
     /// ```
-    pub fn value16<'a>(&'a self) -> Option<impl Iterator<Item=u16> + 'a> {
+    pub fn value16(&self) -> Option<impl Iterator<Item=u16> + '_> {
         if self.format == 16 {
             Some(crate::wrapper::PropertyIterator::new(&self.value))
         } else {
@@ -9481,7 +9481,7 @@ impl GetPropertyReply {
     /// };
     /// assert!(reply.value32().is_none());
     /// ```
-    pub fn value32<'a>(&'a self) -> Option<impl Iterator<Item=u32> + 'a> {
+    pub fn value32(&self) -> Option<impl Iterator<Item=u32> + '_> {
         if self.format == 32 {
             Some(crate::wrapper::PropertyIterator::new(&self.value))
         } else {
