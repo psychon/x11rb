@@ -1369,7 +1369,7 @@ impl std::fmt::Debug for GC  {
             (Self::GL_SCISSOR_BIT.0.into(), "GL_SCISSOR_BIT", "GL_SCISSOR_BIT"),
             (Self::GL_ALL_ATTRIB_BITS.0.into(), "GL_ALL_ATTRIB_BITS", "GL_ALL_ATTRIB_BITS"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 

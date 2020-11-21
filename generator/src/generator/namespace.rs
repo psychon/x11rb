@@ -2513,10 +2513,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     );
                 }
                 outln!(out, "];");
+                let into = match global_enum_size {
+                    32 => "",
+                    _ => ".into()",
+                };
                 if ok_for_bitmask {
-                    outln!(out, "pretty_print_bitmask(fmt, self.0.into(), &variants)");
+                    outln!(out, "pretty_print_bitmask(fmt, self.0{}, &variants)", into);
                 } else {
-                    outln!(out, "pretty_print_enum(fmt, self.0.into(), &variants)");
+                    outln!(out, "pretty_print_enum(fmt, self.0{}, &variants)", into);
                 }
             });
             outln!(out, "}}");

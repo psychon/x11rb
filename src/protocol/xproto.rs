@@ -587,7 +587,7 @@ impl std::fmt::Debug for EventMask  {
             (Self::COLOR_MAP_CHANGE.0.into(), "COLOR_MAP_CHANGE", "ColorMapChange"),
             (Self::OWNER_GRAB_BUTTON.0.into(), "OWNER_GRAB_BUTTON", "OwnerGrabButton"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
 bitmask_binop!(EventMask, u32);
@@ -636,7 +636,7 @@ impl std::fmt::Debug for BackingStore  {
             (Self::WHEN_MAPPED.0.into(), "WHEN_MAPPED", "WhenMapped"),
             (Self::ALWAYS.0.into(), "ALWAYS", "Always"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -5549,7 +5549,7 @@ impl std::fmt::Debug for Gravity  {
             (Self::SOUTH_EAST.0.into(), "SOUTH_EAST", "SouthEast"),
             (Self::STATIC.0.into(), "STATIC", "Static"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -7867,7 +7867,7 @@ impl std::fmt::Debug for StackMode  {
             (Self::BOTTOM_IF.0.into(), "BOTTOM_IF", "BottomIf"),
             (Self::OPPOSITE.0.into(), "OPPOSITE", "Opposite"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -15866,7 +15866,7 @@ impl std::fmt::Debug for GC  {
             (Self::DASH_LIST.0.into(), "DASH_LIST", "DashList"),
             (Self::ARC_MODE.0.into(), "ARC_MODE", "ArcMode"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
 bitmask_binop!(GC, u32);
@@ -15941,7 +15941,7 @@ impl std::fmt::Debug for GX  {
             (Self::NAND.0.into(), "NAND", "Nand"),
             (Self::SET.0.into(), "SET", "Set"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -15989,7 +15989,7 @@ impl std::fmt::Debug for LineStyle  {
             (Self::ON_OFF_DASH.0.into(), "ON_OFF_DASH", "OnOffDash"),
             (Self::DOUBLE_DASH.0.into(), "DOUBLE_DASH", "DoubleDash"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -16039,7 +16039,7 @@ impl std::fmt::Debug for CapStyle  {
             (Self::ROUND.0.into(), "ROUND", "Round"),
             (Self::PROJECTING.0.into(), "PROJECTING", "Projecting"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -16087,7 +16087,7 @@ impl std::fmt::Debug for JoinStyle  {
             (Self::ROUND.0.into(), "ROUND", "Round"),
             (Self::BEVEL.0.into(), "BEVEL", "Bevel"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -16137,7 +16137,7 @@ impl std::fmt::Debug for FillStyle  {
             (Self::STIPPLED.0.into(), "STIPPLED", "Stippled"),
             (Self::OPAQUE_STIPPLED.0.into(), "OPAQUE_STIPPLED", "OpaqueStippled"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -16183,7 +16183,7 @@ impl std::fmt::Debug for FillRule  {
             (Self::EVEN_ODD.0.into(), "EVEN_ODD", "EvenOdd"),
             (Self::WINDING.0.into(), "WINDING", "Winding"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -16229,7 +16229,7 @@ impl std::fmt::Debug for SubwindowMode  {
             (Self::CLIP_BY_CHILDREN.0.into(), "CLIP_BY_CHILDREN", "ClipByChildren"),
             (Self::INCLUDE_INFERIORS.0.into(), "INCLUDE_INFERIORS", "IncludeInferiors"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -16275,7 +16275,7 @@ impl std::fmt::Debug for ArcMode  {
             (Self::CHORD.0.into(), "CHORD", "Chord"),
             (Self::PIE_SLICE.0.into(), "PIE_SLICE", "PieSlice"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -23879,7 +23879,7 @@ impl std::fmt::Debug for LedMode  {
             (Self::OFF.0.into(), "OFF", "Off"),
             (Self::ON.0.into(), "ON", "On"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -23927,7 +23927,7 @@ impl std::fmt::Debug for AutoRepeatMode  {
             (Self::ON.0.into(), "ON", "On"),
             (Self::DEFAULT.0.into(), "DEFAULT", "Default"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 

@@ -628,7 +628,7 @@ impl std::fmt::Debug for Control  {
             (Self::PER_KEY_REPEAT.0.into(), "PER_KEY_REPEAT", "PerKeyRepeat"),
             (Self::CONTROLS_ENABLED.0.into(), "CONTROLS_ENABLED", "ControlsEnabled"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
 bitmask_binop!(Control, u32);

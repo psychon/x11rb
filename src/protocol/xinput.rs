@@ -11180,7 +11180,7 @@ impl std::fmt::Debug for XIEventMask  {
             (Self::BARRIER_HIT.0.into(), "BARRIER_HIT", "BarrierHit"),
             (Self::BARRIER_LEAVE.0.into(), "BARRIER_LEAVE", "BarrierLeave"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
 bitmask_binop!(XIEventMask, u32);
@@ -13578,7 +13578,7 @@ impl std::fmt::Debug for ModifierMask  {
         let variants = [
             (Self::ANY.0.into(), "ANY", "Any"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
 bitmask_binop!(ModifierMask, u32);
@@ -16183,7 +16183,7 @@ impl std::fmt::Debug for KeyEventFlags  {
         let variants = [
             (Self::KEY_REPEAT.0.into(), "KEY_REPEAT", "KeyRepeat"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
 bitmask_binop!(KeyEventFlags, u32);
@@ -16329,7 +16329,7 @@ impl std::fmt::Debug for PointerEventFlags  {
         let variants = [
             (Self::POINTER_EMULATED.0.into(), "POINTER_EMULATED", "PointerEmulated"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
 bitmask_binop!(PointerEventFlags, u32);
@@ -17146,7 +17146,7 @@ impl std::fmt::Debug for TouchEventFlags  {
             (Self::TOUCH_PENDING_END.0.into(), "TOUCH_PENDING_END", "TouchPendingEnd"),
             (Self::TOUCH_EMULATING_POINTER.0.into(), "TOUCH_EMULATING_POINTER", "TouchEmulatingPointer"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
 bitmask_binop!(TouchEventFlags, u32);
@@ -17296,7 +17296,7 @@ impl std::fmt::Debug for TouchOwnershipFlags  {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 

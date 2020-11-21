@@ -95,7 +95,7 @@ impl std::fmt::Debug for Attachment  {
             (Self::BUFFER_DEPTH_STENCIL.0.into(), "BUFFER_DEPTH_STENCIL", "BufferDepthStencil"),
             (Self::BUFFER_HIZ.0.into(), "BUFFER_HIZ", "BufferHiz"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -141,7 +141,7 @@ impl std::fmt::Debug for DriverType  {
             (Self::DRI.0.into(), "DRI", "DRI"),
             (Self::VDPAU.0.into(), "VDPAU", "VDPAU"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 

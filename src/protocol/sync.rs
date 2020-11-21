@@ -147,7 +147,7 @@ impl std::fmt::Debug for TESTTYPE  {
             (Self::POSITIVE_COMPARISON.0.into(), "POSITIVE_COMPARISON", "PositiveComparison"),
             (Self::NEGATIVE_COMPARISON.0.into(), "NEGATIVE_COMPARISON", "NegativeComparison"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -193,7 +193,7 @@ impl std::fmt::Debug for VALUETYPE  {
             (Self::ABSOLUTE.0.into(), "ABSOLUTE", "Absolute"),
             (Self::RELATIVE.0.into(), "RELATIVE", "Relative"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 

@@ -351,7 +351,7 @@ impl std::fmt::Debug for PolyEdge  {
             (Self::SHARP.0.into(), "SHARP", "Sharp"),
             (Self::SMOOTH.0.into(), "SMOOTH", "Smooth"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -397,7 +397,7 @@ impl std::fmt::Debug for PolyMode  {
             (Self::PRECISE.0.into(), "PRECISE", "Precise"),
             (Self::IMPRECISE.0.into(), "IMPRECISE", "Imprecise"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -526,7 +526,7 @@ impl std::fmt::Debug for SubPixel  {
             (Self::VERTICAL_BGR.0.into(), "VERTICAL_BGR", "VerticalBGR"),
             (Self::NONE.0.into(), "NONE", "None"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -576,7 +576,7 @@ impl std::fmt::Debug for Repeat  {
             (Self::PAD.0.into(), "PAD", "Pad"),
             (Self::REFLECT.0.into(), "REFLECT", "Reflect"),
         ];
-        pretty_print_enum(fmt, self.0.into(), &variants)
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
