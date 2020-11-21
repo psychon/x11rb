@@ -478,26 +478,31 @@ impl<T: Serialize> Serialize for [T] {
 macro_rules! bitmask_binop {
     ($t:ty, $u:ty) => {
         impl std::ops::BitOr for $t {
-            type Output = $u;
+            type Output = $t;
             fn bitor(self, other: Self) -> Self::Output {
-                Self::Output::from(self) | Self::Output::from(other)
+                Self::from(<$u>::from(self) | <$u>::from(other))
             }
         }
         impl std::ops::BitOr<$u> for $t {
-            type Output = $u;
+            type Output = $t;
             fn bitor(self, other: $u) -> Self::Output {
-                Self::Output::from(self) | other
+                self | Self::from(other)
             }
         }
         impl std::ops::BitOr<$t> for $u {
-            type Output = $u;
+            type Output = $t;
             fn bitor(self, other: $t) -> Self::Output {
-                self | Self::Output::from(other)
+                <$t>::from(self) | other
             }
         }
         impl std::ops::BitOrAssign<$t> for $u {
             fn bitor_assign(&mut self, other: $t) {
                 *self |= Self::from(other)
+            }
+        }
+        impl std::ops::BitOrAssign<$u> for $t {
+            fn bitor_assign(&mut self, other: $u) {
+                *self = *self | Self::from(other)
             }
         }
     };
