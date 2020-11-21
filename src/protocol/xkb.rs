@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -35,7 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "XKEYBOARD";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Const(u8);
 impl Const {
     pub const MAX_LEGAL_KEY_CODE: Self = Self(255);
@@ -84,8 +84,18 @@ impl From<u8> for Const {
         Self(value)
     }
 }
+impl std::fmt::Debug for Const  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::MAX_LEGAL_KEY_CODE.0.into(), "MAX_LEGAL_KEY_CODE", "MaxLegalKeyCode"),
+            (Self::PER_KEY_BIT_ARRAY_SIZE.0.into(), "PER_KEY_BIT_ARRAY_SIZE", "PerKeyBitArraySize"),
+            (Self::KEY_NAME_LENGTH.0.into(), "KEY_NAME_LENGTH", "KeyNameLength"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EventType(u16);
 impl EventType {
     pub const NEW_KEYBOARD_NOTIFY: Self = Self(1 << 0);
@@ -137,9 +147,28 @@ impl From<u16> for EventType {
         Self(value)
     }
 }
+impl std::fmt::Debug for EventType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NEW_KEYBOARD_NOTIFY.0.into(), "NEW_KEYBOARD_NOTIFY", "NewKeyboardNotify"),
+            (Self::MAP_NOTIFY.0.into(), "MAP_NOTIFY", "MapNotify"),
+            (Self::STATE_NOTIFY.0.into(), "STATE_NOTIFY", "StateNotify"),
+            (Self::CONTROLS_NOTIFY.0.into(), "CONTROLS_NOTIFY", "ControlsNotify"),
+            (Self::INDICATOR_STATE_NOTIFY.0.into(), "INDICATOR_STATE_NOTIFY", "IndicatorStateNotify"),
+            (Self::INDICATOR_MAP_NOTIFY.0.into(), "INDICATOR_MAP_NOTIFY", "IndicatorMapNotify"),
+            (Self::NAMES_NOTIFY.0.into(), "NAMES_NOTIFY", "NamesNotify"),
+            (Self::COMPAT_MAP_NOTIFY.0.into(), "COMPAT_MAP_NOTIFY", "CompatMapNotify"),
+            (Self::BELL_NOTIFY.0.into(), "BELL_NOTIFY", "BellNotify"),
+            (Self::ACTION_MESSAGE.0.into(), "ACTION_MESSAGE", "ActionMessage"),
+            (Self::ACCESS_X_NOTIFY.0.into(), "ACCESS_X_NOTIFY", "AccessXNotify"),
+            (Self::EXTENSION_DEVICE_NOTIFY.0.into(), "EXTENSION_DEVICE_NOTIFY", "ExtensionDeviceNotify"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(EventType, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct NKNDetail(u8);
 impl NKNDetail {
     pub const KEYCODES: Self = Self(1 << 0);
@@ -188,9 +217,19 @@ impl From<u8> for NKNDetail {
         Self(value)
     }
 }
+impl std::fmt::Debug for NKNDetail  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEYCODES.0.into(), "KEYCODES", "Keycodes"),
+            (Self::GEOMETRY.0.into(), "GEOMETRY", "Geometry"),
+            (Self::DEVICE_ID.0.into(), "DEVICE_ID", "DeviceID"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(NKNDetail, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct AXNDetail(u8);
 impl AXNDetail {
     pub const SK_PRESS: Self = Self(1 << 0);
@@ -243,9 +282,23 @@ impl From<u8> for AXNDetail {
         Self(value)
     }
 }
+impl std::fmt::Debug for AXNDetail  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SK_PRESS.0.into(), "SK_PRESS", "SKPress"),
+            (Self::SK_ACCEPT.0.into(), "SK_ACCEPT", "SKAccept"),
+            (Self::SK_REJECT.0.into(), "SK_REJECT", "SKReject"),
+            (Self::SK_RELEASE.0.into(), "SK_RELEASE", "SKRelease"),
+            (Self::BK_ACCEPT.0.into(), "BK_ACCEPT", "BKAccept"),
+            (Self::BK_REJECT.0.into(), "BK_REJECT", "BKReject"),
+            (Self::AXK_WARNING.0.into(), "AXK_WARNING", "AXKWarning"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(AXNDetail, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct MapPart(u8);
 impl MapPart {
     pub const KEY_TYPES: Self = Self(1 << 0);
@@ -299,9 +352,24 @@ impl From<u8> for MapPart {
         Self(value)
     }
 }
+impl std::fmt::Debug for MapPart  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEY_TYPES.0.into(), "KEY_TYPES", "KeyTypes"),
+            (Self::KEY_SYMS.0.into(), "KEY_SYMS", "KeySyms"),
+            (Self::MODIFIER_MAP.0.into(), "MODIFIER_MAP", "ModifierMap"),
+            (Self::EXPLICIT_COMPONENTS.0.into(), "EXPLICIT_COMPONENTS", "ExplicitComponents"),
+            (Self::KEY_ACTIONS.0.into(), "KEY_ACTIONS", "KeyActions"),
+            (Self::KEY_BEHAVIORS.0.into(), "KEY_BEHAVIORS", "KeyBehaviors"),
+            (Self::VIRTUAL_MODS.0.into(), "VIRTUAL_MODS", "VirtualMods"),
+            (Self::VIRTUAL_MOD_MAP.0.into(), "VIRTUAL_MOD_MAP", "VirtualModMap"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(MapPart, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SetMapFlags(u8);
 impl SetMapFlags {
     pub const RESIZE_TYPES: Self = Self(1 << 0);
@@ -349,9 +417,18 @@ impl From<u8> for SetMapFlags {
         Self(value)
     }
 }
+impl std::fmt::Debug for SetMapFlags  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::RESIZE_TYPES.0.into(), "RESIZE_TYPES", "ResizeTypes"),
+            (Self::RECOMPUTE_ACTIONS.0.into(), "RECOMPUTE_ACTIONS", "RecomputeActions"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(SetMapFlags, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct StatePart(u16);
 impl StatePart {
     pub const MODIFIER_STATE: Self = Self(1 << 0);
@@ -405,9 +482,30 @@ impl From<u16> for StatePart {
         Self(value)
     }
 }
+impl std::fmt::Debug for StatePart  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::MODIFIER_STATE.0.into(), "MODIFIER_STATE", "ModifierState"),
+            (Self::MODIFIER_BASE.0.into(), "MODIFIER_BASE", "ModifierBase"),
+            (Self::MODIFIER_LATCH.0.into(), "MODIFIER_LATCH", "ModifierLatch"),
+            (Self::MODIFIER_LOCK.0.into(), "MODIFIER_LOCK", "ModifierLock"),
+            (Self::GROUP_STATE.0.into(), "GROUP_STATE", "GroupState"),
+            (Self::GROUP_BASE.0.into(), "GROUP_BASE", "GroupBase"),
+            (Self::GROUP_LATCH.0.into(), "GROUP_LATCH", "GroupLatch"),
+            (Self::GROUP_LOCK.0.into(), "GROUP_LOCK", "GroupLock"),
+            (Self::COMPAT_STATE.0.into(), "COMPAT_STATE", "CompatState"),
+            (Self::GRAB_MODS.0.into(), "GRAB_MODS", "GrabMods"),
+            (Self::COMPAT_GRAB_MODS.0.into(), "COMPAT_GRAB_MODS", "CompatGrabMods"),
+            (Self::LOOKUP_MODS.0.into(), "LOOKUP_MODS", "LookupMods"),
+            (Self::COMPAT_LOOKUP_MODS.0.into(), "COMPAT_LOOKUP_MODS", "CompatLookupMods"),
+            (Self::POINTER_BUTTONS.0.into(), "POINTER_BUTTONS", "PointerButtons"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(StatePart, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BoolCtrl(u16);
 impl BoolCtrl {
     pub const REPEAT_KEYS: Self = Self(1 << 0);
@@ -460,9 +558,29 @@ impl From<u16> for BoolCtrl {
         Self(value)
     }
 }
+impl std::fmt::Debug for BoolCtrl  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::REPEAT_KEYS.0.into(), "REPEAT_KEYS", "RepeatKeys"),
+            (Self::SLOW_KEYS.0.into(), "SLOW_KEYS", "SlowKeys"),
+            (Self::BOUNCE_KEYS.0.into(), "BOUNCE_KEYS", "BounceKeys"),
+            (Self::STICKY_KEYS.0.into(), "STICKY_KEYS", "StickyKeys"),
+            (Self::MOUSE_KEYS.0.into(), "MOUSE_KEYS", "MouseKeys"),
+            (Self::MOUSE_KEYS_ACCEL.0.into(), "MOUSE_KEYS_ACCEL", "MouseKeysAccel"),
+            (Self::ACCESS_X_KEYS.0.into(), "ACCESS_X_KEYS", "AccessXKeys"),
+            (Self::ACCESS_X_TIMEOUT_MASK.0.into(), "ACCESS_X_TIMEOUT_MASK", "AccessXTimeoutMask"),
+            (Self::ACCESS_X_FEEDBACK_MASK.0.into(), "ACCESS_X_FEEDBACK_MASK", "AccessXFeedbackMask"),
+            (Self::AUDIBLE_BELL_MASK.0.into(), "AUDIBLE_BELL_MASK", "AudibleBellMask"),
+            (Self::OVERLAY1_MASK.0.into(), "OVERLAY1_MASK", "Overlay1Mask"),
+            (Self::OVERLAY2_MASK.0.into(), "OVERLAY2_MASK", "Overlay2Mask"),
+            (Self::IGNORE_GROUP_LOCK_MASK.0.into(), "IGNORE_GROUP_LOCK_MASK", "IgnoreGroupLockMask"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(BoolCtrl, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Control(u32);
 impl Control {
     pub const GROUPS_WRAP: Self = Self(1 << 27);
@@ -501,9 +619,21 @@ impl From<u32> for Control {
         Self(value)
     }
 }
+impl std::fmt::Debug for Control  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::GROUPS_WRAP.0, "GROUPS_WRAP", "GroupsWrap"),
+            (Self::INTERNAL_MODS.0, "INTERNAL_MODS", "InternalMods"),
+            (Self::IGNORE_LOCK_MODS.0, "IGNORE_LOCK_MODS", "IgnoreLockMods"),
+            (Self::PER_KEY_REPEAT.0, "PER_KEY_REPEAT", "PerKeyRepeat"),
+            (Self::CONTROLS_ENABLED.0, "CONTROLS_ENABLED", "ControlsEnabled"),
+        ];
+        pretty_print_bitmask(fmt, self.0, &variants)
+    }
+}
 bitmask_binop!(Control, u32);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct AXOption(u16);
 impl AXOption {
     pub const SK_PRESS_FB: Self = Self(1 << 0);
@@ -555,11 +685,30 @@ impl From<u16> for AXOption {
         Self(value)
     }
 }
+impl std::fmt::Debug for AXOption  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SK_PRESS_FB.0.into(), "SK_PRESS_FB", "SKPressFB"),
+            (Self::SK_ACCEPT_FB.0.into(), "SK_ACCEPT_FB", "SKAcceptFB"),
+            (Self::FEATURE_FB.0.into(), "FEATURE_FB", "FeatureFB"),
+            (Self::SLOW_WARN_FB.0.into(), "SLOW_WARN_FB", "SlowWarnFB"),
+            (Self::INDICATOR_FB.0.into(), "INDICATOR_FB", "IndicatorFB"),
+            (Self::STICKY_KEYS_FB.0.into(), "STICKY_KEYS_FB", "StickyKeysFB"),
+            (Self::TWO_KEYS.0.into(), "TWO_KEYS", "TwoKeys"),
+            (Self::LATCH_TO_LOCK.0.into(), "LATCH_TO_LOCK", "LatchToLock"),
+            (Self::SK_RELEASE_FB.0.into(), "SK_RELEASE_FB", "SKReleaseFB"),
+            (Self::SK_REJECT_FB.0.into(), "SK_REJECT_FB", "SKRejectFB"),
+            (Self::BK_REJECT_FB.0.into(), "BK_REJECT_FB", "BKRejectFB"),
+            (Self::DUMB_BELL.0.into(), "DUMB_BELL", "DumbBell"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(AXOption, u16);
 
 pub type DeviceSpec = u16;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct LedClassResult(u16);
 impl LedClassResult {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
@@ -601,8 +750,17 @@ impl From<u16> for LedClassResult {
         Self(value)
     }
 }
+impl std::fmt::Debug for LedClassResult  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KBD_FEEDBACK_CLASS.0.into(), "KBD_FEEDBACK_CLASS", "KbdFeedbackClass"),
+            (Self::LED_FEEDBACK_CLASS.0.into(), "LED_FEEDBACK_CLASS", "LedFeedbackClass"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct LedClass(u16);
 impl LedClass {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
@@ -646,10 +804,21 @@ impl From<u16> for LedClass {
         Self(value)
     }
 }
+impl std::fmt::Debug for LedClass  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KBD_FEEDBACK_CLASS.0.into(), "KBD_FEEDBACK_CLASS", "KbdFeedbackClass"),
+            (Self::LED_FEEDBACK_CLASS.0.into(), "LED_FEEDBACK_CLASS", "LedFeedbackClass"),
+            (Self::DFLT_XI_CLASS.0.into(), "DFLT_XI_CLASS", "DfltXIClass"),
+            (Self::ALL_XI_CLASSES.0.into(), "ALL_XI_CLASSES", "AllXIClasses"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
 pub type LedClassSpec = u16;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BellClassResult(u8);
 impl BellClassResult {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
@@ -697,8 +866,17 @@ impl From<u8> for BellClassResult {
         Self(value)
     }
 }
+impl std::fmt::Debug for BellClassResult  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KBD_FEEDBACK_CLASS.0.into(), "KBD_FEEDBACK_CLASS", "KbdFeedbackClass"),
+            (Self::BELL_FEEDBACK_CLASS.0.into(), "BELL_FEEDBACK_CLASS", "BellFeedbackClass"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BellClass(u16);
 impl BellClass {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
@@ -741,10 +919,20 @@ impl From<u16> for BellClass {
         Self(value)
     }
 }
+impl std::fmt::Debug for BellClass  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KBD_FEEDBACK_CLASS.0.into(), "KBD_FEEDBACK_CLASS", "KbdFeedbackClass"),
+            (Self::BELL_FEEDBACK_CLASS.0.into(), "BELL_FEEDBACK_CLASS", "BellFeedbackClass"),
+            (Self::DFLT_XI_CLASS.0.into(), "DFLT_XI_CLASS", "DfltXIClass"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
 pub type BellClassSpec = u16;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ID(u16);
 impl ID {
     pub const USE_CORE_KBD: Self = Self(256);
@@ -791,10 +979,24 @@ impl From<u16> for ID {
         Self(value)
     }
 }
+impl std::fmt::Debug for ID  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::USE_CORE_KBD.0.into(), "USE_CORE_KBD", "UseCoreKbd"),
+            (Self::USE_CORE_PTR.0.into(), "USE_CORE_PTR", "UseCorePtr"),
+            (Self::DFLT_XI_CLASS.0.into(), "DFLT_XI_CLASS", "DfltXIClass"),
+            (Self::DFLT_XI_ID.0.into(), "DFLT_XI_ID", "DfltXIId"),
+            (Self::ALL_XI_CLASS.0.into(), "ALL_XI_CLASS", "AllXIClass"),
+            (Self::ALL_XI_ID.0.into(), "ALL_XI_ID", "AllXIId"),
+            (Self::XI_NONE.0.into(), "XI_NONE", "XINone"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
 pub type IDSpec = u16;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Group(u8);
 impl Group {
     pub const M1: Self = Self(0);
@@ -844,8 +1046,19 @@ impl From<u8> for Group {
         Self(value)
     }
 }
+impl std::fmt::Debug for Group  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::M1.0.into(), "M1", "M1"),
+            (Self::M2.0.into(), "M2", "M2"),
+            (Self::M3.0.into(), "M3", "M3"),
+            (Self::M4.0.into(), "M4", "M4"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Groups(u8);
 impl Groups {
     pub const ANY: Self = Self(254);
@@ -893,8 +1106,17 @@ impl From<u8> for Groups {
         Self(value)
     }
 }
+impl std::fmt::Debug for Groups  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ANY.0.into(), "ANY", "Any"),
+            (Self::ALL.0.into(), "ALL", "All"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SetOfGroup(u8);
 impl SetOfGroup {
     pub const GROUP1: Self = Self(1 << 0);
@@ -944,9 +1166,20 @@ impl From<u8> for SetOfGroup {
         Self(value)
     }
 }
+impl std::fmt::Debug for SetOfGroup  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::GROUP1.0.into(), "GROUP1", "Group1"),
+            (Self::GROUP2.0.into(), "GROUP2", "Group2"),
+            (Self::GROUP3.0.into(), "GROUP3", "Group3"),
+            (Self::GROUP4.0.into(), "GROUP4", "Group4"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(SetOfGroup, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SetOfGroups(u8);
 impl SetOfGroups {
     pub const ANY: Self = Self(1 << 7);
@@ -993,9 +1226,17 @@ impl From<u8> for SetOfGroups {
         Self(value)
     }
 }
+impl std::fmt::Debug for SetOfGroups  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ANY.0.into(), "ANY", "Any"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(SetOfGroups, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GroupsWrap(u8);
 impl GroupsWrap {
     pub const WRAP_INTO_RANGE: Self = Self(0);
@@ -1044,9 +1285,19 @@ impl From<u8> for GroupsWrap {
         Self(value)
     }
 }
+impl std::fmt::Debug for GroupsWrap  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::WRAP_INTO_RANGE.0.into(), "WRAP_INTO_RANGE", "WrapIntoRange"),
+            (Self::CLAMP_INTO_RANGE.0.into(), "CLAMP_INTO_RANGE", "ClampIntoRange"),
+            (Self::REDIRECT_INTO_RANGE.0.into(), "REDIRECT_INTO_RANGE", "RedirectIntoRange"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(GroupsWrap, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VModsHigh(u8);
 impl VModsHigh {
     pub const M15: Self = Self(1 << 7);
@@ -1100,9 +1351,24 @@ impl From<u8> for VModsHigh {
         Self(value)
     }
 }
+impl std::fmt::Debug for VModsHigh  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::M15.0.into(), "M15", "M15"),
+            (Self::M14.0.into(), "M14", "M14"),
+            (Self::M13.0.into(), "M13", "M13"),
+            (Self::M12.0.into(), "M12", "M12"),
+            (Self::M11.0.into(), "M11", "M11"),
+            (Self::M10.0.into(), "M10", "M10"),
+            (Self::M9.0.into(), "M9", "M9"),
+            (Self::M8.0.into(), "M8", "M8"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(VModsHigh, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VModsLow(u8);
 impl VModsLow {
     pub const M7: Self = Self(1 << 7);
@@ -1156,9 +1422,24 @@ impl From<u8> for VModsLow {
         Self(value)
     }
 }
+impl std::fmt::Debug for VModsLow  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::M7.0.into(), "M7", "M7"),
+            (Self::M6.0.into(), "M6", "M6"),
+            (Self::M5.0.into(), "M5", "M5"),
+            (Self::M4.0.into(), "M4", "M4"),
+            (Self::M3.0.into(), "M3", "M3"),
+            (Self::M2.0.into(), "M2", "M2"),
+            (Self::M1.0.into(), "M1", "M1"),
+            (Self::M0.0.into(), "M0", "M0"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(VModsLow, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VMod(u16);
 impl VMod {
     pub const M15: Self = Self(1 << 15);
@@ -1214,9 +1495,32 @@ impl From<u16> for VMod {
         Self(value)
     }
 }
+impl std::fmt::Debug for VMod  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::M15.0.into(), "M15", "M15"),
+            (Self::M14.0.into(), "M14", "M14"),
+            (Self::M13.0.into(), "M13", "M13"),
+            (Self::M12.0.into(), "M12", "M12"),
+            (Self::M11.0.into(), "M11", "M11"),
+            (Self::M10.0.into(), "M10", "M10"),
+            (Self::M9.0.into(), "M9", "M9"),
+            (Self::M8.0.into(), "M8", "M8"),
+            (Self::M7.0.into(), "M7", "M7"),
+            (Self::M6.0.into(), "M6", "M6"),
+            (Self::M5.0.into(), "M5", "M5"),
+            (Self::M4.0.into(), "M4", "M4"),
+            (Self::M3.0.into(), "M3", "M3"),
+            (Self::M2.0.into(), "M2", "M2"),
+            (Self::M1.0.into(), "M1", "M1"),
+            (Self::M0.0.into(), "M0", "M0"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(VMod, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Explicit(u8);
 impl Explicit {
     pub const V_MOD_MAP: Self = Self(1 << 7);
@@ -1270,9 +1574,24 @@ impl From<u8> for Explicit {
         Self(value)
     }
 }
+impl std::fmt::Debug for Explicit  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::V_MOD_MAP.0.into(), "V_MOD_MAP", "VModMap"),
+            (Self::BEHAVIOR.0.into(), "BEHAVIOR", "Behavior"),
+            (Self::AUTO_REPEAT.0.into(), "AUTO_REPEAT", "AutoRepeat"),
+            (Self::INTERPRET.0.into(), "INTERPRET", "Interpret"),
+            (Self::KEY_TYPE4.0.into(), "KEY_TYPE4", "KeyType4"),
+            (Self::KEY_TYPE3.0.into(), "KEY_TYPE3", "KeyType3"),
+            (Self::KEY_TYPE2.0.into(), "KEY_TYPE2", "KeyType2"),
+            (Self::KEY_TYPE1.0.into(), "KEY_TYPE1", "KeyType1"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(Explicit, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SymInterpretMatch(u8);
 impl SymInterpretMatch {
     pub const NONE_OF: Self = Self(0);
@@ -1323,8 +1642,20 @@ impl From<u8> for SymInterpretMatch {
         Self(value)
     }
 }
+impl std::fmt::Debug for SymInterpretMatch  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE_OF.0.into(), "NONE_OF", "NoneOf"),
+            (Self::ANY_OF_OR_NONE.0.into(), "ANY_OF_OR_NONE", "AnyOfOrNone"),
+            (Self::ANY_OF.0.into(), "ANY_OF", "AnyOf"),
+            (Self::ALL_OF.0.into(), "ALL_OF", "AllOf"),
+            (Self::EXACTLY.0.into(), "EXACTLY", "Exactly"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SymInterpMatch(u8);
 impl SymInterpMatch {
     pub const LEVEL_ONE_ONLY: Self = Self(1 << 7);
@@ -1372,8 +1703,17 @@ impl From<u8> for SymInterpMatch {
         Self(value)
     }
 }
+impl std::fmt::Debug for SymInterpMatch  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::LEVEL_ONE_ONLY.0.into(), "LEVEL_ONE_ONLY", "LevelOneOnly"),
+            (Self::OP_MASK.0.into(), "OP_MASK", "OpMask"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct IMFlag(u8);
 impl IMFlag {
     pub const NO_EXPLICIT: Self = Self(1 << 7);
@@ -1422,9 +1762,19 @@ impl From<u8> for IMFlag {
         Self(value)
     }
 }
+impl std::fmt::Debug for IMFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NO_EXPLICIT.0.into(), "NO_EXPLICIT", "NoExplicit"),
+            (Self::NO_AUTOMATIC.0.into(), "NO_AUTOMATIC", "NoAutomatic"),
+            (Self::LED_DRIVES_KB.0.into(), "LED_DRIVES_KB", "LEDDrivesKB"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(IMFlag, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct IMModsWhich(u8);
 impl IMModsWhich {
     pub const USE_COMPAT: Self = Self(1 << 4);
@@ -1475,9 +1825,21 @@ impl From<u8> for IMModsWhich {
         Self(value)
     }
 }
+impl std::fmt::Debug for IMModsWhich  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::USE_COMPAT.0.into(), "USE_COMPAT", "UseCompat"),
+            (Self::USE_EFFECTIVE.0.into(), "USE_EFFECTIVE", "UseEffective"),
+            (Self::USE_LOCKED.0.into(), "USE_LOCKED", "UseLocked"),
+            (Self::USE_LATCHED.0.into(), "USE_LATCHED", "UseLatched"),
+            (Self::USE_BASE.0.into(), "USE_BASE", "UseBase"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(IMModsWhich, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct IMGroupsWhich(u8);
 impl IMGroupsWhich {
     pub const USE_COMPAT: Self = Self(1 << 4);
@@ -1526,6 +1888,18 @@ impl From<u8> for IMGroupsWhich {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for IMGroupsWhich  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::USE_COMPAT.0.into(), "USE_COMPAT", "UseCompat"),
+            (Self::USE_EFFECTIVE.0.into(), "USE_EFFECTIVE", "UseEffective"),
+            (Self::USE_LOCKED.0.into(), "USE_LOCKED", "UseLocked"),
+            (Self::USE_LATCHED.0.into(), "USE_LATCHED", "UseLatched"),
+            (Self::USE_BASE.0.into(), "USE_BASE", "UseBase"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(IMGroupsWhich, u8);
@@ -1604,7 +1978,7 @@ impl Serialize for IndicatorMap {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CMDetail(u8);
 impl CMDetail {
     pub const SYM_INTERP: Self = Self(1 << 0);
@@ -1652,9 +2026,18 @@ impl From<u8> for CMDetail {
         Self(value)
     }
 }
+impl std::fmt::Debug for CMDetail  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SYM_INTERP.0.into(), "SYM_INTERP", "SymInterp"),
+            (Self::GROUP_COMPAT.0.into(), "GROUP_COMPAT", "GroupCompat"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(CMDetail, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct NameDetail(u16);
 impl NameDetail {
     pub const KEYCODES: Self = Self(1 << 0);
@@ -1708,9 +2091,30 @@ impl From<u16> for NameDetail {
         Self(value)
     }
 }
+impl std::fmt::Debug for NameDetail  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEYCODES.0.into(), "KEYCODES", "Keycodes"),
+            (Self::GEOMETRY.0.into(), "GEOMETRY", "Geometry"),
+            (Self::SYMBOLS.0.into(), "SYMBOLS", "Symbols"),
+            (Self::PHYS_SYMBOLS.0.into(), "PHYS_SYMBOLS", "PhysSymbols"),
+            (Self::TYPES.0.into(), "TYPES", "Types"),
+            (Self::COMPAT.0.into(), "COMPAT", "Compat"),
+            (Self::KEY_TYPE_NAMES.0.into(), "KEY_TYPE_NAMES", "KeyTypeNames"),
+            (Self::KT_LEVEL_NAMES.0.into(), "KT_LEVEL_NAMES", "KTLevelNames"),
+            (Self::INDICATOR_NAMES.0.into(), "INDICATOR_NAMES", "IndicatorNames"),
+            (Self::KEY_NAMES.0.into(), "KEY_NAMES", "KeyNames"),
+            (Self::KEY_ALIASES.0.into(), "KEY_ALIASES", "KeyAliases"),
+            (Self::VIRTUAL_MOD_NAMES.0.into(), "VIRTUAL_MOD_NAMES", "VirtualModNames"),
+            (Self::GROUP_NAMES.0.into(), "GROUP_NAMES", "GroupNames"),
+            (Self::RG_NAMES.0.into(), "RG_NAMES", "RGNames"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(NameDetail, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GBNDetail(u8);
 impl GBNDetail {
     pub const TYPES: Self = Self(1 << 0);
@@ -1764,9 +2168,24 @@ impl From<u8> for GBNDetail {
         Self(value)
     }
 }
+impl std::fmt::Debug for GBNDetail  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::TYPES.0.into(), "TYPES", "Types"),
+            (Self::COMPAT_MAP.0.into(), "COMPAT_MAP", "CompatMap"),
+            (Self::CLIENT_SYMBOLS.0.into(), "CLIENT_SYMBOLS", "ClientSymbols"),
+            (Self::SERVER_SYMBOLS.0.into(), "SERVER_SYMBOLS", "ServerSymbols"),
+            (Self::INDICATOR_MAPS.0.into(), "INDICATOR_MAPS", "IndicatorMaps"),
+            (Self::KEY_NAMES.0.into(), "KEY_NAMES", "KeyNames"),
+            (Self::GEOMETRY.0.into(), "GEOMETRY", "Geometry"),
+            (Self::OTHER_NAMES.0.into(), "OTHER_NAMES", "OtherNames"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(GBNDetail, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct XIFeature(u8);
 impl XIFeature {
     pub const KEYBOARDS: Self = Self(1 << 0);
@@ -1817,9 +2236,21 @@ impl From<u8> for XIFeature {
         Self(value)
     }
 }
+impl std::fmt::Debug for XIFeature  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEYBOARDS.0.into(), "KEYBOARDS", "Keyboards"),
+            (Self::BUTTON_ACTIONS.0.into(), "BUTTON_ACTIONS", "ButtonActions"),
+            (Self::INDICATOR_NAMES.0.into(), "INDICATOR_NAMES", "IndicatorNames"),
+            (Self::INDICATOR_MAPS.0.into(), "INDICATOR_MAPS", "IndicatorMaps"),
+            (Self::INDICATOR_STATE.0.into(), "INDICATOR_STATE", "IndicatorState"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(XIFeature, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PerClientFlag(u8);
 impl PerClientFlag {
     pub const DETECTABLE_AUTO_REPEAT: Self = Self(1 << 0);
@@ -1868,6 +2299,18 @@ impl From<u8> for PerClientFlag {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PerClientFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DETECTABLE_AUTO_REPEAT.0.into(), "DETECTABLE_AUTO_REPEAT", "DetectableAutoRepeat"),
+            (Self::GRABS_USE_XKB_STATE.0.into(), "GRABS_USE_XKB_STATE", "GrabsUseXKBState"),
+            (Self::AUTO_RESET_CONTROLS.0.into(), "AUTO_RESET_CONTROLS", "AutoResetControls"),
+            (Self::LOOKUP_STATE_WHEN_GRABBED.0.into(), "LOOKUP_STATE_WHEN_GRABBED", "LookupStateWhenGrabbed"),
+            (Self::SEND_EVENT_USES_XKB_STATE.0.into(), "SEND_EVENT_USES_XKB_STATE", "SendEventUsesXKBState"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(PerClientFlag, u8);
@@ -2522,7 +2965,7 @@ impl From<u8> for Behavior {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BehaviorType(u8);
 impl BehaviorType {
     pub const DEFAULT: Self = Self(0);
@@ -2575,6 +3018,22 @@ impl From<u8> for BehaviorType {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for BehaviorType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DEFAULT.0.into(), "DEFAULT", "Default"),
+            (Self::LOCK.0.into(), "LOCK", "Lock"),
+            (Self::RADIO_GROUP.0.into(), "RADIO_GROUP", "RadioGroup"),
+            (Self::OVERLAY1.0.into(), "OVERLAY1", "Overlay1"),
+            (Self::OVERLAY2.0.into(), "OVERLAY2", "Overlay2"),
+            (Self::PERMAMENT_LOCK.0.into(), "PERMAMENT_LOCK", "PermamentLock"),
+            (Self::PERMAMENT_RADIO_GROUP.0.into(), "PERMAMENT_RADIO_GROUP", "PermamentRadioGroup"),
+            (Self::PERMAMENT_OVERLAY1.0.into(), "PERMAMENT_OVERLAY1", "PermamentOverlay1"),
+            (Self::PERMAMENT_OVERLAY2.0.into(), "PERMAMENT_OVERLAY2", "PermamentOverlay2"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -3212,7 +3671,7 @@ impl Row {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DoodadType(u8);
 impl DoodadType {
     pub const OUTLINE: Self = Self(1);
@@ -3261,6 +3720,18 @@ impl From<u8> for DoodadType {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for DoodadType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::OUTLINE.0.into(), "OUTLINE", "Outline"),
+            (Self::SOLID.0.into(), "SOLID", "Solid"),
+            (Self::TEXT.0.into(), "TEXT", "Text"),
+            (Self::INDICATOR.0.into(), "INDICATOR", "Indicator"),
+            (Self::LOGO.0.into(), "LOGO", "Logo"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -3376,7 +3847,7 @@ impl Serialize for DeviceLedInfo {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Error(u8);
 impl Error {
     pub const BAD_DEVICE: Self = Self(255);
@@ -3425,11 +3896,21 @@ impl From<u8> for Error {
         Self(value)
     }
 }
+impl std::fmt::Debug for Error  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::BAD_DEVICE.0.into(), "BAD_DEVICE", "BadDevice"),
+            (Self::BAD_CLASS.0.into(), "BAD_CLASS", "BadClass"),
+            (Self::BAD_ID.0.into(), "BAD_ID", "BadId"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
 /// Opcode for the Keyboard error
 pub const KEYBOARD_ERROR: u8 = 0;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SA(u8);
 impl SA {
     pub const CLEAR_LOCKS: Self = Self(1 << 0);
@@ -3479,9 +3960,20 @@ impl From<u8> for SA {
         Self(value)
     }
 }
+impl std::fmt::Debug for SA  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::CLEAR_LOCKS.0.into(), "CLEAR_LOCKS", "ClearLocks"),
+            (Self::LATCH_TO_LOCK.0.into(), "LATCH_TO_LOCK", "LatchToLock"),
+            (Self::USE_MOD_MAP_MODS.0.into(), "USE_MOD_MAP_MODS", "UseModMapMods"),
+            (Self::GROUP_ABSOLUTE.0.into(), "GROUP_ABSOLUTE", "GroupAbsolute"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(SA, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SAType(u8);
 impl SAType {
     pub const NO_ACTION: Self = Self(0);
@@ -3546,6 +4038,34 @@ impl From<u8> for SAType {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SAType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NO_ACTION.0.into(), "NO_ACTION", "NoAction"),
+            (Self::SET_MODS.0.into(), "SET_MODS", "SetMods"),
+            (Self::LATCH_MODS.0.into(), "LATCH_MODS", "LatchMods"),
+            (Self::LOCK_MODS.0.into(), "LOCK_MODS", "LockMods"),
+            (Self::SET_GROUP.0.into(), "SET_GROUP", "SetGroup"),
+            (Self::LATCH_GROUP.0.into(), "LATCH_GROUP", "LatchGroup"),
+            (Self::LOCK_GROUP.0.into(), "LOCK_GROUP", "LockGroup"),
+            (Self::MOVE_PTR.0.into(), "MOVE_PTR", "MovePtr"),
+            (Self::PTR_BTN.0.into(), "PTR_BTN", "PtrBtn"),
+            (Self::LOCK_PTR_BTN.0.into(), "LOCK_PTR_BTN", "LockPtrBtn"),
+            (Self::SET_PTR_DFLT.0.into(), "SET_PTR_DFLT", "SetPtrDflt"),
+            (Self::ISO_LOCK.0.into(), "ISO_LOCK", "ISOLock"),
+            (Self::TERMINATE.0.into(), "TERMINATE", "Terminate"),
+            (Self::SWITCH_SCREEN.0.into(), "SWITCH_SCREEN", "SwitchScreen"),
+            (Self::SET_CONTROLS.0.into(), "SET_CONTROLS", "SetControls"),
+            (Self::LOCK_CONTROLS.0.into(), "LOCK_CONTROLS", "LockControls"),
+            (Self::ACTION_MESSAGE.0.into(), "ACTION_MESSAGE", "ActionMessage"),
+            (Self::REDIRECT_KEY.0.into(), "REDIRECT_KEY", "RedirectKey"),
+            (Self::DEVICE_BTN.0.into(), "DEVICE_BTN", "DeviceBtn"),
+            (Self::LOCK_DEVICE_BTN.0.into(), "LOCK_DEVICE_BTN", "LockDeviceBtn"),
+            (Self::DEVICE_VALUATOR.0.into(), "DEVICE_VALUATOR", "DeviceValuator"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -3708,7 +4228,7 @@ pub type SALatchGroup = SASetGroup;
 
 pub type SALockGroup = SASetGroup;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SAMovePtrFlag(u8);
 impl SAMovePtrFlag {
     pub const NO_ACCELERATION: Self = Self(1 << 0);
@@ -3755,6 +4275,16 @@ impl From<u8> for SAMovePtrFlag {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SAMovePtrFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NO_ACCELERATION.0.into(), "NO_ACCELERATION", "NoAcceleration"),
+            (Self::MOVE_ABSOLUTE_X.0.into(), "MOVE_ABSOLUTE_X", "MoveAbsoluteX"),
+            (Self::MOVE_ABSOLUTE_Y.0.into(), "MOVE_ABSOLUTE_Y", "MoveAbsoluteY"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(SAMovePtrFlag, u8);
@@ -3924,7 +4454,7 @@ impl Serialize for SALockPtrBtn {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SASetPtrDfltFlag(u8);
 impl SASetPtrDfltFlag {
     pub const DFLT_BTN_ABSOLUTE: Self = Self(1 << 2);
@@ -3970,6 +4500,15 @@ impl From<u8> for SASetPtrDfltFlag {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SASetPtrDfltFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DFLT_BTN_ABSOLUTE.0.into(), "DFLT_BTN_ABSOLUTE", "DfltBtnAbsolute"),
+            (Self::AFFECT_DFLT_BUTTON.0.into(), "AFFECT_DFLT_BUTTON", "AffectDfltButton"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(SASetPtrDfltFlag, u8);
@@ -4027,7 +4566,7 @@ impl Serialize for SASetPtrDflt {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SAIsoLockFlag(u8);
 impl SAIsoLockFlag {
     pub const NO_LOCK: Self = Self(1 << 0);
@@ -4078,9 +4617,21 @@ impl From<u8> for SAIsoLockFlag {
         Self(value)
     }
 }
+impl std::fmt::Debug for SAIsoLockFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NO_LOCK.0.into(), "NO_LOCK", "NoLock"),
+            (Self::NO_UNLOCK.0.into(), "NO_UNLOCK", "NoUnlock"),
+            (Self::USE_MOD_MAP_MODS.0.into(), "USE_MOD_MAP_MODS", "UseModMapMods"),
+            (Self::GROUP_ABSOLUTE.0.into(), "GROUP_ABSOLUTE", "GroupAbsolute"),
+            (Self::ISO_DFLT_IS_GROUP.0.into(), "ISO_DFLT_IS_GROUP", "ISODfltIsGroup"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(SAIsoLockFlag, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SAIsoLockNoAffect(u8);
 impl SAIsoLockNoAffect {
     pub const CTRLS: Self = Self(1 << 3);
@@ -4128,6 +4679,17 @@ impl From<u8> for SAIsoLockNoAffect {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SAIsoLockNoAffect  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::CTRLS.0.into(), "CTRLS", "Ctrls"),
+            (Self::PTR.0.into(), "PTR", "Ptr"),
+            (Self::GROUP.0.into(), "GROUP", "Group"),
+            (Self::MODS.0.into(), "MODS", "Mods"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(SAIsoLockNoAffect, u8);
@@ -4240,7 +4802,7 @@ impl Serialize for SATerminate {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SwitchScreenFlag(u8);
 impl SwitchScreenFlag {
     pub const APPLICATION: Self = Self(1 << 0);
@@ -4286,6 +4848,15 @@ impl From<u8> for SwitchScreenFlag {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SwitchScreenFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::APPLICATION.0.into(), "APPLICATION", "Application"),
+            (Self::ABSOLUTE.0.into(), "ABSOLUTE", "Absolute"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(SwitchScreenFlag, u8);
@@ -4339,7 +4910,7 @@ impl Serialize for SASwitchScreen {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BoolCtrlsHigh(u8);
 impl BoolCtrlsHigh {
     pub const ACCESS_X_FEEDBACK: Self = Self(1 << 0);
@@ -4390,9 +4961,21 @@ impl From<u8> for BoolCtrlsHigh {
         Self(value)
     }
 }
+impl std::fmt::Debug for BoolCtrlsHigh  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ACCESS_X_FEEDBACK.0.into(), "ACCESS_X_FEEDBACK", "AccessXFeedback"),
+            (Self::AUDIBLE_BELL.0.into(), "AUDIBLE_BELL", "AudibleBell"),
+            (Self::OVERLAY1.0.into(), "OVERLAY1", "Overlay1"),
+            (Self::OVERLAY2.0.into(), "OVERLAY2", "Overlay2"),
+            (Self::IGNORE_GROUP_LOCK.0.into(), "IGNORE_GROUP_LOCK", "IgnoreGroupLock"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(BoolCtrlsHigh, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BoolCtrlsLow(u8);
 impl BoolCtrlsLow {
     pub const REPEAT_KEYS: Self = Self(1 << 0);
@@ -4444,6 +5027,21 @@ impl From<u8> for BoolCtrlsLow {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for BoolCtrlsLow  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::REPEAT_KEYS.0.into(), "REPEAT_KEYS", "RepeatKeys"),
+            (Self::SLOW_KEYS.0.into(), "SLOW_KEYS", "SlowKeys"),
+            (Self::BOUNCE_KEYS.0.into(), "BOUNCE_KEYS", "BounceKeys"),
+            (Self::STICKY_KEYS.0.into(), "STICKY_KEYS", "StickyKeys"),
+            (Self::MOUSE_KEYS.0.into(), "MOUSE_KEYS", "MouseKeys"),
+            (Self::MOUSE_KEYS_ACCEL.0.into(), "MOUSE_KEYS_ACCEL", "MouseKeysAccel"),
+            (Self::ACCESS_X_KEYS.0.into(), "ACCESS_X_KEYS", "AccessXKeys"),
+            (Self::ACCESS_X_TIMEOUT.0.into(), "ACCESS_X_TIMEOUT", "AccessXTimeout"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(BoolCtrlsLow, u8);
@@ -4501,7 +5099,7 @@ impl Serialize for SASetControls {
 
 pub type SALockControls = SASetControls;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ActionMessageFlag(u8);
 impl ActionMessageFlag {
     pub const ON_PRESS: Self = Self(1 << 0);
@@ -4548,6 +5146,16 @@ impl From<u8> for ActionMessageFlag {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ActionMessageFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ON_PRESS.0.into(), "ON_PRESS", "OnPress"),
+            (Self::ON_RELEASE.0.into(), "ON_RELEASE", "OnRelease"),
+            (Self::GEN_KEY_EVENT.0.into(), "GEN_KEY_EVENT", "GenKeyEvent"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(ActionMessageFlag, u8);
@@ -4723,7 +5331,7 @@ impl Serialize for SADeviceBtn {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct LockDeviceFlags(u8);
 impl LockDeviceFlags {
     pub const NO_LOCK: Self = Self(1 << 0);
@@ -4769,6 +5377,15 @@ impl From<u8> for LockDeviceFlags {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for LockDeviceFlags  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NO_LOCK.0.into(), "NO_LOCK", "NoLock"),
+            (Self::NO_UNLOCK.0.into(), "NO_UNLOCK", "NoUnlock"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(LockDeviceFlags, u8);
@@ -4828,7 +5445,7 @@ impl Serialize for SALockDeviceBtn {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SAValWhat(u8);
 impl SAValWhat {
     pub const IGNORE_VAL: Self = Self(0);
@@ -4878,6 +5495,19 @@ impl From<u8> for SAValWhat {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SAValWhat  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::IGNORE_VAL.0.into(), "IGNORE_VAL", "IgnoreVal"),
+            (Self::SET_VAL_MIN.0.into(), "SET_VAL_MIN", "SetValMin"),
+            (Self::SET_VAL_CENTER.0.into(), "SET_VAL_CENTER", "SetValCenter"),
+            (Self::SET_VAL_MAX.0.into(), "SET_VAL_MAX", "SetValMax"),
+            (Self::SET_VAL_RELATIVE.0.into(), "SET_VAL_RELATIVE", "SetValRelative"),
+            (Self::SET_VAL_ABSOLUTE.0.into(), "SET_VAL_ABSOLUTE", "SetValAbsolute"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

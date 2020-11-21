@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -38,7 +38,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
 pub type Damage = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ReportLevel(u8);
 impl ReportLevel {
     pub const RAW_RECTANGLES: Self = Self(0);
@@ -86,6 +86,17 @@ impl From<u8> for ReportLevel {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ReportLevel  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::RAW_RECTANGLES.0.into(), "RAW_RECTANGLES", "RawRectangles"),
+            (Self::DELTA_RECTANGLES.0.into(), "DELTA_RECTANGLES", "DeltaRectangles"),
+            (Self::BOUNDING_BOX.0.into(), "BOUNDING_BOX", "BoundingBox"),
+            (Self::NON_EMPTY.0.into(), "NON_EMPTY", "NonEmpty"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

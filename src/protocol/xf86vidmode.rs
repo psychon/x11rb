@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -38,7 +38,7 @@ pub type Syncrange = u32;
 
 pub type Dotclock = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModeFlag(u16);
 impl ModeFlag {
     pub const POSITIVE_H_SYNC: Self = Self(1 << 0);
@@ -91,9 +91,29 @@ impl From<u16> for ModeFlag {
         Self(value)
     }
 }
+impl std::fmt::Debug for ModeFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::POSITIVE_H_SYNC.0.into(), "POSITIVE_H_SYNC", "PositiveHSync"),
+            (Self::NEGATIVE_H_SYNC.0.into(), "NEGATIVE_H_SYNC", "NegativeHSync"),
+            (Self::POSITIVE_V_SYNC.0.into(), "POSITIVE_V_SYNC", "PositiveVSync"),
+            (Self::NEGATIVE_V_SYNC.0.into(), "NEGATIVE_V_SYNC", "NegativeVSync"),
+            (Self::INTERLACE.0.into(), "INTERLACE", "Interlace"),
+            (Self::COMPOSITE_SYNC.0.into(), "COMPOSITE_SYNC", "CompositeSync"),
+            (Self::POSITIVE_C_SYNC.0.into(), "POSITIVE_C_SYNC", "PositiveCSync"),
+            (Self::NEGATIVE_C_SYNC.0.into(), "NEGATIVE_C_SYNC", "NegativeCSync"),
+            (Self::H_SKEW.0.into(), "H_SKEW", "HSkew"),
+            (Self::BROADCAST.0.into(), "BROADCAST", "Broadcast"),
+            (Self::PIXMUX.0.into(), "PIXMUX", "Pixmux"),
+            (Self::DOUBLE_CLOCK.0.into(), "DOUBLE_CLOCK", "DoubleClock"),
+            (Self::HALF_CLOCK.0.into(), "HALF_CLOCK", "HalfClock"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(ModeFlag, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ClockFlag(u8);
 impl ClockFlag {
     pub const PROGRAMABLE: Self = Self(1 << 0);
@@ -140,9 +160,17 @@ impl From<u8> for ClockFlag {
         Self(value)
     }
 }
+impl std::fmt::Debug for ClockFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::PROGRAMABLE.0.into(), "PROGRAMABLE", "Programable"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(ClockFlag, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Permission(u8);
 impl Permission {
     pub const READ: Self = Self(1 << 0);
@@ -188,6 +216,15 @@ impl From<u8> for Permission {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Permission  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::READ.0.into(), "READ", "Read"),
+            (Self::WRITE.0.into(), "WRITE", "Write"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(Permission, u8);

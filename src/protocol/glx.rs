@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -295,7 +295,7 @@ impl From<BufferSwapCompleteEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PBCET(u16);
 impl PBCET {
     pub const DAMAGED: Self = Self(32791);
@@ -337,8 +337,17 @@ impl From<u16> for PBCET {
         Self(value)
     }
 }
+impl std::fmt::Debug for PBCET  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DAMAGED.0.into(), "DAMAGED", "Damaged"),
+            (Self::SAVED.0.into(), "SAVED", "Saved"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PBCDT(u16);
 impl PBCDT {
     pub const WINDOW: Self = Self(32793);
@@ -378,6 +387,15 @@ impl From<u16> for PBCDT {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PBCDT  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::WINDOW.0.into(), "WINDOW", "Window"),
+            (Self::PBUFFER.0.into(), "PBUFFER", "Pbuffer"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -1271,7 +1289,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GC(u32);
 impl GC {
     pub const GL_CURRENT_BIT: Self = Self(1 << 0);
@@ -1324,6 +1342,34 @@ impl From<u32> for GC {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for GC  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::GL_CURRENT_BIT.0, "GL_CURRENT_BIT", "GL_CURRENT_BIT"),
+            (Self::GL_POINT_BIT.0, "GL_POINT_BIT", "GL_POINT_BIT"),
+            (Self::GL_LINE_BIT.0, "GL_LINE_BIT", "GL_LINE_BIT"),
+            (Self::GL_POLYGON_BIT.0, "GL_POLYGON_BIT", "GL_POLYGON_BIT"),
+            (Self::GL_POLYGON_STIPPLE_BIT.0, "GL_POLYGON_STIPPLE_BIT", "GL_POLYGON_STIPPLE_BIT"),
+            (Self::GL_PIXEL_MODE_BIT.0, "GL_PIXEL_MODE_BIT", "GL_PIXEL_MODE_BIT"),
+            (Self::GL_LIGHTING_BIT.0, "GL_LIGHTING_BIT", "GL_LIGHTING_BIT"),
+            (Self::GL_FOG_BIT.0, "GL_FOG_BIT", "GL_FOG_BIT"),
+            (Self::GL_DEPTH_BUFFER_BIT.0, "GL_DEPTH_BUFFER_BIT", "GL_DEPTH_BUFFER_BIT"),
+            (Self::GL_ACCUM_BUFFER_BIT.0, "GL_ACCUM_BUFFER_BIT", "GL_ACCUM_BUFFER_BIT"),
+            (Self::GL_STENCIL_BUFFER_BIT.0, "GL_STENCIL_BUFFER_BIT", "GL_STENCIL_BUFFER_BIT"),
+            (Self::GL_VIEWPORT_BIT.0, "GL_VIEWPORT_BIT", "GL_VIEWPORT_BIT"),
+            (Self::GL_TRANSFORM_BIT.0, "GL_TRANSFORM_BIT", "GL_TRANSFORM_BIT"),
+            (Self::GL_ENABLE_BIT.0, "GL_ENABLE_BIT", "GL_ENABLE_BIT"),
+            (Self::GL_COLOR_BUFFER_BIT.0, "GL_COLOR_BUFFER_BIT", "GL_COLOR_BUFFER_BIT"),
+            (Self::GL_HINT_BIT.0, "GL_HINT_BIT", "GL_HINT_BIT"),
+            (Self::GL_EVAL_BIT.0, "GL_EVAL_BIT", "GL_EVAL_BIT"),
+            (Self::GL_LIST_BIT.0, "GL_LIST_BIT", "GL_LIST_BIT"),
+            (Self::GL_TEXTURE_BIT.0, "GL_TEXTURE_BIT", "GL_TEXTURE_BIT"),
+            (Self::GL_SCISSOR_BIT.0, "GL_SCISSOR_BIT", "GL_SCISSOR_BIT"),
+            (Self::GL_ALL_ATTRIB_BITS.0, "GL_ALL_ATTRIB_BITS", "GL_ALL_ATTRIB_BITS"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -4523,7 +4569,7 @@ impl RenderModeReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct RM(u16);
 impl RM {
     pub const GL_RENDER: Self = Self(7168);
@@ -4564,6 +4610,16 @@ impl From<u16> for RM {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for RM  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::GL_RENDER.0.into(), "GL_RENDER", "GL_RENDER"),
+            (Self::GL_FEEDBACK.0.into(), "GL_FEEDBACK", "GL_FEEDBACK"),
+            (Self::GL_SELECT.0.into(), "GL_SELECT", "GL_SELECT"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
