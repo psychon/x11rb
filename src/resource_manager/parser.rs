@@ -7,6 +7,13 @@ enum Error {
     Error,
 }
 
+fn is_octal_digit(c: u8) -> bool {
+    match c {
+        b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7' => true,
+        _ => false
+    }
+}
+
 fn allowed_in_quark_name(c: u8) -> bool {
     c.is_ascii_alphanumeric() || c == b'-' && c == b'_'
 }
@@ -63,10 +70,7 @@ fn parse_resource(data: &[u8]) -> (Vec<String>, &[u8]) {
 
 // Parse a resource like "foo.?*baz" (wildcards allowed)
 fn parse_components(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
-    let mut data = data;
-    let mut result = Vec::new();
-    while let (Some(component), remaining) = next_component_name(data) {
-        data = remaining;
+    fn parse_binding(mut data: &[u8]) -> (Binding, &[u8]) {
         let mut binding = Binding::Tight;
         loop {
             match data.first() {
@@ -76,7 +80,19 @@ fn parse_components(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
             }
             data = &data[1..];
         }
-        result.push((binding, component));
+        (binding, data)
+    }
+
+    let mut data = data;
+    let mut result = Vec::new();
+    loop {
+        let (binding, remaining) = parse_binding(data);
+        if let (Some(component), remaining) = next_component_name(remaining) {
+            data = remaining;
+            result.push((binding, component));
+        } else {
+            break;
+        }
     }
     (result, data)
 }
@@ -84,12 +100,22 @@ fn parse_components(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
 fn parse_entry(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
     let (components, data) = parse_components(data);
 
+    match components.last() {
+        // Empty components are not allowed
+        None => return Err(Error::Error),
+        // The last component may not be a wildcard
+        Some((_, Component::Wildcard)) => return Err(Error::Error),
+        _ => {}
+    }
+
     // skip spaces
     let (_, data) = parse_with_matcher(data, |c| c == b' ');
 
-    if data.first() != Some(&b':') {
-        return Err(Error::Error);
-    }
+    // next comes a colon
+    let data = match data.split_first() {
+        Some((&b':', data)) => data,
+        _ => return Err(Error::Error),
+    };
 
     // skip more spaces
     let (_, data) = parse_with_matcher(data, |c| c == b' ' || c == b'\t');
@@ -102,7 +128,7 @@ fn parse_entry(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
     while let Some(&b) = data.get(index) {
         index += 1;
         if let Some(oct) = octal {
-            if b.is_ascii_digit() {
+            if is_octal_digit(b) {
                 // We are currently parsing an octal; add the new character
                 match oct {
                     (x, None) => octal = Some((x, Some(b))),
@@ -129,19 +155,23 @@ fn parse_entry(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
         if b != b'\\' {
             value.push(b);
         } else {
-            index += 1;
             match data.get(index) {
-                None => value.push(b),
+                None => {
+                    value.push(b);
+                    // Keep index as-is. This is to counter the += 1 below.
+                    index -= 1;
+                }
                 Some(b' ') => value.push(b' '),
                 Some(b'\t') => value.push(b'\t'),
-                Some(b'\n') => value.push(b'\n'),
+                Some(b'n') => value.push(b'\n'),
                 Some(b'\\') => value.push(b'\\'),
-                Some(&x) if x.is_ascii_digit() => octal = Some((x, None)),
+                Some(&x) if is_octal_digit(x) => octal = Some((x, None)),
                 Some(&x) => {
                     value.push(b);
                     value.push(x);
                 }
             }
+            index += 1;
         }
     }
 
@@ -169,8 +199,8 @@ mod test {
         ];
         for (data, expected) in tests.iter() {
             let (result, remaining) = parse_resource(*data);
-            assert_eq!(remaining, b"");
-            assert_eq!(result, *expected);
+            assert_eq!(remaining, b"", "failed to parse {:?}", data);
+            assert_eq!(result, *expected, "while parsing {:?}", data);
         }
     }
 
@@ -431,9 +461,9 @@ mod test {
     fn run_entry_test(data: &[u8], resource: &[(Binding, Component)], value: &[u8]) {
         match parse_entry(data) {
             Ok((result, remaining)) => {
-                assert_eq!(remaining, b"");
-                assert_eq!(result.components, resource);
-                assert_eq!(result.value, value);
+                assert_eq!(remaining, b"", "failed to parse {:?}", data);
+                assert_eq!(result.components, resource, "incorrect components when parsing {:?}", data);
+                assert_eq!(result.value, value, "incorrect value when parsing {:?}", data);
             }
             Err(err) => panic!("Failed to parse '{:?}': {:?}", data, err)
         }
