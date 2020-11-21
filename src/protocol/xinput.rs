@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -200,7 +200,7 @@ impl TryFrom<&[u8]> for GetExtensionVersionReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceUse(u8);
 impl DeviceUse {
     pub const IS_X_POINTER: Self = Self(0);
@@ -251,8 +251,20 @@ impl From<u8> for DeviceUse {
         Self(value)
     }
 }
+impl std::fmt::Debug for DeviceUse  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::IS_X_POINTER.0.into(), "IS_X_POINTER", "IsXPointer"),
+            (Self::IS_X_KEYBOARD.0.into(), "IS_X_KEYBOARD", "IsXKeyboard"),
+            (Self::IS_X_EXTENSION_DEVICE.0.into(), "IS_X_EXTENSION_DEVICE", "IsXExtensionDevice"),
+            (Self::IS_X_EXTENSION_KEYBOARD.0.into(), "IS_X_EXTENSION_KEYBOARD", "IsXExtensionKeyboard"),
+            (Self::IS_X_EXTENSION_POINTER.0.into(), "IS_X_EXTENSION_POINTER", "IsXExtensionPointer"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct InputClass(u8);
 impl InputClass {
     pub const KEY: Self = Self(0);
@@ -305,8 +317,22 @@ impl From<u8> for InputClass {
         Self(value)
     }
 }
+impl std::fmt::Debug for InputClass  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEY.0.into(), "KEY", "Key"),
+            (Self::BUTTON.0.into(), "BUTTON", "Button"),
+            (Self::VALUATOR.0.into(), "VALUATOR", "Valuator"),
+            (Self::FEEDBACK.0.into(), "FEEDBACK", "Feedback"),
+            (Self::PROXIMITY.0.into(), "PROXIMITY", "Proximity"),
+            (Self::FOCUS.0.into(), "FOCUS", "Focus"),
+            (Self::OTHER.0.into(), "OTHER", "Other"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ValuatorMode(u8);
 impl ValuatorMode {
     pub const RELATIVE: Self = Self(0);
@@ -352,6 +378,15 @@ impl From<u8> for ValuatorMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ValuatorMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::RELATIVE.0.into(), "RELATIVE", "Relative"),
+            (Self::ABSOLUTE.0.into(), "ABSOLUTE", "Absolute"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -1577,7 +1612,7 @@ impl GetSelectedExtensionEventsReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PropagateMode(u8);
 impl PropagateMode {
     pub const ADD_TO_LIST: Self = Self(0);
@@ -1623,6 +1658,15 @@ impl From<u8> for PropagateMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PropagateMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ADD_TO_LIST.0.into(), "ADD_TO_LIST", "AddToList"),
+            (Self::DELETE_FROM_LIST.0.into(), "DELETE_FROM_LIST", "DeleteFromList"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -2461,7 +2505,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModifierDevice(u8);
 impl ModifierDevice {
     pub const USE_X_KEYBOARD: Self = Self(255);
@@ -2506,6 +2550,14 @@ impl From<u8> for ModifierDevice {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ModifierDevice  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::USE_X_KEYBOARD.0.into(), "USE_X_KEYBOARD", "UseXKeyboard"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -3000,7 +3052,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceInputMode(u8);
 impl DeviceInputMode {
     pub const ASYNC_THIS_DEVICE: Self = Self(0);
@@ -3050,6 +3102,19 @@ impl From<u8> for DeviceInputMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for DeviceInputMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ASYNC_THIS_DEVICE.0.into(), "ASYNC_THIS_DEVICE", "AsyncThisDevice"),
+            (Self::SYNC_THIS_DEVICE.0.into(), "SYNC_THIS_DEVICE", "SyncThisDevice"),
+            (Self::REPLAY_THIS_DEVICE.0.into(), "REPLAY_THIS_DEVICE", "ReplayThisDevice"),
+            (Self::ASYNC_OTHER_DEVICES.0.into(), "ASYNC_OTHER_DEVICES", "AsyncOtherDevices"),
+            (Self::ASYNC_ALL.0.into(), "ASYNC_ALL", "AsyncAll"),
+            (Self::SYNC_ALL.0.into(), "SYNC_ALL", "SyncAll"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -3334,7 +3399,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FeedbackClass(u8);
 impl FeedbackClass {
     pub const KEYBOARD: Self = Self(0);
@@ -3384,6 +3449,19 @@ impl From<u8> for FeedbackClass {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for FeedbackClass  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEYBOARD.0.into(), "KEYBOARD", "Keyboard"),
+            (Self::POINTER.0.into(), "POINTER", "Pointer"),
+            (Self::STRING.0.into(), "STRING", "String"),
+            (Self::INTEGER.0.into(), "INTEGER", "Integer"),
+            (Self::LED.0.into(), "LED", "Led"),
+            (Self::BELL.0.into(), "BELL", "Bell"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -5296,7 +5374,7 @@ impl Serialize for FeedbackCtl {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ChangeFeedbackControlMask(u8);
 impl ChangeFeedbackControlMask {
     pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
@@ -5353,6 +5431,26 @@ impl From<u8> for ChangeFeedbackControlMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ChangeFeedbackControlMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEY_CLICK_PERCENT.0.into(), "KEY_CLICK_PERCENT", "KeyClickPercent"),
+            (Self::PERCENT.0.into(), "PERCENT", "Percent"),
+            (Self::PITCH.0.into(), "PITCH", "Pitch"),
+            (Self::DURATION.0.into(), "DURATION", "Duration"),
+            (Self::LED.0.into(), "LED", "Led"),
+            (Self::LED_MODE.0.into(), "LED_MODE", "LedMode"),
+            (Self::KEY.0.into(), "KEY", "Key"),
+            (Self::AUTO_REPEAT_MODE.0.into(), "AUTO_REPEAT_MODE", "AutoRepeatMode"),
+            (Self::STRING.0.into(), "STRING", "String"),
+            (Self::INTEGER.0.into(), "INTEGER", "Integer"),
+            (Self::ACCEL_NUM.0.into(), "ACCEL_NUM", "AccelNum"),
+            (Self::ACCEL_DENOM.0.into(), "ACCEL_DENOM", "AccelDenom"),
+            (Self::THRESHOLD.0.into(), "THRESHOLD", "Threshold"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(ChangeFeedbackControlMask, u8);
@@ -6306,7 +6404,7 @@ impl Serialize for ButtonState {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ValuatorStateModeMask(u8);
 impl ValuatorStateModeMask {
     pub const DEVICE_MODE_ABSOLUTE: Self = Self(1 << 0);
@@ -6352,6 +6450,15 @@ impl From<u8> for ValuatorStateModeMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ValuatorStateModeMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DEVICE_MODE_ABSOLUTE.0.into(), "DEVICE_MODE_ABSOLUTE", "DeviceModeAbsolute"),
+            (Self::OUT_OF_PROXIMITY.0.into(), "OUT_OF_PROXIMITY", "OutOfProximity"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(ValuatorStateModeMask, u8);
@@ -7038,7 +7145,7 @@ impl TryFrom<&[u8]> for SetDeviceValuatorsReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceControl(u16);
 impl DeviceControl {
     pub const RESOLUTION: Self = Self(1);
@@ -7081,6 +7188,18 @@ impl From<u16> for DeviceControl {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for DeviceControl  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::RESOLUTION.0.into(), "RESOLUTION", "Resolution"),
+            (Self::ABSCALIB.0.into(), "ABSCALIB", "Abscalib"),
+            (Self::CORE.0.into(), "CORE", "Core"),
+            (Self::ENABLE.0.into(), "ENABLE", "Enable"),
+            (Self::ABSAREA.0.into(), "ABSAREA", "Absarea"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -8932,7 +9051,7 @@ impl ListDevicePropertiesReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PropertyFormat(u8);
 impl PropertyFormat {
     pub const M8_BITS: Self = Self(8);
@@ -8979,6 +9098,16 @@ impl From<u8> for PropertyFormat {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PropertyFormat  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::M8_BITS.0.into(), "M8_BITS", "M8Bits"),
+            (Self::M16_BITS.0.into(), "M16_BITS", "M16Bits"),
+            (Self::M32_BITS.0.into(), "M32_BITS", "M32Bits"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -9503,7 +9632,7 @@ impl TryFrom<&[u8]> for GetDevicePropertyReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Device(bool);
 impl Device {
     pub const ALL: Self = Self(false);
@@ -9561,6 +9690,15 @@ impl From<bool> for Device {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Device  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ALL.0.into(), "ALL", "All"),
+            (Self::ALL_MASTER.0.into(), "ALL_MASTER", "AllMaster"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -10033,7 +10171,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct HierarchyChangeType(u16);
 impl HierarchyChangeType {
     pub const ADD_MASTER: Self = Self(1);
@@ -10077,8 +10215,19 @@ impl From<u16> for HierarchyChangeType {
         Self(value)
     }
 }
+impl std::fmt::Debug for HierarchyChangeType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ADD_MASTER.0.into(), "ADD_MASTER", "AddMaster"),
+            (Self::REMOVE_MASTER.0.into(), "REMOVE_MASTER", "RemoveMaster"),
+            (Self::ATTACH_SLAVE.0.into(), "ATTACH_SLAVE", "AttachSlave"),
+            (Self::DETACH_SLAVE.0.into(), "DETACH_SLAVE", "DetachSlave"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ChangeMode(u8);
 impl ChangeMode {
     pub const ATTACH: Self = Self(1);
@@ -10124,6 +10273,15 @@ impl From<u8> for ChangeMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ChangeMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ATTACH.0.into(), "ATTACH", "Attach"),
+            (Self::FLOAT.0.into(), "FLOAT", "Float"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -10932,7 +11090,7 @@ impl TryFrom<&[u8]> for XIGetClientPointerReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct XIEventMask(u32);
 impl XIEventMask {
     pub const DEVICE_CHANGED: Self = Self(1 << 1);
@@ -10990,6 +11148,39 @@ impl From<u32> for XIEventMask {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for XIEventMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DEVICE_CHANGED.0.into(), "DEVICE_CHANGED", "DeviceChanged"),
+            (Self::KEY_PRESS.0.into(), "KEY_PRESS", "KeyPress"),
+            (Self::KEY_RELEASE.0.into(), "KEY_RELEASE", "KeyRelease"),
+            (Self::BUTTON_PRESS.0.into(), "BUTTON_PRESS", "ButtonPress"),
+            (Self::BUTTON_RELEASE.0.into(), "BUTTON_RELEASE", "ButtonRelease"),
+            (Self::MOTION.0.into(), "MOTION", "Motion"),
+            (Self::ENTER.0.into(), "ENTER", "Enter"),
+            (Self::LEAVE.0.into(), "LEAVE", "Leave"),
+            (Self::FOCUS_IN.0.into(), "FOCUS_IN", "FocusIn"),
+            (Self::FOCUS_OUT.0.into(), "FOCUS_OUT", "FocusOut"),
+            (Self::HIERARCHY.0.into(), "HIERARCHY", "Hierarchy"),
+            (Self::PROPERTY.0.into(), "PROPERTY", "Property"),
+            (Self::RAW_KEY_PRESS.0.into(), "RAW_KEY_PRESS", "RawKeyPress"),
+            (Self::RAW_KEY_RELEASE.0.into(), "RAW_KEY_RELEASE", "RawKeyRelease"),
+            (Self::RAW_BUTTON_PRESS.0.into(), "RAW_BUTTON_PRESS", "RawButtonPress"),
+            (Self::RAW_BUTTON_RELEASE.0.into(), "RAW_BUTTON_RELEASE", "RawButtonRelease"),
+            (Self::RAW_MOTION.0.into(), "RAW_MOTION", "RawMotion"),
+            (Self::TOUCH_BEGIN.0.into(), "TOUCH_BEGIN", "TouchBegin"),
+            (Self::TOUCH_UPDATE.0.into(), "TOUCH_UPDATE", "TouchUpdate"),
+            (Self::TOUCH_END.0.into(), "TOUCH_END", "TouchEnd"),
+            (Self::TOUCH_OWNERSHIP.0.into(), "TOUCH_OWNERSHIP", "TouchOwnership"),
+            (Self::RAW_TOUCH_BEGIN.0.into(), "RAW_TOUCH_BEGIN", "RawTouchBegin"),
+            (Self::RAW_TOUCH_UPDATE.0.into(), "RAW_TOUCH_UPDATE", "RawTouchUpdate"),
+            (Self::RAW_TOUCH_END.0.into(), "RAW_TOUCH_END", "RawTouchEnd"),
+            (Self::BARRIER_HIT.0.into(), "BARRIER_HIT", "BarrierHit"),
+            (Self::BARRIER_LEAVE.0.into(), "BARRIER_LEAVE", "BarrierLeave"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(XIEventMask, u32);
@@ -11237,7 +11428,7 @@ impl TryFrom<&[u8]> for XIQueryVersionReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceClassType(u16);
 impl DeviceClassType {
     pub const KEY: Self = Self(0);
@@ -11282,8 +11473,20 @@ impl From<u16> for DeviceClassType {
         Self(value)
     }
 }
+impl std::fmt::Debug for DeviceClassType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEY.0.into(), "KEY", "Key"),
+            (Self::BUTTON.0.into(), "BUTTON", "Button"),
+            (Self::VALUATOR.0.into(), "VALUATOR", "Valuator"),
+            (Self::SCROLL.0.into(), "SCROLL", "Scroll"),
+            (Self::TOUCH.0.into(), "TOUCH", "Touch"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceType(u16);
 impl DeviceType {
     pub const MASTER_POINTER: Self = Self(1);
@@ -11328,8 +11531,20 @@ impl From<u16> for DeviceType {
         Self(value)
     }
 }
+impl std::fmt::Debug for DeviceType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::MASTER_POINTER.0.into(), "MASTER_POINTER", "MasterPointer"),
+            (Self::MASTER_KEYBOARD.0.into(), "MASTER_KEYBOARD", "MasterKeyboard"),
+            (Self::SLAVE_POINTER.0.into(), "SLAVE_POINTER", "SlavePointer"),
+            (Self::SLAVE_KEYBOARD.0.into(), "SLAVE_KEYBOARD", "SlaveKeyboard"),
+            (Self::FLOATING_SLAVE.0.into(), "FLOATING_SLAVE", "FloatingSlave"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ScrollFlags(u8);
 impl ScrollFlags {
     pub const NO_EMULATION: Self = Self(1 << 0);
@@ -11377,9 +11592,18 @@ impl From<u8> for ScrollFlags {
         Self(value)
     }
 }
+impl std::fmt::Debug for ScrollFlags  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NO_EMULATION.0.into(), "NO_EMULATION", "NoEmulation"),
+            (Self::PREFERRED.0.into(), "PREFERRED", "Preferred"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(ScrollFlags, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ScrollType(u16);
 impl ScrollType {
     pub const VERTICAL: Self = Self(1);
@@ -11421,8 +11645,17 @@ impl From<u16> for ScrollType {
         Self(value)
     }
 }
+impl std::fmt::Debug for ScrollType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::VERTICAL.0.into(), "VERTICAL", "Vertical"),
+            (Self::HORIZONTAL.0.into(), "HORIZONTAL", "Horizontal"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct TouchMode(u8);
 impl TouchMode {
     pub const DIRECT: Self = Self(1);
@@ -11468,6 +11701,15 @@ impl From<u8> for TouchMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for TouchMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DIRECT.0.into(), "DIRECT", "Direct"),
+            (Self::DEPENDENT.0.into(), "DEPENDENT", "Dependent"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -12674,7 +12916,7 @@ impl TryFrom<&[u8]> for XIGetFocusReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabOwner(bool);
 impl GrabOwner {
     pub const NO_OWNER: Self = Self(false);
@@ -12732,6 +12974,15 @@ impl From<bool> for GrabOwner {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for GrabOwner  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NO_OWNER.0.into(), "NO_OWNER", "NoOwner"),
+            (Self::OWNER.0.into(), "OWNER", "Owner"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -12990,7 +13241,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EventMode(u8);
 impl EventMode {
     pub const ASYNC_DEVICE: Self = Self(0);
@@ -13042,6 +13293,21 @@ impl From<u8> for EventMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for EventMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ASYNC_DEVICE.0.into(), "ASYNC_DEVICE", "AsyncDevice"),
+            (Self::SYNC_DEVICE.0.into(), "SYNC_DEVICE", "SyncDevice"),
+            (Self::REPLAY_DEVICE.0.into(), "REPLAY_DEVICE", "ReplayDevice"),
+            (Self::ASYNC_PAIRED_DEVICE.0.into(), "ASYNC_PAIRED_DEVICE", "AsyncPairedDevice"),
+            (Self::ASYNC_PAIR.0.into(), "ASYNC_PAIR", "AsyncPair"),
+            (Self::SYNC_PAIR.0.into(), "SYNC_PAIR", "SyncPair"),
+            (Self::ACCEPT_TOUCH.0.into(), "ACCEPT_TOUCH", "AcceptTouch"),
+            (Self::REJECT_TOUCH.0.into(), "REJECT_TOUCH", "RejectTouch"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -13148,7 +13414,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabMode22(u8);
 impl GrabMode22 {
     pub const SYNC: Self = Self(0);
@@ -13197,8 +13463,18 @@ impl From<u8> for GrabMode22 {
         Self(value)
     }
 }
+impl std::fmt::Debug for GrabMode22  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SYNC.0.into(), "SYNC", "Sync"),
+            (Self::ASYNC.0.into(), "ASYNC", "Async"),
+            (Self::TOUCH.0.into(), "TOUCH", "Touch"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabType(u8);
 impl GrabType {
     pub const BUTTON: Self = Self(0);
@@ -13249,8 +13525,20 @@ impl From<u8> for GrabType {
         Self(value)
     }
 }
+impl std::fmt::Debug for GrabType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::BUTTON.0.into(), "BUTTON", "Button"),
+            (Self::KEYCODE.0.into(), "KEYCODE", "Keycode"),
+            (Self::ENTER.0.into(), "ENTER", "Enter"),
+            (Self::FOCUS_IN.0.into(), "FOCUS_IN", "FocusIn"),
+            (Self::TOUCH_BEGIN.0.into(), "TOUCH_BEGIN", "TouchBegin"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModifierMask(u32);
 impl ModifierMask {
     pub const ANY: Self = Self(1 << 31);
@@ -13283,6 +13571,14 @@ impl From<u32> for ModifierMask {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ModifierMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ANY.0.into(), "ANY", "Any"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(ModifierMask, u32);
@@ -14656,7 +14952,7 @@ impl From<DeviceValuatorEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct MoreEventsMask(u8);
 impl MoreEventsMask {
     pub const MORE_EVENTS: Self = Self(1 << 7);
@@ -14701,6 +14997,14 @@ impl From<u8> for MoreEventsMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for MoreEventsMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::MORE_EVENTS.0.into(), "MORE_EVENTS", "MoreEvents"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(MoreEventsMask, u8);
@@ -14929,7 +15233,7 @@ pub type ProximityInEvent = DeviceKeyPressEvent;
 pub const PROXIMITY_OUT_EVENT: u8 = 9;
 pub type ProximityOutEvent = DeviceKeyPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ClassesReportedMask(u8);
 impl ClassesReportedMask {
     pub const OUT_OF_PROXIMITY: Self = Self(1 << 7);
@@ -14978,6 +15282,18 @@ impl From<u8> for ClassesReportedMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ClassesReportedMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::OUT_OF_PROXIMITY.0.into(), "OUT_OF_PROXIMITY", "OutOfProximity"),
+            (Self::DEVICE_MODE_ABSOLUTE.0.into(), "DEVICE_MODE_ABSOLUTE", "DeviceModeAbsolute"),
+            (Self::REPORTING_VALUATORS.0.into(), "REPORTING_VALUATORS", "ReportingValuators"),
+            (Self::REPORTING_BUTTONS.0.into(), "REPORTING_BUTTONS", "ReportingButtons"),
+            (Self::REPORTING_KEYS.0.into(), "REPORTING_KEYS", "ReportingKeys"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(ClassesReportedMask, u8);
@@ -15178,7 +15494,7 @@ impl From<DeviceMappingNotifyEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ChangeDevice(u8);
 impl ChangeDevice {
     pub const NEW_POINTER: Self = Self(0);
@@ -15224,6 +15540,15 @@ impl From<u8> for ChangeDevice {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ChangeDevice  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NEW_POINTER.0.into(), "NEW_POINTER", "NewPointer"),
+            (Self::NEW_KEYBOARD.0.into(), "NEW_KEYBOARD", "NewKeyboard"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -15463,7 +15788,7 @@ impl From<DeviceButtonStateNotifyEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceChange(u8);
 impl DeviceChange {
     pub const ADDED: Self = Self(0);
@@ -15513,6 +15838,19 @@ impl From<u8> for DeviceChange {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for DeviceChange  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ADDED.0.into(), "ADDED", "Added"),
+            (Self::REMOVED.0.into(), "REMOVED", "Removed"),
+            (Self::ENABLED.0.into(), "ENABLED", "Enabled"),
+            (Self::DISABLED.0.into(), "DISABLED", "Disabled"),
+            (Self::UNRECOVERABLE.0.into(), "UNRECOVERABLE", "Unrecoverable"),
+            (Self::CONTROL_CHANGED.0.into(), "CONTROL_CHANGED", "ControlChanged"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -15687,7 +16025,7 @@ impl From<DevicePropertyNotifyEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ChangeReason(u8);
 impl ChangeReason {
     pub const SLAVE_SWITCH: Self = Self(1);
@@ -15733,6 +16071,15 @@ impl From<u8> for ChangeReason {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ChangeReason  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SLAVE_SWITCH.0.into(), "SLAVE_SWITCH", "SlaveSwitch"),
+            (Self::DEVICE_CHANGE.0.into(), "DEVICE_CHANGE", "DeviceChange"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -15796,7 +16143,7 @@ impl DeviceChangedEvent {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct KeyEventFlags(u32);
 impl KeyEventFlags {
     pub const KEY_REPEAT: Self = Self(1 << 16);
@@ -15829,6 +16176,14 @@ impl From<u32> for KeyEventFlags {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for KeyEventFlags  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEY_REPEAT.0.into(), "KEY_REPEAT", "KeyRepeat"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(KeyEventFlags, u32);
@@ -15934,7 +16289,7 @@ impl KeyPressEvent {
 pub const KEY_RELEASE_EVENT: u16 = 3;
 pub type KeyReleaseEvent = KeyPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PointerEventFlags(u32);
 impl PointerEventFlags {
     pub const POINTER_EMULATED: Self = Self(1 << 16);
@@ -15967,6 +16322,14 @@ impl From<u32> for PointerEventFlags {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PointerEventFlags  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::POINTER_EMULATED.0.into(), "POINTER_EMULATED", "PointerEmulated"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(PointerEventFlags, u32);
@@ -16076,7 +16439,7 @@ pub type ButtonReleaseEvent = ButtonPressEvent;
 pub const MOTION_EVENT: u16 = 6;
 pub type MotionEvent = ButtonPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct NotifyMode(u8);
 impl NotifyMode {
     pub const NORMAL: Self = Self(0);
@@ -16128,8 +16491,21 @@ impl From<u8> for NotifyMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for NotifyMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NORMAL.0.into(), "NORMAL", "Normal"),
+            (Self::GRAB.0.into(), "GRAB", "Grab"),
+            (Self::UNGRAB.0.into(), "UNGRAB", "Ungrab"),
+            (Self::WHILE_GRABBED.0.into(), "WHILE_GRABBED", "WhileGrabbed"),
+            (Self::PASSIVE_GRAB.0.into(), "PASSIVE_GRAB", "PassiveGrab"),
+            (Self::PASSIVE_UNGRAB.0.into(), "PASSIVE_UNGRAB", "PassiveUngrab"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct NotifyDetail(u8);
 impl NotifyDetail {
     pub const ANCESTOR: Self = Self(0);
@@ -16181,6 +16557,21 @@ impl From<u8> for NotifyDetail {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for NotifyDetail  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ANCESTOR.0.into(), "ANCESTOR", "Ancestor"),
+            (Self::VIRTUAL.0.into(), "VIRTUAL", "Virtual"),
+            (Self::INFERIOR.0.into(), "INFERIOR", "Inferior"),
+            (Self::NONLINEAR.0.into(), "NONLINEAR", "Nonlinear"),
+            (Self::NONLINEAR_VIRTUAL.0.into(), "NONLINEAR_VIRTUAL", "NonlinearVirtual"),
+            (Self::POINTER.0.into(), "POINTER", "Pointer"),
+            (Self::POINTER_ROOT.0.into(), "POINTER_ROOT", "PointerRoot"),
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -16280,7 +16671,7 @@ pub type FocusInEvent = EnterEvent;
 pub const FOCUS_OUT_EVENT: u16 = 10;
 pub type FocusOutEvent = EnterEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct HierarchyMask(u8);
 impl HierarchyMask {
     pub const MASTER_ADDED: Self = Self(1 << 0);
@@ -16332,6 +16723,21 @@ impl From<u8> for HierarchyMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for HierarchyMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::MASTER_ADDED.0.into(), "MASTER_ADDED", "MasterAdded"),
+            (Self::MASTER_REMOVED.0.into(), "MASTER_REMOVED", "MasterRemoved"),
+            (Self::SLAVE_ADDED.0.into(), "SLAVE_ADDED", "SlaveAdded"),
+            (Self::SLAVE_REMOVED.0.into(), "SLAVE_REMOVED", "SlaveRemoved"),
+            (Self::SLAVE_ATTACHED.0.into(), "SLAVE_ATTACHED", "SlaveAttached"),
+            (Self::SLAVE_DETACHED.0.into(), "SLAVE_DETACHED", "SlaveDetached"),
+            (Self::DEVICE_ENABLED.0.into(), "DEVICE_ENABLED", "DeviceEnabled"),
+            (Self::DEVICE_DISABLED.0.into(), "DEVICE_DISABLED", "DeviceDisabled"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(HierarchyMask, u8);
@@ -16454,7 +16860,7 @@ impl HierarchyEvent {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PropertyFlag(u8);
 impl PropertyFlag {
     pub const DELETED: Self = Self(0);
@@ -16501,6 +16907,16 @@ impl From<u8> for PropertyFlag {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PropertyFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DELETED.0.into(), "DELETED", "Deleted"),
+            (Self::CREATED.0.into(), "CREATED", "Created"),
+            (Self::MODIFIED.0.into(), "MODIFIED", "Modified"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -16688,7 +17104,7 @@ pub type RawButtonReleaseEvent = RawButtonPressEvent;
 pub const RAW_MOTION_EVENT: u16 = 17;
 pub type RawMotionEvent = RawButtonPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct TouchEventFlags(u32);
 impl TouchEventFlags {
     pub const TOUCH_PENDING_END: Self = Self(1 << 16);
@@ -16722,6 +17138,15 @@ impl From<u32> for TouchEventFlags {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for TouchEventFlags  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::TOUCH_PENDING_END.0.into(), "TOUCH_PENDING_END", "TouchPendingEnd"),
+            (Self::TOUCH_EMULATING_POINTER.0.into(), "TOUCH_EMULATING_POINTER", "TouchEmulatingPointer"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(TouchEventFlags, u32);
@@ -16831,7 +17256,7 @@ pub type TouchUpdateEvent = TouchBeginEvent;
 pub const TOUCH_END_EVENT: u16 = 20;
 pub type TouchEndEvent = TouchBeginEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct TouchOwnershipFlags(u32);
 impl TouchOwnershipFlags {
     pub const NONE: Self = Self(0);
@@ -16864,6 +17289,14 @@ impl From<u32> for TouchOwnershipFlags {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for TouchOwnershipFlags  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -16991,7 +17424,7 @@ pub type RawTouchUpdateEvent = RawTouchBeginEvent;
 pub const RAW_TOUCH_END_EVENT: u16 = 24;
 pub type RawTouchEndEvent = RawTouchBeginEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BarrierFlags(u8);
 impl BarrierFlags {
     pub const POINTER_RELEASED: Self = Self(1 << 0);
@@ -17037,6 +17470,15 @@ impl From<u8> for BarrierFlags {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for BarrierFlags  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::POINTER_RELEASED.0.into(), "POINTER_RELEASED", "PointerReleased"),
+            (Self::DEVICE_IS_GRABBED.0.into(), "DEVICE_IS_GRABBED", "DeviceIsGrabbed"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(BarrierFlags, u8);

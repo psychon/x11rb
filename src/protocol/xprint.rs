@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -118,7 +118,7 @@ impl Printer {
 
 pub type Pcontext = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GetDoc(bool);
 impl GetDoc {
     pub const FINISHED: Self = Self(false);
@@ -178,8 +178,17 @@ impl From<bool> for GetDoc {
         Self(value)
     }
 }
+impl std::fmt::Debug for GetDoc  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::FINISHED.0.into(), "FINISHED", "Finished"),
+            (Self::SECOND_CONSUMER.0.into(), "SECOND_CONSUMER", "SecondConsumer"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EvMask(u8);
 impl EvMask {
     pub const NO_EVENT_MASK: Self = Self(0);
@@ -228,9 +237,19 @@ impl From<u8> for EvMask {
         Self(value)
     }
 }
+impl std::fmt::Debug for EvMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NO_EVENT_MASK.0.into(), "NO_EVENT_MASK", "NoEventMask"),
+            (Self::PRINT_MASK.0.into(), "PRINT_MASK", "PrintMask"),
+            (Self::ATTRIBUTE_MASK.0.into(), "ATTRIBUTE_MASK", "AttributeMask"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(EvMask, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Detail(u8);
 impl Detail {
     pub const START_JOB_NOTIFY: Self = Self(1);
@@ -282,8 +301,21 @@ impl From<u8> for Detail {
         Self(value)
     }
 }
+impl std::fmt::Debug for Detail  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::START_JOB_NOTIFY.0.into(), "START_JOB_NOTIFY", "StartJobNotify"),
+            (Self::END_JOB_NOTIFY.0.into(), "END_JOB_NOTIFY", "EndJobNotify"),
+            (Self::START_DOC_NOTIFY.0.into(), "START_DOC_NOTIFY", "StartDocNotify"),
+            (Self::END_DOC_NOTIFY.0.into(), "END_DOC_NOTIFY", "EndDocNotify"),
+            (Self::START_PAGE_NOTIFY.0.into(), "START_PAGE_NOTIFY", "StartPageNotify"),
+            (Self::END_PAGE_NOTIFY.0.into(), "END_PAGE_NOTIFY", "EndPageNotify"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Attr(u8);
 impl Attr {
     pub const JOB_ATTR: Self = Self(1);
@@ -334,6 +366,20 @@ impl From<u8> for Attr {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Attr  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::JOB_ATTR.0.into(), "JOB_ATTR", "JobAttr"),
+            (Self::DOC_ATTR.0.into(), "DOC_ATTR", "DocAttr"),
+            (Self::PAGE_ATTR.0.into(), "PAGE_ATTR", "PageAttr"),
+            (Self::PRINTER_ATTR.0.into(), "PRINTER_ATTR", "PrinterAttr"),
+            (Self::SERVER_ATTR.0.into(), "SERVER_ATTR", "ServerAttr"),
+            (Self::MEDIUM_ATTR.0.into(), "MEDIUM_ATTR", "MediumAttr"),
+            (Self::SPOOLER_ATTR.0.into(), "SPOOLER_ATTR", "SpoolerAttr"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

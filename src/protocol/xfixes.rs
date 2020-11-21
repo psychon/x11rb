@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -145,7 +145,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SaveSetMode(u8);
 impl SaveSetMode {
     pub const INSERT: Self = Self(0);
@@ -193,8 +193,17 @@ impl From<u8> for SaveSetMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for SaveSetMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::INSERT.0.into(), "INSERT", "Insert"),
+            (Self::DELETE.0.into(), "DELETE", "Delete"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SaveSetTarget(u8);
 impl SaveSetTarget {
     pub const NEAREST: Self = Self(0);
@@ -242,8 +251,17 @@ impl From<u8> for SaveSetTarget {
         Self(value)
     }
 }
+impl std::fmt::Debug for SaveSetTarget  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NEAREST.0.into(), "NEAREST", "Nearest"),
+            (Self::ROOT.0.into(), "ROOT", "Root"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SaveSetMapping(u8);
 impl SaveSetMapping {
     pub const MAP: Self = Self(0);
@@ -289,6 +307,15 @@ impl From<u8> for SaveSetMapping {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SaveSetMapping  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::MAP.0.into(), "MAP", "Map"),
+            (Self::UNMAP.0.into(), "UNMAP", "Unmap"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -380,7 +407,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SelectionEvent(u8);
 impl SelectionEvent {
     pub const SET_SELECTION_OWNER: Self = Self(0);
@@ -429,8 +456,18 @@ impl From<u8> for SelectionEvent {
         Self(value)
     }
 }
+impl std::fmt::Debug for SelectionEvent  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SET_SELECTION_OWNER.0.into(), "SET_SELECTION_OWNER", "SetSelectionOwner"),
+            (Self::SELECTION_WINDOW_DESTROY.0.into(), "SELECTION_WINDOW_DESTROY", "SelectionWindowDestroy"),
+            (Self::SELECTION_CLIENT_CLOSE.0.into(), "SELECTION_CLIENT_CLOSE", "SelectionClientClose"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SelectionEventMask(u8);
 impl SelectionEventMask {
     pub const SET_SELECTION_OWNER: Self = Self(1 << 0);
@@ -477,6 +514,16 @@ impl From<u8> for SelectionEventMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SelectionEventMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SET_SELECTION_OWNER.0.into(), "SET_SELECTION_OWNER", "SetSelectionOwner"),
+            (Self::SELECTION_WINDOW_DESTROY.0.into(), "SELECTION_WINDOW_DESTROY", "SelectionWindowDestroy"),
+            (Self::SELECTION_CLIENT_CLOSE.0.into(), "SELECTION_CLIENT_CLOSE", "SelectionClientClose"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(SelectionEventMask, u8);
@@ -657,7 +704,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CursorNotify(u8);
 impl CursorNotify {
     pub const DISPLAY_CURSOR: Self = Self(0);
@@ -704,8 +751,16 @@ impl From<u8> for CursorNotify {
         Self(value)
     }
 }
+impl std::fmt::Debug for CursorNotify  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DISPLAY_CURSOR.0.into(), "DISPLAY_CURSOR", "DisplayCursor"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CursorNotifyMask(u8);
 impl CursorNotifyMask {
     pub const DISPLAY_CURSOR: Self = Self(1 << 0);
@@ -750,6 +805,14 @@ impl From<u8> for CursorNotifyMask {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CursorNotifyMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DISPLAY_CURSOR.0.into(), "DISPLAY_CURSOR", "DisplayCursor"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(CursorNotifyMask, u8);
@@ -1023,7 +1086,7 @@ pub type Region = u32;
 /// Opcode for the BadRegion error
 pub const BAD_REGION_ERROR: u8 = 0;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct RegionEnum(u8);
 impl RegionEnum {
     pub const NONE: Self = Self(0);
@@ -1068,6 +1131,14 @@ impl From<u8> for RegionEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for RegionEnum  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -3294,7 +3365,7 @@ where
 
 pub type Barrier = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BarrierDirections(u8);
 impl BarrierDirections {
     pub const POSITIVE_X: Self = Self(1 << 0);
@@ -3342,6 +3413,17 @@ impl From<u8> for BarrierDirections {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for BarrierDirections  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::POSITIVE_X.0.into(), "POSITIVE_X", "PositiveX"),
+            (Self::POSITIVE_Y.0.into(), "POSITIVE_Y", "PositiveY"),
+            (Self::NEGATIVE_X.0.into(), "NEGATIVE_X", "NegativeX"),
+            (Self::NEGATIVE_Y.0.into(), "NEGATIVE_Y", "NegativeY"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(BarrierDirections, u8);

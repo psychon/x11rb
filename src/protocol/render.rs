@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -35,7 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "RENDER";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (0, 11);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PictType(u8);
 impl PictType {
     pub const INDEXED: Self = Self(0);
@@ -83,8 +83,17 @@ impl From<u8> for PictType {
         Self(value)
     }
 }
+impl std::fmt::Debug for PictType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::INDEXED.0.into(), "INDEXED", "Indexed"),
+            (Self::DIRECT.0.into(), "DIRECT", "Direct"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PictureEnum(u8);
 impl PictureEnum {
     pub const NONE: Self = Self(0);
@@ -131,8 +140,16 @@ impl From<u8> for PictureEnum {
         Self(value)
     }
 }
+impl std::fmt::Debug for PictureEnum  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PictOp(u8);
 impl PictOp {
     pub const CLEAR: Self = Self(0);
@@ -231,8 +248,68 @@ impl From<u8> for PictOp {
         Self(value)
     }
 }
+impl std::fmt::Debug for PictOp  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::CLEAR.0.into(), "CLEAR", "Clear"),
+            (Self::SRC.0.into(), "SRC", "Src"),
+            (Self::DST.0.into(), "DST", "Dst"),
+            (Self::OVER.0.into(), "OVER", "Over"),
+            (Self::OVER_REVERSE.0.into(), "OVER_REVERSE", "OverReverse"),
+            (Self::IN.0.into(), "IN", "In"),
+            (Self::IN_REVERSE.0.into(), "IN_REVERSE", "InReverse"),
+            (Self::OUT.0.into(), "OUT", "Out"),
+            (Self::OUT_REVERSE.0.into(), "OUT_REVERSE", "OutReverse"),
+            (Self::ATOP.0.into(), "ATOP", "Atop"),
+            (Self::ATOP_REVERSE.0.into(), "ATOP_REVERSE", "AtopReverse"),
+            (Self::XOR.0.into(), "XOR", "Xor"),
+            (Self::ADD.0.into(), "ADD", "Add"),
+            (Self::SATURATE.0.into(), "SATURATE", "Saturate"),
+            (Self::DISJOINT_CLEAR.0.into(), "DISJOINT_CLEAR", "DisjointClear"),
+            (Self::DISJOINT_SRC.0.into(), "DISJOINT_SRC", "DisjointSrc"),
+            (Self::DISJOINT_DST.0.into(), "DISJOINT_DST", "DisjointDst"),
+            (Self::DISJOINT_OVER.0.into(), "DISJOINT_OVER", "DisjointOver"),
+            (Self::DISJOINT_OVER_REVERSE.0.into(), "DISJOINT_OVER_REVERSE", "DisjointOverReverse"),
+            (Self::DISJOINT_IN.0.into(), "DISJOINT_IN", "DisjointIn"),
+            (Self::DISJOINT_IN_REVERSE.0.into(), "DISJOINT_IN_REVERSE", "DisjointInReverse"),
+            (Self::DISJOINT_OUT.0.into(), "DISJOINT_OUT", "DisjointOut"),
+            (Self::DISJOINT_OUT_REVERSE.0.into(), "DISJOINT_OUT_REVERSE", "DisjointOutReverse"),
+            (Self::DISJOINT_ATOP.0.into(), "DISJOINT_ATOP", "DisjointAtop"),
+            (Self::DISJOINT_ATOP_REVERSE.0.into(), "DISJOINT_ATOP_REVERSE", "DisjointAtopReverse"),
+            (Self::DISJOINT_XOR.0.into(), "DISJOINT_XOR", "DisjointXor"),
+            (Self::CONJOINT_CLEAR.0.into(), "CONJOINT_CLEAR", "ConjointClear"),
+            (Self::CONJOINT_SRC.0.into(), "CONJOINT_SRC", "ConjointSrc"),
+            (Self::CONJOINT_DST.0.into(), "CONJOINT_DST", "ConjointDst"),
+            (Self::CONJOINT_OVER.0.into(), "CONJOINT_OVER", "ConjointOver"),
+            (Self::CONJOINT_OVER_REVERSE.0.into(), "CONJOINT_OVER_REVERSE", "ConjointOverReverse"),
+            (Self::CONJOINT_IN.0.into(), "CONJOINT_IN", "ConjointIn"),
+            (Self::CONJOINT_IN_REVERSE.0.into(), "CONJOINT_IN_REVERSE", "ConjointInReverse"),
+            (Self::CONJOINT_OUT.0.into(), "CONJOINT_OUT", "ConjointOut"),
+            (Self::CONJOINT_OUT_REVERSE.0.into(), "CONJOINT_OUT_REVERSE", "ConjointOutReverse"),
+            (Self::CONJOINT_ATOP.0.into(), "CONJOINT_ATOP", "ConjointAtop"),
+            (Self::CONJOINT_ATOP_REVERSE.0.into(), "CONJOINT_ATOP_REVERSE", "ConjointAtopReverse"),
+            (Self::CONJOINT_XOR.0.into(), "CONJOINT_XOR", "ConjointXor"),
+            (Self::MULTIPLY.0.into(), "MULTIPLY", "Multiply"),
+            (Self::SCREEN.0.into(), "SCREEN", "Screen"),
+            (Self::OVERLAY.0.into(), "OVERLAY", "Overlay"),
+            (Self::DARKEN.0.into(), "DARKEN", "Darken"),
+            (Self::LIGHTEN.0.into(), "LIGHTEN", "Lighten"),
+            (Self::COLOR_DODGE.0.into(), "COLOR_DODGE", "ColorDodge"),
+            (Self::COLOR_BURN.0.into(), "COLOR_BURN", "ColorBurn"),
+            (Self::HARD_LIGHT.0.into(), "HARD_LIGHT", "HardLight"),
+            (Self::SOFT_LIGHT.0.into(), "SOFT_LIGHT", "SoftLight"),
+            (Self::DIFFERENCE.0.into(), "DIFFERENCE", "Difference"),
+            (Self::EXCLUSION.0.into(), "EXCLUSION", "Exclusion"),
+            (Self::HSL_HUE.0.into(), "HSL_HUE", "HSLHue"),
+            (Self::HSL_SATURATION.0.into(), "HSL_SATURATION", "HSLSaturation"),
+            (Self::HSL_COLOR.0.into(), "HSL_COLOR", "HSLColor"),
+            (Self::HSL_LUMINOSITY.0.into(), "HSL_LUMINOSITY", "HSLLuminosity"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PolyEdge(u32);
 impl PolyEdge {
     pub const SHARP: Self = Self(0);
@@ -268,8 +345,17 @@ impl From<u32> for PolyEdge {
         Self(value)
     }
 }
+impl std::fmt::Debug for PolyEdge  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SHARP.0.into(), "SHARP", "Sharp"),
+            (Self::SMOOTH.0.into(), "SMOOTH", "Smooth"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PolyMode(u32);
 impl PolyMode {
     pub const PRECISE: Self = Self(0);
@@ -305,8 +391,17 @@ impl From<u32> for PolyMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for PolyMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::PRECISE.0.into(), "PRECISE", "Precise"),
+            (Self::IMPRECISE.0.into(), "IMPRECISE", "Imprecise"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CP(u16);
 impl CP {
     pub const REPEAT: Self = Self(1 << 0);
@@ -359,9 +454,29 @@ impl From<u16> for CP {
         Self(value)
     }
 }
+impl std::fmt::Debug for CP  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::REPEAT.0.into(), "REPEAT", "Repeat"),
+            (Self::ALPHA_MAP.0.into(), "ALPHA_MAP", "AlphaMap"),
+            (Self::ALPHA_X_ORIGIN.0.into(), "ALPHA_X_ORIGIN", "AlphaXOrigin"),
+            (Self::ALPHA_Y_ORIGIN.0.into(), "ALPHA_Y_ORIGIN", "AlphaYOrigin"),
+            (Self::CLIP_X_ORIGIN.0.into(), "CLIP_X_ORIGIN", "ClipXOrigin"),
+            (Self::CLIP_Y_ORIGIN.0.into(), "CLIP_Y_ORIGIN", "ClipYOrigin"),
+            (Self::CLIP_MASK.0.into(), "CLIP_MASK", "ClipMask"),
+            (Self::GRAPHICS_EXPOSURE.0.into(), "GRAPHICS_EXPOSURE", "GraphicsExposure"),
+            (Self::SUBWINDOW_MODE.0.into(), "SUBWINDOW_MODE", "SubwindowMode"),
+            (Self::POLY_EDGE.0.into(), "POLY_EDGE", "PolyEdge"),
+            (Self::POLY_MODE.0.into(), "POLY_MODE", "PolyMode"),
+            (Self::DITHER.0.into(), "DITHER", "Dither"),
+            (Self::COMPONENT_ALPHA.0.into(), "COMPONENT_ALPHA", "ComponentAlpha"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(CP, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SubPixel(u32);
 impl SubPixel {
     pub const UNKNOWN: Self = Self(0);
@@ -401,8 +516,21 @@ impl From<u32> for SubPixel {
         Self(value)
     }
 }
+impl std::fmt::Debug for SubPixel  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::UNKNOWN.0.into(), "UNKNOWN", "Unknown"),
+            (Self::HORIZONTAL_RGB.0.into(), "HORIZONTAL_RGB", "HorizontalRGB"),
+            (Self::HORIZONTAL_BGR.0.into(), "HORIZONTAL_BGR", "HorizontalBGR"),
+            (Self::VERTICAL_RGB.0.into(), "VERTICAL_RGB", "VerticalRGB"),
+            (Self::VERTICAL_BGR.0.into(), "VERTICAL_BGR", "VerticalBGR"),
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Repeat(u32);
 impl Repeat {
     pub const NONE: Self = Self(0);
@@ -438,6 +566,17 @@ impl From<u32> for Repeat {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Repeat  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+            (Self::NORMAL.0.into(), "NORMAL", "Normal"),
+            (Self::PAD.0.into(), "PAD", "Pad"),
+            (Self::REFLECT.0.into(), "REFLECT", "Reflect"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

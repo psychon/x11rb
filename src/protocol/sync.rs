@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -37,7 +37,7 @@ pub const X11_XML_VERSION: (u32, u32) = (3, 1);
 
 pub type Alarm = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ALARMSTATE(u8);
 impl ALARMSTATE {
     pub const ACTIVE: Self = Self(0);
@@ -86,12 +86,22 @@ impl From<u8> for ALARMSTATE {
         Self(value)
     }
 }
+impl std::fmt::Debug for ALARMSTATE  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ACTIVE.0.into(), "ACTIVE", "Active"),
+            (Self::INACTIVE.0.into(), "INACTIVE", "Inactive"),
+            (Self::DESTROYED.0.into(), "DESTROYED", "Destroyed"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
 pub type Counter = u32;
 
 pub type Fence = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct TESTTYPE(u32);
 impl TESTTYPE {
     pub const POSITIVE_TRANSITION: Self = Self(0);
@@ -129,8 +139,19 @@ impl From<u32> for TESTTYPE {
         Self(value)
     }
 }
+impl std::fmt::Debug for TESTTYPE  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::POSITIVE_TRANSITION.0.into(), "POSITIVE_TRANSITION", "PositiveTransition"),
+            (Self::NEGATIVE_TRANSITION.0.into(), "NEGATIVE_TRANSITION", "NegativeTransition"),
+            (Self::POSITIVE_COMPARISON.0.into(), "POSITIVE_COMPARISON", "PositiveComparison"),
+            (Self::NEGATIVE_COMPARISON.0.into(), "NEGATIVE_COMPARISON", "NegativeComparison"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VALUETYPE(u32);
 impl VALUETYPE {
     pub const ABSOLUTE: Self = Self(0);
@@ -166,8 +187,17 @@ impl From<u32> for VALUETYPE {
         Self(value)
     }
 }
+impl std::fmt::Debug for VALUETYPE  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ABSOLUTE.0.into(), "ABSOLUTE", "Absolute"),
+            (Self::RELATIVE.0.into(), "RELATIVE", "Relative"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CA(u8);
 impl CA {
     pub const COUNTER: Self = Self(1 << 0);
@@ -217,6 +247,19 @@ impl From<u8> for CA {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CA  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::COUNTER.0.into(), "COUNTER", "Counter"),
+            (Self::VALUE_TYPE.0.into(), "VALUE_TYPE", "ValueType"),
+            (Self::VALUE.0.into(), "VALUE", "Value"),
+            (Self::TEST_TYPE.0.into(), "TEST_TYPE", "TestType"),
+            (Self::DELTA.0.into(), "DELTA", "Delta"),
+            (Self::EVENTS.0.into(), "EVENTS", "Events"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(CA, u8);

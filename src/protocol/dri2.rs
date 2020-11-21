@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -35,7 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "DRI2";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 4);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Attachment(u32);
 impl Attachment {
     pub const BUFFER_FRONT_LEFT: Self = Self(0);
@@ -80,8 +80,26 @@ impl From<u32> for Attachment {
         Self(value)
     }
 }
+impl std::fmt::Debug for Attachment  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::BUFFER_FRONT_LEFT.0.into(), "BUFFER_FRONT_LEFT", "BufferFrontLeft"),
+            (Self::BUFFER_BACK_LEFT.0.into(), "BUFFER_BACK_LEFT", "BufferBackLeft"),
+            (Self::BUFFER_FRONT_RIGHT.0.into(), "BUFFER_FRONT_RIGHT", "BufferFrontRight"),
+            (Self::BUFFER_BACK_RIGHT.0.into(), "BUFFER_BACK_RIGHT", "BufferBackRight"),
+            (Self::BUFFER_DEPTH.0.into(), "BUFFER_DEPTH", "BufferDepth"),
+            (Self::BUFFER_STENCIL.0.into(), "BUFFER_STENCIL", "BufferStencil"),
+            (Self::BUFFER_ACCUM.0.into(), "BUFFER_ACCUM", "BufferAccum"),
+            (Self::BUFFER_FAKE_FRONT_LEFT.0.into(), "BUFFER_FAKE_FRONT_LEFT", "BufferFakeFrontLeft"),
+            (Self::BUFFER_FAKE_FRONT_RIGHT.0.into(), "BUFFER_FAKE_FRONT_RIGHT", "BufferFakeFrontRight"),
+            (Self::BUFFER_DEPTH_STENCIL.0.into(), "BUFFER_DEPTH_STENCIL", "BufferDepthStencil"),
+            (Self::BUFFER_HIZ.0.into(), "BUFFER_HIZ", "BufferHiz"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DriverType(u32);
 impl DriverType {
     pub const DRI: Self = Self(0);
@@ -117,8 +135,17 @@ impl From<u32> for DriverType {
         Self(value)
     }
 }
+impl std::fmt::Debug for DriverType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DRI.0.into(), "DRI", "DRI"),
+            (Self::VDPAU.0.into(), "VDPAU", "VDPAU"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EventType(u16);
 impl EventType {
     pub const EXCHANGE_COMPLETE: Self = Self(1);
@@ -159,6 +186,16 @@ impl From<u16> for EventType {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for EventType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::EXCHANGE_COMPLETE.0.into(), "EXCHANGE_COMPLETE", "ExchangeComplete"),
+            (Self::BLIT_COMPLETE.0.into(), "BLIT_COMPLETE", "BlitComplete"),
+            (Self::FLIP_COMPLETE.0.into(), "FLIP_COMPLETE", "FlipComplete"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

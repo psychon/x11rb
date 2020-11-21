@@ -151,6 +151,8 @@ pub mod wrapper;
 #[rustfmt::skip]
 #[allow(missing_docs)]
 pub mod protocol;
+#[cfg(test)]
+mod test;
 
 use connection::Connection;
 use errors::ConnectError;
