@@ -274,8 +274,10 @@ mod pretty_printer {
         use super::{pretty_print_bitmask, pretty_print_enum};
         use std::fmt::{Display, Formatter, Result};
 
-        struct CallbackFormating<'a, 'b, F> {
-            callback: F,
+        type CallbackType = fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result;
+
+        struct CallbackFormating<'a, 'b> {
+            callback: CallbackType,
             value: u32,
             cases: &'a [(u32, &'b str, &'b str)],
         }
@@ -283,8 +285,7 @@ mod pretty_printer {
         fn new_enum<'a, 'b>(
             value: u32,
             cases: &'a [(u32, &'b str, &'b str)],
-        ) -> CallbackFormating<'a, 'b, fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result>
-        {
+        ) -> CallbackFormating<'a, 'b> {
             CallbackFormating {
                 callback: pretty_print_enum,
                 value,
@@ -295,8 +296,7 @@ mod pretty_printer {
         fn new_bitmask<'a, 'b>(
             value: u32,
             cases: &'a [(u32, &'b str, &'b str)],
-        ) -> CallbackFormating<'a, 'b, fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result>
-        {
+        ) -> CallbackFormating<'a, 'b> {
             CallbackFormating {
                 callback: pretty_print_bitmask,
                 value,
@@ -304,10 +304,7 @@ mod pretty_printer {
             }
         }
 
-        impl<F> Display for CallbackFormating<'_, '_, F>
-        where
-            F: Fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result,
-        {
+        impl Display for CallbackFormating<'_, '_> {
             fn fmt(&self, f: &mut Formatter<'_>) -> Result {
                 (self.callback)(f, self.value, self.cases)
             }
