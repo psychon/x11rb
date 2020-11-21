@@ -11,18 +11,25 @@ fn allowed_in_quark_name(c: u8) -> bool {
     c.is_ascii_alphanumeric() || c == b'-' && c == b'_'
 }
 
+fn parse_with_matcher<M>(data: &[u8], matcher: M) -> (&[u8], &[u8])
+where
+    M: Fn(u8) -> bool,
+{
+    let end = data.iter()
+        .enumerate()
+        .find(|(_, &c)| !matcher(c))
+        .map(|(idx, _)| idx)
+        .unwrap_or(data.len());
+    (&data[..end], &data[end..])
+}
+
 // Find the longest prefix satisfying allowed_in_quark_name().
 // This returns (Some(prefix), remaining) if a prefix is found, else (None, data).
 fn next_component(data: &[u8]) -> (Option<&[u8]>, &[u8]) {
-    let end = data.iter()
-        .enumerate()
-        .find(|(_, &c)| !allowed_in_quark_name(c))
-        .map(|(idx, _)| idx)
-        .unwrap_or(data.len());
-    if end == 0 {
-        (None, data)
-    } else {
-        (Some(&data[..end]), &data[end..])
+    let (prefix, remaining) = parse_with_matcher(data, allowed_in_quark_name);
+    match prefix {
+        [] => (None, remaining),
+        prefix => (Some(prefix), remaining),
     }
 }
 
@@ -55,7 +62,7 @@ fn parse_resource(data: &[u8]) -> (Vec<String>, &[u8]) {
 }
 
 // Parse a resource like "foo.?*baz" (wildcards allowed)
-fn parse_resource_entry(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
+fn parse_components(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
     let mut data = data;
     let mut result = Vec::new();
     while let (Some(component), remaining) = next_component_name(data) {
@@ -74,19 +81,75 @@ fn parse_resource_entry(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
     (result, data)
 }
 
-fn parse_value(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
-    let _ = data;
-    todo!()
-}
-
 fn parse_entry(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
-    let (resource, data) = parse_resource(data);
-    // Now... something about expecting a ':'  and then skipping ' '  and '\t'  until the value
-    // begins.
-    // Afterwards:
-    let value = parse_value(data);
-    let _ = (resource, value);
-    todo!()
+    let (components, data) = parse_components(data);
+
+    // skip spaces
+    let (_, data) = parse_with_matcher(data, |c| c == b' ');
+
+    if data.first() != Some(&b':') {
+        return Err(Error::Error);
+    }
+
+    // skip more spaces
+    let (_, data) = parse_with_matcher(data, |c| c == b' ' || c == b'\t');
+
+    // Parse the value, decoding escape sequences. The most complicated case are octal escape
+    // sequences like \123.
+    let mut value = Vec::new();
+    let mut index = 0;
+    let mut octal = None;
+    while let Some(&b) = data.get(index) {
+        index += 1;
+        if let Some(oct) = octal {
+            if b.is_ascii_digit() {
+                // We are currently parsing an octal; add the new character
+                match oct {
+                    (x, None) => octal = Some((x, Some(b))),
+                    (x, Some(y)) => {
+                        let (x, y, z) = (x - b'0', y - b'0', b - b'0');
+                        let decoded = (x * 8 + y) * 8 + z;
+                        value.push(decoded);
+                        octal = None;
+                    }
+                }
+                continue;
+            } else {
+                // Not an octal sequence; add the collected characters to the output
+                value.push(b'\\');
+                value.push(oct.0);
+                if let Some(oct2) = oct.1 {
+                    value.push(oct2);
+                }
+                octal = None;
+
+                // Fall through to the parsing code below
+            }
+        }
+        if b != b'\\' {
+            value.push(b);
+        } else {
+            index += 1;
+            match data.get(index) {
+                None => value.push(b),
+                Some(b' ') => value.push(b' '),
+                Some(b'\t') => value.push(b'\t'),
+                Some(b'\n') => value.push(b'\n'),
+                Some(b'\\') => value.push(b'\\'),
+                Some(&x) if x.is_ascii_digit() => octal = Some((x, None)),
+                Some(&x) => {
+                    value.push(b);
+                    value.push(x);
+                }
+            }
+        }
+    }
+
+    let entry = Entry {
+        components,
+        value,
+    };
+    Ok((entry, &data[index..]))
 }
 
 #[cfg(test)]
