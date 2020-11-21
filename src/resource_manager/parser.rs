@@ -223,7 +223,7 @@ mod test {
 
     #[test]
     fn test_parse_entry_success() {
-        let tests: [(&[u8], _, &[u8]); 31] = [
+        let tests: [(&[u8], _, &[u8]); 37] = [
             // Basics
             (
                 b"First: 1",
@@ -408,6 +408,38 @@ mod test {
                 b"First: \\00a",
                 vec![(Binding::Tight, Component::Normal("First".to_string()))],
                 b"\\00a",
+            ),
+            // Own tests
+            // Some more escape tests, e.g. escape at end of input
+            (
+                b"First: \\",
+                vec![(Binding::Tight, Component::Normal("First".to_string()))],
+                b"\\",
+            ),
+            (
+                b"First: \\xxx",
+                vec![(Binding::Tight, Component::Normal("First".to_string()))],
+                b"\\xxx",
+            ),
+            (
+                b"First: \\1xx",
+                vec![(Binding::Tight, Component::Normal("First".to_string()))],
+                b"\\1xx",
+            ),
+            (
+                b"First: \\10x",
+                vec![(Binding::Tight, Component::Normal("First".to_string()))],
+                b"\\10x",
+            ),
+            (
+                b"First: \\100",
+                vec![(Binding::Tight, Component::Normal("First".to_string()))],
+                b"@",
+            ),
+            (
+                b"First: \\n",
+                vec![(Binding::Tight, Component::Normal("First".to_string()))],
+                b"\n",
             ),
         ];
         for (data, resource, value) in tests.iter() {
