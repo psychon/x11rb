@@ -536,7 +536,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "use std::convert::TryInto;");
         outln!(out, "use std::io::IoSlice;");
         outln!(out, "#[allow(unused_imports)]");
-        outln!(out, "use crate::utils::{{RawFdContainer, pretty_print_bitmask, pretty_print_enum}};");
+        outln!(
+            out,
+            "use crate::utils::{{RawFdContainer, pretty_print_bitmask, pretty_print_enum}};"
+        );
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
@@ -2492,13 +2495,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         outln!(out, "impl std::fmt::Debug for {}  {{", rust_name);
         out.indented(|out| {
-            outln!(out, "fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{");
+            outln!(
+                out,
+                "fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{"
+            );
             out.indented(|out| {
                 outln!(out, "let variants = [");
                 for enum_item in enum_def.items.iter() {
                     let rust_item_name = ename_to_rust(&enum_item.name);
                     let camel_item_name = ename_to_camel_case(&enum_item.name);
-                    outln!(out.indent(), "(Self::{}.0.into(), \"{}\", \"{}\"),", rust_item_name, rust_item_name, camel_item_name);
+                    outln!(
+                        out.indent(),
+                        "(Self::{}.0.into(), \"{}\", \"{}\"),",
+                        rust_item_name,
+                        rust_item_name,
+                        camel_item_name
+                    );
                 }
                 outln!(out, "];");
                 if ok_for_bitmask {

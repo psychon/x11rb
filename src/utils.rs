@@ -216,7 +216,11 @@ mod pretty_printer {
     /// match is used. Otherwise, the number is printed as a decimal.
     ///
     /// In alternate mode, the second string in the given array is used, else the first.
-    pub(crate) fn pretty_print_enum(fmt: &mut Formatter<'_>, value: u32, cases: &[(u32, &str, &str)]) -> Result {
+    pub(crate) fn pretty_print_enum(
+        fmt: &mut Formatter<'_>,
+        value: u32,
+        cases: &[(u32, &str, &str)],
+    ) -> Result {
         for (variant, name1, name2) in cases {
             if &value == variant {
                 if fmt.alternate() {
@@ -235,10 +239,13 @@ mod pretty_printer {
     /// Any left-over number is printed as a decimal.
     ///
     /// In alternate mode, the second string in the given array is used, else the first.
-    pub(crate) fn pretty_print_bitmask(fmt: &mut Formatter<'_>, value: u32, cases: &[(u32, &str, &str)]) -> Result {
+    pub(crate) fn pretty_print_bitmask(
+        fmt: &mut Formatter<'_>,
+        value: u32,
+        cases: &[(u32, &str, &str)],
+    ) -> Result {
         // First, figure out if there are any bits not covered by any case
-        let known_bits = cases.iter()
-            .fold(0, |acc, (value, _, _)| acc | value);
+        let known_bits = cases.iter().fold(0, |acc, (value, _, _)| acc | value);
         let remaining = value & !known_bits;
         let mut already_printed = if value == 0 || remaining != 0 {
             Debug::fmt(&remaining, fmt)?;
@@ -273,7 +280,11 @@ mod pretty_printer {
             cases: &'a [(u32, &'b str, &'b str)],
         }
 
-        fn new_enum<'a, 'b>(value: u32, cases: &'a [(u32, &'b str, &'b str)]) -> CallbackFormating<'a, 'b, fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result> {
+        fn new_enum<'a, 'b>(
+            value: u32,
+            cases: &'a [(u32, &'b str, &'b str)],
+        ) -> CallbackFormating<'a, 'b, fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result>
+        {
             CallbackFormating {
                 callback: pretty_print_enum,
                 value,
@@ -281,7 +292,11 @@ mod pretty_printer {
             }
         }
 
-        fn new_bitmask<'a, 'b>(value: u32, cases: &'a [(u32, &'b str, &'b str)]) -> CallbackFormating<'a, 'b, fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result> {
+        fn new_bitmask<'a, 'b>(
+            value: u32,
+            cases: &'a [(u32, &'b str, &'b str)],
+        ) -> CallbackFormating<'a, 'b, fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result>
+        {
             CallbackFormating {
                 callback: pretty_print_bitmask,
                 value,
@@ -290,7 +305,8 @@ mod pretty_printer {
         }
 
         impl<F> Display for CallbackFormating<'_, '_, F>
-            where F: Fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result
+        where
+            F: Fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result,
         {
             fn fmt(&self, f: &mut Formatter<'_>) -> Result {
                 (self.callback)(f, self.value, self.cases)
@@ -299,10 +315,7 @@ mod pretty_printer {
 
         #[test]
         fn test_enum() {
-            let cases = [
-                (0, "zero", "ZERO"),
-                (42, "the answer", "ANSWER"),
-            ];
+            let cases = [(0, "zero", "ZERO"), (42, "the answer", "ANSWER")];
             let printer = new_enum(0, &cases);
             assert_eq!(&format!("{}", printer), "zero");
             assert_eq!(&format!("{:#}", printer), "ZERO");
