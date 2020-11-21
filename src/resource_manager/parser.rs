@@ -7,9 +7,71 @@ enum Error {
     Error,
 }
 
-fn parse_resource(data: &[u8]) -> Result<(Resource, &[u8]), Error> {
-    let _ = data;
-    todo!()
+fn allowed_in_quark_name(c: u8) -> bool {
+    c.is_ascii_alphanumeric() || c == b'-' && c == b'_'
+}
+
+// Find the longest prefix satisfying allowed_in_quark_name().
+// This returns (Some(prefix), remaining) if a prefix is found, else (None, data).
+fn next_component(data: &[u8]) -> (Option<&[u8]>, &[u8]) {
+    let end = data.iter()
+        .enumerate()
+        .find(|(_, &c)| !allowed_in_quark_name(c))
+        .map(|(idx, _)| idx)
+        .unwrap_or(data.len());
+    if end == 0 {
+        (None, data)
+    } else {
+        (Some(&data[..end]), &data[end..])
+    }
+}
+
+fn next_component_name(data: &[u8]) -> (Option<Component>, &[u8]) {
+    if data.first() == Some(&b'?') {
+        (Some(Component::Wildcard), &data[1..])
+    } else {
+        let (comp, remaining) = next_component(data);
+        let comp = comp.map(|s| {
+            let s = std::str::from_utf8(s).expect("ascii-only");
+            Component::Normal(s.to_string())
+        });
+        (comp, remaining)
+    }
+}
+
+// Parse a resource like "foo.bar.baz" (no wildcards allowed, no bindings allowed)
+fn parse_resource(data: &[u8]) -> (Vec<String>, &[u8]) {
+    let mut data = data;
+    let mut result = Vec::new();
+    while let (Some(component), remaining) = next_component(data) {
+        data = remaining;
+        while let Some(&b'.') = data.first() {
+            data = &data[1..];
+        }
+        let component = std::str::from_utf8(component).expect("ascii-only");
+        result.push(component.to_string());
+    }
+    (result, data)
+}
+
+// Parse a resource like "foo.?*baz" (wildcards allowed)
+fn parse_resource_entry(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
+    let mut data = data;
+    let mut result = Vec::new();
+    while let (Some(component), remaining) = next_component_name(data) {
+        data = remaining;
+        let mut binding = Binding::Tight;
+        loop {
+            match data.first() {
+                Some(&b'*') => binding = Binding::Loose,
+                Some(&b'.') => {}
+                _ => break,
+            }
+            data = &data[1..];
+        }
+        result.push((binding, component));
+    }
+    (result, data)
 }
 
 fn parse_value(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
@@ -18,7 +80,7 @@ fn parse_value(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
 }
 
 fn parse_entry(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
-    let (resource, data) = parse_resource(data)?;
+    let (resource, data) = parse_resource(data);
     // Now... something about expecting a ':'  and then skipping ' '  and '\t'  until the value
     // begins.
     // Afterwards:
@@ -38,18 +100,14 @@ mod test {
     fn test_parse_resource_success() {
         let tests = [
             (b"First.second", vec![
-                (Binding::Tight, Component::Normal("First".to_string())),
-                (Binding::Tight, Component::Normal("second".to_string())),
+                "First".to_string(),
+                "second".to_string(),
             ]),
         ];
         for (data, expected) in tests.iter() {
-            match parse_resource(*data) {
-                Ok((result, remaining)) => {
-                    assert_eq!(remaining, b"");
-                    assert_eq!(result, *expected);
-                }
-                Err(err) => panic!("Failed to parse '{:?}': {:?}", data, err)
-            }
+            let (result, remaining) = parse_resource(*data);
+            assert_eq!(remaining, b"");
+            assert_eq!(result, *expected);
         }
     }
 
@@ -63,9 +121,9 @@ mod test {
             b"?.second",
         ];
         for data in tests.iter() {
-            match parse_resource(*data) {
-                Ok(v) => panic!("Unexpected success parsing '{:?}': {:?}", data, v),
-                Err(_) => {},
+            let (result, remaining) = parse_resource(*data);
+            if remaining.is_empty() {
+                panic!("Unexpected success parsing '{:?}': {:?}", data, result);
             }
         }
     }
