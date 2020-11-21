@@ -67,7 +67,7 @@ pub(super) fn handle_request(request_def: &xcbdefs::RequestDef, out: &mut Output
 /// }};
 /// assert!(reply.value{width}().is_none());
 /// ```
-pub fn value{width}<'a>(&'a self) -> Option<impl Iterator<Item=u{width}> + 'a> {{
+pub fn value{width}(&self) -> Option<impl Iterator<Item=u{width}> + '_> {{
     if self.format == {width} {{
         Some(crate::wrapper::PropertyIterator::new(&self.value))
     }} else {{
