@@ -142,10 +142,10 @@ impl From<u32> for TESTTYPE {
 impl std::fmt::Debug for TESTTYPE  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::POSITIVE_TRANSITION.0.into(), "POSITIVE_TRANSITION", "PositiveTransition"),
-            (Self::NEGATIVE_TRANSITION.0.into(), "NEGATIVE_TRANSITION", "NegativeTransition"),
-            (Self::POSITIVE_COMPARISON.0.into(), "POSITIVE_COMPARISON", "PositiveComparison"),
-            (Self::NEGATIVE_COMPARISON.0.into(), "NEGATIVE_COMPARISON", "NegativeComparison"),
+            (Self::POSITIVE_TRANSITION.0, "POSITIVE_TRANSITION", "PositiveTransition"),
+            (Self::NEGATIVE_TRANSITION.0, "NEGATIVE_TRANSITION", "NegativeTransition"),
+            (Self::POSITIVE_COMPARISON.0, "POSITIVE_COMPARISON", "PositiveComparison"),
+            (Self::NEGATIVE_COMPARISON.0, "NEGATIVE_COMPARISON", "NegativeComparison"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -190,8 +190,8 @@ impl From<u32> for VALUETYPE {
 impl std::fmt::Debug for VALUETYPE  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::ABSOLUTE.0.into(), "ABSOLUTE", "Absolute"),
-            (Self::RELATIVE.0.into(), "RELATIVE", "Relative"),
+            (Self::ABSOLUTE.0, "ABSOLUTE", "Absolute"),
+            (Self::RELATIVE.0, "RELATIVE", "Relative"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }

@@ -348,8 +348,8 @@ impl From<u32> for PolyEdge {
 impl std::fmt::Debug for PolyEdge  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::SHARP.0.into(), "SHARP", "Sharp"),
-            (Self::SMOOTH.0.into(), "SMOOTH", "Smooth"),
+            (Self::SHARP.0, "SHARP", "Sharp"),
+            (Self::SMOOTH.0, "SMOOTH", "Smooth"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -394,8 +394,8 @@ impl From<u32> for PolyMode {
 impl std::fmt::Debug for PolyMode  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::PRECISE.0.into(), "PRECISE", "Precise"),
-            (Self::IMPRECISE.0.into(), "IMPRECISE", "Imprecise"),
+            (Self::PRECISE.0, "PRECISE", "Precise"),
+            (Self::IMPRECISE.0, "IMPRECISE", "Imprecise"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -519,12 +519,12 @@ impl From<u32> for SubPixel {
 impl std::fmt::Debug for SubPixel  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::UNKNOWN.0.into(), "UNKNOWN", "Unknown"),
-            (Self::HORIZONTAL_RGB.0.into(), "HORIZONTAL_RGB", "HorizontalRGB"),
-            (Self::HORIZONTAL_BGR.0.into(), "HORIZONTAL_BGR", "HorizontalBGR"),
-            (Self::VERTICAL_RGB.0.into(), "VERTICAL_RGB", "VerticalRGB"),
-            (Self::VERTICAL_BGR.0.into(), "VERTICAL_BGR", "VerticalBGR"),
-            (Self::NONE.0.into(), "NONE", "None"),
+            (Self::UNKNOWN.0, "UNKNOWN", "Unknown"),
+            (Self::HORIZONTAL_RGB.0, "HORIZONTAL_RGB", "HorizontalRGB"),
+            (Self::HORIZONTAL_BGR.0, "HORIZONTAL_BGR", "HorizontalBGR"),
+            (Self::VERTICAL_RGB.0, "VERTICAL_RGB", "VerticalRGB"),
+            (Self::VERTICAL_BGR.0, "VERTICAL_BGR", "VerticalBGR"),
+            (Self::NONE.0, "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -571,10 +571,10 @@ impl From<u32> for Repeat {
 impl std::fmt::Debug for Repeat  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::NONE.0.into(), "NONE", "None"),
-            (Self::NORMAL.0.into(), "NORMAL", "Normal"),
-            (Self::PAD.0.into(), "PAD", "Pad"),
-            (Self::REFLECT.0.into(), "REFLECT", "Reflect"),
+            (Self::NONE.0, "NONE", "None"),
+            (Self::NORMAL.0, "NORMAL", "Normal"),
+            (Self::PAD.0, "PAD", "Pad"),
+            (Self::REFLECT.0, "REFLECT", "Reflect"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }

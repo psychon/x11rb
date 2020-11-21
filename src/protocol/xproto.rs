@@ -560,32 +560,32 @@ impl From<u32> for EventMask {
 impl std::fmt::Debug for EventMask  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::NO_EVENT.0.into(), "NO_EVENT", "NoEvent"),
-            (Self::KEY_PRESS.0.into(), "KEY_PRESS", "KeyPress"),
-            (Self::KEY_RELEASE.0.into(), "KEY_RELEASE", "KeyRelease"),
-            (Self::BUTTON_PRESS.0.into(), "BUTTON_PRESS", "ButtonPress"),
-            (Self::BUTTON_RELEASE.0.into(), "BUTTON_RELEASE", "ButtonRelease"),
-            (Self::ENTER_WINDOW.0.into(), "ENTER_WINDOW", "EnterWindow"),
-            (Self::LEAVE_WINDOW.0.into(), "LEAVE_WINDOW", "LeaveWindow"),
-            (Self::POINTER_MOTION.0.into(), "POINTER_MOTION", "PointerMotion"),
-            (Self::POINTER_MOTION_HINT.0.into(), "POINTER_MOTION_HINT", "PointerMotionHint"),
-            (Self::BUTTON1_MOTION.0.into(), "BUTTON1_MOTION", "Button1Motion"),
-            (Self::BUTTON2_MOTION.0.into(), "BUTTON2_MOTION", "Button2Motion"),
-            (Self::BUTTON3_MOTION.0.into(), "BUTTON3_MOTION", "Button3Motion"),
-            (Self::BUTTON4_MOTION.0.into(), "BUTTON4_MOTION", "Button4Motion"),
-            (Self::BUTTON5_MOTION.0.into(), "BUTTON5_MOTION", "Button5Motion"),
-            (Self::BUTTON_MOTION.0.into(), "BUTTON_MOTION", "ButtonMotion"),
-            (Self::KEYMAP_STATE.0.into(), "KEYMAP_STATE", "KeymapState"),
-            (Self::EXPOSURE.0.into(), "EXPOSURE", "Exposure"),
-            (Self::VISIBILITY_CHANGE.0.into(), "VISIBILITY_CHANGE", "VisibilityChange"),
-            (Self::STRUCTURE_NOTIFY.0.into(), "STRUCTURE_NOTIFY", "StructureNotify"),
-            (Self::RESIZE_REDIRECT.0.into(), "RESIZE_REDIRECT", "ResizeRedirect"),
-            (Self::SUBSTRUCTURE_NOTIFY.0.into(), "SUBSTRUCTURE_NOTIFY", "SubstructureNotify"),
-            (Self::SUBSTRUCTURE_REDIRECT.0.into(), "SUBSTRUCTURE_REDIRECT", "SubstructureRedirect"),
-            (Self::FOCUS_CHANGE.0.into(), "FOCUS_CHANGE", "FocusChange"),
-            (Self::PROPERTY_CHANGE.0.into(), "PROPERTY_CHANGE", "PropertyChange"),
-            (Self::COLOR_MAP_CHANGE.0.into(), "COLOR_MAP_CHANGE", "ColorMapChange"),
-            (Self::OWNER_GRAB_BUTTON.0.into(), "OWNER_GRAB_BUTTON", "OwnerGrabButton"),
+            (Self::NO_EVENT.0, "NO_EVENT", "NoEvent"),
+            (Self::KEY_PRESS.0, "KEY_PRESS", "KeyPress"),
+            (Self::KEY_RELEASE.0, "KEY_RELEASE", "KeyRelease"),
+            (Self::BUTTON_PRESS.0, "BUTTON_PRESS", "ButtonPress"),
+            (Self::BUTTON_RELEASE.0, "BUTTON_RELEASE", "ButtonRelease"),
+            (Self::ENTER_WINDOW.0, "ENTER_WINDOW", "EnterWindow"),
+            (Self::LEAVE_WINDOW.0, "LEAVE_WINDOW", "LeaveWindow"),
+            (Self::POINTER_MOTION.0, "POINTER_MOTION", "PointerMotion"),
+            (Self::POINTER_MOTION_HINT.0, "POINTER_MOTION_HINT", "PointerMotionHint"),
+            (Self::BUTTON1_MOTION.0, "BUTTON1_MOTION", "Button1Motion"),
+            (Self::BUTTON2_MOTION.0, "BUTTON2_MOTION", "Button2Motion"),
+            (Self::BUTTON3_MOTION.0, "BUTTON3_MOTION", "Button3Motion"),
+            (Self::BUTTON4_MOTION.0, "BUTTON4_MOTION", "Button4Motion"),
+            (Self::BUTTON5_MOTION.0, "BUTTON5_MOTION", "Button5Motion"),
+            (Self::BUTTON_MOTION.0, "BUTTON_MOTION", "ButtonMotion"),
+            (Self::KEYMAP_STATE.0, "KEYMAP_STATE", "KeymapState"),
+            (Self::EXPOSURE.0, "EXPOSURE", "Exposure"),
+            (Self::VISIBILITY_CHANGE.0, "VISIBILITY_CHANGE", "VisibilityChange"),
+            (Self::STRUCTURE_NOTIFY.0, "STRUCTURE_NOTIFY", "StructureNotify"),
+            (Self::RESIZE_REDIRECT.0, "RESIZE_REDIRECT", "ResizeRedirect"),
+            (Self::SUBSTRUCTURE_NOTIFY.0, "SUBSTRUCTURE_NOTIFY", "SubstructureNotify"),
+            (Self::SUBSTRUCTURE_REDIRECT.0, "SUBSTRUCTURE_REDIRECT", "SubstructureRedirect"),
+            (Self::FOCUS_CHANGE.0, "FOCUS_CHANGE", "FocusChange"),
+            (Self::PROPERTY_CHANGE.0, "PROPERTY_CHANGE", "PropertyChange"),
+            (Self::COLOR_MAP_CHANGE.0, "COLOR_MAP_CHANGE", "ColorMapChange"),
+            (Self::OWNER_GRAB_BUTTON.0, "OWNER_GRAB_BUTTON", "OwnerGrabButton"),
         ];
         pretty_print_bitmask(fmt, self.0, &variants)
     }
@@ -632,9 +632,9 @@ impl From<u32> for BackingStore {
 impl std::fmt::Debug for BackingStore  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::NOT_USEFUL.0.into(), "NOT_USEFUL", "NotUseful"),
-            (Self::WHEN_MAPPED.0.into(), "WHEN_MAPPED", "WhenMapped"),
-            (Self::ALWAYS.0.into(), "ALWAYS", "Always"),
+            (Self::NOT_USEFUL.0, "NOT_USEFUL", "NotUseful"),
+            (Self::WHEN_MAPPED.0, "WHEN_MAPPED", "WhenMapped"),
+            (Self::ALWAYS.0, "ALWAYS", "Always"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -5536,18 +5536,18 @@ impl From<u32> for Gravity {
 impl std::fmt::Debug for Gravity  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::BIT_FORGET.0.into(), "BIT_FORGET", "BitForget"),
-            (Self::WIN_UNMAP.0.into(), "WIN_UNMAP", "WinUnmap"),
-            (Self::NORTH_WEST.0.into(), "NORTH_WEST", "NorthWest"),
-            (Self::NORTH.0.into(), "NORTH", "North"),
-            (Self::NORTH_EAST.0.into(), "NORTH_EAST", "NorthEast"),
-            (Self::WEST.0.into(), "WEST", "West"),
-            (Self::CENTER.0.into(), "CENTER", "Center"),
-            (Self::EAST.0.into(), "EAST", "East"),
-            (Self::SOUTH_WEST.0.into(), "SOUTH_WEST", "SouthWest"),
-            (Self::SOUTH.0.into(), "SOUTH", "South"),
-            (Self::SOUTH_EAST.0.into(), "SOUTH_EAST", "SouthEast"),
-            (Self::STATIC.0.into(), "STATIC", "Static"),
+            (Self::BIT_FORGET.0, "BIT_FORGET", "BitForget"),
+            (Self::WIN_UNMAP.0, "WIN_UNMAP", "WinUnmap"),
+            (Self::NORTH_WEST.0, "NORTH_WEST", "NorthWest"),
+            (Self::NORTH.0, "NORTH", "North"),
+            (Self::NORTH_EAST.0, "NORTH_EAST", "NorthEast"),
+            (Self::WEST.0, "WEST", "West"),
+            (Self::CENTER.0, "CENTER", "Center"),
+            (Self::EAST.0, "EAST", "East"),
+            (Self::SOUTH_WEST.0, "SOUTH_WEST", "SouthWest"),
+            (Self::SOUTH.0, "SOUTH", "South"),
+            (Self::SOUTH_EAST.0, "SOUTH_EAST", "SouthEast"),
+            (Self::STATIC.0, "STATIC", "Static"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -7861,11 +7861,11 @@ impl From<u32> for StackMode {
 impl std::fmt::Debug for StackMode  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::ABOVE.0.into(), "ABOVE", "Above"),
-            (Self::BELOW.0.into(), "BELOW", "Below"),
-            (Self::TOP_IF.0.into(), "TOP_IF", "TopIf"),
-            (Self::BOTTOM_IF.0.into(), "BOTTOM_IF", "BottomIf"),
-            (Self::OPPOSITE.0.into(), "OPPOSITE", "Opposite"),
+            (Self::ABOVE.0, "ABOVE", "Above"),
+            (Self::BELOW.0, "BELOW", "Below"),
+            (Self::TOP_IF.0, "TOP_IF", "TopIf"),
+            (Self::BOTTOM_IF.0, "BOTTOM_IF", "BottomIf"),
+            (Self::OPPOSITE.0, "OPPOSITE", "Opposite"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -15842,29 +15842,29 @@ impl From<u32> for GC {
 impl std::fmt::Debug for GC  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::FUNCTION.0.into(), "FUNCTION", "Function"),
-            (Self::PLANE_MASK.0.into(), "PLANE_MASK", "PlaneMask"),
-            (Self::FOREGROUND.0.into(), "FOREGROUND", "Foreground"),
-            (Self::BACKGROUND.0.into(), "BACKGROUND", "Background"),
-            (Self::LINE_WIDTH.0.into(), "LINE_WIDTH", "LineWidth"),
-            (Self::LINE_STYLE.0.into(), "LINE_STYLE", "LineStyle"),
-            (Self::CAP_STYLE.0.into(), "CAP_STYLE", "CapStyle"),
-            (Self::JOIN_STYLE.0.into(), "JOIN_STYLE", "JoinStyle"),
-            (Self::FILL_STYLE.0.into(), "FILL_STYLE", "FillStyle"),
-            (Self::FILL_RULE.0.into(), "FILL_RULE", "FillRule"),
-            (Self::TILE.0.into(), "TILE", "Tile"),
-            (Self::STIPPLE.0.into(), "STIPPLE", "Stipple"),
-            (Self::TILE_STIPPLE_ORIGIN_X.0.into(), "TILE_STIPPLE_ORIGIN_X", "TileStippleOriginX"),
-            (Self::TILE_STIPPLE_ORIGIN_Y.0.into(), "TILE_STIPPLE_ORIGIN_Y", "TileStippleOriginY"),
-            (Self::FONT.0.into(), "FONT", "Font"),
-            (Self::SUBWINDOW_MODE.0.into(), "SUBWINDOW_MODE", "SubwindowMode"),
-            (Self::GRAPHICS_EXPOSURES.0.into(), "GRAPHICS_EXPOSURES", "GraphicsExposures"),
-            (Self::CLIP_ORIGIN_X.0.into(), "CLIP_ORIGIN_X", "ClipOriginX"),
-            (Self::CLIP_ORIGIN_Y.0.into(), "CLIP_ORIGIN_Y", "ClipOriginY"),
-            (Self::CLIP_MASK.0.into(), "CLIP_MASK", "ClipMask"),
-            (Self::DASH_OFFSET.0.into(), "DASH_OFFSET", "DashOffset"),
-            (Self::DASH_LIST.0.into(), "DASH_LIST", "DashList"),
-            (Self::ARC_MODE.0.into(), "ARC_MODE", "ArcMode"),
+            (Self::FUNCTION.0, "FUNCTION", "Function"),
+            (Self::PLANE_MASK.0, "PLANE_MASK", "PlaneMask"),
+            (Self::FOREGROUND.0, "FOREGROUND", "Foreground"),
+            (Self::BACKGROUND.0, "BACKGROUND", "Background"),
+            (Self::LINE_WIDTH.0, "LINE_WIDTH", "LineWidth"),
+            (Self::LINE_STYLE.0, "LINE_STYLE", "LineStyle"),
+            (Self::CAP_STYLE.0, "CAP_STYLE", "CapStyle"),
+            (Self::JOIN_STYLE.0, "JOIN_STYLE", "JoinStyle"),
+            (Self::FILL_STYLE.0, "FILL_STYLE", "FillStyle"),
+            (Self::FILL_RULE.0, "FILL_RULE", "FillRule"),
+            (Self::TILE.0, "TILE", "Tile"),
+            (Self::STIPPLE.0, "STIPPLE", "Stipple"),
+            (Self::TILE_STIPPLE_ORIGIN_X.0, "TILE_STIPPLE_ORIGIN_X", "TileStippleOriginX"),
+            (Self::TILE_STIPPLE_ORIGIN_Y.0, "TILE_STIPPLE_ORIGIN_Y", "TileStippleOriginY"),
+            (Self::FONT.0, "FONT", "Font"),
+            (Self::SUBWINDOW_MODE.0, "SUBWINDOW_MODE", "SubwindowMode"),
+            (Self::GRAPHICS_EXPOSURES.0, "GRAPHICS_EXPOSURES", "GraphicsExposures"),
+            (Self::CLIP_ORIGIN_X.0, "CLIP_ORIGIN_X", "ClipOriginX"),
+            (Self::CLIP_ORIGIN_Y.0, "CLIP_ORIGIN_Y", "ClipOriginY"),
+            (Self::CLIP_MASK.0, "CLIP_MASK", "ClipMask"),
+            (Self::DASH_OFFSET.0, "DASH_OFFSET", "DashOffset"),
+            (Self::DASH_LIST.0, "DASH_LIST", "DashList"),
+            (Self::ARC_MODE.0, "ARC_MODE", "ArcMode"),
         ];
         pretty_print_bitmask(fmt, self.0, &variants)
     }
@@ -15924,22 +15924,22 @@ impl From<u32> for GX {
 impl std::fmt::Debug for GX  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::CLEAR.0.into(), "CLEAR", "Clear"),
-            (Self::AND.0.into(), "AND", "And"),
-            (Self::AND_REVERSE.0.into(), "AND_REVERSE", "AndReverse"),
-            (Self::COPY.0.into(), "COPY", "Copy"),
-            (Self::AND_INVERTED.0.into(), "AND_INVERTED", "AndInverted"),
-            (Self::NOOP.0.into(), "NOOP", "Noop"),
-            (Self::XOR.0.into(), "XOR", "Xor"),
-            (Self::OR.0.into(), "OR", "Or"),
-            (Self::NOR.0.into(), "NOR", "Nor"),
-            (Self::EQUIV.0.into(), "EQUIV", "Equiv"),
-            (Self::INVERT.0.into(), "INVERT", "Invert"),
-            (Self::OR_REVERSE.0.into(), "OR_REVERSE", "OrReverse"),
-            (Self::COPY_INVERTED.0.into(), "COPY_INVERTED", "CopyInverted"),
-            (Self::OR_INVERTED.0.into(), "OR_INVERTED", "OrInverted"),
-            (Self::NAND.0.into(), "NAND", "Nand"),
-            (Self::SET.0.into(), "SET", "Set"),
+            (Self::CLEAR.0, "CLEAR", "Clear"),
+            (Self::AND.0, "AND", "And"),
+            (Self::AND_REVERSE.0, "AND_REVERSE", "AndReverse"),
+            (Self::COPY.0, "COPY", "Copy"),
+            (Self::AND_INVERTED.0, "AND_INVERTED", "AndInverted"),
+            (Self::NOOP.0, "NOOP", "Noop"),
+            (Self::XOR.0, "XOR", "Xor"),
+            (Self::OR.0, "OR", "Or"),
+            (Self::NOR.0, "NOR", "Nor"),
+            (Self::EQUIV.0, "EQUIV", "Equiv"),
+            (Self::INVERT.0, "INVERT", "Invert"),
+            (Self::OR_REVERSE.0, "OR_REVERSE", "OrReverse"),
+            (Self::COPY_INVERTED.0, "COPY_INVERTED", "CopyInverted"),
+            (Self::OR_INVERTED.0, "OR_INVERTED", "OrInverted"),
+            (Self::NAND.0, "NAND", "Nand"),
+            (Self::SET.0, "SET", "Set"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -15985,9 +15985,9 @@ impl From<u32> for LineStyle {
 impl std::fmt::Debug for LineStyle  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::SOLID.0.into(), "SOLID", "Solid"),
-            (Self::ON_OFF_DASH.0.into(), "ON_OFF_DASH", "OnOffDash"),
-            (Self::DOUBLE_DASH.0.into(), "DOUBLE_DASH", "DoubleDash"),
+            (Self::SOLID.0, "SOLID", "Solid"),
+            (Self::ON_OFF_DASH.0, "ON_OFF_DASH", "OnOffDash"),
+            (Self::DOUBLE_DASH.0, "DOUBLE_DASH", "DoubleDash"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -16034,10 +16034,10 @@ impl From<u32> for CapStyle {
 impl std::fmt::Debug for CapStyle  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::NOT_LAST.0.into(), "NOT_LAST", "NotLast"),
-            (Self::BUTT.0.into(), "BUTT", "Butt"),
-            (Self::ROUND.0.into(), "ROUND", "Round"),
-            (Self::PROJECTING.0.into(), "PROJECTING", "Projecting"),
+            (Self::NOT_LAST.0, "NOT_LAST", "NotLast"),
+            (Self::BUTT.0, "BUTT", "Butt"),
+            (Self::ROUND.0, "ROUND", "Round"),
+            (Self::PROJECTING.0, "PROJECTING", "Projecting"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -16083,9 +16083,9 @@ impl From<u32> for JoinStyle {
 impl std::fmt::Debug for JoinStyle  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::MITER.0.into(), "MITER", "Miter"),
-            (Self::ROUND.0.into(), "ROUND", "Round"),
-            (Self::BEVEL.0.into(), "BEVEL", "Bevel"),
+            (Self::MITER.0, "MITER", "Miter"),
+            (Self::ROUND.0, "ROUND", "Round"),
+            (Self::BEVEL.0, "BEVEL", "Bevel"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -16132,10 +16132,10 @@ impl From<u32> for FillStyle {
 impl std::fmt::Debug for FillStyle  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::SOLID.0.into(), "SOLID", "Solid"),
-            (Self::TILED.0.into(), "TILED", "Tiled"),
-            (Self::STIPPLED.0.into(), "STIPPLED", "Stippled"),
-            (Self::OPAQUE_STIPPLED.0.into(), "OPAQUE_STIPPLED", "OpaqueStippled"),
+            (Self::SOLID.0, "SOLID", "Solid"),
+            (Self::TILED.0, "TILED", "Tiled"),
+            (Self::STIPPLED.0, "STIPPLED", "Stippled"),
+            (Self::OPAQUE_STIPPLED.0, "OPAQUE_STIPPLED", "OpaqueStippled"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -16180,8 +16180,8 @@ impl From<u32> for FillRule {
 impl std::fmt::Debug for FillRule  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::EVEN_ODD.0.into(), "EVEN_ODD", "EvenOdd"),
-            (Self::WINDING.0.into(), "WINDING", "Winding"),
+            (Self::EVEN_ODD.0, "EVEN_ODD", "EvenOdd"),
+            (Self::WINDING.0, "WINDING", "Winding"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -16226,8 +16226,8 @@ impl From<u32> for SubwindowMode {
 impl std::fmt::Debug for SubwindowMode  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::CLIP_BY_CHILDREN.0.into(), "CLIP_BY_CHILDREN", "ClipByChildren"),
-            (Self::INCLUDE_INFERIORS.0.into(), "INCLUDE_INFERIORS", "IncludeInferiors"),
+            (Self::CLIP_BY_CHILDREN.0, "CLIP_BY_CHILDREN", "ClipByChildren"),
+            (Self::INCLUDE_INFERIORS.0, "INCLUDE_INFERIORS", "IncludeInferiors"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -16272,8 +16272,8 @@ impl From<u32> for ArcMode {
 impl std::fmt::Debug for ArcMode  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::CHORD.0.into(), "CHORD", "Chord"),
-            (Self::PIE_SLICE.0.into(), "PIE_SLICE", "PieSlice"),
+            (Self::CHORD.0, "CHORD", "Chord"),
+            (Self::PIE_SLICE.0, "PIE_SLICE", "PieSlice"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -23876,8 +23876,8 @@ impl From<u32> for LedMode {
 impl std::fmt::Debug for LedMode  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::OFF.0.into(), "OFF", "Off"),
-            (Self::ON.0.into(), "ON", "On"),
+            (Self::OFF.0, "OFF", "Off"),
+            (Self::ON.0, "ON", "On"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -23923,9 +23923,9 @@ impl From<u32> for AutoRepeatMode {
 impl std::fmt::Debug for AutoRepeatMode  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::OFF.0.into(), "OFF", "Off"),
-            (Self::ON.0.into(), "ON", "On"),
-            (Self::DEFAULT.0.into(), "DEFAULT", "Default"),
+            (Self::OFF.0, "OFF", "Off"),
+            (Self::ON.0, "ON", "On"),
+            (Self::DEFAULT.0, "DEFAULT", "Default"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }

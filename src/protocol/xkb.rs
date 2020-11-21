@@ -622,11 +622,11 @@ impl From<u32> for Control {
 impl std::fmt::Debug for Control  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::GROUPS_WRAP.0.into(), "GROUPS_WRAP", "GroupsWrap"),
-            (Self::INTERNAL_MODS.0.into(), "INTERNAL_MODS", "InternalMods"),
-            (Self::IGNORE_LOCK_MODS.0.into(), "IGNORE_LOCK_MODS", "IgnoreLockMods"),
-            (Self::PER_KEY_REPEAT.0.into(), "PER_KEY_REPEAT", "PerKeyRepeat"),
-            (Self::CONTROLS_ENABLED.0.into(), "CONTROLS_ENABLED", "ControlsEnabled"),
+            (Self::GROUPS_WRAP.0, "GROUPS_WRAP", "GroupsWrap"),
+            (Self::INTERNAL_MODS.0, "INTERNAL_MODS", "InternalMods"),
+            (Self::IGNORE_LOCK_MODS.0, "IGNORE_LOCK_MODS", "IgnoreLockMods"),
+            (Self::PER_KEY_REPEAT.0, "PER_KEY_REPEAT", "PerKeyRepeat"),
+            (Self::CONTROLS_ENABLED.0, "CONTROLS_ENABLED", "ControlsEnabled"),
         ];
         pretty_print_bitmask(fmt, self.0, &variants)
     }

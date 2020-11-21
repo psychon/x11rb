@@ -2500,23 +2500,24 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 "fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{"
             );
             out.indented(|out| {
+                let into = match global_enum_size {
+                    32 => "",
+                    _ => ".into()",
+                };
                 outln!(out, "let variants = [");
                 for enum_item in enum_def.items.iter() {
                     let rust_item_name = ename_to_rust(&enum_item.name);
                     let camel_item_name = ename_to_camel_case(&enum_item.name);
                     outln!(
                         out.indent(),
-                        "(Self::{}.0.into(), \"{}\", \"{}\"),",
+                        "(Self::{}.0{}, \"{}\", \"{}\"),",
                         rust_item_name,
+                        into,
                         rust_item_name,
                         camel_item_name
                     );
                 }
                 outln!(out, "];");
-                let into = match global_enum_size {
-                    32 => "",
-                    _ => ".into()",
-                };
                 if ok_for_bitmask {
                     outln!(out, "pretty_print_bitmask(fmt, self.0{}, &variants)", into);
                 } else {

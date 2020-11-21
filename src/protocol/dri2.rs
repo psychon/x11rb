@@ -83,17 +83,17 @@ impl From<u32> for Attachment {
 impl std::fmt::Debug for Attachment  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::BUFFER_FRONT_LEFT.0.into(), "BUFFER_FRONT_LEFT", "BufferFrontLeft"),
-            (Self::BUFFER_BACK_LEFT.0.into(), "BUFFER_BACK_LEFT", "BufferBackLeft"),
-            (Self::BUFFER_FRONT_RIGHT.0.into(), "BUFFER_FRONT_RIGHT", "BufferFrontRight"),
-            (Self::BUFFER_BACK_RIGHT.0.into(), "BUFFER_BACK_RIGHT", "BufferBackRight"),
-            (Self::BUFFER_DEPTH.0.into(), "BUFFER_DEPTH", "BufferDepth"),
-            (Self::BUFFER_STENCIL.0.into(), "BUFFER_STENCIL", "BufferStencil"),
-            (Self::BUFFER_ACCUM.0.into(), "BUFFER_ACCUM", "BufferAccum"),
-            (Self::BUFFER_FAKE_FRONT_LEFT.0.into(), "BUFFER_FAKE_FRONT_LEFT", "BufferFakeFrontLeft"),
-            (Self::BUFFER_FAKE_FRONT_RIGHT.0.into(), "BUFFER_FAKE_FRONT_RIGHT", "BufferFakeFrontRight"),
-            (Self::BUFFER_DEPTH_STENCIL.0.into(), "BUFFER_DEPTH_STENCIL", "BufferDepthStencil"),
-            (Self::BUFFER_HIZ.0.into(), "BUFFER_HIZ", "BufferHiz"),
+            (Self::BUFFER_FRONT_LEFT.0, "BUFFER_FRONT_LEFT", "BufferFrontLeft"),
+            (Self::BUFFER_BACK_LEFT.0, "BUFFER_BACK_LEFT", "BufferBackLeft"),
+            (Self::BUFFER_FRONT_RIGHT.0, "BUFFER_FRONT_RIGHT", "BufferFrontRight"),
+            (Self::BUFFER_BACK_RIGHT.0, "BUFFER_BACK_RIGHT", "BufferBackRight"),
+            (Self::BUFFER_DEPTH.0, "BUFFER_DEPTH", "BufferDepth"),
+            (Self::BUFFER_STENCIL.0, "BUFFER_STENCIL", "BufferStencil"),
+            (Self::BUFFER_ACCUM.0, "BUFFER_ACCUM", "BufferAccum"),
+            (Self::BUFFER_FAKE_FRONT_LEFT.0, "BUFFER_FAKE_FRONT_LEFT", "BufferFakeFrontLeft"),
+            (Self::BUFFER_FAKE_FRONT_RIGHT.0, "BUFFER_FAKE_FRONT_RIGHT", "BufferFakeFrontRight"),
+            (Self::BUFFER_DEPTH_STENCIL.0, "BUFFER_DEPTH_STENCIL", "BufferDepthStencil"),
+            (Self::BUFFER_HIZ.0, "BUFFER_HIZ", "BufferHiz"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
@@ -138,8 +138,8 @@ impl From<u32> for DriverType {
 impl std::fmt::Debug for DriverType  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::DRI.0.into(), "DRI", "DRI"),
-            (Self::VDPAU.0.into(), "VDPAU", "VDPAU"),
+            (Self::DRI.0, "DRI", "DRI"),
+            (Self::VDPAU.0, "VDPAU", "VDPAU"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }

@@ -11153,32 +11153,32 @@ impl From<u32> for XIEventMask {
 impl std::fmt::Debug for XIEventMask  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::DEVICE_CHANGED.0.into(), "DEVICE_CHANGED", "DeviceChanged"),
-            (Self::KEY_PRESS.0.into(), "KEY_PRESS", "KeyPress"),
-            (Self::KEY_RELEASE.0.into(), "KEY_RELEASE", "KeyRelease"),
-            (Self::BUTTON_PRESS.0.into(), "BUTTON_PRESS", "ButtonPress"),
-            (Self::BUTTON_RELEASE.0.into(), "BUTTON_RELEASE", "ButtonRelease"),
-            (Self::MOTION.0.into(), "MOTION", "Motion"),
-            (Self::ENTER.0.into(), "ENTER", "Enter"),
-            (Self::LEAVE.0.into(), "LEAVE", "Leave"),
-            (Self::FOCUS_IN.0.into(), "FOCUS_IN", "FocusIn"),
-            (Self::FOCUS_OUT.0.into(), "FOCUS_OUT", "FocusOut"),
-            (Self::HIERARCHY.0.into(), "HIERARCHY", "Hierarchy"),
-            (Self::PROPERTY.0.into(), "PROPERTY", "Property"),
-            (Self::RAW_KEY_PRESS.0.into(), "RAW_KEY_PRESS", "RawKeyPress"),
-            (Self::RAW_KEY_RELEASE.0.into(), "RAW_KEY_RELEASE", "RawKeyRelease"),
-            (Self::RAW_BUTTON_PRESS.0.into(), "RAW_BUTTON_PRESS", "RawButtonPress"),
-            (Self::RAW_BUTTON_RELEASE.0.into(), "RAW_BUTTON_RELEASE", "RawButtonRelease"),
-            (Self::RAW_MOTION.0.into(), "RAW_MOTION", "RawMotion"),
-            (Self::TOUCH_BEGIN.0.into(), "TOUCH_BEGIN", "TouchBegin"),
-            (Self::TOUCH_UPDATE.0.into(), "TOUCH_UPDATE", "TouchUpdate"),
-            (Self::TOUCH_END.0.into(), "TOUCH_END", "TouchEnd"),
-            (Self::TOUCH_OWNERSHIP.0.into(), "TOUCH_OWNERSHIP", "TouchOwnership"),
-            (Self::RAW_TOUCH_BEGIN.0.into(), "RAW_TOUCH_BEGIN", "RawTouchBegin"),
-            (Self::RAW_TOUCH_UPDATE.0.into(), "RAW_TOUCH_UPDATE", "RawTouchUpdate"),
-            (Self::RAW_TOUCH_END.0.into(), "RAW_TOUCH_END", "RawTouchEnd"),
-            (Self::BARRIER_HIT.0.into(), "BARRIER_HIT", "BarrierHit"),
-            (Self::BARRIER_LEAVE.0.into(), "BARRIER_LEAVE", "BarrierLeave"),
+            (Self::DEVICE_CHANGED.0, "DEVICE_CHANGED", "DeviceChanged"),
+            (Self::KEY_PRESS.0, "KEY_PRESS", "KeyPress"),
+            (Self::KEY_RELEASE.0, "KEY_RELEASE", "KeyRelease"),
+            (Self::BUTTON_PRESS.0, "BUTTON_PRESS", "ButtonPress"),
+            (Self::BUTTON_RELEASE.0, "BUTTON_RELEASE", "ButtonRelease"),
+            (Self::MOTION.0, "MOTION", "Motion"),
+            (Self::ENTER.0, "ENTER", "Enter"),
+            (Self::LEAVE.0, "LEAVE", "Leave"),
+            (Self::FOCUS_IN.0, "FOCUS_IN", "FocusIn"),
+            (Self::FOCUS_OUT.0, "FOCUS_OUT", "FocusOut"),
+            (Self::HIERARCHY.0, "HIERARCHY", "Hierarchy"),
+            (Self::PROPERTY.0, "PROPERTY", "Property"),
+            (Self::RAW_KEY_PRESS.0, "RAW_KEY_PRESS", "RawKeyPress"),
+            (Self::RAW_KEY_RELEASE.0, "RAW_KEY_RELEASE", "RawKeyRelease"),
+            (Self::RAW_BUTTON_PRESS.0, "RAW_BUTTON_PRESS", "RawButtonPress"),
+            (Self::RAW_BUTTON_RELEASE.0, "RAW_BUTTON_RELEASE", "RawButtonRelease"),
+            (Self::RAW_MOTION.0, "RAW_MOTION", "RawMotion"),
+            (Self::TOUCH_BEGIN.0, "TOUCH_BEGIN", "TouchBegin"),
+            (Self::TOUCH_UPDATE.0, "TOUCH_UPDATE", "TouchUpdate"),
+            (Self::TOUCH_END.0, "TOUCH_END", "TouchEnd"),
+            (Self::TOUCH_OWNERSHIP.0, "TOUCH_OWNERSHIP", "TouchOwnership"),
+            (Self::RAW_TOUCH_BEGIN.0, "RAW_TOUCH_BEGIN", "RawTouchBegin"),
+            (Self::RAW_TOUCH_UPDATE.0, "RAW_TOUCH_UPDATE", "RawTouchUpdate"),
+            (Self::RAW_TOUCH_END.0, "RAW_TOUCH_END", "RawTouchEnd"),
+            (Self::BARRIER_HIT.0, "BARRIER_HIT", "BarrierHit"),
+            (Self::BARRIER_LEAVE.0, "BARRIER_LEAVE", "BarrierLeave"),
         ];
         pretty_print_bitmask(fmt, self.0, &variants)
     }
@@ -13576,7 +13576,7 @@ impl From<u32> for ModifierMask {
 impl std::fmt::Debug for ModifierMask  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::ANY.0.into(), "ANY", "Any"),
+            (Self::ANY.0, "ANY", "Any"),
         ];
         pretty_print_bitmask(fmt, self.0, &variants)
     }
@@ -16181,7 +16181,7 @@ impl From<u32> for KeyEventFlags {
 impl std::fmt::Debug for KeyEventFlags  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::KEY_REPEAT.0.into(), "KEY_REPEAT", "KeyRepeat"),
+            (Self::KEY_REPEAT.0, "KEY_REPEAT", "KeyRepeat"),
         ];
         pretty_print_bitmask(fmt, self.0, &variants)
     }
@@ -16327,7 +16327,7 @@ impl From<u32> for PointerEventFlags {
 impl std::fmt::Debug for PointerEventFlags  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::POINTER_EMULATED.0.into(), "POINTER_EMULATED", "PointerEmulated"),
+            (Self::POINTER_EMULATED.0, "POINTER_EMULATED", "PointerEmulated"),
         ];
         pretty_print_bitmask(fmt, self.0, &variants)
     }
@@ -17143,8 +17143,8 @@ impl From<u32> for TouchEventFlags {
 impl std::fmt::Debug for TouchEventFlags  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::TOUCH_PENDING_END.0.into(), "TOUCH_PENDING_END", "TouchPendingEnd"),
-            (Self::TOUCH_EMULATING_POINTER.0.into(), "TOUCH_EMULATING_POINTER", "TouchEmulatingPointer"),
+            (Self::TOUCH_PENDING_END.0, "TOUCH_PENDING_END", "TouchPendingEnd"),
+            (Self::TOUCH_EMULATING_POINTER.0, "TOUCH_EMULATING_POINTER", "TouchEmulatingPointer"),
         ];
         pretty_print_bitmask(fmt, self.0, &variants)
     }
@@ -17294,7 +17294,7 @@ impl From<u32> for TouchOwnershipFlags {
 impl std::fmt::Debug for TouchOwnershipFlags  {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let variants = [
-            (Self::NONE.0.into(), "NONE", "None"),
+            (Self::NONE.0, "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
     }
