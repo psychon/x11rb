@@ -185,6 +185,7 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
                 Some(b'\t') => value.push(b'\t'),
                 Some(b'n') => value.push(b'\n'),
                 Some(b'\\') => value.push(b'\\'),
+                Some(b'\n') => { /* Continue parsing next line */ },
                 Some(&x) if is_octal_digit(x) => octal = Some((x, None)),
                 Some(&x) => {
                     value.push(b);
@@ -561,7 +562,7 @@ mod test {
             components: vec![(Binding::Tight, Component::Normal("First".to_string()))],
             value: b"1".to_vec(),
         };
-        let tests: [(&[u8], _); 5] = [
+        let tests: [(&[u8], _); 6] = [
             (
                 b"First: 1\n\n\n",
                 vec![expected_entry.clone()],
@@ -581,6 +582,13 @@ mod test {
             (
                 b"First :\\\n \\\n\\\n1\n",
                 vec![expected_entry.clone()],
+            ),
+            (
+                b"First: \\\n  1\\\n2\n",
+                vec![Entry {
+                    components: vec![(Binding::Tight, Component::Normal("First".to_string()))],
+                    value: b"12".to_vec(),
+                }],
             ),
         ];
         let mut success = true;
