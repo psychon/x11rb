@@ -63,7 +63,7 @@ fn next_component_name(data: &[u8]) -> (Option<Component>, &[u8]) {
 }
 
 // Parse a resource like "foo.bar.baz" (no wildcards allowed, no bindings allowed)
-fn parse_resource(data: &[u8]) -> (Vec<String>, &[u8]) {
+pub(crate) fn parse_resource(data: &[u8]) -> Option<Vec<String>> {
     let mut data = data;
     let mut result = Vec::new();
     while let (Some(component), remaining) = next_component(data) {
@@ -74,7 +74,11 @@ fn parse_resource(data: &[u8]) -> (Vec<String>, &[u8]) {
         let component = std::str::from_utf8(component).expect("ascii-only");
         result.push(component.to_string());
     }
-    (result, data)
+    if data.is_empty() {
+        Some(result)
+    } else {
+        None
+    }
 }
 
 // Parse a resource like "foo.?*baz" (wildcards allowed)
@@ -263,9 +267,8 @@ mod test {
             ]),
         ];
         for (data, expected) in tests.iter() {
-            let (result, remaining) = parse_resource(*data);
-            assert_eq!(remaining, b"", "failed to parse {:?}", data);
-            assert_eq!(result, *expected, "while parsing {:?}", data);
+            let result = parse_resource(*data);
+            assert_eq!(result.as_ref(), Some(expected), "while parsing {:?}", data);
         }
     }
 
@@ -279,8 +282,8 @@ mod test {
             b"?.second",
         ];
         for data in tests.iter() {
-            let (result, remaining) = parse_resource(*data);
-            if remaining.is_empty() {
+            let result = parse_resource(*data);
+            if result.is_some() {
                 panic!("Unexpected success parsing '{:?}': {:?}", data, result);
             }
         }
