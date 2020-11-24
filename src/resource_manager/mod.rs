@@ -24,7 +24,7 @@ enum Component {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct Entry {
+pub(crate) struct Entry {
     components: Vec<(Binding, Component)>,
     value: Vec<u8>,
 }

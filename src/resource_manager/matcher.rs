@@ -6,7 +6,7 @@ fn match_entry<'a>(database: &'a [Entry], resource: &str, class: &str) -> Option
 
 #[cfg(test)]
 mod test {
-    use super::super::Database;
+    use super::super::parser::parse_database;
     use super::match_entry;
 
     // Most tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
@@ -18,9 +18,21 @@ mod test {
         let tests = [
             (b"", "", ""),
         ];
-        for &(database, resource, class) in &tests {
-            let database = Database::new_from_data(database);
-            assert_eq!(None, match_entry(&database.entries, resource, class));
+        let mut success = true;
+        for &(data, resource, class) in &tests {
+            let mut entries = Vec::new();
+            let database = parse_database(data, &mut entries, |_, _| unreachable!());
+            let result = match_entry(&entries, resource, class);
+            if !result.is_none() {
+                eprintln!("While testing {}", print_string(data));
+                eprintln!("Expected: None");
+                eprintln!("Got:      {:?}", result.map(print_string));
+                eprintln!();
+                success = false;
+            }
+        }
+        if !success {
+            panic!()
         }
     }
 
@@ -123,9 +135,28 @@ mod test {
             (b"urxvt.keysym.Control-Shift-Up: perl:font:increment", "urxvt.keysym.Control-Shift-Up", "", Some(b"perl:font:increment")),
             (b"rofi.normal: #000000, #000000, #000000, #000000", "rofi.normal", "", Some(b"#000000, #000000, #000000, #000000")),
         ];
-        for &(database, resource, class, result) in &tests {
-            let database = Database::new_from_data(database);
-            assert_eq!(result, match_entry(&database.entries, resource, class));
+        let mut success = true;
+        for &(data, resource, class, expected) in &tests {
+            let mut entries = Vec::new();
+            let database = parse_database(data, &mut entries, |_, _| unreachable!());
+            let result = match_entry(&entries, resource, class);
+            if result != expected {
+                eprintln!("While testing resource '{}' and class '{}' with the following input:", resource, class);
+                eprintln!("{}", print_string(data));
+                eprintln!("Expected: {:?}", expected.map(print_string));
+                eprintln!("Got:      {:?}", result.map(print_string));
+                eprintln!();
+                success = false;
+            }
         }
+        if !success {
+            panic!()
+        }
+    }
+
+    fn print_string(data: &[u8]) -> String {
+        std::str::from_utf8(data)
+            .map(|s| s.to_string())
+            .unwrap_or_else(|_| format!("{:?}", data))
     }
 }

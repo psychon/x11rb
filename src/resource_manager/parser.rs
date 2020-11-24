@@ -203,7 +203,7 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
     (Ok(entry), &data[index..])
 }
 
-fn parse_database<F>(mut data: &[u8], result: &mut Vec<Entry>, mut include_callback: F)
+pub(crate) fn parse_database<F>(mut data: &[u8], result: &mut Vec<Entry>, mut include_callback: F)
 where
     for<'r> F: FnMut(&'r [u8], &mut Vec<Entry>)
 {
