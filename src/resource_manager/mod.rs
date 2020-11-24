@@ -23,7 +23,7 @@ enum Component {
     Wildcard,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Entry {
     components: Vec<(Binding, Component)>,
     value: Vec<u8>,

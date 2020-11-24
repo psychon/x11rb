@@ -1,7 +1,5 @@
 use super::{Binding, Component, Entry};
 
-type Resource = Vec<(Binding, Component)>;
-
 fn is_octal_digit(c: u8) -> bool {
     match c {
         b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7' => true,
@@ -27,6 +25,18 @@ where
 
 fn skip_to_eol(data: &[u8]) -> &[u8] {
     parse_with_matcher(data, |c| c != b'\n').1
+}
+
+fn skip_spaces(data: &[u8]) -> &[u8] {
+    parse_with_matcher(data, |c| c == b' ').1
+}
+
+fn skip_text<'a>(data: &'a [u8], text: &[u8]) -> Option<&'a [u8]> {
+    if data.starts_with(text) {
+        Some(&data[text.len()..])
+    } else {
+        None
+    }
 }
 
 // Find the longest prefix satisfying allowed_in_quark_name().
@@ -107,8 +117,7 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
         _ => {}
     }
 
-    // skip spaces
-    let (_, data) = parse_with_matcher(data, |c| c == b' ');
+    let data = skip_spaces(data);
 
     // next comes a colon
     let data = match data.split_first() {
@@ -126,6 +135,9 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
     let mut octal = None;
     while let Some(&b) = data.get(index) {
         index += 1;
+        if b == b'\n' {
+            break;
+        }
         if let Some(oct) = octal {
             if is_octal_digit(b) {
                 // We are currently parsing an octal; add the new character
@@ -181,9 +193,53 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
     (Ok(entry), &data[index..])
 }
 
+fn parse_database<F>(mut data: &[u8], result: &mut Vec<Entry>, mut include_callback: F)
+where
+    for<'r> F: FnMut(&'r [u8], &mut Vec<Entry>)
+{
+    // Iterate over lines
+    while let Some(first) = data.first() {
+        match first {
+            // Skip empty lines
+            b'\n' => data = &data[1..],
+            // Comment, skip the line
+            b'!' => data = skip_to_eol(data),
+            b'#' => {
+                let remaining = skip_spaces(&data[1..]);
+                // Skip to the next line for the next loop iteration. The rest of the code here
+                // tried to parse the line.
+                data = skip_to_eol(remaining);
+
+                // Only #include is defined
+                if let Some(remaining) = skip_text(remaining, b"include") {
+                    let (_, remaining) = parse_with_matcher(remaining, |c| c == b' ');
+                    // Find the text enclosed in quotation marks
+                    if let Some(b'\"') = remaining.first() {
+                        let (file, remaining) = parse_with_matcher(
+                            &remaining[1..],
+                            |c| c != b'"' && c != b'\n'
+                        );
+                        if let Some(b'\"') = remaining.first() {
+                            // Okay, we found a well-formed include directive.
+                            include_callback(file, result);
+                        }
+                    }
+                }
+            }
+            _ => {
+                let (entry, remaining) = parse_entry(data);
+                data = remaining;
+                // Add the entry to the result if we parsed one; ignore errors
+                result.extend(entry.ok());
+            }
+
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use super::{Binding, Component, parse_entry, parse_resource};
+    use super::{Binding, Component, Entry, parse_database, parse_entry, parse_resource};
 
     // Most tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
     // [1]: https://github.com/Airblader/xcb-util-xrm/blob/master/tests/tests_parser.c
@@ -488,6 +544,77 @@ mod test {
             (Binding::Tight, Component::Normal(String::from_utf8(y).unwrap())),
         ];
         run_entry_test(&data, &resource, b"1");
+    }
+
+    #[test]
+    fn test_parse_database() {
+        let expected_entry = Entry {
+            components: vec![(Binding::Tight, Component::Normal("First".to_string()))],
+            value: b"1".to_vec(),
+        };
+        let tests: [(&[u8], _); 4] = [
+            (
+                b"First: 1\n\n\n",
+                vec![expected_entry.clone()],
+            ),
+            (
+                b"First: 1\n!Foo",
+                vec![expected_entry.clone()],
+            ),
+            (
+                b"!First: 1\nbar\n\n\n",
+                Vec::new(),
+            ),
+            (
+                b"!bar\nFirst: 1\nbaz",
+                vec![expected_entry.clone()],
+            ),
+        ];
+        let mut success = true;
+        for (data, expected) in tests.iter() {
+            let mut result = Vec::new();
+            let database = parse_database(data, &mut result, |_, _| unreachable!());
+            if &result != expected {
+                eprintln!("While testing {:?}", data);
+                eprintln!("Expected: {:?}", expected);
+                eprintln!("Got:      {:?}", result);
+                eprintln!();
+                success = false;
+            }
+        }
+        if !success {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_include() {
+        let tests: [(&[u8], _); 8] = [
+            (b"#include\"test\"", vec![&b"test"[..]]),
+            (b"#  include   \" test \"   \n#include  \"foo\"", vec![b" test ", b"foo"]),
+            (b"#include\"test", Vec::new()),
+            (b"#include\"", Vec::new()),
+            (b"#include", Vec::new()),
+            (b"#includ", Vec::new()),
+            (b"#in", Vec::new()),
+            (b"#  foo", Vec::new()),
+        ];
+        let mut success = true;
+        for (data, expected) in tests.iter() {
+            let mut result = Vec::new();
+            let mut calls = Vec::new();
+            parse_database(data, &mut result, |file, _| calls.push(file.to_vec()));
+            if &calls != expected {
+                eprintln!("While testing {:?}", data);
+                eprintln!("Expected: {:?}", expected);
+                eprintln!("Got:      {:?}", calls);
+                eprintln!();
+                success = false;
+            }
+        }
+        if !success {
+            panic!()
+        }
     }
 
     fn run_entry_test(data: &[u8], resource: &[(Binding, Component)], value: &[u8]) {
