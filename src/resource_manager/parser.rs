@@ -125,8 +125,17 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
         _ => return (Err(()), skip_to_eol(data)),
     };
 
-    // skip more spaces
-    let (_, data) = parse_with_matcher(data, |c| c == b' ' || c == b'\t');
+    // skip more spaces and let \ escape line breaks
+    let mut data = data;
+    loop {
+        let (_, remaining) = parse_with_matcher(data, |c| c == b' ' || c == b'\t');
+        if remaining.get(..2) == Some(&b"\\\n"[..]) {
+            data = &remaining[2..];
+        } else {
+            data = remaining;
+            break;
+        }
+    }
 
     // Parse the value, decoding escape sequences. The most complicated case are octal escape
     // sequences like \123.
@@ -552,7 +561,7 @@ mod test {
             components: vec![(Binding::Tight, Component::Normal("First".to_string()))],
             value: b"1".to_vec(),
         };
-        let tests: [(&[u8], _); 4] = [
+        let tests: [(&[u8], _); 5] = [
             (
                 b"First: 1\n\n\n",
                 vec![expected_entry.clone()],
@@ -567,6 +576,10 @@ mod test {
             ),
             (
                 b"!bar\nFirst: 1\nbaz",
+                vec![expected_entry.clone()],
+            ),
+            (
+                b"First :\\\n \\\n\\\n1\n",
                 vec![expected_entry.clone()],
             ),
         ];
