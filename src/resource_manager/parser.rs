@@ -185,7 +185,7 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
 mod test {
     use super::{Binding, Component, parse_entry, parse_resource};
 
-    // The tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
+    // Most tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
     // [1]: https://github.com/Airblader/xcb-util-xrm/blob/master/tests/tests_parser.c
 
     #[test]

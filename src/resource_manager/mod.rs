@@ -9,6 +9,7 @@ use crate::connection::Connection;
 use crate::errors::ReplyError;
 
 mod parser;
+mod matcher;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Binding {
