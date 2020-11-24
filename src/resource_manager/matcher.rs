@@ -13,32 +13,11 @@ mod test {
     // [1]: https://github.com/Airblader/xcb-util-xrm/blob/master/tests/tests_match.c
 
     #[test]
-    fn test_non_match() {
-        // Non-matches / Errors
-        let tests = [
-            (b"", "", ""),
-        ];
-        let mut success = true;
-        for &(data, resource, class) in &tests {
-            let mut entries = Vec::new();
-            let database = parse_database(data, &mut entries, |_, _| unreachable!());
-            let result = match_entry(&entries, resource, class);
-            if !result.is_none() {
-                eprintln!("While testing {}", print_string(data));
-                eprintln!("Expected: None");
-                eprintln!("Got:      {:?}", result.map(print_string));
-                eprintln!();
-                success = false;
-            }
-        }
-        if !success {
-            panic!()
-        }
-    }
-
-    #[test]
     fn test_matches() {
-        let tests: [(&[u8], _, _, Option<&[u8]>); 67] = [
+        let tests: [(&[u8], _, _, Option<&[u8]>); 68] = [
+            // Non-matches / Errors
+            (b"", "", "", None),
+
             // Xlib returns the match here, despite the query violating the specs.
             (b"First.second: 1", "First.second", "First.second.third", None),
             (b"", "First.second", "", None),
