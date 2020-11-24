@@ -2,11 +2,6 @@ use super::{Binding, Component, Entry};
 
 type Resource = Vec<(Binding, Component)>;
 
-#[derive(Debug)]
-enum Error {
-    Error,
-}
-
 fn is_octal_digit(c: u8) -> bool {
     match c {
         b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7' => true,
@@ -28,6 +23,10 @@ where
         .map(|(idx, _)| idx)
         .unwrap_or(data.len());
     (&data[..end], &data[end..])
+}
+
+fn skip_to_eol(data: &[u8]) -> &[u8] {
+    parse_with_matcher(data, |c| c != b'\n').1
 }
 
 // Find the longest prefix satisfying allowed_in_quark_name().
@@ -97,14 +96,14 @@ fn parse_components(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
     (result, data)
 }
 
-fn parse_entry(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
+fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
     let (components, data) = parse_components(data);
 
     match components.last() {
         // Empty components are not allowed
-        None => return Err(Error::Error),
+        None => return (Err(()), skip_to_eol(data)),
         // The last component may not be a wildcard
-        Some((_, Component::Wildcard)) => return Err(Error::Error),
+        Some((_, Component::Wildcard)) => return (Err(()), skip_to_eol(data)),
         _ => {}
     }
 
@@ -114,7 +113,7 @@ fn parse_entry(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
     // next comes a colon
     let data = match data.split_first() {
         Some((&b':', data)) => data,
-        _ => return Err(Error::Error),
+        _ => return (Err(()), skip_to_eol(data)),
     };
 
     // skip more spaces
@@ -179,7 +178,7 @@ fn parse_entry(data: &[u8]) -> Result<(Entry, &[u8]), Error> {
         components,
         value,
     };
-    Ok((entry, &data[index..]))
+    (Ok(entry), &data[index..])
 }
 
 #[cfg(test)]
@@ -460,8 +459,9 @@ mod test {
         ];
         for data in tests.iter() {
             match parse_entry(*data) {
-                Ok(v) => panic!("Unexpected success parsing '{:?}': {:?}", data, v),
-                Err(_) => {},
+                (Ok(v), _) => panic!("Unexpected success parsing '{:?}': {:?}", data, v),
+                (Err(_), b"") => {},
+                (Err(_), remaining) => panic!("Unexpected remaining data parsing '{:?}': {:?}", data, remaining),
             }
         }
     }
@@ -492,12 +492,12 @@ mod test {
 
     fn run_entry_test(data: &[u8], resource: &[(Binding, Component)], value: &[u8]) {
         match parse_entry(data) {
-            Ok((result, remaining)) => {
+            (Ok(result), remaining) => {
                 assert_eq!(remaining, b"", "failed to parse {:?}", data);
                 assert_eq!(result.components, resource, "incorrect components when parsing {:?}", data);
                 assert_eq!(result.value, value, "incorrect value when parsing {:?}", data);
             }
-            Err(err) => panic!("Failed to parse '{:?}': {:?}", data, err)
+            (Err(err), _) => panic!("Failed to parse '{:?}': {:?}", data, err)
         }
     }
 }
