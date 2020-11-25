@@ -114,7 +114,7 @@ mod test {
             (b"urxvt.keysym.Control-Shift-Up: perl:font:increment", "urxvt.keysym.Control-Shift-Up", "", Some(b"perl:font:increment")),
             (b"rofi.normal: #000000, #000000, #000000, #000000", "rofi.normal", "", Some(b"#000000, #000000, #000000, #000000")),
         ];
-        let mut success = true;
+        let mut failures = 0;
         for &(data, resource, class, expected) in &tests {
             let mut entries = Vec::new();
             let database = parse_database(data, &mut entries, |_, _| unreachable!());
@@ -125,11 +125,11 @@ mod test {
                 eprintln!("Expected: {:?}", expected.map(print_string));
                 eprintln!("Got:      {:?}", result.map(print_string));
                 eprintln!();
-                success = false;
+                failures += 1;
             }
         }
-        if !success {
-            panic!()
+        if failures != 0 {
+            panic!("Had {} failures", failures)
         }
     }
 
