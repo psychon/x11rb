@@ -261,10 +261,11 @@ mod test {
     #[test]
     fn test_parse_resource_success() {
         let tests = [
-            (b"First.second", vec![
+            (&b"First.second"[..], vec![
                 "First".to_string(),
                 "second".to_string(),
             ]),
+            (b"", Vec::new()),
         ];
         for (data, expected) in tests.iter() {
             let result = parse_resource(*data);
@@ -274,8 +275,8 @@ mod test {
 
     #[test]
     fn test_parse_resource_error() {
-        let tests: [&[u8]; 5] = [
-            b"First.second: on",
+        let tests = [
+            &b"First.second: on"[..],
             b"First*second",
             b"First.?.second",
             b"*second",
@@ -291,12 +292,12 @@ mod test {
 
     #[test]
     fn test_parse_entry_success() {
-        let tests: [(&[u8], _, &[u8]); 37] = [
+        let tests = [
             // Basics
             (
-                b"First: 1",
+                &b"First: 1"[..],
                 vec![(Binding::Tight, Component::Normal("First".to_string()))],
-                b"1",
+                &b"1"[..],
             ),
             (
                 b"First.second: 1",
@@ -517,8 +518,8 @@ mod test {
 
     #[test]
     fn test_parse_entry_error() {
-        let tests: [&[u8]; 7] = [
-            b": 1",
+        let tests = [
+            &b": 1"[..],
             b"?: 1",
             b"First",
             b"First second",
@@ -565,9 +566,9 @@ mod test {
             components: vec![(Binding::Tight, Component::Normal("First".to_string()))],
             value: b"1".to_vec(),
         };
-        let tests: [(&[u8], _); 6] = [
+        let tests = [
             (
-                b"First: 1\n\n\n",
+                &b"First: 1\n\n\n"[..],
                 vec![expected_entry.clone()],
             ),
             (
@@ -613,8 +614,8 @@ mod test {
 
     #[test]
     fn test_include() {
-        let tests: [(&[u8], _); 8] = [
-            (b"#include\"test\"", vec![&b"test"[..]]),
+        let tests = [
+            (&b"#include\"test\""[..], vec![&b"test"[..]]),
             (b"#  include   \" test \"   \n#include  \"foo\"", vec![b" test ", b"foo"]),
             (b"#include\"test", Vec::new()),
             (b"#include\"", Vec::new()),

@@ -14,9 +14,9 @@ mod test {
 
     #[test]
     fn test_matches() {
-        let tests: [(&[u8], _, _, Option<&[u8]>); 68] = [
+        let tests = [
             // Non-matches / Errors
-            (b"", "", "", None),
+            (&b""[..], "", "", None),
 
             // Xlib returns the match here, despite the query violating the specs.
             (b"First.second: 1", "First.second", "First.second.third", None),
@@ -30,7 +30,7 @@ mod test {
             (b"First: 1", "", "first", None),
 
             // Duplicate entries
-            (b"First: 1\nFirst: 2\nFirst: 3\n", "First", "", Some(b"3")),
+            (b"First: 1\nFirst: 2\nFirst: 3\n", "First", "", Some(&b"3"[..])),
             (b"First: 1\nSecond: 2\nSecond: 3\nThird: 4\n", "Second", "", Some(b"3")),
 
             /* Basic matching */
