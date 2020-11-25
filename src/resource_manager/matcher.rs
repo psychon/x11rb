@@ -1,56 +1,54 @@
 use super::{Binding, Component, Entry};
 use super::parser::parse_resource;
 
+fn check_match(entry: &Entry, query: &[String]) -> bool {
+    // The idea is to check if a nondeterministic finite automaton accepts a given
+    // word. We have a set of current states (indicies). This describes where in the
+    // entry we are while trying to match. When we have a match, we go to the next
+    // component in the entry (index + 1). When we have a loose binding, we can accept
+    // the current component by staying in the same state (index).
+    let mut indicies = vec![0];
+    if let Some((Binding::Loose, _)) = entry.components.get(0) {
+        // First binding is loose, so we could "start anywhere" with the match
+        indicies.extend(1..entry.components.len());
+    }
+    // Go through the components and match them
+    for component in query {
+        let mut next_indicies = Vec::new();
+        for index in indicies {
+            if index == entry.components.len() {
+                // We are at the end of the entry and thus cannot continue this match
+                continue;
+            }
+            match entry.components[index].0 {
+                // We have to match here, no way around that.
+                Binding::Tight => {}
+                // We could "eat" this with the loose binding by staying in the state
+                Binding::Loose => next_indicies.push(index)
+            }
+            // Does the component match?
+            let matches = match entry.components[index].1 {
+                Component::Wildcard => true,
+                Component::Normal(ref s) => s == component,
+            };
+            if matches {
+                // Yes, the component matches and we go to the next state
+                next_indicies.push(index + 1);
+            }
+        }
+        indicies = next_indicies;
+    }
+    // We have a match if we reached the end of the components
+    indicies.contains(&entry.components.len())
+}
+
 pub(crate) fn match_entry<'a>(database: &'a [Entry], resource: &str, class: &str) -> Option<&'a [u8]> {
     let resource = parse_resource(resource.as_bytes())?;
     let class = parse_resource(class.as_bytes())?;
-    if class.is_empty() {
-        database.iter()
-            .filter(|entry| {
-                // The idea is to check if a nondeterministic finite automaton accepts a given
-                // word. We have a set of current states (indicies). This describes where in the
-                // entry we are while trying to match. When we have a match, we go to the next
-                // component in the entry (index + 1). When we have a loose binding, we can accept
-                // the current component by staying in the same state (index).
-                let mut indicies = vec![0];
-                if let Some((Binding::Loose, _)) = entry.components.get(0) {
-                    // First binding is loose, so we could "start anywhere" with the match
-                    indicies.extend(1..entry.components.len());
-                }
-                // Go through the components and match them
-                for component in resource.iter() {
-                    let mut next_indicies = Vec::new();
-                    for index in indicies {
-                        if index == entry.components.len() {
-                            // We are at the end of the entry and thus cannot continue this match
-                            continue;
-                        }
-                        match entry.components[index].0 {
-                            // We have to match here, no way around that.
-                            Binding::Tight => {}
-                            // We could "eat" this with the loose binding by staying in the state
-                            Binding::Loose => next_indicies.push(index)
-                        }
-                        // Does the component match?
-                        let matches = match entry.components[index].1 {
-                            Component::Wildcard => true,
-                            Component::Normal(ref s) => s == component,
-                        };
-                        if matches {
-                            // Yes, the component matches and we go to the next state
-                            next_indicies.push(index + 1);
-                        }
-                    }
-                    indicies = next_indicies;
-                }
-                // We have a match if we reached the end of the components
-                indicies.contains(&entry.components.len())
-            })
-            .last()
-            .map(|entry| &entry.value[..])
-    } else {
-        None
-    }
+    database.iter()
+        .filter(|entry| check_match(entry, &resource) || check_match(entry, &class))
+        .last()
+        .map(|entry| &entry.value[..])
 }
 
 #[cfg(test)]
