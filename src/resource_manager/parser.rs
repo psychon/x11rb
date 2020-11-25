@@ -598,7 +598,7 @@ mod test {
         let mut success = true;
         for (data, expected) in tests.iter() {
             let mut result = Vec::new();
-            let database = parse_database(data, &mut result, |_, _| unreachable!());
+            parse_database(data, &mut result, |_, _| unreachable!());
             if &result != expected {
                 eprintln!("While testing {:?}", data);
                 eprintln!("Expected: {:?}", expected);

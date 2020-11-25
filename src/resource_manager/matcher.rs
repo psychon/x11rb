@@ -117,7 +117,7 @@ mod test {
         let mut failures = 0;
         for &(data, resource, class, expected) in &tests {
             let mut entries = Vec::new();
-            let database = parse_database(data, &mut entries, |_, _| unreachable!());
+            parse_database(data, &mut entries, |_, _| unreachable!());
             let result = match_entry(&entries, resource, class);
             if result != expected {
                 eprintln!("While testing resource '{}' and class '{}' with the following input:", resource, class);
