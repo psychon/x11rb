@@ -1,7 +1,87 @@
 use super::{Binding, Component, Entry};
 use super::parser::parse_resource;
 
-fn check_match(entry: &Entry, query: &[String]) -> bool {
+pub(crate) struct ZipLongest<A, B> {
+    a: A,
+    b: B,
+}
+
+impl<A, B> Iterator for ZipLongest<A, B>
+where
+    A: Iterator,
+    B: Iterator,
+{
+    type Item = (Option<A::Item>, Option<B::Item>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match (self.a.next(), self.b.next()) {
+            (None, None) => None,
+            (a, b) => Some((a, b)),
+        }
+    }
+}
+
+fn zip_longest<'a, T>(a: &'a [T], b: &'a [T]) -> impl Iterator<Item=(Option<&'a T>, Option<&'a T>)> + 'a {
+    ZipLongest {
+        a: a.iter(),
+        b: b.iter(),
+    }
+}
+
+#[cfg(test)]
+mod test_zip_longest {
+    use super::zip_longest;
+
+    #[test]
+    fn empty() {
+        let (a, b): ([u8; 0], [u8; 0]) = ([], []);
+        let res = zip_longest(&a, &b).collect::<Vec<_>>();
+        assert_eq!(res, []);
+    }
+
+    #[test]
+    fn same_length() {
+        let a = [0, 1, 2];
+        let b = [4, 5, 6];
+        let expected = [
+            (Some(&0), Some(&4)),
+            (Some(&1), Some(&5)),
+            (Some(&2), Some(&6)),
+        ];
+        let res = zip_longest(&a, &b).collect::<Vec<_>>();
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn first_shorter() {
+        let a = [0, 1];
+        let b = [4, 5, 6, 7];
+        let expected = [
+            (Some(&0), Some(&4)),
+            (Some(&1), Some(&5)),
+            (None, Some(&6)),
+            (None, Some(&7)),
+        ];
+        let res = zip_longest(&a, &b).collect::<Vec<_>>();
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn second_shorter() {
+        let a = [0, 1, 2, 3];
+        let b = [4, 5];
+        let expected = [
+            (Some(&0), Some(&4)),
+            (Some(&1), Some(&5)),
+            (Some(&2), None),
+            (Some(&3), None),
+        ];
+        let res = zip_longest(&a, &b).collect::<Vec<_>>();
+        assert_eq!(res, expected);
+    }
+}
+
+fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> bool {
     // The idea is to check if a nondeterministic finite automaton accepts a given
     // word. We have a set of current states (indicies). This describes where in the
     // entry we are while trying to match. When we have a match, we go to the next
@@ -13,7 +93,7 @@ fn check_match(entry: &Entry, query: &[String]) -> bool {
         indicies.extend(1..entry.components.len());
     }
     // Go through the components and match them
-    for component in query {
+    for (resource, class) in zip_longest(resource, class) {
         let mut next_indicies = Vec::new();
         for index in indicies {
             if index == entry.components.len() {
@@ -29,7 +109,7 @@ fn check_match(entry: &Entry, query: &[String]) -> bool {
             // Does the component match?
             let matches = match entry.components[index].1 {
                 Component::Wildcard => true,
-                Component::Normal(ref s) => s == component,
+                Component::Normal(ref s) => Some(s) == resource || Some(s) == class,
             };
             if matches {
                 // Yes, the component matches and we go to the next state
@@ -46,7 +126,7 @@ pub(crate) fn match_entry<'a>(database: &'a [Entry], resource: &str, class: &str
     let resource = parse_resource(resource.as_bytes())?;
     let class = parse_resource(class.as_bytes())?;
     database.iter()
-        .filter(|entry| check_match(entry, &resource) || check_match(entry, &class))
+        .filter(|entry| check_match(entry, &resource, &class))
         .last()
         .map(|entry| &entry.value[..])
 }
