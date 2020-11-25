@@ -8,7 +8,7 @@ fn is_octal_digit(c: u8) -> bool {
 }
 
 fn allowed_in_quark_name(c: u8) -> bool {
-    c.is_ascii_alphanumeric() || c == b'-' && c == b'_'
+    c.is_ascii_alphanumeric() || c == b'-' || c == b'_'
 }
 
 fn parse_with_matcher<M>(data: &[u8], matcher: M) -> (&[u8], &[u8])
@@ -266,6 +266,14 @@ mod test {
                 "second".to_string(),
             ]),
             (b"", Vec::new()),
+            (b"urxvt.scrollBar_right",  vec![
+                "urxvt".to_string(),
+                "scrollBar_right".to_string(),
+            ]),
+            (b"urxvt.Control-Shift-Up",  vec![
+                "urxvt".to_string(),
+                "Control-Shift-Up".to_string(),
+            ]),
         ];
         for (data, expected) in tests.iter() {
             let result = parse_resource(*data);
