@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use super::{Binding, Component, Entry};
 use super::parser::parse_resource;
 
@@ -143,7 +145,7 @@ impl MatchState {
     }
 }
 
-fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> bool {
+fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> Vec<Vec<MatchKind>> {
     // The idea is to check if a nondeterministic finite automaton accepts a given
     // word. We have a set of current states. This describes where in the
     // entry we are while trying to match. When we have a match, we go to the next
@@ -186,16 +188,50 @@ fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> bool {
         states = next_states;
     }
     // We have a match if we reached the end of the components
-    states.iter().any(|s| s.index == entry.components.len())
+    states.into_iter().filter(|s| s.index == entry.components.len()).map(|s| s.history).collect()
+}
+
+fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
+    use Binding::*;
+    use HowMatched::*;
+    use MatchKind::*;
+
+    assert_eq!(match1.len(), match2.len(), "Both matches should have the same length TODO: This is incorrect thanks to instance/class, I think");
+    for (m1, m2) in match1.iter().zip(match2.iter()) {
+        match (m1, m2) {
+            // Precedence rule #1: Matching components (including wildcard '?') outweighs loose bindings ('*')
+            (SkippedViaLooseBinding, Matched(_)) => return Ordering::Less,
+            (Matched(_), SkippedViaLooseBinding) => return Ordering::Greater,
+            // Precedence rule #2a: Matching instance outweighs both matching class and wildcard
+            (Matched(MatchComponent { how_matched: Class, .. }), Matched(MatchComponent { how_matched: Instance, .. })) => return Ordering::Less,
+            (Matched(MatchComponent { how_matched: Wildcard, .. }), Matched(MatchComponent { how_matched: Instance, .. })) => return Ordering::Less,
+            (Matched(MatchComponent { how_matched: Instance, .. }), Matched(MatchComponent { how_matched: Class, .. })) => return Ordering::Greater,
+            (Matched(MatchComponent { how_matched: Instance, .. }), Matched(MatchComponent { how_matched: Wildcard, .. })) => return Ordering::Greater,
+            // Precedence rule #2b: Matching class outweighs wildcard
+            (Matched(MatchComponent { how_matched: Wildcard, .. }), Matched(MatchComponent { how_matched: Class, .. })) => return Ordering::Less,
+            (Matched(MatchComponent { how_matched: Class, .. }), Matched(MatchComponent { how_matched: Wildcard, .. })) => return Ordering::Greater,
+            // Precedence rule #3: A preceding exact match outweights a preceding '*'
+            (Matched(MatchComponent { preceding_binding: Loose, .. }), Matched(MatchComponent { preceding_binding: Tight, .. })) => return Ordering::Less,
+            (Matched(MatchComponent { preceding_binding: Tight, .. }), Matched(MatchComponent { preceding_binding: Loose, .. })) => return Ordering::Greater,
+            _ => {}
+        }
+    }
+    Ordering::Equal
 }
 
 pub(crate) fn match_entry<'a>(database: &'a [Entry], resource: &str, class: &str) -> Option<&'a [u8]> {
     let resource = parse_resource(resource.as_bytes())?;
     let class = parse_resource(class.as_bytes())?;
     database.iter()
-        .filter(|entry| check_match(entry, &resource, &class))
-        .last()
-        .map(|entry| &entry.value[..])
+        // Filter for entries that match the query (and record some info on how they match)
+        .flat_map(|entry| {
+            let matches = check_match(entry, &resource, &class);
+            let best_match = matches.into_iter().max_by(|match1, match2| compare_matches(match1, match2));
+            best_match.map(|m| (entry, m))
+
+        })
+        .max_by(|(_, match1), (_, match2)| compare_matches(match1, match2))
+        .map(|(entry, _)| &entry.value[..])
 }
 
 #[cfg(test)]
