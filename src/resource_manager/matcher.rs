@@ -196,7 +196,7 @@ fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
     use HowMatched::*;
     use MatchKind::*;
 
-    assert_eq!(match1.len(), match2.len(), "Both matches should have the same length TODO: This is incorrect thanks to instance/class, I think");
+    assert_eq!(match1.len(), match2.len(), "Both matches should have the same length (which is guaranteed by the current implementation of check_match())");
     for (m1, m2) in match1.iter().zip(match2.iter()) {
         match (m1, m2) {
             // Precedence rule #1: Matching components (including wildcard '?') outweighs loose bindings ('*')
@@ -346,6 +346,8 @@ mod test {
 
             // Own tests
             (b"*foo.bar: 1", "bar", "", None),
+            (b"First.Second.Third: 1\nFirst.Second: 2", "First.Second.Third", "First.Second", Some(b"1")),
+            (b"First.Second.Third: 1\nFirst.Second: 2", "First.Second", "First.Second.Third", Some(b"1")),
         ];
         let mut failures = 0;
         for &(data, resource, class, expected) in &tests {
