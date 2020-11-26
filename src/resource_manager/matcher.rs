@@ -81,41 +81,112 @@ mod test_zip_longest {
     }
 }
 
+/// Info how a specific component was matched.
+#[derive(Debug, Copy, Clone)]
+enum HowMatched {
+    /// The component matched the instance of the query
+    Instance,
+    /// The component matched the class of the query
+    Class,
+    /// The component is a wildcard and thus matched by default
+    Wildcard,
+}
+
+/// Info on how an (unskipped) component of the query was matched
+#[derive(Debug, Copy, Clone)]
+struct MatchComponent {
+    preceding_binding: Binding,
+    how_matched: HowMatched,
+}
+
+/// Info how a (possibly skipped) component of the query was matched
+#[derive(Debug, Copy, Clone)]
+enum MatchKind {
+    /// The component was skipped via a loose binding ("*")
+    SkippedViaLooseBinding,
+    /// The component was matched against the entry.
+    Matched(MatchComponent),
+}
+
+impl MatchKind {
+    fn new_match(preceding_binding: Binding, how_matched: HowMatched) -> Self {
+        Self::Matched(MatchComponent {
+            preceding_binding,
+            how_matched,
+        })
+    }
+}
+
+/// Current state of the matching machinery
+#[derive(Debug, Default)]
+struct MatchState {
+    /// Index into the entry on where we have to continue matching
+    index: usize,
+    /// How did we get to this state?
+    history: Vec<MatchKind>,
+}
+
+impl MatchState {
+    fn skip_loose(&self) -> Self {
+        let mut history = self.history.clone();
+        history.push(MatchKind::SkippedViaLooseBinding);
+        Self {
+            index: self.index,
+            history,
+        }
+    }
+
+    fn step(mut self, kind: MatchKind) -> Self {
+        self.history.push(kind);
+        self.index += 1;
+        self
+    }
+}
+
 fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> bool {
     // The idea is to check if a nondeterministic finite automaton accepts a given
-    // word. We have a set of current states (indicies). This describes where in the
+    // word. We have a set of current states. This describes where in the
     // entry we are while trying to match. When we have a match, we go to the next
     // component in the entry (index + 1). When we have a loose binding, we can accept
     // the current component by staying in the same state (index).
-    let mut indicies = vec![0];
+    let mut states = vec![MatchState::default()];
     // Go through the components and match them
     for (resource, class) in zip_longest(resource, class) {
-        let mut next_indicies = Vec::new();
-        for index in indicies {
-            if index == entry.components.len() {
+        let mut next_states = Vec::new();
+        for state in states.into_iter() {
+            if state.index == entry.components.len() {
                 // We are at the end of the entry and thus cannot continue this match
                 continue;
             }
-            match entry.components[index].0 {
+            let binding = entry.components[state.index].0;
+            match binding {
                 // We have to match here, no way around that.
                 Binding::Tight => {}
                 // We could "eat" this with the loose binding by staying in the state
-                Binding::Loose => next_indicies.push(index)
+                Binding::Loose => next_states.push(state.skip_loose())
             }
             // Does the component match?
-            let matches = match entry.components[index].1 {
-                Component::Wildcard => true,
-                Component::Normal(ref s) => Some(s) == resource || Some(s) == class,
+            let kind = match entry.components[state.index].1 {
+                Component::Wildcard => Some(MatchKind::new_match(binding, HowMatched::Wildcard)),
+                Component::Normal(ref s) => {
+                    if Some(s) == resource {
+                        Some(MatchKind::new_match(binding, HowMatched::Instance))
+                    } else if Some(s) == class {
+                        Some(MatchKind::new_match(binding, HowMatched::Class))
+                    } else {
+                        None
+                    }
+                },
             };
-            if matches {
+            if let Some(kind) = kind {
                 // Yes, the component matches and we go to the next state
-                next_indicies.push(index + 1);
+                next_states.push(state.step(kind));
             }
         }
-        indicies = next_indicies;
+        states = next_states;
     }
     // We have a match if we reached the end of the components
-    indicies.contains(&entry.components.len())
+    states.iter().any(|s| s.index == entry.components.len())
 }
 
 pub(crate) fn match_entry<'a>(database: &'a [Entry], resource: &str, class: &str) -> Option<&'a [u8]> {
