@@ -88,10 +88,6 @@ fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> bool {
     // component in the entry (index + 1). When we have a loose binding, we can accept
     // the current component by staying in the same state (index).
     let mut indicies = vec![0];
-    if let Some((Binding::Loose, _)) = entry.components.get(0) {
-        // First binding is loose, so we could "start anywhere" with the match
-        indicies.extend(1..entry.components.len());
-    }
     // Go through the components and match them
     for (resource, class) in zip_longest(resource, class) {
         let mut next_indicies = Vec::new();
@@ -240,6 +236,9 @@ mod test {
             (b"urxvt*cutchars:    '\"'()*<>[]{|}", "urxvt.cutchars", "", Some(b"'\"'()*<>[]{|}")),
             (b"urxvt.keysym.Control-Shift-Up: perl:font:increment", "urxvt.keysym.Control-Shift-Up", "", Some(b"perl:font:increment")),
             (b"rofi.normal: #000000, #000000, #000000, #000000", "rofi.normal", "", Some(b"#000000, #000000, #000000, #000000")),
+
+            // Own tests
+            (b"*foo.bar: 1", "bar", "", None),
         ];
         let mut failures = 0;
         for &(data, resource, class, expected) in &tests {
