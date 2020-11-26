@@ -621,7 +621,7 @@ mod test {
     }
 
     #[test]
-    fn test_include() {
+    fn test_include_parsing() {
         let tests = [
             (&b"#include\"test\""[..], vec![&b"test"[..]]),
             (b"#  include   \" test \"   \n#include  \"foo\"", vec![b" test ", b"foo"]),
@@ -648,6 +648,20 @@ mod test {
         if !success {
             panic!()
         }
+    }
+
+    #[test]
+    fn test_include_additions() {
+        let entry = Entry {
+            components: Vec::new(),
+            value: b"42".to_vec(),
+        };
+        let mut result = Vec::new();
+        parse_database(b"#include\"test\"", &mut result, |file, result| {
+            assert_eq!(file, b"test");
+            result.push(entry.clone());
+        });
+        assert_eq!(result, [entry]);
     }
 
     fn run_entry_test(data: &[u8], resource: &[(Binding, Component)], value: &[u8]) {
