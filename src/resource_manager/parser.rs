@@ -1,5 +1,12 @@
+//! Code for parsing resource management things
+
 use super::{Binding, Component, Entry};
 
+// =======================
+// Common helper functions
+// =======================
+
+/// Check if a character (well, u8) is an octal digit
 fn is_octal_digit(c: u8) -> bool {
     match c {
         b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7' => true,
@@ -7,10 +14,7 @@ fn is_octal_digit(c: u8) -> bool {
     }
 }
 
-fn allowed_in_quark_name(c: u8) -> bool {
-    c.is_ascii_alphanumeric() || c == b'-' || c == b'_'
-}
-
+/// Find the longest prefix of the given data where the given callback returns true
 fn parse_with_matcher<M>(data: &[u8], matcher: M) -> (&[u8], &[u8])
 where
     M: Fn(u8) -> bool,
@@ -23,24 +27,13 @@ where
     (&data[..end], &data[end..])
 }
 
-fn skip_to_eol(data: &[u8]) -> &[u8] {
-    parse_with_matcher(data, |c| c != b'\n').1
+/// Check if a character is allowed in a quark name
+fn allowed_in_quark_name(c: u8) -> bool {
+    c.is_ascii_alphanumeric() || c == b'-' || c == b'_'
 }
 
-fn skip_spaces(data: &[u8]) -> &[u8] {
-    parse_with_matcher(data, |c| c == b' ').1
-}
-
-fn skip_text<'a>(data: &'a [u8], text: &[u8]) -> Option<&'a [u8]> {
-    if data.starts_with(text) {
-        Some(&data[text.len()..])
-    } else {
-        None
-    }
-}
-
-// Find the longest prefix satisfying allowed_in_quark_name().
-// This returns (Some(prefix), remaining) if a prefix is found, else (None, data).
+/// Find the longest prefix satisfying allowed_in_quark_name().
+/// This returns (Some(prefix), remaining) if a prefix is found, else (None, data).
 fn next_component(data: &[u8]) -> (Option<&[u8]>, &[u8]) {
     let (prefix, remaining) = parse_with_matcher(data, allowed_in_quark_name);
     match prefix {
@@ -49,6 +42,31 @@ fn next_component(data: &[u8]) -> (Option<&[u8]>, &[u8]) {
     }
 }
 
+// =========================
+// Parser for resource files
+// =========================
+
+/// Skip to the next end of line in the given data
+fn skip_to_eol(data: &[u8]) -> &[u8] {
+    parse_with_matcher(data, |c| c != b'\n').1
+}
+
+/// Skip all spaces in the given data
+fn skip_spaces(data: &[u8]) -> &[u8] {
+    parse_with_matcher(data, |c| c == b' ').1
+}
+
+/// Skip the given text. Returns `None` if the text was not found
+fn skip_text<'a>(data: &'a [u8], text: &[u8]) -> Option<&'a [u8]> {
+    if data.starts_with(text) {
+        Some(&data[text.len()..])
+    } else {
+        None
+    }
+}
+
+/// Parse a single `Component` from the data. This can either be a wildcard ("?") or a
+/// component made up of characters accepted by `allowed_in_quark_name`.
 fn next_component_name(data: &[u8]) -> (Option<Component>, &[u8]) {
     if data.first() == Some(&b'?') {
         (Some(Component::Wildcard), &data[1..])
@@ -62,26 +80,7 @@ fn next_component_name(data: &[u8]) -> (Option<Component>, &[u8]) {
     }
 }
 
-// Parse a resource like "foo.bar.baz" (no wildcards allowed, no bindings allowed)
-pub(crate) fn parse_resource(data: &[u8]) -> Option<Vec<String>> {
-    let mut data = data;
-    let mut result = Vec::new();
-    while let (Some(component), remaining) = next_component(data) {
-        data = remaining;
-        while let Some(&b'.') = data.first() {
-            data = &data[1..];
-        }
-        let component = std::str::from_utf8(component).expect("ascii-only");
-        result.push(component.to_string());
-    }
-    if data.is_empty() {
-        Some(result)
-    } else {
-        None
-    }
-}
-
-// Parse a resource like "foo.?*baz" (wildcards allowed)
+/// Parse a resource like "foo.?*baz" (wildcards allowed)
 fn parse_components(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
     fn parse_binding(mut data: &[u8]) -> (Binding, &[u8]) {
         let mut binding = Binding::Tight;
@@ -110,6 +109,8 @@ fn parse_components(data: &[u8]) -> (Vec<(Binding, Component)>, &[u8]) {
     (result, data)
 }
 
+/// Parse a full entry from the data. This begins with components (see `parse_components()`),
+/// then after a colon (":") comes the value. The value may contain escape sequences.
 fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
     let (components, data) = parse_components(data);
 
@@ -207,6 +208,7 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
     (Ok(entry), &data[index..])
 }
 
+/// Parse the contents of a database
 pub(crate) fn parse_database<F>(mut data: &[u8], result: &mut Vec<Entry>, mut include_callback: F)
 where
     for<'r> F: FnMut(&'r [u8], &mut Vec<Entry>)
@@ -251,15 +253,35 @@ where
     }
 }
 
+
+/// Parse a resource query like "foo.bar.baz" (no wildcards allowed, no bindings allowed)
+pub(crate) fn parse_query(data: &[u8]) -> Option<Vec<String>> {
+    let mut data = data;
+    let mut result = Vec::new();
+    while let (Some(component), remaining) = next_component(data) {
+        data = remaining;
+        while let Some(&b'.') = data.first() {
+            data = &data[1..];
+        }
+        let component = std::str::from_utf8(component).expect("ascii-only");
+        result.push(component.to_string());
+    }
+    if data.is_empty() {
+        Some(result)
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use super::{Binding, Component, Entry, parse_database, parse_entry, parse_resource};
+    use super::{Binding, Component, Entry, parse_database, parse_entry, parse_query};
 
     // Most tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
     // [1]: https://github.com/Airblader/xcb-util-xrm/blob/master/tests/tests_parser.c
 
     #[test]
-    fn test_parse_resource_success() {
+    fn test_parse_query_success() {
         let tests = [
             (&b"First.second"[..], vec![
                 "First".to_string(),
@@ -276,13 +298,13 @@ mod test {
             ]),
         ];
         for (data, expected) in tests.iter() {
-            let result = parse_resource(*data);
+            let result = parse_query(*data);
             assert_eq!(result.as_ref(), Some(expected), "while parsing {:?}", data);
         }
     }
 
     #[test]
-    fn test_parse_resource_error() {
+    fn test_parse_query_error() {
         let tests = [
             &b"First.second: on"[..],
             b"First*second",
@@ -291,7 +313,7 @@ mod test {
             b"?.second",
         ];
         for data in tests.iter() {
-            let result = parse_resource(*data);
+            let result = parse_query(*data);
             if result.is_some() {
                 panic!("Unexpected success parsing '{:?}': {:?}", data, result);
             }

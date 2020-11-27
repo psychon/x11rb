@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 
 use super::{Binding, Component, Entry};
-use super::parser::parse_resource;
+use super::parser::parse_query;
 
 pub(crate) struct ZipLongest<A, B> {
     a: A,
@@ -220,8 +220,8 @@ fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
 }
 
 pub(crate) fn match_entry<'a>(database: &'a [Entry], resource: &str, class: &str) -> Option<&'a [u8]> {
-    let resource = parse_resource(resource.as_bytes())?;
-    let class = parse_resource(class.as_bytes())?;
+    let resource = parse_query(resource.as_bytes())?;
+    let class = parse_query(class.as_bytes())?;
     database.iter()
         // Filter for entries that match the query (and record some info on how they match)
         .flat_map(|entry| {
