@@ -5,11 +5,18 @@
 
 #![allow(missing_docs)] // FIXME remove this
 
+use std::path::{Path, PathBuf};
+use std::str::FromStr;
+
 use crate::connection::Connection;
 use crate::errors::ReplyError;
+use crate::protocol::xproto::{AtomEnum, ConnectionExt as _};
 
 mod parser;
 mod matcher;
+
+/// Maximum nesting of #include directives, same value as Xlib uses
+const MAX_INCLUSION_DEPTH: u8 = 100;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Binding {
@@ -41,67 +48,153 @@ impl Database {
         todo!()
     }
 
-    pub fn new_from_resource_manager_property(conn: impl Connection) -> Result<Self, ReplyError> {
-        let _ = conn;
-        todo!()
+    pub fn new_from_resource_manager(conn: impl Connection) -> Result<Option<Self>, ReplyError> {
+        let max_length = 100_000_000; // This is what Xlib does, so it must be correct (tm)
+        let window = conn.setup().roots[0].root;
+        let property = conn.
+            get_property(false, window, AtomEnum::RESOURCE_MANAGER, AtomEnum::STRING, 0, max_length)?
+            .reply()?;
+        if property.format == 8 && !property.value.is_empty() {
+            Ok(Some(Self::new_from_data(&property.value)))
+        } else {
+            Ok(None)
+        }
     }
 
     pub fn new_from_data(data: &[u8]) -> Self {
-        let _ = data;
-        todo!()
+        let mut entries = Vec::new();
+        parse_data_with_base_directory(&mut entries, data, Path::new("."), 0);
+        Self { entries }
     }
 
-    pub fn new_from_file(todo: ()) -> Self {
-        // I think it would be better to replace this with "from reader"? Or remove it completely?
-        let _ = todo;
-        todo!()
+    pub fn new_from_data_with_base_directory(data: &[u8], base_path: impl AsRef<Path>) -> Self {
+        Self::new_from_data_with_base_directory_impl(data, base_path.as_ref())
     }
 
-    pub fn to_string(&self) -> String {
-        let _ = self;
-        todo!()
+    fn new_from_data_with_base_directory_impl(data: &[u8], base_path: &Path) -> Self {
+        let mut entries = Vec::new();
+        parse_data_with_base_directory(&mut entries, data, base_path, 0);
+        Self { entries }
     }
 
-    pub fn combine(&self, target: &mut Self, overwrite: bool) {
-        let _ = (target, overwrite);
-        todo!()
+    pub fn get_bytes(&self, resource_name: &str, resource_class: &str) -> Option<&[u8]> {
+        matcher::match_entry(&self.entries, resource_name, resource_class)
     }
 
-    pub fn put_resource(&mut self, resource: &str, value: &[u8]) {
-        let _ = (resource, value);
-        todo!()
+    pub fn get_string(&self, resource_name: &str, resource_class: &str) -> Option<&str> {
+        std::str::from_utf8(self.get_bytes(resource_name, resource_class)?).ok()
     }
 
-    pub fn put_resource_line(&mut self, line: &[u8]) {
-        let _ = line;
-        todo!()
+    pub fn get_bool(&self, resource_name: &str, resource_class: &str) -> Option<bool> {
+        to_bool(self.get_string(resource_name, resource_class)?)
     }
 
-    pub fn get_bytes(&self, resource_name: &str, resource_class: &str) -> &[u8] {
-        let _ = (resource_name, resource_class);
-        todo!()
-    }
-
-    pub fn get_string(&self, resource_name: &str, resource_class: &str) -> &str {
-        let _ = (resource_name, resource_class);
-        todo!()
-    }
-
-    pub fn get_bool(&self, resource_name: &str, resource_class: &str) -> bool {
-        let _ = (resource_name, resource_class);
-        todo!()
-    }
-
-    pub fn get_value<T>(&self, resource_name: &str, resource_class: &str) -> Result<T, T::Err>
-        where T: std::str::FromStr
+    pub fn get_value<T>(&self, resource_name: &str, resource_class: &str) -> Result<Option<T>, T::Err>
+        where T: FromStr
     {
-        let _ = (resource_name, resource_class);
-        T::from_str(self.get_string(resource_name, resource_class))
+        self.get_string(resource_name, resource_class).map(T::from_str).transpose()
     }
 }
 
-// API: [u8] or str?
-// It seems that the value is "a bunch of bytes" (with one extra rule - no zero bytes, but
-// everything else is possible via escape sequences). The resource itself is less than ascii.
+fn parse_data_with_base_directory(result: &mut Vec<Entry>, data: &[u8], base_path: &Path, depth: u8) {
+    if depth > MAX_INCLUSION_DEPTH {
+        return;
+    }
+    parser::parse_database(data, result, |path, entries| {
+        // Construct the name of the file to include
+        if let Ok(path) = std::str::from_utf8(path) {
+            let mut path_buf = PathBuf::from(base_path);
+            path_buf.push(path);
 
-// TODO: Add an API so that no file I/O is done
+            // Read the file contents
+            if let Ok(new_data) = std::fs::read(&path_buf) {
+                // Parse the file contents with the new base path
+                let new_base = path_buf.parent().unwrap_or(base_path);
+                parse_data_with_base_directory(entries, &new_data, new_base, depth + 1);
+            }
+        }
+    });
+}
+
+fn to_bool(data: &str) -> Option<bool> {
+    if let Ok(num) = i64::from_str(data) {
+        return Some(num != 0);
+    }
+    match data.to_lowercase().as_bytes() {
+        b"true" => Some(true),
+        b"on" => Some(true),
+        b"yes" => Some(true),
+        b"false" => Some(false),
+        b"off" => Some(false),
+        b"no" => Some(false),
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{Database, to_bool};
+
+    #[test]
+    fn test_bool_true() {
+        let data = [
+            "1",
+            "10",
+            "true",
+            "TRUE",
+            "on",
+            "ON",
+            "yes",
+            "YES",
+        ];
+        for input in &data {
+            assert_eq!(Some(true), to_bool(input));
+        }
+    }
+
+    #[test]
+    fn test_bool_false() {
+        let data = [
+            "0",
+            "false",
+            "FALSE",
+            "off",
+            "OFF",
+            "no",
+            "NO",
+        ];
+        for input in &data {
+            assert_eq!(Some(false), to_bool(input));
+        }
+    }
+
+    #[test]
+    fn test_bool_none() {
+        let data = ["", "abc"];
+        for input in &data {
+            assert_eq!(None, to_bool(input));
+        }
+    }
+
+    #[test]
+    fn test_parse_i32_fail() {
+        let db = Database::new_from_data(b"a:");
+        assert_eq!(db.get_string("a", "a"), Some(""));
+        assert!(db.get_value::<i32>("a", "a").is_err());
+    }
+
+    #[test]
+    fn test_parse_i32_success() {
+        let data = [
+            (&b"a: 0"[..], 0),
+            (b"a: 1", 1),
+            (b"a: -1", -1),
+            (b"a: 100", 100),
+        ];
+        for (input, expected) in data.iter() {
+            let db = Database::new_from_data(input);
+            let result = db.get_value::<i32>("a", "a");
+            assert_eq!(result.unwrap().unwrap(), *expected);
+        }
+    }
+}
