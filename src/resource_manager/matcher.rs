@@ -1,89 +1,103 @@
+//! Match Xrm entries against a query.
+
 use std::cmp::Ordering;
 
 use super::{Binding, Component, Entry};
 use super::parser::parse_query;
 
-pub(crate) struct ZipLongest<A, B> {
-    a: A,
-    b: B,
-}
+mod zip_longest {
+    /// Given two slices, produce an iterator that zips the two slices.
+    ///
+    /// Compared to std::iter::Iterator::zip(), this iterator does not stop at the end of the
+    /// shorter of the two slices, but instead continues to the end of the longer slice. To make
+    /// this possible, the individual items are wrapped in `Option`.
+    ///
+    /// See tests below to make this clearer.
+    pub(super) fn zip_longest<'a, T>(a: &'a [T], b: &'a [T]) -> impl Iterator<Item=(Option<&'a T>, Option<&'a T>)> + 'a {
+        ZipLongest {
+            a: a.iter(),
+            b: b.iter(),
+        }
+    }
 
-impl<A, B> Iterator for ZipLongest<A, B>
-where
-    A: Iterator,
-    B: Iterator,
-{
-    type Item = (Option<A::Item>, Option<B::Item>);
+    #[derive(Debug)]
+    struct ZipLongest<A, B> {
+        a: A,
+        b: B,
+    }
 
-    fn next(&mut self) -> Option<Self::Item> {
-        match (self.a.next(), self.b.next()) {
-            (None, None) => None,
-            (a, b) => Some((a, b)),
+    impl<A, B> Iterator for ZipLongest<A, B>
+    where
+        A: Iterator,
+        B: Iterator,
+    {
+        type Item = (Option<A::Item>, Option<B::Item>);
+
+        fn next(&mut self) -> Option<Self::Item> {
+            match (self.a.next(), self.b.next()) {
+                (None, None) => None,
+                (a, b) => Some((a, b)),
+            }
+        }
+    }
+
+    #[cfg(test)]
+    mod test_zip_longest {
+        use super::zip_longest;
+
+        #[test]
+        fn empty() {
+            let (a, b): ([u8; 0], [u8; 0]) = ([], []);
+            let res = zip_longest(&a, &b).collect::<Vec<_>>();
+            assert_eq!(res, []);
+        }
+
+        #[test]
+        fn same_length() {
+            let a = [0, 1, 2];
+            let b = [4, 5, 6];
+            let expected = [
+                (Some(&0), Some(&4)),
+                (Some(&1), Some(&5)),
+                (Some(&2), Some(&6)),
+            ];
+            let res = zip_longest(&a, &b).collect::<Vec<_>>();
+            assert_eq!(res, expected);
+        }
+
+        #[test]
+        fn first_shorter() {
+            let a = [0, 1];
+            let b = [4, 5, 6, 7];
+            let expected = [
+                (Some(&0), Some(&4)),
+                (Some(&1), Some(&5)),
+                (None, Some(&6)),
+                (None, Some(&7)),
+            ];
+            let res = zip_longest(&a, &b).collect::<Vec<_>>();
+            assert_eq!(res, expected);
+        }
+
+        #[test]
+        fn second_shorter() {
+            let a = [0, 1, 2, 3];
+            let b = [4, 5];
+            let expected = [
+                (Some(&0), Some(&4)),
+                (Some(&1), Some(&5)),
+                (Some(&2), None),
+                (Some(&3), None),
+            ];
+            let res = zip_longest(&a, &b).collect::<Vec<_>>();
+            assert_eq!(res, expected);
         }
     }
 }
 
-fn zip_longest<'a, T>(a: &'a [T], b: &'a [T]) -> impl Iterator<Item=(Option<&'a T>, Option<&'a T>)> + 'a {
-    ZipLongest {
-        a: a.iter(),
-        b: b.iter(),
-    }
-}
-
-#[cfg(test)]
-mod test_zip_longest {
-    use super::zip_longest;
-
-    #[test]
-    fn empty() {
-        let (a, b): ([u8; 0], [u8; 0]) = ([], []);
-        let res = zip_longest(&a, &b).collect::<Vec<_>>();
-        assert_eq!(res, []);
-    }
-
-    #[test]
-    fn same_length() {
-        let a = [0, 1, 2];
-        let b = [4, 5, 6];
-        let expected = [
-            (Some(&0), Some(&4)),
-            (Some(&1), Some(&5)),
-            (Some(&2), Some(&6)),
-        ];
-        let res = zip_longest(&a, &b).collect::<Vec<_>>();
-        assert_eq!(res, expected);
-    }
-
-    #[test]
-    fn first_shorter() {
-        let a = [0, 1];
-        let b = [4, 5, 6, 7];
-        let expected = [
-            (Some(&0), Some(&4)),
-            (Some(&1), Some(&5)),
-            (None, Some(&6)),
-            (None, Some(&7)),
-        ];
-        let res = zip_longest(&a, &b).collect::<Vec<_>>();
-        assert_eq!(res, expected);
-    }
-
-    #[test]
-    fn second_shorter() {
-        let a = [0, 1, 2, 3];
-        let b = [4, 5];
-        let expected = [
-            (Some(&0), Some(&4)),
-            (Some(&1), Some(&5)),
-            (Some(&2), None),
-            (Some(&3), None),
-        ];
-        let res = zip_longest(&a, &b).collect::<Vec<_>>();
-        assert_eq!(res, expected);
-    }
-}
-
 /// Info how a specific component was matched.
+///
+/// This information is used to decide which of two matches is "better" in `compare_matches()`.
 #[derive(Debug, Copy, Clone)]
 enum HowMatched {
     /// The component matched the instance of the query
@@ -95,6 +109,8 @@ enum HowMatched {
 }
 
 /// Info on how an (unskipped) component of the query was matched
+///
+/// This information is used to decide which of two matches is "better" in `compare_matches()`.
 #[derive(Debug, Copy, Clone)]
 struct MatchComponent {
     preceding_binding: Binding,
@@ -102,6 +118,8 @@ struct MatchComponent {
 }
 
 /// Info how a (possibly skipped) component of the query was matched
+///
+/// This information is used to decide which of two matches is "better" in `compare_matches()`.
 #[derive(Debug, Copy, Clone)]
 enum MatchKind {
     /// The component was skipped via a loose binding ("*")
@@ -111,6 +129,7 @@ enum MatchKind {
 }
 
 impl MatchKind {
+    /// Create a new `MatchKind::Match` with the given entries.
     fn new_match(preceding_binding: Binding, how_matched: HowMatched) -> Self {
         Self::Matched(MatchComponent {
             preceding_binding,
@@ -119,45 +138,50 @@ impl MatchKind {
     }
 }
 
-/// Current state of the matching machinery
-#[derive(Debug, Default)]
-struct MatchState {
-    /// Index into the entry on where we have to continue matching
-    index: usize,
-    /// How did we get to this state?
-    history: Vec<MatchKind>,
-}
+fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> Vec<Vec<MatchKind>> {
+    /// Current state of the matching machinery
+    #[derive(Debug, Default)]
+    struct MatchState {
+        /// Index into the entry on where we have to continue matching
+        index: usize,
+        /// How did we get to this state?
+        history: Vec<MatchKind>,
+    }
 
-impl MatchState {
-    fn skip_loose(&self) -> Self {
-        let mut history = self.history.clone();
-        history.push(MatchKind::SkippedViaLooseBinding);
-        Self {
-            index: self.index,
-            history,
+    impl MatchState {
+        /// Record that a component was skipped via a loose binding (`*`).
+        fn skip_loose(&self) -> Self {
+            let mut history = self.history.clone();
+            history.push(MatchKind::SkippedViaLooseBinding);
+            Self {
+                index: self.index,
+                history,
+            }
+        }
+
+        /// Record that a component was matched in the given way.
+        fn step(mut self, kind: MatchKind) -> Self {
+            self.history.push(kind);
+            self.index += 1;
+            self
         }
     }
 
-    fn step(mut self, kind: MatchKind) -> Self {
-        self.history.push(kind);
-        self.index += 1;
-        self
-    }
-}
-
-fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> Vec<Vec<MatchKind>> {
     // The idea is to check if a nondeterministic finite automaton accepts a given
     // word. We have a set of current states. This describes where in the
-    // entry we are while trying to match. When we have a match, we go to the next
-    // component in the entry (index + 1). When we have a loose binding, we can accept
-    // the current component by staying in the same state (index).
+    // entry we are while trying to match. When we match a component, we go to the next
+    // component in the entry (index + 1, `MatchState::step()`). When we have a loose binding, we
+    // can accept the current component by staying in the same state (index,
+    // `MatchState::skip_loose()`).
     let mut states = vec![MatchState::default()];
-    // Go through the components and match them
-    for (resource, class) in zip_longest(resource, class) {
+
+    // Go through the components and match them against the query
+    for (resource, class) in zip_longest::zip_longest(resource, class) {
         let mut next_states = Vec::new();
         for state in states.into_iter() {
             if state.index == entry.components.len() {
-                // We are at the end of the entry and thus cannot continue this match
+                // We are at the end of the entry and thus cannot continue this match.
+                // We drop this match state.
                 continue;
             }
             let binding = entry.components[state.index].0;
@@ -191,6 +215,7 @@ fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> Vec<Vec<
     states.into_iter().filter(|s| s.index == entry.components.len()).map(|s| s.history).collect()
 }
 
+/// Compare two matches and decide which one of the two is better (`Ordering::Greater`)
 fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
     use Binding::*;
     use HowMatched::*;
@@ -219,6 +244,7 @@ fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
     Ordering::Equal
 }
 
+/// Find the best match for the given query in the database, returning `None` when nothing matches.
 pub(crate) fn match_entry<'a>(database: &'a [Entry], resource: &str, class: &str) -> Option<&'a [u8]> {
     let resource = parse_query(resource.as_bytes())?;
     let class = parse_query(class.as_bytes())?;
