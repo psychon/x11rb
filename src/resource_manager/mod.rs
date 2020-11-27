@@ -5,6 +5,7 @@
 
 #![allow(missing_docs)] // FIXME remove this
 
+use std::env::var_os;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
@@ -44,8 +45,59 @@ pub struct Database {
 
 impl Database {
     pub fn new_from_default(conn: impl Connection) -> Result<Self, ReplyError> {
-        let _ = conn;
-        todo!()
+        let cur_dir = Path::new(".");
+
+        // 1. Try to load the RESOURCE_MANAGER property
+        let mut entries = if let Some(db) = Self::new_from_resource_manager(conn)? {
+            db.entries
+        } else {
+            let mut entries = Vec::new();
+            if let Some(home) = var_os("HOME") {
+                // 2. Otherwise, try to load $HOME/.Xresources
+                let mut path = PathBuf::from(&home);
+                path.push(".Xresources");
+                let read_something = if let Ok(data) = std::fs::read(&path) {
+                    parse_data_with_base_directory(&mut entries, &data, Path::new(&home), 0);
+                    true
+                } else {
+                    false
+                };
+                let _ = path.pop();
+
+                if !read_something {
+                    // 3. Otherwise, try to load $HOME/.Xdefaults
+                    path.push(".Xdefaults");
+                    if let Ok(data) = std::fs::read(&path) {
+                        parse_data_with_base_directory(&mut entries, &data, Path::new(&home), 0);
+                    }
+                    let _ = path.pop();
+                }
+            }
+            entries
+        };
+
+        // 4. If XENVIRONMENT is specified, merge the database defined by that file
+        if let Some(xenv) = var_os("XENVIRONMENT") {
+            if let Ok(data) = std::fs::read(&xenv) {
+                let base = Path::new(&xenv).parent().unwrap_or(cur_dir);
+                parse_data_with_base_directory(&mut entries, &data, base, 0);
+            }
+        } else {
+            let mut path = if let Some(home) = var_os("HOME") {
+                PathBuf::from(home)
+            } else {
+                PathBuf::new()
+            };
+            let mut file = std::ffi::OsString::from(".Xdefaults-");
+            file.push(gethostname::gethostname());
+            path.push(file);
+            if let Ok(data) = std::fs::read(&path) {
+                let base = path.parent().unwrap_or(cur_dir);
+                parse_data_with_base_directory(&mut entries, &data, base, 0);
+            }
+        }
+
+        Ok(Self { entries })
     }
 
     pub fn new_from_resource_manager(conn: impl Connection) -> Result<Option<Self>, ReplyError> {
