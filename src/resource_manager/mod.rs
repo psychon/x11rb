@@ -44,7 +44,7 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn new_from_default(conn: impl Connection) -> Result<Self, ReplyError> {
+    pub fn new_from_default(conn: &impl Connection) -> Result<Self, ReplyError> {
         let cur_dir = Path::new(".");
 
         // 1. Try to load the RESOURCE_MANAGER property
@@ -100,7 +100,7 @@ impl Database {
         Ok(Self { entries })
     }
 
-    pub fn new_from_resource_manager(conn: impl Connection) -> Result<Option<Self>, ReplyError> {
+    pub fn new_from_resource_manager(conn: &impl Connection) -> Result<Option<Self>, ReplyError> {
         let max_length = 100_000_000; // This is what Xlib does, so it must be correct (tm)
         let window = conn.setup().roots[0].root;
         let property = conn.
