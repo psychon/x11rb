@@ -228,24 +228,55 @@ fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
     use HowMatched::*;
     use MatchKind::*;
 
+    fn rule1(match1: &MatchKind, match2: &MatchKind) -> Ordering {
+        // Precedence rule #1: Matching components (including wildcard '?') outweighs loose bindings ('*')
+        if let Matched(_) = match1 {
+            if let SkippedViaLooseBinding = match2 {
+                return Ordering::Greater;
+            }
+        }
+        Ordering::Equal
+    }
+
+    fn rule2(match1: &MatchKind, match2: &MatchKind) -> Ordering {
+        // Precedence rule #2a: Matching instance outweighs both matching class and wildcard
+        if let Matched(MatchComponent { how_matched: Instance, .. }) = match1 {
+            if let Matched(MatchComponent { how_matched: Class, .. }) = match2 {
+                return Ordering::Greater;
+            }
+            if let Matched(MatchComponent { how_matched: Wildcard, .. }) = match2 {
+                return Ordering::Greater;
+            }
+        }
+        // Precedence rule #2b: Matching class outweighs wildcard
+        if let Matched(MatchComponent { how_matched: Class, .. }) = match1 {
+            if let Matched(MatchComponent { how_matched: Wildcard, .. }) = match2 {
+                return Ordering::Greater;
+            }
+        }
+        Ordering::Equal
+    }
+
+    fn rule3(match1: &MatchKind, match2: &MatchKind) -> Ordering {
+        // Precedence rule #3: A preceding exact match outweights a preceding '*'
+        if let Matched(MatchComponent { preceding_binding: Tight, .. }) = match1 {
+            if let Matched(MatchComponent { preceding_binding: Loose, .. }) = match2 {
+                return Ordering::Greater;
+            }
+        }
+        Ordering::Equal
+    }
+
     assert_eq!(match1.len(), match2.len(), "Both matches should have the same length (which is guaranteed by the current implementation of check_match())");
     for (m1, m2) in match1.iter().zip(match2.iter()) {
-        match (m1, m2) {
-            // Precedence rule #1: Matching components (including wildcard '?') outweighs loose bindings ('*')
-            (SkippedViaLooseBinding, Matched(_)) => return Ordering::Less,
-            (Matched(_), SkippedViaLooseBinding) => return Ordering::Greater,
-            // Precedence rule #2a: Matching instance outweighs both matching class and wildcard
-            (Matched(MatchComponent { how_matched: Class, .. }), Matched(MatchComponent { how_matched: Instance, .. })) => return Ordering::Less,
-            (Matched(MatchComponent { how_matched: Wildcard, .. }), Matched(MatchComponent { how_matched: Instance, .. })) => return Ordering::Less,
-            (Matched(MatchComponent { how_matched: Instance, .. }), Matched(MatchComponent { how_matched: Class, .. })) => return Ordering::Greater,
-            (Matched(MatchComponent { how_matched: Instance, .. }), Matched(MatchComponent { how_matched: Wildcard, .. })) => return Ordering::Greater,
-            // Precedence rule #2b: Matching class outweighs wildcard
-            (Matched(MatchComponent { how_matched: Wildcard, .. }), Matched(MatchComponent { how_matched: Class, .. })) => return Ordering::Less,
-            (Matched(MatchComponent { how_matched: Class, .. }), Matched(MatchComponent { how_matched: Wildcard, .. })) => return Ordering::Greater,
-            // Precedence rule #3: A preceding exact match outweights a preceding '*'
-            (Matched(MatchComponent { preceding_binding: Loose, .. }), Matched(MatchComponent { preceding_binding: Tight, .. })) => return Ordering::Less,
-            (Matched(MatchComponent { preceding_binding: Tight, .. }), Matched(MatchComponent { preceding_binding: Loose, .. })) => return Ordering::Greater,
-            _ => {}
+        let ordering = rule1(m1, m2)
+            .then_with(|| rule1(m2, m1).reverse())
+            .then_with(|| rule2(m1, m2))
+            .then_with(|| rule2(m2, m1).reverse())
+            .then_with(|| rule3(m1, m2))
+            .then_with(|| rule3(m2, m1).reverse());
+        if ordering != Ordering::Equal {
+            return ordering;
         }
     }
     Ordering::Equal
