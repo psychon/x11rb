@@ -286,7 +286,7 @@ impl Database {
         resource_class: &str,
     ) -> Result<Option<T>, T::Err>
     where
-         T: FromStr,
+        T: FromStr,
     {
         self.get_string(resource_name, resource_class)
             .map(T::from_str)

@@ -16,7 +16,7 @@ mod zip_longest {
     pub(super) fn zip_longest<'a, T>(
         a: &'a [T],
         b: &'a [T],
-    ) -> impl Iterator<Item=(Option<&'a T>, Option<&'a T>)> + 'a {
+    ) -> impl Iterator<Item = (Option<&'a T>, Option<&'a T>)> + 'a {
         ZipLongest {
             a: a.iter(),
             b: b.iter(),
@@ -240,17 +240,36 @@ fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
 
     fn rule2(match1: &MatchKind, match2: &MatchKind) -> Ordering {
         // Precedence rule #2a: Matching instance outweighs both matching class and wildcard
-        if let Matched(MatchComponent { how_matched: Instance, .. }) = match1 {
-            if let Matched(MatchComponent { how_matched: Class, .. }) = match2 {
+        if let Matched(MatchComponent {
+            how_matched: Instance,
+            preceding_binding: _,
+        }) = match1
+        {
+            if let Matched(MatchComponent {
+                how_matched: Class,
+                preceding_binding: _,
+            }) = match2
+            {
                 return Ordering::Greater;
             }
-            if let Matched(MatchComponent { how_matched: Wildcard, .. }) = match2 {
+            if let Matched(MatchComponent {
+                how_matched: Wildcard,
+                ..
+            }) = match2
+            {
                 return Ordering::Greater;
             }
         }
         // Precedence rule #2b: Matching class outweighs wildcard
-        if let Matched(MatchComponent { how_matched: Class, .. }) = match1 {
-            if let Matched(MatchComponent { how_matched: Wildcard, .. }) = match2 {
+        if let Matched(MatchComponent {
+            how_matched: Class, ..
+        }) = match1
+        {
+            if let Matched(MatchComponent {
+                how_matched: Wildcard,
+                ..
+            }) = match2
+            {
                 return Ordering::Greater;
             }
         }
@@ -259,8 +278,16 @@ fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
 
     fn rule3(match1: &MatchKind, match2: &MatchKind) -> Ordering {
         // Precedence rule #3: A preceding exact match outweights a preceding '*'
-        if let Matched(MatchComponent { preceding_binding: Tight, .. }) = match1 {
-            if let Matched(MatchComponent { preceding_binding: Loose, .. }) = match2 {
+        if let Matched(MatchComponent {
+            preceding_binding: Tight,
+            ..
+        }) = match1
+        {
+            if let Matched(MatchComponent {
+                preceding_binding: Loose,
+                ..
+            }) = match2
+            {
                 return Ordering::Greater;
             }
         }
@@ -299,7 +326,6 @@ pub(crate) fn match_entry<'a>(
                 .into_iter()
                 .max_by(|match1, match2| compare_matches(match1, match2));
             best_match.map(|m| (entry, m))
-
         })
         .max_by(|(_, match1), (_, match2)| compare_matches(match1, match2))
         .map(|(entry, _)| &entry.value[..])

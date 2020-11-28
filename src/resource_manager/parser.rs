@@ -279,16 +279,16 @@ mod test {
         let tests = [
             (
                 &b"First.second"[..],
-                vec!["First".to_string(), "second".to_string()]
+                vec!["First".to_string(), "second".to_string()],
             ),
             (b"", Vec::new()),
             (
                 b"urxvt.scrollBar_right",
-                vec!["urxvt".to_string(), "scrollBar_right".to_string()]
+                vec!["urxvt".to_string(), "scrollBar_right".to_string()],
             ),
             (
                 b"urxvt.Control-Shift-Up",
-                vec!["urxvt".to_string(), "Control-Shift-Up".to_string()]
+                vec!["urxvt".to_string(), "Control-Shift-Up".to_string()],
             ),
         ];
         for (data, expected) in tests.iter() {
@@ -682,14 +682,12 @@ mod test {
             (Ok(result), remaining) => {
                 assert_eq!(remaining, b"", "failed to parse {:?}", data);
                 assert_eq!(
-                    result.components,
-                    resource,
+                    result.components, resource,
                     "incorrect components when parsing {:?}",
                     data
                 );
                 assert_eq!(
-                    result.value,
-                    value,
+                    result.value, value,
                     "incorrect value when parsing {:?}",
                     data
                 );
