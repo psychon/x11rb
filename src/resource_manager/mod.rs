@@ -1,5 +1,20 @@
 //! X11 resource manager library.
 //!
+//! Usage example (please cache the database in real applications instead of re-opening it whenever
+//! a value is needed):
+//! ```
+//! use x11rb::{connection::Connection, errors::ReplyError, resource_manager::Database};
+//! fn get_xft_dpi(conn: &impl Connection) -> Result<Option<u32>, ReplyError> {
+//!     let db = Database::new_from_default(conn)?;
+//!     let value = db.get_value("Xft.dpi", "");
+//!     Ok(value.ok().flatten())
+//! }
+//! ```
+//!
+//! This functionality is similar to what is available to C code through xcb-util-xrm and Xlib's
+//! `Xrm*` function family. Not all their functionality is available in this library. Please open a
+//! feature request if you need something that is not available.
+//!
 //! The code in this module is only available when the `resource_manager` feature of the library is
 //! enabled.
 
@@ -70,6 +85,12 @@ impl Database {
     ///
     /// This function only returns an error if communication with the X11 server fails. All other
     /// errors are ignored. It might be that an empty database is returned.
+    ///
+    /// The behaviour of this function is mostly equivalent to Xlib's `XGetDefault()`. The
+    /// exception is that `XGetDefault()` does not load `$HOME/.Xresources`.
+    ///
+    /// The behaviour of this function is equivalent to xcb-util-xrm's
+    /// `xcb_xrm_database_from_default()`.
     pub fn new_from_default(conn: &impl Connection) -> Result<Self, ReplyError> {
         let cur_dir = Path::new(".");
 
@@ -173,8 +194,12 @@ impl Database {
 
     /// Get a value from the resource database as a byte slice.
     ///
-    /// The given values describe a query to the resource database. For example, this is how Xterm
-    /// could query one of its settings if it where written in Rust (see `man xterm`):
+    /// The given values describe a query to the resource database. `resource_class` can be an
+    /// empty string, but otherwise must contain the same number of components as `resource_name`.
+    /// Both strings may only contain alphanumeric characters or '-', '_', and '.'.
+    ///
+    /// For example, this is how Xterm could query one of its settings if it where written in Rust
+    /// (see `man xterm`):
     /// ```
     /// use x11rb::resource_manager::Database;
     /// fn get_pointer_shape(db: &Database) -> &[u8] {
@@ -187,40 +212,57 @@ impl Database {
 
     /// Get a value from the resource database as a byte slice.
     ///
-    /// The given values describe a query to the resource database. For example, this is how Xterm
-    /// could query one of its settings if it where written in Rust (see `man xterm`):
+    /// The given values describe a query to the resource database. `resource_class` can be an
+    /// empty string, but otherwise must contain the same number of components as `resource_name`.
+    /// Both strings may only contain alphanumeric characters or '-', '_', and '.'.
+    ///
+    /// If an entry is found that is not a valid utf8 `str`, `None` is returned.
+    ///
+    /// For example, this is how Xterm could query one of its settings if it where written in Rust
+    /// (see `man xterm`):
     /// ```
     /// use x11rb::resource_manager::Database;
     /// fn get_pointer_shape(db: &Database) -> &str {
     ///     db.get_string("XTerm.vt100.pointerShape", "XTerm.VT100.Cursor").unwrap_or("xterm")
     /// }
     /// ```
-    /// If an entry is found that is not a valid `str`, `None` is returned.
     pub fn get_string(&self, resource_name: &str, resource_class: &str) -> Option<&str> {
         std::str::from_utf8(self.get_bytes(resource_name, resource_class)?).ok()
     }
 
     /// Get a value from the resource database as a byte slice.
     ///
-    /// The given values describe a query to the resource database. For example, this is how Xterm
-    /// could query one of its settings if it where written in Rust (see `man xterm`):
+    /// The given values describe a query to the resource database. `resource_class` can be an
+    /// empty string, but otherwise must contain the same number of components as `resource_name`.
+    /// Both strings may only contain alphanumeric characters or '-', '_', and '.'.
+    ///
+    /// This function interprets "true", "on", "yes" as true-ish and "false", "off", "no" als
+    /// false-ish. Numbers are parsed and are true if they are not zero. Unknown values are mapped
+    /// to `None`.
+    ///
+    /// For example, this is how Xterm could query one of its settings if it where written in Rust
+    /// (see `man xterm`):
     /// ```
     /// use x11rb::resource_manager::Database;
     /// fn get_bell_is_urgent(db: &Database) -> bool {
     ///     db.get_bool("XTerm.vt100.bellIsUrgent", "XTerm.VT100.BellIsUrgent").unwrap_or(false)
     /// }
     /// ```
-    /// This function interprets "true", "on", "yes" as true-ish and "false", "off", "no" als
-    /// false-ish. Numbers are parsed and are true if they are not zero. Unknown values are mapped
-    /// to `None`.
     pub fn get_bool(&self, resource_name: &str, resource_class: &str) -> Option<bool> {
         to_bool(self.get_string(resource_name, resource_class)?)
     }
 
     /// Get a value from the resource database and parse it.
     ///
-    /// The given values describe a query to the resource database. For example, this is how Xterm
-    /// could query one of its settings if it where written in Rust (see `man xterm`):
+    /// The given values describe a query to the resource database. `resource_class` can be an
+    /// empty string, but otherwise must contain the same number of components as `resource_name`.
+    /// Both strings may only contain alphanumeric characters or '-', '_', and '.'.
+    ///
+    /// If no value is found, `Ok(None)` is returned. Otherwise, the result from
+    /// [`FromStr::from_str]` is returned with `Ok(value)` replaced with `Ok(Some(value))`.
+    ///
+    /// For example, this is how Xterm could query one of its settings if it where written in Rust
+    /// (see `man xterm`):
     /// ```
     /// use x11rb::resource_manager::Database;
     /// fn get_print_attributes(db: &Database) -> u8 {
@@ -228,8 +270,6 @@ impl Database {
     ///             .ok().flatten().unwrap_or(1)
     /// }
     /// ```
-    /// If no value is found, `Ok(None)` is returned. Otherwise, the result from
-    /// [`FromStr::from_str]` is returned with `Ok(value)` replaced with `Ok(Some(value))`.
     pub fn get_value<T>(&self, resource_name: &str, resource_class: &str) -> Result<Option<T>, T::Err>
         where T: FromStr
     {
