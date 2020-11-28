@@ -2,8 +2,8 @@
 
 use std::cmp::Ordering;
 
-use super::{Binding, Component, Entry};
 use super::parser::parse_query;
+use super::{Binding, Component, Entry};
 
 mod zip_longest {
     /// Given two slices, produce an iterator that zips the two slices.
@@ -13,7 +13,10 @@ mod zip_longest {
     /// this possible, the individual items are wrapped in `Option`.
     ///
     /// See tests below to make this clearer.
-    pub(super) fn zip_longest<'a, T>(a: &'a [T], b: &'a [T]) -> impl Iterator<Item=(Option<&'a T>, Option<&'a T>)> + 'a {
+    pub(super) fn zip_longest<'a, T>(
+        a: &'a [T],
+        b: &'a [T],
+    ) -> impl Iterator<Item=(Option<&'a T>, Option<&'a T>)> + 'a {
         ZipLongest {
             a: a.iter(),
             b: b.iter(),
@@ -189,7 +192,7 @@ fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> Vec<Vec<
                 // We have to match here, no way around that.
                 Binding::Tight => {}
                 // We could "eat" this with the loose binding by staying in the state
-                Binding::Loose => next_states.push(state.skip_loose())
+                Binding::Loose => next_states.push(state.skip_loose()),
             }
             // Does the component match?
             let kind = match entry.components[state.index].1 {
@@ -202,7 +205,7 @@ fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> Vec<Vec<
                     } else {
                         None
                     }
-                },
+                }
             };
             if let Some(kind) = kind {
                 // Yes, the component matches and we go to the next state
@@ -212,7 +215,11 @@ fn check_match(entry: &Entry, resource: &[String], class: &[String]) -> Vec<Vec<
         states = next_states;
     }
     // We have a match if we reached the end of the components
-    states.into_iter().filter(|s| s.index == entry.components.len()).map(|s| s.history).collect()
+    states
+        .into_iter()
+        .filter(|s| s.index == entry.components.len())
+        .map(|s| s.history)
+        .collect()
 }
 
 /// Compare two matches and decide which one of the two is better (`Ordering::Greater`)
@@ -245,14 +252,21 @@ fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
 }
 
 /// Find the best match for the given query in the database, returning `None` when nothing matches.
-pub(crate) fn match_entry<'a>(database: &'a [Entry], resource: &str, class: &str) -> Option<&'a [u8]> {
+pub(crate) fn match_entry<'a>(
+    database: &'a [Entry],
+    resource: &str,
+    class: &str,
+) -> Option<&'a [u8]> {
     let resource = parse_query(resource.as_bytes())?;
     let class = parse_query(class.as_bytes())?;
-    database.iter()
+    database
+        .iter()
         // Filter for entries that match the query (and record some info on how they match)
         .flat_map(|entry| {
             let matches = check_match(entry, &resource, &class);
-            let best_match = matches.into_iter().max_by(|match1, match2| compare_matches(match1, match2));
+            let best_match = matches
+                .into_iter()
+                .max_by(|match1, match2| compare_matches(match1, match2));
             best_match.map(|m| (entry, m))
 
         })
@@ -273,9 +287,14 @@ mod test {
         let tests = [
             // Non-matches / Errors
             (&b""[..], "", "", None),
-
-            // Xlib returns the match here, despite the query violating the specs.
-            (b"First.second: 1", "First.second", "First.second.third", None),
+            // Xlib returns the match here, despite the query violating the specs (different number
+            // of components in the query)
+            (
+                b"First.second: 1",
+                "First.second",
+                "First.second.third",
+                None,
+            ),
             (b"", "First.second", "", None),
             (b"First.second: 1", "First.third", "", None),
             (b"First.second: 1", "First", "", None),
@@ -284,35 +303,67 @@ mod test {
             (b"First*?.third: 1", "First.third", "", None),
             (b"First: 1", "first", "", None),
             (b"First: 1", "", "first", None),
-
             // Duplicate entries
-            (b"First: 1\nFirst: 2\nFirst: 3\n", "First", "", Some(&b"3"[..])),
-            (b"First: 1\nSecond: 2\nSecond: 3\nThird: 4\n", "Second", "", Some(b"3")),
-
-            /* Basic matching */
+            (
+                b"First: 1\nFirst: 2\nFirst: 3\n",
+                "First",
+                "",
+                Some(&b"3"[..]),
+            ),
+            (
+                b"First: 1\nSecond: 2\nSecond: 3\nThird: 4\n",
+                "Second",
+                "",
+                Some(b"3"),
+            ),
+            // Basic matching
             (b"First: 1", "First", "", Some(b"1")),
             (b"First.second: 1", "First.second", "", Some(b"1")),
             (b"?.second: 1", "First.second", "", Some(b"1")),
             (b"First.?.third: 1", "First.second.third", "", Some(b"1")),
-            (b"First.?.?.fourth: 1", "First.second.third.fourth", "", Some(b"1")),
+            (
+                b"First.?.?.fourth: 1",
+                "First.second.third.fourth",
+                "",
+                Some(b"1"),
+            ),
             (b"*second: 1", "First.second", "", Some(b"1")),
             (b".second: 1", "First.second", "", None),
             (b"*third: 1", "First.second.third", "", Some(b"1")),
             (b"First*second: 1", "First.second", "", Some(b"1")),
             (b"First*third: 1", "First.second.third", "", Some(b"1")),
-            (b"First*fourth: 1", "First.second.third.fourth", "", Some(b"1")),
+            (
+                b"First*fourth: 1",
+                "First.second.third.fourth",
+                "",
+                Some(b"1"),
+            ),
             (b"First*?.third: 1", "First.second.third", "", Some(b"1")),
             (b"First: 1", "Second", "First", Some(b"1")),
-            (b"First.second: 1", "First.third", "first.second", Some(b"1")),
-            (b"First.second.third: 1", "First.third.third", "first.second.fourth", Some(b"1")),
-            (b"First*third*fifth: 1", "First.second.third.fourth.third.fifth", "", Some(b"1")),
+            (
+                b"First.second: 1",
+                "First.third",
+                "first.second",
+                Some(b"1"),
+            ),
+            (
+                b"First.second.third: 1",
+                "First.third.third",
+                "first.second.fourth",
+                Some(b"1"),
+            ),
+            (
+                b"First*third*fifth: 1",
+                "First.second.third.fourth.third.fifth",
+                "",
+                Some(b"1"),
+            ),
             (b"First: x\\\ny", "First", "", Some(b"xy")),
             (b"! First: x", "First", "", None),
             (b"# First: x", "First", "", None),
             (b"First:", "First", "", Some(b"")),
             (b"First: ", "First", "", Some(b"")),
             (b"First: \t ", "First", "", Some(b"")),
-
             // Consecutive bindings
             (b"*.bar: 1", "foo.foo.bar", "", Some(b"1")),
             (b"...bar: 1", "foo.bar", "", None),
@@ -324,56 +375,148 @@ mod test {
             (b"a.*.z: 1", "a.b.c.d.e.f.z", "", Some(b"1")),
             (b"a...z: 1", "a.z", "", Some(b"1")),
             (b"a...z: 1", "a.b.z", "", None),
-
             // Matching among multiple entries
             (b"First: 1\nSecond: 2\n", "First", "", Some(b"1")),
             (b"First: 1\nSecond: 2\n", "Second", "", Some(b"2")),
-
             // Greediness
             (b"a*c.e: 1", "a.b.c.d.c.e", "", Some(b"1")),
             (b"a*c.e: 1", "a.b.c.c.e", "", Some(b"1")),
             (b"a*?.e: 1", "a.b.c.e", "", Some(b"1")),
             (b"a*c*e: 1", "a.b.c.d.c.d.e.d.e", "", Some(b"1")),
-
             // Precedence rules
             // Rule 1
-            (b"First.second.third: 1\nFirst*third: 2\n", "First.second.third", "", Some(b"1")),
-            (b"First*third: 2\nFirst.second.third: 1\n", "First.second.third", "", Some(b"1")),
-            (b"First.second.third: 1\nFirst*third: 2\n", "x.x.x", "First.second.third", Some(b"1")),
-            (b"First*third: 2\nFirst.second.third: 1\n", "x.x.x", "First.second.third", Some(b"1")),
-
+            (
+                b"First.second.third: 1\nFirst*third: 2\n",
+                "First.second.third",
+                "",
+                Some(b"1"),
+            ),
+            (
+                b"First*third: 2\nFirst.second.third: 1\n",
+                "First.second.third",
+                "",
+                Some(b"1"),
+            ),
+            (
+                b"First.second.third: 1\nFirst*third: 2\n",
+                "x.x.x",
+                "First.second.third",
+                Some(b"1"),
+            ),
+            (
+                b"First*third: 2\nFirst.second.third: 1\n",
+                "x.x.x",
+                "First.second.third",
+                Some(b"1"),
+            ),
             // Rule 2
-            (b"First.second: 1\nFirst.third: 2\n", "First.second", "First.third", Some(b"1")),
-            (b"First.third: 2\nFirst.second: 1\n", "First.second", "First.third", Some(b"1")),
-            (b"First.second.third: 1\nFirst.?.third: 2\n", "First.second.third", "", Some(b"1")),
-            (b"First.?.third: 2\nFirst.second.third: 1\n", "First.second.third", "", Some(b"1")),
-            (b"First.second.third: 1\nFirst.?.third: 2\n", "x.x.x", "First.second.third", Some(b"1")),
-            (b"First.?.third: 2\nFirst.second.third: 1\n", "x.x.x", "First.second.third", Some(b"1")),
-
+            (
+                b"First.second: 1\nFirst.third: 2\n",
+                "First.second",
+                "First.third",
+                Some(b"1"),
+            ),
+            (
+                b"First.third: 2\nFirst.second: 1\n",
+                "First.second",
+                "First.third",
+                Some(b"1"),
+            ),
+            (
+                b"First.second.third: 1\nFirst.?.third: 2\n",
+                "First.second.third",
+                "",
+                Some(b"1"),
+            ),
+            (
+                b"First.?.third: 2\nFirst.second.third: 1\n",
+                "First.second.third",
+                "",
+                Some(b"1"),
+            ),
+            (
+                b"First.second.third: 1\nFirst.?.third: 2\n",
+                "x.x.x",
+                "First.second.third",
+                Some(b"1"),
+            ),
+            (
+                b"First.?.third: 2\nFirst.second.third: 1\n",
+                "x.x.x",
+                "First.second.third",
+                Some(b"1"),
+            ),
             // Rule 3
-            (b"First.second: 1\nFirst*second: 2\n", "First.second", "", Some(b"1")),
-            (b"First*second: 2\nFirst.second: 1\n", "First.second", "", Some(b"1")),
-
+            (
+                b"First.second: 1\nFirst*second: 2\n",
+                "First.second",
+                "",
+                Some(b"1"),
+            ),
+            (
+                b"First*second: 2\nFirst.second: 1\n",
+                "First.second",
+                "",
+                Some(b"1"),
+            ),
             // Some real world examples. May contain duplicates to the above tests.
 
             // From the specification:
             // https://tronche.com/gui/x/xlib/resource-manager/matching-rules.html
-            (b"xmh*Paned*activeForeground: red\n\
-              *incorporate.Foreground: blue\n\
-              xmh.toc*Command*activeForeground: green\n\
-              xmh.toc*?.Foreground: white\n\
-              xmh.toc*Command.activeForeground: black",
-              "xmh.toc.messagefunctions.incorporate.activeForeground", "Xmh.Paned.Box.Command.Foreground", Some(b"black")),
-            (b"urxvt*background: [95]#000", "urxvt.background", "", Some(b"[95]#000")),
-            (b"urxvt*scrollBar_right:true", "urxvt.scrollBar_right", "", Some(b"true")),
-            (b"urxvt*cutchars:    '\"'()*<>[]{|}", "urxvt.cutchars", "", Some(b"'\"'()*<>[]{|}")),
-            (b"urxvt.keysym.Control-Shift-Up: perl:font:increment", "urxvt.keysym.Control-Shift-Up", "", Some(b"perl:font:increment")),
-            (b"rofi.normal: #000000, #000000, #000000, #000000", "rofi.normal", "", Some(b"#000000, #000000, #000000, #000000")),
-
+            (
+                b"xmh*Paned*activeForeground: red\n\
+                  *incorporate.Foreground: blue\n\
+                  xmh.toc*Command*activeForeground: green\n\
+                  xmh.toc*?.Foreground: white\n\
+                  xmh.toc*Command.activeForeground: black",
+                "xmh.toc.messagefunctions.incorporate.activeForeground",
+                "Xmh.Paned.Box.Command.Foreground",
+                Some(b"black"),
+            ),
+            (
+                b"urxvt*background: [95]#000",
+                "urxvt.background",
+                "",
+                Some(b"[95]#000"),
+            ),
+            (
+                b"urxvt*scrollBar_right:true",
+                "urxvt.scrollBar_right",
+                "",
+                Some(b"true"),
+            ),
+            (
+                b"urxvt*cutchars:    '\"'()*<>[]{|}",
+                "urxvt.cutchars",
+                "",
+                Some(b"'\"'()*<>[]{|}"),
+            ),
+            (
+                b"urxvt.keysym.Control-Shift-Up: perl:font:increment",
+                "urxvt.keysym.Control-Shift-Up",
+                "",
+                Some(b"perl:font:increment"),
+            ),
+            (
+                b"rofi.normal: #000000, #000000, #000000, #000000",
+                "rofi.normal",
+                "",
+                Some(b"#000000, #000000, #000000, #000000"),
+            ),
             // Own tests
             (b"*foo.bar: 1", "bar", "", None),
-            (b"First.Second.Third: 1\nFirst.Second: 2", "First.Second.Third", "First.Second", Some(b"1")),
-            (b"First.Second.Third: 1\nFirst.Second: 2", "First.Second", "First.Second.Third", Some(b"1")),
+            (
+                b"First.Second.Third: 1\nFirst.Second: 2",
+                "First.Second.Third",
+                "First.Second",
+                Some(b"1"),
+            ),
+            (
+                b"First.Second.Third: 1\nFirst.Second: 2",
+                "First.Second",
+                "First.Second.Third",
+                Some(b"1"),
+            ),
         ];
         let mut failures = 0;
         for &(data, resource, class, expected) in &tests {
@@ -381,7 +524,10 @@ mod test {
             parse_database(data, &mut entries, |_, _| unreachable!());
             let result = match_entry(&entries, resource, class);
             if result != expected {
-                eprintln!("While testing resource '{}' and class '{}' with the following input:", resource, class);
+                eprintln!(
+                    "While testing resource '{}' and class '{}' with the following input:",
+                    resource, class
+                );
                 eprintln!("{}", print_string(data));
                 eprintln!("Expected: {:?}", expected.map(print_string));
                 eprintln!("Got:      {:?}", result.map(print_string));

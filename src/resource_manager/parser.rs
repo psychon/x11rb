@@ -10,7 +10,7 @@ use super::{Binding, Component, Entry};
 fn is_octal_digit(c: u8) -> bool {
     match c {
         b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7' => true,
-        _ => false
+        _ => false,
     }
 }
 
@@ -19,7 +19,8 @@ fn parse_with_matcher<M>(data: &[u8], matcher: M) -> (&[u8], &[u8])
 where
     M: Fn(u8) -> bool,
 {
-    let end = data.iter()
+    let end = data
+        .iter()
         .enumerate()
         .find(|(_, &c)| !matcher(c))
         .map(|(idx, _)| idx)
@@ -190,7 +191,7 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
                 Some(b'\t') => value.push(b'\t'),
                 Some(b'n') => value.push(b'\n'),
                 Some(b'\\') => value.push(b'\\'),
-                Some(b'\n') => { /* Continue parsing next line */ },
+                Some(b'\n') => { /* Continue parsing next line */ }
                 Some(&x) if is_octal_digit(x) => octal = Some((x, None)),
                 Some(&x) => {
                     value.push(b);
@@ -201,17 +202,14 @@ fn parse_entry(data: &[u8]) -> (Result<Entry, ()>, &[u8]) {
         }
     }
 
-    let entry = Entry {
-        components,
-        value,
-    };
+    let entry = Entry { components, value };
     (Ok(entry), &data[index..])
 }
 
 /// Parse the contents of a database
 pub(crate) fn parse_database<F>(mut data: &[u8], result: &mut Vec<Entry>, mut include_callback: F)
 where
-    for<'r> F: FnMut(&'r [u8], &mut Vec<Entry>)
+    for<'r> F: FnMut(&'r [u8], &mut Vec<Entry>),
 {
     // Iterate over lines
     while let Some(first) = data.first() {
@@ -231,10 +229,8 @@ where
                     let (_, remaining) = parse_with_matcher(remaining, |c| c == b' ');
                     // Find the text enclosed in quotation marks
                     if let Some(b'\"') = remaining.first() {
-                        let (file, remaining) = parse_with_matcher(
-                            &remaining[1..],
-                            |c| c != b'"' && c != b'\n'
-                        );
+                        let (file, remaining) =
+                            parse_with_matcher(&remaining[1..], |c| c != b'"' && c != b'\n');
                         if let Some(b'\"') = remaining.first() {
                             // Okay, we found a well-formed include directive.
                             include_callback(file, result);
@@ -248,11 +244,9 @@ where
                 // Add the entry to the result if we parsed one; ignore errors
                 result.extend(entry.ok());
             }
-
         }
     }
 }
-
 
 /// Parse a resource query like "foo.bar.baz" (no wildcards allowed, no bindings allowed)
 pub(crate) fn parse_query(data: &[u8]) -> Option<Vec<String>> {
@@ -275,7 +269,7 @@ pub(crate) fn parse_query(data: &[u8]) -> Option<Vec<String>> {
 
 #[cfg(test)]
 mod test {
-    use super::{Binding, Component, Entry, parse_database, parse_entry, parse_query};
+    use super::{parse_database, parse_entry, parse_query, Binding, Component, Entry};
 
     // Most tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
     // [1]: https://github.com/Airblader/xcb-util-xrm/blob/master/tests/tests_parser.c
@@ -283,19 +277,19 @@ mod test {
     #[test]
     fn test_parse_query_success() {
         let tests = [
-            (&b"First.second"[..], vec![
-                "First".to_string(),
-                "second".to_string(),
-            ]),
+            (
+                &b"First.second"[..],
+                vec!["First".to_string(), "second".to_string()]
+            ),
             (b"", Vec::new()),
-            (b"urxvt.scrollBar_right",  vec![
-                "urxvt".to_string(),
-                "scrollBar_right".to_string(),
-            ]),
-            (b"urxvt.Control-Shift-Up",  vec![
-                "urxvt".to_string(),
-                "Control-Shift-Up".to_string(),
-            ]),
+            (
+                b"urxvt.scrollBar_right",
+                vec!["urxvt".to_string(), "scrollBar_right".to_string()]
+            ),
+            (
+                b"urxvt.Control-Shift-Up",
+                vec!["urxvt".to_string(), "Control-Shift-Up".to_string()]
+            ),
         ];
         for (data, expected) in tests.iter() {
             let result = parse_query(*data);
@@ -404,7 +398,7 @@ mod test {
             (
                 b"First: -1337",
                 vec![(Binding::Tight, Component::Normal("First".to_string()))],
-                b"-1337"
+                b"-1337",
             ),
             (
                 b"First: 13.37",
@@ -560,8 +554,11 @@ mod test {
         for data in tests.iter() {
             match parse_entry(*data) {
                 (Ok(v), _) => panic!("Unexpected success parsing '{:?}': {:?}", data, v),
-                (Err(_), b"") => {},
-                (Err(_), remaining) => panic!("Unexpected remaining data parsing '{:?}': {:?}", data, remaining),
+                (Err(_), b"") => {}
+                (Err(_), remaining) => panic!(
+                    "Unexpected remaining data parsing '{:?}': {:?}",
+                    data, remaining
+                ),
             }
         }
     }
@@ -584,8 +581,14 @@ mod test {
         data.extend(&y);
         data.extend(b": 1");
         let resource = [
-            (Binding::Tight, Component::Normal(String::from_utf8(x).unwrap())),
-            (Binding::Tight, Component::Normal(String::from_utf8(y).unwrap())),
+            (
+                Binding::Tight,
+                Component::Normal(String::from_utf8(x).unwrap()),
+            ),
+            (
+                Binding::Tight,
+                Component::Normal(String::from_utf8(y).unwrap()),
+            ),
         ];
         run_entry_test(&data, &resource, b"1");
     }
@@ -597,26 +600,11 @@ mod test {
             value: b"1".to_vec(),
         };
         let tests = [
-            (
-                &b"First: 1\n\n\n"[..],
-                vec![expected_entry.clone()],
-            ),
-            (
-                b"First: 1\n!Foo",
-                vec![expected_entry.clone()],
-            ),
-            (
-                b"!First: 1\nbar\n\n\n",
-                Vec::new(),
-            ),
-            (
-                b"!bar\nFirst: 1\nbaz",
-                vec![expected_entry.clone()],
-            ),
-            (
-                b"First :\\\n \\\n\\\n1\n",
-                vec![expected_entry.clone()],
-            ),
+            (&b"First: 1\n\n\n"[..], vec![expected_entry.clone()]),
+            (b"First: 1\n!Foo", vec![expected_entry.clone()]),
+            (b"!First: 1\nbar\n\n\n", Vec::new()),
+            (b"!bar\nFirst: 1\nbaz", vec![expected_entry.clone()]),
+            (b"First :\\\n \\\n\\\n1\n", vec![expected_entry.clone()]),
             (
                 b"First: \\\n  1\\\n2\n",
                 vec![Entry {
@@ -646,13 +634,16 @@ mod test {
     fn test_include_parsing() {
         let tests = [
             (&b"#include\"test\""[..], vec![&b"test"[..]]),
-            (b"#  include   \" test \"   \n#include  \"foo\"", vec![b" test ", b"foo"]),
             (b"#include\"test", Vec::new()),
             (b"#include\"", Vec::new()),
             (b"#include", Vec::new()),
             (b"#includ", Vec::new()),
             (b"#in", Vec::new()),
             (b"#  foo", Vec::new()),
+            (
+                b"#  include   \" test \"   \n#include  \"foo\"",
+                vec![b" test ", b"foo"],
+            ),
         ];
         let mut success = true;
         for (data, expected) in tests.iter() {
@@ -690,10 +681,20 @@ mod test {
         match parse_entry(data) {
             (Ok(result), remaining) => {
                 assert_eq!(remaining, b"", "failed to parse {:?}", data);
-                assert_eq!(result.components, resource, "incorrect components when parsing {:?}", data);
-                assert_eq!(result.value, value, "incorrect value when parsing {:?}", data);
+                assert_eq!(
+                    result.components,
+                    resource,
+                    "incorrect components when parsing {:?}",
+                    data
+                );
+                assert_eq!(
+                    result.value,
+                    value,
+                    "incorrect value when parsing {:?}",
+                    data
+                );
             }
-            (Err(err), _) => panic!("Failed to parse '{:?}': {:?}", data, err)
+            (Err(err), _) => panic!("Failed to parse '{:?}': {:?}", data, err),
         }
     }
 }

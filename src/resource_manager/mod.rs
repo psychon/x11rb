@@ -26,8 +26,8 @@ use crate::connection::Connection;
 use crate::errors::ReplyError;
 use crate::protocol::xproto::{AtomEnum, ConnectionExt as _};
 
-mod parser;
 mod matcher;
+mod parser;
 
 /// Maximum nesting of #include directives, same value as Xlib uses.
 /// After following this many `#include` directives, further includes are ignored.
@@ -133,7 +133,10 @@ impl Database {
             // 5. Load `$HOME/.Xdefaults-[hostname]`
             let mut file = std::ffi::OsString::from(".Xdefaults-");
             file.push(gethostname::gethostname());
-            let mut path = var_os("HOME").map(PathBuf::from).unwrap_or_else(PathBuf::new);
+            let mut path = match var_os("HOME") {
+                Some(home) => PathBuf::from(home),
+                None => PathBuf::new(),
+            };
             path.push(file);
             if let Ok(data) = std::fs::read(&path) {
                 let base = path.parent().unwrap_or(cur_dir);
@@ -153,8 +156,15 @@ impl Database {
     pub fn new_from_resource_manager(conn: &impl Connection) -> Result<Option<Self>, ReplyError> {
         let max_length = 100_000_000; // This is what Xlib does, so it must be correct (tm)
         let window = conn.setup().roots[0].root;
-        let property = conn.
-            get_property(false, window, AtomEnum::RESOURCE_MANAGER, AtomEnum::STRING, 0, max_length)?
+        let property = conn
+            .get_property(
+                false,
+                window,
+                AtomEnum::RESOURCE_MANAGER,
+                AtomEnum::STRING,
+                0,
+                max_length,
+            )?
             .reply()?;
         if property.format == 8 && !property.value.is_empty() {
             Ok(Some(Self::new_from_data(&property.value)))
@@ -270,10 +280,17 @@ impl Database {
     ///             .ok().flatten().unwrap_or(1)
     /// }
     /// ```
-    pub fn get_value<T>(&self, resource_name: &str, resource_class: &str) -> Result<Option<T>, T::Err>
-        where T: FromStr
+    pub fn get_value<T>(
+        &self,
+        resource_name: &str,
+        resource_class: &str,
+    ) -> Result<Option<T>, T::Err>
+    where
+         T: FromStr,
     {
-        self.get_string(resource_name, resource_class).map(T::from_str).transpose()
+        self.get_string(resource_name, resource_class)
+            .map(T::from_str)
+            .transpose()
     }
 }
 
@@ -282,7 +299,12 @@ impl Database {
 /// The parsed entries are appended to `result`. `#include`s are resolved relative to the given
 /// `base_path`. `depth` is the number of includes that we are already handling. This value is used
 /// to prevent endless loops when a file (directly or indirectly) includes itself.
-fn parse_data_with_base_directory(result: &mut Vec<Entry>, data: &[u8], base_path: &Path, depth: u8) {
+fn parse_data_with_base_directory(
+    result: &mut Vec<Entry>,
+    data: &[u8],
+    base_path: &Path,
+    depth: u8,
+) {
     if depth > MAX_INCLUSION_DEPTH {
         return;
     }
@@ -320,20 +342,11 @@ fn to_bool(data: &str) -> Option<bool> {
 
 #[cfg(test)]
 mod test {
-    use super::{Database, to_bool};
+    use super::{to_bool, Database};
 
     #[test]
     fn test_bool_true() {
-        let data = [
-            "1",
-            "10",
-            "true",
-            "TRUE",
-            "on",
-            "ON",
-            "yes",
-            "YES",
-        ];
+        let data = ["1", "10", "true", "TRUE", "on", "ON", "yes", "YES"];
         for input in &data {
             assert_eq!(Some(true), to_bool(input));
         }
@@ -341,15 +354,7 @@ mod test {
 
     #[test]
     fn test_bool_false() {
-        let data = [
-            "0",
-            "false",
-            "FALSE",
-            "off",
-            "OFF",
-            "no",
-            "NO",
-        ];
+        let data = ["0", "false", "FALSE", "off", "OFF", "no", "NO"];
         for input in &data {
             assert_eq!(Some(false), to_bool(input));
         }
