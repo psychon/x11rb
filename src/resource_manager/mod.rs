@@ -47,6 +47,8 @@ pub(crate) struct Entry {
 }
 
 /// A X11 resource database.
+///
+/// The recommended way to load a database is through [`Database::new_from_default`].
 #[derive(Debug, Default, Clone)]
 pub struct Database {
     entries: Vec<Entry>,
@@ -222,7 +224,8 @@ impl Database {
     /// ```
     /// use x11rb::resource_manager::Database;
     /// fn get_print_attributes(db: &Database) -> u8 {
-    ///     db.get_value("XTerm.vt100.printAttributes", "XTerm.VT100.PrintAttributes").ok().flatten().unwrap_or(1)
+    ///     db.get_value("XTerm.vt100.printAttributes", "XTerm.VT100.PrintAttributes")
+    ///             .ok().flatten().unwrap_or(1)
     /// }
     /// ```
     /// If no value is found, `Ok(None)` is returned. Otherwise, the result from
