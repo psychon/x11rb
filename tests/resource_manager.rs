@@ -85,11 +85,7 @@ mod test {
             "xresources2",
             b"#include \"sub/xresources3\"\nSecond: 2\n",
         );
-        write_file(
-            &dir,
-            "sub/xresources3",
-            b"Third: 3\n",
-        );
+        write_file(&dir, "sub/xresources3", b"Third: 3\n");
 
         let db = database_from_file(file);
         check_db(&db, &[("First", b"1"), ("Second", b"2"), ("Third", b"3")]);
@@ -228,8 +224,7 @@ mod test {
         fn wait_for_reply_with_fds_raw(
             &self,
             _: SequenceNumber,
-        ) -> Result<ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>, ConnectionError>
-        {
+        ) -> Result<ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>, ConnectionError> {
             todo!()
         }
 
