@@ -576,7 +576,7 @@ mod test {
             ),
         ];
         let mut failures = 0;
-        for &(data, resource, class, expected) in &tests {
+        for &(data, resource, class, expected) in tests.iter() {
             let mut entries = Vec::new();
             parse_database(data, &mut entries, |_, _| unreachable!());
             let result = match_entry(&entries, resource, class);
