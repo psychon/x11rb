@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -35,7 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "MIT-SCREEN-SAVER";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Kind(u8);
 impl Kind {
     pub const BLANKED: Self = Self(0);
@@ -84,8 +84,18 @@ impl From<u8> for Kind {
         Self(value)
     }
 }
+impl std::fmt::Debug for Kind  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::BLANKED.0.into(), "BLANKED", "Blanked"),
+            (Self::INTERNAL.0.into(), "INTERNAL", "Internal"),
+            (Self::EXTERNAL.0.into(), "EXTERNAL", "External"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Event(u8);
 impl Event {
     pub const NOTIFY_MASK: Self = Self(1 << 0);
@@ -133,9 +143,18 @@ impl From<u8> for Event {
         Self(value)
     }
 }
+impl std::fmt::Debug for Event  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NOTIFY_MASK.0.into(), "NOTIFY_MASK", "NotifyMask"),
+            (Self::CYCLE_MASK.0.into(), "CYCLE_MASK", "CycleMask"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(Event, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct State(u8);
 impl State {
     pub const OFF: Self = Self(0);
@@ -183,6 +202,17 @@ impl From<u8> for State {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for State  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::OFF.0.into(), "OFF", "Off"),
+            (Self::ON.0.into(), "ON", "On"),
+            (Self::CYCLE.0.into(), "CYCLE", "Cycle"),
+            (Self::DISABLED.0.into(), "DISABLED", "Disabled"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

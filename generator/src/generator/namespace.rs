@@ -536,7 +536,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "use std::convert::TryInto;");
         outln!(out, "use std::io::IoSlice;");
         outln!(out, "#[allow(unused_imports)]");
-        outln!(out, "use crate::utils::RawFdContainer;");
+        outln!(
+            out,
+            "use crate::utils::{{RawFdContainer, pretty_print_bitmask, pretty_print_enum}};"
+        );
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
@@ -2353,7 +2356,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let (raw_type, smaller_types, larger_types): (&str, &[&str], &[&str]) =
             match global_enum_size {
-                1 => ("bool", &[], &[]),
+                1 => ("bool", &[], &["u8", "u16", "u32"]),
                 8 => ("u8", &[], &["u16", "u32"]),
                 16 => ("u16", &["u8"], &["u32"]),
                 32 => ("u32", &["u8", "u16"], &[]),
@@ -2364,7 +2367,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             self.emit_doc(doc, out);
         }
 
-        outln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
+        outln!(out, "#[derive(Clone, Copy, PartialEq, Eq)]");
         outln!(out, "pub struct {}({});", rust_name, raw_type);
 
         outln!(out, "impl {} {{", rust_name);
@@ -2489,6 +2492,41 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     xcbdefs::EnumValue::Value(_) => false,
                     xcbdefs::EnumValue::Bit(_) => true,
                 });
+
+        outln!(out, "impl std::fmt::Debug for {}  {{", rust_name);
+        out.indented(|out| {
+            outln!(
+                out,
+                "fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{"
+            );
+            out.indented(|out| {
+                let into = match global_enum_size {
+                    32 => "",
+                    _ => ".into()",
+                };
+                outln!(out, "let variants = [");
+                for enum_item in enum_def.items.iter() {
+                    let rust_item_name = ename_to_rust(&enum_item.name);
+                    let camel_item_name = ename_to_camel_case(&enum_item.name);
+                    outln!(
+                        out.indent(),
+                        "(Self::{}.0{}, \"{}\", \"{}\"),",
+                        rust_item_name,
+                        into,
+                        rust_item_name,
+                        camel_item_name
+                    );
+                }
+                outln!(out, "];");
+                if ok_for_bitmask {
+                    outln!(out, "pretty_print_bitmask(fmt, self.0{}, &variants)", into);
+                } else {
+                    outln!(out, "pretty_print_enum(fmt, self.0{}, &variants)", into);
+                }
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
 
         if ok_for_bitmask {
             outln!(out, "bitmask_binop!({}, {});", rust_name, raw_type);
@@ -6228,19 +6266,23 @@ fn ename_to_rust(name: &str) -> String {
         // Special case
         "DEC_NET".into()
     } else {
-        // First convert to proper camel-case
-        let mut name = String::from(name);
-        if name.as_bytes()[0].is_ascii_digit() {
-            name.insert(0, 'M');
-        }
-        if name.contains('_') && name.bytes().any(|c| c.is_ascii_lowercase()) {
-            // xf86vidmode has a ModeFlag enum with items like
-            // Positive_HSync. Turn this into PositiveHSync.
-            name = name.replace('_', "");
-        }
-        name[..1].make_ascii_uppercase();
-
-        // Now convert to upper-snake-case
-        super::camel_case_to_upper_snake(&name)
+        super::camel_case_to_upper_snake(&ename_to_camel_case(name))
     }
+}
+
+/// Converts the name of a enum value from the XML
+/// to a camel case name.
+fn ename_to_camel_case(name: &str) -> String {
+    // First convert to proper camel-case
+    let mut name = String::from(name);
+    if name.as_bytes()[0].is_ascii_digit() {
+        name.insert(0, 'M');
+    }
+    if name.contains('_') && name.bytes().any(|c| c.is_ascii_lowercase()) {
+        // xf86vidmode has a ModeFlag enum with items like
+        // Positive_HSync. Turn this into PositiveHSync.
+        name = name.replace('_', "");
+    }
+    name[..1].make_ascii_uppercase();
+    name
 }

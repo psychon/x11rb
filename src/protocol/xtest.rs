@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -138,7 +138,7 @@ impl TryFrom<&[u8]> for GetVersionReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Cursor(bool);
 impl Cursor {
     pub const NONE: Self = Self(false);
@@ -156,10 +156,55 @@ impl From<Cursor> for Option<bool> {
         Some(input.0)
     }
 }
+impl From<Cursor> for u8 {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<Cursor> for Option<u8> {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<Cursor> for u16 {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<Cursor> for Option<u16> {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<Cursor> for u32 {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<Cursor> for Option<u32> {
+    #[inline]
+    fn from(input: Cursor) -> Self {
+        Some(u32::from(input.0))
+    }
+}
 impl From<bool> for Cursor {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Cursor  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+            (Self::CURRENT.0.into(), "CURRENT", "Current"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

@@ -334,3 +334,10 @@ fn test_serialize_setup_authenticate() {
     ];
     assert_eq!(&setup_bytes[..], &setup.serialize()[..]);
 }
+
+#[cfg(feature = "xinput")]
+#[allow(dead_code)]
+fn compile_test(conn: &impl RequestConnection) {
+    use x11rb::protocol::xinput::{xi_query_device, Device};
+    let _ = xi_query_device(conn, Device::ALL);
+}

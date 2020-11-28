@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -500,7 +500,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DPMSMode(u16);
 impl DPMSMode {
     pub const ON: Self = Self(0);
@@ -542,6 +542,17 @@ impl From<u16> for DPMSMode {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for DPMSMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ON.0.into(), "ON", "On"),
+            (Self::STANDBY.0.into(), "STANDBY", "Standby"),
+            (Self::SUSPEND.0.into(), "SUSPEND", "Suspend"),
+            (Self::OFF.0.into(), "OFF", "Off"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

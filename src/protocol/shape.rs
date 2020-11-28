@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -39,7 +39,7 @@ pub type Op = u8;
 
 pub type Kind = u8;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SO(u8);
 impl SO {
     pub const SET: Self = Self(0);
@@ -90,8 +90,20 @@ impl From<u8> for SO {
         Self(value)
     }
 }
+impl std::fmt::Debug for SO  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SET.0.into(), "SET", "Set"),
+            (Self::UNION.0.into(), "UNION", "Union"),
+            (Self::INTERSECT.0.into(), "INTERSECT", "Intersect"),
+            (Self::SUBTRACT.0.into(), "SUBTRACT", "Subtract"),
+            (Self::INVERT.0.into(), "INVERT", "Invert"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SK(u8);
 impl SK {
     pub const BOUNDING: Self = Self(0);
@@ -138,6 +150,16 @@ impl From<u8> for SK {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SK  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::BOUNDING.0.into(), "BOUNDING", "Bounding"),
+            (Self::CLIP.0.into(), "CLIP", "Clip"),
+            (Self::INPUT.0.into(), "INPUT", "Input"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

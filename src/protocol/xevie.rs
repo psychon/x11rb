@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -328,7 +328,7 @@ impl TryFrom<&[u8]> for EndReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Datatype(bool);
 impl Datatype {
     pub const UNMODIFIED: Self = Self(false);
@@ -346,10 +346,55 @@ impl From<Datatype> for Option<bool> {
         Some(input.0)
     }
 }
+impl From<Datatype> for u8 {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<Datatype> for Option<u8> {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<Datatype> for u16 {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<Datatype> for Option<u16> {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<Datatype> for u32 {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<Datatype> for Option<u32> {
+    #[inline]
+    fn from(input: Datatype) -> Self {
+        Some(u32::from(input.0))
+    }
+}
 impl From<bool> for Datatype {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Datatype  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::UNMODIFIED.0.into(), "UNMODIFIED", "Unmodified"),
+            (Self::MODIFIED.0.into(), "MODIFIED", "Modified"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

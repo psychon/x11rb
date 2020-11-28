@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -239,7 +239,7 @@ impl Serialize for Range {
 
 pub type ElementHeader = u8;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct HType(u8);
 impl HType {
     pub const FROM_SERVER_TIME: Self = Self(1 << 0);
@@ -288,11 +288,21 @@ impl From<u8> for HType {
         Self(value)
     }
 }
+impl std::fmt::Debug for HType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::FROM_SERVER_TIME.0.into(), "FROM_SERVER_TIME", "FromServerTime"),
+            (Self::FROM_CLIENT_TIME.0.into(), "FROM_CLIENT_TIME", "FromClientTime"),
+            (Self::FROM_CLIENT_SEQUENCE.0.into(), "FROM_CLIENT_SEQUENCE", "FromClientSequence"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(HType, u8);
 
 pub type ClientSpec = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CS(u8);
 impl CS {
     pub const CURRENT_CLIENTS: Self = Self(1);
@@ -339,6 +349,16 @@ impl From<u8> for CS {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CS  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::CURRENT_CLIENTS.0.into(), "CURRENT_CLIENTS", "CurrentClients"),
+            (Self::FUTURE_CLIENTS.0.into(), "FUTURE_CLIENTS", "FutureClients"),
+            (Self::ALL_CLIENTS.0.into(), "ALL_CLIENTS", "AllClients"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

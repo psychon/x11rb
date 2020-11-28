@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -40,7 +40,7 @@ pub type Port = u32;
 
 pub type Encoding = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Type(u8);
 impl Type {
     pub const INPUT_MASK: Self = Self(1 << 0);
@@ -91,9 +91,21 @@ impl From<u8> for Type {
         Self(value)
     }
 }
+impl std::fmt::Debug for Type  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::INPUT_MASK.0.into(), "INPUT_MASK", "InputMask"),
+            (Self::OUTPUT_MASK.0.into(), "OUTPUT_MASK", "OutputMask"),
+            (Self::VIDEO_MASK.0.into(), "VIDEO_MASK", "VideoMask"),
+            (Self::STILL_MASK.0.into(), "STILL_MASK", "StillMask"),
+            (Self::IMAGE_MASK.0.into(), "IMAGE_MASK", "ImageMask"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(Type, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ImageFormatInfoType(u8);
 impl ImageFormatInfoType {
     pub const RGB: Self = Self(0);
@@ -141,8 +153,17 @@ impl From<u8> for ImageFormatInfoType {
         Self(value)
     }
 }
+impl std::fmt::Debug for ImageFormatInfoType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::RGB.0.into(), "RGB", "RGB"),
+            (Self::YUV.0.into(), "YUV", "YUV"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ImageFormatInfoFormat(u8);
 impl ImageFormatInfoFormat {
     pub const PACKED: Self = Self(0);
@@ -190,8 +211,17 @@ impl From<u8> for ImageFormatInfoFormat {
         Self(value)
     }
 }
+impl std::fmt::Debug for ImageFormatInfoFormat  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::PACKED.0.into(), "PACKED", "Packed"),
+            (Self::PLANAR.0.into(), "PLANAR", "Planar"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct AttributeFlag(u8);
 impl AttributeFlag {
     pub const GETTABLE: Self = Self(1 << 0);
@@ -239,9 +269,18 @@ impl From<u8> for AttributeFlag {
         Self(value)
     }
 }
+impl std::fmt::Debug for AttributeFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::GETTABLE.0.into(), "GETTABLE", "Gettable"),
+            (Self::SETTABLE.0.into(), "SETTABLE", "Settable"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(AttributeFlag, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VideoNotifyReason(u8);
 impl VideoNotifyReason {
     pub const STARTED: Self = Self(0);
@@ -292,8 +331,20 @@ impl From<u8> for VideoNotifyReason {
         Self(value)
     }
 }
+impl std::fmt::Debug for VideoNotifyReason  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::STARTED.0.into(), "STARTED", "Started"),
+            (Self::STOPPED.0.into(), "STOPPED", "Stopped"),
+            (Self::BUSY.0.into(), "BUSY", "Busy"),
+            (Self::PREEMPTED.0.into(), "PREEMPTED", "Preempted"),
+            (Self::HARD_ERROR.0.into(), "HARD_ERROR", "HardError"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ScanlineOrder(u8);
 impl ScanlineOrder {
     pub const TOP_TO_BOTTOM: Self = Self(0);
@@ -341,8 +392,17 @@ impl From<u8> for ScanlineOrder {
         Self(value)
     }
 }
+impl std::fmt::Debug for ScanlineOrder  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::TOP_TO_BOTTOM.0.into(), "TOP_TO_BOTTOM", "TopToBottom"),
+            (Self::BOTTOM_TO_TOP.0.into(), "BOTTOM_TO_TOP", "BottomToTop"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortStatus(u8);
 impl GrabPortStatus {
     pub const SUCCESS: Self = Self(0);
@@ -392,6 +452,19 @@ impl From<u8> for GrabPortStatus {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for GrabPortStatus  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SUCCESS.0.into(), "SUCCESS", "Success"),
+            (Self::BAD_EXTENSION.0.into(), "BAD_EXTENSION", "BadExtension"),
+            (Self::ALREADY_GRABBED.0.into(), "ALREADY_GRABBED", "AlreadyGrabbed"),
+            (Self::INVALID_TIME.0.into(), "INVALID_TIME", "InvalidTime"),
+            (Self::BAD_REPLY.0.into(), "BAD_REPLY", "BadReply"),
+            (Self::BAD_ALLOC.0.into(), "BAD_ALLOC", "BadAlloc"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 

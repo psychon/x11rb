@@ -126,6 +126,10 @@
     // Not everything in x11rb::protocol has doc comments
     missing_docs,
 )]
+#![allow(
+    // This suggests a method that was stabilised in Rust 1.45, while our MSRV is 1.40.
+    clippy::manual_strip,
+)]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 
 // Only contains documentation, but no "actual rust"
@@ -152,6 +156,8 @@ pub mod wrapper;
 pub mod protocol;
 #[cfg(feature = "resource_manager")]
 pub mod resource_manager;
+#[cfg(test)]
+mod test;
 
 use connection::Connection;
 use errors::ConnectError;

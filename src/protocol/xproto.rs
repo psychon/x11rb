@@ -20,7 +20,7 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
@@ -295,7 +295,7 @@ impl Serialize for Format {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VisualClass(u8);
 impl VisualClass {
     pub const STATIC_GRAY: Self = Self(0);
@@ -345,6 +345,19 @@ impl From<u8> for VisualClass {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for VisualClass  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::STATIC_GRAY.0.into(), "STATIC_GRAY", "StaticGray"),
+            (Self::GRAY_SCALE.0.into(), "GRAY_SCALE", "GrayScale"),
+            (Self::STATIC_COLOR.0.into(), "STATIC_COLOR", "StaticColor"),
+            (Self::PSEUDO_COLOR.0.into(), "PSEUDO_COLOR", "PseudoColor"),
+            (Self::TRUE_COLOR.0.into(), "TRUE_COLOR", "TrueColor"),
+            (Self::DIRECT_COLOR.0.into(), "DIRECT_COLOR", "DirectColor"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -484,7 +497,7 @@ impl Depth {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EventMask(u32);
 impl EventMask {
     pub const NO_EVENT: Self = Self(0);
@@ -544,9 +557,42 @@ impl From<u32> for EventMask {
         Self(value)
     }
 }
+impl std::fmt::Debug for EventMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NO_EVENT.0, "NO_EVENT", "NoEvent"),
+            (Self::KEY_PRESS.0, "KEY_PRESS", "KeyPress"),
+            (Self::KEY_RELEASE.0, "KEY_RELEASE", "KeyRelease"),
+            (Self::BUTTON_PRESS.0, "BUTTON_PRESS", "ButtonPress"),
+            (Self::BUTTON_RELEASE.0, "BUTTON_RELEASE", "ButtonRelease"),
+            (Self::ENTER_WINDOW.0, "ENTER_WINDOW", "EnterWindow"),
+            (Self::LEAVE_WINDOW.0, "LEAVE_WINDOW", "LeaveWindow"),
+            (Self::POINTER_MOTION.0, "POINTER_MOTION", "PointerMotion"),
+            (Self::POINTER_MOTION_HINT.0, "POINTER_MOTION_HINT", "PointerMotionHint"),
+            (Self::BUTTON1_MOTION.0, "BUTTON1_MOTION", "Button1Motion"),
+            (Self::BUTTON2_MOTION.0, "BUTTON2_MOTION", "Button2Motion"),
+            (Self::BUTTON3_MOTION.0, "BUTTON3_MOTION", "Button3Motion"),
+            (Self::BUTTON4_MOTION.0, "BUTTON4_MOTION", "Button4Motion"),
+            (Self::BUTTON5_MOTION.0, "BUTTON5_MOTION", "Button5Motion"),
+            (Self::BUTTON_MOTION.0, "BUTTON_MOTION", "ButtonMotion"),
+            (Self::KEYMAP_STATE.0, "KEYMAP_STATE", "KeymapState"),
+            (Self::EXPOSURE.0, "EXPOSURE", "Exposure"),
+            (Self::VISIBILITY_CHANGE.0, "VISIBILITY_CHANGE", "VisibilityChange"),
+            (Self::STRUCTURE_NOTIFY.0, "STRUCTURE_NOTIFY", "StructureNotify"),
+            (Self::RESIZE_REDIRECT.0, "RESIZE_REDIRECT", "ResizeRedirect"),
+            (Self::SUBSTRUCTURE_NOTIFY.0, "SUBSTRUCTURE_NOTIFY", "SubstructureNotify"),
+            (Self::SUBSTRUCTURE_REDIRECT.0, "SUBSTRUCTURE_REDIRECT", "SubstructureRedirect"),
+            (Self::FOCUS_CHANGE.0, "FOCUS_CHANGE", "FocusChange"),
+            (Self::PROPERTY_CHANGE.0, "PROPERTY_CHANGE", "PropertyChange"),
+            (Self::COLOR_MAP_CHANGE.0, "COLOR_MAP_CHANGE", "ColorMapChange"),
+            (Self::OWNER_GRAB_BUTTON.0, "OWNER_GRAB_BUTTON", "OwnerGrabButton"),
+        ];
+        pretty_print_bitmask(fmt, self.0, &variants)
+    }
+}
 bitmask_binop!(EventMask, u32);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BackingStore(u32);
 impl BackingStore {
     pub const NOT_USEFUL: Self = Self(0);
@@ -581,6 +627,16 @@ impl From<u32> for BackingStore {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for BackingStore  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NOT_USEFUL.0, "NOT_USEFUL", "NotUseful"),
+            (Self::WHEN_MAPPED.0, "WHEN_MAPPED", "WhenMapped"),
+            (Self::ALWAYS.0, "ALWAYS", "Always"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -888,7 +944,7 @@ impl SetupAuthenticate {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ImageOrder(u8);
 impl ImageOrder {
     pub const LSB_FIRST: Self = Self(0);
@@ -934,6 +990,15 @@ impl From<u8> for ImageOrder {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ImageOrder  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::LSB_FIRST.0.into(), "LSB_FIRST", "LSBFirst"),
+            (Self::MSB_FIRST.0.into(), "MSB_FIRST", "MSBFirst"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -1081,7 +1146,7 @@ impl Setup {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModMask(u16);
 impl ModMask {
     pub const SHIFT: Self = Self(1 << 0);
@@ -1130,9 +1195,25 @@ impl From<u16> for ModMask {
         Self(value)
     }
 }
+impl std::fmt::Debug for ModMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SHIFT.0.into(), "SHIFT", "Shift"),
+            (Self::LOCK.0.into(), "LOCK", "Lock"),
+            (Self::CONTROL.0.into(), "CONTROL", "Control"),
+            (Self::M1.0.into(), "M1", "M1"),
+            (Self::M2.0.into(), "M2", "M2"),
+            (Self::M3.0.into(), "M3", "M3"),
+            (Self::M4.0.into(), "M4", "M4"),
+            (Self::M5.0.into(), "M5", "M5"),
+            (Self::ANY.0.into(), "ANY", "Any"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(ModMask, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct KeyButMask(u16);
 impl KeyButMask {
     pub const SHIFT: Self = Self(1 << 0);
@@ -1185,9 +1266,29 @@ impl From<u16> for KeyButMask {
         Self(value)
     }
 }
+impl std::fmt::Debug for KeyButMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SHIFT.0.into(), "SHIFT", "Shift"),
+            (Self::LOCK.0.into(), "LOCK", "Lock"),
+            (Self::CONTROL.0.into(), "CONTROL", "Control"),
+            (Self::MOD1.0.into(), "MOD1", "Mod1"),
+            (Self::MOD2.0.into(), "MOD2", "Mod2"),
+            (Self::MOD3.0.into(), "MOD3", "Mod3"),
+            (Self::MOD4.0.into(), "MOD4", "Mod4"),
+            (Self::MOD5.0.into(), "MOD5", "Mod5"),
+            (Self::BUTTON1.0.into(), "BUTTON1", "Button1"),
+            (Self::BUTTON2.0.into(), "BUTTON2", "Button2"),
+            (Self::BUTTON3.0.into(), "BUTTON3", "Button3"),
+            (Self::BUTTON4.0.into(), "BUTTON4", "Button4"),
+            (Self::BUTTON5.0.into(), "BUTTON5", "Button5"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(KeyButMask, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct WindowEnum(u8);
 impl WindowEnum {
     pub const NONE: Self = Self(0);
@@ -1232,6 +1333,14 @@ impl From<u8> for WindowEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for WindowEnum  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -1368,7 +1477,7 @@ impl From<KeyPressEvent> for [u8; 32] {
 pub const KEY_RELEASE_EVENT: u8 = 3;
 pub type KeyReleaseEvent = KeyPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ButtonMask(u16);
 impl ButtonMask {
     pub const M1: Self = Self(1 << 8);
@@ -1412,6 +1521,19 @@ impl From<u16> for ButtonMask {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ButtonMask  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::M1.0.into(), "M1", "M1"),
+            (Self::M2.0.into(), "M2", "M2"),
+            (Self::M3.0.into(), "M3", "M3"),
+            (Self::M4.0.into(), "M4", "M4"),
+            (Self::M5.0.into(), "M5", "M5"),
+            (Self::ANY.0.into(), "ANY", "Any"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(ButtonMask, u16);
@@ -1549,7 +1671,7 @@ impl From<ButtonPressEvent> for [u8; 32] {
 pub const BUTTON_RELEASE_EVENT: u8 = 5;
 pub type ButtonReleaseEvent = ButtonPressEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Motion(u8);
 impl Motion {
     pub const NORMAL: Self = Self(0);
@@ -1595,6 +1717,15 @@ impl From<u8> for Motion {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Motion  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NORMAL.0.into(), "NORMAL", "Normal"),
+            (Self::HINT.0.into(), "HINT", "Hint"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -1728,7 +1859,7 @@ impl From<MotionNotifyEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct NotifyDetail(u8);
 impl NotifyDetail {
     pub const ANCESTOR: Self = Self(0);
@@ -1782,8 +1913,23 @@ impl From<u8> for NotifyDetail {
         Self(value)
     }
 }
+impl std::fmt::Debug for NotifyDetail  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ANCESTOR.0.into(), "ANCESTOR", "Ancestor"),
+            (Self::VIRTUAL.0.into(), "VIRTUAL", "Virtual"),
+            (Self::INFERIOR.0.into(), "INFERIOR", "Inferior"),
+            (Self::NONLINEAR.0.into(), "NONLINEAR", "Nonlinear"),
+            (Self::NONLINEAR_VIRTUAL.0.into(), "NONLINEAR_VIRTUAL", "NonlinearVirtual"),
+            (Self::POINTER.0.into(), "POINTER", "Pointer"),
+            (Self::POINTER_ROOT.0.into(), "POINTER_ROOT", "PointerRoot"),
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct NotifyMode(u8);
 impl NotifyMode {
     pub const NORMAL: Self = Self(0);
@@ -1831,6 +1977,17 @@ impl From<u8> for NotifyMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for NotifyMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NORMAL.0.into(), "NORMAL", "Normal"),
+            (Self::GRAB.0.into(), "GRAB", "Grab"),
+            (Self::UNGRAB.0.into(), "UNGRAB", "Ungrab"),
+            (Self::WHILE_GRABBED.0.into(), "WHILE_GRABBED", "WhileGrabbed"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -2417,7 +2574,7 @@ impl From<NoExposureEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Visibility(u8);
 impl Visibility {
     pub const UNOBSCURED: Self = Self(0);
@@ -2464,6 +2621,16 @@ impl From<u8> for Visibility {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Visibility  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::UNOBSCURED.0.into(), "UNOBSCURED", "Unobscured"),
+            (Self::PARTIALLY_OBSCURED.0.into(), "PARTIALLY_OBSCURED", "PartiallyObscured"),
+            (Self::FULLY_OBSCURED.0.into(), "FULLY_OBSCURED", "FullyObscured"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -3505,7 +3672,7 @@ impl From<ResizeRequestEvent> for [u8; 32] {
 ///
 /// * `OnTop` - The window is now on top of all siblings.
 /// * `OnBottom` - The window is now below all siblings.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Place(u8);
 impl Place {
     pub const ON_TOP: Self = Self(0);
@@ -3551,6 +3718,15 @@ impl From<u8> for Place {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Place  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ON_TOP.0.into(), "ON_TOP", "OnTop"),
+            (Self::ON_BOTTOM.0.into(), "ON_BOTTOM", "OnBottom"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -3655,7 +3831,7 @@ impl From<CirculateNotifyEvent> for [u8; 32] {
 pub const CIRCULATE_REQUEST_EVENT: u8 = 27;
 pub type CirculateRequestEvent = CirculateNotifyEvent;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Property(u8);
 impl Property {
     pub const NEW_VALUE: Self = Self(0);
@@ -3701,6 +3877,15 @@ impl From<u8> for Property {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Property  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NEW_VALUE.0.into(), "NEW_VALUE", "NewValue"),
+            (Self::DELETE.0.into(), "DELETE", "Delete"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -3885,7 +4070,7 @@ impl From<SelectionClearEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Time(u8);
 impl Time {
     pub const CURRENT_TIME: Self = Self(0);
@@ -3932,8 +4117,16 @@ impl From<u8> for Time {
         Self(value)
     }
 }
+impl std::fmt::Debug for Time  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::CURRENT_TIME.0.into(), "CURRENT_TIME", "CurrentTime"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct AtomEnum(u8);
 impl AtomEnum {
     pub const NONE: Self = Self(0);
@@ -4047,6 +4240,83 @@ impl From<u8> for AtomEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for AtomEnum  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+            (Self::ANY.0.into(), "ANY", "Any"),
+            (Self::PRIMARY.0.into(), "PRIMARY", "PRIMARY"),
+            (Self::SECONDARY.0.into(), "SECONDARY", "SECONDARY"),
+            (Self::ARC.0.into(), "ARC", "ARC"),
+            (Self::ATOM.0.into(), "ATOM", "ATOM"),
+            (Self::BITMAP.0.into(), "BITMAP", "BITMAP"),
+            (Self::CARDINAL.0.into(), "CARDINAL", "CARDINAL"),
+            (Self::COLORMAP.0.into(), "COLORMAP", "COLORMAP"),
+            (Self::CURSOR.0.into(), "CURSOR", "CURSOR"),
+            (Self::CUT_BUFFE_R0.0.into(), "CUT_BUFFE_R0", "CUT_BUFFER0"),
+            (Self::CUT_BUFFE_R1.0.into(), "CUT_BUFFE_R1", "CUT_BUFFER1"),
+            (Self::CUT_BUFFE_R2.0.into(), "CUT_BUFFE_R2", "CUT_BUFFER2"),
+            (Self::CUT_BUFFE_R3.0.into(), "CUT_BUFFE_R3", "CUT_BUFFER3"),
+            (Self::CUT_BUFFE_R4.0.into(), "CUT_BUFFE_R4", "CUT_BUFFER4"),
+            (Self::CUT_BUFFE_R5.0.into(), "CUT_BUFFE_R5", "CUT_BUFFER5"),
+            (Self::CUT_BUFFE_R6.0.into(), "CUT_BUFFE_R6", "CUT_BUFFER6"),
+            (Self::CUT_BUFFE_R7.0.into(), "CUT_BUFFE_R7", "CUT_BUFFER7"),
+            (Self::DRAWABLE.0.into(), "DRAWABLE", "DRAWABLE"),
+            (Self::FONT.0.into(), "FONT", "FONT"),
+            (Self::INTEGER.0.into(), "INTEGER", "INTEGER"),
+            (Self::PIXMAP.0.into(), "PIXMAP", "PIXMAP"),
+            (Self::POINT.0.into(), "POINT", "POINT"),
+            (Self::RECTANGLE.0.into(), "RECTANGLE", "RECTANGLE"),
+            (Self::RESOURCE_MANAGER.0.into(), "RESOURCE_MANAGER", "RESOURCE_MANAGER"),
+            (Self::RGB_COLOR_MAP.0.into(), "RGB_COLOR_MAP", "RGB_COLOR_MAP"),
+            (Self::RGB_BEST_MAP.0.into(), "RGB_BEST_MAP", "RGB_BEST_MAP"),
+            (Self::RGB_BLUE_MAP.0.into(), "RGB_BLUE_MAP", "RGB_BLUE_MAP"),
+            (Self::RGB_DEFAULT_MAP.0.into(), "RGB_DEFAULT_MAP", "RGB_DEFAULT_MAP"),
+            (Self::RGB_GRAY_MAP.0.into(), "RGB_GRAY_MAP", "RGB_GRAY_MAP"),
+            (Self::RGB_GREEN_MAP.0.into(), "RGB_GREEN_MAP", "RGB_GREEN_MAP"),
+            (Self::RGB_RED_MAP.0.into(), "RGB_RED_MAP", "RGB_RED_MAP"),
+            (Self::STRING.0.into(), "STRING", "STRING"),
+            (Self::VISUALID.0.into(), "VISUALID", "VISUALID"),
+            (Self::WINDOW.0.into(), "WINDOW", "WINDOW"),
+            (Self::WM_COMMAND.0.into(), "WM_COMMAND", "WM_COMMAND"),
+            (Self::WM_HINTS.0.into(), "WM_HINTS", "WM_HINTS"),
+            (Self::WM_CLIENT_MACHINE.0.into(), "WM_CLIENT_MACHINE", "WM_CLIENT_MACHINE"),
+            (Self::WM_ICON_NAME.0.into(), "WM_ICON_NAME", "WM_ICON_NAME"),
+            (Self::WM_ICON_SIZE.0.into(), "WM_ICON_SIZE", "WM_ICON_SIZE"),
+            (Self::WM_NAME.0.into(), "WM_NAME", "WM_NAME"),
+            (Self::WM_NORMAL_HINTS.0.into(), "WM_NORMAL_HINTS", "WM_NORMAL_HINTS"),
+            (Self::WM_SIZE_HINTS.0.into(), "WM_SIZE_HINTS", "WM_SIZE_HINTS"),
+            (Self::WM_ZOOM_HINTS.0.into(), "WM_ZOOM_HINTS", "WM_ZOOM_HINTS"),
+            (Self::MIN_SPACE.0.into(), "MIN_SPACE", "MIN_SPACE"),
+            (Self::NORM_SPACE.0.into(), "NORM_SPACE", "NORM_SPACE"),
+            (Self::MAX_SPACE.0.into(), "MAX_SPACE", "MAX_SPACE"),
+            (Self::END_SPACE.0.into(), "END_SPACE", "END_SPACE"),
+            (Self::SUPERSCRIPT_X.0.into(), "SUPERSCRIPT_X", "SUPERSCRIPT_X"),
+            (Self::SUPERSCRIPT_Y.0.into(), "SUPERSCRIPT_Y", "SUPERSCRIPT_Y"),
+            (Self::SUBSCRIPT_X.0.into(), "SUBSCRIPT_X", "SUBSCRIPT_X"),
+            (Self::SUBSCRIPT_Y.0.into(), "SUBSCRIPT_Y", "SUBSCRIPT_Y"),
+            (Self::UNDERLINE_POSITION.0.into(), "UNDERLINE_POSITION", "UNDERLINE_POSITION"),
+            (Self::UNDERLINE_THICKNESS.0.into(), "UNDERLINE_THICKNESS", "UNDERLINE_THICKNESS"),
+            (Self::STRIKEOUT_ASCENT.0.into(), "STRIKEOUT_ASCENT", "STRIKEOUT_ASCENT"),
+            (Self::STRIKEOUT_DESCENT.0.into(), "STRIKEOUT_DESCENT", "STRIKEOUT_DESCENT"),
+            (Self::ITALIC_ANGLE.0.into(), "ITALIC_ANGLE", "ITALIC_ANGLE"),
+            (Self::X_HEIGHT.0.into(), "X_HEIGHT", "X_HEIGHT"),
+            (Self::QUAD_WIDTH.0.into(), "QUAD_WIDTH", "QUAD_WIDTH"),
+            (Self::WEIGHT.0.into(), "WEIGHT", "WEIGHT"),
+            (Self::POINT_SIZE.0.into(), "POINT_SIZE", "POINT_SIZE"),
+            (Self::RESOLUTION.0.into(), "RESOLUTION", "RESOLUTION"),
+            (Self::COPYRIGHT.0.into(), "COPYRIGHT", "COPYRIGHT"),
+            (Self::NOTICE.0.into(), "NOTICE", "NOTICE"),
+            (Self::FONT_NAME.0.into(), "FONT_NAME", "FONT_NAME"),
+            (Self::FAMILY_NAME.0.into(), "FAMILY_NAME", "FAMILY_NAME"),
+            (Self::FULL_NAME.0.into(), "FULL_NAME", "FULL_NAME"),
+            (Self::CAP_HEIGHT.0.into(), "CAP_HEIGHT", "CAP_HEIGHT"),
+            (Self::WM_CLASS.0.into(), "WM_CLASS", "WM_CLASS"),
+            (Self::WM_TRANSIENT_FOR.0.into(), "WM_TRANSIENT_FOR", "WM_TRANSIENT_FOR"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -4233,7 +4503,7 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 ///
 /// * `Uninstalled` - The colormap was uninstalled.
 /// * `Installed` - The colormap was installed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ColormapState(u8);
 impl ColormapState {
     pub const UNINSTALLED: Self = Self(0);
@@ -4281,8 +4551,17 @@ impl From<u8> for ColormapState {
         Self(value)
     }
 }
+impl std::fmt::Debug for ColormapState  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::UNINSTALLED.0.into(), "UNINSTALLED", "Uninstalled"),
+            (Self::INSTALLED.0.into(), "INSTALLED", "Installed"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ColormapEnum(u8);
 impl ColormapEnum {
     pub const NONE: Self = Self(0);
@@ -4327,6 +4606,14 @@ impl From<u8> for ColormapEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ColormapEnum  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -4685,7 +4972,7 @@ impl From<ClientMessageEvent> for [u8; 32] {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Mapping(u8);
 impl Mapping {
     pub const MODIFIER: Self = Self(0);
@@ -4732,6 +5019,16 @@ impl From<u8> for Mapping {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Mapping  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::MODIFIER.0.into(), "MODIFIER", "Modifier"),
+            (Self::KEYBOARD.0.into(), "KEYBOARD", "Keyboard"),
+            (Self::POINTER.0.into(), "POINTER", "Pointer"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -4917,7 +5214,7 @@ pub const LENGTH_ERROR: u8 = 16;
 /// Opcode for the Implementation error
 pub const IMPLEMENTATION_ERROR: u8 = 17;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct WindowClass(u16);
 impl WindowClass {
     pub const COPY_FROM_PARENT: Self = Self(0);
@@ -4958,6 +5255,16 @@ impl From<u16> for WindowClass {
     #[inline]
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for WindowClass  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::COPY_FROM_PARENT.0.into(), "COPY_FROM_PARENT", "CopyFromParent"),
+            (Self::INPUT_OUTPUT.0.into(), "INPUT_OUTPUT", "InputOutput"),
+            (Self::INPUT_ONLY.0.into(), "INPUT_ONLY", "InputOnly"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -5031,7 +5338,7 @@ impl From<u16> for WindowClass {
 /// * `Cursor` - If a cursor is specified, it will be used whenever the pointer is in the window. If None is speci-
 /// fied, the parent's cursor will be used when the pointer is in the window, and any change in the
 /// parent's cursor will cause an immediate change in the displayed cursor.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CW(u16);
 impl CW {
     pub const BACK_PIXMAP: Self = Self(1 << 0);
@@ -5086,9 +5393,31 @@ impl From<u16> for CW {
         Self(value)
     }
 }
+impl std::fmt::Debug for CW  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::BACK_PIXMAP.0.into(), "BACK_PIXMAP", "BackPixmap"),
+            (Self::BACK_PIXEL.0.into(), "BACK_PIXEL", "BackPixel"),
+            (Self::BORDER_PIXMAP.0.into(), "BORDER_PIXMAP", "BorderPixmap"),
+            (Self::BORDER_PIXEL.0.into(), "BORDER_PIXEL", "BorderPixel"),
+            (Self::BIT_GRAVITY.0.into(), "BIT_GRAVITY", "BitGravity"),
+            (Self::WIN_GRAVITY.0.into(), "WIN_GRAVITY", "WinGravity"),
+            (Self::BACKING_STORE.0.into(), "BACKING_STORE", "BackingStore"),
+            (Self::BACKING_PLANES.0.into(), "BACKING_PLANES", "BackingPlanes"),
+            (Self::BACKING_PIXEL.0.into(), "BACKING_PIXEL", "BackingPixel"),
+            (Self::OVERRIDE_REDIRECT.0.into(), "OVERRIDE_REDIRECT", "OverrideRedirect"),
+            (Self::SAVE_UNDER.0.into(), "SAVE_UNDER", "SaveUnder"),
+            (Self::EVENT_MASK.0.into(), "EVENT_MASK", "EventMask"),
+            (Self::DONT_PROPAGATE.0.into(), "DONT_PROPAGATE", "DontPropagate"),
+            (Self::COLORMAP.0.into(), "COLORMAP", "Colormap"),
+            (Self::CURSOR.0.into(), "CURSOR", "Cursor"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(CW, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BackPixmap(bool);
 impl BackPixmap {
     pub const NONE: Self = Self(false);
@@ -5106,14 +5435,59 @@ impl From<BackPixmap> for Option<bool> {
         Some(input.0)
     }
 }
+impl From<BackPixmap> for u8 {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<BackPixmap> for Option<u8> {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<BackPixmap> for u16 {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<BackPixmap> for Option<u16> {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<BackPixmap> for u32 {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<BackPixmap> for Option<u32> {
+    #[inline]
+    fn from(input: BackPixmap) -> Self {
+        Some(u32::from(input.0))
+    }
+}
 impl From<bool> for BackPixmap {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
     }
 }
+impl std::fmt::Debug for BackPixmap  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+            (Self::PARENT_RELATIVE.0.into(), "PARENT_RELATIVE", "ParentRelative"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Gravity(u32);
 impl Gravity {
     pub const BIT_FORGET: Self = Self(0);
@@ -5157,6 +5531,25 @@ impl From<u32> for Gravity {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Gravity  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::BIT_FORGET.0, "BIT_FORGET", "BitForget"),
+            (Self::WIN_UNMAP.0, "WIN_UNMAP", "WinUnmap"),
+            (Self::NORTH_WEST.0, "NORTH_WEST", "NorthWest"),
+            (Self::NORTH.0, "NORTH", "North"),
+            (Self::NORTH_EAST.0, "NORTH_EAST", "NorthEast"),
+            (Self::WEST.0, "WEST", "West"),
+            (Self::CENTER.0, "CENTER", "Center"),
+            (Self::EAST.0, "EAST", "East"),
+            (Self::SOUTH_WEST.0, "SOUTH_WEST", "SouthWest"),
+            (Self::SOUTH.0, "SOUTH", "South"),
+            (Self::SOUTH_EAST.0, "SOUTH_EAST", "SouthEast"),
+            (Self::STATIC.0, "STATIC", "Static"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -6240,7 +6633,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct MapState(u8);
 impl MapState {
     pub const UNMAPPED: Self = Self(0);
@@ -6287,6 +6680,16 @@ impl From<u8> for MapState {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for MapState  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::UNMAPPED.0.into(), "UNMAPPED", "Unmapped"),
+            (Self::UNVIEWABLE.0.into(), "UNVIEWABLE", "Unviewable"),
+            (Self::VIEWABLE.0.into(), "VIEWABLE", "Viewable"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -6639,7 +7042,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SetMode(u8);
 impl SetMode {
     pub const INSERT: Self = Self(0);
@@ -6685,6 +7088,15 @@ impl From<u8> for SetMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SetMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::INSERT.0.into(), "INSERT", "Insert"),
+            (Self::DELETE.0.into(), "DELETE", "Delete"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -7338,7 +7750,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ConfigWindow(u8);
 impl ConfigWindow {
     pub const X: Self = Self(1 << 0);
@@ -7391,9 +7803,23 @@ impl From<u8> for ConfigWindow {
         Self(value)
     }
 }
+impl std::fmt::Debug for ConfigWindow  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::X.0.into(), "X", "X"),
+            (Self::Y.0.into(), "Y", "Y"),
+            (Self::WIDTH.0.into(), "WIDTH", "Width"),
+            (Self::HEIGHT.0.into(), "HEIGHT", "Height"),
+            (Self::BORDER_WIDTH.0.into(), "BORDER_WIDTH", "BorderWidth"),
+            (Self::SIBLING.0.into(), "SIBLING", "Sibling"),
+            (Self::STACK_MODE.0.into(), "STACK_MODE", "StackMode"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(ConfigWindow, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct StackMode(u32);
 impl StackMode {
     pub const ABOVE: Self = Self(0);
@@ -7430,6 +7856,18 @@ impl From<u32> for StackMode {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for StackMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ABOVE.0, "ABOVE", "Above"),
+            (Self::BELOW.0, "BELOW", "Below"),
+            (Self::TOP_IF.0, "TOP_IF", "TopIf"),
+            (Self::BOTTOM_IF.0, "BOTTOM_IF", "BottomIf"),
+            (Self::OPPOSITE.0, "OPPOSITE", "Opposite"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -7800,7 +8238,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Circulate(u8);
 impl Circulate {
     pub const RAISE_LOWEST: Self = Self(0);
@@ -7846,6 +8284,15 @@ impl From<u8> for Circulate {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Circulate  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::RAISE_LOWEST.0.into(), "RAISE_LOWEST", "RaiseLowest"),
+            (Self::LOWER_HIGHEST.0.into(), "LOWER_HIGHEST", "LowerHighest"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -8678,7 +9125,7 @@ impl GetAtomNameReply {
 /// * `Append` - Insert the new data after the beginning of existing data. The `format` must
 /// match existing property value. If the property is undefined, it is treated as
 /// defined with the correct type and format with zero-length data.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PropMode(u8);
 impl PropMode {
     pub const REPLACE: Self = Self(0);
@@ -8725,6 +9172,16 @@ impl From<u8> for PropMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PropMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::REPLACE.0.into(), "REPLACE", "Replace"),
+            (Self::PREPEND.0.into(), "PREPEND", "Prepend"),
+            (Self::APPEND.0.into(), "APPEND", "Append"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -9039,7 +9496,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GetPropertyType(u8);
 impl GetPropertyType {
     pub const ANY: Self = Self(0);
@@ -9084,6 +9541,14 @@ impl From<u8> for GetPropertyType {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for GetPropertyType  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ANY.0.into(), "ANY", "Any"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -9380,7 +9845,7 @@ impl GetPropertyReply {
     /// };
     /// assert!(reply.value8().is_none());
     /// ```
-    pub fn value8<'a>(&'a self) -> Option<impl Iterator<Item=u8> + 'a> {
+    pub fn value8(&self) -> Option<impl Iterator<Item=u8> + '_> {
         if self.format == 8 {
             Some(crate::wrapper::PropertyIterator::new(&self.value))
         } else {
@@ -9431,7 +9896,7 @@ impl GetPropertyReply {
     /// };
     /// assert!(reply.value16().is_none());
     /// ```
-    pub fn value16<'a>(&'a self) -> Option<impl Iterator<Item=u16> + 'a> {
+    pub fn value16(&self) -> Option<impl Iterator<Item=u16> + '_> {
         if self.format == 16 {
             Some(crate::wrapper::PropertyIterator::new(&self.value))
         } else {
@@ -9481,7 +9946,7 @@ impl GetPropertyReply {
     /// };
     /// assert!(reply.value32().is_none());
     /// ```
-    pub fn value32<'a>(&'a self) -> Option<impl Iterator<Item=u32> + 'a> {
+    pub fn value32(&self) -> Option<impl Iterator<Item=u32> + '_> {
         if self.format == 32 {
             Some(crate::wrapper::PropertyIterator::new(&self.value))
         } else {
@@ -10045,7 +10510,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SendEventDest(bool);
 impl SendEventDest {
     pub const POINTER_WINDOW: Self = Self(false);
@@ -10063,10 +10528,55 @@ impl From<SendEventDest> for Option<bool> {
         Some(input.0)
     }
 }
+impl From<SendEventDest> for u8 {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        u8::from(input.0)
+    }
+}
+impl From<SendEventDest> for Option<u8> {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        Some(u8::from(input.0))
+    }
+}
+impl From<SendEventDest> for u16 {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        u16::from(input.0)
+    }
+}
+impl From<SendEventDest> for Option<u16> {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        Some(u16::from(input.0))
+    }
+}
+impl From<SendEventDest> for u32 {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        u32::from(input.0)
+    }
+}
+impl From<SendEventDest> for Option<u32> {
+    #[inline]
+    fn from(input: SendEventDest) -> Self {
+        Some(u32::from(input.0))
+    }
+}
 impl From<bool> for SendEventDest {
     #[inline]
     fn from(value: bool) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for SendEventDest  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::POINTER_WINDOW.0.into(), "POINTER_WINDOW", "PointerWindow"),
+            (Self::ITEM_FOCUS.0.into(), "ITEM_FOCUS", "ItemFocus"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -10323,7 +10833,7 @@ where
 /// generated by the server until the grabbing client issues a releasing
 /// `AllowEvents` request or until the keyboard grab is released.
 /// * `Async` - Keyboard event processing continues normally.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabMode(u8);
 impl GrabMode {
     pub const SYNC: Self = Self(0);
@@ -10371,8 +10881,17 @@ impl From<u8> for GrabMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for GrabMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SYNC.0.into(), "SYNC", "Sync"),
+            (Self::ASYNC.0.into(), "ASYNC", "Async"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabStatus(u8);
 impl GrabStatus {
     pub const SUCCESS: Self = Self(0);
@@ -10423,8 +10942,20 @@ impl From<u8> for GrabStatus {
         Self(value)
     }
 }
+impl std::fmt::Debug for GrabStatus  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SUCCESS.0.into(), "SUCCESS", "Success"),
+            (Self::ALREADY_GRABBED.0.into(), "ALREADY_GRABBED", "AlreadyGrabbed"),
+            (Self::INVALID_TIME.0.into(), "INVALID_TIME", "InvalidTime"),
+            (Self::NOT_VIEWABLE.0.into(), "NOT_VIEWABLE", "NotViewable"),
+            (Self::FROZEN.0.into(), "FROZEN", "Frozen"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CursorEnum(u8);
 impl CursorEnum {
     pub const NONE: Self = Self(0);
@@ -10469,6 +11000,14 @@ impl From<u8> for CursorEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CursorEnum  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -10895,7 +11434,7 @@ where
 /// * `3` - The middle mouse button.
 /// * `4` - Scroll wheel. TODO: direction?
 /// * `5` - Scroll wheel. TODO: direction?
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ButtonIndex(u8);
 impl ButtonIndex {
     pub const ANY: Self = Self(0);
@@ -10945,6 +11484,19 @@ impl From<u8> for ButtonIndex {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ButtonIndex  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ANY.0.into(), "ANY", "Any"),
+            (Self::M1.0.into(), "M1", "M1"),
+            (Self::M2.0.into(), "M2", "M2"),
+            (Self::M3.0.into(), "M3", "M3"),
+            (Self::M4.0.into(), "M4", "M4"),
+            (Self::M5.0.into(), "M5", "M5"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -11715,7 +12267,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Grab(u8);
 impl Grab {
     pub const ANY: Self = Self(0);
@@ -11760,6 +12312,14 @@ impl From<u8> for Grab {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Grab  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ANY.0.into(), "ANY", "Any"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -12183,7 +12743,7 @@ where
 /// processing for both devices continues normally. If a device is frozen twice by
 /// the client on behalf of two separate grabs, AsyncBoth thaws for both. AsyncBoth
 /// has no effect unless both pointer and keyboard are frozen by the client.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Allow(u8);
 impl Allow {
     pub const ASYNC_POINTER: Self = Self(0);
@@ -12235,6 +12795,21 @@ impl From<u8> for Allow {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Allow  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ASYNC_POINTER.0.into(), "ASYNC_POINTER", "AsyncPointer"),
+            (Self::SYNC_POINTER.0.into(), "SYNC_POINTER", "SyncPointer"),
+            (Self::REPLAY_POINTER.0.into(), "REPLAY_POINTER", "ReplayPointer"),
+            (Self::ASYNC_KEYBOARD.0.into(), "ASYNC_KEYBOARD", "AsyncKeyboard"),
+            (Self::SYNC_KEYBOARD.0.into(), "SYNC_KEYBOARD", "SyncKeyboard"),
+            (Self::REPLAY_KEYBOARD.0.into(), "REPLAY_KEYBOARD", "ReplayKeyboard"),
+            (Self::ASYNC_BOTH.0.into(), "ASYNC_BOTH", "AsyncBoth"),
+            (Self::SYNC_BOTH.0.into(), "SYNC_BOTH", "SyncBoth"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -13121,7 +13696,7 @@ where
 /// * `Parent` - The focus reverts to the parent (or closest viewable ancestor) and the new
 /// revert_to value is `XCB_INPUT_FOCUS_NONE`.
 /// * `FollowKeyboard` - NOT YET DOCUMENTED. Only relevant for the xinput extension.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct InputFocus(u8);
 impl InputFocus {
     pub const NONE: Self = Self(0);
@@ -13169,6 +13744,17 @@ impl From<u8> for InputFocus {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for InputFocus  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+            (Self::POINTER_ROOT.0.into(), "POINTER_ROOT", "PointerRoot"),
+            (Self::PARENT.0.into(), "PARENT", "Parent"),
+            (Self::FOLLOW_KEYBOARD.0.into(), "FOLLOW_KEYBOARD", "FollowKeyboard"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -13700,7 +14286,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FontDraw(u8);
 impl FontDraw {
     pub const LEFT_TO_RIGHT: Self = Self(0);
@@ -13746,6 +14332,15 @@ impl From<u8> for FontDraw {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for FontDraw  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::LEFT_TO_RIGHT.0.into(), "LEFT_TO_RIGHT", "LeftToRight"),
+            (Self::RIGHT_TO_LEFT.0.into(), "RIGHT_TO_LEFT", "RightToLeft"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -15187,7 +15782,7 @@ where
 /// * `DashOffset` - TODO
 /// * `DashList` - TODO
 /// * `ArcMode` - TODO
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GC(u32);
 impl GC {
     pub const FUNCTION: Self = Self(1 << 0);
@@ -15244,9 +15839,39 @@ impl From<u32> for GC {
         Self(value)
     }
 }
+impl std::fmt::Debug for GC  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::FUNCTION.0, "FUNCTION", "Function"),
+            (Self::PLANE_MASK.0, "PLANE_MASK", "PlaneMask"),
+            (Self::FOREGROUND.0, "FOREGROUND", "Foreground"),
+            (Self::BACKGROUND.0, "BACKGROUND", "Background"),
+            (Self::LINE_WIDTH.0, "LINE_WIDTH", "LineWidth"),
+            (Self::LINE_STYLE.0, "LINE_STYLE", "LineStyle"),
+            (Self::CAP_STYLE.0, "CAP_STYLE", "CapStyle"),
+            (Self::JOIN_STYLE.0, "JOIN_STYLE", "JoinStyle"),
+            (Self::FILL_STYLE.0, "FILL_STYLE", "FillStyle"),
+            (Self::FILL_RULE.0, "FILL_RULE", "FillRule"),
+            (Self::TILE.0, "TILE", "Tile"),
+            (Self::STIPPLE.0, "STIPPLE", "Stipple"),
+            (Self::TILE_STIPPLE_ORIGIN_X.0, "TILE_STIPPLE_ORIGIN_X", "TileStippleOriginX"),
+            (Self::TILE_STIPPLE_ORIGIN_Y.0, "TILE_STIPPLE_ORIGIN_Y", "TileStippleOriginY"),
+            (Self::FONT.0, "FONT", "Font"),
+            (Self::SUBWINDOW_MODE.0, "SUBWINDOW_MODE", "SubwindowMode"),
+            (Self::GRAPHICS_EXPOSURES.0, "GRAPHICS_EXPOSURES", "GraphicsExposures"),
+            (Self::CLIP_ORIGIN_X.0, "CLIP_ORIGIN_X", "ClipOriginX"),
+            (Self::CLIP_ORIGIN_Y.0, "CLIP_ORIGIN_Y", "ClipOriginY"),
+            (Self::CLIP_MASK.0, "CLIP_MASK", "ClipMask"),
+            (Self::DASH_OFFSET.0, "DASH_OFFSET", "DashOffset"),
+            (Self::DASH_LIST.0, "DASH_LIST", "DashList"),
+            (Self::ARC_MODE.0, "ARC_MODE", "ArcMode"),
+        ];
+        pretty_print_bitmask(fmt, self.0, &variants)
+    }
+}
 bitmask_binop!(GC, u32);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GX(u32);
 impl GX {
     pub const CLEAR: Self = Self(0);
@@ -15296,8 +15921,31 @@ impl From<u32> for GX {
         Self(value)
     }
 }
+impl std::fmt::Debug for GX  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::CLEAR.0, "CLEAR", "Clear"),
+            (Self::AND.0, "AND", "And"),
+            (Self::AND_REVERSE.0, "AND_REVERSE", "AndReverse"),
+            (Self::COPY.0, "COPY", "Copy"),
+            (Self::AND_INVERTED.0, "AND_INVERTED", "AndInverted"),
+            (Self::NOOP.0, "NOOP", "Noop"),
+            (Self::XOR.0, "XOR", "Xor"),
+            (Self::OR.0, "OR", "Or"),
+            (Self::NOR.0, "NOR", "Nor"),
+            (Self::EQUIV.0, "EQUIV", "Equiv"),
+            (Self::INVERT.0, "INVERT", "Invert"),
+            (Self::OR_REVERSE.0, "OR_REVERSE", "OrReverse"),
+            (Self::COPY_INVERTED.0, "COPY_INVERTED", "CopyInverted"),
+            (Self::OR_INVERTED.0, "OR_INVERTED", "OrInverted"),
+            (Self::NAND.0, "NAND", "Nand"),
+            (Self::SET.0, "SET", "Set"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct LineStyle(u32);
 impl LineStyle {
     pub const SOLID: Self = Self(0);
@@ -15334,8 +15982,18 @@ impl From<u32> for LineStyle {
         Self(value)
     }
 }
+impl std::fmt::Debug for LineStyle  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SOLID.0, "SOLID", "Solid"),
+            (Self::ON_OFF_DASH.0, "ON_OFF_DASH", "OnOffDash"),
+            (Self::DOUBLE_DASH.0, "DOUBLE_DASH", "DoubleDash"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CapStyle(u32);
 impl CapStyle {
     pub const NOT_LAST: Self = Self(0);
@@ -15373,8 +16031,19 @@ impl From<u32> for CapStyle {
         Self(value)
     }
 }
+impl std::fmt::Debug for CapStyle  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NOT_LAST.0, "NOT_LAST", "NotLast"),
+            (Self::BUTT.0, "BUTT", "Butt"),
+            (Self::ROUND.0, "ROUND", "Round"),
+            (Self::PROJECTING.0, "PROJECTING", "Projecting"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct JoinStyle(u32);
 impl JoinStyle {
     pub const MITER: Self = Self(0);
@@ -15411,8 +16080,18 @@ impl From<u32> for JoinStyle {
         Self(value)
     }
 }
+impl std::fmt::Debug for JoinStyle  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::MITER.0, "MITER", "Miter"),
+            (Self::ROUND.0, "ROUND", "Round"),
+            (Self::BEVEL.0, "BEVEL", "Bevel"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FillStyle(u32);
 impl FillStyle {
     pub const SOLID: Self = Self(0);
@@ -15450,8 +16129,19 @@ impl From<u32> for FillStyle {
         Self(value)
     }
 }
+impl std::fmt::Debug for FillStyle  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SOLID.0, "SOLID", "Solid"),
+            (Self::TILED.0, "TILED", "Tiled"),
+            (Self::STIPPLED.0, "STIPPLED", "Stippled"),
+            (Self::OPAQUE_STIPPLED.0, "OPAQUE_STIPPLED", "OpaqueStippled"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FillRule(u32);
 impl FillRule {
     pub const EVEN_ODD: Self = Self(0);
@@ -15487,8 +16177,17 @@ impl From<u32> for FillRule {
         Self(value)
     }
 }
+impl std::fmt::Debug for FillRule  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::EVEN_ODD.0, "EVEN_ODD", "EvenOdd"),
+            (Self::WINDING.0, "WINDING", "Winding"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SubwindowMode(u32);
 impl SubwindowMode {
     pub const CLIP_BY_CHILDREN: Self = Self(0);
@@ -15524,8 +16223,17 @@ impl From<u32> for SubwindowMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for SubwindowMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::CLIP_BY_CHILDREN.0, "CLIP_BY_CHILDREN", "ClipByChildren"),
+            (Self::INCLUDE_INFERIORS.0, "INCLUDE_INFERIORS", "IncludeInferiors"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ArcMode(u32);
 impl ArcMode {
     pub const CHORD: Self = Self(0);
@@ -15559,6 +16267,15 @@ impl From<u32> for ArcMode {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ArcMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::CHORD.0, "CHORD", "Chord"),
+            (Self::PIE_SLICE.0, "PIE_SLICE", "PieSlice"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -17075,7 +17792,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ClipOrdering(u8);
 impl ClipOrdering {
     pub const UNSORTED: Self = Self(0);
@@ -17123,6 +17840,17 @@ impl From<u8> for ClipOrdering {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ClipOrdering  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::UNSORTED.0.into(), "UNSORTED", "Unsorted"),
+            (Self::Y_SORTED.0.into(), "Y_SORTED", "YSorted"),
+            (Self::YX_SORTED.0.into(), "YX_SORTED", "YXSorted"),
+            (Self::YX_BANDED.0.into(), "YX_BANDED", "YXBanded"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -17734,7 +18462,7 @@ where
 ///
 /// * `Origin` - Treats all coordinates as relative to the origin.
 /// * `Previous` - Treats all coordinates after the first as relative to the previous coordinate.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CoordMode(u8);
 impl CoordMode {
     pub const ORIGIN: Self = Self(0);
@@ -17780,6 +18508,15 @@ impl From<u8> for CoordMode {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CoordMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ORIGIN.0.into(), "ORIGIN", "Origin"),
+            (Self::PREVIOUS.0.into(), "PREVIOUS", "Previous"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -18470,7 +19207,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PolyShape(u8);
 impl PolyShape {
     pub const COMPLEX: Self = Self(0);
@@ -18517,6 +19254,16 @@ impl From<u8> for PolyShape {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PolyShape  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::COMPLEX.0.into(), "COMPLEX", "Complex"),
+            (Self::NONCONVEX.0.into(), "NONCONVEX", "Nonconvex"),
+            (Self::CONVEX.0.into(), "CONVEX", "Convex"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -18886,7 +19633,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ImageFormat(u8);
 impl ImageFormat {
     pub const XY_BITMAP: Self = Self(0);
@@ -18933,6 +19680,16 @@ impl From<u8> for ImageFormat {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ImageFormat  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::XY_BITMAP.0.into(), "XY_BITMAP", "XYBitmap"),
+            (Self::XY_PIXMAP.0.into(), "XY_PIXMAP", "XYPixmap"),
+            (Self::Z_PIXMAP.0.into(), "Z_PIXMAP", "ZPixmap"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -19813,7 +20570,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ColormapAlloc(u8);
 impl ColormapAlloc {
     pub const NONE: Self = Self(0);
@@ -19859,6 +20616,15 @@ impl From<u8> for ColormapAlloc {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ColormapAlloc  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+            (Self::ALL.0.into(), "ALL", "All"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -21043,7 +21809,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ColorFlag(u8);
 impl ColorFlag {
     pub const RED: Self = Self(1 << 0);
@@ -21090,6 +21856,16 @@ impl From<u8> for ColorFlag {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ColorFlag  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::RED.0.into(), "RED", "Red"),
+            (Self::GREEN.0.into(), "GREEN", "Green"),
+            (Self::BLUE.0.into(), "BLUE", "Blue"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(ColorFlag, u8);
@@ -21664,7 +22440,7 @@ impl TryFrom<&[u8]> for LookupColorReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PixmapEnum(u8);
 impl PixmapEnum {
     pub const NONE: Self = Self(0);
@@ -21709,6 +22485,14 @@ impl From<u8> for PixmapEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for PixmapEnum  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -21855,7 +22639,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FontEnum(u8);
 impl FontEnum {
     pub const NONE: Self = Self(0);
@@ -21900,6 +22684,14 @@ impl From<u8> for FontEnum {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for FontEnum  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NONE.0.into(), "NONE", "None"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -22312,7 +23104,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct QueryShapeOf(u8);
 impl QueryShapeOf {
     pub const LARGEST_CURSOR: Self = Self(0);
@@ -22359,6 +23151,16 @@ impl From<u8> for QueryShapeOf {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for QueryShapeOf  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::LARGEST_CURSOR.0.into(), "LARGEST_CURSOR", "LargestCursor"),
+            (Self::FASTEST_TILE.0.into(), "FASTEST_TILE", "FastestTile"),
+            (Self::FASTEST_STIPPLE.0.into(), "FASTEST_STIPPLE", "FastestStipple"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -22964,7 +23766,7 @@ impl GetKeyboardMappingReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct KB(u8);
 impl KB {
     pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
@@ -23018,9 +23820,24 @@ impl From<u8> for KB {
         Self(value)
     }
 }
+impl std::fmt::Debug for KB  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::KEY_CLICK_PERCENT.0.into(), "KEY_CLICK_PERCENT", "KeyClickPercent"),
+            (Self::BELL_PERCENT.0.into(), "BELL_PERCENT", "BellPercent"),
+            (Self::BELL_PITCH.0.into(), "BELL_PITCH", "BellPitch"),
+            (Self::BELL_DURATION.0.into(), "BELL_DURATION", "BellDuration"),
+            (Self::LED.0.into(), "LED", "Led"),
+            (Self::LED_MODE.0.into(), "LED_MODE", "LedMode"),
+            (Self::KEY.0.into(), "KEY", "Key"),
+            (Self::AUTO_REPEAT_MODE.0.into(), "AUTO_REPEAT_MODE", "AutoRepeatMode"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
+    }
+}
 bitmask_binop!(KB, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct LedMode(u32);
 impl LedMode {
     pub const OFF: Self = Self(0);
@@ -23056,8 +23873,17 @@ impl From<u32> for LedMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for LedMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::OFF.0, "OFF", "Off"),
+            (Self::ON.0, "ON", "On"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct AutoRepeatMode(u32);
 impl AutoRepeatMode {
     pub const OFF: Self = Self(0);
@@ -23092,6 +23918,16 @@ impl From<u32> for AutoRepeatMode {
     #[inline]
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for AutoRepeatMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::OFF.0, "OFF", "Off"),
+            (Self::ON.0, "ON", "On"),
+            (Self::DEFAULT.0, "DEFAULT", "Default"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 
@@ -23718,7 +24554,7 @@ impl TryFrom<&[u8]> for GetPointerControlReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Blanking(u8);
 impl Blanking {
     pub const NOT_PREFERRED: Self = Self(0);
@@ -23767,8 +24603,18 @@ impl From<u8> for Blanking {
         Self(value)
     }
 }
+impl std::fmt::Debug for Blanking  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NOT_PREFERRED.0.into(), "NOT_PREFERRED", "NotPreferred"),
+            (Self::PREFERRED.0.into(), "PREFERRED", "Preferred"),
+            (Self::DEFAULT.0.into(), "DEFAULT", "Default"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Exposures(u8);
 impl Exposures {
     pub const NOT_ALLOWED: Self = Self(0);
@@ -23815,6 +24661,16 @@ impl From<u8> for Exposures {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Exposures  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NOT_ALLOWED.0.into(), "NOT_ALLOWED", "NotAllowed"),
+            (Self::ALLOWED.0.into(), "ALLOWED", "Allowed"),
+            (Self::DEFAULT.0.into(), "DEFAULT", "Default"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -24002,7 +24858,7 @@ impl TryFrom<&[u8]> for GetScreenSaverReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct HostMode(u8);
 impl HostMode {
     pub const INSERT: Self = Self(0);
@@ -24050,8 +24906,17 @@ impl From<u8> for HostMode {
         Self(value)
     }
 }
+impl std::fmt::Debug for HostMode  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::INSERT.0.into(), "INSERT", "Insert"),
+            (Self::DELETE.0.into(), "DELETE", "Delete"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Family(u8);
 impl Family {
     pub const INTERNET: Self = Self(0);
@@ -24100,6 +24965,18 @@ impl From<u8> for Family {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Family  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::INTERNET.0.into(), "INTERNET", "Internet"),
+            (Self::DEC_NET.0.into(), "DEC_NET", "DECnet"),
+            (Self::CHAOS.0.into(), "CHAOS", "Chaos"),
+            (Self::SERVER_INTERPRETED.0.into(), "SERVER_INTERPRETED", "ServerInterpreted"),
+            (Self::INTERNET6.0.into(), "INTERNET6", "Internet6"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -24362,7 +25239,7 @@ impl ListHostsReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct AccessControl(u8);
 impl AccessControl {
     pub const DISABLE: Self = Self(0);
@@ -24408,6 +25285,15 @@ impl From<u8> for AccessControl {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for AccessControl  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DISABLE.0.into(), "DISABLE", "Disable"),
+            (Self::ENABLE.0.into(), "ENABLE", "Enable"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -24474,7 +25360,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CloseDown(u8);
 impl CloseDown {
     pub const DESTROY_ALL: Self = Self(0);
@@ -24521,6 +25407,16 @@ impl From<u8> for CloseDown {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for CloseDown  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::DESTROY_ALL.0.into(), "DESTROY_ALL", "DestroyAll"),
+            (Self::RETAIN_PERMANENT.0.into(), "RETAIN_PERMANENT", "RetainPermanent"),
+            (Self::RETAIN_TEMPORARY.0.into(), "RETAIN_TEMPORARY", "RetainTemporary"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -24587,7 +25483,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Kill(u8);
 impl Kill {
     pub const ALL_TEMPORARY: Self = Self(0);
@@ -24632,6 +25528,14 @@ impl From<u8> for Kill {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for Kill  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::ALL_TEMPORARY.0.into(), "ALL_TEMPORARY", "AllTemporary"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -24837,7 +25741,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ScreenSaver(u8);
 impl ScreenSaver {
     pub const RESET: Self = Self(0);
@@ -24883,6 +25787,15 @@ impl From<u8> for ScreenSaver {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for ScreenSaver  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::RESET.0.into(), "RESET", "Reset"),
+            (Self::ACTIVE.0.into(), "ACTIVE", "Active"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -24949,7 +25862,7 @@ where
     request0.send(conn)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct MappingStatus(u8);
 impl MappingStatus {
     pub const SUCCESS: Self = Self(0);
@@ -24996,6 +25909,16 @@ impl From<u8> for MappingStatus {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for MappingStatus  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SUCCESS.0.into(), "SUCCESS", "Success"),
+            (Self::BUSY.0.into(), "BUSY", "Busy"),
+            (Self::FAILURE.0.into(), "FAILURE", "Failure"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
@@ -25207,7 +26130,7 @@ impl GetPointerMappingReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct MapIndex(u8);
 impl MapIndex {
     pub const SHIFT: Self = Self(0);
@@ -25259,6 +26182,21 @@ impl From<u8> for MapIndex {
     #[inline]
     fn from(value: u8) -> Self {
         Self(value)
+    }
+}
+impl std::fmt::Debug for MapIndex  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::SHIFT.0.into(), "SHIFT", "Shift"),
+            (Self::LOCK.0.into(), "LOCK", "Lock"),
+            (Self::CONTROL.0.into(), "CONTROL", "Control"),
+            (Self::M1.0.into(), "M1", "M1"),
+            (Self::M2.0.into(), "M2", "M2"),
+            (Self::M3.0.into(), "M3", "M3"),
+            (Self::M4.0.into(), "M4", "M4"),
+            (Self::M5.0.into(), "M5", "M5"),
+        ];
+        pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
 
