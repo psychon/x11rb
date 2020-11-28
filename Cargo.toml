@@ -45,7 +45,8 @@ cursor = ["render"]
 # Enable utility functions in `x11rb::image` for working with image data.
 image = []
 
-# FOO TODO
+# Enable utility functions in `x11rb::resource_manager` for querying the
+# resource databases.
 resource_manager = []
 
 dl-libxcb = ["allow-unsafe-code", "libloading", "once_cell"]
@@ -111,7 +112,7 @@ xv = ["shm"]
 xvmc = ["xv"]
 
 [package.metadata.docs.rs]
-features = [ "all-extensions", "allow-unsafe-code", "cursor", "image" ]
+features = [ "all-extensions", "allow-unsafe-code", "cursor", "image", "resource_manager" ]
 
 [[example]]
 name = "generic_events"
