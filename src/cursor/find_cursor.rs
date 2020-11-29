@@ -1,5 +1,3 @@
-#![allow(clippy::match_like_matches_macro)]
-
 //! Find the right cursor file from a cursor name
 
 // Based on libxcb-cursor's load_cursor.c which has:

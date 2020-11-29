@@ -91,6 +91,9 @@
 //! Additionally, the following flags exist:
 //! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
 //!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
+//! * `cursor`: Enable the code in [x11rb::cursor] for loading cursor files.
+//! * `resource_manager`: Enable the code in [x11rb::resource_manager] for loading and querying the
+//!   X11 resource database.
 //! * `dl-libxcb`: Enabling this feature will prevent from libxcb being linked to the
 //!   resulting executable. Instead libxcb will be dynamically loaded at runtime.
 //!   This feature adds the `x11rb::xcb_ffi::load_libxcb` function, that allows load
@@ -126,6 +129,8 @@
 #![allow(
     // This suggests a method that was stabilised in Rust 1.45, while our MSRV is 1.40.
     clippy::manual_strip,
+    // This suggests a macro that was stabilised in Rust 1.42, while our MSRV is 1.40.
+    clippy::match_like_matches_macro,
 )]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 
@@ -151,6 +156,8 @@ pub mod wrapper;
 #[rustfmt::skip]
 #[allow(missing_docs)]
 pub mod protocol;
+#[cfg(feature = "resource_manager")]
+pub mod resource_manager;
 #[cfg(test)]
 mod test;
 
