@@ -31,7 +31,8 @@ jobs:
        matrix:
          include:
            - rust: stable
-           - rust: beta
+           #fixme: beta was disabled due to the false positive from https://github.com/rust-lang/rust/issues/79498
+           #- rust: beta
              #fixme: remove this hack
              clippy_args: -A clippy::manual_strip
      steps:
