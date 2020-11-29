@@ -162,7 +162,7 @@ mod test {
         where
             R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
         {
-            todo!()
+            unimplemented!()
         }
 
         fn send_request_without_reply(
@@ -170,22 +170,22 @@ mod test {
             _: &[IoSlice<'_>],
             _: Vec<RawFdContainer>,
         ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
-            todo!()
+            unimplemented!()
         }
 
         fn discard_reply(&self, _: SequenceNumber, _: RequestKind, _: DiscardMode) {
-            todo!()
+            unimplemented!()
         }
 
         fn prefetch_extension_information(&self, _: &'static str) -> Result<(), ConnectionError> {
-            todo!()
+            unimplemented!()
         }
 
         fn extension_information(
             &self,
             _: &'static str,
         ) -> Result<Option<ExtensionInformation>, ConnectionError> {
-            todo!()
+            unimplemented!()
         }
 
         fn wait_for_reply_or_raw_error(
@@ -218,37 +218,37 @@ mod test {
         }
 
         fn wait_for_reply(&self, _: SequenceNumber) -> Result<Option<Self::Buf>, ConnectionError> {
-            todo!()
+            unimplemented!()
         }
 
         fn wait_for_reply_with_fds_raw(
             &self,
             _: SequenceNumber,
         ) -> Result<ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>, ConnectionError> {
-            todo!()
+            unimplemented!()
         }
 
         fn check_for_raw_error(
             &self,
             _: SequenceNumber,
         ) -> Result<Option<Self::Buf>, ConnectionError> {
-            todo!()
+            unimplemented!()
         }
 
         fn prefetch_maximum_request_bytes(&self) {
-            todo!()
+            unimplemented!()
         }
 
         fn maximum_request_bytes(&self) -> usize {
-            todo!()
+            unimplemented!()
         }
 
         fn parse_error(&self, _: &[u8]) -> Result<X11Error, ParseError> {
-            todo!()
+            unimplemented!()
         }
 
         fn parse_event(&self, _: &[u8]) -> Result<Event, ParseError> {
-            todo!()
+            unimplemented!()
         }
     }
 
@@ -256,17 +256,17 @@ mod test {
         fn wait_for_raw_event_with_sequence(
             &self,
         ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError> {
-            todo!()
+            unimplemented!()
         }
 
         fn poll_for_raw_event_with_sequence(
             &self,
         ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
-            todo!()
+            unimplemented!()
         }
 
         fn flush(&self) -> Result<(), ConnectionError> {
-            todo!()
+            unimplemented!()
         }
 
         fn setup(&self) -> &Setup {
@@ -274,7 +274,7 @@ mod test {
         }
 
         fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
-            todo!()
+            unimplemented!()
         }
     }
 }
