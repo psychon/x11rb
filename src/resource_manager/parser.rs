@@ -604,7 +604,7 @@ mod test {
             (b"First: 1\n!Foo", vec![expected_entry.clone()]),
             (b"!First: 1\nbar\n\n\n", Vec::new()),
             (b"!bar\nFirst: 1\nbaz", vec![expected_entry.clone()]),
-            (b"First :\\\n \\\n\\\n1\n", vec![expected_entry.clone()]),
+            (b"First :\\\n \\\n\\\n1\n", vec![expected_entry]),
             (
                 b"First: \\\n  1\\\n2\n",
                 vec![Entry {
