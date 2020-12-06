@@ -7,6 +7,7 @@ use crate::cookie::Cookie as X11Cookie;
 use crate::errors::{ConnectionError, ReplyOrIdError};
 use crate::protocol::render::{self, Pictformat};
 use crate::protocol::xproto::{self, Font, Window};
+use crate::resource_manager::Database;
 use crate::NONE;
 
 use std::fs::File;
@@ -29,20 +30,19 @@ enum RenderSupport {
 
 /// A cookie for creating a `Handle`
 #[derive(Debug)]
-pub struct Cookie<'a, C: Connection> {
+pub struct Cookie<'a, 'b, C: Connection> {
     conn: &'a C,
     screen: &'a xproto::Screen,
-    resource_manager: X11Cookie<'a, C, xproto::GetPropertyReply>,
+    resource_database: &'b Database,
     render_info: Option<(
         X11Cookie<'a, C, render::QueryVersionReply>,
         X11Cookie<'a, C, render::QueryPictFormatsReply>,
     )>,
 }
 
-impl<C: Connection> Cookie<'_, C> {
+impl<C: Connection> Cookie<'_, '_, C> {
     /// Get the handle from the replies from the X11 server
     pub fn reply(self) -> Result<Handle, ReplyOrIdError> {
-        let resource_manager = self.resource_manager.reply()?;
         let mut render_version = (0, 0);
         let mut picture_format = NONE;
         if let Some((version, formats)) = self.render_info {
@@ -53,7 +53,7 @@ impl<C: Connection> Cookie<'_, C> {
         Ok(Self::from_replies(
             self.conn,
             self.screen,
-            &resource_manager,
+            self.resource_database,
             render_version,
             picture_format,
         )?)
@@ -61,7 +61,6 @@ impl<C: Connection> Cookie<'_, C> {
 
     /// Get the handle from the replies from the X11 server
     pub fn reply_unchecked(self) -> Result<Option<Handle>, ReplyOrIdError> {
-        let resource_manager = self.resource_manager.reply_unchecked()?;
         let mut render_version = (0, 0);
         let mut picture_format = NONE;
         if let Some((version, formats)) = self.render_info {
@@ -73,14 +72,10 @@ impl<C: Connection> Cookie<'_, C> {
                 _ => return Ok(None),
             }
         }
-        let resource_manager = match resource_manager {
-            None => return Ok(None),
-            Some(resource_manager) => resource_manager,
-        };
         Ok(Some(Self::from_replies(
             self.conn,
             self.screen,
-            &resource_manager,
+            self.resource_database,
             render_version,
             picture_format,
         )?))
@@ -89,7 +84,7 @@ impl<C: Connection> Cookie<'_, C> {
     fn from_replies(
         conn: &C,
         screen: &xproto::Screen,
-        resource_manager: &xproto::GetPropertyReply,
+        resource_database: &Database,
         render_version: (u32, u32),
         picture_format: Pictformat,
     ) -> Result<Handle, ReplyOrIdError> {
@@ -100,7 +95,17 @@ impl<C: Connection> Cookie<'_, C> {
         } else {
             RenderSupport::None
         };
-        let (theme, cursor_size, xft_dpi) = parse_resource_manager(&resource_manager.value);
+        let theme = resource_database
+            .get_string("Xcursor.theme", "")
+            .map(|theme| theme.to_string());
+        let cursor_size = match resource_database.get_value("Xcursor.size", "") {
+            Ok(Some(value)) => value,
+            _ => 0,
+        };
+        let xft_dpi = match resource_database.get_value("Xft.dpi", "") {
+            Ok(Some(value)) => value,
+            _ => 0,
+        };
         let cursor_size = get_cursor_size(cursor_size, xft_dpi, screen);
         let cursor_font = conn.generate_id()?;
         let _ = xproto::open_font(conn, cursor_font, b"cursor")?;
@@ -129,23 +134,20 @@ pub struct Handle {
 impl Handle {
     /// Create a new cursor handle for creating cursors on the given screen.
     ///
+    /// The `resource_database` is used to look up settings like the current cursor theme and the
+    /// cursor size to use.
+    ///
     /// This function returns a cookie that can be used to later get the actual handle.
     ///
     /// If you want this function not to block, you should prefetch the RENDER extension's data on
     /// the connection.
     #[allow(clippy::new_ret_no_self)]
-    pub fn new<C: Connection>(conn: &C, screen: usize) -> Result<Cookie<'_, C>, ConnectionError> {
+    pub fn new<'a, 'b, C: Connection>(
+        conn: &'a C,
+        screen: usize,
+        resource_database: &'b Database,
+    ) -> Result<Cookie<'a, 'b, C>, ConnectionError> {
         let screen = &conn.setup().roots[screen];
-        let root = screen.root;
-        let resource_manager = xproto::get_property(
-            conn,
-            false,
-            root,
-            xproto::AtomEnum::RESOURCE_MANAGER,
-            xproto::AtomEnum::STRING,
-            0,
-            1 << 20,
-        )?;
         let render_info = if conn
             .extension_information(render::X11_EXTENSION_NAME)?
             .is_some()
@@ -159,7 +161,7 @@ impl Handle {
         Ok(Cookie {
             conn,
             screen,
-            resource_manager,
+            resource_database,
             render_info,
         })
     }
@@ -342,47 +344,6 @@ fn find_format(reply: &render::QueryPictFormatsReply) -> Pictformat {
         .map(|format| format.id)
         .next()
         .expect("The X11 server is missing the RENDER ARGB_32 standard format!")
-}
-
-fn parse_resource_manager(rm: &[u8]) -> (Option<String>, u32, u32) {
-    let (mut theme, mut cursor_size, mut xft_dpi) = (None, 0, 0);
-
-    for line in rm.split(|&c| c == b'\n') {
-        // Split line at first ':'
-        let pos = match line.iter().enumerate().find(|&(_, &c)| c == b':') {
-            None => continue,
-            Some((pos, _)) => pos,
-        };
-        let (key, mut value) = line.split_at(pos);
-
-        // Skip leading whitespace
-        while value.get(0).map(|&c| char::from(c).is_whitespace()) == Some(true) {
-            value = &value[1..];
-        }
-        // Skip trailing whitespace
-        while value.last().map(|&c| char::from(c).is_whitespace()) == Some(true) {
-            value = &value[..value.len() - 1];
-        }
-
-        if let Ok(value) = std::str::from_utf8(value) {
-            match key {
-                b"Xcursor.theme" => theme = Some(value.to_string()),
-                b"Xcursor.size" => {
-                    if let Ok(num) = value.parse() {
-                        cursor_size = num;
-                    }
-                }
-                b"Xft.dpi" => {
-                    if let Ok(num) = value.parse() {
-                        xft_dpi = num;
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-
-    (theme, cursor_size, xft_dpi)
 }
 
 fn get_cursor_size(rm_cursor_size: u32, rm_xft_dpi: u32, screen: &xproto::Screen) -> u32 {
