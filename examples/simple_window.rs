@@ -4,6 +4,7 @@ use x11rb::connection::Connection;
 use x11rb::cursor::Handle as CursorHandle;
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::Event;
+use x11rb::resource_manager::Database;
 use x11rb::wrapper::ConnectionExt as _;
 
 fn main() {
@@ -16,7 +17,8 @@ fn main() {
     let screen = &conn.setup().roots[screen_num];
     let win_id = conn.generate_id().unwrap();
     let gc_id = conn.generate_id().unwrap();
-    let cursor_handle = CursorHandle::new(conn, screen_num).unwrap();
+    let resource_db = Database::new_from_default(conn).unwrap();
+    let cursor_handle = CursorHandle::new(conn, screen_num, &resource_db).unwrap();
 
     let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
     let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();

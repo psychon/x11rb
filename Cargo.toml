@@ -40,7 +40,7 @@ features = ["winsock2"]
 allow-unsafe-code = ["libc"]
 
 # Enable utility functions in `x11rb::cursor` for loading mouse cursors.
-cursor = ["render"]
+cursor = ["render", "resource_manager"]
 
 # Enable utility functions in `x11rb::image` for working with image data.
 image = []
@@ -128,7 +128,7 @@ required-features = ["shape"]
 
 [[example]]
 name = "simple_window"
-required-features = ["cursor"]
+required-features = ["cursor", "resource_manager"]
 
 [[example]]
 name = "display_ppm"
