@@ -11432,8 +11432,12 @@ where
 /// * `1` - The left mouse button.
 /// * `2` - The right mouse button.
 /// * `3` - The middle mouse button.
-/// * `4` - Scroll wheel. TODO: direction?
-/// * `5` - Scroll wheel. TODO: direction?
+/// * `4` - Scroll wheel up movement.
+/// * `5` - Scroll wheel down movement.
+/// * `6` - Scroll wheel left movement.
+/// * `7` - Scroll wheel right movement.
+/// * `8` - The forward mouse button.
+/// * `9` - The backward mouse button.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ButtonIndex(u8);
 impl ButtonIndex {
@@ -11443,6 +11447,10 @@ impl ButtonIndex {
     pub const M3: Self = Self(3);
     pub const M4: Self = Self(4);
     pub const M5: Self = Self(5);
+    pub const M6: Self = Self(6);
+    pub const M7: Self = Self(7);
+    pub const M8: Self = Self(8);
+    pub const M9: Self = Self(9);
 }
 impl From<ButtonIndex> for u8 {
     #[inline]
@@ -11495,6 +11503,10 @@ impl std::fmt::Debug for ButtonIndex  {
             (Self::M3.0.into(), "M3", "M3"),
             (Self::M4.0.into(), "M4", "M4"),
             (Self::M5.0.into(), "M5", "M5"),
+            (Self::M6.0.into(), "M6", "M6"),
+            (Self::M7.0.into(), "M7", "M7"),
+            (Self::M8.0.into(), "M8", "M8"),
+            (Self::M9.0.into(), "M9", "M9"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
