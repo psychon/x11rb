@@ -77,7 +77,14 @@
 //!
 //! This crate uses [feature
 //! flags](https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section) to reduce
-//! the amount of compiled code. By default, only the core X11 protocol and X11 extensions that are
+//! the amount of compiled code. There are two kinds of feature flags available:
+//!
+//! * Feature flags for specific X11 extensions
+//! * Feature flags for additional functionality
+//!
+//! ### Feature flags for specific X11 extensions
+//!
+//! By default, only the core X11 protocol and X11 extensions that are
 //! needed internally are enabled. Further extensions need to be explicitly enabled via their
 //! feature flag:
 //!
@@ -88,12 +95,15 @@
 //! If you want to take the "I do not want to think about this"-approach, you can enable the
 //! `all-extensions` feature to just enable, well, all extensions.
 //!
+//! ### Feature flags for additional functionality
+//!
 //! Additionally, the following flags exist:
 //! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
 //!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
 //! * `cursor`: Enable the code in [x11rb::cursor] for loading cursor files.
 //! * `resource_manager`: Enable the code in [x11rb::resource_manager] for loading and querying the
 //!   X11 resource database.
+//! * `image`: Enable the code in [x11rb::image] for working with pixel image data.
 //! * `dl-libxcb`: Enabling this feature will prevent from libxcb being linked to the
 //!   resulting executable. Instead libxcb will be dynamically loaded at runtime.
 //!   This feature adds the `x11rb::xcb_ffi::load_libxcb` function, that allows load

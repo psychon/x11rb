@@ -9,6 +9,9 @@
 //! converts it to the native format of the X11 server. These conversions do not change the actual
 //! content of the image, but only the way that it is laid out in memory (e.g. byte order and
 //! padding). Specifically, there is no support for converting an image to another `depth`.
+//!
+//! The code in this module is only available when the `image` feature of the library is
+//! enabled.
 
 // For future readers:
 //
