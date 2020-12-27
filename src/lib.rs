@@ -106,7 +106,7 @@
 //! * `image`: Enable the code in [x11rb::image] for working with pixel image data.
 //! * `dl-libxcb`: Enabling this feature will prevent from libxcb being linked to the
 //!   resulting executable. Instead libxcb will be dynamically loaded at runtime.
-//!   This feature adds the `x11rb::xcb_ffi::load_libxcb` function, that allows load
+//!   This feature adds the `x11rb::xcb_ffi::load_libxcb` function, that allows to load
 //!   libxcb and check for success or failure.
 //!
 //! # Integrating x11rb with an Event Loop
