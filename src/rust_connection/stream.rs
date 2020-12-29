@@ -63,10 +63,6 @@ pub trait Stream {
     /// If `Self` is `Send + Sync` and `poll` is used concurrently from more than
     /// one thread, all threads should wake when the stream becomes readable (when
     /// `read` is `true`) or writable (when `write` is `true`).
-    ///
-    /// # Panics
-    ///
-    /// This function shall panic if `read` and `write` are both false.
     fn poll(&self, mode: PollMode) -> Result<()>;
 
     /// Read some bytes and FDs from this reader without blocking, returning how many bytes
