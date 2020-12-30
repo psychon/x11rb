@@ -82,3 +82,64 @@ pub fn value{width}(&self) -> Option<impl Iterator<Item=u{width}> + '_> {{
         outln!(out, "");
     }
 }
+
+pub(super) fn handle_request_switch(
+    request_def: &xcbdefs::RequestDef,
+    switch_field: &xcbdefs::SwitchField,
+    aux_name: &str,
+    out: &mut Output,
+) {
+    let ns = request_def.namespace.upgrade().unwrap();
+    if aux_name == "ConfigureWindowAux" && ns.header == "xproto" {
+        outln!(out, "impl {} {{", aux_name);
+        out.indented(|out| {
+            outln!(
+                out,
+                r"/// Construct from a [`ConfigureRequestEvent`].
+///
+/// This function construct a new `ConfigureWindowAux` instance by accepting all requested
+/// changes from a `ConfigureRequestEvent`. This function is useful for window managers that want
+/// to handle `ConfigureRequestEvent`s.
+pub fn from_configure_request(event: &ConfigureRequestEvent) -> Self {{
+    let mut result = Self::new();"
+            );
+            out.indented(|out| {
+                for case in switch_field.cases.iter() {
+                    let fields = case.fields.borrow();
+                    assert_eq!(1, fields.len());
+                    let field = match &fields[0] {
+                        xcbdefs::FieldDef::Normal(field) => field,
+                        _ => unreachable!(),
+                    };
+                    let name = &field.name;
+                    let flag = super::camel_case_to_upper_snake(name);
+                    outln!(
+                        out,
+                        "if event.value_mask & u16::from(ConfigWindow::{}) != 0 {{",
+                        flag,
+                    );
+                    if name == "stack_mode" || name == "sibling" {
+                        // This already has the right type
+                        outln!(out.indent(), "result = result.{}(event.{});", name, name);
+                    } else {
+                        let rust_type = match field.type_.type_.get_resolved() {
+                            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int32) => "i32",
+                            _ => "u32",
+                        };
+                        outln!(
+                            out.indent(),
+                            "result = result.{}({}::from(event.{}));",
+                            name,
+                            rust_type,
+                            name,
+                        );
+                    }
+                    outln!(out, "}}");
+                }
+                outln!(out, "result");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+    }
+}

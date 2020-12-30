@@ -896,6 +896,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "}}");
         }
 
+        special_cases::handle_request_switch(request_def, switch_field, &aux_name, out);
+
         outln!(out, "");
     }
 

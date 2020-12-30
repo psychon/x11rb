@@ -306,19 +306,10 @@ impl<'a, C: Connection> WMState<'a, C> {
             let _ = state;
             unimplemented!();
         }
-        let mut aux = ConfigureWindowAux::default();
-        if event.value_mask & u16::from(ConfigWindow::X) != 0 {
-            aux = aux.x(i32::from(event.x));
-        }
-        if event.value_mask & u16::from(ConfigWindow::Y) != 0 {
-            aux = aux.y(i32::from(event.y));
-        }
-        if event.value_mask & u16::from(ConfigWindow::WIDTH) != 0 {
-            aux = aux.width(u32::from(event.width));
-        }
-        if event.value_mask & u16::from(ConfigWindow::HEIGHT) != 0 {
-            aux = aux.height(u32::from(event.height));
-        }
+        // Allow clients to change everything, except sibling / stack mode
+        let aux = ConfigureWindowAux::from_configure_request(&event)
+            .sibling(None)
+            .stack_mode(None);
         println!("Configure: {:?}", aux);
         self.conn.configure_window(event.window, &aux)?;
         Ok(())

@@ -8047,6 +8047,38 @@ impl ConfigureWindowAux {
         self
     }
 }
+impl ConfigureWindowAux {
+    /// Construct from a [`ConfigureRequestEvent`].
+    ///
+    /// This function construct a new `ConfigureWindowAux` instance by accepting all requested
+    /// changes from a `ConfigureRequestEvent`. This function is useful for window managers that want
+    /// to handle `ConfigureRequestEvent`s.
+    pub fn from_configure_request(event: &ConfigureRequestEvent) -> Self {
+        let mut result = Self::new();
+        if event.value_mask & u16::from(ConfigWindow::X) != 0 {
+            result = result.x(i32::from(event.x));
+        }
+        if event.value_mask & u16::from(ConfigWindow::Y) != 0 {
+            result = result.y(i32::from(event.y));
+        }
+        if event.value_mask & u16::from(ConfigWindow::WIDTH) != 0 {
+            result = result.width(u32::from(event.width));
+        }
+        if event.value_mask & u16::from(ConfigWindow::HEIGHT) != 0 {
+            result = result.height(u32::from(event.height));
+        }
+        if event.value_mask & u16::from(ConfigWindow::BORDER_WIDTH) != 0 {
+            result = result.border_width(u32::from(event.border_width));
+        }
+        if event.value_mask & u16::from(ConfigWindow::SIBLING) != 0 {
+            result = result.sibling(event.sibling);
+        }
+        if event.value_mask & u16::from(ConfigWindow::STACK_MODE) != 0 {
+            result = result.stack_mode(event.stack_mode);
+        }
+        result
+    }
+}
 
 /// Opcode for the ConfigureWindow request
 pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
