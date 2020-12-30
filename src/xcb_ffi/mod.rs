@@ -640,19 +640,17 @@ fn reconstruct_full_sequence_impl(recent: SequenceNumber, value: u32) -> Sequenc
 
 #[cfg(test)]
 mod test {
-    use super::{atomic_u64_max, ConnectionError, XCBConnection};
+    use super::{atomic_u64_max, XCBConnection};
     use std::ffi::CString;
 
     #[test]
-    fn xcb_connect_smoke_test() -> Result<(), ConnectionError> {
+    fn xcb_connect_smoke_test() {
         // in cfg(test), raw_ffi does not call XCB, but instead uses a mock. This test calls into
         // that mock and tests a bit of XCBConnection.
 
         let str = CString::new("display name").unwrap();
         let (_conn, screen) = XCBConnection::connect(Some(&str)).expect("Failed to 'connect'");
         assert_eq!(screen, 0);
-
-        Ok(())
     }
 
     #[test]

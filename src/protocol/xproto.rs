@@ -5964,7 +5964,7 @@ pub struct CreateWindowRequest<'input> {
 }
 impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -6024,13 +6024,13 @@ impl<'input> CreateWindowRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -6532,7 +6532,7 @@ pub struct ChangeWindowAttributesRequest<'input> {
 }
 impl<'input> ChangeWindowAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -6563,13 +6563,13 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -6713,7 +6713,7 @@ pub struct GetWindowAttributesRequest {
 }
 impl GetWindowAttributesRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -6734,13 +6734,13 @@ impl GetWindowAttributesRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetWindowAttributesReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -6894,7 +6894,7 @@ pub struct DestroyWindowRequest {
 }
 impl DestroyWindowRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -6915,13 +6915,13 @@ impl DestroyWindowRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -6983,7 +6983,7 @@ pub struct DestroySubwindowsRequest {
 }
 impl DestroySubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7004,13 +7004,13 @@ impl DestroySubwindowsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -7131,7 +7131,7 @@ pub struct ChangeSaveSetRequest {
 }
 impl ChangeSaveSetRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7153,13 +7153,13 @@ impl ChangeSaveSetRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -7259,7 +7259,7 @@ pub struct ReparentWindowRequest {
 }
 impl ReparentWindowRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7291,13 +7291,13 @@ impl ReparentWindowRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -7413,7 +7413,7 @@ pub struct MapWindowRequest {
 }
 impl MapWindowRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7434,13 +7434,13 @@ impl MapWindowRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -7515,7 +7515,7 @@ pub struct MapSubwindowsRequest {
 }
 impl MapSubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7536,13 +7536,13 @@ impl MapSubwindowsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -7603,7 +7603,7 @@ pub struct UnmapWindowRequest {
 }
 impl UnmapWindowRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7624,13 +7624,13 @@ impl UnmapWindowRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -7691,7 +7691,7 @@ pub struct UnmapSubwindowsRequest {
 }
 impl UnmapSubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -7712,13 +7712,13 @@ impl UnmapSubwindowsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -8107,7 +8107,7 @@ pub struct ConfigureWindowRequest<'input> {
 }
 impl<'input> ConfigureWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8138,13 +8138,13 @@ impl<'input> ConfigureWindowRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -8322,7 +8322,7 @@ pub struct CirculateWindowRequest {
 }
 impl CirculateWindowRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8344,13 +8344,13 @@ impl CirculateWindowRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -8446,7 +8446,7 @@ pub struct GetGeometryRequest {
 }
 impl GetGeometryRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8467,13 +8467,13 @@ impl GetGeometryRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetGeometryReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -8642,7 +8642,7 @@ pub struct QueryTreeRequest {
 }
 impl QueryTreeRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8663,13 +8663,13 @@ impl QueryTreeRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryTreeReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -8849,7 +8849,7 @@ pub struct InternAtomRequest<'input> {
 }
 impl<'input> InternAtomRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -8875,13 +8875,13 @@ impl<'input> InternAtomRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
+        (vec![request0.into(), self.name, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, InternAtomReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -9008,7 +9008,7 @@ pub struct GetAtomNameRequest {
 }
 impl GetAtomNameRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -9029,13 +9029,13 @@ impl GetAtomNameRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetAtomNameReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -9250,7 +9250,7 @@ pub struct ChangePropertyRequest<'input> {
 }
 impl<'input> ChangePropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -9296,13 +9296,13 @@ impl<'input> ChangePropertyRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
+        (vec![request0.into(), self.data, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -9429,7 +9429,7 @@ pub struct DeletePropertyRequest {
 }
 impl DeletePropertyRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -9455,13 +9455,13 @@ impl DeletePropertyRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -9633,7 +9633,7 @@ pub struct GetPropertyRequest {
 }
 impl GetPropertyRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -9675,13 +9675,13 @@ impl GetPropertyRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetPropertyReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -10014,7 +10014,7 @@ pub struct ListPropertiesRequest {
 }
 impl ListPropertiesRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -10035,13 +10035,13 @@ impl ListPropertiesRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -10160,7 +10160,7 @@ pub struct SetSelectionOwnerRequest {
 }
 impl SetSelectionOwnerRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -10191,13 +10191,13 @@ impl SetSelectionOwnerRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -10293,7 +10293,7 @@ pub struct GetSelectionOwnerRequest {
 }
 impl GetSelectionOwnerRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -10314,13 +10314,13 @@ impl GetSelectionOwnerRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetSelectionOwnerReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -10415,7 +10415,7 @@ pub struct ConvertSelectionRequest {
 }
 impl ConvertSelectionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -10456,13 +10456,13 @@ impl ConvertSelectionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -10664,7 +10664,7 @@ pub struct SendEventRequest<'input> {
 }
 impl<'input> SendEventRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -10692,13 +10692,13 @@ impl<'input> SendEventRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), Cow::Owned(self.event.to_vec())], vec![]))
+        (vec![request0.into(), Cow::Owned(self.event.to_vec())], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -11097,7 +11097,7 @@ pub struct GrabPointerRequest {
 }
 impl GrabPointerRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -11141,13 +11141,13 @@ impl GrabPointerRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -11342,7 +11342,7 @@ pub struct UngrabPointerRequest {
 }
 impl UngrabPointerRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -11363,13 +11363,13 @@ impl UngrabPointerRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -11583,7 +11583,7 @@ pub struct GrabButtonRequest {
 }
 impl GrabButtonRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -11628,13 +11628,13 @@ impl GrabButtonRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -11778,7 +11778,7 @@ pub struct UngrabButtonRequest {
 }
 impl UngrabButtonRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -11805,13 +11805,13 @@ impl UngrabButtonRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -11862,7 +11862,7 @@ pub struct ChangeActivePointerGrabRequest {
 }
 impl ChangeActivePointerGrabRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -11893,13 +11893,13 @@ impl ChangeActivePointerGrabRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -12018,7 +12018,7 @@ pub struct GrabKeyboardRequest {
 }
 impl GrabKeyboardRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -12051,13 +12051,13 @@ impl GrabKeyboardRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -12206,7 +12206,7 @@ pub struct UngrabKeyboardRequest {
 }
 impl UngrabKeyboardRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -12227,13 +12227,13 @@ impl UngrabKeyboardRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -12396,7 +12396,7 @@ pub struct GrabKeyRequest {
 }
 impl GrabKeyRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -12430,13 +12430,13 @@ impl GrabKeyRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -12584,7 +12584,7 @@ pub struct UngrabKeyRequest {
 }
 impl UngrabKeyRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -12611,13 +12611,13 @@ impl UngrabKeyRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -12840,7 +12840,7 @@ pub struct AllowEventsRequest {
 }
 impl AllowEventsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -12862,13 +12862,13 @@ impl AllowEventsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -12929,7 +12929,7 @@ pub const GRAB_SERVER_REQUEST: u8 = 36;
 pub struct GrabServerRequest;
 impl GrabServerRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -12945,13 +12945,13 @@ impl GrabServerRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -12985,7 +12985,7 @@ pub const UNGRAB_SERVER_REQUEST: u8 = 37;
 pub struct UngrabServerRequest;
 impl UngrabServerRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -13001,13 +13001,13 @@ impl UngrabServerRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -13056,7 +13056,7 @@ pub struct QueryPointerRequest {
 }
 impl QueryPointerRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -13077,13 +13077,13 @@ impl QueryPointerRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryPointerReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -13248,7 +13248,7 @@ pub struct GetMotionEventsRequest {
 }
 impl GetMotionEventsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -13279,13 +13279,13 @@ impl GetMotionEventsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -13386,7 +13386,7 @@ pub struct TranslateCoordinatesRequest {
 }
 impl TranslateCoordinatesRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -13418,13 +13418,13 @@ impl TranslateCoordinatesRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, TranslateCoordinatesReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -13548,7 +13548,7 @@ pub struct WarpPointerRequest {
 }
 impl WarpPointerRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -13592,13 +13592,13 @@ impl WarpPointerRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -13803,7 +13803,7 @@ pub struct SetInputFocusRequest {
 }
 impl SetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -13830,13 +13830,13 @@ impl SetInputFocusRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -13919,7 +13919,7 @@ pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 pub struct GetInputFocusRequest;
 impl GetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -13935,13 +13935,13 @@ impl GetInputFocusRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -14008,7 +14008,7 @@ pub const QUERY_KEYMAP_REQUEST: u8 = 44;
 pub struct QueryKeymapRequest;
 impl QueryKeymapRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -14024,13 +14024,13 @@ impl QueryKeymapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryKeymapReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -14119,7 +14119,7 @@ pub struct OpenFontRequest<'input> {
 }
 impl<'input> OpenFontRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -14149,13 +14149,13 @@ impl<'input> OpenFontRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
+        (vec![request0.into(), self.name, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -14227,7 +14227,7 @@ pub struct CloseFontRequest {
 }
 impl CloseFontRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -14248,13 +14248,13 @@ impl CloseFontRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -14463,7 +14463,7 @@ pub struct QueryFontRequest {
 }
 impl QueryFontRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -14484,13 +14484,13 @@ impl QueryFontRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryFontReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -14672,7 +14672,7 @@ pub struct QueryTextExtentsRequest<'input> {
 }
 impl<'input> QueryTextExtentsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -14700,13 +14700,13 @@ impl<'input> QueryTextExtentsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), string_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), string_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryTextExtentsReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -14910,7 +14910,7 @@ pub struct ListFontsRequest<'input> {
 }
 impl<'input> ListFontsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -14936,13 +14936,13 @@ impl<'input> ListFontsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.pattern, padding0.into()], vec![]))
+        (vec![request0.into(), self.pattern, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, ListFontsReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -15071,7 +15071,7 @@ pub struct ListFontsWithInfoRequest<'input> {
 }
 impl<'input> ListFontsWithInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -15097,13 +15097,13 @@ impl<'input> ListFontsWithInfoRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.pattern, padding0.into()], vec![]))
+        (vec![request0.into(), self.pattern, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<ListFontsWithInfoCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&slices, fds)?))
     }
@@ -15273,7 +15273,7 @@ pub struct SetFontPathRequest<'input> {
 }
 impl<'input> SetFontPathRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -15299,13 +15299,13 @@ impl<'input> SetFontPathRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), font_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), font_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -15351,7 +15351,7 @@ pub const GET_FONT_PATH_REQUEST: u8 = 52;
 pub struct GetFontPathRequest;
 impl GetFontPathRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -15367,13 +15367,13 @@ impl GetFontPathRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetFontPathReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -15484,7 +15484,7 @@ pub struct CreatePixmapRequest {
 }
 impl CreatePixmapRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -15517,13 +15517,13 @@ impl CreatePixmapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -15609,7 +15609,7 @@ pub struct FreePixmapRequest {
 }
 impl FreePixmapRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -15630,13 +15630,13 @@ impl FreePixmapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -16816,7 +16816,7 @@ pub struct CreateGCRequest<'input> {
 }
 impl<'input> CreateGCRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -16852,13 +16852,13 @@ impl<'input> CreateGCRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -17486,7 +17486,7 @@ pub struct ChangeGCRequest<'input> {
 }
 impl<'input> ChangeGCRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -17517,13 +17517,13 @@ impl<'input> ChangeGCRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -17621,7 +17621,7 @@ pub struct CopyGCRequest {
 }
 impl CopyGCRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -17652,13 +17652,13 @@ impl CopyGCRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -17708,7 +17708,7 @@ pub struct SetDashesRequest<'input> {
 }
 impl<'input> SetDashesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -17739,13 +17739,13 @@ impl<'input> SetDashesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.dashes, padding0.into()], vec![]))
+        (vec![request0.into(), self.dashes, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -17866,7 +17866,7 @@ pub struct SetClipRectanglesRequest<'input> {
 }
 impl<'input> SetClipRectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -17898,13 +17898,13 @@ impl<'input> SetClipRectanglesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -17984,7 +17984,7 @@ pub struct FreeGCRequest {
 }
 impl FreeGCRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -18005,13 +18005,13 @@ impl FreeGCRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -18067,7 +18067,7 @@ pub struct ClearAreaRequest {
 }
 impl ClearAreaRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -18101,13 +18101,13 @@ impl ClearAreaRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -18190,7 +18190,7 @@ pub struct CopyAreaRequest {
 }
 impl CopyAreaRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -18239,13 +18239,13 @@ impl CopyAreaRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -18339,7 +18339,7 @@ pub struct CopyPlaneRequest {
 }
 impl CopyPlaneRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -18393,13 +18393,13 @@ impl CopyPlaneRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -18531,7 +18531,7 @@ pub struct PolyPointRequest<'input> {
 }
 impl<'input> PolyPointRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -18562,13 +18562,13 @@ impl<'input> PolyPointRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), points_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -18675,7 +18675,7 @@ pub struct PolyLineRequest<'input> {
 }
 impl<'input> PolyLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -18706,13 +18706,13 @@ impl<'input> PolyLineRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), points_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -18894,7 +18894,7 @@ pub struct PolySegmentRequest<'input> {
 }
 impl<'input> PolySegmentRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -18924,13 +18924,13 @@ impl<'input> PolySegmentRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), segments_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), segments_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -19019,7 +19019,7 @@ pub struct PolyRectangleRequest<'input> {
 }
 impl<'input> PolyRectangleRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -19049,13 +19049,13 @@ impl<'input> PolyRectangleRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -19118,7 +19118,7 @@ pub struct PolyArcRequest<'input> {
 }
 impl<'input> PolyArcRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -19148,13 +19148,13 @@ impl<'input> PolyArcRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -19279,7 +19279,7 @@ pub struct FillPolyRequest<'input> {
 }
 impl<'input> FillPolyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -19315,13 +19315,13 @@ impl<'input> FillPolyRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), points_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), points_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -19420,7 +19420,7 @@ pub struct PolyFillRectangleRequest<'input> {
 }
 impl<'input> PolyFillRectangleRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -19450,13 +19450,13 @@ impl<'input> PolyFillRectangleRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -19544,7 +19544,7 @@ pub struct PolyFillArcRequest<'input> {
 }
 impl<'input> PolyFillArcRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -19574,13 +19574,13 @@ impl<'input> PolyFillArcRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), arcs_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -19710,7 +19710,7 @@ pub struct PutImageRequest<'input> {
 }
 impl<'input> PutImageRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -19758,13 +19758,13 @@ impl<'input> PutImageRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.data, padding0.into()], vec![]))
+        (vec![request0.into(), self.data, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -19853,7 +19853,7 @@ pub struct GetImageRequest {
 }
 impl GetImageRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -19892,13 +19892,13 @@ impl GetImageRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -20011,7 +20011,7 @@ pub struct PolyText8Request<'input> {
 }
 impl<'input> PolyText8Request<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -20046,13 +20046,13 @@ impl<'input> PolyText8Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.items, padding0.into()], vec![]))
+        (vec![request0.into(), self.items, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -20118,7 +20118,7 @@ pub struct PolyText16Request<'input> {
 }
 impl<'input> PolyText16Request<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -20153,13 +20153,13 @@ impl<'input> PolyText16Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.items, padding0.into()], vec![]))
+        (vec![request0.into(), self.items, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -20259,7 +20259,7 @@ pub struct ImageText8Request<'input> {
 }
 impl<'input> ImageText8Request<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -20296,13 +20296,13 @@ impl<'input> ImageText8Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.string, padding0.into()], vec![]))
+        (vec![request0.into(), self.string, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -20437,7 +20437,7 @@ pub struct ImageText16Request<'input> {
 }
 impl<'input> ImageText16Request<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -20475,13 +20475,13 @@ impl<'input> ImageText16Request<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), string_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), string_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -20639,7 +20639,7 @@ pub struct CreateColormapRequest {
 }
 impl CreateColormapRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -20671,13 +20671,13 @@ impl CreateColormapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -20726,7 +20726,7 @@ pub struct FreeColormapRequest {
 }
 impl FreeColormapRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -20747,13 +20747,13 @@ impl FreeColormapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -20794,7 +20794,7 @@ pub struct CopyColormapAndFreeRequest {
 }
 impl CopyColormapAndFreeRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -20820,13 +20820,13 @@ impl CopyColormapAndFreeRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -20869,7 +20869,7 @@ pub struct InstallColormapRequest {
 }
 impl InstallColormapRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -20890,13 +20890,13 @@ impl InstallColormapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -20936,7 +20936,7 @@ pub struct UninstallColormapRequest {
 }
 impl UninstallColormapRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -20957,13 +20957,13 @@ impl UninstallColormapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -21003,7 +21003,7 @@ pub struct ListInstalledColormapsRequest {
 }
 impl ListInstalledColormapsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -21024,13 +21024,13 @@ impl ListInstalledColormapsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, ListInstalledColormapsReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -21139,7 +21139,7 @@ pub struct AllocColorRequest {
 }
 impl AllocColorRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -21171,13 +21171,13 @@ impl AllocColorRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, AllocColorReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -21284,7 +21284,7 @@ pub struct AllocNamedColorRequest<'input> {
 }
 impl<'input> AllocNamedColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -21314,13 +21314,13 @@ impl<'input> AllocNamedColorRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
+        (vec![request0.into(), self.name, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, AllocNamedColorReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -21418,7 +21418,7 @@ pub struct AllocColorCellsRequest {
 }
 impl AllocColorCellsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -21446,13 +21446,13 @@ impl AllocColorCellsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, AllocColorCellsReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -21569,7 +21569,7 @@ pub struct AllocColorPlanesRequest {
 }
 impl AllocColorPlanesRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -21603,13 +21603,13 @@ impl AllocColorPlanesRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, AllocColorPlanesReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -21720,7 +21720,7 @@ pub struct FreeColorsRequest<'input> {
 }
 impl<'input> FreeColorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -21750,13 +21750,13 @@ impl<'input> FreeColorsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -21939,7 +21939,7 @@ pub struct StoreColorsRequest<'input> {
 }
 impl<'input> StoreColorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -21964,13 +21964,13 @@ impl<'input> StoreColorsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), items_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), items_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -22030,7 +22030,7 @@ pub struct StoreNamedColorRequest<'input> {
 }
 impl<'input> StoreNamedColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -22066,13 +22066,13 @@ impl<'input> StoreNamedColorRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
+        (vec![request0.into(), self.name, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -22182,7 +22182,7 @@ pub struct QueryColorsRequest<'input> {
 }
 impl<'input> QueryColorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -22207,13 +22207,13 @@ impl<'input> QueryColorsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), pixels_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryColorsReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -22319,7 +22319,7 @@ pub struct LookupColorRequest<'input> {
 }
 impl<'input> LookupColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -22349,13 +22349,13 @@ impl<'input> LookupColorRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
+        (vec![request0.into(), self.name, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, LookupColorReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -22514,7 +22514,7 @@ pub struct CreateCursorRequest {
 }
 impl CreateCursorRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -22569,13 +22569,13 @@ impl CreateCursorRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -22746,7 +22746,7 @@ pub struct CreateGlyphCursorRequest {
 }
 impl CreateGlyphCursorRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -22801,13 +22801,13 @@ impl CreateGlyphCursorRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -22924,7 +22924,7 @@ pub struct FreeCursorRequest {
 }
 impl FreeCursorRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -22945,13 +22945,13 @@ impl FreeCursorRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -23009,7 +23009,7 @@ pub struct RecolorCursorRequest {
 }
 impl RecolorCursorRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -23048,13 +23048,13 @@ impl RecolorCursorRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -23175,7 +23175,7 @@ pub struct QueryBestSizeRequest {
 }
 impl QueryBestSizeRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -23203,13 +23203,13 @@ impl QueryBestSizeRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -23313,7 +23313,7 @@ pub struct QueryExtensionRequest<'input> {
 }
 impl<'input> QueryExtensionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -23338,13 +23338,13 @@ impl<'input> QueryExtensionRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.name, padding0.into()], vec![]))
+        (vec![request0.into(), self.name, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryExtensionReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -23455,7 +23455,7 @@ pub const LIST_EXTENSIONS_REQUEST: u8 = 99;
 pub struct ListExtensionsRequest;
 impl ListExtensionsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -23471,13 +23471,13 @@ impl ListExtensionsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, ListExtensionsReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -23563,7 +23563,7 @@ pub struct ChangeKeyboardMappingRequest<'input> {
 }
 impl<'input> ChangeKeyboardMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -23591,13 +23591,13 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), keysyms_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), keysyms_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -23656,7 +23656,7 @@ pub struct GetKeyboardMappingRequest {
 }
 impl GetKeyboardMappingRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -23678,13 +23678,13 @@ impl GetKeyboardMappingRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetKeyboardMappingReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -24137,7 +24137,7 @@ pub struct ChangeKeyboardControlRequest<'input> {
 }
 impl<'input> ChangeKeyboardControlRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -24163,13 +24163,13 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -24214,7 +24214,7 @@ pub const GET_KEYBOARD_CONTROL_REQUEST: u8 = 103;
 pub struct GetKeyboardControlRequest;
 impl GetKeyboardControlRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -24230,13 +24230,13 @@ impl GetKeyboardControlRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetKeyboardControlReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -24317,7 +24317,7 @@ pub struct BellRequest {
 }
 impl BellRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -24334,13 +24334,13 @@ impl BellRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -24383,7 +24383,7 @@ pub struct ChangePointerControlRequest {
 }
 impl ChangePointerControlRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -24412,13 +24412,13 @@ impl ChangePointerControlRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -24468,7 +24468,7 @@ pub const GET_POINTER_CONTROL_REQUEST: u8 = 106;
 pub struct GetPointerControlRequest;
 impl GetPointerControlRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -24484,13 +24484,13 @@ impl GetPointerControlRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerControlReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -24685,7 +24685,7 @@ pub struct SetScreenSaverRequest {
 }
 impl SetScreenSaverRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -24713,13 +24713,13 @@ impl SetScreenSaverRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -24768,7 +24768,7 @@ pub const GET_SCREEN_SAVER_REQUEST: u8 = 108;
 pub struct GetScreenSaverRequest;
 impl GetScreenSaverRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -24784,13 +24784,13 @@ impl GetScreenSaverRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetScreenSaverReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -24990,7 +24990,7 @@ pub struct ChangeHostsRequest<'input> {
 }
 impl<'input> ChangeHostsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -25017,13 +25017,13 @@ impl<'input> ChangeHostsRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.address, padding0.into()], vec![]))
+        (vec![request0.into(), self.address, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -25139,7 +25139,7 @@ pub const LIST_HOSTS_REQUEST: u8 = 110;
 pub struct ListHostsRequest;
 impl ListHostsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -25155,13 +25155,13 @@ impl ListHostsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, ListHostsReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -25305,7 +25305,7 @@ pub struct SetAccessControlRequest {
 }
 impl SetAccessControlRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -25322,13 +25322,13 @@ impl SetAccessControlRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -25428,7 +25428,7 @@ pub struct SetCloseDownModeRequest {
 }
 impl SetCloseDownModeRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -25445,13 +25445,13 @@ impl SetCloseDownModeRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -25566,7 +25566,7 @@ pub struct KillClientRequest {
 }
 impl KillClientRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -25587,13 +25587,13 @@ impl KillClientRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -25656,7 +25656,7 @@ pub struct RotatePropertiesRequest<'input> {
 }
 impl<'input> RotatePropertiesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -25688,13 +25688,13 @@ impl<'input> RotatePropertiesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), atoms_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), atoms_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -25807,7 +25807,7 @@ pub struct ForceScreenSaverRequest {
 }
 impl ForceScreenSaverRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -25824,13 +25824,13 @@ impl ForceScreenSaverRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -25930,7 +25930,7 @@ pub struct SetPointerMappingRequest<'input> {
 }
 impl<'input> SetPointerMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -25951,13 +25951,13 @@ impl<'input> SetPointerMappingRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.map, padding0.into()], vec![]))
+        (vec![request0.into(), self.map, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, SetPointerMappingReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -26032,7 +26032,7 @@ pub const GET_POINTER_MAPPING_REQUEST: u8 = 117;
 pub struct GetPointerMappingRequest;
 impl GetPointerMappingRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -26048,13 +26048,13 @@ impl GetPointerMappingRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerMappingReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -26208,7 +26208,7 @@ pub struct SetModifierMappingRequest<'input> {
 }
 impl<'input> SetModifierMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -26230,13 +26230,13 @@ impl<'input> SetModifierMappingRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), self.keycodes, padding0.into()], vec![]))
+        (vec![request0.into(), self.keycodes, padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, SetModifierMappingReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -26311,7 +26311,7 @@ pub const GET_MODIFIER_MAPPING_REQUEST: u8 = 119;
 pub struct GetModifierMappingRequest;
 impl GetModifierMappingRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -26327,13 +26327,13 @@ impl GetModifierMappingRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetModifierMappingReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -26416,7 +26416,7 @@ pub const NO_OPERATION_REQUEST: u8 = 127;
 pub struct NoOperationRequest;
 impl NoOperationRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -26432,13 +26432,13 @@ impl NoOperationRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }

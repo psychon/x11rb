@@ -908,7 +908,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         out: &mut Output,
     ) {
         let ns = request_def.namespace.upgrade().unwrap();
-        let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
+        let is_xproto = ns.header == "xproto";
+        let is_send_event = is_xproto && request_def.name == "SendEvent";
 
         if let Some(ref doc) = request_def.doc {
             self.emit_doc(doc, out);
@@ -966,9 +967,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             );
             outln!(
                 out,
-                "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> \
-                 Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>",
+                "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> {return_type}",
                 lifetime = serialize_lifetime_block,
+                return_type = if is_xproto {
+                    "BufWithFds<PiecewiseBuf<'input>>"
+                } else {
+                    "Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>"
+                }
             );
             outln!(out, "where");
             outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
@@ -1396,18 +1401,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     slices_arg.push_str(request_slices);
                 }
 
-                outln!(
-                    out,
-                    "Ok((vec![{slices}], {fds}))",
+                let result = format!(
+                    "(vec![{slices}], {fds})",
                     slices = slices_arg,
                     fds = fds_arg,
                 );
+                if is_xproto {
+                    outln!(out, "{}", result);
+                } else {
+                    outln!(out, "Ok({})", result);
+                }
             });
             outln!(out, "}}");
 
             // Sending method
-            let is_list_fonts_with_info =
-                request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
+            let is_xproto = ns.header == "xproto";
+            let is_list_fonts_with_info = request_def.name == "ListFontsWithInfo" && is_xproto;
             let is_record_enable_context =
                 request_def.name == "EnableContext" && ns.header == "record";
             let ret_type = if is_list_fonts_with_info || is_record_enable_context {
@@ -1433,7 +1442,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
             outln!(out, "{{");
             out.indented(|out| {
-                outln!(out, "let (bytes, fds) = self.serialize(conn)?;");
+                outln!(
+                    out,
+                    "let (bytes, fds) = self.serialize(conn){};",
+                    if is_xproto { "" } else { "?" }
+                );
                 outln!(
                     out,
                     "let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();"
