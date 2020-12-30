@@ -222,7 +222,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Do all pending work that was queued while handling some events
-    fn refresh(&mut self) -> Result<(), ReplyError> {
+    fn refresh(&mut self) {
         while let Some(&win) = self.pending_expose.iter().next() {
             self.pending_expose.remove(&win);
             if let Some(state) = self.find_window_by_id(win) {
@@ -234,7 +234,6 @@ impl<'a, C: Connection> WMState<'a, C> {
                 }
             }
         }
-        Ok(())
     }
 
     fn find_window_by_id(&self, win: Window) -> Option<&WindowState> {
@@ -274,12 +273,12 @@ impl<'a, C: Connection> WMState<'a, C> {
             return Ok(());
         }
         match event {
-            Event::UnmapNotify(event) => self.handle_unmap_notify(event)?,
+            Event::UnmapNotify(event) => self.handle_unmap_notify(event),
             Event::ConfigureRequest(event) => self.handle_configure_request(event)?,
             Event::MapRequest(event) => self.handle_map_request(event)?,
-            Event::Expose(event) => self.handle_expose(event)?,
+            Event::Expose(event) => self.handle_expose(event),
             Event::EnterNotify(event) => self.handle_enter(event)?,
-            Event::ButtonPress(event) => self.handle_button_press(event)?,
+            Event::ButtonPress(event) => self.handle_button_press(event),
             Event::ButtonRelease(event) => self.handle_button_release(event)?,
             Event::MotionNotify(event) => self.handle_motion_notify(event)?,
             _ => {}
@@ -287,7 +286,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_unmap_notify(&mut self, event: UnmapNotifyEvent) -> Result<(), ReplyError> {
+    fn handle_unmap_notify(&mut self, event: UnmapNotifyEvent) {
         let root = self.conn.setup().roots[self.screen_num].root;
         let conn = self.conn;
         self.windows.retain(|state| {
@@ -300,7 +299,6 @@ impl<'a, C: Connection> WMState<'a, C> {
             conn.destroy_window(state.frame_window).unwrap();
             false
         });
-        Ok(())
     }
 
     fn handle_configure_request(&mut self, event: ConfigureRequestEvent) -> Result<(), ReplyError> {
@@ -333,9 +331,8 @@ impl<'a, C: Connection> WMState<'a, C> {
         )
     }
 
-    fn handle_expose(&mut self, event: ExposeEvent) -> Result<(), ReplyError> {
+    fn handle_expose(&mut self, event: ExposeEvent) {
         self.pending_expose.insert(event.window);
-        Ok(())
     }
 
     fn handle_enter(&mut self, event: EnterNotifyEvent) -> Result<(), ReplyError> {
@@ -352,9 +349,9 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_button_press(&mut self, event: ButtonPressEvent) -> Result<(), ReplyError> {
+    fn handle_button_press(&mut self, event: ButtonPressEvent) {
         if event.detail != DRAG_BUTTON || event.state != 0 {
-            return Ok(());
+            return;
         }
         if let Some(state) = self.find_window_by_id(event.event) {
             if self.drag_window.is_none() && event.event_x < state.close_x_position() {
@@ -362,7 +359,6 @@ impl<'a, C: Connection> WMState<'a, C> {
                 self.drag_window = Some((state.frame_window, (x, y)));
             }
         }
-        Ok(())
     }
 
     fn handle_button_release(&mut self, event: ButtonReleaseEvent) -> Result<(), ReplyError> {
@@ -433,7 +429,7 @@ fn main() {
     util::start_timeout_thread(conn1.clone(), screen.root);
 
     loop {
-        wm_state.refresh().unwrap();
+        wm_state.refresh();
         conn.flush().unwrap();
 
         let event = conn.wait_for_event().unwrap();

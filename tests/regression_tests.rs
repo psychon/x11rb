@@ -231,7 +231,7 @@ fn test_big_requests() -> Result<(), ConnectionError> {
 }
 
 #[test]
-fn test_too_large_request() -> Result<(), ConnectionError> {
+fn test_too_large_request() {
     let conn = FakeConnection::default();
     let big_buffer = [0; (1 << 19) + 1];
     let drawable: u32 = 42;
@@ -243,7 +243,6 @@ fn test_too_large_request() -> Result<(), ConnectionError> {
         ConnectionError::MaximumRequestLengthExceeded => {}
         err => panic!("Wrong error: {:?}", err),
     };
-    Ok(())
 }
 
 #[test]
