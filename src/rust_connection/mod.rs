@@ -704,6 +704,8 @@ fn write_setup(
 /// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
 /// as errors.
 fn read_setup(stream: &impl Stream) -> Result<Setup, ConnectError> {
+    use crate::protocol::xproto::{SetupAuthenticate, SetupFailed};
+
     let mut fds = Vec::new();
     let mut setup = vec![0; 8];
     stream.read_exact(&mut setup, &mut fds)?;
@@ -722,11 +724,11 @@ fn read_setup(stream: &impl Stream) -> Result<Setup, ConnectError> {
     }
     match setup[0] {
         // 0 is SetupFailed
-        0 => Err(ConnectError::SetupFailed((&setup[..]).try_into()?)),
+        0 => Err(ConnectError::SetupFailed(SetupFailed::try_parse(&setup[..])?.0)),
         // Success
-        1 => Ok((&setup[..]).try_into()?),
+        1 => Ok(Setup::try_parse(&setup[..])?.0),
         // 2 is SetupAuthenticate
-        2 => Err(ConnectError::SetupAuthenticate((&setup[..]).try_into()?)),
+        2 => Err(ConnectError::SetupAuthenticate(SetupAuthenticate::try_parse(&setup[..])?.0)),
         // Uhm... no other cases are defined
         _ => Err(ParseError::InvalidValue.into()),
     }
