@@ -1,6 +1,6 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryInto;
 use std::io::IoSlice;
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
@@ -14,7 +14,7 @@ use crate::extension_manager::ExtensionManager;
 use crate::protocol::bigreq::{ConnectionExt as _, EnableReply};
 use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{ExtensionInformation, Serialize, TryParse};
+use crate::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd};
 
 mod id_allocator;
 mod inner;
@@ -465,7 +465,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<'_, Self, Reply>, ConnectionError>
     where
-        Reply: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+        Reply: TryParseFd,
     {
         Ok(CookieWithFds::new(
             self,

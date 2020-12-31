@@ -25,7 +25,7 @@ pub use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, R
 use crate::extension_manager::ExtensionManager;
 use crate::protocol::xproto::Setup;
 use crate::utils::{CSlice, RawFdContainer};
-use crate::x11_utils::{ExtensionInformation, TryParse};
+use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd};
 
 mod pending_errors;
 mod raw_ffi;
@@ -370,7 +370,7 @@ impl RequestConnection for XCBConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
     where
-        R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+        R: TryParseFd,
     {
         Ok(CookieWithFds::new(
             self,

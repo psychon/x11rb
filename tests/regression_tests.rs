@@ -13,7 +13,7 @@ use x11rb::protocol::xproto::{
     ClientMessageData, ConnectionExt, KeymapNotifyEvent, Segment, SetupAuthenticate,
 };
 use x11rb::utils::RawFdContainer;
-use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse};
+use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd};
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -80,7 +80,7 @@ impl RequestConnection for FakeConnection {
         _fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<Self, R>, ConnectionError>
     where
-        R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+        R: TryParseFd,
     {
         unimplemented!()
     }

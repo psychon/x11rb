@@ -49,7 +49,7 @@ use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::protocol::xproto::Setup;
 use crate::protocol::Event;
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{ExtensionInformation, TryParse, X11Error};
+use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd, X11Error};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -146,7 +146,7 @@ pub trait RequestConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
     where
-        R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>;
+        R: TryParseFd;
 
     /// Send a request without a reply to the server.
     ///

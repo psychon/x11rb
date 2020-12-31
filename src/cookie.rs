@@ -1,15 +1,13 @@
 //! Cookies are handles to future replies or errors from the X11 server.
 
-use std::convert::TryFrom;
 use std::marker::PhantomData;
 
 use crate::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
-use crate::errors::{ConnectionError, ParseError, ReplyError};
+use crate::errors::{ConnectionError, ReplyError};
 #[cfg(feature = "record")]
 use crate::protocol::record::EnableContextReply;
 use crate::protocol::xproto::ListFontsWithInfoReply;
-use crate::utils::RawFdContainer;
-use crate::x11_utils::TryParse;
+use crate::x11_utils::{TryParse, TryParseFd};
 
 /// A handle to a possible error from the X11 server.
 ///
@@ -224,7 +222,7 @@ where
 
 impl<C, R> CookieWithFds<'_, C, R>
 where
-    R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+    R: TryParseFd,
     C: RequestConnection + ?Sized,
 {
     /// Construct a new cookie.
@@ -251,8 +249,8 @@ where
 
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<R, ReplyError> {
-        let (buffer, fds) = self.raw_reply()?;
-        Ok(R::try_from((buffer.as_ref(), fds))?)
+        let (buffer, mut fds) = self.raw_reply()?;
+        Ok(R::try_parse_fd(buffer.as_ref(), &mut fds)?.0)
     }
 }
 
