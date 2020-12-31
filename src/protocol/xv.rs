@@ -481,12 +481,6 @@ impl TryParse for Rational {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Rational {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Rational {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -522,12 +516,6 @@ impl TryParse for Format {
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let result = Format { visual, depth };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Format {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Format {
@@ -580,12 +568,6 @@ impl TryParse for AdaptorInfo {
         let (formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, num_formats.try_to_usize()?)?;
         let result = AdaptorInfo { base_id, num_ports, type_, name, formats };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AdaptorInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for AdaptorInfo {
@@ -666,12 +648,6 @@ impl TryParse for EncodingInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for EncodingInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for EncodingInfo {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -730,12 +706,6 @@ impl TryParse for Image {
         let data = data.to_vec();
         let result = Image { id, width, height, pitches, offsets, data };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Image {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Image {
@@ -811,12 +781,6 @@ impl TryParse for AttributeInfo {
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let result = AttributeInfo { flags, min, max, name };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AttributeInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for AttributeInfo {
@@ -915,12 +879,6 @@ impl TryParse for ImageFormatInfo {
         let vscanline_order = vscanline_order.into();
         let result = ImageFormatInfo { id, type_, byte_order, guid, bpp, num_planes, depth, red_mask, green_mask, blue_mask, format, y_sample_bits, u_sample_bits, v_sample_bits, vhorz_y_period, vhorz_u_period, vhorz_v_period, vvert_y_period, vvert_u_period, vvert_v_period, vcomp_order, vscanline_order };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ImageFormatInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ImageFormatInfo {
@@ -1146,12 +1104,6 @@ impl TryParse for VideoNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for VideoNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&VideoNotifyEvent> for [u8; 32] {
     fn from(input: &VideoNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1229,12 +1181,6 @@ impl TryParse for PortNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for PortNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&PortNotifyEvent> for [u8; 32] {
@@ -1368,12 +1314,6 @@ impl TryParse for QueryExtensionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryExtensionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the QueryAdaptors request
 pub const QUERY_ADAPTORS_REQUEST: u8 = 1;
@@ -1464,12 +1404,6 @@ impl TryParse for QueryAdaptorsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryAdaptorsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryAdaptorsReply {
@@ -1577,12 +1511,6 @@ impl TryParse for QueryEncodingsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryEncodingsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryEncodingsReply {
@@ -1699,12 +1627,6 @@ impl TryParse for GrabPortReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GrabPortReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -2693,12 +2615,6 @@ impl TryParse for QueryBestSizeReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryBestSizeReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the SetPortAttribute request
 pub const SET_PORT_ATTRIBUTE_REQUEST: u8 = 13;
@@ -2881,12 +2797,6 @@ impl TryParse for GetPortAttributeReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetPortAttributeReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the QueryPortAttributes request
 pub const QUERY_PORT_ATTRIBUTES_REQUEST: u8 = 15;
@@ -2979,12 +2889,6 @@ impl TryParse for QueryPortAttributesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryPortAttributesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryPortAttributesReply {
@@ -3092,12 +2996,6 @@ impl TryParse for ListImageFormatsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ListImageFormatsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ListImageFormatsReply {
@@ -3236,12 +3134,6 @@ impl TryParse for QueryImageAttributesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryImageAttributesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryImageAttributesReply {

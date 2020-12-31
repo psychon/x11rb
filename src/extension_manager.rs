@@ -149,7 +149,6 @@ impl ExtInfoProvider for ExtensionManager {
 #[cfg(test)]
 mod test {
     use std::cell::RefCell;
-    use std::convert::TryFrom;
     use std::io::IoSlice;
 
     use crate::connection::{
@@ -158,7 +157,7 @@ mod test {
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError};
     use crate::utils::RawFdContainer;
-    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation};
+    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation, TryParse, TryParseFd};
 
     use super::{CheckState, ExtensionManager};
 
@@ -173,7 +172,7 @@ mod test {
             _fds: Vec<RawFdContainer>,
         ) -> Result<Cookie<'_, Self, R>, ConnectionError>
         where
-            R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+            R: TryParse,
         {
             Ok(Cookie::new(self, 1))
         }
@@ -184,7 +183,7 @@ mod test {
             _fds: Vec<RawFdContainer>,
         ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
         where
-            R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+            R: TryParseFd,
         {
             unimplemented!()
         }

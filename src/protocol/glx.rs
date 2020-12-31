@@ -139,12 +139,6 @@ impl TryParse for PbufferClobberEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PbufferClobberEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&PbufferClobberEvent> for [u8; 32] {
     fn from(input: &PbufferClobberEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -234,12 +228,6 @@ impl TryParse for BufferSwapCompleteEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for BufferSwapCompleteEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
@@ -855,12 +843,6 @@ impl TryParse for MakeCurrentReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for MakeCurrentReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the IsDirect request
 pub const IS_DIRECT_REQUEST: u8 = 6;
@@ -950,12 +932,6 @@ impl TryParse for IsDirectReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for IsDirectReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1058,12 +1034,6 @@ impl TryParse for QueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1733,12 +1703,6 @@ impl TryParse for GetVisualConfigsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetVisualConfigsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetVisualConfigsReply {
     /// Get the value of the `length` field.
     ///
@@ -2027,12 +1991,6 @@ impl TryParse for VendorPrivateWithReplyReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for VendorPrivateWithReplyReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl VendorPrivateWithReplyReply {
     /// Get the value of the `length` field.
     ///
@@ -2141,12 +2099,6 @@ impl TryParse for QueryExtensionsStringReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryExtensionsStringReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the QueryServerString request
 pub const QUERY_SERVER_STRING_REQUEST: u8 = 19;
@@ -2248,12 +2200,6 @@ impl TryParse for QueryServerStringReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryServerStringReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryServerStringReply {
@@ -2459,12 +2405,6 @@ impl TryParse for GetFBConfigsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetFBConfigsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetFBConfigsReply {
@@ -2868,12 +2808,6 @@ impl TryParse for QueryContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl QueryContextReply {
     /// Get the value of the `num_attribs` field.
     ///
@@ -3006,12 +2940,6 @@ impl TryParse for MakeContextCurrentReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for MakeContextCurrentReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -3277,12 +3205,6 @@ impl TryParse for GetDrawableAttributesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetDrawableAttributesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetDrawableAttributesReply {
@@ -4279,12 +4201,6 @@ impl TryParse for GenListsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GenListsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the FeedbackBuffer request
 pub const FEEDBACK_BUFFER_REQUEST: u8 = 105;
@@ -4547,12 +4463,6 @@ impl TryParse for RenderModeReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for RenderModeReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl RenderModeReply {
     /// Get the value of the `n` field.
     ///
@@ -4708,12 +4618,6 @@ impl TryParse for FinishReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for FinishReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -5041,12 +4945,6 @@ impl TryParse for ReadPixelsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ReadPixelsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl ReadPixelsReply {
     /// Get the value of the `length` field.
     ///
@@ -5167,12 +5065,6 @@ impl TryParse for GetBooleanvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetBooleanvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetBooleanvReply {
     /// Get the value of the `n` field.
     ///
@@ -5285,12 +5177,6 @@ impl TryParse for GetClipPlaneReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetClipPlaneReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetClipPlaneReply {
@@ -5413,12 +5299,6 @@ impl TryParse for GetDoublevReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDoublevReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetDoublevReply {
     /// Get the value of the `n` field.
     ///
@@ -5524,12 +5404,6 @@ impl TryParse for GetErrorReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetErrorReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetFloatv request
 pub const GET_FLOATV_REQUEST: u8 = 116;
@@ -5632,12 +5506,6 @@ impl TryParse for GetFloatvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetFloatvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetFloatvReply {
@@ -5757,12 +5625,6 @@ impl TryParse for GetIntegervReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetIntegervReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetIntegervReply {
@@ -5893,12 +5755,6 @@ impl TryParse for GetLightfvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetLightfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetLightfvReply {
     /// Get the value of the `n` field.
     ///
@@ -6025,12 +5881,6 @@ impl TryParse for GetLightivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetLightivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetLightivReply {
@@ -6161,12 +6011,6 @@ impl TryParse for GetMapdvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetMapdvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetMapdvReply {
     /// Get the value of the `n` field.
     ///
@@ -6293,12 +6137,6 @@ impl TryParse for GetMapfvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetMapfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetMapfvReply {
@@ -6429,12 +6267,6 @@ impl TryParse for GetMapivReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetMapivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetMapivReply {
     /// Get the value of the `n` field.
     ///
@@ -6561,12 +6393,6 @@ impl TryParse for GetMaterialfvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetMaterialfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetMaterialfvReply {
@@ -6697,12 +6523,6 @@ impl TryParse for GetMaterialivReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetMaterialivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetMaterialivReply {
     /// Get the value of the `n` field.
     ///
@@ -6820,12 +6640,6 @@ impl TryParse for GetPixelMapfvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetPixelMapfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetPixelMapfvReply {
@@ -6947,12 +6761,6 @@ impl TryParse for GetPixelMapuivReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetPixelMapuivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetPixelMapuivReply {
     /// Get the value of the `n` field.
     ///
@@ -7072,12 +6880,6 @@ impl TryParse for GetPixelMapusvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetPixelMapusvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetPixelMapusvReply {
     /// Get the value of the `n` field.
     ///
@@ -7191,12 +6993,6 @@ impl TryParse for GetPolygonStippleReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetPolygonStippleReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetPolygonStippleReply {
@@ -7316,12 +7112,6 @@ impl TryParse for GetStringReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetStringReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetStringReply {
@@ -7452,12 +7242,6 @@ impl TryParse for GetTexEnvfvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetTexEnvfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetTexEnvfvReply {
     /// Get the value of the `n` field.
     ///
@@ -7584,12 +7368,6 @@ impl TryParse for GetTexEnvivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetTexEnvivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetTexEnvivReply {
@@ -7720,12 +7498,6 @@ impl TryParse for GetTexGendvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetTexGendvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetTexGendvReply {
     /// Get the value of the `n` field.
     ///
@@ -7854,12 +7626,6 @@ impl TryParse for GetTexGenfvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetTexGenfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetTexGenfvReply {
     /// Get the value of the `n` field.
     ///
@@ -7986,12 +7752,6 @@ impl TryParse for GetTexGenivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetTexGenivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetTexGenivReply {
@@ -8152,12 +7912,6 @@ impl TryParse for GetTexImageReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetTexImageReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetTexImageReply {
     /// Get the value of the `length` field.
     ///
@@ -8287,12 +8041,6 @@ impl TryParse for GetTexParameterfvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetTexParameterfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetTexParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -8419,12 +8167,6 @@ impl TryParse for GetTexParameterivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetTexParameterivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetTexParameterivReply {
@@ -8564,12 +8306,6 @@ impl TryParse for GetTexLevelParameterfvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetTexLevelParameterfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetTexLevelParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -8707,12 +8443,6 @@ impl TryParse for GetTexLevelParameterivReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetTexLevelParameterivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetTexLevelParameterivReply {
     /// Get the value of the `n` field.
     ///
@@ -8827,12 +8557,6 @@ impl TryParse for IsEnabledReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for IsEnabledReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the IsList request
 pub const IS_LIST_REQUEST: u8 = 141;
@@ -8930,12 +8654,6 @@ impl TryParse for IsListReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for IsListReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -9115,12 +8833,6 @@ impl TryParse for AreTexturesResidentReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AreTexturesResidentReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl AreTexturesResidentReply {
@@ -9325,12 +9037,6 @@ impl TryParse for GenTexturesReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GenTexturesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GenTexturesReply {
     /// Get the value of the `length` field.
     ///
@@ -9443,12 +9149,6 @@ impl TryParse for IsTextureReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for IsTextureReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -9581,12 +9281,6 @@ impl TryParse for GetColorTableReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetColorTableReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetColorTableReply {
     /// Get the value of the `length` field.
     ///
@@ -9716,12 +9410,6 @@ impl TryParse for GetColorTableParameterfvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetColorTableParameterfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetColorTableParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -9848,12 +9536,6 @@ impl TryParse for GetColorTableParameterivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetColorTableParameterivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetColorTableParameterivReply {
@@ -10003,12 +9685,6 @@ impl TryParse for GetConvolutionFilterReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetConvolutionFilterReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetConvolutionFilterReply {
     /// Get the value of the `length` field.
     ///
@@ -10138,12 +9814,6 @@ impl TryParse for GetConvolutionParameterfvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetConvolutionParameterfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetConvolutionParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -10270,12 +9940,6 @@ impl TryParse for GetConvolutionParameterivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetConvolutionParameterivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetConvolutionParameterivReply {
@@ -10423,12 +10087,6 @@ impl TryParse for GetSeparableFilterReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetSeparableFilterReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetSeparableFilterReply {
@@ -10582,12 +10240,6 @@ impl TryParse for GetHistogramReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetHistogramReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetHistogramReply {
     /// Get the value of the `length` field.
     ///
@@ -10717,12 +10369,6 @@ impl TryParse for GetHistogramParameterfvReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetHistogramParameterfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetHistogramParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -10849,12 +10495,6 @@ impl TryParse for GetHistogramParameterivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetHistogramParameterivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetHistogramParameterivReply {
@@ -11004,12 +10644,6 @@ impl TryParse for GetMinmaxReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetMinmaxReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetMinmaxReply {
     /// Get the value of the `length` field.
     ///
@@ -11137,12 +10771,6 @@ impl TryParse for GetMinmaxParameterfvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetMinmaxParameterfvReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetMinmaxParameterfvReply {
@@ -11273,12 +10901,6 @@ impl TryParse for GetMinmaxParameterivReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetMinmaxParameterivReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetMinmaxParameterivReply {
     /// Get the value of the `n` field.
     ///
@@ -11404,12 +11026,6 @@ impl TryParse for GetCompressedTexImageARBReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetCompressedTexImageARBReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetCompressedTexImageARBReply {
@@ -11614,12 +11230,6 @@ impl TryParse for GenQueriesARBReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GenQueriesARBReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GenQueriesARBReply {
     /// Get the value of the `length` field.
     ///
@@ -11734,12 +11344,6 @@ impl TryParse for IsQueryARBReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for IsQueryARBReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetQueryivARB request
 pub const GET_QUERYIV_ARB_REQUEST: u8 = 164;
@@ -11851,12 +11455,6 @@ impl TryParse for GetQueryivARBReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetQueryivARBReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetQueryivARBReply {
@@ -11987,12 +11585,6 @@ impl TryParse for GetQueryObjectivARBReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetQueryObjectivARBReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetQueryObjectivARBReply {
     /// Get the value of the `n` field.
     ///
@@ -12119,12 +11711,6 @@ impl TryParse for GetQueryObjectuivARBReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetQueryObjectuivARBReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetQueryObjectuivARBReply {

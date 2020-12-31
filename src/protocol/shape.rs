@@ -200,12 +200,6 @@ impl TryParse for NotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for NotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -338,12 +332,6 @@ impl TryParse for QueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -892,12 +880,6 @@ impl TryParse for QueryExtentsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryExtentsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 6;
@@ -1062,12 +1044,6 @@ impl TryParse for InputSelectedReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for InputSelectedReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetRectangles request
 pub const GET_RECTANGLES_REQUEST: u8 = 8;
@@ -1171,12 +1147,6 @@ impl TryParse for GetRectanglesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetRectanglesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetRectanglesReply {

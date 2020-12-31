@@ -195,12 +195,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the RedirectWindow request
 pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
@@ -742,12 +736,6 @@ impl TryParse for GetOverlayWindowReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetOverlayWindowReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 

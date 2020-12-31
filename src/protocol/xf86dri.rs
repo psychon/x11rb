@@ -51,12 +51,6 @@ impl TryParse for DrmClipRect {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DrmClipRect {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DrmClipRect {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -166,12 +160,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the QueryDirectRenderingCapable request
 pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
@@ -260,12 +248,6 @@ impl TryParse for QueryDirectRenderingCapableReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryDirectRenderingCapableReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -363,12 +345,6 @@ impl TryParse for OpenConnectionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for OpenConnectionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl OpenConnectionReply {
@@ -550,12 +526,6 @@ impl TryParse for GetClientDriverNameReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetClientDriverNameReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetClientDriverNameReply {
     /// Get the value of the `client_driver_name_len` field.
     ///
@@ -677,12 +647,6 @@ impl TryParse for CreateContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for CreateContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -856,12 +820,6 @@ impl TryParse for CreateDrawableReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for CreateDrawableReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1057,12 +1015,6 @@ impl TryParse for GetDrawableInfoReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDrawableInfoReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetDrawableInfoReply {
     /// Get the value of the `num_clip_rects` field.
     ///
@@ -1192,12 +1144,6 @@ impl TryParse for GetDeviceInfoReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDeviceInfoReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetDeviceInfoReply {
     /// Get the value of the `device_private_size` field.
     ///
@@ -1310,12 +1256,6 @@ impl TryParse for AuthConnectionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AuthConnectionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 

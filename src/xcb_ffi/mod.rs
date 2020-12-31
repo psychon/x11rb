@@ -2,7 +2,7 @@
 //!
 //! This module is only available when the `allow-unsafe-code` feature is enabled.
 
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryInto;
 use std::ffi::CStr;
 use std::io::{Error as IOError, ErrorKind, IoSlice};
 use std::os::raw::c_int;
@@ -25,7 +25,7 @@ pub use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, R
 use crate::extension_manager::ExtensionManager;
 use crate::protocol::xproto::Setup;
 use crate::utils::{CSlice, RawFdContainer};
-use crate::x11_utils::ExtensionInformation;
+use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd};
 
 mod pending_errors;
 mod raw_ffi;
@@ -158,7 +158,7 @@ impl XCBConnection {
         let length = usize::from(length) * 4 + 8;
 
         let slice = from_raw_parts(wrapper.as_ptr(), length);
-        let result = Setup::try_from(&*slice)?;
+        let result = Setup::try_parse(&*slice)?.0;
 
         Ok(result)
     }
@@ -356,7 +356,7 @@ impl RequestConnection for XCBConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<Cookie<'_, Self, R>, ConnectionError>
     where
-        R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+        R: TryParse,
     {
         Ok(Cookie::new(
             self,
@@ -370,7 +370,7 @@ impl RequestConnection for XCBConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
     where
-        R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+        R: TryParseFd,
     {
         Ok(CookieWithFds::new(
             self,

@@ -1,6 +1,5 @@
 #[cfg(feature = "resource_manager")]
 mod test {
-    use std::convert::TryFrom;
     use std::fs;
     use std::io::IoSlice;
     use std::path::{Path, PathBuf};
@@ -15,7 +14,7 @@ mod test {
     use x11rb::protocol::Event;
     use x11rb::resource_manager::Database;
     use x11rb::utils::RawFdContainer;
-    use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse, X11Error};
+    use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd, X11Error};
 
     // Most tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
     // [1]: https://github.com/Airblader/xcb-util-xrm/blob/master/tests/tests_database.c
@@ -149,7 +148,7 @@ mod test {
             _: Vec<RawFdContainer>,
         ) -> Result<Cookie<'_, Self, R>, ConnectionError>
         where
-            R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+            R: TryParse,
         {
             Ok(Cookie::new(self, 42))
         }
@@ -160,7 +159,7 @@ mod test {
             _: Vec<RawFdContainer>,
         ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
         where
-            R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+            R: TryParseFd,
         {
             unimplemented!()
         }

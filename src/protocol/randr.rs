@@ -142,12 +142,6 @@ impl TryParse for ScreenSize {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ScreenSize {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ScreenSize {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -185,12 +179,6 @@ impl TryParse for RefreshRates {
         let (rates, remaining) = crate::x11_utils::parse_list::<u16>(remaining, n_rates.try_to_usize()?)?;
         let result = RefreshRates { rates };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for RefreshRates {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for RefreshRates {
@@ -321,12 +309,6 @@ impl TryParse for QueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -533,12 +515,6 @@ impl TryParse for SetScreenConfigReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SetScreenConfigReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -798,12 +774,6 @@ impl TryParse for GetScreenInfoReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetScreenInfoReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetScreenInfoReply {
     /// Get the value of the `nSizes` field.
     ///
@@ -914,12 +884,6 @@ impl TryParse for GetScreenSizeRangeReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetScreenSizeRangeReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1132,12 +1096,6 @@ impl TryParse for ModeInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ModeInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ModeInfo {
     type Bytes = [u8; 32];
     fn serialize(&self) -> [u8; 32] {
@@ -1310,12 +1268,6 @@ impl TryParse for GetScreenResourcesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetScreenResourcesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetScreenResourcesReply {
@@ -1560,12 +1512,6 @@ impl TryParse for GetOutputInfoReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetOutputInfoReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetOutputInfoReply {
     /// Get the value of the `num_crtcs` field.
     ///
@@ -1712,12 +1658,6 @@ impl TryParse for ListOutputPropertiesReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ListOutputPropertiesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl ListOutputPropertiesReply {
     /// Get the value of the `num_atoms` field.
     ///
@@ -1836,12 +1776,6 @@ impl TryParse for QueryOutputPropertyReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryOutputPropertyReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryOutputPropertyReply {
@@ -2327,12 +2261,6 @@ impl TryParse for GetOutputPropertyReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetOutputPropertyReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the CreateMode request
 pub const CREATE_MODE_REQUEST: u8 = 16;
@@ -2474,12 +2402,6 @@ impl TryParse for CreateModeReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for CreateModeReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -2816,12 +2738,6 @@ impl TryParse for GetCrtcInfoReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetCrtcInfoReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetCrtcInfoReply {
     /// Get the value of the `num_outputs` field.
     ///
@@ -3024,12 +2940,6 @@ impl TryParse for SetCrtcConfigReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SetCrtcConfigReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetCrtcGammaSize request
 pub const GET_CRTC_GAMMA_SIZE_REQUEST: u8 = 22;
@@ -3119,12 +3029,6 @@ impl TryParse for GetCrtcGammaSizeReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetCrtcGammaSizeReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -3221,12 +3125,6 @@ impl TryParse for GetCrtcGammaReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetCrtcGammaReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetCrtcGammaReply {
@@ -3452,12 +3350,6 @@ impl TryParse for GetScreenResourcesCurrentReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetScreenResourcesCurrentReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetScreenResourcesCurrentReply {
@@ -3845,12 +3737,6 @@ impl TryParse for GetCrtcTransformReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetCrtcTransformReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetCrtcTransformReply {
     /// Get the value of the `pending_len` field.
     ///
@@ -4019,12 +3905,6 @@ impl TryParse for GetPanningReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetPanningReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -4212,12 +4092,6 @@ impl TryParse for SetPanningReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SetPanningReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the SetOutputPrimary request
 pub const SET_OUTPUT_PRIMARY_REQUEST: u8 = 30;
@@ -4382,12 +4256,6 @@ impl TryParse for GetOutputPrimaryReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetOutputPrimaryReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetProviders request
 pub const GET_PROVIDERS_REQUEST: u8 = 32;
@@ -4480,12 +4348,6 @@ impl TryParse for GetProvidersReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetProvidersReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetProvidersReply {
@@ -4682,12 +4544,6 @@ impl TryParse for GetProviderInfoReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetProviderInfoReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetProviderInfoReply {
@@ -5002,12 +4858,6 @@ impl TryParse for ListProviderPropertiesReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ListProviderPropertiesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl ListProviderPropertiesReply {
     /// Get the value of the `num_atoms` field.
     ///
@@ -5126,12 +4976,6 @@ impl TryParse for QueryProviderPropertyReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryProviderPropertyReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryProviderPropertyReply {
@@ -5614,12 +5458,6 @@ impl TryParse for GetProviderPropertyReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetProviderPropertyReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the ScreenChangeNotify event
 pub const SCREEN_CHANGE_NOTIFY_EVENT: u8 = 0;
@@ -5661,12 +5499,6 @@ impl TryParse for ScreenChangeNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ScreenChangeNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
@@ -5822,12 +5654,6 @@ impl TryParse for CrtcChange {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for CrtcChange {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for CrtcChange {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
@@ -5915,12 +5741,6 @@ impl TryParse for OutputChange {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for OutputChange {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for OutputChange {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
@@ -5999,12 +5819,6 @@ impl TryParse for OutputProperty {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for OutputProperty {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for OutputProperty {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
@@ -6069,12 +5883,6 @@ impl TryParse for ProviderChange {
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let result = ProviderChange { timestamp, window, provider };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ProviderChange {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ProviderChange {
@@ -6143,12 +5951,6 @@ impl TryParse for ProviderProperty {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ProviderProperty {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ProviderProperty {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
@@ -6211,12 +6013,6 @@ impl TryParse for ResourceChange {
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
         let result = ResourceChange { timestamp, window };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ResourceChange {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ResourceChange {
@@ -6291,12 +6087,6 @@ impl TryParse for MonitorInfo {
         let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, n_output.try_to_usize()?)?;
         let result = MonitorInfo { name, primary, automatic, x, y, width, height, width_in_millimeters, height_in_millimeters, outputs };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for MonitorInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for MonitorInfo {
@@ -6440,12 +6230,6 @@ impl TryParse for GetMonitorsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetMonitorsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetMonitorsReply {
@@ -6745,13 +6529,6 @@ impl TryParseFd for CreateLeaseReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<(&[u8], Vec<RawFdContainer>)> for CreateLeaseReply {
-    type Error = ParseError;
-    fn try_from(value: (&[u8], Vec<RawFdContainer>)) -> Result<Self, Self::Error> {
-        let (value, mut fds) = value;
-        Ok(Self::try_parse_fd(value, &mut fds)?.0)
-    }
-}
 
 /// Opcode for the FreeLease request
 pub const FREE_LEASE_REQUEST: u8 = 46;
@@ -6843,12 +6620,6 @@ impl TryParse for LeaseNotify {
         let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
         let result = LeaseNotify { timestamp, window, lease, created };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for LeaseNotify {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for LeaseNotify {
@@ -7043,12 +6814,6 @@ impl TryParse for NotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for NotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {

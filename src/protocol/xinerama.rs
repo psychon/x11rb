@@ -52,12 +52,6 @@ impl TryParse for ScreenInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ScreenInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ScreenInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -181,12 +175,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 1;
@@ -278,12 +266,6 @@ impl TryParse for GetStateReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetStateReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetScreenCount request
 pub const GET_SCREEN_COUNT_REQUEST: u8 = 2;
@@ -373,12 +355,6 @@ impl TryParse for GetScreenCountReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetScreenCountReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -486,12 +462,6 @@ impl TryParse for GetScreenSizeReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetScreenSizeReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the IsActive request
 pub const IS_ACTIVE_REQUEST: u8 = 4;
@@ -569,12 +539,6 @@ impl TryParse for IsActiveReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for IsActiveReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -656,12 +620,6 @@ impl TryParse for QueryScreensReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryScreensReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryScreensReply {

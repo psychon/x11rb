@@ -131,12 +131,6 @@ impl TryParse for GetVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Cursor(bool);
@@ -303,12 +297,6 @@ impl TryParse for CompareCursorReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for CompareCursorReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 

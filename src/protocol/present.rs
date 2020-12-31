@@ -426,12 +426,6 @@ impl TryParse for Notify {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Notify {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Notify {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -553,12 +547,6 @@ impl TryParse for QueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1086,12 +1074,6 @@ impl TryParse for QueryCapabilitiesReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryCapabilitiesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the Generic event
 pub const GENERIC_EVENT: u8 = 0;
@@ -1119,12 +1101,6 @@ impl TryParse for GenericEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GenericEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&GenericEvent> for [u8; 32] {
@@ -1226,12 +1202,6 @@ impl TryParse for ConfigureNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ConfigureNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the CompleteNotify event
 pub const COMPLETE_NOTIFY_EVENT: u16 = 1;
@@ -1274,12 +1244,6 @@ impl TryParse for CompleteNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for CompleteNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the IdleNotify event
 pub const IDLE_NOTIFY_EVENT: u16 = 2;
@@ -1315,12 +1279,6 @@ impl TryParse for IdleNotifyEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for IdleNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1396,12 +1354,6 @@ impl TryParse for RedirectNotifyEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for RedirectNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 

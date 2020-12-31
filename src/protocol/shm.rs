@@ -68,12 +68,6 @@ impl TryParse for CompletionEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for CompletionEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&CompletionEvent> for [u8; 32] {
     fn from(input: &CompletionEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -215,12 +209,6 @@ impl TryParse for QueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -698,12 +686,6 @@ impl TryParse for GetImageReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetImageReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 5;
@@ -1012,13 +994,6 @@ impl TryParseFd for CreateSegmentReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<(&[u8], Vec<RawFdContainer>)> for CreateSegmentReply {
-    type Error = ParseError;
-    fn try_from(value: (&[u8], Vec<RawFdContainer>)) -> Result<Self, Self::Error> {
-        let (value, mut fds) = value;
-        Ok(Self::try_parse_fd(value, &mut fds)?.0)
     }
 }
 

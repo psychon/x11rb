@@ -277,12 +277,6 @@ impl TryParse for Int64 {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Int64 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Int64 {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -326,12 +320,6 @@ impl TryParse for Systemcounter {
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let result = Systemcounter { counter, resolution, name };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Systemcounter {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Systemcounter {
@@ -386,12 +374,6 @@ impl TryParse for Trigger {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Trigger {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Trigger {
     type Bytes = [u8; 20];
     fn serialize(&self) -> [u8; 20] {
@@ -442,12 +424,6 @@ impl TryParse for Waitcondition {
         let (event_threshold, remaining) = Int64::try_parse(remaining)?;
         let result = Waitcondition { trigger, event_threshold };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Waitcondition {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Waitcondition {
@@ -596,12 +572,6 @@ impl TryParse for InitializeReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for InitializeReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the ListSystemCounters request
 pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
@@ -681,12 +651,6 @@ impl TryParse for ListSystemCountersReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ListSystemCountersReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ListSystemCountersReply {
@@ -935,12 +899,6 @@ impl TryParse for QueryCounterReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryCounterReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1829,12 +1787,6 @@ impl TryParse for QueryAlarmReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryAlarmReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the SetPriority request
 pub const SET_PRIORITY_REQUEST: u8 = 12;
@@ -1997,12 +1949,6 @@ impl TryParse for GetPriorityReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetPriorityReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -2374,12 +2320,6 @@ impl TryParse for QueryFenceReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryFenceReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
@@ -2492,12 +2432,6 @@ impl TryParse for CounterNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for CounterNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&CounterNotifyEvent> for [u8; 32] {
     fn from(input: &CounterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2582,12 +2516,6 @@ impl TryParse for AlarmNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AlarmNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {

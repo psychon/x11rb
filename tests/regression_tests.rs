@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::convert::TryFrom;
 use std::io::IoSlice;
 use std::ops::Deref;
 
@@ -13,7 +12,7 @@ use x11rb::protocol::xproto::{
     ClientMessageData, ConnectionExt, KeymapNotifyEvent, Segment, SetupAuthenticate,
 };
 use x11rb::utils::RawFdContainer;
-use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse};
+use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd};
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -69,7 +68,7 @@ impl RequestConnection for FakeConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<Cookie<Self, R>, ConnectionError>
     where
-        R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+        R: TryParse,
     {
         Ok(Cookie::new(self, self.internal_send_request(bufs, fds)?))
     }
@@ -80,7 +79,7 @@ impl RequestConnection for FakeConnection {
         _fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<Self, R>, ConnectionError>
     where
-        R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+        R: TryParseFd,
     {
         unimplemented!()
     }
@@ -252,7 +251,7 @@ fn test_send_event() -> Result<(), ConnectionError> {
         11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
         24, 25, 26, 27, 28, 29, 30,
     ];
-    let event = KeymapNotifyEvent::try_from(&buffer[..])?;
+    let event = KeymapNotifyEvent::try_parse(&buffer[..])?.0;
 
     // "Send" it
     let conn = FakeConnection::default();

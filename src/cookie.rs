@@ -1,14 +1,13 @@
 //! Cookies are handles to future replies or errors from the X11 server.
 
-use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 
 use crate::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
-use crate::errors::{ConnectionError, ParseError, ReplyError};
+use crate::errors::{ConnectionError, ReplyError};
 #[cfg(feature = "record")]
 use crate::protocol::record::EnableContextReply;
 use crate::protocol::xproto::ListFontsWithInfoReply;
-use crate::utils::RawFdContainer;
+use crate::x11_utils::{TryParse, TryParseFd};
 
 /// A handle to a possible error from the X11 server.
 ///
@@ -144,7 +143,7 @@ where
 
 impl<C, R> Cookie<'_, C, R>
 where
-    R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+    R: TryParse,
     C: RequestConnection + ?Sized,
 {
     /// Construct a new cookie.
@@ -177,13 +176,13 @@ where
 
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<R, ReplyError> {
-        Ok(self.raw_reply()?.as_ref().try_into()?)
+        Ok(R::try_parse(self.raw_reply()?.as_ref())?.0)
     }
 
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<R>, ConnectionError> {
         self.raw_reply_unchecked()?
-            .map(|buf| buf.as_ref().try_into())
+            .map(|buf| R::try_parse(buf.as_ref()).map(|r| r.0))
             .transpose()
             .map_err(Into::into)
     }
@@ -223,7 +222,7 @@ where
 
 impl<C, R> CookieWithFds<'_, C, R>
 where
-    R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+    R: TryParseFd,
     C: RequestConnection + ?Sized,
 {
     /// Construct a new cookie.
@@ -250,8 +249,8 @@ where
 
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<R, ReplyError> {
-        let (buffer, fds) = self.raw_reply()?;
-        Ok(R::try_from((buffer.as_ref(), fds))?)
+        let (buffer, mut fds) = self.raw_reply()?;
+        Ok(R::try_parse_fd(buffer.as_ref(), &mut fds)?.0)
     }
 }
 
@@ -298,15 +297,15 @@ macro_rules! multiple_reply_cookie {
                     Err(e) => return Some(Err(e)),
                     Ok(v) => v,
                 };
-                let reply = $reply::try_from(reply.as_ref()).map_err(ReplyError::from);
+                let reply = $reply::try_parse(reply.as_ref());
                 match reply {
                     // Is this an indicator that no more replies follow?
-                    Ok(ref reply) if Self::is_last(&reply) => None,
+                    Ok(ref reply) if Self::is_last(&reply.0) => None,
                     Ok(reply) => {
                         self.0 = Some(cookie);
-                        Some(Ok(reply))
+                        Some(Ok(reply.0))
                     }
-                    Err(e) => Some(Err(e)),
+                    Err(e) => Some(Err(e.into())),
                 }
             }
         }

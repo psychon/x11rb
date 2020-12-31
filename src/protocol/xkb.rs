@@ -1933,12 +1933,6 @@ impl TryParse for IndicatorMap {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for IndicatorMap {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for IndicatorMap {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -2330,12 +2324,6 @@ impl TryParse for ModDef {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ModDef {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ModDef {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -2369,12 +2357,6 @@ impl TryParse for KeyName {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for KeyName {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for KeyName {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -2404,12 +2386,6 @@ impl TryParse for KeyAlias {
         let alias = <[u8; 4]>::try_from(alias).unwrap();
         let result = KeyAlias { real, alias };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KeyAlias {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for KeyAlias {
@@ -2447,12 +2423,6 @@ impl TryParse for CountedString16 {
         let alignment_pad = alignment_pad.to_vec();
         let result = CountedString16 { string, alignment_pad };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for CountedString16 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for CountedString16 {
@@ -2504,12 +2474,6 @@ impl TryParse for KTMapEntry {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let result = KTMapEntry { active, mods_mask, level, mods_mods, mods_vmods };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KTMapEntry {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for KTMapEntry {
@@ -2565,12 +2529,6 @@ impl TryParse for KeyType {
         let (preserve, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(has_preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let result = KeyType { mods_mask, mods_mods, mods_vmods, num_levels, has_preserve, map, preserve };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KeyType {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for KeyType {
@@ -2630,12 +2588,6 @@ impl TryParse for KeySymMap {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for KeySymMap {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for KeySymMap {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -2682,12 +2634,6 @@ impl TryParse for CommonBehavior {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for CommonBehavior {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for CommonBehavior {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -2715,12 +2661,6 @@ impl TryParse for DefaultBehavior {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let result = DefaultBehavior { type_ };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DefaultBehavior {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DefaultBehavior {
@@ -2754,12 +2694,6 @@ impl TryParse for RadioGroupBehavior {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for RadioGroupBehavior {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for RadioGroupBehavior {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -2788,12 +2722,6 @@ impl TryParse for OverlayBehavior {
         let (key, remaining) = xproto::Keycode::try_parse(remaining)?;
         let result = OverlayBehavior { type_, key };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for OverlayBehavior {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for OverlayBehavior {
@@ -3051,12 +2979,6 @@ impl TryParse for SetBehavior {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SetBehavior {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SetBehavior {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -3090,12 +3012,6 @@ impl TryParse for SetExplicit {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SetExplicit {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SetExplicit {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -3124,12 +3040,6 @@ impl TryParse for KeyModMap {
         let (mods, remaining) = u8::try_parse(remaining)?;
         let result = KeyModMap { keycode, mods };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KeyModMap {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for KeyModMap {
@@ -3161,12 +3071,6 @@ impl TryParse for KeyVModMap {
         let (vmods, remaining) = u16::try_parse(remaining)?;
         let result = KeyVModMap { keycode, vmods };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KeyVModMap {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for KeyVModMap {
@@ -3202,12 +3106,6 @@ impl TryParse for KTSetMapEntry {
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let result = KTSetMapEntry { level, real_mods, virtual_mods };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KTSetMapEntry {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for KTSetMapEntry {
@@ -3254,12 +3152,6 @@ impl TryParse for SetKeyType {
         let (preserve_entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, u32::from(preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let result = SetKeyType { mask, real_mods, virtual_mods, num_levels, preserve, entries, preserve_entries };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SetKeyType {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SetKeyType {
@@ -3317,12 +3209,6 @@ impl TryParse for Outline {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Outline {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Outline {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -3372,12 +3258,6 @@ impl TryParse for Shape {
         let (outlines, remaining) = crate::x11_utils::parse_list::<Outline>(remaining, n_outlines.try_to_usize()?)?;
         let result = Shape { name, primary_ndx, approx_ndx, outlines };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Shape {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Shape {
@@ -3432,12 +3312,6 @@ impl TryParse for Key {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Key {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Key {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -3479,12 +3353,6 @@ impl TryParse for OverlayKey {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for OverlayKey {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for OverlayKey {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -3519,12 +3387,6 @@ impl TryParse for OverlayRow {
         let (keys, remaining) = crate::x11_utils::parse_list::<OverlayKey>(remaining, n_keys.try_to_usize()?)?;
         let result = OverlayRow { row_under, keys };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for OverlayRow {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for OverlayRow {
@@ -3572,12 +3434,6 @@ impl TryParse for Overlay {
         let (rows, remaining) = crate::x11_utils::parse_list::<OverlayRow>(remaining, n_rows.try_to_usize()?)?;
         let result = Overlay { name, rows };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Overlay {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Overlay {
@@ -3629,12 +3485,6 @@ impl TryParse for Row {
         let (keys, remaining) = crate::x11_utils::parse_list::<Key>(remaining, n_keys.try_to_usize()?)?;
         let result = Row { top, left, vertical, keys };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Row {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Row {
@@ -3755,12 +3605,6 @@ impl TryParse for Listing {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Listing {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Listing {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -3817,12 +3661,6 @@ impl TryParse for DeviceLedInfo {
         let led_class = led_class.into();
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceLedInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceLedInfo {
@@ -4082,12 +3920,6 @@ impl TryParse for SANoAction {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SANoAction {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SANoAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -4131,12 +3963,6 @@ impl TryParse for SASetMods {
         let type_ = type_.into();
         let result = SASetMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SASetMods {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SASetMods {
@@ -4190,12 +4016,6 @@ impl TryParse for SASetGroup {
         let type_ = type_.into();
         let result = SASetGroup { type_, flags, group };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SASetGroup {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SASetGroup {
@@ -4312,12 +4132,6 @@ impl TryParse for SAMovePtr {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SAMovePtr {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SAMovePtr {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -4369,12 +4183,6 @@ impl TryParse for SAPtrBtn {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SAPtrBtn {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SAPtrBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -4419,12 +4227,6 @@ impl TryParse for SALockPtrBtn {
         let type_ = type_.into();
         let result = SALockPtrBtn { type_, flags, button };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SALockPtrBtn {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SALockPtrBtn {
@@ -4530,12 +4332,6 @@ impl TryParse for SASetPtrDflt {
         let type_ = type_.into();
         let result = SASetPtrDflt { type_, flags, affect, value };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SASetPtrDflt {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SASetPtrDflt {
@@ -4720,12 +4516,6 @@ impl TryParse for SAIsoLock {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SAIsoLock {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SAIsoLock {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -4772,12 +4562,6 @@ impl TryParse for SATerminate {
         let type_ = type_.into();
         let result = SATerminate { type_ };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SATerminate {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SATerminate {
@@ -4876,12 +4660,6 @@ impl TryParse for SASwitchScreen {
         let type_ = type_.into();
         let result = SASwitchScreen { type_, flags, new_screen };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SASwitchScreen {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SASwitchScreen {
@@ -5064,12 +4842,6 @@ impl TryParse for SASetControls {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SASetControls {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SASetControls {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -5177,12 +4949,6 @@ impl TryParse for SAActionMessage {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SAActionMessage {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SAActionMessage {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -5231,12 +4997,6 @@ impl TryParse for SARedirectKey {
         let type_ = type_.into();
         let result = SARedirectKey { type_, newkey, mask, real_modifiers, vmods_mask_high, vmods_mask_low, vmods_high, vmods_low };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SARedirectKey {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SARedirectKey {
@@ -5293,12 +5053,6 @@ impl TryParse for SADeviceBtn {
         let type_ = type_.into();
         let result = SADeviceBtn { type_, flags, count, button, device };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SADeviceBtn {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SADeviceBtn {
@@ -5408,12 +5162,6 @@ impl TryParse for SALockDeviceBtn {
         let type_ = type_.into();
         let result = SALockDeviceBtn { type_, flags, button, device };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SALockDeviceBtn {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SALockDeviceBtn {
@@ -5539,12 +5287,6 @@ impl TryParse for SADeviceValuator {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SADeviceValuator {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SADeviceValuator {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -5595,12 +5337,6 @@ impl TryParse for SIAction {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SIAction {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SIAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -5642,12 +5378,6 @@ impl TryParse for SymInterpret {
         let (action, remaining) = SIAction::try_parse(remaining)?;
         let result = SymInterpret { sym, mods, match_, virtual_mod, flags, action };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SymInterpret {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SymInterpret {
@@ -6100,12 +5830,6 @@ impl TryParse for UseExtensionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for UseExtensionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectEventsAuxBitcase1 {
@@ -6118,12 +5842,6 @@ impl TryParse for SelectEventsAuxBitcase1 {
         let (new_keyboard_details, remaining) = u16::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase1 { affect_new_keyboard, new_keyboard_details };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase1 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SelectEventsAuxBitcase1 {
@@ -6157,12 +5875,6 @@ impl TryParse for SelectEventsAuxBitcase2 {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase2 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SelectEventsAuxBitcase2 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -6192,12 +5904,6 @@ impl TryParse for SelectEventsAuxBitcase3 {
         let (ctrl_details, remaining) = u32::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase3 { affect_ctrls, ctrl_details };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase3 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SelectEventsAuxBitcase3 {
@@ -6235,12 +5941,6 @@ impl TryParse for SelectEventsAuxBitcase4 {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase4 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SelectEventsAuxBitcase4 {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -6274,12 +5974,6 @@ impl TryParse for SelectEventsAuxBitcase5 {
         let (indicator_map_details, remaining) = u32::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase5 { affect_indicator_map, indicator_map_details };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase5 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SelectEventsAuxBitcase5 {
@@ -6317,12 +6011,6 @@ impl TryParse for SelectEventsAuxBitcase6 {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase6 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SelectEventsAuxBitcase6 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -6354,12 +6042,6 @@ impl TryParse for SelectEventsAuxBitcase7 {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase7 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SelectEventsAuxBitcase7 {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -6387,12 +6069,6 @@ impl TryParse for SelectEventsAuxBitcase8 {
         let (bell_details, remaining) = u8::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase8 { affect_bell, bell_details };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase8 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SelectEventsAuxBitcase8 {
@@ -6424,12 +6100,6 @@ impl TryParse for SelectEventsAuxBitcase9 {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase9 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SelectEventsAuxBitcase9 {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -6457,12 +6127,6 @@ impl TryParse for SelectEventsAuxBitcase10 {
         let (access_x_details, remaining) = u16::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase10 { affect_access_x, access_x_details };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase10 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SelectEventsAuxBitcase10 {
@@ -6494,12 +6158,6 @@ impl TryParse for SelectEventsAuxBitcase11 {
         let (extdev_details, remaining) = u16::try_parse(remaining)?;
         let result = SelectEventsAuxBitcase11 { affect_ext_dev, extdev_details };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SelectEventsAuxBitcase11 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for SelectEventsAuxBitcase11 {
@@ -7141,12 +6799,6 @@ impl TryParse for GetStateReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetStateReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the LatchLockState request
 pub const LATCH_LOCK_STATE_REQUEST: u8 = 5;
@@ -7407,12 +7059,6 @@ impl TryParse for GetControlsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetControlsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -7951,7 +7597,6 @@ impl GetMapMapBitcase3 {
         Ok((result, remaining))
     }
 }
-// Skipping TryFrom implementations because of unresolved members
 #[derive(Debug, Clone, Default)]
 pub struct GetMapMap {
     pub types_rtrn: Option<Vec<KeyType>>,
@@ -8127,12 +7772,6 @@ impl TryParse for GetMapReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetMapReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Debug, Clone)]
 pub struct SetMapAuxBitcase3 {
@@ -8153,7 +7792,6 @@ impl SetMapAuxBitcase3 {
         Ok((result, remaining))
     }
 }
-// Skipping TryFrom implementations because of unresolved members
 impl SetMapAuxBitcase3 {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
@@ -8764,12 +8402,6 @@ impl TryParse for GetCompatMapReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetCompatMapReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetCompatMapReply {
     /// Get the value of the `nSIRtrn` field.
     ///
@@ -9005,12 +8637,6 @@ impl TryParse for GetIndicatorStateReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetIndicatorStateReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetIndicatorMap request
 pub const GET_INDICATOR_MAP_REQUEST: u8 = 13;
@@ -9117,12 +8743,6 @@ impl TryParse for GetIndicatorMapReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetIndicatorMapReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -9360,12 +8980,6 @@ impl TryParse for GetNamedIndicatorReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetNamedIndicatorReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -9643,7 +9257,6 @@ impl GetNamesValueListBitcase8 {
         Ok((result, remaining))
     }
 }
-// Skipping TryFrom implementations because of unresolved members
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct GetNamesValueList {
     pub keycodes_name: Option<xproto::Atom>,
@@ -9830,12 +9443,6 @@ impl TryParse for GetNamesReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetNamesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetNamesAuxBitcase8 {
@@ -9856,7 +9463,6 @@ impl SetNamesAuxBitcase8 {
         Ok((result, remaining))
     }
 }
-// Skipping TryFrom implementations because of unresolved members
 impl SetNamesAuxBitcase8 {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
@@ -10527,12 +10133,6 @@ impl TryParse for PerClientFlagsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PerClientFlagsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the ListComponents request
 pub const LIST_COMPONENTS_REQUEST: u8 = 22;
@@ -10646,12 +10246,6 @@ impl TryParse for ListComponentsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ListComponentsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ListComponentsReply {
@@ -10843,7 +10437,6 @@ impl GetKbdByNameRepliesTypesMapBitcase3 {
         Ok((result, remaining))
     }
 }
-// Skipping TryFrom implementations because of unresolved members
 #[derive(Debug, Clone, Default)]
 pub struct GetKbdByNameRepliesTypesMap {
     pub types_rtrn: Option<Vec<KeyType>>,
@@ -11013,12 +10606,6 @@ impl TryParse for GetKbdByNameRepliesTypes {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetKbdByNameRepliesTypes {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetKbdByNameRepliesCompatMap {
     pub compatmap_type: u8,
@@ -11047,12 +10634,6 @@ impl TryParse for GetKbdByNameRepliesCompatMap {
         let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_to_usize()?)?;
         let result = GetKbdByNameRepliesCompatMap { compatmap_type, compat_device_id, compatmap_sequence, compatmap_length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetKbdByNameRepliesCompatMap {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetKbdByNameRepliesCompatMap {
@@ -11095,12 +10676,6 @@ impl TryParse for GetKbdByNameRepliesIndicatorMaps {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetKbdByNameRepliesIndicatorMaps {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetKbdByNameRepliesIndicatorMaps {
     /// Get the value of the `nIndicators` field.
     ///
@@ -11135,7 +10710,6 @@ impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
         Ok((result, remaining))
     }
 }
-// Skipping TryFrom implementations because of unresolved members
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct GetKbdByNameRepliesKeyNamesValueList {
     pub keycodes_name: Option<xproto::Atom>,
@@ -11316,12 +10890,6 @@ impl TryParse for GetKbdByNameRepliesKeyNames {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetKbdByNameRepliesKeyNames {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetKbdByNameRepliesGeometry {
     pub geometry_type: u8,
@@ -11364,12 +10932,6 @@ impl TryParse for GetKbdByNameRepliesGeometry {
         let (label_font, remaining) = CountedString16::try_parse(remaining)?;
         let result = GetKbdByNameRepliesGeometry { geometry_type, geometry_device_id, geometry_sequence, geometry_length, name, geometry_found, width_mm, height_mm, n_properties, n_colors, n_shapes, n_sections, n_doodads, n_key_aliases, base_color_ndx, label_color_ndx, label_font };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetKbdByNameRepliesGeometry {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 #[derive(Debug, Clone, Default)]
@@ -11460,12 +11022,6 @@ impl TryParse for GetKbdByNameReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetKbdByNameReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -11637,12 +11193,6 @@ impl TryParse for GetDeviceInfoReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetDeviceInfoReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetDeviceInfoReply {
@@ -11946,12 +11496,6 @@ impl TryParse for SetDebuggingFlagsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SetDebuggingFlagsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the NewKeyboardNotify event
 pub const NEW_KEYBOARD_NOTIFY_EVENT: u8 = 0;
@@ -11993,12 +11537,6 @@ impl TryParse for NewKeyboardNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for NewKeyboardNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&NewKeyboardNotifyEvent> for [u8; 32] {
@@ -12120,12 +11658,6 @@ impl TryParse for MapNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for MapNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&MapNotifyEvent> for [u8; 32] {
@@ -12261,12 +11793,6 @@ impl TryParse for StateNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for StateNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&StateNotifyEvent> for [u8; 32] {
     fn from(input: &StateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -12378,12 +11904,6 @@ impl TryParse for ControlsNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ControlsNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&ControlsNotifyEvent> for [u8; 32] {
     fn from(input: &ControlsNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -12472,12 +11992,6 @@ impl TryParse for IndicatorStateNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for IndicatorStateNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&IndicatorStateNotifyEvent> for [u8; 32] {
     fn from(input: &IndicatorStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -12558,12 +12072,6 @@ impl TryParse for IndicatorMapNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for IndicatorMapNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&IndicatorMapNotifyEvent> for [u8; 32] {
@@ -12669,12 +12177,6 @@ impl TryParse for NamesNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for NamesNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&NamesNotifyEvent> for [u8; 32] {
     fn from(input: &NamesNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -12768,12 +12270,6 @@ impl TryParse for CompatMapNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for CompatMapNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&CompatMapNotifyEvent> for [u8; 32] {
@@ -12870,12 +12366,6 @@ impl TryParse for BellNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for BellNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&BellNotifyEvent> for [u8; 32] {
@@ -12975,12 +12465,6 @@ impl TryParse for ActionMessageEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ActionMessageEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&ActionMessageEvent> for [u8; 32] {
     fn from(input: &ActionMessageEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -13067,12 +12551,6 @@ impl TryParse for AccessXNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AccessXNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&AccessXNotifyEvent> for [u8; 32] {
@@ -13172,12 +12650,6 @@ impl TryParse for ExtensionDeviceNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ExtensionDeviceNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&ExtensionDeviceNotifyEvent> for [u8; 32] {

@@ -135,12 +135,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the Open request
 pub const OPEN_REQUEST: u8 = 1;
@@ -241,13 +235,6 @@ impl TryParseFd for OpenReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<(&[u8], Vec<RawFdContainer>)> for OpenReply {
-    type Error = ParseError;
-    fn try_from(value: (&[u8], Vec<RawFdContainer>)) -> Result<Self, Self::Error> {
-        let (value, mut fds) = value;
-        Ok(Self::try_parse_fd(value, &mut fds)?.0)
     }
 }
 
@@ -478,13 +465,6 @@ impl TryParseFd for BufferFromPixmapReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<(&[u8], Vec<RawFdContainer>)> for BufferFromPixmapReply {
-    type Error = ParseError;
-    fn try_from(value: (&[u8], Vec<RawFdContainer>)) -> Result<Self, Self::Error> {
-        let (value, mut fds) = value;
-        Ok(Self::try_parse_fd(value, &mut fds)?.0)
-    }
-}
 
 /// Opcode for the FenceFromFD request
 pub const FENCE_FROM_FD_REQUEST: u8 = 4;
@@ -678,13 +658,6 @@ impl TryParseFd for FDFromFenceReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<(&[u8], Vec<RawFdContainer>)> for FDFromFenceReply {
-    type Error = ParseError;
-    fn try_from(value: (&[u8], Vec<RawFdContainer>)) -> Result<Self, Self::Error> {
-        let (value, mut fds) = value;
-        Ok(Self::try_parse_fd(value, &mut fds)?.0)
-    }
-}
 
 /// Opcode for the GetSupportedModifiers request
 pub const GET_SUPPORTED_MODIFIERS_REQUEST: u8 = 6;
@@ -793,12 +766,6 @@ impl TryParse for GetSupportedModifiersReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetSupportedModifiersReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetSupportedModifiersReply {
@@ -1139,13 +1106,6 @@ impl TryParseFd for BuffersFromPixmapReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<(&[u8], Vec<RawFdContainer>)> for BuffersFromPixmapReply {
-    type Error = ParseError;
-    fn try_from(value: (&[u8], Vec<RawFdContainer>)) -> Result<Self, Self::Error> {
-        let (value, mut fds) = value;
-        Ok(Self::try_parse_fd(value, &mut fds)?.0)
     }
 }
 impl BuffersFromPixmapReply {

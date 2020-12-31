@@ -68,12 +68,6 @@ impl TryParse for SurfaceInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SurfaceInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for SurfaceInfo {
     type Bytes = [u8; 24];
     fn serialize(&self) -> [u8; 24] {
@@ -207,12 +201,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the ListSurfaceTypes request
 pub const LIST_SURFACE_TYPES_REQUEST: u8 = 1;
@@ -303,12 +291,6 @@ impl TryParse for ListSurfaceTypesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ListSurfaceTypesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ListSurfaceTypesReply {
@@ -461,12 +443,6 @@ impl TryParse for CreateContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for CreateContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl CreateContextReply {
@@ -646,12 +622,6 @@ impl TryParse for CreateSurfaceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for CreateSurfaceReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl CreateSurfaceReply {
@@ -867,12 +837,6 @@ impl TryParse for CreateSubpictureReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for CreateSubpictureReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl CreateSubpictureReply {
     /// Get the value of the `length` field.
     ///
@@ -1052,12 +1016,6 @@ impl TryParse for ListSubpictureTypesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ListSubpictureTypesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ListSubpictureTypesReply {

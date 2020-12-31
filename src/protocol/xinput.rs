@@ -57,12 +57,6 @@ impl TryParse for Fp3232 {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Fp3232 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Fp3232 {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -191,12 +185,6 @@ impl TryParse for GetExtensionVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetExtensionVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -409,12 +397,6 @@ impl TryParse for DeviceInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -464,12 +446,6 @@ impl TryParse for KeyInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for KeyInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for KeyInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -516,12 +492,6 @@ impl TryParse for ButtonInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ButtonInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ButtonInfo {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -556,12 +526,6 @@ impl TryParse for AxisInfo {
         let (maximum, remaining) = i32::try_parse(remaining)?;
         let result = AxisInfo { resolution, minimum, maximum };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AxisInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for AxisInfo {
@@ -615,12 +579,6 @@ impl TryParse for ValuatorInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ValuatorInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ValuatorInfo {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -671,12 +629,6 @@ impl TryParse for InputInfoInfoKey {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for InputInfoInfoKey {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for InputInfoInfoKey {
     type Bytes = [u8; 6];
     fn serialize(&self) -> [u8; 6] {
@@ -711,12 +663,6 @@ impl TryParse for InputInfoInfoButton {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for InputInfoInfoButton {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for InputInfoInfoButton {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -746,12 +692,6 @@ impl TryParse for InputInfoInfoValuator {
         let mode = mode.into();
         let result = InputInfoInfoValuator { mode, motion_size, axes };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for InputInfoInfoValuator {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for InputInfoInfoValuator {
@@ -880,12 +820,6 @@ impl TryParse for InputInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for InputInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for InputInfo {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -913,12 +847,6 @@ impl TryParse for DeviceName {
         let string = string.to_vec();
         let result = DeviceName { string };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceName {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceName {
@@ -1041,12 +969,6 @@ impl TryParse for ListInputDevicesReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ListInputDevicesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl ListInputDevicesReply {
     /// Get the value of the `devices_len` field.
     ///
@@ -1077,12 +999,6 @@ impl TryParse for InputClassInfo {
         let class_id = class_id.into();
         let result = InputClassInfo { class_id, event_type_base };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for InputClassInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for InputClassInfo {
@@ -1198,12 +1114,6 @@ impl TryParse for OpenDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for OpenDeviceReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl OpenDeviceReply {
@@ -1385,12 +1295,6 @@ impl TryParse for SetDeviceModeReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SetDeviceModeReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1575,12 +1479,6 @@ impl TryParse for GetSelectedExtensionEventsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetSelectedExtensionEventsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetSelectedExtensionEventsReply {
@@ -1857,12 +1755,6 @@ impl TryParse for GetDeviceDontPropagateListReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDeviceDontPropagateListReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetDeviceDontPropagateListReply {
     /// Get the value of the `num_classes` field.
     ///
@@ -1892,7 +1784,6 @@ impl DeviceTimeCoord {
         Ok((result, remaining))
     }
 }
-// Skipping TryFrom implementations because of unresolved members
 impl DeviceTimeCoord {
     #[allow(dead_code)]
     fn serialize(&self, num_axes: u8) -> Vec<u8> {
@@ -2032,12 +1923,6 @@ impl TryParse for GetDeviceMotionEventsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDeviceMotionEventsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetDeviceMotionEventsReply {
     /// Get the value of the `num_events` field.
     ///
@@ -2147,12 +2032,6 @@ impl TryParse for ChangeKeyboardDeviceReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ChangeKeyboardDeviceReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the ChangePointerDevice request
 pub const CHANGE_POINTER_DEVICE_REQUEST: u8 = 12;
@@ -2255,12 +2134,6 @@ impl TryParse for ChangePointerDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ChangePointerDeviceReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -2419,12 +2292,6 @@ impl TryParse for GrabDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GrabDeviceReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -3298,12 +3165,6 @@ impl TryParse for GetDeviceFocusReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDeviceFocusReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the SetDeviceFocus request
 pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
@@ -3499,12 +3360,6 @@ impl TryParse for KbdFeedbackState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for KbdFeedbackState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for KbdFeedbackState {
     type Bytes = [u8; 52];
     fn serialize(&self) -> [u8; 52] {
@@ -3613,12 +3468,6 @@ impl TryParse for PtrFeedbackState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PtrFeedbackState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for PtrFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -3675,12 +3524,6 @@ impl TryParse for IntegerFeedbackState {
         let class_id = class_id.into();
         let result = IntegerFeedbackState { class_id, feedback_id, len, resolution, min_value, max_value };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for IntegerFeedbackState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for IntegerFeedbackState {
@@ -3743,12 +3586,6 @@ impl TryParse for StringFeedbackState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for StringFeedbackState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for StringFeedbackState {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -3806,12 +3643,6 @@ impl TryParse for BellFeedbackState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for BellFeedbackState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for BellFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -3866,12 +3697,6 @@ impl TryParse for LedFeedbackState {
         let class_id = class_id.into();
         let result = LedFeedbackState { class_id, feedback_id, len, led_mask, led_values };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for LedFeedbackState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for LedFeedbackState {
@@ -3932,12 +3757,6 @@ impl TryParse for FeedbackStateDataKeyboard {
         let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
         let result = FeedbackStateDataKeyboard { pitch, duration, led_mask, led_values, global_auto_repeat, click, percent, auto_repeats };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for FeedbackStateDataKeyboard {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for FeedbackStateDataKeyboard {
@@ -4030,12 +3849,6 @@ impl TryParse for FeedbackStateDataPointer {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for FeedbackStateDataPointer {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for FeedbackStateDataPointer {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -4073,12 +3886,6 @@ impl TryParse for FeedbackStateDataString {
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_to_usize()?)?;
         let result = FeedbackStateDataString { max_symbols, keysyms };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for FeedbackStateDataString {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for FeedbackStateDataString {
@@ -4126,12 +3933,6 @@ impl TryParse for FeedbackStateDataInteger {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for FeedbackStateDataInteger {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for FeedbackStateDataInteger {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -4173,12 +3974,6 @@ impl TryParse for FeedbackStateDataLed {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for FeedbackStateDataLed {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for FeedbackStateDataLed {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -4215,12 +4010,6 @@ impl TryParse for FeedbackStateDataBell {
         let (duration, remaining) = u16::try_parse(remaining)?;
         let result = FeedbackStateDataBell { percent, pitch, duration };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for FeedbackStateDataBell {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for FeedbackStateDataBell {
@@ -4390,12 +4179,6 @@ impl TryParse for FeedbackState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for FeedbackState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for FeedbackState {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -4506,12 +4289,6 @@ impl TryParse for GetFeedbackControlReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetFeedbackControlReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetFeedbackControlReply {
     /// Get the value of the `num_feedbacks` field.
     ///
@@ -4558,12 +4335,6 @@ impl TryParse for KbdFeedbackCtl {
         let class_id = class_id.into();
         let result = KbdFeedbackCtl { class_id, feedback_id, len, key, auto_repeat_mode, key_click_percent, bell_percent, bell_pitch, bell_duration, led_mask, led_values };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KbdFeedbackCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for KbdFeedbackCtl {
@@ -4642,12 +4413,6 @@ impl TryParse for PtrFeedbackCtl {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PtrFeedbackCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for PtrFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -4702,12 +4467,6 @@ impl TryParse for IntegerFeedbackCtl {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for IntegerFeedbackCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for IntegerFeedbackCtl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -4753,12 +4512,6 @@ impl TryParse for StringFeedbackCtl {
         let class_id = class_id.into();
         let result = StringFeedbackCtl { class_id, feedback_id, len, keysyms };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for StringFeedbackCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for StringFeedbackCtl {
@@ -4818,12 +4571,6 @@ impl TryParse for BellFeedbackCtl {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for BellFeedbackCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for BellFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -4878,12 +4625,6 @@ impl TryParse for LedFeedbackCtl {
         let class_id = class_id.into();
         let result = LedFeedbackCtl { class_id, feedback_id, len, led_mask, led_values };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for LedFeedbackCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for LedFeedbackCtl {
@@ -4944,12 +4685,6 @@ impl TryParse for FeedbackCtlDataKeyboard {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for FeedbackCtlDataKeyboard {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for FeedbackCtlDataKeyboard {
     type Bytes = [u8; 16];
     fn serialize(&self) -> [u8; 16] {
@@ -5008,12 +4743,6 @@ impl TryParse for FeedbackCtlDataPointer {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for FeedbackCtlDataPointer {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for FeedbackCtlDataPointer {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -5050,12 +4779,6 @@ impl TryParse for FeedbackCtlDataString {
         let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_to_usize()?)?;
         let result = FeedbackCtlDataString { keysyms };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for FeedbackCtlDataString {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for FeedbackCtlDataString {
@@ -5099,12 +4822,6 @@ impl TryParse for FeedbackCtlDataInteger {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for FeedbackCtlDataInteger {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for FeedbackCtlDataInteger {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -5132,12 +4849,6 @@ impl TryParse for FeedbackCtlDataLed {
         let (led_values, remaining) = u32::try_parse(remaining)?;
         let result = FeedbackCtlDataLed { led_mask, led_values };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for FeedbackCtlDataLed {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for FeedbackCtlDataLed {
@@ -5176,12 +4887,6 @@ impl TryParse for FeedbackCtlDataBell {
         let (duration, remaining) = i16::try_parse(remaining)?;
         let result = FeedbackCtlDataBell { percent, pitch, duration };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for FeedbackCtlDataBell {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for FeedbackCtlDataBell {
@@ -5349,12 +5054,6 @@ impl TryParse for FeedbackCtl {
         let (data, remaining) = FeedbackCtlData::try_parse(remaining, class_id)?;
         let result = FeedbackCtl { feedback_id, len, data };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for FeedbackCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for FeedbackCtl {
@@ -5648,12 +5347,6 @@ impl TryParse for GetDeviceKeyMappingReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDeviceKeyMappingReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetDeviceKeyMappingReply {
     /// Get the value of the `length` field.
     ///
@@ -5863,12 +5556,6 @@ impl TryParse for GetDeviceModifierMappingReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDeviceModifierMappingReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetDeviceModifierMappingReply {
     /// Get the value of the `keycodes_per_modifier` field.
     ///
@@ -5997,12 +5684,6 @@ impl TryParse for SetDeviceModifierMappingReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SetDeviceModifierMappingReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetDeviceButtonMapping request
 pub const GET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 28;
@@ -6101,12 +5782,6 @@ impl TryParse for GetDeviceButtonMappingReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetDeviceButtonMappingReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetDeviceButtonMappingReply {
@@ -6235,12 +5910,6 @@ impl TryParse for SetDeviceButtonMappingReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SetDeviceButtonMappingReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyState {
@@ -6260,12 +5929,6 @@ impl TryParse for KeyState {
         let class_id = class_id.into();
         let result = KeyState { class_id, len, num_keys, keys };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KeyState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for KeyState {
@@ -6341,12 +6004,6 @@ impl TryParse for ButtonState {
         let class_id = class_id.into();
         let result = ButtonState { class_id, len, num_buttons, buttons };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ButtonState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ButtonState {
@@ -6482,12 +6139,6 @@ impl TryParse for ValuatorState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ValuatorState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ValuatorState {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -6534,12 +6185,6 @@ impl TryParse for InputStateDataKey {
         let keys = <[u8; 32]>::try_from(keys).unwrap();
         let result = InputStateDataKey { num_keys, keys };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for InputStateDataKey {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for InputStateDataKey {
@@ -6605,12 +6250,6 @@ impl TryParse for InputStateDataButton {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for InputStateDataButton {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for InputStateDataButton {
     type Bytes = [u8; 34];
     fn serialize(&self) -> [u8; 34] {
@@ -6671,12 +6310,6 @@ impl TryParse for InputStateDataValuator {
         let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_to_usize()?)?;
         let result = InputStateDataValuator { mode, valuators };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for InputStateDataValuator {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for InputStateDataValuator {
@@ -6804,12 +6437,6 @@ impl TryParse for InputState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for InputState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for InputState {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -6917,12 +6544,6 @@ impl TryParse for QueryDeviceStateReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryDeviceStateReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryDeviceStateReply {
@@ -7138,12 +6759,6 @@ impl TryParse for SetDeviceValuatorsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SetDeviceValuatorsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceControl(u16);
@@ -7224,12 +6839,6 @@ impl TryParse for DeviceResolutionState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceResolutionState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceResolutionState {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -7294,12 +6903,6 @@ impl TryParse for DeviceAbsCalibState {
         let control_id = control_id.into();
         let result = DeviceAbsCalibState { control_id, len, min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceAbsCalibState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceAbsCalibState {
@@ -7395,12 +6998,6 @@ impl TryParse for DeviceAbsAreaState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceAbsAreaState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceAbsAreaState {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
@@ -7475,12 +7072,6 @@ impl TryParse for DeviceCoreState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceCoreState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceCoreState {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -7526,12 +7117,6 @@ impl TryParse for DeviceEnableState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceEnableState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceEnableState {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -7572,12 +7157,6 @@ impl TryParse for DeviceStateDataResolution {
         let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_to_usize()?)?;
         let result = DeviceStateDataResolution { resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceStateDataResolution {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceStateDataResolution {
@@ -7635,12 +7214,6 @@ impl TryParse for DeviceStateDataAbsCalib {
         let (button_threshold, remaining) = u32::try_parse(remaining)?;
         let result = DeviceStateDataAbsCalib { min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceStateDataAbsCalib {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceStateDataAbsCalib {
@@ -7715,12 +7288,6 @@ impl TryParse for DeviceStateDataCore {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceStateDataCore {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceStateDataCore {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -7759,12 +7326,6 @@ impl TryParse for DeviceStateDataAbsArea {
         let (following, remaining) = u32::try_parse(remaining)?;
         let result = DeviceStateDataAbsArea { offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceStateDataAbsArea {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceStateDataAbsArea {
@@ -7944,12 +7505,6 @@ impl TryParse for DeviceState {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceState {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceState {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -8066,12 +7621,6 @@ impl TryParse for GetDeviceControlReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDeviceControlReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceResolutionCtl {
@@ -8091,12 +7640,6 @@ impl TryParse for DeviceResolutionCtl {
         let control_id = control_id.into();
         let result = DeviceResolutionCtl { control_id, len, first_valuator, resolution_values };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceResolutionCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceResolutionCtl {
@@ -8161,12 +7704,6 @@ impl TryParse for DeviceAbsCalibCtl {
         let control_id = control_id.into();
         let result = DeviceAbsCalibCtl { control_id, len, min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceAbsCalibCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceAbsCalibCtl {
@@ -8262,12 +7799,6 @@ impl TryParse for DeviceAbsAreaCtrl {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceAbsAreaCtrl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceAbsAreaCtrl {
     type Bytes = [u8; 28];
     fn serialize(&self) -> [u8; 28] {
@@ -8340,12 +7871,6 @@ impl TryParse for DeviceCoreCtrl {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceCoreCtrl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceCoreCtrl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -8389,12 +7914,6 @@ impl TryParse for DeviceEnableCtrl {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceEnableCtrl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceEnableCtrl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -8434,12 +7953,6 @@ impl TryParse for DeviceCtlDataResolution {
         let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_to_usize()?)?;
         let result = DeviceCtlDataResolution { first_valuator, resolution_values };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceCtlDataResolution {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceCtlDataResolution {
@@ -8496,12 +8009,6 @@ impl TryParse for DeviceCtlDataAbsCalib {
         let (button_threshold, remaining) = u32::try_parse(remaining)?;
         let result = DeviceCtlDataAbsCalib { min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceCtlDataAbsCalib {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceCtlDataAbsCalib {
@@ -8574,12 +8081,6 @@ impl TryParse for DeviceCtlDataCore {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceCtlDataCore {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceCtlDataCore {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -8616,12 +8117,6 @@ impl TryParse for DeviceCtlDataAbsArea {
         let (following, remaining) = u32::try_parse(remaining)?;
         let result = DeviceCtlDataAbsArea { offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceCtlDataAbsArea {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceCtlDataAbsArea {
@@ -8801,12 +8296,6 @@ impl TryParse for DeviceCtl {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceCtl {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceCtl {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -8929,12 +8418,6 @@ impl TryParse for ChangeDeviceControlReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ChangeDeviceControlReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the ListDeviceProperties request
 pub const LIST_DEVICE_PROPERTIES_REQUEST: u8 = 36;
@@ -9027,12 +8510,6 @@ impl TryParse for ListDevicePropertiesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ListDevicePropertiesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ListDevicePropertiesReply {
@@ -9625,12 +9102,6 @@ impl TryParse for GetDevicePropertyReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDevicePropertyReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Device(bool);
@@ -9719,12 +9190,6 @@ impl TryParse for GroupInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GroupInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for GroupInfo {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -9763,12 +9228,6 @@ impl TryParse for ModifierInfo {
         let (effective, remaining) = u32::try_parse(remaining)?;
         let result = ModifierInfo { base, latched, locked, effective };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ModifierInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ModifierInfo {
@@ -9925,12 +9384,6 @@ impl TryParse for XIQueryPointerReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for XIQueryPointerReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl XIQueryPointerReply {
@@ -10312,12 +9765,6 @@ impl TryParse for AddMaster {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for AddMaster {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for AddMaster {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -10377,12 +9824,6 @@ impl TryParse for RemoveMaster {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for RemoveMaster {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for RemoveMaster {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -10437,12 +9878,6 @@ impl TryParse for AttachSlave {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for AttachSlave {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for AttachSlave {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -10485,12 +9920,6 @@ impl TryParse for DetachSlave {
         let type_ = type_.into();
         let result = DetachSlave { type_, len, deviceid };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DetachSlave {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DetachSlave {
@@ -10539,12 +9968,6 @@ impl TryParse for HierarchyChangeDataAddMaster {
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let result = HierarchyChangeDataAddMaster { send_core, enable, name };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for HierarchyChangeDataAddMaster {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for HierarchyChangeDataAddMaster {
@@ -10598,12 +10021,6 @@ impl TryParse for HierarchyChangeDataRemoveMaster {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for HierarchyChangeDataRemoveMaster {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for HierarchyChangeDataRemoveMaster {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -10644,12 +10061,6 @@ impl TryParse for HierarchyChangeDataAttachSlave {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for HierarchyChangeDataAttachSlave {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for HierarchyChangeDataAttachSlave {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
@@ -10678,12 +10089,6 @@ impl TryParse for HierarchyChangeDataDetachSlave {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let result = HierarchyChangeDataDetachSlave { deviceid };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for HierarchyChangeDataDetachSlave {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for HierarchyChangeDataDetachSlave {
@@ -10811,12 +10216,6 @@ impl TryParse for HierarchyChange {
         let (data, remaining) = HierarchyChangeData::try_parse(remaining, type_)?;
         let result = HierarchyChange { len, data };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for HierarchyChange {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for HierarchyChange {
@@ -11083,12 +10482,6 @@ impl TryParse for XIGetClientPointerReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for XIGetClientPointerReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct XIEventMask(u32);
@@ -11197,12 +10590,6 @@ impl TryParse for EventMask {
         let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_to_usize()?)?;
         let result = EventMask { deviceid, mask };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for EventMask {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for EventMask {
@@ -11419,12 +10806,6 @@ impl TryParse for XIQueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for XIQueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -11734,12 +11115,6 @@ impl TryParse for ButtonClass {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ButtonClass {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ButtonClass {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -11792,12 +11167,6 @@ impl TryParse for KeyClass {
         let type_ = type_.into();
         let result = KeyClass { type_, len, sourceid, keys };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KeyClass {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for KeyClass {
@@ -11857,12 +11226,6 @@ impl TryParse for ScrollClass {
         let scroll_type = scroll_type.into();
         let result = ScrollClass { type_, len, sourceid, number, scroll_type, flags, increment };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ScrollClass {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ScrollClass {
@@ -11936,12 +11299,6 @@ impl TryParse for TouchClass {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for TouchClass {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for TouchClass {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -12001,12 +11358,6 @@ impl TryParse for ValuatorClass {
         let mode = mode.into();
         let result = ValuatorClass { type_, len, sourceid, number, label, min, max, value, resolution, mode };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ValuatorClass {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ValuatorClass {
@@ -12097,12 +11448,6 @@ impl TryParse for DeviceClassDataKey {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceClassDataKey {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceClassDataKey {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -12143,12 +11488,6 @@ impl TryParse for DeviceClassDataButton {
         let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_to_usize()?)?;
         let result = DeviceClassDataButton { state, labels };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceClassDataButton {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceClassDataButton {
@@ -12204,12 +11543,6 @@ impl TryParse for DeviceClassDataValuator {
         let mode = mode.into();
         let result = DeviceClassDataValuator { number, label, min, max, value, resolution, mode };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceClassDataValuator {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceClassDataValuator {
@@ -12294,12 +11627,6 @@ impl TryParse for DeviceClassDataScroll {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceClassDataScroll {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceClassDataScroll {
     type Bytes = [u8; 18];
     fn serialize(&self) -> [u8; 18] {
@@ -12349,12 +11676,6 @@ impl TryParse for DeviceClassDataTouch {
         let mode = mode.into();
         let result = DeviceClassDataTouch { mode, num_touches };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceClassDataTouch {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for DeviceClassDataTouch {
@@ -12500,12 +11821,6 @@ impl TryParse for DeviceClass {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceClass {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DeviceClass {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -12552,12 +11867,6 @@ impl TryParse for XIDeviceInfo {
         let type_ = type_.into();
         let result = XIDeviceInfo { deviceid, type_, attachment, enabled, name, classes };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for XIDeviceInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for XIDeviceInfo {
@@ -12704,12 +12013,6 @@ impl TryParse for XIQueryDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for XIQueryDeviceReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl XIQueryDeviceReply {
@@ -12907,12 +12210,6 @@ impl TryParse for XIGetFocusReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for XIGetFocusReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -13153,12 +12450,6 @@ impl TryParse for XIGrabDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for XIGrabDeviceReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -13598,12 +12889,6 @@ impl TryParse for GrabModifierInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GrabModifierInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for GrabModifierInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -13826,12 +13111,6 @@ impl TryParse for XIPassiveGrabDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for XIPassiveGrabDeviceReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl XIPassiveGrabDeviceReply {
@@ -14059,12 +13338,6 @@ impl TryParse for XIListPropertiesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for XIListPropertiesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl XIListPropertiesReply {
@@ -14599,12 +13872,6 @@ impl TryParse for XIGetPropertyReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for XIGetPropertyReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the XIGetSelectedEvents request
 pub const XI_GET_SELECTED_EVENTS_REQUEST: u8 = 60;
@@ -14697,12 +13964,6 @@ impl TryParse for XIGetSelectedEventsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for XIGetSelectedEventsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl XIGetSelectedEventsReply {
     /// Get the value of the `num_masks` field.
     ///
@@ -14733,12 +13994,6 @@ impl TryParse for BarrierReleasePointerInfo {
         let (eventid, remaining) = u32::try_parse(remaining)?;
         let result = BarrierReleasePointerInfo { deviceid, barrier, eventid };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for BarrierReleasePointerInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for BarrierReleasePointerInfo {
@@ -14888,12 +14143,6 @@ impl TryParse for DeviceValuatorEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceValuatorEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&DeviceValuatorEvent> for [u8; 32] {
@@ -15052,12 +14301,6 @@ impl TryParse for DeviceKeyPressEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceKeyPressEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&DeviceKeyPressEvent> for [u8; 32] {
     fn from(input: &DeviceKeyPressEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -15162,12 +14405,6 @@ impl TryParse for DeviceFocusInEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceFocusInEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&DeviceFocusInEvent> for [u8; 32] {
@@ -15344,12 +14581,6 @@ impl TryParse for DeviceStateNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceStateNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&DeviceStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -15435,12 +14666,6 @@ impl TryParse for DeviceMappingNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceMappingNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
@@ -15579,12 +14804,6 @@ impl TryParse for ChangeDeviceNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ChangeDeviceNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
     fn from(input: &ChangeDeviceNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -15658,12 +14877,6 @@ impl TryParse for DeviceKeyStateNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceKeyStateNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&DeviceKeyStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceKeyStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -15733,12 +14946,6 @@ impl TryParse for DeviceButtonStateNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DeviceButtonStateNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&DeviceButtonStateNotifyEvent> for [u8; 32] {
@@ -15884,12 +15091,6 @@ impl TryParse for DevicePresenceNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DevicePresenceNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePresenceNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -15967,12 +15168,6 @@ impl TryParse for DevicePropertyNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for DevicePropertyNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
@@ -16121,12 +15316,6 @@ impl TryParse for DeviceChangedEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DeviceChangedEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl DeviceChangedEvent {
     /// Get the value of the `num_classes` field.
     ///
@@ -16248,12 +15437,6 @@ impl TryParse for KeyPressEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for KeyPressEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl KeyPressEvent {
@@ -16394,12 +15577,6 @@ impl TryParse for ButtonPressEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ButtonPressEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ButtonPressEvent {
@@ -16637,12 +15814,6 @@ impl TryParse for EnterEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for EnterEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl EnterEvent {
     /// Get the value of the `buttons_len` field.
     ///
@@ -16763,12 +15934,6 @@ impl TryParse for HierarchyInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for HierarchyInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for HierarchyInfo {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -16836,12 +16001,6 @@ impl TryParse for HierarchyEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for HierarchyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl HierarchyEvent {
@@ -16955,12 +16114,6 @@ impl TryParse for PropertyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PropertyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the RawKeyPress event
 pub const RAW_KEY_PRESS_EVENT: u16 = 13;
@@ -17003,12 +16156,6 @@ impl TryParse for RawKeyPressEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for RawKeyPressEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl RawKeyPressEvent {
@@ -17072,12 +16219,6 @@ impl TryParse for RawButtonPressEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for RawButtonPressEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl RawButtonPressEvent {
@@ -17213,12 +16354,6 @@ impl TryParse for TouchBeginEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for TouchBeginEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl TouchBeginEvent {
     /// Get the value of the `buttons_len` field.
     ///
@@ -17344,12 +16479,6 @@ impl TryParse for TouchOwnershipEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for TouchOwnershipEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the RawTouchBegin event
 pub const RAW_TOUCH_BEGIN_EVENT: u16 = 22;
@@ -17392,12 +16521,6 @@ impl TryParse for RawTouchBeginEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for RawTouchBeginEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl RawTouchBeginEvent {
@@ -17535,12 +16658,6 @@ impl TryParse for BarrierHitEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for BarrierHitEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the BarrierLeave event
 pub const BARRIER_LEAVE_EVENT: u16 = 26;
@@ -17552,87 +16669,87 @@ impl EventForSend {
     pub fn as_device_valuator_event(&self) -> DeviceValuatorEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceValuatorEvent::try_from(value).unwrap()
+        DeviceValuatorEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_key_press_event(&self) -> DeviceKeyPressEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceKeyPressEvent::try_from(value).unwrap()
+        DeviceKeyPressEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_key_release_event(&self) -> DeviceKeyReleaseEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceKeyReleaseEvent::try_from(value).unwrap()
+        DeviceKeyReleaseEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_button_press_event(&self) -> DeviceButtonPressEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceButtonPressEvent::try_from(value).unwrap()
+        DeviceButtonPressEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_button_release_event(&self) -> DeviceButtonReleaseEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceButtonReleaseEvent::try_from(value).unwrap()
+        DeviceButtonReleaseEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_motion_notify_event(&self) -> DeviceMotionNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceMotionNotifyEvent::try_from(value).unwrap()
+        DeviceMotionNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_focus_in_event(&self) -> DeviceFocusInEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceFocusInEvent::try_from(value).unwrap()
+        DeviceFocusInEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_focus_out_event(&self) -> DeviceFocusOutEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceFocusOutEvent::try_from(value).unwrap()
+        DeviceFocusOutEvent::try_parse(value).unwrap().0
     }
     pub fn as_proximity_in_event(&self) -> ProximityInEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        ProximityInEvent::try_from(value).unwrap()
+        ProximityInEvent::try_parse(value).unwrap().0
     }
     pub fn as_proximity_out_event(&self) -> ProximityOutEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        ProximityOutEvent::try_from(value).unwrap()
+        ProximityOutEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_state_notify_event(&self) -> DeviceStateNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceStateNotifyEvent::try_from(value).unwrap()
+        DeviceStateNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_mapping_notify_event(&self) -> DeviceMappingNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceMappingNotifyEvent::try_from(value).unwrap()
+        DeviceMappingNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_change_device_notify_event(&self) -> ChangeDeviceNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        ChangeDeviceNotifyEvent::try_from(value).unwrap()
+        ChangeDeviceNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_key_state_notify_event(&self) -> DeviceKeyStateNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceKeyStateNotifyEvent::try_from(value).unwrap()
+        DeviceKeyStateNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_button_state_notify_event(&self) -> DeviceButtonStateNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceButtonStateNotifyEvent::try_from(value).unwrap()
+        DeviceButtonStateNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_presence_notify_event(&self) -> DevicePresenceNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DevicePresenceNotifyEvent::try_from(value).unwrap()
+        DevicePresenceNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_property_notify_event(&self) -> DevicePropertyNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DevicePropertyNotifyEvent::try_from(value).unwrap()
+        DevicePropertyNotifyEvent::try_parse(value).unwrap().0
     }
 }
 impl Serialize for EventForSend {
